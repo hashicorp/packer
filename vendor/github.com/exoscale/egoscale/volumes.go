@@ -62,6 +62,7 @@ func (Volume) ResourceType() string {
 // ListRequest builds the ListVolumes request
 func (vol Volume) ListRequest() (ListCommand, error) {
 	req := &ListVolumes{
+		ID:               vol.ID,
 		Name:             vol.Name,
 		Type:             vol.Type,
 		VirtualMachineID: vol.VirtualMachineID,
@@ -99,7 +100,7 @@ type ListVolumes struct {
 	Name             string        `json:"name,omitempty" doc:"The name of the disk volume"`
 	Page             int           `json:"page,omitempty"`
 	PageSize         int           `json:"pagesize,omitempty"`
-	Tags             []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs)"`
+	Tags             []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs). Note: multiple tags are OR'ed, not AND'ed."`
 	Type             string        `json:"type,omitempty" doc:"The type of disk volume"`
 	VirtualMachineID *UUID         `json:"virtualmachineid,omitempty" doc:"The ID of the virtual machine"`
 	ZoneID           *UUID         `json:"zoneid,omitempty" doc:"The ID of the availability zone"`

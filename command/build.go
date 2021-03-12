@@ -126,7 +126,11 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 	}
 
 	if err != nil {
-		m.Ui.Error(fmt.Sprintf("Failed to parse template: %s", err))
+		m.Ui.Error(fmt.Sprintf("Failed to parse file as legacy JSON template: "+
+			"if you are using an HCL template, check your file extensions; they "+
+			"should be either *.pkr.hcl or *.pkr.json; see the docs for more "+
+			"details: https://www.packer.io/docs/templates/hcl_templates. \n"+
+			"Original error: %s", err))
 		return nil, 1
 	}
 

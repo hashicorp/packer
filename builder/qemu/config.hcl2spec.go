@@ -98,6 +98,7 @@ type FlatConfig struct {
 	Accelerator               *string           `mapstructure:"accelerator" required:"false" cty:"accelerator" hcl:"accelerator"`
 	AdditionalDiskSize        []string          `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	CpuCount                  *int              `mapstructure:"cpus" required:"false" cty:"cpus" hcl:"cpus"`
+	Firmware                  *string           `mapstructure:"firmware" required:"false" cty:"firmware" hcl:"firmware"`
 	DiskInterface             *string           `mapstructure:"disk_interface" required:"false" cty:"disk_interface" hcl:"disk_interface"`
 	DiskSize                  *string           `mapstructure:"disk_size" required:"false" cty:"disk_size" hcl:"disk_size"`
 	SkipResizeDisk            *bool             `mapstructure:"skip_resize_disk" required:"false" cty:"skip_resize_disk" hcl:"skip_resize_disk"`
@@ -231,6 +232,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"accelerator":                  &hcldec.AttrSpec{Name: "accelerator", Type: cty.String, Required: false},
 		"disk_additional_size":         &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.String), Required: false},
 		"cpus":                         &hcldec.AttrSpec{Name: "cpus", Type: cty.Number, Required: false},
+		"firmware":                     &hcldec.AttrSpec{Name: "firmware", Type: cty.String, Required: false},
 		"disk_interface":               &hcldec.AttrSpec{Name: "disk_interface", Type: cty.String, Required: false},
 		"disk_size":                    &hcldec.AttrSpec{Name: "disk_size", Type: cty.String, Required: false},
 		"skip_resize_disk":             &hcldec.AttrSpec{Name: "skip_resize_disk", Type: cty.Bool, Required: false},

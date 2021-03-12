@@ -5,20 +5,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 )
 
-func testAccessConfig() *AccessConfig {
-	return &AccessConfig{
-		getEC2Connection: func() ec2iface.EC2API {
-			return &mockEC2Client{}
-		},
-		PollingConfig: new(AWSPollingConfig),
-	}
-}
-
 func TestAccessConfigPrepare_Region(t *testing.T) {
-	c := testAccessConfig()
+	c := FakeAccessConfig()
 
 	c.RawRegion = "us-east-12"
 	err := c.ValidateRegion(c.RawRegion)
@@ -40,7 +30,7 @@ func TestAccessConfigPrepare_Region(t *testing.T) {
 }
 
 func TestAccessConfigPrepare_RegionRestricted(t *testing.T) {
-	c := testAccessConfig()
+	c := FakeAccessConfig()
 
 	// Create a Session with a custom region
 	c.session = session.Must(session.NewSession(&aws.Config{

@@ -49,6 +49,18 @@ compressed raw disk image artifact for us to work with, and that the GCS bucket
 has been created.
 
 <Tabs>
+<Tab heading="HCL">
+
+```hcl
+post-processor "googlecompute-import"{
+  account_file = "account.json"
+  bucket = "my-bucket"
+  project_id = "my-project"
+  image_name = "my-gce-image"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -62,19 +74,6 @@ has been created.
 ```
 
 </Tab>
-
-<Tab heading="HCL">
-
-```hcl
-post-processor "googlecompute-import"{
-  account_file = "account.json"
-  bucket = "my-bucket"
-  project_id = "my-project"
-  image_name = "my-gce-image"
-}
-```
-
-</Tab>
 </Tabs>
 
 ## QEMU Builder Example
@@ -82,72 +81,10 @@ post-processor "googlecompute-import"{
 Here is a complete example for building a Fedora 31 server GCE image. For this
 example Packer was run from a Debian Linux host with KVM installed.
 
-    $ packer build -var serial=$(tty) build.json
+    $ packer build -var serial=$(tty) build.pkr.hcl
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "variables": {
-    "account_file": "account.json",
-    "bucket": "my-bucket",
-    "project": "my-project",
-    "serial": ""
-  },
-  "builders": [
-    {
-      "type": "qemu",
-      "accelerator": "kvm",
-      "boot_command": [
-        "<tab> console=ttyS0,115200n8 inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora-31-ks.cfg rd.live.check=0<enter><wait>"
-      ],
-      "disk_size": "15000",
-      "format": "raw",
-      "iso_checksum": "sha256:225ebc160e40bb43c5de28bad9680e3a78a9db40c9e3f4f42f3ee3f10f95dbeb",
-      "iso_url": "https://download-ib01.fedoraproject.org/pub/fedora/linux/releases/31/Server/x86_64/iso/Fedora-Server-dvd-x86_64-31-1.9.iso",
-      "headless": "true",
-      "http_directory": "http",
-      "http_port_max": "10089",
-      "http_port_min": "10082",
-      "output_directory": "output",
-      "shutdown_timeout": "30m",
-      "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
-      "ssh_username": "vagrant",
-      "ssh_password": "vagrant",
-      "vm_name": "disk.raw",
-      "qemu_binary": "/usr/bin/kvm",
-      "qemuargs": [
-        ["-m", "1024"],
-        ["-cpu", "host"],
-        ["-chardev", "tty,id=pts,path={{user `serial`}}"],
-        ["-device", "isa-serial,chardev=pts"],
-        ["-device", "virtio-net,netdev=user.0"]
-      ]
-    }
-  ],
-  "post-processors": [
-    [
-      {
-        "type": "compress",
-        "output": "output/disk.raw.tar.gz"
-      },
-      {
-        "type": "googlecompute-import",
-        "project_id": "{{user `project`}}",
-        "account_file": "{{user `account_file`}}",
-        "bucket": "{{user `bucket`}}",
-        "image_name": "fedora31-server-packertest",
-        "image_description": "Fedora 31 Server",
-        "image_family": "fedora31-server"
-      }
-    ]
-  ]
-}
-```
-
-</Tab>
-<Tab heading="HCL">
+<Tab heading="HCL2">
 
 ```hcl
 variables {
@@ -204,6 +141,68 @@ build {
     }
 }
 ```
+
+</Tab>
+  <Tab heading="JSON">
+
+  ```json
+  {
+    "variables": {
+      "account_file": "account.json",
+      "bucket": "my-bucket",
+      "project": "my-project",
+      "serial": ""
+    },
+    "builders": [
+      {
+        "type": "qemu",
+        "accelerator": "kvm",
+        "boot_command": [
+          "<tab> console=ttyS0,115200n8 inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/fedora-31-ks.cfg rd.live.check=0<enter><wait>"
+        ],
+        "disk_size": "15000",
+        "format": "raw",
+        "iso_checksum": "sha256:225ebc160e40bb43c5de28bad9680e3a78a9db40c9e3f4f42f3ee3f10f95dbeb",
+        "iso_url": "https://download-ib01.fedoraproject.org/pub/fedora/linux/releases/31/Server/x86_64/iso/Fedora-Server-dvd-x86_64-31-1.9.iso",
+        "headless": "true",
+        "http_directory": "http",
+        "http_port_max": "10089",
+        "http_port_min": "10082",
+        "output_directory": "output",
+        "shutdown_timeout": "30m",
+        "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "vm_name": "disk.raw",
+        "qemu_binary": "/usr/bin/kvm",
+        "qemuargs": [
+          ["-m", "1024"],
+          ["-cpu", "host"],
+          ["-chardev", "tty,id=pts,path={{user `serial`}}"],
+          ["-device", "isa-serial,chardev=pts"],
+          ["-device", "virtio-net,netdev=user.0"]
+        ]
+      }
+    ],
+    "post-processors": [
+      [
+        {
+          "type": "compress",
+          "output": "output/disk.raw.tar.gz"
+        },
+        {
+          "type": "googlecompute-import",
+          "project_id": "{{user `project`}}",
+          "account_file": "{{user `account_file`}}",
+          "bucket": "{{user `bucket`}}",
+          "image_name": "fedora31-server-packertest",
+          "image_description": "Fedora 31 Server",
+          "image_family": "fedora31-server"
+        }
+      ]
+    ]
+  }
+  ```
 
 </Tab>
 </Tabs>

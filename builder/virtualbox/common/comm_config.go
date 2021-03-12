@@ -50,8 +50,9 @@ func (c *CommConfig) Prepare(ctx *interpolate.Context) []error {
 		c.SkipNatMapping = c.SSHSkipNatMapping
 	}
 
-	if c.Comm.SSHHost == "" {
+	if c.Comm.Host() == "" {
 		c.Comm.SSHHost = "127.0.0.1"
+		c.Comm.WinRMHost = "127.0.0.1"
 	}
 
 	if c.HostPortMin == 0 {

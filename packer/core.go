@@ -828,7 +828,6 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 		for _, k := range deleteKeys {
 			for ind, kv := range sortedMap {
 				if kv.Key == k {
-					log.Printf("Deleting kv.Value: %s", kv.Value)
 					sortedMap = append(sortedMap[:ind], sortedMap[ind+1:]...)
 					break
 				}

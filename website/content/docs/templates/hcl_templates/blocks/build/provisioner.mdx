@@ -30,7 +30,7 @@ machine image after booting. Provisioners prepare the system for use.
 The list of available provisioners can be found in the
 [provisioners](/docs/provisioners) section.
 
-# Run on Specific Builds
+## Run on Specific Builds
 
 You can use the `only` or `except` configurations to run a provisioner only
 with specific builds. These two configurations do what you expect: `only` will
@@ -52,7 +52,7 @@ source "amazon-ebs" "second-example" {
 }
 
 build {
-  source = [
+  sources = [
     "source.amazon-ebs.first-example",
     "source.amazon-ebs.second-example",
   ]
@@ -75,6 +75,99 @@ build {
 ```
 
 The values within `only` or `except` are _build names_, not builder types.
+
+## Build-Specific Overrides
+
+While the goal of Packer is to produce identical machine images, it sometimes
+requires periods of time where the machines are different before they
+eventually converge to be identical. In these cases, different configurations
+for provisioners may be necessary depending on the build. This can be done
+using build-specific overrides.
+
+An example of where this might be necessary is when building both an EC2 AMI
+and a VMware machine. The source EC2 AMI may setup a user with administrative
+privileges by default, whereas the VMware machine doesn't have these
+privileges. In this case, the shell script may need to be executed differently.
+Of course, the goal is that hopefully the shell script converges these two
+images to be identical. However, they may initially need to be run differently.
+
+This example is shown below:
+
+```hcl
+source "null" "example1" {
+  communicator = "none"
+}
+
+source "null" "example2" {
+  communicator = "none"
+}
+
+source "null" "example3" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example2", "source.null.example3"]
+
+  source "source.null.example1" {
+    // Give a name to this source
+    name = "renamed"
+  }
+
+  provisioner "shell-local" {
+    inline = ["echo not overridden"]
+    override = {
+      example3 = {
+        inline = ["echo overrides for example3"]
+      }
+      // Refer to the source with the given name
+      renamed = {
+        inline = ["echo overrides for renamed"]
+      }
+    }
+  }
+}
+```
+
+As you can see, the `override` key is used. The value of this key is another
+HCL attribute map where the key is the name of a [builder
+definition](/docs/templates/hcl_templates/blocks/source). The value of this is in turn
+another HCL attribute map. This HCL attribute map simply contains the provisioner
+configuration as normal. This configuration is merged into the default
+provisioner configuration.
+
+## On Error Provisioner
+
+You can optionally create a single specialized provisioner called an
+`error-cleanup-provisioner`. This provisioner will not run unless the normal
+provisioning run fails. If the normal provisioning run does fail, this special
+error provisioner will run _before the instance is shut down_. This allows you
+to make last minute changes and clean up behaviors that Packer may not be able
+to clean up on its own.
+
+For examples, users may use this provisioner to make sure that the instance is
+properly unsubscribed from any services that it connected to during the build
+run.
+
+Toy usage example for the error cleanup script:
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "shell-local" {
+    inline = ["exit 2"]
+  }
+
+  error-cleanup-provisioner "shell-local" {
+    inline = ["echo 'rubber ducky'> ducky.txt"]
+  }
+}
+```
 
 ## Pausing Before Running
 

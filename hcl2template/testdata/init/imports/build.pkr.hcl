@@ -3,29 +3,26 @@ packer {
     required_version = ">= v1"
 
     required_plugins {
-        amazon = ">= v0"
-
+        amazon = {
+            source  = "github.com/hashicorp/amazon"
+            version = ">= v0"
+        }
         amazon-v1 = {
-            source  = "amazon"
+            source  = "github.com/hashicorp/amazon"
             version = ">= v1"
         }
-
         amazon-v2 = {
-            source  = "amazon"
+            source  = "github.com/hashicorp/amazon"
             version = ">= v2"
         }
-
-
         amazon-v3 = {
-            source  = "hashicorp/amazon"
+            source  = "github.com/hashicorp/amazon"
             version = ">= v3"
         }
-
         amazon-v3-azr = {
-            source  = "azr/amazon"
+            source  = "github.com/azr/amazon"
             version = ">= v3"
         }
-
         amazon-v4 = {
             source  = "github.com/hashicorp/amazon"
             version = ">= v4"

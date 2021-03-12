@@ -1,0 +1,55 @@
+/*
+Note: colours have been hard-coded
+to match Terraform Registry tier labels.
+*/
+.root {
+  --background-color: #8f96a2;
+  --text-color: #fff;
+
+  align-items: center;
+  background: var(--background-color);
+  border-radius: 3px;
+  display: inline-flex;
+  margin: 0;
+  padding: 1px 8px 2px 8px;
+  vertical-align: baseline;
+
+  /* variations */
+  &[data-tier='official'] {
+    --background-color: #f8e397;
+    --text-color: #975b06;
+  }
+
+  /* subsequent page titles should get cozy,
+  otherwise the label doesn't look associated */
+  & + h1 {
+    margin-top: 16px;
+  }
+}
+
+/* add margin-top to separate from the adjacent
+search bar present on docs pages */
+:global(.g-search) + .root {
+  margin-top: 40px;
+}
+
+.text {
+  /* composes */
+  composes: g-type-body-small-strong from global;
+
+  /* additional properties */
+  color: var(--text-color);
+  line-height: 21px;
+}
+
+.icon {
+  margin-right: 4px;
+
+  & svg {
+    display: block;
+    & [fill] {
+      fill: var(--text-color);
+    }
+  }
+}
+

@@ -323,38 +323,49 @@ func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceUseBlock, blocks 
 		if pb.OnlyExcept.Skip(source.String()) {
 			continue
 		}
-		provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
+
+		coreBuildProv, moreDiags := cfg.getCoreBuildProvisioner(source, pb, ectx)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
 		}
-
-		// If we're pausing, we wrap the provisioner in a special pauser.
-		if pb.PauseBefore != 0 {
-			provisioner = &packer.PausedProvisioner{
-				PauseBefore: pb.PauseBefore,
-				Provisioner: provisioner,
-			}
-		} else if pb.Timeout != 0 {
-			provisioner = &packer.TimeoutProvisioner{
-				Timeout:     pb.Timeout,
-				Provisioner: provisioner,
-			}
-		}
-		if pb.MaxRetries != 0 {
-			provisioner = &packer.RetriedProvisioner{
-				MaxRetries:  pb.MaxRetries,
-				Provisioner: provisioner,
-			}
-		}
-
-		res = append(res, packer.CoreBuildProvisioner{
-			PType:       pb.PType,
-			PName:       pb.PName,
-			Provisioner: provisioner,
-		})
+		res = append(res, coreBuildProv)
 	}
 	return res, diags
+}
+
+func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packer.CoreBuildProvisioner, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	provisioner, moreDiags := cfg.startProvisioner(source, pb, ectx)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return packer.CoreBuildProvisioner{}, diags
+	}
+
+	// If we're pausing, we wrap the provisioner in a special pauser.
+	if pb.PauseBefore != 0 {
+		provisioner = &packer.PausedProvisioner{
+			PauseBefore: pb.PauseBefore,
+			Provisioner: provisioner,
+		}
+	} else if pb.Timeout != 0 {
+		provisioner = &packer.TimeoutProvisioner{
+			Timeout:     pb.Timeout,
+			Provisioner: provisioner,
+		}
+	}
+	if pb.MaxRetries != 0 {
+		provisioner = &packer.RetriedProvisioner{
+			MaxRetries:  pb.MaxRetries,
+			Provisioner: provisioner,
+		}
+	}
+
+	return packer.CoreBuildProvisioner{
+		PType:       pb.PType,
+		PName:       pb.PName,
+		Provisioner: provisioner,
+	}, diags
 }
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
@@ -505,6 +516,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
+			}
+
+			if build.ErrorCleanupProvisionerBlock != nil {
+				if !build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
+					errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
+					diags = append(diags, moreDiags...)
+					if moreDiags.HasErrors() {
+						continue
+					}
+					pcb.CleanupProvisioner = errorCleanupProv
+				}
 			}
 
 			pcb.Builder = builder

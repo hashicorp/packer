@@ -3,6 +3,7 @@ package egoscale
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/url"
@@ -122,7 +123,7 @@ func (client *Client) GetRunstatusService(ctx context.Context, service Runstatus
 		}
 	}
 
-	return nil, fmt.Errorf("%#v not found", service)
+	return nil, errors.New("service not found")
 }
 
 func (client *Client) getRunstatusService(ctx context.Context, serviceURL string) (*RunstatusService, error) {

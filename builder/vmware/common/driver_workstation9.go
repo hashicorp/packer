@@ -30,7 +30,7 @@ func NewWorkstation9Driver(config *SSHConfig) Driver {
 	}
 }
 
-func (d *Workstation9Driver) Clone(dst, src string, linked bool) error {
+func (d *Workstation9Driver) Clone(dst, src string, linked bool, snapshot string) error {
 	return errors.New("Cloning is not supported with VMware WS version 9. Please use VMware WS version 10, or greater.")
 }
 
@@ -165,12 +165,32 @@ func (d *Workstation9Driver) Verify() error {
 
 	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
 		pathNetmap := workstationNetmapConfPath()
-		if _, err := os.Stat(pathNetmap); err != nil {
-			return nil, fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
-		}
-		log.Printf("Located networkmapper configuration file using Workstation: %s", pathNetmap)
 
-		return ReadNetmapConfig(pathNetmap)
+		// Check that the file for the networkmapper configuration exists. If there's no
+		// error, then the file exists and we can proceed to read the configuration out of it.
+		if _, err := os.Stat(pathNetmap); err == nil {
+			log.Printf("Located networkmapper configuration file using Workstation: %s", pathNetmap)
+			return ReadNetmapConfig(pathNetmap)
+		}
+
+		// If we weren't able to find the networkmapper configuration file, then fall back
+		// to the networking file which might also be in the configuration directory.
+		libpath, _ := workstationVMwareRoot()
+		pathNetworking := filepath.Join(libpath, "networking")
+		if _, err := os.Stat(pathNetworking); err != nil {
+			return nil, fmt.Errorf("Could not determine network mappings from files in path: %s", libpath)
+		}
+
+		// We were able to successfully stat the file.. So, now we can open a handle to it.
+		log.Printf("Located networking configuration file using Workstation: %s", pathNetworking)
+		fd, err := os.Open(pathNetworking)
+		if err != nil {
+			return nil, err
+		}
+		defer fd.Close()
+
+		// Then we pass the handle to the networking configuration parser.
+		return ReadNetworkingConfig(fd)
 	}
 	return nil
 }

@@ -6,13 +6,12 @@ go:
   - 1.9.x
   - 1.10.x
   - 1.11.x
+  - 1.12.x
   - tip
 matrix:
   allow_failures:
     - go: tip
   fast_finish: true
-env:
-  - GO111MODULE=on
 before_install:
   - go get golang.org/x/tools/cmd/cover
 script:

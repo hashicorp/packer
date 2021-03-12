@@ -1,7 +1,13 @@
 
 packer {
     required_plugins {
-        amazon = ">= v0"
-        amazon = ">= v4"
+        amazon = {
+            source  = "github.com/hashicorp/amazon"
+            version = ">= v0"
+        }
+        amazon = {
+            source  = "github.com/hashicorp/amazon"
+            version = ">= v4"
+        }
     }
 }

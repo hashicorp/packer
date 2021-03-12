@@ -113,7 +113,7 @@ type SecurityRule struct {
 	// If you specify TCP as the protocol but omit this object, then all destination ports are allowed.
 	TcpOptions *TcpOptions `mandatory:"false" json:"tcpOptions"`
 
-	// The date and time the security rule was created. Format defined by RFC3339.
+	// The date and time the security rule was created. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 
 	// Optional and valid only for UDP. Use to specify particular destination ports for UDP rules.

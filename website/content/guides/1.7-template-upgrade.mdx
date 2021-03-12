@@ -1,0 +1,184 @@
+---
+page_title: Upgrading your template to use Packer init
+sidebar_title: Upgrade Your Template to use Packer init
+---
+
+# Upgrading your template to be compatible with `packer init`
+
+The `packer init` command introduced in version v1.7.0 benefits Packer users by providing better control of plugin
+usage within a Packer template configuration.
+
+In short, `packer init` will look at the `required_plugins` block definition within a template, and download the correct
+binaries for that template. For details about how the command works and where the plugins will be installed, please
+refer to the [`packer init`](/docs/commands/init) documentation.
+
+-> **Note:** `packer init` is only supported for HCL templates. You can
+upgrade legacy JSON templates to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
+
+## Updating your template with the `required_plugins` block
+
+## FAQs
+
+### Why do you need to upgrade your template?
+
+To use the `packer init` command, you must upgrade your template to use the `required_plugins` block. The `init` command
+won't work if no `required_plugins` is provided.
+
+We strongly encourage you to upgrade and start using `required_plugins` block within your templates to manage plugin
+installation, but if you prefer not to use the `required_plugins` block you can continue to
+[install plugins manually](/docs/plugins#installing-plugins).
+
+
+### What if you only use components that are built into the Packer core?
+
+You don't need `packer init` for this, as of v1.7.0. But it's a good idea to get familiar with the required_plugins
+block anyway, because we are going to start splitting popular HashiCorp-maintained components like the amazon-ebs
+builder out of the core into their own multi-component plugins. When we do split these plugins out of the core, we will
+provide a tool to help you create the correct required_plugins block.
+
+### When should you upgrade your template?
+
+The `packer init` command can only install plugins that have been upgraded to use the latest version of the
+[Packer Plugin SDK](https://github.com/hashicorp/packer-plugin-sdk), and therefore are compatible with Packer's API
+version v5.0. The plugin repository on GitHub also needs to use a specific release format. If you are not sure whether
+the plugin you use fits those requirements, you can reach out to your maintainer to ask. You can also look for clues
+that the plugin is ready for use with `packer init`:
+
+* Check the plugin's CHANGELOG for notes about migrating to the packer-plugin-sdk.
+* Check the name of the repository the plugin resides in. Chances are that if the repository follows the naming
+  convention `packer-plugin-*` (e.g. `packer-plugin-comment`), then the plugin has been upgraded to be compatible with
+  `packer init`. If the repository has a name that references a specific Packer component (for example,
+  `packer-provisioner-*`, `packer-builder-*`, or `packer-post-processor-*`) then the plugin likely still needs to be
+  upgraded to be compatible with `packer init`. Reach out to your plugin maintainer to request that they upgrade; the
+  Packer team has written a maintainer-focused guide [here](/guides/1.7-plugin-upgrade).
+
+If the plugin(s) have been upgraded, then they can be used with the `required_plugins` block in your upgraded template.
+
+#### What if the plugin you need is not upgraded to API v5.0?
+
+Since the SDK is being released at the same time as the `init` command, plugin users may face a gap between when the
+Packer core v1.7.0 is released, and the plugins you use are upgraded by their maintainers. The Packer team is getting
+in touch with all currently known plugin maintainers to provide support during their upgrade process.
+
+If you are willing to upgrade your template but found out that the plugin you are using hasn't been upgraded yet,
+we suggest you reach out to the plugin maintainers and ask for an upgrade; the Packer team has written a
+maintainer-focused guide [here](/guides/1.7-plugin-upgrade).
+
+Check the table below to better understand whether your plugin is compatible with `packer init`, with manual
+installation, or with both for the the Packer version you are using.
+
+| Packer Core Version | Single Component Plugin - API v4                  | Single Component Plugin - API v5.0                | Multi Component Plugin - API v5.0                        |
+| ------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| v1.5.0 to v1.6.6    | ✋ Plugin must be manually installed              | ⛔ Plugin cannot be used with this Packer version | ⛔ Plugin cannot be used with this Packer version         |
+| v1.7.0              | ⛔ Plugin cannot be used with this Packer version | ✋ Plugin must be manually installed              | 📦 Plugin can be installed manually or with `packer init` |
+
+### How to upgrade your template
+
+Let's use the following template as an example:
+
+```hcl
+# file: example.pkr.hcl
+
+source "null" "basic-example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["sources.null.basic-example"]
+
+  provisioner "comment" {
+    comment = "Hello from comment plugin"
+    ui = true
+    bubble_text =  true
+  }
+}
+```
+
+This template uses the example [packer-provisioner-comment](https://github.com/sylviamoss/packer-plugin-comment) plugin.
+Until Packer v1.7.0, the binaries were installed manually.
+
+Since the Packer v1.7.0 release, the plugin has been upgraded by its maintainers and is now called
+`packer-plugin-comment`. with its latest version being v0.2.23. Knowing that, our example template can be upgraded to
+use the `required_plugins` block.
+
+```hcl
+# file: example.pkr.hcl
+
+packer {
+    required_plugins {
+        comment = {
+            version = ">=v0.2.23"
+            source = "github.com/sylviamoss/comment"
+        }
+    }
+}
+
+source "null" "basic-example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["sources.null.basic-example"]
+
+  provisioner "comment" {
+    comment = "Hello from comment plugin"
+    ui = true
+    bubble_text =  true
+  }
+}
+```
+
+The upgraded template is now telling Packer that it requires a plugin named `comment` stored in a github repository
+owned by the user `sylviamoss`. It also says that the template needs to use a version of the plugin equal to or greater
+than `v0.2.23`. Finally, the local_name of the plugin will be `comment`, which means it will be referred to as `comment`
+in the rest of the template.
+
+Here it is a brief explanation of each field:
+- `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+- `source` - Should have the GitHub hostname, the plugin's organizational namespace, and its short name. 
+Packer will be responsible for determining the full GitHub
+  address. For example, if the source is `github.com/sylviamoss/comment`, Packer
+  will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
+  To learn more about the source field, check out the [Source
+  Address](/docs/plugins#source-addresses) documentation.
+- `local_name`- Can be replaced with whatever you want, and the new value will become the name of the plugin.
+  For example:
+    ```hcl
+    packer {
+        required_plugins {
+            bubbled_up = {
+                # ...
+            }
+        }
+    }
+
+    # ...
+
+    build {
+        # ...
+
+        provisioner "bubbled_up" {
+            # ...
+        }
+    }
+    ```
+
+Once the template is upgraded, you can run `packer init example.pkr.hcl` and the output should tell you the installed
+plugin, and the place where it was installed.
+
+```shell
+➜ packerdev init example.pkr.hcl
+Installed plugin sylviamoss/comment v0.2.23 in "/Users/<user>/.packer.d/plugins/github.com/sylviamoss/comment/packer-plugin-comment_v0.2.23_x5.0_darwin_amd64"
+```
+
+`packer init` will only download plugin binaries and never delete existing ones. If all the required plugins are installed,
+the command won't do anything unless you set the `-upgrade` flag to force download newer versions of the existing plugins.
+
+You can uninstall a plugin by deleting it from the `.packer.d/plugins/` directory on your computer.
+
+Now that the required comment plugin is installed via `packer init`, you can run `packer build example.pkr.hcl` as usual
+and won't need to run `init` again unless you want to upgrade the plugin version.
+
+A template with a `required_plugins` block should **always** be initialised at least once with `packer init` before
+`packer build`. If the template is built before init, Packer will fail and ask for initialisation.
+

@@ -1,0 +1,18 @@
+{
+    "builders": [
+        {
+            "type": "null",
+            "communicator": "none"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell-local",
+            "inline": ["exit 2"]
+        }
+    ],
+    "error-cleanup-provisioner": {
+        "type": "shell-local",
+        "inline": ["echo 'rubber ducky'> ducky.txt"]
+    }
+}

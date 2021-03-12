@@ -47,7 +47,7 @@ type NatGateway struct {
 	// The IP address associated with the NAT gateway.
 	NatIp *string `mandatory:"true" json:"natIp"`
 
-	// The date and time the NAT gateway was created, in the format defined by RFC3339.
+	// The date and time the NAT gateway was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 

@@ -97,6 +97,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			OutputDir: &b.config.OutputDir,
 			VMName:    b.config.VMName,
 			Linked:    b.config.Linked,
+			Snapshot:  b.config.AttachSnapshot,
 		},
 		&vmwcommon.StepConfigureVMX{
 			CustomData:       b.config.VMXData,

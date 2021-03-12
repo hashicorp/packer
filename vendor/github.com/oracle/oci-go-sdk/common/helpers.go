@@ -230,13 +230,29 @@ func PrivateKeyFromBytesWithPassword(pemData, password []byte) (key *rsa.Private
 			}
 		}
 
-		key, e = x509.ParsePKCS1PrivateKey(decrypted)
+		key, e = parsePKCSPrivateKey(decrypted)
 
 	} else {
 		e = fmt.Errorf("PEM data was not found in buffer")
 		return
 	}
 	return
+}
+
+// ParsePrivateKey using PKCS1 or PKCS8
+func parsePKCSPrivateKey(decryptedKey []byte) (*rsa.PrivateKey, error) {
+	if key, err := x509.ParsePKCS1PrivateKey(decryptedKey); err == nil {
+		return key, nil
+	}
+	if key, err := x509.ParsePKCS8PrivateKey(decryptedKey); err == nil {
+		switch key := key.(type) {
+		case *rsa.PrivateKey:
+			return key, nil
+		default:
+			return nil, fmt.Errorf("unsupportesd private key type in PKCS8 wrapping")
+		}
+	}
+	return nil, fmt.Errorf("failed to parse private key")
 }
 
 func generateRandUUID() (string, error) {

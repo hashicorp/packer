@@ -253,7 +253,6 @@ func (d *driverGCE) GetImage(name string, fromFamily bool) (*Image, error) {
 		"ubuntu-os-cloud",
 		"windows-cloud",
 		"windows-sql-cloud",
-		"gce-uefi-images",
 		"gce-nvme",
 		// misc
 		"google-containers",
@@ -568,7 +567,7 @@ func (d *driverGCE) createWindowsPassword(errCh chan<- error, name, zone string,
 		return
 	}
 
-	timeout := time.Now().Add(time.Minute * 3)
+	timeout := time.Now().Add(c.WindowsPasswordTimeout)
 	hash := sha1.New()
 	random := rand.Reader
 

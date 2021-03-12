@@ -117,6 +117,13 @@
     ],
     "provisioners": [
         {
+            "type": "breakpoint",
+            "only": [
+                "amazon-ebs"
+            ],
+            "pause_before": "5s"
+        },
+        {
             "type": "shell",
             "except": [
                 "amazon-ebs"
@@ -180,7 +187,7 @@
         {
             "type": "shell",
             "inline": [
-                "echo {{ replace `some-string` `-` `/` 1 }}"
+                "echo {{ replace `some-string` `-` 1 `/` }}"
             ]
         },
         {
@@ -189,6 +196,7 @@
                 "amazon-ebs"
             ],
             "timeout": "5s",
+            "pause_before": "5s",
             "inline": [
                 "sleep 100000"
             ]
@@ -229,6 +237,9 @@
                 "tags": {
                     "Description": "packer amazon-import {{timestamp}}"
                 }
+            },
+            {
+                "type": "compress"
             }
         ]
     ]

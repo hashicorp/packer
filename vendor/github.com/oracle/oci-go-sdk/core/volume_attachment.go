@@ -43,7 +43,7 @@ type VolumeAttachment interface {
 	// The current state of the volume attachment.
 	GetLifecycleState() VolumeAttachmentLifecycleStateEnum
 
-	// The date and time the volume was created, in the format defined by RFC3339.
+	// The date and time the volume was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	GetTimeCreated() *common.SDKTime
 

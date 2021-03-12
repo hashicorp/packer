@@ -54,6 +54,24 @@ type StepRunSpotInstance struct {
 	instanceId string
 }
 
+// The EbsBlockDevice and LaunchTemplateEbsBlockDeviceRequest structs are
+// nearly identical except for the struct's name and one extra field in
+// EbsBlockDeviceResuest, which unfortunately means you can't just cast one
+// into the other. THANKS AMAZON.
+func castBlockDeviceToRequest(bd *ec2.EbsBlockDevice) *ec2.LaunchTemplateEbsBlockDeviceRequest {
+	out := &ec2.LaunchTemplateEbsBlockDeviceRequest{
+		DeleteOnTermination: bd.DeleteOnTermination,
+		Encrypted:           bd.Encrypted,
+		Iops:                bd.Iops,
+		KmsKeyId:            bd.KmsKeyId,
+		SnapshotId:          bd.SnapshotId,
+		Throughput:          bd.Throughput,
+		VolumeSize:          bd.VolumeSize,
+		VolumeType:          bd.VolumeType,
+	}
+	return out
+}
+
 func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	state multistep.StateBag, marketOptions *ec2.LaunchTemplateInstanceMarketOptionsRequest) *ec2.RequestLaunchTemplateData {
 	blockDeviceMappings := s.LaunchMappings.BuildEC2BlockDeviceMappings()
@@ -61,15 +79,12 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	// LaunchTemplateBlockDeviceMappingRequest. These structs are identical,
 	// except for the EBS field -- on one, that field contains a
 	// LaunchTemplateEbsBlockDeviceRequest, and on the other, it contains an
-	// EbsBlockDevice. The EbsBlockDevice and
-	// LaunchTemplateEbsBlockDeviceRequest structs are themselves
-	// identical except for the struct's name, so you can cast one directly
-	// into the other.
+	// EbsBlockDevice.
 	var launchMappingRequests []*ec2.LaunchTemplateBlockDeviceMappingRequest
 	for _, mapping := range blockDeviceMappings {
 		launchRequest := &ec2.LaunchTemplateBlockDeviceMappingRequest{
 			DeviceName:  mapping.DeviceName,
-			Ebs:         (*ec2.LaunchTemplateEbsBlockDeviceRequest)(mapping.Ebs),
+			Ebs:         castBlockDeviceToRequest(mapping.Ebs),
 			VirtualName: mapping.VirtualName,
 		}
 		launchMappingRequests = append(launchMappingRequests, launchRequest)

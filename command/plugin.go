@@ -24,7 +24,6 @@ import (
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
 	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
-	dockerbuilder "github.com/hashicorp/packer/builder/docker"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	googlecomputebuilder "github.com/hashicorp/packer/builder/googlecompute"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
@@ -73,11 +72,6 @@ import (
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
-	dockerimportpostprocessor "github.com/hashicorp/packer/post-processor/docker-import"
-	dockerpushpostprocessor "github.com/hashicorp/packer/post-processor/docker-push"
-	dockersavepostprocessor "github.com/hashicorp/packer/post-processor/docker-save"
-	dockertagpostprocessor "github.com/hashicorp/packer/post-processor/docker-tag"
-	exoscaleimportpostprocessor "github.com/hashicorp/packer/post-processor/exoscale-import"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer/post-processor/googlecompute-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
@@ -125,7 +119,6 @@ var Builders = map[string]packersdk.Builder{
 	"azure-dtl":           new(azuredtlbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
 	"digitalocean":        new(digitaloceanbuilder.Builder),
-	"docker":              new(dockerbuilder.Builder),
 	"file":                new(filebuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"hcloud":              new(hcloudbuilder.Builder),
@@ -196,11 +189,6 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
 	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
-	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":          new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
-	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"manifest":             new(manifestpostprocessor.PostProcessor),

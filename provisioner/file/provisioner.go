@@ -138,12 +138,12 @@ func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packersdk.Communic
 		return fmt.Errorf("Error interpolating destination: %s", err)
 	}
 	for _, src := range p.config.Sources {
+		dst := dst
 		src, err := interpolate.Render(src, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error interpolating source: %s", err)
 		}
 
-		ui.Say(fmt.Sprintf("Downloading %s => %s", src, dst))
 		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
 		dir := dst
 		// if it doesn't end with a /, set dir as the parent dir
@@ -152,6 +152,8 @@ func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packersdk.Communic
 		} else if !strings.HasSuffix(src, "/") && !strings.HasSuffix(src, "*") {
 			dst = filepath.Join(dst, filepath.Base(src))
 		}
+		ui.Say(fmt.Sprintf("Downloading %s => %s", src, dst))
+
 		if dir != "" {
 			err := os.MkdirAll(dir, os.FileMode(0755))
 			if err != nil {

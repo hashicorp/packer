@@ -155,7 +155,7 @@ This builder requires privileged actions, such as mounting disks, running
 permissions, for example:
 
 ```shell-session
-$ sudo -E packer build example.json
+$ sudo -E packer build example.pkr.json
 ```
 
 ### Using a VM with a Managed Identity
@@ -163,6 +163,30 @@ $ sudo -E packer build example.json
 On a VM with a system-assigned managed identity that has the contributor role
 on its own resource group, the following config can be used to create an
 updated Debian image:
+
+<Tabs>
+
+<Tab heading="HCL2">
+
+```hcl
+source "azure-chroot" "example" {
+  image_resource_id = "/subscriptions/{{vm `subscription_id`}}/resourceGroups/{{vm `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}"
+  source            = "credativ:Debian:9:latest"
+}
+
+build {
+  sources = ["source.azure-chroot.example"]
+
+  provisioner "shell" {
+    inline         = ["apt-get update", "apt-get upgrade -y"]
+    inline_shebang = "/bin/sh -x"
+  }
+}
+```
+
+</Tab>
+
+<Tab heading="JSON">
 
 ```json
 {
@@ -184,6 +208,9 @@ updated Debian image:
 }
 ```
 
+</Tab>
+</Tabs>
+
 ### Using a Service Principal
 
 Here is an example that creates a Debian image with updated packages. Specify
@@ -195,40 +222,6 @@ Set the `ARM_IMAGE_RESOURCEGROUP_ID` variable to an existing resource group in t
 subscription where the resulting image will be created.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "variables": {
-    "client_id": "{{env `ARM_CLIENT_ID`}}",
-    "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
-    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
-    "resource_group": "{{env `ARM_IMAGE_RESOURCEGROUP_ID`}}"
-  },
-  "builders": [
-    {
-      "type": "azure-chroot",
-
-      "client_id": "{{user `client_id`}}",
-      "client_secret": "{{user `client_secret`}}",
-      "subscription_id": "{{user `subscription_id`}}",
-
-      "image_resource_id": "/subscriptions/{{user `subscription_id`}}/resourceGroups/{{user `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
-
-      "source": "credativ:Debian:9:latest"
-    }
-  ],
-  "provisioners": [
-    {
-      "inline": ["apt-get update", "apt-get upgrade -y"],
-      "inline_shebang": "/bin/sh -x",
-      "type": "shell"
-    }
-  ]
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -264,6 +257,40 @@ build {
   }
 }
 ```
+
+</Tab>
+<Tab heading="JSON">
+
+  ```json
+  {
+    "variables": {
+      "client_id": "{{env `ARM_CLIENT_ID`}}",
+      "client_secret": "{{env `ARM_CLIENT_SECRET`}}",
+      "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+      "resource_group": "{{env `ARM_IMAGE_RESOURCEGROUP_ID`}}"
+    },
+    "builders": [
+      {
+        "type": "azure-chroot",
+
+        "client_id": "{{user `client_id`}}",
+        "client_secret": "{{user `client_secret`}}",
+        "subscription_id": "{{user `subscription_id`}}",
+
+        "image_resource_id": "/subscriptions/{{user `subscription_id`}}/resourceGroups/{{user `resource_group`}}/providers/Microsoft.Compute/images/MyDebianOSImage-{{timestamp}}",
+
+        "source": "credativ:Debian:9:latest"
+      }
+    ],
+    "provisioners": [
+      {
+        "inline": ["apt-get update", "apt-get upgrade -y"],
+        "inline_shebang": "/bin/sh -x",
+        "type": "shell"
+      }
+    ]
+  }
+  ```
 
 </Tab>
 </Tabs>

@@ -43,7 +43,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		{
 			"darwin_amazon_prot_5.0",
 			fields{
-				Identifier: "amazon",
+				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
 				[]string{
@@ -80,7 +80,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		{
 			"darwin_amazon_prot_5.1",
 			fields{
-				Identifier: "amazon",
+				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
 				[]string{
@@ -121,7 +121,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		{
 			"windows_amazon",
 			fields{
-				Identifier: "amazon",
+				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
 				[]string{
@@ -159,7 +159,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		{
 			"windows_google_multifolder",
 			fields{
-				Identifier: "hashicorp/google",
+				Identifier: "github.com/hashicorp/google",
 			},
 			ListInstallationsOptions{
 				[]string{
@@ -542,7 +542,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			log.Printf("starting %s test", tt.name)
 
-			identifier, diags := addrs.ParsePluginSourceString(tt.fields.Identifier)
+			identifier, diags := addrs.ParsePluginSourceString("github.com/hashicorp/" + tt.fields.Identifier)
 			if len(diags) != 0 {
 				t.Fatalf("ParsePluginSourceString(%q): %v", tt.fields.Identifier, diags)
 			}

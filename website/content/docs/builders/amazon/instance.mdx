@@ -142,29 +142,6 @@ Block devices can be nested in the
 Here is a basic example. It is completely valid except for the access keys:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "amazon-instance",
-  "access_key": "YOUR KEY HERE",
-  "secret_key": "YOUR SECRET KEY HERE",
-  "region": "us-east-1",
-  "source_ami": "ami-d9d6a6b0",
-  "instance_type": "m1.small",
-  "ssh_username": "ubuntu",
-
-  "account_id": "0123-4567-0890",
-  "s3_bucket": "packer-images",
-  "x509_cert_path": "x509.cert",
-  "x509_key_path": "x509.key",
-  "x509_upload_path": "/tmp",
-
-  "ami_name": "packer-quick-start {{timestamp}}"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -185,6 +162,29 @@ build {
   source "sources.amazon-instance.basic-example" {
     ami_name = "packer-quick-start {{timestamp}}"
   }
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "amazon-instance",
+  "access_key": "YOUR KEY HERE",
+  "secret_key": "YOUR SECRET KEY HERE",
+  "region": "us-east-1",
+  "source_ami": "ami-d9d6a6b0",
+  "instance_type": "m1.small",
+  "ssh_username": "ubuntu",
+
+  "account_id": "0123-4567-0890",
+  "s3_bucket": "packer-images",
+  "x509_cert_path": "x509.cert",
+  "x509_key_path": "x509.key",
+  "x509_upload_path": "/tmp",
+
+  "ami_name": "packer-quick-start {{timestamp}}"
 }
 ```
 
@@ -239,22 +239,6 @@ The generated variables available for this builder are:
 Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"post-processors": [
-    {
-      "type": "manifest",
-      "output": "manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "source_ami_name": "{{ build `SourceAMIName` }}"
-      }
-    }
-]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -281,6 +265,22 @@ post-processor "manifest" {
         source_ami_name = "${build.SourceAMIName}"
     }
 }
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+"post-processors": [
+  {
+    "type": "manifest",
+    "output": "manifest.json",
+    "strip_path": true,
+    "custom_data": {
+      "source_ami_name": "{{ build `SourceAMIName` }}"
+    }
+  }
+]
 ```
 
 </Tab>

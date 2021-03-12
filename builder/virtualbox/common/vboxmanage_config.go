@@ -20,7 +20,7 @@ type VBoxManageConfig struct {
 	// ```json
 	// "vboxmanage": [
 	//    ["modifyvm", "{{.Name}}", "--memory", "1024"],
-	//	  ["modifyvm", "{{.Name}}", "--cpus", "2"]
+	//    ["modifyvm", "{{.Name}}", "--cpus", "2"]
 	// ]
 	// ```
 	//

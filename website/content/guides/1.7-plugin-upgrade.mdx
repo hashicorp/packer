@@ -1,0 +1,119 @@
+---
+page_title: Upgrading your plugin to use the Packer plugin sdk
+sidebar_title: Upgrade Your Plugin to use the Packer plugin sdk
+---
+
+# Upgrading your plugin to be compatible with Packer v1.7.0 and later
+
+In version v1.7.0 the Packer plugin development model was split into two separate packages: the Packer core
+and the Packer plugin SDK. Prior to version 1.7.0, the Packer core repository (https://github.com/hashicorp/packer) contained the libraries and interfaces used by Packer plugins. In version 1.7.0, these libraries were moved into their own repository (https://github.com/hashicorp/packer-plugin-sdk). If you authored a plugin prior to the v1.7.0 release using the API version 4, you should switch to the Packer Plugin SDK.
+
+## Update plugins to use the new SDK
+
+### Why update to the new SDK?
+
+The goal of the SDK is to clearly separate the Packer core from the Packer plugins; as a plugin maintainer, you should only have to import the SDK and not the core. The SDK will allow us to use semantic versioning to express the changes to the API that our maintainers are expected to use, and will help us keep a clearer promise to you about the location and functionality of our helper tools.
+
+### How to update plugins to use the Packer plugin SDK
+
+We have created a [packer-sdk-migrator](https://github.com/hashicorp/packer-sdk-migrator) cli tool to help you migrate your plugin to use the new import paths. To use it, follow the installation instructions for the migration tool, then call `packer-sdk-migrator migrate` from the root of your plugin directory. More details can be found in the migrator's [README](https://github.com/hashicorp/packer-sdk-migrator/blob/main/README.md).
+
+Once you have migrated your plugin to the new SDK, your users can continue using your plugin as they always have, manually installing it in their `plugins` directories. However, Packer v1.7 also introduced the `packer init` command, and since you're here anyway it's a great time to upgrade your plugin so it can be found by `packer init`. Keep reading for more details!
+
+## Upgrade Plugins to use the new multi-component RPC server
+
+### Why is there a new RPC server?
+
+There are two main reasons we wrote the new server type.
+
+First, it enables multiple related components, for example a builder and a post-processor that share a hypervisor or cloud, to live together in the same plugin. This helps maintainers who are experts in a specific technology to focus on that technology without having to maintain several repositories that submodule the same common code. You can think of a multi-component plugin as being in some ways analogous to Terraform providers, in the sense that both frequently bundle common resources or components by hypervisor or cloud.
+
+Second, the new server provides the Packer core with structured metadata that allows the new `packer init` feature to work. This data includes semantic versioning that we need to implement the new [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) block, which allows us to ensure that users are using the correct _version_ of their plugin for a given Packer template. If you don't upgrade, your users cannot take advantage of the `packer init` tooling.
+
+### How to upgrade the plugin
+
+We've created a [scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/) that you can either clone or use as a reference example. If you already have a working plugin, it should look pretty familiar. You'll notice, however, that there are some changes to main.go.
+
+Previously, you may have had a main.go that looks something like:
+
+```go
+package main
+
+import (
+  "github.com/hashicorp/packer-plugin-sdk/plugin"
+)
+
+func main() {
+  server, err := plugin.Server()
+  if err != nil {
+    panic(err)
+  }
+
+  // MyProvisioner fulfils the Provisioner interface and is defined elsewhere
+  server.RegisterProvisioner(new(MyProvisioner))
+  server.Serve()
+}
+
+```
+
+With this single-component plugin binary you'd install it by putting it into the plugin directory with the name `packer-provisioner-foo`, and to access your provisioner in your Packer template, you would use the type `foo`.
+
+
+To use the new multi-component server, you'll want to use the NewSet() function to create a server:
+
+```go
+package main
+
+import (
+  "fmt"
+  "os"
+
+  "github.com/hashicorp/packer-plugin-sdk/plugin"
+)
+
+func main() {
+  pps := plugin.NewSet()
+  pps.RegisterProvisioner(plugin.DEFAULT_NAME, new(MyProvisioner))
+  err := pps.Run()
+  if err != nil {
+    fmt.Fprintln(os.Stderr, err.Error())
+    os.Exit(1)
+  }
+}
+
+```
+
+The implementation is similar, but now we use the "NewSet" function to create the component Server, and call Run() instead of Serve().
+
+You build it as you would any go binary:
+
+```go
+go build -o packer-plugin-bar
+```
+
+Then you install it by putting it into the plugin directory with the name `packer-plugin-foo`, and reference it in your template using the type "foo".
+
+Notice that the new naming convention uses the generic name "plugin" as opposed to saying the specific component type like the old style did; `packer-pluign-name` instead of `packer-provisioner-name`. You need to respect this new convention when installing the plugin, or Packer will not register it as a multi-component plugin.
+
+What does that `plugin.DEFAULT_NAME` do? It tells the Packer core that in your template you'll be using the root plugin name instead of a compound name composed of the plugin name and the component name. If you are only serving a single component, you may want to use `plugin.DEFAULT_NAME` to prevent your templates from stuttering.
+
+Here's an example using a custom string instead of `plugin.DEFAULT_NAME`:
+
+```go
+pps.RegisterProvisioner("bar", new(MyProvisioner))
+```
+
+When you do this, if you install your plugin as `packer-plugin-foo`, the Packer core expects you to access the provisioner in your template using the type `foo-bar`, where "foo" is the last portion of the plugin name as installed and "bar" is the name of the provisioner that you registered.
+
+## Registering multiple components
+
+The goal of this guide is to help you upgrade a single-component plugin to use the new SDK and plugin server; check out our [Plugin Development Basics](/docs/plugins/creation#plugin-development-basics) guide for details on how to add new components to your plugin.
+
+## Distributing migrated plugins
+
+Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the Packer plugin directory. But this method will not allow your users to take advantage of the `packer init` command.
+
+If you want Packer to be able to automatically install your plugin for your users via`packer init` -- the preferred method of installation -- you need to make the plugin available on GitHub in a repository named after the multi-component plugin. `https://github.com/<yourorg>/packer-plugin-name`. We recognize that this may require you to rename or fork your plugin repository, but we think that it is worth the inconvenience to reduce ambiguity in the `init` call.
+
+See our documentation on [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
+

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//RunstatusEvent is a runstatus event
+// RunstatusEvent is a runstatus event
 type RunstatusEvent struct {
 	Created *time.Time `json:"created,omitempty"`
 	State   string     `json:"state,omitempty"`

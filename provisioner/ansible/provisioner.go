@@ -57,6 +57,10 @@ type Config struct {
 	// ```json
 	//   "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
 	// ```
+	// In certain scenarios where you want to pass ansible command line arguments
+	// that include parameter and value (for example `--vault-password-file pwfile`),
+	// from ansible documentation this is correct format but that is NOT accepted here.
+	// Instead you need to do it like `--vault-password-file=pwfile`.
 	//
 	// If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
 	// and would like to access the auto-generated password that Packer uses to

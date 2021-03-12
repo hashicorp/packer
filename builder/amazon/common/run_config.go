@@ -132,8 +132,21 @@ type RunConfig struct {
 	// Whether or not to check if the IAM instance profile exists. Defaults to false
 	SkipProfileValidation bool `mapstructure:"skip_profile_validation" required:"false"`
 	// Temporary IAM instance profile policy document
-	// If IamInstanceProfile is specified it will be used instead. Example:
+	// If IamInstanceProfile is specified it will be used instead.
 	//
+	// HCL2 example:
+	// ```hcl
+	//temporary_iam_instance_profile_policy_document {
+	//	Statement {
+	//		Action   = ["logs:*"]
+	//		Effect   = "Allow"
+	//		Resource = "*"
+	//	}
+	//	Version = "2012-10-17"
+	//}
+	// ```
+	//
+	// JSON example:
 	// ```json
 	//{
 	//	"Version": "2012-10-17",
@@ -157,17 +170,7 @@ type RunConfig struct {
 	// The EC2 instance type to use while building the
 	// AMI, such as t2.small.
 	InstanceType string `mapstructure:"instance_type" required:"true"`
-	// Filters used to populate the `security_group_ids` field. JSON Example:
-	//
-	// ```json
-	// {
-	//   "security_group_filter": {
-	//     "filters": {
-	//       "tag:Class": "packer"
-	//     }
-	//   }
-	// }
-	// ```
+	// Filters used to populate the `security_group_ids` field.
 	//
 	// HCL2 Example:
 	//
@@ -177,6 +180,17 @@ type RunConfig struct {
 	//       "tag:Class": "packer"
 	//     }
 	//   }
+	// ```
+	//
+	// JSON Example:
+	// ```json
+	// {
+	//   "security_group_filter": {
+	//     "filters": {
+	//       "tag:Class": "packer"
+	//     }
+	//   }
+	// }
 	// ```
 	//
 	// This selects the SG's with tag `Class` with the value `packer`.
@@ -213,8 +227,24 @@ type RunConfig struct {
 	// AMI with a root volume snapshot that you have access to.
 	SourceAmi string `mapstructure:"source_ami" required:"true"`
 	// Filters used to populate the `source_ami`
-	// field. JSON Example:
+	// field.
 	//
+	// HCL2 example:
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   source_ami_filter {
+	//     filters = {
+	//        virtualization-type = "hvm"
+	//        name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
+	//        root-device-type = "ebs"
+	//     }
+	//     owners = ["099720109477"]
+	//     most_recent = true
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -230,21 +260,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   source_ami_filter {
-	//     filters = {
-	//        virtualization-type = "hvm"
-	//        name = "ubuntu/images/\*ubuntu-xenial-16.04-amd64-server-\*"
-	//        root-device-type = "ebs"
-	//     }
-	//     owners = ["099720109477"]
-	//     most_recent = true
-	//   }
-	// }
 	// ```
 	//
 	//   This selects the most recent Ubuntu 16.04 HVM EBS AMI from Canonical. NOTE:
@@ -313,8 +328,22 @@ type RunConfig struct {
 	// will allow you to create those programatically.
 	SpotTag config.KeyValues `mapstructure:"spot_tag" required:"false"`
 	// Filters used to populate the `subnet_id` field.
-	// JSON Example:
 	//
+	// HCL2 example:
+	//
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   subnet_filter {
+	//     filters = {
+	//           "tag:Class": "build"
+	//     }
+	//     most_free = true
+	//     random = false
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -328,19 +357,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   subnet_filter {
-	//     filters = {
-	//           "tag:Class": "build"
-	//     }
-	//     most_free = true
-	//     random = false
-	//   }
-	// }
 	// ```
 	//
 	//   This selects the Subnet with tag `Class` with the value `build`, which has
@@ -388,8 +404,21 @@ type RunConfig struct {
 	// data when launching the instance.
 	UserDataFile string `mapstructure:"user_data_file" required:"false"`
 	// Filters used to populate the `vpc_id` field.
-	// JSON Example:
 	//
+	// HCL2 example:
+	// ```hcl
+	// source "amazon-ebs" "basic-example" {
+	//   vpc_filter {
+	//     filters = {
+	//       "tag:Class": "build",
+	//       "isDefault": "false",
+	//       "cidr": "/24"
+	//     }
+	//   }
+	// }
+	// ```
+	//
+	// JSON Example:
 	// ```json
 	// "builders" [
 	//   {
@@ -403,19 +432,6 @@ type RunConfig struct {
 	//     }
 	//   }
 	// ]
-	// ```
-	// HCL2 example:
-	//
-	// ```hcl
-	// source "amazon-ebs" "basic-example" {
-	//   vpc_filter {
-	//     filters = {
-	//       "tag:Class": "build",
-	//       "isDefault": "false",
-	//       "cidr": "/24"
-	//     }
-	//   }
-	// }
 	// ```
 	//
 	// This selects the VPC with tag `Class` with the value `build`, which is not

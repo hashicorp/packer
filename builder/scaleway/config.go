@@ -74,8 +74,10 @@ type Config struct {
 
 	RemoveVolume bool `mapstructure:"remove_volume"`
 
-	UserAgent string `mapstructure-to-hcl2:",skip"`
-	ctx       interpolate.Context
+	// Shutdown timeout. Default to 5m
+	ShutdownTimeout string `mapstructure:"shutdown_timeout" required:"false"`
+	UserAgent       string `mapstructure-to-hcl2:",skip"`
+	ctx             interpolate.Context
 
 	// Deprecated configs
 
@@ -253,6 +255,10 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	if c.Image == "" {
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("image is required"))
+	}
+
+	if c.ShutdownTimeout == "" {
+		c.ShutdownTimeout = "5m"
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

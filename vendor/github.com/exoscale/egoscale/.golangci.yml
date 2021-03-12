@@ -1,3 +1,6 @@
+run:
+  timeout: 10m
+
 linters-settings:
   golint:
     min-confidence: 0.3
@@ -9,8 +12,8 @@ linters-settings:
 linters:
   enable:
     - deadcode
-    - dupl
     - errcheck
+    - gocritic
     - gocyclo
     - goimports
     - golint

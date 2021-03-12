@@ -17,10 +17,10 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ImageShapeCompatibilitySummary Summary information for an image shape compatibility entry.
+// ImageShapeCompatibilitySummary Summary information for a compatible image and shape.
 type ImageShapeCompatibilitySummary struct {
 
-	// The image OCID.
+	// The image OCID (https://docs.cloud.oracle.com/Content/General/Concepts/identifiers.htm).
 	ImageId *string `mandatory:"true" json:"imageId"`
 
 	// The shape name.

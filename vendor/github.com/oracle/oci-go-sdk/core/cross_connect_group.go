@@ -59,7 +59,7 @@ type CrossConnectGroup struct {
 	// group uses.
 	CustomerReferenceName *string `mandatory:"false" json:"customerReferenceName"`
 
-	// The date and time the cross-connect group was created, in the format defined by RFC3339.
+	// The date and time the cross-connect group was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 }

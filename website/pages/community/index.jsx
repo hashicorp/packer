@@ -18,27 +18,27 @@ export default function CommunityPage() {
           {
             header: 'Community Forum',
             body:
-              '[Packer Community Forum](https://discuss.hashicorp.com/c/packer)',
+              '<a href="https://discuss.hashicorp.com/c/packer">Packer Community Forum</a>',
           },
           {
             header: 'Discussion List',
             body:
-              '[Packer Google Group](https://groups.google.com/group/packer-tool)',
+              '<a href="https://groups.google.com/group/packer-tool">Packer Google Group</a>',
           },
           {
             header: 'Announcement List',
             body:
-              '[HashiCorp Announcement Google Group](https://groups.google.com/group/hashicorp-announce)',
+              '<a href="https://groups.google.com/group/hashicorp-announce">HashiCorp Announcement Google Group</a>',
           },
           {
             header: 'Bug Tracker',
             body:
-              '[Issue tracker on GitHub](https://github.com/hashicorp/packer/issues). Please only use this for reporting bugs. For general help, please use the Community Forum.',
+              '<a href="https://github.com/hashicorp/packer/issues">Issue tracker on GitHub</a>. Please only use this for reporting bugs. For general help, please use the Community Forum.',
           },
           {
             header: 'Training',
             body:
-              'Paid [HashiCorp training courses](https://www.hashicorp.com/training) are also available in a city near you. Private training courses are also available.',
+              'Paid <a href="https://www.hashicorp.com/training">HashiCorp training courses</a> are also available in a city near you. Private training courses are also available.',
           },
         ]}
       />

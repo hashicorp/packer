@@ -1,0 +1,1200 @@
+[
+  {
+    "divider": true
+  },
+  {
+    "title": "Terminology",
+    "path": "terminology"
+  },
+  {
+    "title": "Commands (CLI)",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "commands"
+      },
+      {
+        "title": "<code>init</code>",
+        "path": "commands/init"
+      },
+      {
+        "title": "<code>build</code>",
+        "path": "commands/build"
+      },
+      {
+        "title": "<code>console</code>",
+        "path": "commands/console"
+      },
+      {
+        "title": "<code>fix</code>",
+        "path": "commands/fix"
+      },
+      {
+        "title": "<code>fmt</code>",
+        "path": "commands/fmt"
+      },
+      {
+        "title": "<code>inspect</code>",
+        "path": "commands/inspect"
+      },
+      {
+        "title": "<code>validate</code>",
+        "path": "commands/validate"
+      },
+      {
+        "title": "<code>hcl2_upgrade</code>",
+        "path": "commands/hcl2_upgrade"
+      }
+    ]
+  },
+  {
+    "title": "Templates",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "templates"
+      },
+      {
+        "title": "HCL Templates",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "templates/hcl_templates"
+          },
+          {
+            "title": "Blocks",
+            "routes": [
+              {
+                "title": "Overview",
+                "path": "templates/hcl_templates/blocks"
+              },
+              {
+                "title": "<code>build</code>",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/blocks/build"
+                  },
+                  {
+                    "title": "<code>source</code>",
+                    "path": "templates/hcl_templates/blocks/build/source"
+                  },
+                  {
+                    "title": "<code>provisioner</code>",
+                    "path": "templates/hcl_templates/blocks/build/provisioner"
+                  },
+                  {
+                    "title": "<code>post-processor</code>",
+                    "path": "templates/hcl_templates/blocks/build/post-processor"
+                  },
+                  {
+                    "title": "<code>post-processors</code>",
+                    "path": "templates/hcl_templates/blocks/build/post-processors"
+                  }
+                ]
+              },
+              {
+                "title": "<code>locals</code>",
+                "path": "templates/hcl_templates/blocks/locals"
+              },
+              {
+                "title": "<code>source</code>",
+                "path": "templates/hcl_templates/blocks/source"
+              },
+              {
+                "title": "<code>variable</code>",
+                "path": "templates/hcl_templates/blocks/variable"
+              },
+              {
+                "title": "<code>packer</code>",
+                "path": "templates/hcl_templates/blocks/packer"
+              },
+              {
+                "title": "<code>data</code>",
+                "path": "templates/hcl_templates/blocks/data"
+              }
+            ]
+          },
+          {
+            "title": "Functions",
+            "routes": [
+              {
+                "title": "Overview",
+                "path": "templates/hcl_templates/functions"
+              },
+              {
+                "title": "Contextual Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/contextual"
+                  },
+                  {
+                    "title": "aws_secretsmanager",
+                    "path": "templates/hcl_templates/functions/contextual/aws_secretsmanager"
+                  },
+                  {
+                    "title": "consul",
+                    "path": "templates/hcl_templates/functions/contextual/consul"
+                  },
+                  {
+                    "title": "env",
+                    "path": "templates/hcl_templates/functions/contextual/env"
+                  },
+                  {
+                    "title": "vault",
+                    "path": "templates/hcl_templates/functions/contextual/vault"
+                  }
+                ]
+              },
+              {
+                "title": "Numeric Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/numeric"
+                  },
+                  {
+                    "title": "abs",
+                    "path": "templates/hcl_templates/functions/numeric/abs"
+                  },
+                  {
+                    "title": "ceil",
+                    "path": "templates/hcl_templates/functions/numeric/ceil"
+                  },
+                  {
+                    "title": "floor",
+                    "path": "templates/hcl_templates/functions/numeric/floor"
+                  },
+                  {
+                    "title": "log",
+                    "path": "templates/hcl_templates/functions/numeric/log"
+                  },
+                  {
+                    "title": "max",
+                    "path": "templates/hcl_templates/functions/numeric/max"
+                  },
+                  {
+                    "title": "min",
+                    "path": "templates/hcl_templates/functions/numeric/min"
+                  },
+                  {
+                    "title": "parseint",
+                    "path": "templates/hcl_templates/functions/numeric/parseint"
+                  },
+                  {
+                    "title": "pow",
+                    "path": "templates/hcl_templates/functions/numeric/pow"
+                  },
+                  {
+                    "title": "signum",
+                    "path": "templates/hcl_templates/functions/numeric/signum"
+                  }
+                ]
+              },
+              {
+                "title": "String Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/string"
+                  },
+                  {
+                    "title": "chomp",
+                    "path": "templates/hcl_templates/functions/string/chomp"
+                  },
+                  {
+                    "title": "format",
+                    "path": "templates/hcl_templates/functions/string/format"
+                  },
+                  {
+                    "title": "formatlist",
+                    "path": "templates/hcl_templates/functions/string/formatlist"
+                  },
+                  {
+                    "title": "indent",
+                    "path": "templates/hcl_templates/functions/string/indent"
+                  },
+                  {
+                    "title": "join",
+                    "path": "templates/hcl_templates/functions/string/join"
+                  },
+                  {
+                    "title": "lower",
+                    "path": "templates/hcl_templates/functions/string/lower"
+                  },
+                  {
+                    "title": "replace",
+                    "path": "templates/hcl_templates/functions/string/replace"
+                  },
+                  {
+                    "title": "regex_replace",
+                    "path": "templates/hcl_templates/functions/string/regex_replace"
+                  },
+                  {
+                    "title": "regex",
+                    "path": "templates/hcl_templates/functions/string/regex"
+                  },
+                  {
+                    "title": "regexall",
+                    "path": "templates/hcl_templates/functions/string/regexall"
+                  },
+                  {
+                    "title": "split",
+                    "path": "templates/hcl_templates/functions/string/split"
+                  },
+                  {
+                    "title": "strrev",
+                    "path": "templates/hcl_templates/functions/string/strrev"
+                  },
+                  {
+                    "title": "substr",
+                    "path": "templates/hcl_templates/functions/string/substr"
+                  },
+                  {
+                    "title": "title",
+                    "path": "templates/hcl_templates/functions/string/title"
+                  },
+                  {
+                    "title": "trim",
+                    "path": "templates/hcl_templates/functions/string/trim"
+                  },
+                  {
+                    "title": "trimprefix",
+                    "path": "templates/hcl_templates/functions/string/trimprefix"
+                  },
+                  {
+                    "title": "trimsuffix",
+                    "path": "templates/hcl_templates/functions/string/trimsuffix"
+                  },
+                  {
+                    "title": "trimspace",
+                    "path": "templates/hcl_templates/functions/string/trimspace"
+                  },
+                  {
+                    "title": "upper",
+                    "path": "templates/hcl_templates/functions/string/upper"
+                  }
+                ]
+              },
+              {
+                "title": "Collection Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/collection"
+                  },
+                  {
+                    "title": "chunklist",
+                    "path": "templates/hcl_templates/functions/collection/chunklist"
+                  },
+                  {
+                    "title": "coalesce",
+                    "path": "templates/hcl_templates/functions/collection/coalesce"
+                  },
+                  {
+                    "title": "coalescelist",
+                    "path": "templates/hcl_templates/functions/collection/coalescelist"
+                  },
+                  {
+                    "title": "compact",
+                    "path": "templates/hcl_templates/functions/collection/compact"
+                  },
+                  {
+                    "title": "concat",
+                    "path": "templates/hcl_templates/functions/collection/concat"
+                  },
+                  {
+                    "title": "contains",
+                    "path": "templates/hcl_templates/functions/collection/contains"
+                  },
+                  {
+                    "title": "distinct",
+                    "path": "templates/hcl_templates/functions/collection/distinct"
+                  },
+                  {
+                    "title": "element",
+                    "path": "templates/hcl_templates/functions/collection/element"
+                  },
+                  {
+                    "title": "flatten",
+                    "path": "templates/hcl_templates/functions/collection/flatten"
+                  },
+                  {
+                    "title": "keys",
+                    "path": "templates/hcl_templates/functions/collection/keys"
+                  },
+                  {
+                    "title": "length",
+                    "path": "templates/hcl_templates/functions/collection/length"
+                  },
+                  {
+                    "title": "lookup",
+                    "path": "templates/hcl_templates/functions/collection/lookup"
+                  },
+                  {
+                    "title": "merge",
+                    "path": "templates/hcl_templates/functions/collection/merge"
+                  },
+                  {
+                    "title": "range",
+                    "path": "templates/hcl_templates/functions/collection/range"
+                  },
+                  {
+                    "title": "reverse",
+                    "path": "templates/hcl_templates/functions/collection/reverse"
+                  },
+                  {
+                    "title": "setintersection",
+                    "path": "templates/hcl_templates/functions/collection/setintersection"
+                  },
+                  {
+                    "title": "setproduct",
+                    "path": "templates/hcl_templates/functions/collection/setproduct"
+                  },
+                  {
+                    "title": "setunion",
+                    "path": "templates/hcl_templates/functions/collection/setunion"
+                  },
+                  {
+                    "title": "slice",
+                    "path": "templates/hcl_templates/functions/collection/slice"
+                  },
+                  {
+                    "title": "sort",
+                    "path": "templates/hcl_templates/functions/collection/sort"
+                  },
+                  {
+                    "title": "values",
+                    "path": "templates/hcl_templates/functions/collection/values"
+                  },
+                  {
+                    "title": "zipmap",
+                    "path": "templates/hcl_templates/functions/collection/zipmap"
+                  }
+                ]
+              },
+              {
+                "title": "Encoding Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/encoding"
+                  },
+                  {
+                    "title": "base64decode",
+                    "path": "templates/hcl_templates/functions/encoding/base64decode"
+                  },
+                  {
+                    "title": "base64encode",
+                    "path": "templates/hcl_templates/functions/encoding/base64encode"
+                  },
+                  {
+                    "title": "csvdecode",
+                    "path": "templates/hcl_templates/functions/encoding/csvdecode"
+                  },
+                  {
+                    "title": "jsondecode",
+                    "path": "templates/hcl_templates/functions/encoding/jsondecode"
+                  },
+                  {
+                    "title": "jsonencode",
+                    "path": "templates/hcl_templates/functions/encoding/jsonencode"
+                  },
+                  {
+                    "title": "urlencode",
+                    "path": "templates/hcl_templates/functions/encoding/urlencode"
+                  },
+                  {
+                    "title": "yamldecode",
+                    "path": "templates/hcl_templates/functions/encoding/yamldecode"
+                  },
+                  {
+                    "title": "yamlencode",
+                    "path": "templates/hcl_templates/functions/encoding/yamlencode"
+                  }
+                ]
+              },
+              {
+                "title": "Filesystem Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/file"
+                  },
+                  {
+                    "title": "abspath",
+                    "path": "templates/hcl_templates/functions/file/abspath"
+                  },
+                  {
+                    "title": "basename",
+                    "path": "templates/hcl_templates/functions/file/basename"
+                  },
+                  {
+                    "title": "dirname",
+                    "path": "templates/hcl_templates/functions/file/dirname"
+                  },
+                  {
+                    "title": "file",
+                    "path": "templates/hcl_templates/functions/file/file"
+                  },
+                  {
+                    "title": "fileexists",
+                    "path": "templates/hcl_templates/functions/file/fileexists"
+                  },
+                  {
+                    "title": "fileset",
+                    "path": "templates/hcl_templates/functions/file/fileset"
+                  },
+                  {
+                    "title": "pathexpand",
+                    "path": "templates/hcl_templates/functions/file/pathexpand"
+                  }
+                ]
+              },
+              {
+                "title": "Date and Time Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/datetime"
+                  },
+                  {
+                    "title": "formatdate",
+                    "path": "templates/hcl_templates/functions/datetime/formatdate"
+                  },
+                  {
+                    "title": "timeadd",
+                    "path": "templates/hcl_templates/functions/datetime/timeadd"
+                  },
+                  {
+                    "title": "timestamp",
+                    "path": "templates/hcl_templates/functions/datetime/timestamp"
+                  }
+                ]
+              },
+              {
+                "title": "Hash and Crypto Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/crypto"
+                  },
+                  {
+                    "title": "bcrypt",
+                    "path": "templates/hcl_templates/functions/crypto/bcrypt"
+                  },
+                  {
+                    "title": "md5",
+                    "path": "templates/hcl_templates/functions/crypto/md5"
+                  },
+                  {
+                    "title": "rsadecrypt",
+                    "path": "templates/hcl_templates/functions/crypto/rsadecrypt"
+                  },
+                  {
+                    "title": "sha1",
+                    "path": "templates/hcl_templates/functions/crypto/sha1"
+                  },
+                  {
+                    "title": "sha256",
+                    "path": "templates/hcl_templates/functions/crypto/sha256"
+                  },
+                  {
+                    "title": "sha512",
+                    "path": "templates/hcl_templates/functions/crypto/sha512"
+                  }
+                ]
+              },
+              {
+                "title": "UUID Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/uuid"
+                  },
+                  {
+                    "title": "uuidv4",
+                    "path": "templates/hcl_templates/functions/uuid/uuidv4"
+                  },
+                  {
+                    "title": "uuidv5",
+                    "path": "templates/hcl_templates/functions/uuid/uuidv5"
+                  }
+                ]
+              },
+              {
+                "title": "IP Network Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/ipnet"
+                  },
+                  {
+                    "title": "cidrhost",
+                    "path": "templates/hcl_templates/functions/ipnet/cidrhost"
+                  },
+                  {
+                    "title": "cidrnetmask",
+                    "path": "templates/hcl_templates/functions/ipnet/cidrnetmask"
+                  },
+                  {
+                    "title": "cidrsubnet",
+                    "path": "templates/hcl_templates/functions/ipnet/cidrsubnet"
+                  }
+                ]
+              },
+              {
+                "title": "Type Conversion Functions",
+                "routes": [
+                  {
+                    "title": "Overview",
+                    "path": "templates/hcl_templates/functions/conversion"
+                  },
+                  {
+                    "title": "can",
+                    "path": "templates/hcl_templates/functions/conversion/can"
+                  },
+                  {
+                    "title": "convert",
+                    "path": "templates/hcl_templates/functions/conversion/convert"
+                  },
+                  {
+                    "title": "try",
+                    "path": "templates/hcl_templates/functions/conversion/try"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Variables",
+            "path": "templates/hcl_templates/variables"
+          },
+          {
+            "title": "Locals",
+            "path": "templates/hcl_templates/locals"
+          },
+          {
+            "title": "Contextual Variables",
+            "path": "templates/hcl_templates/contextual-variables"
+          },
+          {
+            "title": "Data Sources",
+            "path": "templates/hcl_templates/datasources"
+          },
+          {
+            "title": "Path Variables",
+            "path": "templates/hcl_templates/path-variables"
+          },
+          {
+            "title": "Syntax",
+            "path": "templates/hcl_templates/syntax"
+          },
+          {
+            "title": "Only Except",
+            "path": "templates/hcl_templates/onlyexcept"
+          },
+          {
+            "title": "Expressions",
+            "path": "templates/hcl_templates/expressions"
+          },
+          {
+            "title": "JSON Syntax",
+            "path": "templates/hcl_templates/syntax-json"
+          }
+        ]
+      },
+      {
+        "title": "JSON Templates",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "templates/legacy_json_templates"
+          },
+          {
+            "title": "Builders",
+            "path": "templates/legacy_json_templates/builders"
+          },
+          {
+            "title": "Communicators",
+            "path": "templates/legacy_json_templates/communicator"
+          },
+          {
+            "title": "Engine",
+            "path": "templates/legacy_json_templates/engine"
+          },
+          {
+            "title": "Post-Processors",
+            "path": "templates/legacy_json_templates/post-processors"
+          },
+          {
+            "title": "Provisioners",
+            "path": "templates/legacy_json_templates/provisioners"
+          },
+          {
+            "title": "User Variables",
+            "path": "templates/legacy_json_templates/user-variables"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "divider": true
+  },
+  {
+    "title": "Communicators",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "communicators"
+      },
+      {
+        "title": "SSH",
+        "path": "communicators/ssh"
+      },
+      {
+        "title": "WINRM",
+        "path": "communicators/winrm"
+      }
+    ]
+  },
+  {
+    "title": "Builders",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "builders"
+      },
+      {
+        "title": "Alicloud ECS",
+        "path": "builders/alicloud-ecs"
+      },
+      {
+        "title": "Amazon EC2",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/amazon"
+          },
+          {
+            "title": "chroot",
+            "path": "builders/amazon/chroot"
+          },
+          {
+            "title": "EBS",
+            "path": "builders/amazon/ebs"
+          },
+          {
+            "title": "EBS Surrogate",
+            "path": "builders/amazon/ebssurrogate"
+          },
+          {
+            "title": "EBS Volume",
+            "path": "builders/amazon/ebsvolume"
+          },
+          {
+            "title": "Instance",
+            "path": "builders/amazon/instance"
+          }
+        ]
+      },
+      {
+        "title": "Azure",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/azure"
+          },
+          {
+            "title": "ARM",
+            "path": "builders/azure/arm"
+          },
+          {
+            "title": "chroot",
+            "path": "builders/azure/chroot"
+          }
+        ]
+      },
+      {
+        "title": "CloudStack",
+        "path": "builders/cloudstack"
+      },
+      {
+        "title": "DigitalOcean",
+        "path": "builders/digitalocean"
+      },
+      {
+        "title": "File",
+        "path": "builders/file"
+      },
+      {
+        "title": "Google Cloud",
+        "path": "builders/googlecompute"
+      },
+      {
+        "title": "Hetzner Cloud",
+        "path": "builders/hetzner-cloud"
+      },
+      {
+        "title": "HyperOne",
+        "path": "builders/hyperone"
+      },
+      {
+        "title": "Hyper-V",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/hyperv"
+          },
+          {
+            "title": "ISO",
+            "path": "builders/hyperv/iso"
+          },
+          {
+            "title": "VMCX",
+            "path": "builders/hyperv/vmcx"
+          }
+        ]
+      },
+      {
+        "title": "Linode",
+        "path": "builders/linode"
+      },
+      {
+        "title": "LXC",
+        "path": "builders/lxc"
+      },
+      {
+        "title": "LXD",
+        "path": "builders/lxd"
+      },
+      {
+        "title": "NAVER Cloud",
+        "path": "builders/ncloud"
+      },
+      {
+        "title": "Null",
+        "path": "builders/null"
+      },
+      {
+        "title": "1&amp;1",
+        "path": "builders/oneandone"
+      },
+      {
+        "title": "OpenStack",
+        "path": "builders/openstack"
+      },
+      {
+        "title": "Oracle",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/oracle"
+          },
+          {
+            "title": "Oracle Classic",
+            "path": "builders/oracle/classic"
+          },
+          {
+            "title": "Oracle OCI",
+            "path": "builders/oracle/oci"
+          }
+        ]
+      },
+      {
+        "title": "Outscale",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/outscale"
+          },
+          {
+            "title": "chroot",
+            "path": "builders/outscale/chroot"
+          },
+          {
+            "title": "BSU",
+            "path": "builders/outscale/bsu"
+          },
+          {
+            "title": "BSU Surrogate",
+            "path": "builders/outscale/bsusurrogate"
+          },
+          {
+            "title": "BSU Volume",
+            "path": "builders/outscale/bsuvolume"
+          }
+        ]
+      },
+      {
+        "title": "Parallels",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/parallels"
+          },
+          {
+            "title": "ISO",
+            "path": "builders/parallels/iso"
+          },
+          {
+            "title": "PVM",
+            "path": "builders/parallels/pvm"
+          }
+        ]
+      },
+      {
+        "title": "ProfitBricks",
+        "path": "builders/profitbricks"
+      },
+      {
+        "title": "Proxmox",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/proxmox"
+          },
+          {
+            "title": "ISO",
+            "path": "builders/proxmox/iso"
+          },
+          {
+            "title": "Clone",
+            "path": "builders/proxmox/clone"
+          }
+        ]
+      },
+      {
+        "title": "QEMU",
+        "path": "builders/qemu"
+      },
+      {
+        "title": "Scaleway",
+        "path": "builders/scaleway"
+      },
+      {
+        "title": "Tencent Cloud",
+        "path": "builders/tencentcloud-cvm"
+      },
+      {
+        "title": "JDCloud",
+        "path": "builders/jdcloud"
+      },
+      {
+        "title": "Triton",
+        "path": "builders/triton"
+      },
+      {
+        "title": "UCloud",
+        "path": "builders/ucloud-uhost"
+      },
+      {
+        "title": "Vagrant",
+        "path": "builders/vagrant"
+      },
+      {
+        "title": "VirtualBox",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/virtualbox"
+          },
+          {
+            "title": "ISO",
+            "path": "builders/virtualbox/iso"
+          },
+          {
+            "title": "OVF",
+            "path": "builders/virtualbox/ovf"
+          },
+          {
+            "title": "VM",
+            "path": "builders/virtualbox/vm"
+          }
+        ]
+      },
+      {
+        "title": "VMware",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "builders/vmware"
+          },
+          {
+            "title": "VMWare ISO",
+            "path": "builders/vmware/iso"
+          },
+          {
+            "title": "VMWare VMX",
+            "path": "builders/vmware/vmx"
+          },
+          {
+            "title": "VSphere ISO",
+            "path": "builders/vmware/vsphere-iso"
+          },
+          {
+            "title": "VSphere Clone",
+            "path": "builders/vmware/vsphere-clone"
+          }
+        ]
+      },
+      {
+        "title": "Yandex.Cloud",
+        "path": "builders/yandex"
+      },
+      {
+        "title": "Custom",
+        "path": "builders/custom"
+      },
+      {
+        "title": "Community-Supported",
+        "path": "builders/community-supported"
+      }
+    ]
+  },
+  {
+    "title": "Data Sources",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "datasources"
+      },
+      {
+        "title": "Amazon",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "datasources/amazon"
+          },
+          {
+            "title": "Amazon AMI",
+            "path": "datasources/amazon/ami"
+          },
+          {
+            "title": "Secrets Manager",
+            "path": "datasources/amazon/secretsmanager"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Provisioners",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "provisioners"
+      },
+      {
+        "title": "Ansible Local",
+        "path": "provisioners/ansible-local"
+      },
+      {
+        "title": "Ansible (Remote)",
+        "path": "provisioners/ansible"
+      },
+      {
+        "title": "Breakpoint",
+        "path": "provisioners/breakpoint"
+      },
+      {
+        "title": "Chef Client",
+        "path": "provisioners/chef-client"
+      },
+      {
+        "title": "Chef Solo",
+        "path": "provisioners/chef-solo"
+      },
+      {
+        "title": "Converge",
+        "path": "provisioners/converge"
+      },
+      {
+        "title": "File",
+        "path": "provisioners/file"
+      },
+      {
+        "title": "InSpec",
+        "path": "provisioners/inspec"
+      },
+      {
+        "title": "PowerShell",
+        "path": "provisioners/powershell"
+      },
+      {
+        "title": "Puppet Masterless",
+        "path": "provisioners/puppet-masterless"
+      },
+      {
+        "title": "Puppet Server",
+        "path": "provisioners/puppet-server"
+      },
+      {
+        "title": "Salt Masterless",
+        "path": "provisioners/salt-masterless"
+      },
+      {
+        "title": "Shell",
+        "path": "provisioners/shell"
+      },
+      {
+        "title": "Shell (Local)",
+        "path": "provisioners/shell-local"
+      },
+      {
+        "title": "Windows Shell",
+        "path": "provisioners/windows-shell"
+      },
+      {
+        "title": "Windows Restart",
+        "path": "provisioners/windows-restart"
+      },
+      {
+        "title": "Custom",
+        "path": "provisioners/custom"
+      },
+      {
+        "title": "Community-Supported",
+        "path": "provisioners/community-supported"
+      }
+    ]
+  },
+  {
+    "title": "Post-Processors",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "post-processors"
+      },
+      {
+        "title": "Alicloud Import",
+        "path": "post-processors/alicloud-import"
+      },
+      {
+        "title": "Amazon Import",
+        "path": "post-processors/amazon-import"
+      },
+      {
+        "title": "Artifice",
+        "path": "post-processors/artifice"
+      },
+      {
+        "title": "Compress",
+        "path": "post-processors/compress"
+      },
+      {
+        "title": "Checksum",
+        "path": "post-processors/checksum"
+      },
+      {
+        "title": "DigitalOcean Import",
+        "path": "post-processors/digitalocean-import"
+      },
+      {
+        "title": "Google Compute Export",
+        "path": "post-processors/googlecompute-export"
+      },
+      {
+        "title": "Google Compute Import",
+        "path": "post-processors/googlecompute-import"
+      },
+      {
+        "title": "Manifest",
+        "path": "post-processors/manifest"
+      },
+      {
+        "title": "Shell (Local)",
+        "path": "post-processors/shell-local"
+      },
+      {
+        "title": "UCloud Import",
+        "path": "post-processors/ucloud-import"
+      },
+      {
+        "title": "Vagrant",
+        "path": "post-processors/vagrant"
+      },
+      {
+        "title": "Vagrant Cloud",
+        "path": "post-processors/vagrant-cloud"
+      },
+      {
+        "title": "vSphere",
+        "path": "post-processors/vsphere"
+      },
+      {
+        "title": "vSphere Template",
+        "path": "post-processors/vsphere-template"
+      },
+      {
+        "title": "Yandex.Cloud Compute Export",
+        "path": "post-processors/yandex-export"
+      },
+      {
+        "title": "Yandex.Cloud Compute Import",
+        "path": "post-processors/yandex-import"
+      },
+      {
+        "title": "Community-Supported",
+        "path": "post-processors/community-supported"
+      }
+    ]
+  },
+  {
+    "divider": true
+  },
+  {
+    "title": "Installing Packer",
+    "path": "install"
+  },
+  {
+    "title": "Configuring Packer",
+    "path": "configure"
+  },
+  {
+    "divider": true
+  },
+  {
+    "title": "Packer Plugins",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "plugins"
+      },
+      {
+        "title": "Extending Packer",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "plugins/creation"
+          },
+          {
+            "title": "Custom Builders",
+            "path": "plugins/creation/custom-builders"
+          },
+          {
+            "title": "Custom Post-Processors",
+            "path": "plugins/creation/custom-post-processors"
+          },
+          {
+            "title": "Custom Provisioners",
+            "path": "plugins/creation/custom-provisioners"
+          },
+          {
+            "title": "Custom Data Sources",
+            "path": "plugins/creation/custom-datasources"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "divider": true
+  },
+  {
+    "title": "Debugging",
+    "path": "debugging"
+  }
+]

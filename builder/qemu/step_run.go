@@ -104,6 +104,11 @@ func (s *stepRun) getDefaultArgs(config *Config, state multistep.StateBag) map[s
 			config.MachineType, config.Accelerator)
 	}
 
+	// Firmware
+	if config.Firmware != "" {
+		defaultArgs["-bios"] = config.Firmware
+	}
+
 	// Configure "-netdev" arguments
 	defaultArgs["-netdev"] = fmt.Sprintf("bridge,id=user.0,br=%s", config.NetBridge)
 	if config.NetBridge == "" {

@@ -87,7 +87,6 @@
 
 /post-processor/alicloud-import/        dongxiao.zzh@alibaba-inc.com
 /post-processor/checksum/               v.tolstov@selfip.ru
-/post-processor/exoscale-import/        @falzm @mcorbin
 /post-processor/googlecompute-export/   crunkleton@google.com
 /post-processor/yandex-export/          @GennadySpb
 /post-processor/yandex-import/          @GennadySpb

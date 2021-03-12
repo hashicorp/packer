@@ -1,22 +1,63 @@
-## 1.7.0 (Upcoming)
+## 1.7.1 (Upcoming)
+
+### IMPROVEMENTS
+* builder/amazon: allow creation of ebs snapshots wihtout volumes. [GH-9591]
+* builder/scaleway: add support for timeout in shutdown step. [GH-10503]
+* builder/virtualbox: Add template options for chipset, firmware, nic, graphics
+    controller, and audio controller. [GH-10671]
+* builder/virtualbox: Support for "virtio" storage and ISO drive. [GH-10632]
+* builder/vmware: Added "attach_snapshot" parameter to vmware vmx builder.
+    [GH-10651]
+* core: Change template parsing error to include warning about file extensions.
+    [GH-10652]
+* hcl2_upgrade: hcl2_upgrade command can now upgrade json var-files [GH-10676]
+
+### BUG FIXES
+* builder/amazon: Update amazon SDK to fix an SSO login issue. [GH-10668]
+* builder/azure: Don't overwrite subscription id if unset. [GH-10659]
+* builder/oracle-oci: Update Oracle Go SDK to fix issue with reading key file.
+    [GH-10560]
+* builder/vmware: Added a fallback file check when trying to determine the
+    network-mapping configuration. [GH-10543]
+* core/hcl2_upgrade: Make hcl2_upgrade command correctly translate
+    pause_before. [GH-10654]
+* core: Templates previously could not interpolate the environment variable
+    PACKER_LOG_PATH. [GH-10660]
+* provisioner/chef-solo: HCL2 templates can support the json_string option.
+    [GH-10655]
+
+## 1.7.0 (February 17, 2021)
 
 ### FEATURES
-** New Command** (HCL only) `packer init` command will download plugins defined
-    in a new `required_plugins` block [GH-10304]
-** New Plugin Type** Data sources can be implemented (blog post forthcoming).
+* **New Command** (HCL only) `packer init` command will download plugins defined
+    in a new `required_plugins` block [GH-10304] [GH-10633].
+* **New Plugin Type** Data sources can be implemented (blog post forthcoming).
     [GH-10440]
-** New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
+* **New Plugin** Aws Secrets Manager data source [GH-10505] [GH-10467]
+
+### BACKWARDS INCOMPATIBILITIES
+* core: The API that the Packer core uses to communicate with community plugins
+    has changed; maintainers of community plugins will need to upgrade their
+    plugins in order to make them compatible with v1.7.0. An upgrade guide will
+    be available on our guides page https://www.packer.io/guides.
 
 ### IMPROVEMENTS
 * builder/amazon: Add `skip_create_ami` option for testing and situations where
     artifact is not the ami. [GH-10531]
-* builder/amazon: Add IMDSv2 support for AWS EBS builder [GH-10546]
+* builder/amazon: Add IMDSv2 support for AWS EBS builder. [GH-10546]
 * builder/amazon: Add resource tags in the launch template used to request spot
     instances. [GH-10456]
 * builder/openstack:  Add `skip_create_image` option for testing and situations
     where artifact is not the image. [GH-10496]
+* builder/oracle-oci: Add retry strategies to oci calls [GH-10591]
 * core/fmt: The `packer fmt` can now read from stdin. [GH-10500]
-* core/hcl: Templates now support "sensitive" locals [GH-10509]
+* core/hcl: Add regex and regexall hcl2 template functions. [GH-10601]
+* core/hcl: Templates now support "sensitive" locals. [GH-10509]
+* core/hcl: Templates now support error-cleanup-provisioner. [GH-10604]
+* hcl2_upgrade: Command now comes with a flag so you can control whether output
+    templates are annotated with helpful comments. [GH-10619]
+* hcl2_upgrade: Command now gracefully handles options with template engine
+    interpolations. [GH-10625]
 * hcl2_upgrade: Command will convert amazon filters to use the ami data source.
     [GH-10491]
 
@@ -25,16 +66,19 @@
     snapshot. [GH-10150]
 * builder/amazon: Fix bug where validation fails if optional iops value is
     unset. [GH-10518]
-* builder/bsusurrogate: override bsu when omi root device is set [GH-10490]
+* builder/amazon: Wrap API call to get filtered image in a retry. [GH-10610]
+* builder/bsusurrogate: override bsu when omi root device is set. [GH-10490]
 * builder/google: Fix bug where Packer would fail when run by users who do not
     have permission to access the metadata, even though the metadata is not
     necessary to the run. [GH-10458]
 * builder/profitbricks: Profitbricks builder could not connect using SSH
-    communicator [GH-10549]
-* builder/proxmox: Improve cloud init error logging for proxmox builder
+    communicator. [GH-10549]
+* builder/proxmox: Ensure ISOs in additional_iso_files are mounted during VM
+    creation. [GH-10586]
+* builder/proxmox: Improve cloud init error logging for proxmox builder.
     [GH-10499]
 * builder/qemu: Fix bug where vnc_min_port set to value greater then 5900 could
-    prevent Packer from connecting to QEMU. [GH-10450]
+    prevent Packer from connecting to QEMU. [GH-10450] [GH-10451]
 * builder/qemu: Fix regression with cd indexing when disk_interface is `ide`.
     [GH-10519]
 * builder/vmware-esx: Skip credential validation, which requires ovftool to be
@@ -42,7 +86,10 @@
 * builder/yandex: Fix cloud-init config for ubuntu 20.04. [GH-10522]
 * builder/yandex: Fix incorrect access to `instance_id`. [GH-10522]
 * core/hcl: Fix bug where []uint8 types could not be passed to plugins.
-* core/hcl: Fix force flag for hcl2 provisioners and post-processors [GH-10571]
+* core/hcl: fix bug where HCL core could not handle passing []uint8 to plugins.
+    [GH-10516]
+* core/hcl: Fix force flag for hcl2 provisioners and post-processors.
+    [GH-10571]
 * post-processor/vsphere: Fix regression where Packer would not check the exit
     status after streaming UI from the ovftool command. [GH-10468]
 * post-processor/yandex-export: Changed dhclient command and supported
@@ -58,7 +105,7 @@
     [GH-10377]
 * **New function** `env` allows users to set the default value of a variable to
     the value of an environment variable. Please see [env function
-    docs](https://www.packer.io/docs/templates/hcl_templates/functions/contextual/env") for
+    docs](https://www.packer.io/docs/templates/hcl_templates/functions/contextual/env) for
     more details. [GH-10240]
 * **Future Scaffolding** This release contains a large number of no-op
     refactoring changes. The Packer team at HashiCorp is preparing to split the

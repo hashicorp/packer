@@ -39,7 +39,7 @@ type VolumeGroupBackup struct {
 	LifecycleState VolumeGroupBackupLifecycleStateEnum `mandatory:"true" json:"lifecycleState"`
 
 	// The date and time the volume group backup was created. This is the time the actual point-in-time image
-	// of the volume group data was taken. Format defined by RFC3339.
+	// of the volume group data was taken. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeCreated *common.SDKTime `mandatory:"true" json:"timeCreated"`
 
 	// The type of backup.
@@ -64,7 +64,7 @@ type VolumeGroupBackup struct {
 	// The aggregate size of the volume group backup, in GBs.
 	SizeInGBs *int64 `mandatory:"false" json:"sizeInGBs"`
 
-	// The date and time the request to create the volume group backup was received. Format defined by RFC3339.
+	// The date and time the request to create the volume group backup was received. Format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	TimeRequestReceived *common.SDKTime `mandatory:"false" json:"timeRequestReceived"`
 
 	// The aggregate size used by the volume group backup, in MBs.

@@ -112,6 +112,7 @@ type FlatConfig struct {
 	SourceImageFamily            *string                    `mapstructure:"source_image_family" required:"true" cty:"source_image_family" hcl:"source_image_family"`
 	SourceImageProjectId         []string                   `mapstructure:"source_image_project_id" required:"false" cty:"source_image_project_id" hcl:"source_image_project_id"`
 	StartupScriptFile            *string                    `mapstructure:"startup_script_file" required:"false" cty:"startup_script_file" hcl:"startup_script_file"`
+	WindowsPasswordTimeout       *string                    `mapstructure:"windows_password_timeout" required:"false" cty:"windows_password_timeout" hcl:"windows_password_timeout"`
 	WrapStartupScriptFile        *bool                      `mapstructure:"wrap_startup_script" required:"false" cty:"wrap_startup_script" hcl:"wrap_startup_script"`
 	Subnetwork                   *string                    `mapstructure:"subnetwork" required:"false" cty:"subnetwork" hcl:"subnetwork"`
 	Tags                         []string                   `mapstructure:"tags" required:"false" cty:"tags" hcl:"tags"`
@@ -236,6 +237,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image_family":             &hcldec.AttrSpec{Name: "source_image_family", Type: cty.String, Required: false},
 		"source_image_project_id":         &hcldec.AttrSpec{Name: "source_image_project_id", Type: cty.List(cty.String), Required: false},
 		"startup_script_file":             &hcldec.AttrSpec{Name: "startup_script_file", Type: cty.String, Required: false},
+		"windows_password_timeout":        &hcldec.AttrSpec{Name: "windows_password_timeout", Type: cty.String, Required: false},
 		"wrap_startup_script":             &hcldec.AttrSpec{Name: "wrap_startup_script", Type: cty.Bool, Required: false},
 		"subnetwork":                      &hcldec.AttrSpec{Name: "subnetwork", Type: cty.String, Required: false},
 		"tags":                            &hcldec.AttrSpec{Name: "tags", Type: cty.List(cty.String), Required: false},

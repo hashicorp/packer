@@ -8,27 +8,27 @@ sidebar_title: <tt>init</tt>
 # `init` Command
 
 -> **Note:** Packer init does not work with legacy JSON templates. You can
-upgrade your JSON config files to HCL using the hcl2ugprade command.
+upgrade your JSON config files to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
 
--> **Note:** Packer init will only work with multiplugins -- that is plugins
-that are named `packer-plugin-*` -- to install a single plugin binary -- that is
-`packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
+-> **Note:** Packer init will only work with multi-component plugins -- that is
+plugins that are named `packer-plugin-*`. To install a single-component plugin --
+that is `packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
 have to [install the plugin manually](/docs/plugins#installing-plugins).
 
 The `packer init` command is used to download Packer plugin binaries. This is
 the first command that should be executed when working with a new or existing
 template. This command is always safe to run multiple times. Though subsequent
-runs may give errors, this command will never delete anything.   
+runs may give errors, this command will never delete anything.
 
 Packer does not currently have the notion of a state like Terraform has. In other words,
-currently `packer init` is only in charge of installing packer plugins.   
+currently `packer init` is only in charge of installing packer plugins.
 
 Currently, `packer init` can only fetch binaries from public projects on **GitHub**. GitHub's public API, [limits the number of unauthenticated requests
 per hour one IP can
 do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits).
 Packer will do its best to avoid hitting those limits and in an average local
 usage this should not be an issue. Otherwise you can set the
-`PKR_GITHUB_API_TOKEN` env var in order to get more requests per hour. Go to
+`PACKER_GITHUB_API_TOKEN` env var in order to get more requests per hour. Go to
 your personal [access token page](https://github.com/settings/tokens) to
 generate a new token.
 
@@ -44,14 +44,20 @@ block :
 ```hcl
 packer {
   required_plugins {
-    myawesomecloud = {
+    happycloud = {
       version = ">= 2.7.0"
-      source = "azr/myawesomecloud"
+      source = "github.com/azr/happycloud"
     }
-    happycloud = ">= 2.7.0"
   }
 }
 ```
+
+HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; as with all open source tools, please do your own due diligence when using a new tool.
+
+## Plugin Selection
+Plugin selection depends on the source and version constraints defined within the `required_plugins` block.
+For each of the required plugins Packer will query the source repository `github.com/azr/happycloud` whose fully qualified address
+is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.
 
 Packer init will install the latest found version matching the version selection
 in the `required_plugins` section. Make sure to set a correct [version
@@ -60,9 +66,11 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints). The
 plugins will be installed in the [Plugin
 Directory](/docs/configure#packer-s-plugin-directory).
 
-
+See [Installing Plugins](/docs/plugins#installing-plugins) for more information on how plugin installation works.
 ## Options
 
 - `-upgrade` - On top of installing missing plugins, update installed plugins to
   the latest available version, if there is a new higher one. Note that this
   still takes into consideration the version constraint of the config.
+
+

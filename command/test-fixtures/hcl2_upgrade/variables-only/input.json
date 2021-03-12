@@ -1,0 +1,18 @@
+{
+    "variables": {
+        "secret_account": "🤷",
+        "aws_region": null,
+        "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
+        "aws_secret_key": "",
+        "aws_access_key": "",
+        "password": "{{ aws_secretsmanager `sample/app/password` }}",
+        "password_key": "MY_KEY_{{ aws_secretsmanager `sample/app/passwords` `api_key` }}"
+    },
+    "sensitive-variables": [
+        "aws_secret_key",
+        "aws_access_key",
+        "secret_account",
+        "potato",
+        "password"
+    ]
+}

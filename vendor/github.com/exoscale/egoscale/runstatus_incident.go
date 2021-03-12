@@ -3,11 +3,12 @@ package egoscale
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 )
 
-//RunstatusIncident is a runstatus incident
+// RunstatusIncident is a runstatus incident
 type RunstatusIncident struct {
 	EndDate    *time.Time       `json:"end_date,omitempty"`
 	Events     []RunstatusEvent `json:"events,omitempty"`
@@ -38,7 +39,7 @@ func (incident RunstatusIncident) Match(other RunstatusIncident) bool {
 	return false
 }
 
-//RunstatusIncidentList is a list of incident
+// RunstatusIncidentList is a list of incident
 type RunstatusIncidentList struct {
 	Next      string              `json:"next"`
 	Previous  string              `json:"previous"`
@@ -67,7 +68,7 @@ func (client *Client) GetRunstatusIncident(ctx context.Context, incident Runstat
 		}
 	}
 
-	return nil, fmt.Errorf("%#v not found", incident)
+	return nil, errors.New("incident not found")
 }
 
 func (client *Client) getRunstatusIncident(ctx context.Context, incidentURL string) (*RunstatusIncident, error) {

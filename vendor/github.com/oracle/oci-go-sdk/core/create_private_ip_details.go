@@ -20,10 +20,6 @@ import (
 // CreatePrivateIpDetails The representation of CreatePrivateIpDetails
 type CreatePrivateIpDetails struct {
 
-	// The OCID of the VNIC to assign the private IP to. The VNIC and private IP
-	// must be in the same subnet.
-	VnicId *string `mandatory:"true" json:"vnicId"`
-
 	// Defined tags for this resource. Each key is predefined and scoped to a
 	// namespace. For more information, see Resource Tags (https://docs.cloud.oracle.com/Content/General/Concepts/resourcetags.htm).
 	// Example: `{"Operations": {"CostCenter": "42"}}`
@@ -54,6 +50,15 @@ type CreatePrivateIpDetails struct {
 	// assigns a private IP address from the subnet.
 	// Example: `10.0.3.3`
 	IpAddress *string `mandatory:"false" json:"ipAddress"`
+
+	// The OCID of the VNIC to assign the private IP to. The VNIC and private IP
+	// must be in the same subnet.
+	VnicId *string `mandatory:"false" json:"vnicId"`
+
+	// Use this attribute only with the Oracle Cloud VMware Solution.
+	// The OCID of the VLAN from which the private IP is to be drawn. The IP address,
+	// *if supplied*, must be valid for the given VLAN. See Vlan.
+	VlanId *string `mandatory:"false" json:"vlanId"`
 }
 
 func (m CreatePrivateIpDetails) String() string {

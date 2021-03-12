@@ -4,12 +4,12 @@ package egoscale
 
 import "fmt"
 
-// Response returns the struct to unmarshal
+// Response returns the struct to unmarshal.
 func (ListAffinityGroups) Response() interface{} {
 	return new(ListAffinityGroupsResponse)
 }
 
-// ListRequest returns itself
+// ListRequest returns itself.
 func (ls *ListAffinityGroups) ListRequest() (ListCommand, error) {
 	if ls == nil {
 		return nil, fmt.Errorf("%T cannot be nil", ls)
@@ -17,17 +17,17 @@ func (ls *ListAffinityGroups) ListRequest() (ListCommand, error) {
 	return ls, nil
 }
 
-// SetPage sets the current apge
+// SetPage sets the current page.
 func (ls *ListAffinityGroups) SetPage(page int) {
 	ls.Page = page
 }
 
-// SetPageSize sets the page size
+// SetPageSize sets the page size.
 func (ls *ListAffinityGroups) SetPageSize(pageSize int) {
 	ls.PageSize = pageSize
 }
 
-// Each triggers the callback for each, valid answer or any non 404 issue
+// Each triggers the callback for each, valid answer or any non 404 issue.
 func (ListAffinityGroups) Each(resp interface{}, callback IterateItemFunc) {
 	items, ok := resp.(*ListAffinityGroupsResponse)
 	if !ok {

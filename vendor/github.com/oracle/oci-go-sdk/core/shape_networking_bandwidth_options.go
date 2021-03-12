@@ -17,7 +17,8 @@ import (
 	"github.com/oracle/oci-go-sdk/common"
 )
 
-// ShapeNetworkingBandwidthOptions The possible configurations for the amount of networking bandwidth available to an instance of this shape. If this field is null, then all instances of this shape have a fixed amount of bandwidth equivalent to `networkingBandwidthInGbps`.
+// ShapeNetworkingBandwidthOptions For a flexible shape, the amount of networking bandwidth available for instances that use this shape.
+// If this field is null, then this shape has a fixed amount of bandwidth equivalent to `networkingBandwidthInGbps`.
 type ShapeNetworkingBandwidthOptions struct {
 
 	// The minimum amount of networking bandwidth, in gigabits per second.
@@ -26,8 +27,7 @@ type ShapeNetworkingBandwidthOptions struct {
 	// The maximum amount of networking bandwidth, in gigabits per second.
 	MaxInGbps *float32 `mandatory:"false" json:"maxInGbps"`
 
-	// The default amount of networking bandwidth, in gigabits per second,
-	// per OCPU.
+	// The default amount of networking bandwidth per OCPU, in gigabits per second.
 	DefaultPerOcpuInGbps *float32 `mandatory:"false" json:"defaultPerOcpuInGbps"`
 }
 

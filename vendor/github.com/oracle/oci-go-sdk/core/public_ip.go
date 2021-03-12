@@ -66,7 +66,7 @@ type PublicIp struct {
 	Id *string `mandatory:"false" json:"id"`
 
 	// The public IP address of the `publicIp` object.
-	// Example: `129.146.2.1`
+	// Example: `203.0.113.2`
 	IpAddress *string `mandatory:"false" json:"ipAddress"`
 
 	// The public IP's current state.
@@ -102,7 +102,7 @@ type PublicIp struct {
 	// Ephemeral public IPs that are assigned to private IPs have `scope` = `AVAILABILITY_DOMAIN`.
 	Scope PublicIpScopeEnum `mandatory:"false" json:"scope,omitempty"`
 
-	// The date and time the public IP was created, in the format defined by RFC3339.
+	// The date and time the public IP was created, in the format defined by RFC3339 (https://tools.ietf.org/html/rfc3339).
 	// Example: `2016-08-25T21:10:29.600Z`
 	TimeCreated *common.SDKTime `mandatory:"false" json:"timeCreated"`
 }
