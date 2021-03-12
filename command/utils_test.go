@@ -39,3 +39,11 @@ func (c *configDirSingleton) dir(key string) string {
 	c.dirs[key] = mustString(ioutil.TempDir("", "pkr-test-cfg-dir-"+key))
 	return c.dirs[key]
 }
+
+// fileExists returns true if the filename is found
+func fileExists(filename string) bool {
+	if _, err := os.Stat(filename); err == nil {
+		return true
+	}
+	return false
+}
