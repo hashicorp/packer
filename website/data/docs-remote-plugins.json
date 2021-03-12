@@ -3,10 +3,5 @@
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker"
-  },
-  {
-    "title": "Exoscale",
-    "path":  "exoscale",
-    "repo":  "exoscale/packer-plugin-exoscale"
   }
 ]
