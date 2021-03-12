@@ -1,18 +1,30 @@
 ## 1.7.1 (Upcoming)
 
-### FEATURES
 ### IMPROVEMENTS
+* builder/amazon: allow creation of ebs snapshots wihtout volumes. [GH-9591]
+* builder/scaleway: add support for timeout in shutdown step. [GH-10503]
+* builder/virtualbox: Add template options for chipset, firmware, nic, graphics
+    controller, and audio controller. [GH-10671]
+* builder/virtualbox: Support for "virtio" storage and ISO drive. [GH-10632]
+* builder/vmware: Added "attach_snapshot" parameter to vmware vmx builder.
+    [GH-10651]
 * core: Change template parsing error to include warning about file extensions.
     [GH-10652]
+* hcl2_upgrade: hcl2_upgrade command can now upgrade json var-files [GH-10676]
 
 ### BUG FIXES
+* builder/amazon: Update amazon SDK to fix an SSO login issue. [GH-10668]
 * builder/azure: Don't overwrite subscription id if unset. [GH-10659]
 * builder/oracle-oci: Update Oracle Go SDK to fix issue with reading key file.
     [GH-10560]
+* builder/vmware: Added a fallback file check when trying to determine the
+    network-mapping configuration. [GH-10543]
 * core/hcl2_upgrade: Make hcl2_upgrade command correctly translate
     pause_before. [GH-10654]
 * core: Templates previously could not interpolate the environment variable
     PACKER_LOG_PATH. [GH-10660]
+* provisioner/chef-solo: HCL2 templates can support the json_string option.
+    [GH-10655]
 
 ## 1.7.0 (February 17, 2021)
 
