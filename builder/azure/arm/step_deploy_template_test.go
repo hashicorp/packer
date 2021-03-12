@@ -136,8 +136,8 @@ func TestStepDeployTemplateCleanupShouldNotDeleteManagedOSImageInTemporaryResour
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)
-	if deleteDiskCounter != 0 {
-		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 0 times, but invoked %d times", deleteDiskCounter)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 times, but invoked %d times", deleteDiskCounter)
 	}
 }
 
@@ -157,7 +157,7 @@ func TestStepDeployTemplateCleanupShouldDeleteVHDOSImageInExistingResourceGroup(
 	}
 }
 
-func TestStepDeployTemplateCleanupShouldNotDeleteVHDOSImageInTemporaryResourceGroup(t *testing.T) {
+func TestStepDeployTemplateCleanupShouldVHDOSImageInTemporaryResourceGroup(t *testing.T) {
 	var deleteDiskCounter = 0
 	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
 
@@ -168,8 +168,8 @@ func TestStepDeployTemplateCleanupShouldNotDeleteVHDOSImageInTemporaryResourceGr
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)
-	if deleteDiskCounter != 0 {
-		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 0 times, but invoked %d times", deleteDiskCounter)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 times, but invoked %d times", deleteDiskCounter)
 	}
 }
 

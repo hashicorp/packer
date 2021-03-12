@@ -66,17 +66,8 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		}
 	}()
 
-	// Only clean up if this is an existing resource group that has been verified to exist.
-	// ArmIsResourceGroupCreated is set in step_create_resource_group to true, when Packer has verified that the resource group exists.
-	// ArmIsExistingResourceGroup is set to true when build_resource_group is set in the Packer configuration.
-	existingResourceGroup := state.Get(constants.ArmIsExistingResourceGroup).(bool)
-	resourceGroupCreated := state.Get(constants.ArmIsResourceGroupCreated).(bool)
-	if !existingResourceGroup || !resourceGroupCreated {
-		return
-	}
-
 	ui := state.Get("ui").(packersdk.Ui)
-	ui.Say("\nThe resource group was not created by Packer, deleting individual resources ...")
+	ui.Say("\nDeleting individual resources ...")
 
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
