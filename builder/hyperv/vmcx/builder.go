@@ -334,7 +334,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		// configure the communicator ssh, winrm
 		&communicator.StepConnect{
 			Config:    &b.config.SSHConfig.Comm,
-			Host:      hypervcommon.CommHost(b.config.SSHConfig.Comm.SSHHost),
+			Host:      hypervcommon.CommHost(b.config.SSHConfig.Comm.Host()),
 			SSHConfig: b.config.SSHConfig.Comm.SSHConfigFunc(),
 		},
 

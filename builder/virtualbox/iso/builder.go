@@ -455,7 +455,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.CommConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.Host()),
 			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.CommPort,
 			WinRMPort: vboxcommon.CommPort,
