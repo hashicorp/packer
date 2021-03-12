@@ -2,12 +2,14 @@ package command
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,18 +56,20 @@ func TestFmt_unfomattedTemlateDirectory(t *testing.T) {
 	}
 }
 
-func TestFmt_Recursive(t *testing.T) {
-	unformattedData := `
+const (
+	unformattedHCL = `
 ami_filter_name ="amzn2-ami-hvm-*-x86_64-gp2"
 ami_filter_owners =[ "137112412989" ]
 
 `
-
-	formattedData := `
+	formattedHCL = `
 ami_filter_name   = "amzn2-ami-hvm-*-x86_64-gp2"
 ami_filter_owners = ["137112412989"]
 
 `
+)
+
+func TestFmt_Recursive(t *testing.T) {
 
 	tests := []struct {
 		name                  string
@@ -77,34 +81,34 @@ ami_filter_owners = ["137112412989"]
 			name:       "nested formats recursively",
 			formatArgs: []string{"-recursive=true"},
 			alreadyPresentContent: map[string]string{
-				"foo/bar/baz.pkr.hcl":         unformattedData,
-				"foo/bar/baz/woo.pkrvars.hcl": unformattedData,
-				"potato":                      unformattedData,
-				"foo/bar/potato":              unformattedData,
-				"bar.pkr.hcl":                 unformattedData,
+				"foo/bar/baz.pkr.hcl":         unformattedHCL,
+				"foo/bar/baz/woo.pkrvars.hcl": unformattedHCL,
+				"potato":                      unformattedHCL,
+				"foo/bar/potato":              unformattedHCL,
+				"bar.pkr.hcl":                 unformattedHCL,
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
-					"foo/bar/baz.pkr.hcl":         formattedData,
-					"foo/bar/baz/woo.pkrvars.hcl": formattedData,
-					"potato":                      unformattedData,
-					"foo/bar/potato":              unformattedData,
-					"bar.pkr.hcl":                 formattedData,
+					"foo/bar/baz.pkr.hcl":         formattedHCL,
+					"foo/bar/baz/woo.pkrvars.hcl": formattedHCL,
+					"potato":                      unformattedHCL,
+					"foo/bar/potato":              unformattedHCL,
+					"bar.pkr.hcl":                 formattedHCL,
 				}},
 		},
 		{
 			name:       "nested no recursive format",
 			formatArgs: []string{},
 			alreadyPresentContent: map[string]string{
-				"foo/bar/baz.pkr.hcl":         unformattedData,
-				"foo/bar/baz/woo.pkrvars.hcl": unformattedData,
-				"bar.pkr.hcl":                 unformattedData,
+				"foo/bar/baz.pkr.hcl":         unformattedHCL,
+				"foo/bar/baz/woo.pkrvars.hcl": unformattedHCL,
+				"bar.pkr.hcl":                 unformattedHCL,
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
-					"foo/bar/baz.pkr.hcl":         unformattedData,
-					"foo/bar/baz/woo.pkrvars.hcl": unformattedData,
-					"bar.pkr.hcl":                 formattedData,
+					"foo/bar/baz.pkr.hcl":         unformattedHCL,
+					"foo/bar/baz/woo.pkrvars.hcl": unformattedHCL,
+					"bar.pkr.hcl":                 formattedHCL,
 				}},
 		},
 	}
@@ -135,6 +139,34 @@ ami_filter_owners = ["137112412989"]
 			}
 
 			tt.fileCheck.verify(t, tempDirectory)
+		})
+	}
+}
+
+func Test_fmt_pipe(t *testing.T) {
+
+	tc := []struct {
+		piped    string
+		command  []string
+		env      []string
+		expected string
+	}{
+		{unformattedHCL, []string{"fmt", "-"}, nil, formattedHCL + "\n"},
+	}
+
+	for _, tc := range tc {
+		t.Run(fmt.Sprintf("echo %q | packer %s", tc.piped, tc.command), func(t *testing.T) {
+			p := helperCommand(t, tc.command...)
+			p.Stdin = strings.NewReader(tc.piped)
+			p.Env = append(p.Env, tc.env...)
+			bs, err := p.Output()
+			if err != nil {
+				t.Fatalf("%v: %s", err, bs)
+			}
+
+			if diff := cmp.Diff(tc.expected, string(bs)); diff != "" {
+				t.Fatalf("%s", diff)
+			}
 		})
 	}
 }
