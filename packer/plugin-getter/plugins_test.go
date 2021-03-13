@@ -31,8 +31,8 @@ func TestChecksumFileEntry_init(t *testing.T) {
 	expectedVersion := "v0.3.0"
 	req := &Requirement{
 		Identifier: &addrs.Plugin{
-			Hostname:  "github.com/ddelnano/packer-plugin-xenserver",
-			Namespace: "",
+			Hostname:  "github.com",
+			Namespace: "ddelnano",
 			Type:      "xenserver",
 		},
 	}
