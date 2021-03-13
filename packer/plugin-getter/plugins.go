@@ -305,12 +305,12 @@ func (e ChecksumFileEntry) Arch() string        { return e.arch }
 //
 func (e *ChecksumFileEntry) init(req *Requirement) (err error) {
 	filename := e.Filename
-	res := strings.TrimLeft(filename, req.FilenamePrefix())
+	res := strings.TrimPrefix(filename, req.FilenamePrefix())
 	// res now looks like v0.2.12_x5.0_freebsd_amd64.zip
 
 	e.ext = filepath.Ext(res)
 
-	res = strings.TrimRight(res, e.ext)
+	res = strings.TrimSuffix(res, e.ext)
 	// res now looks like v0.2.12_x5.0_freebsd_amd64
 
 	parts := strings.Split(res, "_")
@@ -326,7 +326,7 @@ func (e *ChecksumFileEntry) init(req *Requirement) (err error) {
 
 func (e *ChecksumFileEntry) validate(expectedVersion string, installOpts BinaryInstallationOptions) error {
 	if e.binVersion != expectedVersion {
-		return fmt.Errorf("wrong version, expected %s ", expectedVersion)
+		return fmt.Errorf("wrong version: '%s' does not match expected %s ", e.binVersion, expectedVersion)
 	}
 	if e.os != installOpts.OS || e.arch != installOpts.ARCH {
 		return fmt.Errorf("wrong system, expected %s_%s ", installOpts.OS, installOpts.ARCH)
