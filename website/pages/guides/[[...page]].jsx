@@ -13,7 +13,7 @@ const CONTENT_DIR = 'content/guides'
 const MAIN_BRANCH = 'master'
 const PRODUCT = { name: productName, slug: productSlug }
 
-export default function IntroLayout(props) {
+export default function GuidesLayout(props) {
   return (
     <DocsPage baseRoute={BASE_ROUTE} product={PRODUCT} staticProps={props} />
   )
