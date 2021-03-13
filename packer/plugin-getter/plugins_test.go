@@ -42,7 +42,11 @@ func TestChecksumFileEntry_init(t *testing.T) {
 		Checksum: "0f5969b069b9c0a58f2d5786c422341c70dfe17bd68f896fcbd46677e8c913f1",
 	}
 
-	checkSum.init(req)
+	err := checkSum.init(req)
+
+	if err != nil {
+		t.Fatalf("ChecksumFileEntry.init failure: %v", err)
+	}
 
 	if checkSum.binVersion != expectedVersion {
 		t.Errorf("failed to parse ChecksumFileEntry properly expected version '%s' but found '%s'", expectedVersion, checkSum.binVersion)
