@@ -69,6 +69,15 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 		f.parser = hclparse.NewParser()
 	}
 
+	fmt.Println(fmt.Sprintf("Path is %s", path))
+	if path == "-" {
+		fmt.Println("Found right statement!!!!!")
+		bytesModified, diags = f.formatFile(path, diags, bytesModified)
+		return bytesModified, diags
+	} else {
+		fmt.Println("Did not hit the correct statement")
+	}
+
 	isDir, err := isDir(path)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{

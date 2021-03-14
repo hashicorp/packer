@@ -159,13 +159,13 @@ func Test_fmt_pipe(t *testing.T) {
 			p := helperCommand(t, tc.command...)
 			p.Stdin = strings.NewReader(tc.piped)
 			p.Env = append(p.Env, tc.env...)
+			fmt.Println(fmt.Sprintf("Path: %s", p.Path))
 			bs, err := p.Output()
 			if err != nil {
-				t.Fatalf("%v: %s", err, bs)
+				t.Fatalf("Error occurred running command %v: %s", err, bs)
 			}
-
 			if diff := cmp.Diff(tc.expected, string(bs)); diff != "" {
-				t.Fatalf("%s", diff)
+				t.Fatalf("Error in diff: %s", diff)
 			}
 		})
 	}
