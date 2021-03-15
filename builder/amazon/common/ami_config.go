@@ -172,7 +172,7 @@ func (c *AMIConfig) Prepare(accessConfig *AccessConfig, ctx *interpolate.Context
 
 	// Prevent sharing of default KMS key encrypted volumes with other aws users
 	if len(c.AMIUsers) > 0 {
-		if len(c.AMIKmsKeyId) == 0 && c.AMIEncryptBootVolume.True() {
+		if len(c.AMIKmsKeyId) == 0 && len(c.AMIRegionKMSKeyIDs) == 0 && c.AMIEncryptBootVolume.True() {
 			errs = append(errs, fmt.Errorf("Cannot share AMI encrypted with default KMS key"))
 		}
 		if len(c.AMIRegionKMSKeyIDs) > 0 {
