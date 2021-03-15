@@ -130,16 +130,20 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 				ui.Say(msg)
 
 				warn := fmt.Sprintf(`
-Warning, init with implicitly required plugin is always going to install the 
-latest possible plugin, if a latest version is backward incompatible with your
+Warning, some components used in your config file(s) have moved out of Packer
+into the %[2]q plugin.
+For that reason Packer will try to implicitly require the latest version of the
+%[1]s plugin.
+Upon init Packer will always fetch the latest possible version of implicitly
+required plugins and if a latest version is backward incompatible with your
 config file or your version of Packer, a build will fail. To avoid this, lock
-the plugin version by pasting the following to your configuration:
+the plugin version by pasting the following to your config:
 
 packer {
   required_plugins {
-    %s = {
-      source  = "%s"
-      version = "~> %s"
+    %[1]s = {
+      source  = "%[2]s"
+      version = "~> %[3]s"
     }
   }
 }
