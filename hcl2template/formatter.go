@@ -69,21 +69,7 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 		f.parser = hclparse.NewParser()
 	}
 
-	if path == "-" {
-		return f.formatFile(path, diags, bytesModified)
-	}
-
-	isDir, err := isDir(path)
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Cannot tell wether " + path + " is a directory",
-			Detail:   err.Error(),
-		})
-		return bytesModified, diags
-	}
-
-	if !isDir {
+	if s, err := os.Stat(path); err != nil || !s.IsDir() {
 		return f.formatFile(path, diags, bytesModified)
 	}
 
