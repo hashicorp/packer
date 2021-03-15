@@ -86,6 +86,7 @@ func TestFmt_Recursive(t *testing.T) {
 				"potato":                      unformattedHCL,
 				"foo/bar/potato":              unformattedHCL,
 				"bar.pkr.hcl":                 unformattedHCL,
+				"-":                           unformattedHCL,
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
@@ -94,6 +95,7 @@ func TestFmt_Recursive(t *testing.T) {
 					"potato":                      unformattedHCL,
 					"foo/bar/potato":              unformattedHCL,
 					"bar.pkr.hcl":                 formattedHCL,
+					"-":                           unformattedHCL,
 				}},
 		},
 		{
@@ -103,12 +105,14 @@ func TestFmt_Recursive(t *testing.T) {
 				"foo/bar/baz.pkr.hcl":         unformattedHCL,
 				"foo/bar/baz/woo.pkrvars.hcl": unformattedHCL,
 				"bar.pkr.hcl":                 unformattedHCL,
+				"-":                           unformattedHCL,
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
 					"foo/bar/baz.pkr.hcl":         unformattedHCL,
 					"foo/bar/baz/woo.pkrvars.hcl": unformattedHCL,
 					"bar.pkr.hcl":                 formattedHCL,
+					"-":                           unformattedHCL,
 				}},
 		},
 	}
