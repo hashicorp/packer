@@ -85,34 +85,34 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 	}
 
 	if !isDir {
-		bytesModified, diags = f.formatFile(path, diags, bytesModified)
-	} else {
-		fileInfos, err := ioutil.ReadDir(path)
-		if err != nil {
-			diag := &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Cannot read hcl directory",
-				Detail:   err.Error(),
-			}
-			diags = append(diags, diag)
-			return bytesModified, diags
-		}
+		return f.formatFile(path, diags, bytesModified)
+	}
 
-		for _, fileInfo := range fileInfos {
-			filename := filepath.Join(path, fileInfo.Name())
-			if fileInfo.IsDir() {
-				if f.Recursive {
-					var tempDiags hcl.Diagnostics
-					var tempBytesModified int
-					tempBytesModified, tempDiags = f.Format(filename)
-					bytesModified += tempBytesModified
-					diags = diags.Extend(tempDiags)
-				}
-				continue
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		diag := &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Cannot read hcl directory",
+			Detail:   err.Error(),
+		}
+		diags = append(diags, diag)
+		return bytesModified, diags
+	}
+
+	for _, fileInfo := range fileInfos {
+		filename := filepath.Join(path, fileInfo.Name())
+		if fileInfo.IsDir() {
+			if f.Recursive {
+				var tempDiags hcl.Diagnostics
+				var tempBytesModified int
+				tempBytesModified, tempDiags = f.Format(filename)
+				bytesModified += tempBytesModified
+				diags = diags.Extend(tempDiags)
 			}
-			if isHcl2FileOrVarFile(filename) {
-				bytesModified, diags = f.formatFile(filename, diags, bytesModified)
-			}
+			continue
+		}
+		if isHcl2FileOrVarFile(filename) {
+			bytesModified, diags = f.formatFile(filename, diags, bytesModified)
 		}
 	}
 
