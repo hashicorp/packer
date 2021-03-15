@@ -90,6 +90,11 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	if filename != "" {
 		hclFiles, jsonFiles, moreDiags := GetHCL2Files(filename, hcl2FileExt, hcl2JsonFileExt)
 		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			// here this probably means that the file was not found, let's
+			// simply leave early.
+			return nil, diags
+		}
 		if len(hclFiles)+len(jsonFiles) == 0 {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
