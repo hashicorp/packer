@@ -72,8 +72,6 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 	if path == "-" {
 		bytesModified, diags = f.formatFile(path, diags, bytesModified)
 		return bytesModified, diags
-	} else {
-		fmt.Println("Did not hit the correct statement")
 	}
 
 	isDir, err := isDir(path)
