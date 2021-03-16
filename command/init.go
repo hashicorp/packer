@@ -125,11 +125,9 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 				msg := fmt.Sprintf(`
 Warning, at least one component used in your config file(s) has moved out of 
 Packer into the %q plugin.
-For that reason Packer implicitly required the installation of the latest
-version of the %s plugin. Packer could not install that plugin :
-%s
-It could be because this plugin was not released publicly yet. Other Packer
-command should just work.`,
+For that reason Packer init tried to install the latest version of the %s 
+plugin. Unfortunately, this failed :
+%s`,
 					pluginRequirement.Identifier,
 					pluginRequirement.Identifier.Type,
 					err)
@@ -145,13 +143,13 @@ command should just work.`,
 				ui.Say(msg)
 
 				warn := fmt.Sprintf(`
-Warning, at least one component used in your config file(s) has
-moved out of Packer into the %[2]q plugin.
+Warning, at least one component used in your config file(s) has moved out of 
+Packer into the %[2]q plugin.
 For that reason Packer implicitly required the installation of the latest
 version of the %[1]s plugin.
-Upon init Packer will always fetch the latest possible version of implicitly
+Upon init, Packer will always fetch the latest possible version of implicitly
 required plugins and if a latest version is backward incompatible with your
-config file or your version of Packer, a build will fail. To avoid this, lock
+config file or your version of Packer: a build will fail. To avoid this, lock
 the plugin version by pasting the following to your config:
 
 packer {
