@@ -152,7 +152,7 @@ func wrappedMain() int {
 	// passed into commands like `packer build`
 	config, err := loadConfig()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
+		fmt.Fprintf(os.Stdout, "%s Error loading configuration: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
 
@@ -166,7 +166,7 @@ func wrappedMain() int {
 
 	cacheDir, err := packersdk.CachePath()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
+		fmt.Fprintf(os.Stdout, "%s Error preparing cache directory: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
 	log.Printf("[INFO] Setting cache directory: %s", cacheDir)
@@ -187,7 +187,7 @@ func wrappedMain() int {
 		// Set this so that we don't get colored output in our machine-
 		// readable UI.
 		if err := os.Setenv("PACKER_NO_COLOR", "1"); err != nil {
-			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
+			fmt.Fprintf(os.Stdout, "%s Packer failed to initialize UI: %s\n", ErrorPrefix, err)
 			return 1
 		}
 	} else {
@@ -202,13 +202,13 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot determine if process is in "+
-					"background: %s\n", err)
+				fmt.Fprintf(os.Stdout, "%s cannot determine if process is in "+
+					"background: %s\n", ErrorPrefix, err)
 			}
 			if backgrounded {
-				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+				fmt.Fprintf(os.Stdout, "%s Running in background, not using a TTY\n", ErrorPrefix)
 			} else if TTY, err := openTTY(); err != nil {
-				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+				fmt.Fprintf(os.Stdout, "%s No tty available: %s\n", ErrorPrefix, err)
 			} else {
 				basicUi.TTY = TTY
 				basicUi.PB = &packer.UiProgressBar{}
@@ -246,7 +246,7 @@ func wrappedMain() int {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err)
+		fmt.Fprintf(os.Stdout, "%s Error executing CLI: %s\n", ErrorPrefix, err)
 		return 1
 	}
 
