@@ -123,15 +123,15 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		if err != nil {
 			if pluginRequirement.Implicit {
 				msg := fmt.Sprintf(`
-Warning, at least one component components used in your config file(s) has
-moved out of Packer into the %[2]q plugin.
+Warning, at least one component used in your config file(s) has moved out of 
+Packer into the %q plugin.
 For that reason Packer implicitly required the installation of the latest
-version of the %[1]s plugin. That process failed.
-%s.
+version of the %s plugin. Packer could not install that plugin :
+%s
 It could be because this plugin was not released publicly yet. Other Packer
 command should just work.`,
-					pluginRequirement.Identifier.Type,
 					pluginRequirement.Identifier,
+					pluginRequirement.Identifier.Type,
 					err)
 				c.Ui.Say(msg)
 			} else {
@@ -145,7 +145,7 @@ command should just work.`,
 				ui.Say(msg)
 
 				warn := fmt.Sprintf(`
-Warning, at least one component components used in your config file(s) has
+Warning, at least one component used in your config file(s) has
 moved out of Packer into the %[2]q plugin.
 For that reason Packer implicitly required the installation of the latest
 version of the %[1]s plugin.
