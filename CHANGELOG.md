@@ -2,7 +2,18 @@
 
 ### IMPROVEMENTS
 * builder/amazon: allow creation of ebs snapshots wihtout volumes. [GH-9591]
+* builder/azure: Add client_cert_token_timeout option. [GH-10528]
+* builder/google: Make Windows password timeout configurable. [GH-10727]
+* builder/google: Update public GCP image project as gce-uefi-images are
+    deprecated. [GH-10724]
+* builder/qemu: Added firmware option. [GH-10683]
 * builder/scaleway: add support for timeout in shutdown step. [GH-10503]
+* builder/vagrant: Fix logging to be clearer when Vagrant builder overrides
+    values retrieved from vagrant's ssh_config call. [GH-10743]
+* builder/virtualbox:  Added ISO builder option to create additional disks.
+    [GH-10674]
+* builder/virtualbox: Add options for nested virtualisation and RTC time base.
+    [GH-10736]
 * builder/virtualbox: Add template options for chipset, firmware, nic, graphics
     controller, and audio controller. [GH-10671]
 * builder/virtualbox: Support for "virtio" storage and ISO drive. [GH-10632]
@@ -10,17 +21,34 @@
     [GH-10651]
 * core: Change template parsing error to include warning about file extensions.
     [GH-10652]
+* core: Update to gopsutil v3.21.1 to allow builds to work for darwin arm64.
+    [GH-10697]
 * hcl2_upgrade: hcl2_upgrade command can now upgrade json var-files [GH-10676]
 
 ### BUG FIXES
 * builder/amazon: Update amazon SDK to fix an SSO login issue. [GH-10668]
 * builder/azure: Don't overwrite subscription id if unset. [GH-10659]
+* builder/hyperv: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/openstack: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
 * builder/oracle-oci: Update Oracle Go SDK to fix issue with reading key file.
     [GH-10560]
+* builder/parallels: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/qemu: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/virtualbox: Make Packer respect winrm_host flag in winrm connect
+    func. [GH-10748]
 * builder/vmware: Added a fallback file check when trying to determine the
     network-mapping configuration. [GH-10543]
+* core/hcl2_upgrade: Check for nil config map when provisioner/post-processor
+    doesn't have config. [GH-10730]
 * core/hcl2_upgrade: Make hcl2_upgrade command correctly translate
     pause_before. [GH-10654]
+* core/hcl2_upgrade: Make json variables using template engines get stored as
+    locals so they can be properly interpolated. [GH-10685]
+* core: Pin Packer to Golang 1.16 to fix code generation issues. [GH-10702]
 * core: Templates previously could not interpolate the environment variable
     PACKER_LOG_PATH. [GH-10660]
 * provisioner/chef-solo: HCL2 templates can support the json_string option.
