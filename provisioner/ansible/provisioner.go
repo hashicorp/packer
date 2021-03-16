@@ -662,7 +662,7 @@ func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packersdk.Communicator
 	hasRoles, _ := regexp.Match(`(?m)^roles:`, f)
 	hasCollections, _ := regexp.Match(`(?m)^collections:`, f)
 
-	// If if roles keyword present (v2 format), or no collections keywork present (v1), install roles
+	// If roles keyword present (v2 format), or no collections keyword present (v1), install roles
 	if hasRoles || !hasCollections {
 		if roleInstallError := p.invokeGalaxyCommand(roleArgs, ui, comm); roleInstallError != nil {
 			return roleInstallError
