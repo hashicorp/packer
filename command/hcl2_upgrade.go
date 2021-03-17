@@ -120,6 +120,7 @@ var (
 	amazonSecretsManagerMap = map[string]map[string]interface{}{}
 	localsVariableMap       = map[string]string{}
 	timestamp               = false
+	isotime                 = false
 )
 
 type BlockParser interface {
@@ -337,9 +338,11 @@ func transposeTemplatingCalls(s []byte) []byte {
 		},
 		"isotime": func(a ...string) string {
 			if len(a) == 0 {
-				return "${legacy_isotime()}"
+				// returns rfc3339 formatted string.
+				return "${timestamp()}"
 			}
 			// otherwise a valid isotime func has one input.
+			isotime = true
 			return fmt.Sprintf("${legacy_isotime(\"%s\")}", a[0])
 
 		},
@@ -774,6 +777,9 @@ func (p *LocalsParser) Write(out *bytes.Buffer) {
 			fmt.Fprintln(out, `# "timestamp" template function replacement`)
 		}
 		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	}
+	if isotime {
+		fmt.Fprintln(out, `# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
 	}
 	if len(p.LocalsOut) > 0 {
 		if p.WithAnnotations {
