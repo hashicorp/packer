@@ -92,7 +92,7 @@ func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 		return
 	}
 
-	ui.Say(fmt.Sprintf(" -> %s : '%s'", imageType, imageName))
+	ui.Say(fmt.Sprintf(" Deleting -> %s : '%s'", imageType, imageName))
 	err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
 	if err != nil {
 		ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+

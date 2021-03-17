@@ -125,7 +125,7 @@ func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInExistingResourceGr
 	}
 }
 
-func TestStepDeployTemplateCleanupShouldNotDeleteManagedOSImageInTemporaryResourceGroup(t *testing.T) {
+func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInTemporaryResourceGroup(t *testing.T) {
 	var deleteDiskCounter = 0
 	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
 
