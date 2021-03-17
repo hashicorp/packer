@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template/addrs"
+	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -111,29 +112,35 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 	}
 	redirectAddr, diags := addrs.ParsePluginSourceString(redirect)
 	if diags.HasErrors() {
+		// This should never happen, since the map is manually filled.
 		return diags
 	}
 
-	if cfg.pluginRequired(redirectAddr) {
-		// this plugin is already required
-		return nil
-	}
-	cfg.implicitlyRequirePlugin(redirectAddr)
-	return nil
-}
-
-// pluginRequired tells if a plugin is already required
-func (cfg *PackerConfig) pluginRequired(plugin *addrs.Plugin) bool {
-	for _, requiredPluginsBlock := range cfg.Packer.RequiredPlugins {
-		for _, requiredPlugin := range requiredPluginsBlock.RequiredPlugins {
-			if plugin != requiredPlugin.Type {
-				continue
-			}
-
-			return true
+	for _, req := range cfg.Packer.RequiredPlugins {
+		if _, found := req.RequiredPlugins[redirectAddr.Type]; found {
+			// This could happen if a plugin was forked. For example, I created
+			// and am requiring the github.com/azr/happycloud plugin and am
+			// using the `happycloud-uploader` pp component from it. In that
+			// case, we won't implicitly import any `happycloud` plugin.
+			return nil
 		}
 	}
-	return false
+
+	store := map[ComponentKind]packer.BasicStore{
+		Builder:       cfg.parser.PluginConfig.Builders,
+		PostProcessor: cfg.parser.PluginConfig.PostProcessors,
+		Provisioner:   cfg.parser.PluginConfig.Provisioners,
+		Datasource:    cfg.parser.PluginConfig.DataSources,
+	}[k]
+	if store.Has(redirectAddr.Type) {
+		// If any pre-loaded plugin defines the `happycloud-uploader` pp, skip.
+		// This happens for manually installed plugins, for those we know that
+		// they will be listed in cfg before parsing any HCL.
+		return nil
+	}
+
+	cfg.implicitlyRequirePlugin(redirectAddr)
+	return nil
 }
 
 func (cfg *PackerConfig) implicitlyRequirePlugin(plugin *addrs.Plugin) {
