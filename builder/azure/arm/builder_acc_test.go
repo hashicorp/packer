@@ -164,6 +164,10 @@ func checkTemporaryGroupDeleted(t *testing.T, b *Builder) {
 		spnCloud,
 		spnKeyVault)
 
+	if err != nil {
+		t.Fatalf("failed to create azure client: %s", err)
+	}
+
 	// Validate resource group has been deleted
 	_, err = azureClient.GroupsClient.Get(context.Background(), b.config.tmpResourceGroupName)
 	if err == nil || !resourceNotFound(err) {
@@ -179,7 +183,6 @@ func checkUnmanagedVHDDeleted(t *testing.T, b *Builder) {
 		t.Fatalf("failed getting azure tokens: %s", err)
 	}
 
-	ui.Message("Creating test Azure Resource Manager (ARM) client ...")
 	azureClient, err := NewAzureClient(
 		b.config.ClientConfig.SubscriptionID,
 		b.config.SharedGalleryDestination.SigDestinationSubscription,
@@ -191,6 +194,11 @@ func checkUnmanagedVHDDeleted(t *testing.T, b *Builder) {
 		spnCloud,
 		spnKeyVault)
 
+	if err != nil {
+		t.Fatalf("failed to create azure client: %s", err)
+	}
+
+	// validate temporary os blob was deleted
 	blob := azureClient.BlobStorageClient.GetContainerReference("images").GetBlobReference(b.config.tmpOSDiskName)
 	_, err = blob.BreakLease(nil)
 	if err != nil && !strings.Contains(err.Error(), "BlobNotFound") {
