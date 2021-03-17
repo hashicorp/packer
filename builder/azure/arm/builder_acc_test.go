@@ -463,7 +463,7 @@ const testBuilderAccBlobLinux = `
 	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
 
 	  "storage_account": "{{user ` + "`storage_account`" + `}}",
-	  "resource_group_name": "ace-vault-image",
+	  "resource_group_name": "packer-acceptance-test"",
 	  "capture_container_name": "test",
 	  "capture_name_prefix": "testBuilderAccBlobLinux",
 
@@ -472,7 +472,7 @@ const testBuilderAccBlobLinux = `
 	  "image_offer": "UbuntuServer",
 	  "image_sku": "16.04-LTS",
 
-	  "location": "Eastus2",
+	  "location": "South Central US",
 	  "vm_size": "Standard_DS2_v2"
 	}]
 }
