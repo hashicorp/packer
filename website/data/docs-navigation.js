@@ -137,6 +137,7 @@ export default [
                   'fileexists',
                   'fileset',
                   'pathexpand',
+                  'templatefile',
                 ],
               },
               {
