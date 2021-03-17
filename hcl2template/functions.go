@@ -117,6 +117,12 @@ func Functions(basedir string) map[string]function.Function {
 		"zipmap":             stdlib.ZipmapFunc,
 	}
 
+	funcs["templatefile"] = pkrfunction.MakeTemplateFileFunc(basedir, func() map[string]function.Function {
+		// The templatefile function prevents recursive calls to itself
+		// by copying this map and overwriting the "templatefile" entry.
+		return funcs
+	})
+
 	return funcs
 }
 
