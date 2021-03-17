@@ -41,11 +41,9 @@ func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics
 }
 
 func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Diagnostics {
-	// when a plugin is used but not defined in the required plugin blocks, it
-	// should 'implicitly required', when we want. Here we read common
-	// configuration blocks to try to guess plugins.
-
-	// Then
+	// when a plugin is used but not available it should be 'implicitly
+	// required'. Here we read common configuration blocks to try to guess
+	// plugin usages.
 
 	// decodeRequiredPluginsBlock needs to be called before
 	// decodeImplicitRequiredPluginsBlocks; otherwise all required plugins will
@@ -60,10 +58,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 		switch block.Type {
 		case sourceLabel:
-			diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.BuilderRedirects)...)
+			diags = append(diags, cfg.requirePluginImplicitly(Builder, block)...)
 		case dataSourceLabel:
-			diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.DatasourceRedirects)...)
-
+			diags = append(diags, cfg.requirePluginImplicitly(Datasource, block)...)
 		case buildLabel:
 			content, _, moreDiags := block.Body.PartialContent(buildSchema)
 			diags = append(diags, moreDiags...)
@@ -71,9 +68,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 				switch block.Type {
 				case buildProvisionerLabel:
-					diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.ProvisionerRedirects)...)
+					diags = append(diags, cfg.requirePluginImplicitly(Provisioner, block)...)
 				case buildPostProcessorLabel:
-					diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.PostProcessorRedirects)...)
+					diags = append(diags, cfg.requirePluginImplicitly(PostProcessor, block)...)
 				case buildPostProcessorsLabel:
 					content, _, moreDiags := block.Body.PartialContent(postProcessorsSchema)
 					diags = append(diags, moreDiags...)
@@ -81,7 +78,7 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 						switch block.Type {
 						case buildPostProcessorLabel:
-							diags = append(diags, cfg.requirePluginImplicitly(block, cfg.parser.PluginConfig.PostProcessorRedirects)...)
+							diags = append(diags, cfg.requirePluginImplicitly(PostProcessor, block)...)
 						}
 					}
 				}
@@ -92,14 +89,20 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	return diags
 }
 
-func (cfg *PackerConfig) requirePluginImplicitly(block *hcl.Block, componentRedirects map[string]string) hcl.Diagnostics {
+func (cfg *PackerConfig) requirePluginImplicitly(k ComponentKind, block *hcl.Block) hcl.Diagnostics {
 	if len(block.Labels) == 0 {
 		// malformed block ? Let's not panic :)
 		return nil
 	}
 	componentName := block.Labels[0]
 
-	redirect := componentRedirects[componentName]
+	redirect := map[ComponentKind]map[string]string{
+		Builder:       cfg.parser.PluginConfig.BuilderRedirects,
+		PostProcessor: cfg.parser.PluginConfig.PostProcessorRedirects,
+		Provisioner:   cfg.parser.PluginConfig.ProvisionerRedirects,
+		Datasource:    cfg.parser.PluginConfig.DatasourceRedirects,
+	}[k][componentName]
+
 	if redirect == "" {
 		// no known redirect for this component
 		return nil
