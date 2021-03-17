@@ -336,8 +336,12 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return "${local.timestamp}"
 		},
 		"isotime": func(a ...string) string {
-			timestamp = true
-			return "${local.timestamp}"
+			if len(a) == 0 {
+				return "${legacy_isotime()}"
+			}
+			// otherwise a valid isotime func has one input.
+			return fmt.Sprintf("${legacy_isotime(\"%s\")}", a[0])
+
 		},
 		"user": func(in string) string {
 			if _, ok := localsVariableMap[in]; ok {
