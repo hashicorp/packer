@@ -35,6 +35,8 @@ type PluginConfig struct {
 	// in their corresponding sets (Builders, Provisioners, PostProcessors,
 	// DataSources). That is, for example, if you manually put a single
 	// component plugin in the plugins folder.
+	//
+	// Example BuilderRedirects: "amazon-ebs" => "github.com/hashicorp/amazon"
 	BuilderRedirects       map[string]string
 	DatasourceRedirects    map[string]string
 	ProvisionerRedirects   map[string]string
