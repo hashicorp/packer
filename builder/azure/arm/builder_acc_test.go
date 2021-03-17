@@ -20,12 +20,18 @@ package arm
 //   go test -v -timeout 90m -run TestBuilderAcc_.*
 
 import (
-	"testing"
-
+	"bytes"
+	"context"
+	"errors"
 	"fmt"
 	"os"
+	"strings"
+	"testing"
 
+	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/go-autorest/autorest/azure/auth"
 	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"
@@ -96,10 +102,15 @@ func TestBuilderAcc_ManagedDisk_Linux_AzureCLI(t *testing.T) {
 		return
 	}
 
+	var b Builder
 	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Builder:  &Builder{},
+		PreCheck: func() { testAuthPreCheck(t) },
+		Builder:  &b,
 		Template: testBuilderAccManagedDiskLinuxAzureCLI,
+		Check: func([]packersdk.Artifact) error {
+			checkTemporaryGroupDeleted(t, &b)
+			return nil
+		},
 	})
 }
 
@@ -112,14 +123,99 @@ func TestBuilderAcc_Blob_Windows(t *testing.T) {
 }
 
 func TestBuilderAcc_Blob_Linux(t *testing.T) {
+	var b Builder
 	builderT.Test(t, builderT.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		Builder:  &Builder{},
+		PreCheck: func() { testAuthPreCheck(t) },
+		Builder:  &b,
 		Template: testBuilderAccBlobLinux,
+		Check: func([]packersdk.Artifact) error {
+			checkUnmanagedVHDDeleted(t, &b)
+			return nil
+		},
 	})
 }
 
 func testAccPreCheck(*testing.T) {}
+
+func testAuthPreCheck(t *testing.T) {
+	_, err := auth.NewAuthorizerFromEnvironment()
+	if err != nil {
+		t.Fatalf("failed to auth to azure: %s", err)
+	}
+}
+
+func checkTemporaryGroupDeleted(t *testing.T, b *Builder) {
+	ui := testUi()
+
+	spnCloud, spnKeyVault, err := b.getServicePrincipalTokens(ui.Say)
+	if err != nil {
+		t.Fatalf("failed getting azure tokens: %s", err)
+	}
+
+	ui.Message("Creating test Azure Resource Manager (ARM) client ...")
+	azureClient, err := NewAzureClient(
+		b.config.ClientConfig.SubscriptionID,
+		b.config.SharedGalleryDestination.SigDestinationSubscription,
+		b.config.ResourceGroupName,
+		b.config.StorageAccount,
+		b.config.ClientConfig.CloudEnvironment(),
+		b.config.SharedGalleryTimeout,
+		b.config.PollingDurationTimeout,
+		spnCloud,
+		spnKeyVault)
+
+	// Validate resource group has been deleted
+	_, err = azureClient.GroupsClient.Get(context.Background(), b.config.tmpResourceGroupName)
+	if err == nil || !resourceNotFound(err) {
+		t.Fatalf("failed validating resource group deletion: %s", err)
+	}
+}
+
+func checkUnmanagedVHDDeleted(t *testing.T, b *Builder) {
+	ui := testUi()
+
+	spnCloud, spnKeyVault, err := b.getServicePrincipalTokens(ui.Say)
+	if err != nil {
+		t.Fatalf("failed getting azure tokens: %s", err)
+	}
+
+	ui.Message("Creating test Azure Resource Manager (ARM) client ...")
+	azureClient, err := NewAzureClient(
+		b.config.ClientConfig.SubscriptionID,
+		b.config.SharedGalleryDestination.SigDestinationSubscription,
+		b.config.ResourceGroupName,
+		b.config.StorageAccount,
+		b.config.ClientConfig.CloudEnvironment(),
+		b.config.SharedGalleryTimeout,
+		b.config.PollingDurationTimeout,
+		spnCloud,
+		spnKeyVault)
+
+	blob := azureClient.BlobStorageClient.GetContainerReference("images").GetBlobReference(b.config.tmpOSDiskName)
+	_, err = blob.BreakLease(nil)
+	if err != nil && !strings.Contains(err.Error(), "BlobNotFound") {
+		t.Fatalf("failed validating deletion of unmanaged vhd: %s", err)
+	}
+
+	// Validate resource group has been deleted
+	_, err = azureClient.GroupsClient.Get(context.Background(), b.config.tmpResourceGroupName)
+	if err == nil || !resourceNotFound(err) {
+		t.Fatalf("failed validating resource group deletion: %s", err)
+	}
+}
+
+func resourceNotFound(err error) bool {
+	derr := autorest.DetailedError{}
+	return errors.As(err, &derr) && derr.StatusCode == 404
+}
+
+func testUi() *packersdk.BasicUi {
+	return &packersdk.BasicUi{
+		Reader:      new(bytes.Buffer),
+		Writer:      new(bytes.Buffer),
+		ErrorWriter: new(bytes.Buffer),
+	}
+}
 
 const testBuilderAccManagedDiskWindows = `
 {
@@ -155,6 +251,7 @@ const testBuilderAccManagedDiskWindows = `
 	}]
 }
 `
+
 const testBuilderAccManagedDiskWindowsBuildResourceGroup = `
 {
 	"variables": {
@@ -287,6 +384,7 @@ const testBuilderAccManagedDiskLinux = `
 	}]
 }
 `
+
 const testBuilderAccManagedDiskLinuxDeviceLogin = `
 {
 	"variables": {
@@ -365,7 +463,7 @@ const testBuilderAccBlobLinux = `
 	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
 
 	  "storage_account": "{{user ` + "`storage_account`" + `}}",
-	  "resource_group_name": "packer-acceptance-test",
+	  "resource_group_name": "ace-vault-image",
 	  "capture_container_name": "test",
 	  "capture_name_prefix": "testBuilderAccBlobLinux",
 
@@ -374,11 +472,12 @@ const testBuilderAccBlobLinux = `
 	  "image_offer": "UbuntuServer",
 	  "image_sku": "16.04-LTS",
 
-	  "location": "South Central US",
+	  "location": "Eastus2",
 	  "vm_size": "Standard_DS2_v2"
 	}]
 }
 `
+
 const testBuilderAccManagedDiskLinuxAzureCLI = `
 {
 	"builders": [{
@@ -388,7 +487,8 @@ const testBuilderAccManagedDiskLinuxAzureCLI = `
 
 	  "managed_image_resource_group_name": "packer-acceptance-test",
 	  "managed_image_name": "testBuilderAccManagedDiskLinuxAzureCLI-{{timestamp}}",
-
+	  "temp_resource_group_name": "packer-acceptance-test-managed-cli",
+	  
 	  "os_type": "Linux",
 	  "image_publisher": "Canonical",
 	  "image_offer": "UbuntuServer",
