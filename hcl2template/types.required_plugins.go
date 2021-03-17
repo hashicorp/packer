@@ -58,9 +58,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 		switch block.Type {
 		case sourceLabel:
-			diags = append(diags, cfg.requirePluginImplicitly(Builder, block)...)
+			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Builder, block)...)
 		case dataSourceLabel:
-			diags = append(diags, cfg.requirePluginImplicitly(Datasource, block)...)
+			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Datasource, block)...)
 		case buildLabel:
 			content, _, moreDiags := block.Body.PartialContent(buildSchema)
 			diags = append(diags, moreDiags...)
@@ -68,9 +68,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 				switch block.Type {
 				case buildProvisionerLabel:
-					diags = append(diags, cfg.requirePluginImplicitly(Provisioner, block)...)
+					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Provisioner, block)...)
 				case buildPostProcessorLabel:
-					diags = append(diags, cfg.requirePluginImplicitly(PostProcessor, block)...)
+					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
 				case buildPostProcessorsLabel:
 					content, _, moreDiags := block.Body.PartialContent(postProcessorsSchema)
 					diags = append(diags, moreDiags...)
@@ -78,7 +78,7 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 
 						switch block.Type {
 						case buildPostProcessorLabel:
-							diags = append(diags, cfg.requirePluginImplicitly(PostProcessor, block)...)
+							diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
 						}
 					}
 				}
@@ -89,7 +89,7 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	return diags
 }
 
-func (cfg *PackerConfig) requirePluginImplicitly(k ComponentKind, block *hcl.Block) hcl.Diagnostics {
+func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, block *hcl.Block) hcl.Diagnostics {
 	if len(block.Labels) == 0 {
 		// malformed block ? Let's not panic :)
 		return nil
