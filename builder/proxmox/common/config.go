@@ -73,8 +73,8 @@ type additionalISOsConfig struct {
 	ISOFile               string `mapstructure:"iso_file"`
 	ISOStoragePool        string `mapstructure:"iso_storage_pool"`
 	Unmount               bool   `mapstructure:"unmount"`
-	ShouldUploadISO       bool
-	DownloadPathKey       string
+	ShouldUploadISO       bool   `mapstructure-to-hcl2:",skip"`
+	DownloadPathKey       string `mapstructure-to-hcl2:",skip"`
 }
 
 type nicConfig struct {
