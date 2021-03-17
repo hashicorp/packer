@@ -2,6 +2,7 @@ package function
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/go-cty-funcs/filesystem"
@@ -33,7 +34,7 @@ func TestTemplateFile(t *testing.T) {
 			cty.StringVal("testdata/missing"),
 			cty.EmptyObjectVal,
 			cty.NilVal,
-			`no file exists at testdata/missing`,
+			`no file exists at ` + filepath.Clean("testdata/missing"),
 		},
 		{
 			cty.StringVal("testdata/hello.tmpl"),
