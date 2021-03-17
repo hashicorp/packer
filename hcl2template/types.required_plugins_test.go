@@ -50,6 +50,37 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 				},
 			},
 		}},
+		{"required_plugin_forked", PackerConfig{parser: defaultParser}, `
+		packer {
+			required_plugins {
+				amazon = {
+					source  = "github.com/azr/amazon"
+					version = "~> v1.2.3"
+				}
+			}
+		} `, `
+		source "amazon-ebs" "example" {
+		}
+		`, false, PackerConfig{
+			Packer: struct {
+				VersionConstraints []VersionConstraint
+				RequiredPlugins    []*RequiredPlugins
+			}{
+				RequiredPlugins: []*RequiredPlugins{
+					{RequiredPlugins: map[string]*RequiredPlugin{
+						"amazon": {
+							Name:   "amazon",
+							Source: "github.com/azr/amazon",
+							Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "azr", Type: "amazon"},
+							Requirement: VersionConstraint{
+								Required: mustVersionConstraints(version.NewConstraint("~> v1.2.3")),
+							},
+							PluginDependencyReason: PluginDependencyExplicit,
+						},
+					}},
+				},
+			},
+		}},
 		{"missing-required-plugin-for-builder", PackerConfig{
 			parser: getBasicParser(func(p *Parser) {
 				p.PluginConfig.BuilderRedirects = map[string]string{
