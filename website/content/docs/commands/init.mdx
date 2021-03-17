@@ -66,6 +66,16 @@ string](/docs/templates/hcl_templates/blocks/packer#version-constraints). The
 plugins will be installed in the [Plugin
 Directory](/docs/configure#packer-s-plugin-directory).
 
+### Implicit plugin requirements
+
+When running `packer init`, if Packer logs a warning that tells you to add a
+`packer.required_plugin` block to your config file, this is because this plugin
+was moved out of the Packer binary and you should consider using that block.
+This is part of a set of breaking changes made to decouple Packer releases from
+a Plugin release. These suggestion are manually added each time we move a plugin
+out of the Packer core. These should happen only starting from version `2.0` of
+Packer.
+
 See [Installing Plugins](/docs/plugins#installing-plugins) for more information on how plugin installation works.
 ## Options
 
