@@ -226,8 +226,6 @@ type FlatadditionalISOsConfig struct {
 	ISOFile         *string  `mapstructure:"iso_file" cty:"iso_file" hcl:"iso_file"`
 	ISOStoragePool  *string  `mapstructure:"iso_storage_pool" cty:"iso_storage_pool" hcl:"iso_storage_pool"`
 	Unmount         *bool    `mapstructure:"unmount" cty:"unmount" hcl:"unmount"`
-	ShouldUploadISO *bool    `cty:"should_upload_iso" hcl:"should_upload_iso"`
-	DownloadPathKey *string  `cty:"download_path_key" hcl:"download_path_key"`
 }
 
 // FlatMapstructure returns a new FlatadditionalISOsConfig.
@@ -251,8 +249,6 @@ func (*FlatadditionalISOsConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iso_file":             &hcldec.AttrSpec{Name: "iso_file", Type: cty.String, Required: false},
 		"iso_storage_pool":     &hcldec.AttrSpec{Name: "iso_storage_pool", Type: cty.String, Required: false},
 		"unmount":              &hcldec.AttrSpec{Name: "unmount", Type: cty.Bool, Required: false},
-		"should_upload_iso":    &hcldec.AttrSpec{Name: "should_upload_iso", Type: cty.Bool, Required: false},
-		"download_path_key":    &hcldec.AttrSpec{Name: "download_path_key", Type: cty.String, Required: false},
 	}
 	return s
 }
