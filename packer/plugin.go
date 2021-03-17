@@ -33,7 +33,8 @@ type PluginConfig struct {
 	//
 	// Redirects will be bypassed if the redirected components are already found
 	// in their corresponding sets (Builders, Provisioners, PostProcessors,
-	// DataSources)
+	// DataSources). That is, for example, if you manually put a single
+	// component plugin in the plugins folder.
 	BuilderRedirects       map[string]string
 	DatasourceRedirects    map[string]string
 	ProvisionerRedirects   map[string]string
