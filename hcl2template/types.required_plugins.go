@@ -94,6 +94,8 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 		// malformed block ? Let's not panic :)
 		return nil
 	}
+	// Currently all block types are `type "component-kind" ["name"] {`
+	// this makes this simple.
 	componentName := block.Labels[0]
 
 	redirect := map[ComponentKind]map[string]string{
