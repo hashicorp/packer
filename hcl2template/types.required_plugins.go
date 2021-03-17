@@ -123,7 +123,8 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 			// the github.com/hashicorp/happycloud plugin into
 			// github.com/azr/happycloud that is required in my config file; and
 			// am using the `happycloud-uploader` pp component from it. In that
-			// case, we won't implicitly import any other `happycloud` plugin.
+			// case - and to avoid miss-requires - we won't implicitly import
+			// any other `happycloud` plugin.
 			return nil
 		}
 	}
