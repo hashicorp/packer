@@ -344,7 +344,7 @@ var cmpOpts = []cmp.Option{
 		PackerConfig{},
 		Variable{},
 		SourceBlock{},
-		Datasource{},
+		DatasourceBlock{},
 		ProvisionerBlock{},
 		PostProcessorBlock{},
 		packer.CoreBuild{},
