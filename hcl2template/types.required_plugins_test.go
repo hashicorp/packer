@@ -9,7 +9,6 @@ import (
 )
 
 func TestPackerConfig_required_plugin_parse(t *testing.T) {
-	defaultParser := getBasicParser()
 
 	tests := []struct {
 		name           string
@@ -19,7 +18,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 		wantDiags      bool
 		wantConfig     PackerConfig
 	}{
-		{"required_plugin", PackerConfig{parser: defaultParser}, `
+		{"required_plugin", PackerConfig{parser: getBasicParser()}, `
 		packer {
 			required_plugins {
 				amazon = {
@@ -50,7 +49,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 				},
 			},
 		}},
-		{"required_plugin_forked", PackerConfig{parser: defaultParser}, `
+		{"required_plugin_forked_no_redirect", PackerConfig{parser: getBasicParser()}, `
 		packer {
 			required_plugins {
 				amazon = {
@@ -59,7 +58,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 				}
 			}
 		} `, `
-		source "amazon-ebs" "example" {
+		source "amazon-chroot" "example" {
 		}
 		`, false, PackerConfig{
 			Packer: struct {
@@ -81,7 +80,44 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 				},
 			},
 		}},
-		{"missing-required-plugin-for-builder", PackerConfig{
+		{"required_plugin_forked", PackerConfig{
+			parser: getBasicParser(func(p *Parser) {
+				p.PluginConfig.BuilderRedirects = map[string]string{
+					"amazon-chroot": "github.com/hashicorp/amazon",
+				}
+			},
+			)}, `
+		packer {
+			required_plugins {
+				amazon = {
+					source  = "github.com/azr/amazon"
+					version = "~> v1.2.3"
+				}
+			}
+		} `, `
+		source "amazon-chroot" "example" {
+		}
+		`, false, PackerConfig{
+			Packer: struct {
+				VersionConstraints []VersionConstraint
+				RequiredPlugins    []*RequiredPlugins
+			}{
+				RequiredPlugins: []*RequiredPlugins{
+					{RequiredPlugins: map[string]*RequiredPlugin{
+						"amazon": {
+							Name:   "amazon",
+							Source: "github.com/azr/amazon",
+							Type:   &addrs.Plugin{Hostname: "github.com", Namespace: "azr", Type: "amazon"},
+							Requirement: VersionConstraint{
+								Required: mustVersionConstraints(version.NewConstraint("~> v1.2.3")),
+							},
+							PluginDependencyReason: PluginDependencyExplicit,
+						},
+					}},
+				},
+			},
+		}},
+		{"missing-required-plugin-for-pre-defined-builder", PackerConfig{
 			parser: getBasicParser(func(p *Parser) {
 				p.PluginConfig.BuilderRedirects = map[string]string{
 					"amazon-ebs": "github.com/hashicorp/amazon",
@@ -91,7 +127,30 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 			`
 			packer {
 			}`, `
+			# amazon-ebs is mocked in getBasicParser()
 			source "amazon-ebs" "example" {
+			}
+			`,
+			false,
+			PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					RequiredPlugins: nil,
+				},
+			}},
+		{"missing-required-plugin-for-builder", PackerConfig{
+			parser: getBasicParser(func(p *Parser) {
+				p.PluginConfig.BuilderRedirects = map[string]string{
+					"amazon-chroot": "github.com/hashicorp/amazon",
+				}
+			},
+			)},
+			`
+			packer {
+			}`, `
+			source "amazon-chroot" "example" {
 			}
 			`,
 			false,
@@ -227,7 +286,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 		{"required-plugin-renamed", PackerConfig{
 			parser: getBasicParser(func(p *Parser) {
 				p.PluginConfig.BuilderRedirects = map[string]string{
-					"amazon-ebs": "github.com/hashicorp/amazon",
+					"amazon-chroot": "github.com/hashicorp/amazon",
 				}
 			},
 			)},
@@ -240,9 +299,9 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 					}
 				}
 			}`, `
-			source "amazon-v1-ebs" "example" {
+			source "amazon-v1-chroot" "example" {
 			}
-			source "amazon-ebs" "example" {
+			source "amazon-chroot" "example" {
 			}
 			`,
 			false,

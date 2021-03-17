@@ -110,6 +110,7 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 		// no known redirect for this component
 		return nil
 	}
+
 	redirectAddr, diags := addrs.ParsePluginSourceString(redirect)
 	if diags.HasErrors() {
 		// This should never happen, since the map is manually filled.
@@ -132,7 +133,7 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 		Provisioner:   cfg.parser.PluginConfig.Provisioners,
 		Datasource:    cfg.parser.PluginConfig.DataSources,
 	}[k]
-	if store.Has(redirectAddr.Type) {
+	if store.Has(componentName) {
 		// If any pre-loaded plugin defines the `happycloud-uploader` pp, skip.
 		// This happens for manually installed plugins, for those we know that
 		// they will be listed in cfg before parsing any HCL.
