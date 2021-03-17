@@ -119,10 +119,11 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 
 	for _, req := range cfg.Packer.RequiredPlugins {
 		if _, found := req.RequiredPlugins[redirectAddr.Type]; found {
-			// This could happen if a plugin was forked. For example, I created
-			// and am requiring the github.com/azr/happycloud plugin and am
-			// using the `happycloud-uploader` pp component from it. In that
-			// case, we won't implicitly import any `happycloud` plugin.
+			// This could happen if a plugin was forked. For example, I forked
+			// the github.com/hashicorp/happycloud plugin into
+			// github.com/azr/happycloud plugin that is requried; and am using
+			// the `happycloud-uploader` pp component from it. In that case, we
+			// won't implicitly import any other `happycloud` plugin.
 			return nil
 		}
 	}
