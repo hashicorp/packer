@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
 )
 
@@ -108,11 +109,97 @@ func TestStepDeployTemplateDeleteImageShouldFailWithInvalidImage(t *testing.T) {
 	}
 }
 
+func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInExistingResourceGroup(t *testing.T) {
+	var deleteDiskCounter = 0
+	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
+
+	stateBag := createTestStateBagStepDeployTemplate()
+	stateBag.Put(constants.ArmIsManagedImage, true)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put("ui", packersdk.TestUi(t))
+
+	testSubject.Cleanup(stateBag)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 time, but invoked %d times", deleteDiskCounter)
+	}
+}
+
+func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInTemporaryResourceGroup(t *testing.T) {
+	var deleteDiskCounter = 0
+	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
+
+	stateBag := createTestStateBagStepDeployTemplate()
+	stateBag.Put(constants.ArmIsManagedImage, true)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
+	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put("ui", packersdk.TestUi(t))
+
+	testSubject.Cleanup(stateBag)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 times, but invoked %d times", deleteDiskCounter)
+	}
+}
+
+func TestStepDeployTemplateCleanupShouldDeleteVHDOSImageInExistingResourceGroup(t *testing.T) {
+	var deleteDiskCounter = 0
+	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
+
+	stateBag := createTestStateBagStepDeployTemplate()
+	stateBag.Put(constants.ArmIsManagedImage, false)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
+	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put("ui", packersdk.TestUi(t))
+
+	testSubject.Cleanup(stateBag)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 time, but invoked %d times", deleteDiskCounter)
+	}
+}
+
+func TestStepDeployTemplateCleanupShouldVHDOSImageInTemporaryResourceGroup(t *testing.T) {
+	var deleteDiskCounter = 0
+	var testSubject = createTestStepDeployTemplateDeleteOSImage(&deleteDiskCounter)
+
+	stateBag := createTestStateBagStepDeployTemplate()
+	stateBag.Put(constants.ArmIsManagedImage, false)
+	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
+	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put("ui", packersdk.TestUi(t))
+
+	testSubject.Cleanup(stateBag)
+	if deleteDiskCounter != 1 {
+		t.Fatalf("Expected DeployTemplate Cleanup to invoke deleteDisk 1 times, but invoked %d times", deleteDiskCounter)
+	}
+}
+
 func createTestStateBagStepDeployTemplate() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
 	stateBag.Put(constants.ArmDeploymentName, "Unit Test: DeploymentName")
 	stateBag.Put(constants.ArmResourceGroupName, "Unit Test: ResourceGroupName")
+	stateBag.Put(constants.ArmComputeName, "Unit Test: ComputeName")
 
 	return stateBag
+}
+
+func createTestStepDeployTemplateDeleteOSImage(deleteDiskCounter *int) *StepDeployTemplate {
+	return &StepDeployTemplate{
+		deploy: func(context.Context, string, string) error { return nil },
+		say:    func(message string) {},
+		error:  func(e error) {},
+		deleteDisk: func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error {
+			*deleteDiskCounter++
+			return nil
+		},
+		disk: func(ctx context.Context, resourceGroupName, computeName string) (string, string, error) {
+			return "Microsoft.Compute/disks", "", nil
+		},
+		delete: func(ctx context.Context, deploymentName, resourceGroupName string) error {
+			return nil
+		},
+		deleteDeployment: func(ctx context.Context, state multistep.StateBag) error {
+			return nil
+		},
+	}
 }
