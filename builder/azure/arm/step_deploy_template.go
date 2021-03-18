@@ -295,28 +295,6 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 	return nil
 }
 
-func (s *StepDeployTemplate) deleteResourceWithRetry(ctx context.Context, resourceGroupName, resourceType, resourceName string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	retryConfig := retry.Config{
-		Tries:      10,
-		RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
-	}
-
-	err := retryConfig.Run(ctx, func(ctx context.Context) error {
-		err := deleteResource(ctx, s.client,
-			resourceType,
-			resourceName,
-			resourceGroupName)
-		if err != nil {
-			s.reportIfError(err, resourceName)
-		}
-		return err
-	})
-	if err != nil {
-		s.reportIfError(err, resourceName)
-	}
-}
-
 func (s *StepDeployTemplate) reportIfError(err error, resourceName string) {
 	if err != nil {
 		s.say(fmt.Sprintf("Error deleting resource. Please delete manually.\n\n"+
