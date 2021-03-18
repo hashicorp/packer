@@ -277,7 +277,9 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 					resourceName,
 					resourceGroupName)
 				if err != nil {
-					s.reportIfError(err, resourceName)
+					s.say(fmt.Sprintf("Error deleting resource. Will retry.\n"+
+						"Name: %s\n"+
+						"Error: %s\n", resourceName, err.Error()))
 				}
 				return err
 			})
