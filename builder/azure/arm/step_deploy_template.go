@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -237,6 +238,8 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 		return err
 	}
 
+	resources := map[string]string{}
+
 	for deploymentOperations.NotDone() {
 		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
@@ -248,31 +251,68 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 		resourceName := *deploymentOperation.Properties.TargetResource.ResourceName
 		resourceType := *deploymentOperation.Properties.TargetResource.ResourceType
 
-		s.say(fmt.Sprintf(" -> %s : '%s'", resourceType, resourceName))
-
-		err = retry.Config{
-			Tries:      10,
-			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			err := deleteResource(ctx, s.client,
-				resourceType,
-				resourceName,
-				resourceGroupName)
-			if err != nil {
-				s.reportIfError(err, resourceName)
-			}
-			return nil
-		})
-		if err != nil {
-			s.reportIfError(err, resourceName)
-		}
+		s.say(fmt.Sprintf("Adding to deletion queue -> %s : '%s'", resourceType, resourceName))
+		resources[resourceType] = resourceName
 
 		if err = deploymentOperations.Next(); err != nil {
 			return err
 		}
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(resources))
+
+	for resourceType, resourceName := range resources {
+		go func(resourceType, resourceName string) {
+			defer wg.Done()
+			retryConfig := retry.Config{
+				Tries:      10,
+				RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+			}
+
+			err = retryConfig.Run(ctx, func(ctx context.Context) error {
+				s.say(fmt.Sprintf("Attempting deletion -> %s : '%s'", resourceType, resourceName))
+				err := deleteResource(ctx, s.client,
+					resourceType,
+					resourceName,
+					resourceGroupName)
+				if err != nil {
+					s.reportIfError(err, resourceName)
+				}
+				return err
+			})
+			if err != nil {
+				s.reportIfError(err, resourceName)
+			}
+		}(resourceType, resourceName)
+	}
+
+	s.say("Waiting for deletion of all resources...")
+	wg.Wait()
+
 	return nil
+}
+
+func (s *StepDeployTemplate) deleteResourceWithRetry(ctx context.Context, resourceGroupName, resourceType, resourceName string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	retryConfig := retry.Config{
+		Tries:      10,
+		RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+	}
+
+	err := retryConfig.Run(ctx, func(ctx context.Context) error {
+		err := deleteResource(ctx, s.client,
+			resourceType,
+			resourceName,
+			resourceGroupName)
+		if err != nil {
+			s.reportIfError(err, resourceName)
+		}
+		return err
+	})
+	if err != nil {
+		s.reportIfError(err, resourceName)
+	}
 }
 
 func (s *StepDeployTemplate) reportIfError(err error, resourceName string) {
