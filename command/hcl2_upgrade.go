@@ -270,18 +270,18 @@ func (uc UnhandleableArgumentError) Error() string {
 # Visit %s for more infos.`, uc.Call, uc.Correspondance, uc.Docs)
 }
 
+func fallbackReturn(err error, s []byte) []byte {
+	if strings.Contains(err.Error(), "unhandled") {
+		return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
+	}
+
+	return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
+}
+
 // transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
 func transposeTemplatingCalls(s []byte) []byte {
-	fallbackReturn := func(err error) []byte {
-		if strings.Contains(err.Error(), "unhandled") {
-			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
-		}
-
-		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
-	}
-
 	funcErrors := &multierror.Error{
 		ErrorFormat: func(es []error) string {
 			if len(es) == 1 {
@@ -437,14 +437,14 @@ func transposeTemplatingCalls(s []byte) []byte {
 		Parse(string(s))
 
 	if err != nil {
-		return fallbackReturn(err)
+		return fallbackReturn(err, s)
 	}
 
 	str := &bytes.Buffer{}
 	// PASSTHROUGHS is a map of variable-specific golang text template fields
 	// that should remain in the text template format.
 	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
-		return fallbackReturn(err)
+		return fallbackReturn(err, s)
 	}
 
 	out := str.Bytes()
@@ -461,14 +461,6 @@ func transposeTemplatingCalls(s []byte) []byte {
 // In variableTransposeTemplatingCalls the definition of aws_secretsmanager function will create a data source
 // with the same name as the variable.
 func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
-	fallbackReturn := func(err error) []byte {
-		if strings.Contains(err.Error(), "unhandled") {
-			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
-		}
-
-		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
-	}
-
 	setIsLocal := func(a ...string) string {
 		isLocal = true
 		return ""
@@ -510,14 +502,14 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		Parse(string(s))
 
 	if err != nil {
-		return isLocal, fallbackReturn(err)
+		return isLocal, fallbackReturn(err, s)
 	}
 
 	str := &bytes.Buffer{}
 	// PASSTHROUGHS is a map of variable-specific golang text template fields
 	// that should remain in the text template format.
 	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
-		return isLocal, fallbackReturn(err)
+		return isLocal, fallbackReturn(err, s)
 	}
 
 	return isLocal, str.Bytes()
