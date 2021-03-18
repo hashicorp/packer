@@ -22,7 +22,7 @@ async function fetchDocsFiles({ repo, tag }) {
   // then throw an error - we can't resolve the fallback source ZIP
   // unless we resort to calling the GitHub API, which we do not want to do
   if (tag === 'latest') {
-    const err = `Failed to fetch. Could not find "docs.zip" at ${docsZipUrl}. To fall back to parsing docs from "source", please provide a specific tag instead of "${tag}".`
+    const err = `Failed to fetch. Could not find "docs.zip" at ${docsZipUrl}. To fall back to parsing docs from "source", please provide a specific version tag instead of "${tag}".`
     return [err, null]
   }
   // Else if docs.zip is not present, and we have a specific tag, then
