@@ -3,10 +3,13 @@ package vagrantcloud
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
+
+const VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT = 5000000000 // Upload limit is 5GB
 
 type Upload struct {
 	UploadPath   string `json:"upload_path"`
@@ -24,6 +27,18 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 	version := state.Get("version").(*Version)
 	provider := state.Get("provider").(*Provider)
 	artifactFilePath := state.Get("artifactFilePath").(string)
+
+	// If direct upload is enabled, the asset size must be <= 5 GB
+	if config.NoDirectUpload == false {
+		f, err := os.Stat(artifactFilePath)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error determining size of upload artifact: %s", artifactFilePath))
+		}
+		if f.Size() > VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT {
+			ui.Say(fmt.Sprintf("Asset %s is larger than the direct upload limit. Setting `NoDirectUpload` to true", artifactFilePath))
+			config.NoDirectUpload = true
+		}
+	}
 
 	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Version, provider.Name)
 	if !config.NoDirectUpload {
