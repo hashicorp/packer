@@ -382,7 +382,7 @@ Some setup is required to include docs from remote plugin repositories on the [p
 
 The `docs.zip` release asset is expected to be generated as part of the standard release process for `packer-plugin-*` repositories. Additional details on this process can be found in [the `packer-plugin-scaffolding` `README`](https://github.com/hashicorp/packer-plugin-scaffolding#registering-documentation-on-packerio).
 
-The `docs-remote-plugins.json` file contains an array of entries. Each entry points to a plugin repository. The `{ title, path, repo, tag }` properties are required for each entry, all other properties are optional.
+The `docs-remote-plugins.json` file contains an array of entries. Each entry points to a plugin repository. The `{ title, path, repo, version }` properties are required for each entry, all other properties are optional.
 
 ```json5
 [
