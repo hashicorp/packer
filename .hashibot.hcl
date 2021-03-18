@@ -22,3 +22,21 @@ poll "closed_issue_locker" "locker" {
     If you have found a problem that seems similar to this, please open a new issue and complete the issue template so we can capture all the details necessary to investigate further.
   EOF
 }
+
+poll "label_issue_migrater" "remote_plugin_migrater" {
+  schedule                = "0 20 * * * *"
+  new_owner               = "hashicorp"
+  repo_prefix             = "packer-plugin-"
+  label_prefix            = "remote-plugin/"
+  excluded_label_prefixes  = ["communicator/"]
+  excluded_labels         = ["build", "core", "new-plugin-contribution", "website"]
+
+  issue_header     = <<-EOF
+    _This issue was originally opened by @${var.user} as ${var.repository}#${var.issue_number}. It was migrated here as a result of the [Packer plugin split](###blog-post-url###). The original body of the issue is below._
+
+    <hr>
+
+    EOF
+  migrated_comment = "This issue has been automatically migrated to ${var.repository}#${var.issue_number} because it looks like an issue with that plugin. If you believe this is _not_ an issue with the plugin, please reply to ${var.repository}#${var.issue_number}."
+}
+
