@@ -145,7 +145,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry) {
     const { data: frontmatter } = grayMatter(fileString)
     const { nav_title, sidebar_title } = frontmatter
     const title = nav_title || sidebar_title || basename
-    // construct sourceUrl
+    // construct sourceUrl (used for "Edit this page" link)
     const sourceUrl = `https://github.com/${repo}/blob/${version}/${filePath}`
     // determine pluginTier
     const pluginOwner = repo.split('/')[0]
