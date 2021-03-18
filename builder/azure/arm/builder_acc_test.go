@@ -471,7 +471,7 @@ const testBuilderAccBlobLinux = `
 	  "subscription_id": "{{user ` + "`subscription_id`" + `}}",
 
 	  "storage_account": "{{user ` + "`storage_account`" + `}}",
-	  "resource_group_name": "packer-acceptance-test"",
+	  "resource_group_name": "packer-acceptance-test",
 	  "capture_container_name": "test",
 	  "capture_name_prefix": "testBuilderAccBlobLinux",
 
