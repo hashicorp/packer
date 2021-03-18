@@ -1,9 +1,9 @@
 variable "ubuntu_1804_version" {
-  default = "18.04.4"
+  default = "18.04.5"
 }
 
 locals {
-  iso_url_ubuntu_1804           = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-18.04.4-server-amd64.iso"
+  iso_url_ubuntu_1804           = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/ubuntu-${var.ubuntu_1804_version}-server-amd64.iso"
   iso_checksum_url_ubuntu_1804  = "http://cdimage.ubuntu.com/ubuntu/releases/18.04/release/SHA256SUMS"
   ubuntu_1804_boot_command      = [
     "<esc><wait>",
