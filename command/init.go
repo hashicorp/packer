@@ -123,9 +123,9 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		if err != nil {
 			if pluginRequirement.Implicit {
 				msg := fmt.Sprintf(`
-Warning, at least one component used in your config file(s) has moved out of 
+Warning! At least one component used in your config file(s) has moved out of 
 Packer into the %q plugin.
-For that reason Packer init tried to install the latest version of the %s 
+For that reason, Packer init tried to install the latest version of the %s 
 plugin. Unfortunately, this failed :
 %s`,
 					pluginRequirement.Identifier,
