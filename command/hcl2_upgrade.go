@@ -674,12 +674,49 @@ type VariableParser struct {
 	localsOut       []byte
 }
 
+func makeLocal(variable *template.Variable, sensitive bool, localBody *hclwrite.Body, localsContent *hclwrite.File, hasLocals *bool) []byte {
+	if sensitive {
+		// Create Local block because this is sensitive
+		sensitiveLocalContent := hclwrite.NewEmptyFile()
+		body := sensitiveLocalContent.Body()
+		body.AppendNewline()
+		sensitiveLocalBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
+		sensitiveLocalBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+		sensitiveLocalBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+		localsVariableMap[variable.Key] = "local"
+		return sensitiveLocalContent.Bytes()
+	}
+	localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+	localsVariableMap[variable.Key] = "locals"
+	*hasLocals = true
+	return []byte{}
+}
+
+func makeVariable(variable *template.Variable, sensitive bool) []byte {
+	variablesContent := hclwrite.NewEmptyFile()
+	variablesBody := variablesContent.Body()
+	variablesBody.AppendNewline()
+	variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
+	variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
+
+	if variable.Default != "" || !variable.Required {
+		shimmed := hcl2shim.HCL2ValueFromConfigValue(variable.Default)
+		variableBody.SetAttributeValue("default", shimmed)
+	}
+	if sensitive {
+		variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+	}
+
+	return variablesContent.Bytes()
+}
+
 func (p *VariableParser) Parse(tpl *template.Template) error {
-	// OutPut Locals and Local blocks
+	// Output Locals and Local blocks
 	localsContent := hclwrite.NewEmptyFile()
 	localsBody := localsContent.Body()
 	localsBody.AppendNewline()
 	localBody := localsBody.AppendNewBlock("locals", nil).Body()
+	hasLocals := false
 
 	if len(p.variablesOut) == 0 {
 		p.variablesOut = []byte{}
@@ -699,47 +736,34 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 		})
 	}
 
-	hasLocals := false
 	for _, variable := range variables {
-		variablesContent := hclwrite.NewEmptyFile()
-		variablesBody := variablesContent.Body()
-		variablesBody.AppendNewline()
-		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
-		variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
+		// Create new HCL2 "variables" block, and populate the "value"
+		// field with the "Default" value from the JSON variable.
 
-		if variable.Default != "" || !variable.Required {
-			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-		}
+		// Interpolate Jsonval first as an hcl variable to determine if it is
+		// a local.
+		isLocal, _ := variableTransposeTemplatingCalls([]byte(variable.Default))
 		sensitive := false
 		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
 			sensitive = true
-			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
-		isLocal, out := variableTransposeTemplatingCalls(variablesContent.Bytes())
+		// Create final HCL block and append.
 		if isLocal {
-			if sensitive {
-				// Create Local block because this is sensitive
-				localContent := hclwrite.NewEmptyFile()
-				body := localContent.Body()
-				body.AppendNewline()
-				localBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
-				localBody.SetAttributeValue("sensitive", cty.BoolVal(true))
-				localBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-				p.localsOut = append(p.localsOut, transposeTemplatingCalls(localContent.Bytes())...)
-				localsVariableMap[variable.Key] = "local"
-				continue
+			sensitiveBlocks := makeLocal(variable, sensitive, localBody, localsContent, &hasLocals)
+			if len(sensitiveBlocks) > 0 {
+				p.localsOut = append(p.localsOut, transposeTemplatingCalls(sensitiveBlocks)...)
 			}
-			localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-			localsVariableMap[variable.Key] = "locals"
-			hasLocals = true
 			continue
 		}
+		varbytes := makeVariable(variable, sensitive)
+		_, out := variableTransposeTemplatingCalls(varbytes)
 		p.variablesOut = append(p.variablesOut, out...)
 	}
 
-	if hasLocals {
+	if hasLocals == true {
 		p.localsOut = append(p.localsOut, transposeTemplatingCalls(localsContent.Bytes())...)
 	}
+
 	return nil
 }
 
