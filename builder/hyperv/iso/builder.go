@@ -213,6 +213,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&commonsteps.StepHTTPServer{
 			HTTPDir:     b.config.HTTPDir,
+			HTTPContent: b.config.HTTPContent,
 			HTTPPortMin: b.config.HTTPPortMin,
 			HTTPPortMax: b.config.HTTPPortMax,
 			HTTPAddress: b.config.HTTPAddress,

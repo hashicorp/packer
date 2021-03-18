@@ -56,7 +56,10 @@ func Vault(path string, key string) (string, error) {
 		}
 
 		// neither v1 nor v2 proudced a valid value
-		return "", fmt.Errorf("Vault data was empty at the given path. Warnings: %s", strings.Join(secret.Warnings, "; "))
+		return "", fmt.Errorf("Vault data was empty at the given path. Check "+
+			"the Vault function docs for help: "+
+			"https://www.packer.io/docs/templates/hcl_templates/functions/contextual/vault. "+
+			"Original warnings from Vault call: %s", strings.Join(secret.Warnings, "; "))
 	}
 
 	if val, ok := data.(map[string]interface{})[key]; ok {

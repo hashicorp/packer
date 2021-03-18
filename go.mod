@@ -51,7 +51,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0
 	github.com/hashicorp/hcl/v2 v2.8.0
 	github.com/hashicorp/packer-plugin-docker v0.0.2
-	github.com/hashicorp/packer-plugin-sdk v0.0.14
+	github.com/hashicorp/packer-plugin-sdk v0.1.1-0.20210318122939-63c43d5f735d
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
