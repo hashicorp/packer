@@ -46,8 +46,8 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%v %s", err, bs)
 			}
-			expected := mustBytes(ioutil.ReadFile(expectedPath))
-			actual := mustBytes(ioutil.ReadFile(outputPath))
+			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
+			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
 
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)
