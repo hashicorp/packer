@@ -19,8 +19,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	ocicommon "github.com/oracle/oci-go-sdk/common"
-	ociauth "github.com/oracle/oci-go-sdk/common/auth"
+	ocicommon "github.com/oracle/oci-go-sdk/v36/common"
+	ociauth "github.com/oracle/oci-go-sdk/v36/common/auth"
 )
 
 type CreateVNICDetails struct {
@@ -222,7 +222,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		}
 
 		providers := []ocicommon.ConfigurationProvider{
-			NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
+			ocicommon.NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
 		}
 
 		if fileProvider != nil {

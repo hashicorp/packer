@@ -11,8 +11,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/oracle/oci-go-sdk/common"
-	core "github.com/oracle/oci-go-sdk/core"
+	"github.com/oracle/oci-go-sdk/v36/common"
+	core "github.com/oracle/oci-go-sdk/v36/core"
 )
 
 // driverOCI implements the Driver interface and communicates with Oracle
