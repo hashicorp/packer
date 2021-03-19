@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig,additionalISOsConfig
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig,additionalISOsConfig,cdFilesConfig
 
 package proxmox
 
