@@ -1291,9 +1291,9 @@ func fixQuoting(old string) string {
 
 		unquoted, err := strconv.Unquote(fmt.Sprintf("\"%s\"", group))
 		if err != nil {
-			return []byte(s)
+			return s
 		}
-		return []byte(strings.Replace(string(s), group, fmt.Sprintf("%s", unquoted), 1))
+		return []byte(strings.Replace(string(s), group, unquoted, 1))
 
 	})
 
