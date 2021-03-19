@@ -255,8 +255,21 @@ builder.
 - `http_interface` - (string) - Name of the network interface that Packer gets
   `HTTPIP` from. Defaults to the first non loopback interface.
 
-- `vm_interface` - (string) - Name of the network interface that Packer gets
-  the VMs IP from. Defaults to the first non loopback interface.
+- `http_ipv6` - (bool) - Specifies whether Packer should use the IPv6 address
+  for the `HTTPIP`. Defaults to false.
+
+- `vm_interface` - (object) - Network interface used when Packer determines the
+  VMs IP address. Example:
+  ```json
+  {
+    "interface": "eth0",
+    "ipv6": true
+  }
+  ```
+  - `interface`: - (string) - Name of the network interface that Packer gets
+    the VMs IP from. Defaults to the first non loopback interface.
+  - `ipv6`: - (bool) - Specifies whether Packer should use the IPv6 address of
+    an interface. Defaults to false.
 
 - `boot` - (string) - Override default boot order. Format example `order=virtio0;ide2;net0`.
   Prior to Proxmox 6.2-15 the format was `cdn` (c:CDROM -> d:Disk -> n:Network)

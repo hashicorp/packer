@@ -58,7 +58,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	if c.HTTPAddress != "0.0.0.0" {
 		httpIP = c.HTTPAddress
 	} else {
-		httpIP, err = hostIP(c.HTTPInterface)
+		httpIP, err = hostIP(c.HTTPInterface,c.HTTPIPv6)
 		if err != nil {
 			err := fmt.Errorf("Failed to determine host IP: %s", err)
 			state.Put("error", err)
@@ -103,7 +103,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
-func hostIP(ifname string) (string, error) {
+func hostIP(ifname string, ipv6 bool) (string, error) {
 	var addrs []net.Addr
 	var err error
 
@@ -122,12 +122,22 @@ func hostIP(ifname string) (string, error) {
 			return "", err
 		}
 	}
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
-			}
-		}
-	}
+    if ipv6{
+        for _, addr := range addrs {
+            if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+                if ipnet.IP.To16() != nil && ipv6 {
+                    return ipnet.IP.String(), nil
+                }
+            }
+        }
+    }else{
+        for _, addr := range addrs {
+            if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+                if ipnet.IP.To4() != nil {
+                    return ipnet.IP.String(), nil
+                }
+            }
+        }
+    }
 	return "", errors.New("No host IP found")
 }

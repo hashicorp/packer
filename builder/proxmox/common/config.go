@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig,additionalISOsConfig
+//go:generate mapstructure-to-hcl2 -type Config,nicConfig,diskConfig,vgaConfig,additionalISOsConfig,interfaceConfig
 
 package proxmox
 
@@ -62,11 +62,15 @@ type Config struct {
 	CloudInitStoragePool string `mapstructure:"cloud_init_storage_pool"`
 
 	AdditionalISOFiles []additionalISOsConfig `mapstructure:"additional_iso_files"`
-	VMInterface        string                 `mapstructure:"vm_interface"`
+	VMInterface        interfaceConfig        `mapstructure:"vm_interface"`
 
 	Ctx interpolate.Context `mapstructure-to-hcl2:",skip"`
 }
 
+type interfaceConfig struct {
+    VMInterface string `mapstructure:"interface"`
+    VMIPv6 bool `mapstructure:"ipv6"`
+}
 type additionalISOsConfig struct {
 	commonsteps.ISOConfig `mapstructure:",squash"`
 	Device                string `mapstructure:"device"`

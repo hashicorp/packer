@@ -103,7 +103,7 @@ type FlatConfig struct {
 	CloudInit                 *bool                              `mapstructure:"cloud_init" cty:"cloud_init" hcl:"cloud_init"`
 	CloudInitStoragePool      *string                            `mapstructure:"cloud_init_storage_pool" cty:"cloud_init_storage_pool" hcl:"cloud_init_storage_pool"`
 	AdditionalISOFiles        []proxmox.FlatadditionalISOsConfig `mapstructure:"additional_iso_files" cty:"additional_iso_files" hcl:"additional_iso_files"`
-	VMInterface               *string                            `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
+	VMInterface               *proxmox.FlatinterfaceConfig       `mapstructure:"vm_interface" cty:"vm_interface" hcl:"vm_interface"`
 	CloneVM                   *string                            `mapstructure:"clone_vm" cty:"clone_vm" hcl:"clone_vm"`
 	FullClone                 *bool                              `mapstructure:"full_clone" required:"false" cty:"full_clone" hcl:"full_clone"`
 }
@@ -212,7 +212,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"cloud_init":                   &hcldec.AttrSpec{Name: "cloud_init", Type: cty.Bool, Required: false},
 		"cloud_init_storage_pool":      &hcldec.AttrSpec{Name: "cloud_init_storage_pool", Type: cty.String, Required: false},
 		"additional_iso_files":         &hcldec.BlockListSpec{TypeName: "additional_iso_files", Nested: hcldec.ObjectSpec((*proxmox.FlatadditionalISOsConfig)(nil).HCL2Spec())},
-		"vm_interface":                 &hcldec.AttrSpec{Name: "vm_interface", Type: cty.String, Required: false},
+		"vm_interface":                 &hcldec.BlockSpec{TypeName: "vm_interface", Nested: hcldec.ObjectSpec((*proxmox.FlatinterfaceConfig)(nil).HCL2Spec())},
 		"clone_vm":                     &hcldec.AttrSpec{Name: "clone_vm", Type: cty.String, Required: false},
 		"full_clone":                   &hcldec.AttrSpec{Name: "full_clone", Type: cty.Bool, Required: false},
 	}

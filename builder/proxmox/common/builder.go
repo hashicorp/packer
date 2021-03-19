@@ -150,9 +150,9 @@ func getVMIP(state multistep.StateBag) (string, error) {
 		return "", err
 	}
 
-	if config.VMInterface != "" {
+	if config.VMInterface.VMInterface != "" {
 		for _, iface := range ifs {
-			if config.VMInterface != iface.Name {
+			if config.VMInterface.VMInterface != iface.Name {
 				continue
 			}
 
@@ -162,19 +162,31 @@ func getVMIP(state multistep.StateBag) (string, error) {
 				}
 				return addr.String(), nil
 			}
-			return "", fmt.Errorf("Interface %s only has loopback addresses", config.VMInterface)
+			return "", fmt.Errorf("Interface %s only has loopback addresses", config.VMInterface.VMInterface)
 		}
-		return "", fmt.Errorf("Interface %s not found in VM", config.VMInterface)
+		return "", fmt.Errorf("Interface %s not found in VM", config.VMInterface.VMInterface)
 	}
 
-	for _, iface := range ifs {
-		for _, addr := range iface.IPAddresses {
-			if addr.IsLoopback() {
-				continue
-			}
-			return addr.String(), nil
-		}
-	}
+    if config.VMInterface.VMIPv6 {
+        for _, iface := range ifs {
+            for _, addr := range iface.IPAddresses {
+                if addr.IsLoopback() || addr.To4() == nil {
+                    continue
+                }
+                return addr.String(), nil
+            }
+        }
+    } else{
+        for _, iface := range ifs {
+            for _, addr := range iface.IPAddresses {
+                if addr.IsLoopback() || addr.To16() == nil {
+                    continue
+                }
+                return addr.String(), nil
+            }
+        }
+    }
+
 
 	return "", fmt.Errorf("Found no IP addresses on VM")
 }
