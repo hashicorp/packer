@@ -165,7 +165,7 @@ func (c Config) Validate(errs *packersdk.MultiError) {
 		if _, err := os.Stat(c.ClientCertPath); err != nil {
 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_cert_path is not an accessible file: %v", err))
 		}
-		if c.ClientCertExpireTimeout < 5*time.Minute {
+		if c.ClientCertExpireTimeout != 0 && c.ClientCertExpireTimeout < 5*time.Minute {
 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("client_cert_token_timeout will expire within 5 minutes, please set a value greater than 5 minutes"))
 		}
 		return
