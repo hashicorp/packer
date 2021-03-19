@@ -106,9 +106,9 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 		Datasource:    cfg.parser.PluginConfig.DataSources,
 	}[k]
 	if store.Has(componentName) {
-		// If any pre-loaded plugin defines the `happycloud-uploader` pp, skip.
-		// This happens for manually installed plugins, as they will be listed
-		// in the PluginConfig before parsing any HCL.
+		// If any core or pre-loaded plugin defines the `happycloud-uploader`
+		// pp, skip. This happens for manually installed plugins, as they will
+		// be listed in the PluginConfig before parsing any HCL.
 		return nil
 	}
 
