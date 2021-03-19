@@ -99,6 +99,19 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 	// this makes this simple.
 	componentName := block.Labels[0]
 
+	store := map[ComponentKind]packer.BasicStore{
+		Builder:       cfg.parser.PluginConfig.Builders,
+		PostProcessor: cfg.parser.PluginConfig.PostProcessors,
+		Provisioner:   cfg.parser.PluginConfig.Provisioners,
+		Datasource:    cfg.parser.PluginConfig.DataSources,
+	}[k]
+	if store.Has(componentName) {
+		// If any pre-loaded plugin defines the `happycloud-uploader` pp, skip.
+		// This happens for manually installed plugins, as they will be listed
+		// in the PluginConfig before parsing any HCL.
+		return nil
+	}
+
 	redirect := map[ComponentKind]map[string]string{
 		Builder:       cfg.parser.PluginConfig.BuilderRedirects,
 		PostProcessor: cfg.parser.PluginConfig.PostProcessorRedirects,
@@ -127,19 +140,6 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 			// any other `happycloud` plugin.
 			return nil
 		}
-	}
-
-	store := map[ComponentKind]packer.BasicStore{
-		Builder:       cfg.parser.PluginConfig.Builders,
-		PostProcessor: cfg.parser.PluginConfig.PostProcessors,
-		Provisioner:   cfg.parser.PluginConfig.Provisioners,
-		Datasource:    cfg.parser.PluginConfig.DataSources,
-	}[k]
-	if store.Has(componentName) {
-		// If any pre-loaded plugin defines the `happycloud-uploader` pp, skip.
-		// This happens for manually installed plugins, as they will be listed
-		// in the PluginConfig before parsing any HCL.
-		return nil
 	}
 
 	cfg.implicitlyRequirePlugin(redirectAddr)
