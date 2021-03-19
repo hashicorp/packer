@@ -36,8 +36,9 @@ type winConfig struct {
 	AppXPackages   []appXPackage `mapstructure:"appXPackages, squash" required:"false"`
 	Capabilities   []capability  `mapstructure:"capabilities, squash" required:"false"`
 	Drivers        []driver      `mapstructure:"drivers, squash" required:"false"`
-	Packages       []winPackage  `mapstructure:"packages, squash" required:"false"`
 	Features       []feature     `mapstructure:"features, squash" required:"false"`
+	Languages      []language    `mapstructure:"languages, squash" required:"false"`
+	Packages       []winPackage  `mapstructure:"packages, squash" required:"false"`
 	ProductKey     string        `mapstructure:"productKey, omitempty" required:"false"`
 	Unattend       string        `mapstructure:"unattend, omitempty" required:"false"`
 }
@@ -61,14 +62,28 @@ type driver struct {
 	Path   string `mapstructure:"path" required:"true"`
 }
 
-type winPackage struct {
-	Action string `mapstructure:"action" required:"true"`
-	Path   string `mapstructure:"path" required:"true"`
-}
-
 type feature struct {
 	Action string `mapstructure:"action" required:"true"`
 	Name   string `mapstructure:"name" required:"true"`
+}
+
+type language struct {
+	Action            string `mapstructure:"action" required:"true"`
+	Name              string `mapstructure:"name" required:"true"`
+	SelectAll         bool   `mapstructure:"selectAll" required:"false"`
+	DeployLanguage    bool   `mapstructure:"deployLanguage" required:"false"`
+	Basic             bool   `mapstructure:"basic" required:"false"`
+	Fonts             bool   `mapstructure:"fonts" required:"false"`
+	BasicTyping       bool   `mapstructure:"basicTyping" required:"false"`
+	Handwriting       bool   `mapstructure:"handwriting" required:"false"`
+	OCR               bool   `mapstructure:"ocr" required:"false"`
+	TextToSpeech      bool   `mapstructure:"textToSpeech" required:"false"`
+	SpeechRecognition bool   `mapstructure:"speechRecognition" required:"false"`
+}
+
+type winPackage struct {
+	Action string `mapstructure:"action" required:"true"`
+	Path   string `mapstructure:"path" required:"true"`
 }
 
 func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -202,6 +217,20 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 	}
 
+	// Remove features
+	for _, feature := range config.Features {
+		if feature.Action == "disable" {
+			ui.Say(fmt.Sprintf("Disabling feature: %s", feature.Name))
+
+			if err = s.disableWindowsOptionalFeature(feature.Name); err != nil {
+				err = fmt.Errorf("Error disabling feature %s: %s", feature.Name, err)
+				state.Put("error", err)
+				ui.Error(err.Error())
+				return multistep.ActionHalt
+			}
+		}
+	}
+
 	// Remove packages
 	for _, winPackage := range config.Packages {
 		if winPackage.Action == "remove" {
@@ -216,17 +245,12 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 	}
 
-	// Remove features
-	for _, feature := range config.Features {
-		if feature.Action == "disable" {
-			ui.Say(fmt.Sprintf("Disabling feature: %s", feature.Name))
+	// Remove languages
+	for _, language := range config.Languages {
+		if language.Action == "remove" {
+			ui.Say(fmt.Sprintf("Removing language: %s", filepath.ToSlash(language.Name)))
 
-			if err = s.disableWindowsOptionalFeature(feature.Name); err != nil {
-				err = fmt.Errorf("Error disabling feature %s: %s", feature.Name, err)
-				state.Put("error", err)
-				ui.Error(err.Error())
-				return multistep.ActionHalt
-			}
+			// TODO:
 		}
 	}
 
@@ -269,6 +293,15 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
+		}
+	}
+
+	// Add languages
+	for _, languages := range config.Languages {
+		if languages.Action == "add" {
+			ui.Say(fmt.Sprintf("Adding language: %s", filepath.ToSlash(languages.Name)))
+
+			// TODO:
 		}
 	}
 
