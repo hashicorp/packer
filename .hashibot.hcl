@@ -32,7 +32,7 @@ poll "label_issue_migrater" "remote_plugin_migrater" {
   excluded_labels         = ["build", "core", "new-plugin-contribution", "website"]
 
   issue_header     = <<-EOF
-    _This issue was originally opened by @${var.user} as ${var.repository}#${var.issue_number}. It was migrated here as a result of the [Packer plugin split](###blog-post-url###). The original body of the issue is below._
+    _This issue was originally opened by @${var.user} as ${var.repository}#${var.issue_number}. It was migrated here as a result of the [Packer plugin split](https://github.com/hashicorp/packer/issues/8610#issuecomment-770034737). The original body of the issue is below._
 
     <hr>
 
