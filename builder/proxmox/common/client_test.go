@@ -53,7 +53,7 @@ func TestLogin(t *testing.T) {
 				return
 			}
 
-			json.NewEncoder(rw).Encode(map[string]interface{}{
+			_ = json.NewEncoder(rw).Encode(map[string]interface{}{
 				"data": map[string]string{
 					"username":            user,
 					"ticket":              "dummy-ticket",
