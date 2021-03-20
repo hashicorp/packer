@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 )
+
+const defaultTaskTimeout = 30 * time.Second
 
 type authenticatedTransport struct {
 	rt    http.RoundTripper
@@ -44,7 +47,7 @@ func NewProxmoxClient(config Config) (*proxmox.Client, error) {
 		httpClient = &http.Client{Transport: authTransport}
 	}
 
-	client, err := proxmox.NewClient(config.proxmoxURL.String(), httpClient, tlsConfig)
+	client, err := proxmox.NewClient(config.proxmoxURL.String(), httpClient, tlsConfig, int(defaultTaskTimeout.Seconds()))
 	if err != nil {
 		return nil, err
 	}
