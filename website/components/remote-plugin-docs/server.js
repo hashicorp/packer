@@ -31,8 +31,8 @@ async function generateStaticProps(
     ? remoteFile.fileString
     : fs.readFileSync(path.join(process.cwd(), filePath), 'utf8')
   // Construct the githubFileUrl, used for "Edit this page" link
-  // Note: for custom ".docs-artifacts" directories, the "Edit this page"
-  // link will lead to the artifact file rather than the "docs" source file
+  // Note: we expect remote files, such as those used to render plugin docs,
+  // to have a sourceUrl defined, that points to the file we built from
   const githubFileUrl = remoteFile
     ? remoteFile.sourceUrl
     : `https://github.com/hashicorp/${product.slug}/blob/${mainBranch}/website/${filePath}`
