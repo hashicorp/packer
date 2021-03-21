@@ -46,6 +46,11 @@ type ListImagesRequest struct {
 	Shape                  *string `mapstructure:"shape"`
 }
 
+type FlexShapeConfig struct {
+	Ocpus       *float32 `mapstructure:"ocpus" required:"false"`
+	MemoryInGBs *float32 `mapstructure:"ocpus" required:"false"`
+}
+
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	Comm                communicator.Config `mapstructure:",squash"`
@@ -91,6 +96,7 @@ type Config struct {
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
 	Shape               string                            `mapstructure:"shape"`
+	ShapeConfig         FlexShapeConfig                   `mapstructure:"shape_config"`
 	BootVolumeSizeInGBs int64                             `mapstructure:"disk_size"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
