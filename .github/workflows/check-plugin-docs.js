@@ -20,6 +20,20 @@ async function checkPluginDocs() {
     console.log(`\n${COLOR_BLUE}${repo}${COLOR_RESET} | ${title}`);
     console.log(`Fetching docs from release "${version}" …`);
     try {
+      const undefinedProps = ["title", "repo", "version", "path"].filter(
+        (key) => typeof pluginEntry[key] == "undefined"
+      );
+      if (undefinedProps.length > 0) {
+        throw new Error(
+          `Failed to validate plugin docs. Undefined configuration properties ${JSON.stringify(
+            undefinedProps
+          )} found for "${
+            title || pluginEntry.path || repo
+          }". In "website/data/docs-remote-plugins.json", please ensure the missing properties ${JSON.stringify(
+            undefinedProps
+          )} are defined. Additional information on this configuration can be found in "website/README.md".`
+        );
+      }
       const docsMdxFiles = await fetchPluginDocs({ repo, tag: version });
       const mdxFilesByComponent = docsMdxFiles.reduce((acc, mdxFile) => {
         const componentType = mdxFile.filePath.split("/")[1];
