@@ -12,6 +12,8 @@ on:
   pull_request:
     paths:
       - "website/**"
+  schedule:
+    - cron: "45 0 * * *"
 
 jobs:
   check-plugin-docs:
