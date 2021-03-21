@@ -25,7 +25,7 @@ async function checkPluginDocs() {
       );
       if (undefinedProps.length > 0) {
         throw new Error(
-          `Failed to validate plugin docs. Undefined configuration properties ${JSON.stringify(
+          `Failed to validate plugin docs config. Undefined configuration properties ${JSON.stringify(
             undefinedProps
           )} found for "${
             title || pluginEntry.path || repo
