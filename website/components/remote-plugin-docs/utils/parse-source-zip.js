@@ -2,6 +2,13 @@ const path = require('path')
 const AdmZip = require('adm-zip')
 const validatePluginDocsFiles = require('./validate-plugin-docs-files')
 
+/*
+
+NOTE: used for fallback approach, where we parse from
+the full release archive
+
+*/
+
 // Given a response from fetching a source .zip file,
 // which contains a "docs" folder,
 //

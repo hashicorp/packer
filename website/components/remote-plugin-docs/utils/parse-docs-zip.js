@@ -2,6 +2,12 @@ const path = require('path')
 const AdmZip = require('adm-zip')
 const validatePluginDocsFiles = require('./validate-plugin-docs-files')
 
+/*
+
+NOTE: used for default `docs.zip` release assets
+
+*/
+
 // Given a response from fetching a docs.zip file,
 // which is a compressed "docs" folder,
 //
