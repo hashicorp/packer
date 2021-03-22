@@ -60,13 +60,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	// Build the steps.
 	steps := []multistep.Step{
 		&stepPrepareConfig{},
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPContent: b.config.HTTPContent,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&stepKeypair{
 			Debug:        b.config.PackerDebug,
 			Comm:         &b.config.Comm,
