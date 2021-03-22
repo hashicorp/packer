@@ -81,6 +81,7 @@ type FlatConfig struct {
 	SkipCertValidation        *bool                              `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
 	Username                  *string                            `mapstructure:"username" cty:"username" hcl:"username"`
 	Password                  *string                            `mapstructure:"password" cty:"password" hcl:"password"`
+	Token                     *string                            `mapstructure:"token" cty:"token" hcl:"token"`
 	Node                      *string                            `mapstructure:"node" cty:"node" hcl:"node"`
 	Pool                      *string                            `mapstructure:"pool" cty:"pool" hcl:"pool"`
 	VMName                    *string                            `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
@@ -196,6 +197,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"insecure_skip_tls_verify":     &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
 		"username":                     &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"password":                     &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
+		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"node":                         &hcldec.AttrSpec{Name: "node", Type: cty.String, Required: false},
 		"pool":                         &hcldec.AttrSpec{Name: "pool", Type: cty.String, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

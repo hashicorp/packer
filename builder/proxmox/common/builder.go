@@ -2,7 +2,6 @@ package proxmox
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 
@@ -35,15 +34,7 @@ type Builder struct {
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook, state multistep.StateBag) (packersdk.Artifact, error) {
 	var err error
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: b.config.SkipCertValidation,
-	}
-	b.proxmoxClient, err = proxmox.NewClient(b.config.proxmoxURL.String(), nil, tlsConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	err = b.proxmoxClient.Login(b.config.Username, b.config.Password, "")
+	b.proxmoxClient, err = newProxmoxClient(b.config)
 	if err != nil {
 		return nil, err
 	}
