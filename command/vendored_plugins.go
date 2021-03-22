@@ -52,7 +52,7 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"docker-save":     new(dockersavepostprocessor.PostProcessor),
 	"docker-tag":      new(dockertagpostprocessor.PostProcessor),
 	"exoscale-import": new(exoscaleimportpostprocessor.PostProcessor),
-	"amazon-import": new(anazibimportpostprocessor.PostProcessor),
+	"amazon-import":   new(anazibimportpostprocessor.PostProcessor),
 }
 
 // Upon init lets load up any plugins that were vendored manually into the default
