@@ -4,13 +4,26 @@ import (
 	"context"
 	"fmt"
 	"log"
-
 	"net/http"
+	"os"
+	"path"
+	"sort"
 
+	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/net"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
+
+func HTTPServerFromHTTPConfig(cfg *HTTPConfig) *StepHTTPServer {
+	return &StepHTTPServer{
+		HTTPDir:     cfg.HTTPDir,
+		HTTPContent: cfg.HTTPContent,
+		HTTPPortMin: cfg.HTTPPortMin,
+		HTTPPortMax: cfg.HTTPPortMax,
+		HTTPAddress: cfg.HTTPAddress,
+	}
+}
 
 // This step creates and runs the HTTP server that is serving files from the
 // directory specified by the 'http_directory` configuration parameter in the
@@ -31,29 +44,38 @@ type StepHTTPServer struct {
 	l *net.Listener
 }
 
-type MapServer map[string]string
-
-func (s MapServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	content, found := s[r.URL.Path]
-	if !found {
-		// TODO: this will be displayed on stdout, here we could implement a
-		// "did you mean" for helps.
-		http.Error(w, fmt.Sprintf("File %s not found", r.URL.Path), http.StatusNotFound)
-		return
-	}
-
-	if _, err := w.Write([]byte(content)); err != nil {
-		// log err in case the file couldn't be 100% transferred for example.
-		log.Printf("http_content serve error: %w", err)
-	}
-}
-
 func (s *StepHTTPServer) Handler() http.Handler {
 	if s.HTTPDir != "" {
 		return http.FileServer(http.Dir(s.HTTPDir))
 	}
 
 	return MapServer(s.HTTPContent)
+}
+
+type MapServer map[string]string
+
+func (s MapServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := path.Clean(r.URL.Path)
+	content, found := s[path]
+	if !found {
+		paths := make([]string, 0, len(s))
+		for k := range s {
+			paths = append(paths, k)
+		}
+		sort.Strings(paths)
+		err := fmt.Sprintf("%s not found.", path)
+		if sug := didyoumean.NameSuggestion(path, paths); sug != "" {
+			err += fmt.Sprintf("Did you mean %q?", sug)
+		}
+
+		http.Error(w, err, http.StatusNotFound)
+		return
+	}
+
+	if _, err := w.Write([]byte(content)); err != nil {
+		// log err in case the file couldn't be 100% transferred for example.
+		log.Printf("http_content serve error: %v", err)
+	}
 }
 
 func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
@@ -64,8 +86,16 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 		return multistep.ActionContinue
 	}
 
+	if s.HTTPDir != "" {
+		if _, err := os.Stat(s.HTTPDir); err != nil {
+			err := fmt.Errorf("Error finding %q: %s", s.HTTPDir, err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+	}
+
 	// Find an available TCP port for our HTTP server
-	var httpAddr string
 	var err error
 	s.l, err = net.ListenRangeConfig{
 		Min:     s.HTTPPortMin,
@@ -84,7 +114,7 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	ui.Say(fmt.Sprintf("Starting HTTP server on port %d", s.l.Port))
 
 	// Start the HTTP server and run it in the background
-	server := &http.Server{Addr: httpAddr, Handler: s.Handler()}
+	server := &http.Server{Addr: "", Handler: s.Handler()}
 	go server.Serve(s.l)
 
 	// Save the address into the state so it can be accessed in the future
@@ -96,6 +126,8 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
 	if s.l != nil {
 		// Close the listener so that the HTTP server stops
-		s.l.Close()
+		if err := s.l.Close(); err != nil {
+			log.Printf("Failed closing http server on port %d: %v", s.l.Port, err)
+		}
 	}
 }
