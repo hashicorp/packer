@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/builder/amazon/ebs"
+	"github.com/hashicorp/packer-plugin-amazon/builder/ebs"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"

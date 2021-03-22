@@ -18,7 +18,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
+	awscommon "github.com/hashicorp/packer-plugin-amazon/builder/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"

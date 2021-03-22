@@ -17,7 +17,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
-	github.com/aws/aws-sdk-go v1.37.15
+	github.com/aws/aws-sdk-go v1.38.0
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
@@ -32,24 +32,24 @@ require (
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-	github.com/google/go-cmp v0.5.2
+	github.com/google/go-cmp v0.5.5
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/uuid v1.1.2
 	github.com/gophercloud/gophercloud v0.12.0
 	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
-	github.com/hashicorp/aws-sdk-go-base v0.6.0
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
-	github.com/hashicorp/go-cleanhttp v0.5.1
+	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad
-	github.com/hashicorp/go-multierror v1.1.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.2.0
-	github.com/hashicorp/hcl/v2 v2.8.0
+	github.com/hashicorp/hcl/v2 v2.9.1
+	github.com/hashicorp/packer-plugin-amazon v0.0.0-20210322103904-ebc9f7a3cb33
 	github.com/hashicorp/packer-plugin-docker v0.0.2
 	github.com/hashicorp/packer-plugin-sdk v0.1.1-0.20210323111710-5a7ab7f7a1c0
 	github.com/hashicorp/vault/api v1.0.4
@@ -87,7 +87,7 @@ require (
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
-	github.com/zclconf/go-cty v1.7.0
+	github.com/zclconf/go-cty v1.8.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
@@ -95,7 +95,7 @@ require (
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c
+	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d
 	golang.org/x/tools v0.0.0-20201111133315-69daaf961d65
 	google.golang.org/api v0.32.0
 	google.golang.org/grpc v1.32.0
