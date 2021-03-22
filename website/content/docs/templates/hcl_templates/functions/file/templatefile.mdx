@@ -8,10 +8,12 @@ description: |-
 
 # `templatefile` Function
 
--> *Recommendation:* we recommend on using the `.pkrtpl.hcl` extension file.
-When using the `templatefile` functions, template files *are* treated as hcl
-files but also templates and have slightly different set of features than the
-ones offered in a Packer template. They are still specific to Packer.
+-> *Recommendation:* we recommend using the `.pkrtpl.hcl` file extension when
+using the `templatefile` function. Template files *are* hcl treated as files but
+also templates and therefore have slightly different set of features
+than the ones offered in a `.pkr.hcl` Packer template. While you are not
+required to use this extension, doing so will enable syntax highlighters to
+properly understand your file.
 
 `templatefile` reads the file at the given path and renders its content as a
 template using a supplied set of template variables.
