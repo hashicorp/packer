@@ -60,8 +60,8 @@ available variables are:
 
 - `HTTPIP` and `HTTPPort` - The IP and port, respectively of an HTTP server
   that is started serving the directory specified by the `http_directory`
-  configuration parameter. If `http_directory` isn't specified, these will be
-  blank!
+  configuration parameter or the content specified in the `http_content` map. If
+  `http_directory` or `http_content` isn't specified, these will be blank!
 - `Name` - The name of the VM.
 
 For more examples of various boot commands, see the sample projects from our
