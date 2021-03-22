@@ -2,31 +2,13 @@ package proxmox
 
 import (
 	"crypto/tls"
-	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/Telmate/proxmox-api-go/proxmox"
 )
 
 const defaultTaskTimeout = 30 * time.Second
-
-type authenticatedTransport struct {
-	rt    http.RoundTripper
-	user  string
-	token string
-}
-
-func newAuthenticatedTransport(rt http.RoundTripper, user, token string) *authenticatedTransport {
-	return &authenticatedTransport{rt, user, token}
-}
-
-func (t *authenticatedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	auth := fmt.Sprintf("PVEAPIToken=%s=%s", t.user, t.token)
-	req.Header.Set("Authorization", auth)
-	return t.rt.RoundTrip(req)
-}
 
 func NewProxmoxClient(config Config) (*proxmox.Client, error) {
 	tlsConfig := &tls.Config{
