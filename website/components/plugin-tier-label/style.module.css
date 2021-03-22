@@ -12,7 +12,9 @@ to match Terraform Registry tier labels.
   display: inline-flex;
   margin: 0;
   padding: 1px 8px 2px 8px;
-  vertical-align: baseline;
+  position: relative;
+  top: -1px;
+  vertical-align: bottom;
 
   /* variations */
   &[data-tier='official'] {
@@ -52,4 +54,3 @@ search bar present on docs pages */
     }
   }
 }
-

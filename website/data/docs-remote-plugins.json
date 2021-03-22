@@ -2,6 +2,7 @@
   {
     "title": "Docker",
     "path": "docker",
-    "repo": "hashicorp/packer-plugin-docker"
+    "repo": "hashicorp/packer-plugin-docker",
+    "version": "v0.0.4"
   }
 ]
