@@ -253,7 +253,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 		if _, err := configProvider.PrivateRSAKey(); err != nil {
 			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("'key_file' must be specified"))
+				errs, fmt.Errorf("'key_file' must be correctly specified. %w", err))
 		}
 
 		c.configProvider = configProvider

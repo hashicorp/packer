@@ -12,7 +12,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.3.0
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
-	github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887
+	github.com/Telmate/proxmox-api-go v0.0.0-20210320143302-fea68269e6b0
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antihax/optional v1.0.0

@@ -5,6 +5,7 @@ variable "env_test" {
 }
 
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
+# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.
 
 # 5 errors occurred upgrading the following block:
 # unhandled "lower" call:
@@ -33,7 +34,7 @@ locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
 # Visit https://www.packer.io/docs/templates/hcl_templates/functions/string/upper for more infos.
 locals {
   build_timestamp = "${local.timestamp}"
-  iso_datetime    = "${local.timestamp}"
+  iso_datetime    = "${legacy_isotime("2006-01-02T15:04:05Z07:00")}"
   lower           = "{{ lower `HELLO` }}"
   pwd             = "${path.cwd}"
   replace         = "{{ replace `b` `c` `ababa` 2 }}"

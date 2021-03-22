@@ -151,7 +151,7 @@ build {
   # Please manually upgrade to use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`
   # Visit https://packer.io/docs/templates/hcl_templates/variables#custom-validation-rules , https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace for more infos.
   provisioner "shell" {
-    inline = ["echo mybuild-{{ clean_resource_name `${local.timestamp}` }}"]
+    inline = ["echo mybuild-{{ clean_resource_name `${timestamp()}` }}"]
   }
 
 

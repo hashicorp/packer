@@ -75,6 +75,10 @@ func (s *StepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 		registerOpts = buildRegisterOpts(config, image, newMappings)
 	}
 
+	if config.OMIDescription != "" {
+		registerOpts.Description = config.OMIDescription
+	}
+
 	registerResp, _, err := osconn.ImageApi.CreateImage(context.Background(), &osc.CreateImageOpts{
 		CreateImageRequest: optional.NewInterface(registerOpts),
 	})

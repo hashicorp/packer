@@ -28,6 +28,7 @@ type Session struct {
 	ApiUrl     string
 	AuthTicket string
 	CsrfToken  string
+	AuthToken  string // Combination of user, realm, token ID and UUID
 	Headers    http.Header
 }
 
@@ -108,6 +109,11 @@ func TypedResponse(resp *http.Response, v interface{}) error {
 	return nil
 }
 
+func (s *Session) SetAPIToken(userID, token string) {
+	auth := fmt.Sprintf("%s=%s", userID, token)
+	s.AuthToken = auth
+}
+
 func (s *Session) Login(username string, password string, otp string) (err error) {
 	reqUser := map[string]interface{}{"username": username, "password": password}
 	if otp != "" {
@@ -150,7 +156,9 @@ func (s *Session) NewRequest(method, url string, headers *http.Header, body io.R
 	if headers != nil {
 		req.Header = *headers
 	}
-	if s.AuthTicket != "" {
+	if s.AuthToken != "" {
+		req.Header.Add("Authorization", "PVEAPIToken="+s.AuthToken)
+	} else if s.AuthTicket != "" {
 		req.Header.Add("Cookie", "PVEAuthCookie="+s.AuthTicket)
 		req.Header.Add("CSRFPreventionToken", s.CsrfToken)
 	}
