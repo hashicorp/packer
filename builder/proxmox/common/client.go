@@ -10,7 +10,7 @@ import (
 
 const defaultTaskTimeout = 30 * time.Second
 
-func NewProxmoxClient(config Config) (*proxmox.Client, error) {
+func newProxmoxClient(config Config) (*proxmox.Client, error) {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: config.SkipCertValidation,
 	}
