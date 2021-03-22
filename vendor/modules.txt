@@ -422,10 +422,17 @@ github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
 # github.com/hashicorp/packer-plugin-amazon v0.0.0-20210322103904-ebc9f7a3cb33
 ## explicit
+github.com/hashicorp/packer-plugin-amazon/builder/chroot
 github.com/hashicorp/packer-plugin-amazon/builder/common
 github.com/hashicorp/packer-plugin-amazon/builder/common/awserrors
 github.com/hashicorp/packer-plugin-amazon/builder/common/ssm
 github.com/hashicorp/packer-plugin-amazon/builder/ebs
+github.com/hashicorp/packer-plugin-amazon/builder/ebssurrogate
+github.com/hashicorp/packer-plugin-amazon/builder/ebsvolume
+github.com/hashicorp/packer-plugin-amazon/builder/instance
+github.com/hashicorp/packer-plugin-amazon/datasource/ami
+github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager
+github.com/hashicorp/packer-plugin-amazon/post-processor/import
 # github.com/hashicorp/packer-plugin-docker v0.0.2
 ## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker
