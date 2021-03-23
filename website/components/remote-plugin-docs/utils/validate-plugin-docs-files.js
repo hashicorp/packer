@@ -13,15 +13,23 @@ const COMPONENT_TYPES = [
 // with at least one .mdx file within it.
 function validatePluginDocsFiles(filePaths) {
   function isValidPath(filePath) {
+    // Allow the docs root folder
     const isDocsRoot = filePath === 'docs/'
+    // Allow component folders
     const isComponentRoot = COMPONENT_TYPES.reduce((acc, type) => {
       return acc || filePath === `docs/${type}/`
     }, false)
+    // Allow .mdx files in component folders
     const isComponentMdx = COMPONENT_TYPES.reduce((acc, type) => {
       const mdxPathRegex = new RegExp(`^docs/${type}/(.*).mdx$`)
       return acc || mdxPathRegex.test(filePath)
     }, false)
-    const isValidPath = isDocsRoot || isComponentRoot || isComponentMdx
+    // Allow arbitrary .md files
+    const mdPathRegex = new RegExp(`^docs/(.*).md$`)
+    const isMdFile = mdPathRegex.test(filePath)
+    // Combine all allowed types
+    const isValidPath =
+      isDocsRoot || isComponentRoot || isComponentMdx || isMdFile
     return isValidPath
   }
   const invalidPaths = filePaths.filter((f) => !isValidPath(f))
