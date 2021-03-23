@@ -70,7 +70,7 @@ Directory](/docs/configure#packer-s-plugin-directory).
 
 Starting from Version `1.8` many plugins will move out from Packer core. This is
 part of a set of breaking changes made to decouple Packer releases from a Plugin
-release. To make the transition easier we will tag componentes of these plugins
+release. To make the transition easier we will tag components of these plugins
 as "moved out". If one of the components of a moved out plugin is used in a
 config file, then it is implied that this plugin is required. Packer init will
 install that plugin then display a warning and a suggestion. We recommend on
@@ -83,4 +83,3 @@ See [Installing Plugins](/docs/plugins#installing-plugins) for more information 
 - `-upgrade` - On top of installing missing plugins, update installed plugins to
   the latest available version, if there is a new higher one. Note that this
   still takes into consideration the version constraint of the config.
-
