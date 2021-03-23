@@ -29,7 +29,7 @@ type HTTPConfig struct {
 	// default this is empty, which means no HTTP server will be started. The
 	// address and port of the HTTP server will be available as variables in
 	// `boot_command`. This is covered in more detail below. Example: Setting
-	// `"foo/bar"="baz", will allow you to http get on
+	// `"foo/bar"="baz"`, will allow you to http get on
 	// `http://{http_ip}:{http_port}/foo/bar`.
 	HTTPContent map[string]string `mapstructure:"http_content"`
 	// These are the minimum and maximum port to use for the HTTP server
@@ -77,7 +77,7 @@ func (c *HTTPConfig) Prepare(ctx *interpolate.Context) []error {
 
 	if len(c.HTTPContent) > 0 && len(c.HTTPDir) > 0 {
 		errs = append(errs,
-			errors.New("http_content cannot be used in conjunction with http_dir, consider using the file function"))
+			errors.New("http_content cannot be used in conjunction with http_dir. Consider using the file function to load file in memory and serve them with http_content: https://www.packer.io/docs/templates/hcl_templates/functions/file/file"))
 	}
 
 	return errs

@@ -65,7 +65,7 @@ func (s MapServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		sort.Strings(paths)
 		err := fmt.Sprintf("%s not found.", path)
 		if sug := didyoumean.NameSuggestion(path, paths); sug != "" {
-			err += fmt.Sprintf("Did you mean %q?", sug)
+			err += fmt.Sprintf(" Did you mean %q?", sug)
 		}
 
 		http.Error(w, err, http.StatusNotFound)
@@ -123,11 +123,20 @@ func (s *StepHTTPServer) Run(ctx context.Context, state multistep.StateBag) mult
 	return multistep.ActionContinue
 }
 
-func (s *StepHTTPServer) Cleanup(multistep.StateBag) {
+func (s *StepHTTPServer) Cleanup(state multistep.StateBag) {
 	if s.l != nil {
+		ui := state.Get("ui").(packersdk.Ui)
+
 		// Close the listener so that the HTTP server stops
 		if err := s.l.Close(); err != nil {
-			log.Printf("Failed closing http server on port %d: %v", s.l.Port, err)
+			err = fmt.Errorf("Failed closing http server on port %d: %w", s.l.Port, err)
+			ui.Error(err.Error())
+			// Here this error should be shown to the UI but it won't
+			// specifically stop Packer from terminating successfully. It could
+			// cause a "Listen leak" if it happenned a lot. Though Listen will
+			// try other ports if one is already used. In the case we want to
+			// Listen on only one port, the next Listen call could fail or be
+			// longer than expected.
 		}
 	}
 }
