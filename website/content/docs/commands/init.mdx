@@ -68,12 +68,13 @@ Directory](/docs/configure#packer-s-plugin-directory).
 
 ### Implicit required plugin
 
-Starting from Version `1.8` many plugins will move out from Packer core. To make
-the transition easier we will tag these plugins as moved out. If one of the
-components of a moved out plugin is used in a config file, then it is implied
-that this plugin is required. This is part of a set of breaking changes made to
-decouple Packer releases from a Plugin release. Packer will display a warning
-and a suggestion that we recommend on following to avoid surprises in the
+Starting from Version `1.8` many plugins will move out from Packer core. This is
+part of a set of breaking changes made to decouple Packer releases from a Plugin
+release. To make the transition easier we will tag componentes of these plugins
+as "moved out". If one of the components of a moved out plugin is used in a
+config file, then it is implied that this plugin is required. Packer init will
+install that plugin then display a warning and a suggestion. We recommend on
+using a `required_plugin` block and setting a version to avoid surprises in the
 future.
 
 See [Installing Plugins](/docs/plugins#installing-plugins) for more information on how plugin installation works.
