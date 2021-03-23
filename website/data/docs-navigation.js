@@ -200,10 +200,6 @@ export default [
     content: [
       'alicloud-ecs',
       {
-        category: 'amazon',
-        content: ['chroot', 'ebs', 'ebssurrogate', 'ebsvolume', 'instance'],
-      },
-      {
         category: 'azure',
         content: ['arm', 'chroot'],
       },
@@ -252,15 +248,7 @@ export default [
   },
   {
     category: 'datasources',
-    content: [
-      {
-        category: 'amazon',
-        content: [
-          'ami',
-          'secretsmanager'
-        ],
-      },
-    ]
+    content: []
   },
   {
     category: 'provisioners',
@@ -289,7 +277,6 @@ export default [
     category: 'post-processors',
     content: [
       'alicloud-import',
-      'amazon-import',
       'artifice',
       'compress',
       'checksum',
