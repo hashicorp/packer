@@ -40,7 +40,7 @@ func TestLegacyIsotime_inputs(t *testing.T) {
 		},
 		{
 			cty.StringVal("Mon Jan 02, 2006"),
-			`^(Mon|Tues|Wed|Thu|Fri|Sat|Sun){1} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec){1} \d{2}, \d{4}$`,
+			`^(Mon|Tue|Wed|Thu|Fri|Sat|Sun){1} (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec){1} \d{2}, \d{4}$`,
 		},
 	}
 
