@@ -150,7 +150,7 @@ type AccessConfig struct {
 	// environmental variable.
 	Token   string `mapstructure:"token" required:"false"`
 	session *session.Session
-	// Get credentials from Hashicorp Vault's aws secrets engine. You must
+	// Get credentials from HashiCorp Vault's aws secrets engine. You must
 	// already have created a role to use. For more information about
 	// generating credentials via the Vault engine, see the [Vault
 	// docs.](https://www.vaultproject.io/api/secret/aws#generate-credentials)

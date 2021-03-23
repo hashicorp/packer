@@ -6,9 +6,9 @@
     "version": "latest"
   },
   {
-    "title": "Amazon",
+    "title": "Amazon EC2",
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
-    "version": "latest"
+    "version": "v0.0.1"
   }
 ]

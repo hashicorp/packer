@@ -403,6 +403,10 @@ github.com/hashicorp/packer v1.6.7-0.20210217093213-201869d627bf/go.mod h1:+EWPP
 github.com/hashicorp/packer v1.7.0/go.mod h1:3KRJcwOctl2JaAGpQMI1bWQRArfWNWqcYjO6AOsVVGQ=
 github.com/hashicorp/packer-plugin-amazon v0.0.0-20210322103904-ebc9f7a3cb33 h1:c8fxJJE9Ko8FXaTQexP22cHpvOmEZHk30WTWvo/BKFg=
 github.com/hashicorp/packer-plugin-amazon v0.0.0-20210322103904-ebc9f7a3cb33/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
+github.com/hashicorp/packer-plugin-amazon v0.0.0-20210323151306-ff072d167737 h1:ZA8sQHjGIomiUz4SsccdxHwDk/ZI9CAmimUo7QKhMMs=
+github.com/hashicorp/packer-plugin-amazon v0.0.0-20210323151306-ff072d167737/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
+github.com/hashicorp/packer-plugin-amazon v0.0.1 h1:EuyjNK9bL7WhQeIJzhBJxOx8nyc61ai5UbOsb1PIVwI=
+github.com/hashicorp/packer-plugin-amazon v0.0.1/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
 github.com/hashicorp/packer-plugin-docker v0.0.2 h1:j/hQTogaN2pZfZohlZTRu5YvNZg2/qtYYHkxPBxv2Oo=
 github.com/hashicorp/packer-plugin-docker v0.0.2/go.mod h1:A2p9qztS4n88KsNF+qBM7BWw2HndW636GpFIjNSvbKM=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
