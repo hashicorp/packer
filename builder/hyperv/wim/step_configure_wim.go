@@ -34,13 +34,12 @@ type StepConfigureWIM struct {
 type winConfig struct {
 	ContentVersion string        `mapstructure:"contentVersion" required:"true"`
 	AppXPackages   []appXPackage `mapstructure:"appXPackages, squash" required:"false"`
-	Capabilities   []capability  `mapstructure:"capabilities, squash" required:"false"`
+	Capabilities   []capability  `mapstructure:"featuresOnDemand, squash" required:"false"`
 	Drivers        []driver      `mapstructure:"drivers, squash" required:"false"`
 	Features       []feature     `mapstructure:"features, squash" required:"false"`
 	Languages      []language    `mapstructure:"languages, squash" required:"false"`
 	Packages       []winPackage  `mapstructure:"packages, squash" required:"false"`
 	ProductKey     string        `mapstructure:"productKey, omitempty" required:"false"`
-	Unattend       string        `mapstructure:"unattend, omitempty" required:"false"`
 }
 
 type appXPackage struct {
@@ -70,8 +69,6 @@ type feature struct {
 type language struct {
 	Action            string `mapstructure:"action" required:"true"`
 	Name              string `mapstructure:"name" required:"true"`
-	SelectAll         bool   `mapstructure:"selectAll" required:"false"`
-	DeployLanguage    bool   `mapstructure:"deployLanguage" required:"false"`
 	Basic             bool   `mapstructure:"basic" required:"false"`
 	Fonts             bool   `mapstructure:"fonts" required:"false"`
 	BasicTyping       bool   `mapstructure:"basicTyping" required:"false"`
@@ -122,38 +119,8 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// Open Windows configuration file
-	jsonFile, err := os.Open(s.WindowsConfigUrl)
+	config, err := s.readConfig()
 	if err != nil {
-		err = fmt.Errorf("Error opening Windows configuration file: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	defer jsonFile.Close()
-
-	// Read Windows configuration file into a byte array
-	jsonBytes, err := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		err = fmt.Errorf("Error reading Windows configuration file: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// Unmarshal the byte array
-	var result map[string]interface{}
-	if err = json.Unmarshal([]byte(jsonBytes), &result); err != nil {
-		err = fmt.Errorf("Error unmarshaling Windows configuration: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
-	}
-
-	// Decode Windows configuration
-	var config winConfig
-	if err = mapstructure.Decode(result, &config); err != nil {
-		err = fmt.Errorf("Error decoding Windows configuration: %s", err)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
@@ -254,6 +221,38 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 	}
 
+	//
+	// Install languages, then updates and apps. If you're adding languages to an image that already contains apps or
+	// updates (for example, servicing stack updates (SSU) or cumulative updates (CU), reinstall the apps and updates.
+	//
+	// Important
+	// After you install a language pack, you have to reinstall the latest cumulative update (LCU). If you do not
+	// reinstall the LCU, you may encounter errors. If the LCU is already installed, Windows Update does not offer it
+	// again. You have to manually install the LCU.
+	//
+	//
+	// Care is required when installing languages to an image that includes FODs with satellite packages. When FODs have
+	// satellite packages, the localized text for the feature may be carried in a satellite package rather than the
+	// language pack or primary FOD package. Specific steps must be followed when adding languages to an image that
+	// includes these FODs.
+	// Starting with Windows 10, version 2004, the default Windows 10 image includes several FODs with language resources
+	// in satellite packages. Before adding languages, you must first build a custom FOD and language repository to
+	// ensure that the appropriate satellite packages are pulled in when the language is added.
+	// For versions of Windows 10 earlier than 2004, this is typically only a concern when you have added a FOD with
+	// satellite packages. A best practice here is to add languages first, then FODs.
+	//
+	// https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/add-language-packs-to-windows#considerations
+	//
+
+	// Add languages
+	for _, languages := range config.Languages {
+		if languages.Action == "add" {
+			ui.Say(fmt.Sprintf("Adding language: %s", filepath.ToSlash(languages.Name)))
+
+			// TODO:
+		}
+	}
+
 	// Add AppX packages
 	for _, appX := range config.AppXPackages {
 		if appX.Action == "add" {
@@ -293,15 +292,6 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 				ui.Error(err.Error())
 				return multistep.ActionHalt
 			}
-		}
-	}
-
-	// Add languages
-	for _, languages := range config.Languages {
-		if languages.Action == "add" {
-			ui.Say(fmt.Sprintf("Adding language: %s", filepath.ToSlash(languages.Name)))
-
-			// TODO:
 		}
 	}
 
@@ -345,18 +335,6 @@ func (s *StepConfigureWIM) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 	}
 
-	// Use Windows unattend
-	if config.Unattend != "" {
-		ui.Say(fmt.Sprintf("Using unattend..."))
-
-		if err = s.useWindowsUnattend(config.Unattend); err != nil {
-			err = fmt.Errorf("Error using unattend: %s", err)
-			state.Put("error", err)
-			ui.Error(err.Error())
-			return multistep.ActionHalt
-		}
-	}
-
 	ui.Say("Unmounting WIM...")
 
 	// Unmount WIM
@@ -390,6 +368,42 @@ func (s *StepConfigureWIM) Cleanup(state multistep.StateBag) {
 	}
 
 	ui.Say(fmt.Sprintf("Removed mount dir in %s", s.MountDir))
+}
+
+func (s *StepConfigureWIM) readConfig() (winConfig, error) {
+	var config winConfig
+
+	// Open Windows configuration file
+	jsonFile, err := os.Open(s.WindowsConfigUrl)
+	if err != nil {
+		err = fmt.Errorf("Error opening Windows configuration file: %s", err)
+		return config, err
+	}
+
+	defer jsonFile.Close()
+
+	// Read Windows configuration file into a byte array
+	jsonBytes, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		err = fmt.Errorf("Error reading Windows configuration file: %s", err)
+		return config, err
+	}
+
+	// Unmarshal the byte array
+	var result map[string]interface{}
+	if err = json.Unmarshal([]byte(jsonBytes), &result); err != nil {
+		err = fmt.Errorf("Error unmarshaling Windows configuration: %s", err)
+		return config, err
+	}
+
+	// Decode Windows configuration
+
+	if err = mapstructure.Decode(result, &config); err != nil {
+		err = fmt.Errorf("Error decoding Windows configuration: %s", err)
+		return config, err
+	}
+
+	return config, nil
 }
 
 // addAppxProvisionedPackage adds an app package (.appx) that will install for each new user to a Windows image
@@ -520,11 +534,5 @@ func (s *StepConfigureWIM) removeWindowsPackageByPath(path string) error {
 // setWindowsProductKey sets the product key for the Windows image
 func (s *StepConfigureWIM) setWindowsProductKey(productKey string) error {
 	cmd := fmt.Sprintf("Set-WindowsProductKey -Path \"%s\" -ProductKey \"%s\"", filepath.FromSlash(s.MountDir), productKey)
-	return s.execPSCmd(cmd)
-}
-
-// useWindowsUnattend applies an unattended answer file to a Windows image
-func (s *StepConfigureWIM) useWindowsUnattend(unattendPath string) error {
-	cmd := fmt.Sprintf("Use-WindowsUnattend -Path \"%s\" -UnattendPath \"%s\"", filepath.FromSlash(s.MountDir), filepath.FromSlash(unattendPath))
 	return s.execPSCmd(cmd)
 }
