@@ -428,7 +428,7 @@ github.com/hashicorp/packer-plugin-docker/post-processor/docker-import
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-push
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-save
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag
-# github.com/hashicorp/packer-plugin-sdk v0.0.14
+# github.com/hashicorp/packer-plugin-sdk v0.1.1-0.20210323111710-5a7ab7f7a1c0
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
@@ -440,6 +440,7 @@ github.com/hashicorp/packer-plugin-sdk/common
 github.com/hashicorp/packer-plugin-sdk/communicator
 github.com/hashicorp/packer-plugin-sdk/communicator/ssh
 github.com/hashicorp/packer-plugin-sdk/communicator/sshkey
+github.com/hashicorp/packer-plugin-sdk/didyoumean
 github.com/hashicorp/packer-plugin-sdk/filelock
 github.com/hashicorp/packer-plugin-sdk/guestexec
 github.com/hashicorp/packer-plugin-sdk/hcl2helper

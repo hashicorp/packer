@@ -7,6 +7,15 @@
   started. The address and port of the HTTP server will be available as
   variables in `boot_command`. This is covered in more detail below.
 
+- `http_content` (map[string]string) - Key/Values to serve using an HTTP server. http_content works like and
+  conflicts with http_directory The keys represent the paths and the values
+  contents. This is useful for hosting kickstart files and so on. By
+  default this is empty, which means no HTTP server will be started. The
+  address and port of the HTTP server will be available as variables in
+  `boot_command`. This is covered in more detail below. Example: Setting
+  `"foo/bar"="baz"`, will allow you to http get on
+  `http://{http_ip}:{http_port}/foo/bar`.
+
 - `http_port_min` (int) - These are the minimum and maximum port to use for the HTTP server
   started to serve the `http_directory`. Because Packer often runs in
   parallel, Packer will choose a randomly available port in this range to

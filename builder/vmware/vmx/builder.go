@@ -108,12 +108,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&vmwcommon.StepSuppressMessages{},
 		&vmwcommon.StepHTTPIPDiscover{},
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&vmwcommon.StepUploadVMX{
 			RemoteType: b.config.RemoteType,
 		},
