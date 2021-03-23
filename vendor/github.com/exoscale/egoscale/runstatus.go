@@ -41,7 +41,7 @@ func (req RunstatusValidationErrorResponse) Error() string {
 		}
 		return fmt.Sprintf("Runstatus error: %s", strings.Join(errs, "; "))
 	}
-	return fmt.Sprintf("Runstatus error")
+	return "Runstatus error"
 }
 
 func (client *Client) runstatusRequest(ctx context.Context, uri string, structParam interface{}, method string) (json.RawMessage, error) {
@@ -82,7 +82,6 @@ func (client *Client) runstatusRequest(ctx context.Context, uri string, structPa
 
 	hdr.Add("Authorization", fmt.Sprintf("Exoscale-HMAC-SHA256 %s:%s", client.APIKey, signature))
 	hdr.Add("Exoscale-Date", time)
-	hdr.Add("User-Agent", UserAgent)
 	hdr.Add("Accept", "application/json")
 	if params != "" {
 		hdr.Add("Content-Type", "application/json")

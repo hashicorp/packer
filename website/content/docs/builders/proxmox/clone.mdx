@@ -43,10 +43,20 @@ in the image's Cloud-Init settings for provisioning.
 
 - `username` (string) - Username when authenticating to Proxmox, including
   the realm. For example `user@pve` to use the local Proxmox realm.
+  When used with `token`, it would look like this: `user@pve!token`
   Can also be set via the `PROXMOX_USERNAME` environment variable.
 
 - `password` (string) - Password for the user.
+  For API tokens please use `token`.
   Can also be set via the `PROXMOX_PASSWORD` environment variable.
+  Either `password` or `token` must be specifed. If both are set,
+  `token` takes precedence.
+
+- `token` (string) - Token for authenticating API calls.
+  This allows the API client to work with API tokens instead of user passwords.
+  Can also be set via the `PROXMOX_TOKEN` environment variable.
+  Either `password` or `token` must be specifed. If both are set,
+  `token` takes precedence.
 
 - `node` (string) - Which node in the Proxmox cluster to start the virtual
   machine on during creation.

@@ -12,12 +12,12 @@ import {
 const BASE_ROUTE = 'docs'
 const NAV_DATA = 'data/docs-nav-data.json'
 const CONTENT_DIR = 'content/docs'
-// override default "main" value for branch for "edit on this page"
-const MAIN_BRANCH = 'master'
+const PRODUCT = { name: productName, slug: productSlug }
 // add remote plugin docs loading
 const OPTIONS = {
   remotePluginsFile: 'data/docs-remote-plugins.json',
   additionalComponents: { PluginTierLabel },
+  mainBranch: 'master',
 }
 
 function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
@@ -49,8 +49,7 @@ function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
       <DocsPage
         additionalComponents={OPTIONS.additionalComponents}
         baseRoute={BASE_ROUTE}
-        mainBranch="master" // used for "edit on this page", default "main"
-        product={{ name: productName, slug: productSlug }}
+        product={PRODUCT}
         staticProps={props}
       />
     </>
@@ -67,6 +66,7 @@ export async function getStaticProps({ params }) {
     NAV_DATA,
     CONTENT_DIR,
     params,
+    PRODUCT,
     OPTIONS
   )
   return { props }

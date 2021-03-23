@@ -449,6 +449,10 @@
                   {
                     "title": "pathexpand",
                     "path": "templates/hcl_templates/functions/file/pathexpand"
+                  },
+                  {
+                    "title": "templatefile",
+                    "path": "templates/hcl_templates/functions/file/templatefile"
                   }
                 ]
               },
@@ -1091,10 +1095,6 @@
       {
         "title": "DigitalOcean Import",
         "path": "post-processors/digitalocean-import"
-      },
-      {
-        "title": "Exoscale Import",
-        "path": "post-processors/exoscale-import"
       },
       {
         "title": "Google Compute Export",

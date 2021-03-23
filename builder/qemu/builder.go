@@ -96,12 +96,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			QemuImgArgs:     b.config.QemuImgArgs,
 		},
 		new(stepHTTPIPDiscover),
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&stepPortForward{
 			CommunicatorType: b.config.CommConfig.Comm.Type,
 			NetBridge:        b.config.NetBridge,

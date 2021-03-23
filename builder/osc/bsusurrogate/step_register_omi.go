@@ -37,6 +37,9 @@ func (s *StepRegisterOMI) Run(ctx context.Context, state multistep.StateBag) mul
 		BlockDeviceMappings: blockDevices,
 	}
 
+	if config.OMIDescription != "" {
+		registerOpts.Description = config.OMIDescription
+	}
 	registerResp, _, err := oscconn.ImageApi.CreateImage(context.Background(), &osc.CreateImageOpts{
 		CreateImageRequest: optional.NewInterface(registerOpts),
 	})

@@ -101,7 +101,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		tempDir:           "/tmp/salt",
 		stateRoot:         "/srv/salt",
 		pillarRoot:        "/srv/pillar",
-		bootstrapFetchCmd: "curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltstack.com",
+		bootstrapFetchCmd: "curl -L https://bootstrap.saltproject.io -o /tmp/install_salt.sh || wget -O /tmp/install_salt.sh https://bootstrap.saltproject.io",
 		bootstrapRunCmd:   "sh /tmp/install_salt.sh",
 	},
 	guestexec.WindowsOSType: {
@@ -109,7 +109,7 @@ var guestOSTypeConfigs = map[string]guestOSTypeConfig{
 		tempDir:           "C:/Windows/Temp/salt/",
 		stateRoot:         "C:/salt/state",
 		pillarRoot:        "C:/salt/pillar/",
-		bootstrapFetchCmd: "powershell Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.ps1' -OutFile 'C:/Windows/Temp/bootstrap-salt.ps1'",
+		bootstrapFetchCmd: "powershell -Command \"[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12'; Invoke-WebRequest -Uri 'https://winbootstrap.saltproject.io' -OutFile 'C:/Windows/Temp/bootstrap-salt.ps1'\"",
 		bootstrapRunCmd:   "Powershell C:/Windows/Temp/bootstrap-salt.ps1",
 	},
 }

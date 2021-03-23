@@ -30,6 +30,7 @@ type FlatConfig struct {
 	LocalPort            *int              `mapstructure:"local_port" cty:"local_port" hcl:"local_port"`
 	SSHHostKeyFile       *string           `mapstructure:"ssh_host_key_file" cty:"ssh_host_key_file" hcl:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile *string           `mapstructure:"ssh_authorized_key_file" cty:"ssh_authorized_key_file" hcl:"ssh_authorized_key_file"`
+	ValidExitCodes       []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes" hcl:"valid_exit_codes"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -64,6 +65,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"local_port":                 &hcldec.AttrSpec{Name: "local_port", Type: cty.Number, Required: false},
 		"ssh_host_key_file":          &hcldec.AttrSpec{Name: "ssh_host_key_file", Type: cty.String, Required: false},
 		"ssh_authorized_key_file":    &hcldec.AttrSpec{Name: "ssh_authorized_key_file", Type: cty.String, Required: false},
+		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 	}
 	return s
 }

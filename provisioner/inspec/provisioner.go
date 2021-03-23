@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"unicode"
 
 	"golang.org/x/crypto/ssh"
@@ -59,6 +60,7 @@ type Config struct {
 	LocalPort            int      `mapstructure:"local_port"`
 	SSHHostKeyFile       string   `mapstructure:"ssh_host_key_file"`
 	SSHAuthorizedKeyFile string   `mapstructure:"ssh_authorized_key_file"`
+	ValidExitCodes       []int    `mapstructure:"valid_exit_codes"`
 }
 
 type Provisioner struct {
@@ -157,6 +159,10 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user: could not determine current user from environment."))
 	}
 
+	if p.config.ValidExitCodes == nil {
+		p.config.ValidExitCodes = []int{0, 101}
+	}
+
 	if errs != nil && len(errs.Errors) > 0 {
 		return errs
 	}
@@ -170,7 +176,7 @@ func (p *Provisioner) getVersion() error {
 			"Error running \"%s version\": %s", p.config.Command, err.Error())
 	}
 
-	versionRe := regexp.MustCompile(`\w (\d+\.\d+[.\d+]*)`)
+	versionRe := regexp.MustCompile(`(\d+\.\d+[.\d+]*)`)
 	matches := versionRe.FindStringSubmatch(string(out))
 	if matches == nil {
 		return fmt.Errorf(
@@ -412,9 +418,33 @@ func (p *Provisioner) executeInspec(ui packersdk.Ui, comm packersdk.Communicator
 		return err
 	}
 	wg.Wait()
-	err = cmd.Wait()
-	if err != nil {
-		return fmt.Errorf("Non-zero exit status: %s", err)
+
+	if err := cmd.Wait(); err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			// The program has exited with an exit code != 0
+
+			// This works on both Unix and Windows. Although package
+			// syscall is generally platform dependent, WaitStatus is
+			// defined for both Unix and Windows and in both cases has
+			// an ExitStatus() method with the same signature.
+			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				exitStatus := status.ExitStatus()
+				// Check exit code against allowed codes (likely just 0)
+				validExitCode := false
+				for _, v := range p.config.ValidExitCodes {
+					if exitStatus == v {
+						validExitCode = true
+					}
+				}
+				if !validExitCode {
+					return fmt.Errorf(
+						"Inspec exited with unexpected exit status: %d. Expected exit codes are: %v",
+						exitStatus, p.config.ValidExitCodes)
+				}
+			}
+		} else {
+			return fmt.Errorf("Unable to get exit status: %s", err)
+		}
 	}
 
 	return nil

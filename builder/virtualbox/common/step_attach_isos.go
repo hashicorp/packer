@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+
+	"strconv"
 )
 
 // This step attaches the boot ISO, cd_files iso, and guest additions to the
@@ -69,49 +71,50 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 
 		// We have three different potential isos we can attach, so let's
 		// assign each one its own spot so they don't conflict.
-		var controllerName, device, port string
+		var controllerName string
+		var device, port int
 		switch diskCategory {
 		case "boot_iso":
 			// figure out controller path
 			controllerName = "IDE Controller"
-			port = "0"
-			device = "1"
+			port = 0
+			device = 1
 			if s.ISOInterface == "sata" {
 				controllerName = "SATA Controller"
-				port = "1"
-				device = "0"
+				port = 15
+				device = 0
 			} else if s.ISOInterface == "virtio" {
 				controllerName = "VirtIO Controller"
-				port = "1"
-				device = "0"
+				port = 15
+				device = 0
 			}
 			ui.Message("Mounting boot ISO...")
 		case "guest_additions":
 			controllerName = "IDE Controller"
-			port = "1"
-			device = "0"
+			port = 1
+			device = 0
 			if s.GuestAdditionsInterface == "sata" {
 				controllerName = "SATA Controller"
-				port = "2"
-				device = "0"
+				port = 14
+				device = 0
 			} else if s.GuestAdditionsInterface == "virtio" {
 				controllerName = "VirtIO Controller"
-				port = "2"
-				device = "0"
+				port = 14
+				device = 0
 			}
 			ui.Message("Mounting guest additions ISO...")
 		case "cd_files":
 			controllerName = "IDE Controller"
-			port = "1"
-			device = "1"
+			port = 1
+			device = 1
 			if s.ISOInterface == "sata" {
 				controllerName = "SATA Controller"
-				port = "3"
-				device = "0"
+				port = 13
+				device = 0
 			} else if s.ISOInterface == "virtio" {
 				controllerName = "VirtIO Controller"
-				port = "3"
-				device = "0"
+				port = 13
+				device = 0
 			}
 			ui.Message("Mounting cd_files ISO...")
 		}
@@ -120,8 +123,8 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 		command := []string{
 			"storageattach", vmName,
 			"--storagectl", controllerName,
-			"--port", port,
-			"--device", device,
+			"--port", strconv.Itoa(port),
+			"--device", strconv.Itoa(device),
 			"--type", "dvddrive",
 			"--medium", isoPath,
 		}
@@ -137,8 +140,8 @@ func (s *StepAttachISOs) Run(ctx context.Context, state multistep.StateBag) mult
 		unmountCommand := []string{
 			"storageattach", vmName,
 			"--storagectl", controllerName,
-			"--port", port,
-			"--device", device,
+			"--port", strconv.Itoa(port),
+			"--device", strconv.Itoa(device),
 			"--type", "dvddrive",
 			"--medium", "none",
 		}

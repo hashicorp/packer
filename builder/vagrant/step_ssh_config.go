@@ -41,17 +41,23 @@ func (s *StepSSHConfig) Run(ctx context.Context, state multistep.StateBag) multi
 		return multistep.ActionHalt
 	}
 
-	config.Comm.SSHHost = sshConfig.Hostname
-	port, err := strconv.Atoi(sshConfig.Port)
-	if err != nil {
-		state.Put("error", err)
-		return multistep.ActionHalt
+	if config.Comm.SSHHost == "" {
+		config.Comm.SSHHost = sshConfig.Hostname
 	}
-	config.Comm.SSHPort = port
+	if config.Comm.SSHPort == 0 {
+		port, err := strconv.Atoi(sshConfig.Port)
+		if err != nil {
+			state.Put("error", err)
+			return multistep.ActionHalt
+		}
+		config.Comm.SSHPort = port
+	}
 
 	if config.Comm.SSHUsername != "" {
 		// If user has set the username within the communicator, use the
-		// auth provided there.
+		// username, password, and/or keyfile auth provided there.
+		log.Printf("Overriding SSH config from Vagrant with the username, " +
+			"password, and private key information provided to the Packer template.")
 		return multistep.ActionContinue
 	}
 	log.Printf("identity file is %s", sshConfig.IdentityFile)

@@ -151,7 +151,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		&communicator.StepConnect{
 			Config: &b.config.RunConfig.Comm,
 			Host: CommHost(
-				b.config.RunConfig.Comm.SSHHost,
+				b.config.RunConfig.Comm.Host(),
 				computeClient,
 				b.config.SSHInterface,
 				b.config.SSHIPVersion),

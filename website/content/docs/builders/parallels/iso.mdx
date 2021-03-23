@@ -146,20 +146,6 @@ can also be supplied to override the typical auto-generated key:
   \["en0", "en1", "en2", "en3", "en4", "en5", "en6", "en7", "en8", "en9",
   "ppp0", "ppp1", "ppp2"\].
 
-- `http_directory` (string) - Path to a directory to serve using an
-  HTTP server. The files in this directory will be available over HTTP that
-  will be requestable from the virtual machine. This is useful for hosting
-  kickstart files and so on. By default this is "", which means no HTTP server
-  will be started. The address and port of the HTTP server will be available
-  as variables in `boot_command`. This is covered in more detail below.
-
-- `http_port_min` and `http_port_max` (number) - These are the minimum and
-  maximum port to use for the HTTP server started to serve the
-  `http_directory`. Because Packer often runs in parallel, Packer will choose
-  a randomly available port in this range to run the HTTP server. If you want
-  to force the HTTP server to be on one port, make this minimum and maximum
-  port the same. By default the values are 8000 and 9000, respectively.
-
 - `memory` (number) - The amount of memory to use for building the VM in
   megabytes. Defaults to `512` megabytes.
 
@@ -230,6 +216,14 @@ can also be supplied to override the typical auto-generated key:
 - `vm_name` (string) - This is the name of the PVM directory for the new
   virtual machine, without the file extension. By default this is
   "packer-BUILDNAME", where "BUILDNAME" is the name of the build.
+
+## Http directory configuration reference
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig.mdx'
+
+### Optional:
+
+@include 'packer-plugin-sdk/multistep/commonsteps/HTTPConfig-not-required.mdx'
 
 ## Boot Command
 

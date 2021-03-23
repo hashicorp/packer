@@ -19,6 +19,7 @@ type FlatConfig struct {
 	PackerUserVars            map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars       []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	HTTPDir                   *string           `mapstructure:"http_directory" cty:"http_directory" hcl:"http_directory"`
+	HTTPContent               map[string]string `mapstructure:"http_content" cty:"http_content" hcl:"http_content"`
 	HTTPPortMin               *int              `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int              `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string           `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
@@ -135,6 +136,7 @@ type FlatConfig struct {
 	NVMePortCount             *int              `mapstructure:"nvme_port_count" required:"false" cty:"nvme_port_count" hcl:"nvme_port_count"`
 	HardDriveNonrotational    *bool             `mapstructure:"hard_drive_nonrotational" required:"false" cty:"hard_drive_nonrotational" hcl:"hard_drive_nonrotational"`
 	ISOInterface              *string           `mapstructure:"iso_interface" required:"false" cty:"iso_interface" hcl:"iso_interface"`
+	AdditionalDiskSize        []uint            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	KeepRegistered            *bool             `mapstructure:"keep_registered" required:"false" cty:"keep_registered" hcl:"keep_registered"`
 	SkipExport                *bool             `mapstructure:"skip_export" required:"false" cty:"skip_export" hcl:"skip_export"`
 	VMName                    *string           `mapstructure:"vm_name" required:"false" cty:"vm_name" hcl:"vm_name"`
@@ -161,6 +163,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
+		"http_content":                 &hcldec.AttrSpec{Name: "http_content", Type: cty.Map(cty.String), Required: false},
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":            &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
@@ -277,6 +280,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"nvme_port_count":              &hcldec.AttrSpec{Name: "nvme_port_count", Type: cty.Number, Required: false},
 		"hard_drive_nonrotational":     &hcldec.AttrSpec{Name: "hard_drive_nonrotational", Type: cty.Bool, Required: false},
 		"iso_interface":                &hcldec.AttrSpec{Name: "iso_interface", Type: cty.String, Required: false},
+		"disk_additional_size":         &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"keep_registered":              &hcldec.AttrSpec{Name: "keep_registered", Type: cty.Bool, Required: false},
 		"skip_export":                  &hcldec.AttrSpec{Name: "skip_export", Type: cty.Bool, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

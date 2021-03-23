@@ -149,6 +149,12 @@ type Config struct {
 	// When set to sata, the drive is attached to an AHCI SATA controller.
 	// When set to virtio, the drive is attached to a VirtIO controller.
 	ISOInterface string `mapstructure:"iso_interface" required:"false"`
+	// Additional disks to create. Uses `vm_name` as the disk name template and
+	// appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
+	// is the default disk. Each value represents the disk image size in MiB.
+	// Each additional disk uses the same disk parameters as the default disk.
+	// Unset by default.
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
 	// Set this to true if you would like to keep the VM registered with
 	// virtualbox. Defaults to false.
 	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
@@ -400,12 +406,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label: b.config.CDConfig.CDLabel,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&vboxcommon.StepSshKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
@@ -449,7 +450,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.CommConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.Host()),
 			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.CommPort,
 			WinRMPort: vboxcommon.CommPort,

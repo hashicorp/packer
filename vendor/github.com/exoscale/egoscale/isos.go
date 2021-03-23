@@ -50,7 +50,7 @@ type ListISOs struct {
 	Page        int           `json:"page,omitempty"`
 	PageSize    int           `json:"pagesize,omitempty"`
 	ShowRemoved *bool         `json:"showremoved,omitempty" doc:"Show removed ISOs as well"`
-	Tags        []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs)"`
+	Tags        []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs). Note: multiple tags are OR'ed, not AND'ed."`
 	ZoneID      *UUID         `json:"zoneid,omitempty" doc:"The ID of the zone"`
 }
 

@@ -10,9 +10,11 @@ to match Terraform Registry tier labels.
   background: var(--background-color);
   border-radius: 3px;
   display: inline-flex;
-  margin: 40px 8px 8px 0;
+  margin: 0;
   padding: 1px 8px 2px 8px;
-  vertical-align: baseline;
+  position: relative;
+  top: -1px;
+  vertical-align: bottom;
 
   /* variations */
   &[data-tier='official'] {
@@ -25,6 +27,12 @@ to match Terraform Registry tier labels.
   & + h1 {
     margin-top: 16px;
   }
+}
+
+/* add margin-top to separate from the adjacent
+search bar present on docs pages */
+:global(.g-search) + .root {
+  margin-top: 40px;
 }
 
 .text {
