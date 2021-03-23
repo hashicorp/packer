@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
@@ -118,7 +119,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
-	content, moreDiags := b.Config.Content(buildSchema)
+	body := dynblock.Expand(b.Config, cfg.EvalContext(BuildContext, nil))
+	content, moreDiags := body.Content(buildSchema)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return nil, diags
