@@ -2,13 +2,14 @@ package ncloud
 
 import (
 	"fmt"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"log"
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
 )
 
-func waiterServerInstanceStatus(conn *NcloudAPIClient, serverInstanceNo string, status string, timeout time.Duration) error {
+func waiterClassicServerInstanceStatus(conn *NcloudAPIClient, serverInstanceNo string, status string, timeout time.Duration) error {
 	reqParams := new(server.GetServerInstanceListRequest)
 	reqParams.ServerInstanceNoList = []*string{&serverInstanceNo}
 
@@ -29,7 +30,40 @@ func waiterServerInstanceStatus(conn *NcloudAPIClient, serverInstanceNo string, 
 			}
 
 			log.Printf("Status of serverInstanceNo [%s] is %s\n", serverInstanceNo, *code)
-			log.Println(serverInstanceList.ServerInstanceList[0])
+			time.Sleep(time.Second * 5)
+		}
+	}()
+
+	select {
+	case res := <-c1:
+		return res
+	case <-time.After(timeout):
+		return fmt.Errorf("TIMEOUT : server instance status is not changed into status %s", status)
+	}
+}
+
+func waiterVpcServerInstanceStatus(conn *NcloudAPIClient, serverInstanceNo string, status string, timeout time.Duration) error {
+	reqParams := &vserver.GetServerInstanceDetailRequest{
+		ServerInstanceNo: &serverInstanceNo,
+	}
+
+	c1 := make(chan error, 1)
+
+	go func() {
+		for {
+			serverInstanceList, err := conn.vserver.V2Api.GetServerInstanceDetail(reqParams)
+			if err != nil {
+				c1 <- err
+				return
+			}
+
+			code := serverInstanceList.ServerInstanceList[0].ServerInstanceStatus.Code
+			if *code == status {
+				c1 <- nil
+				return
+			}
+
+			log.Printf("Status of serverInstanceNo [%s] is %s\n", serverInstanceNo, *code)
 			time.Sleep(time.Second * 5)
 		}
 	}()

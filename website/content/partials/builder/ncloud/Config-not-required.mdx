@@ -27,7 +27,15 @@
 - `region` (string) - Name of the region where you want to create an image.
   (default: Korea)
 
+- `region_code` (string) - Region Code
+
 - `access_control_group_configuration_no` (string) - This is used to allow
   winrm access when you create a Windows server. An ACG that specifies an
   access source (0.0.0.0/0) and allowed port (5985) must be created in
   advance.
+
+- `support_vpc` (bool) - Whether to use VPC. By default, the value is false on "public" site. If you want to use VPC environment. Please set this value true.
+
+- `subnet_no` (string) - The ID of the associated Subnet
+
+- `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance

@@ -6,6 +6,8 @@ package ncloud
 import (
 	"errors"
 	"fmt"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vpc"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"os"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
@@ -50,12 +52,19 @@ type Config struct {
 	BlockStorageSize int `mapstructure:"block_storage_size" required:"false"`
 	// Name of the region where you want to create an image.
 	// (default: Korea)
-	Region string `mapstructure:"region" required:"false"`
+	Region     string `mapstructure:"region" required:"false"`
+	RegionCode string `mapstructure:"region_code" required:"false"`
 	// This is used to allow
 	// winrm access when you create a Windows server. An ACG that specifies an
 	// access source (0.0.0.0/0) and allowed port (5985) must be created in
 	// advance.
 	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no" required:"false"`
+	// Whether to use VPC. By default, the value is false on "public" site. If you want to use VPC environment. Please set this value true.
+	SupportVPC bool `mapstructure:"support_vpc" required:"false"`
+	// The ID of the associated Subnet
+	SubnetNo string `mapstructure:"subnet_no" required:"false"`
+	// The ID of the VPC where you want to place the Server Instance
+	VpcNo string `mapstructure:"vpc_no" required:"false"`
 
 	Comm communicator.Config `mapstructure:",squash"`
 	ctx  *interpolate.Context
@@ -63,7 +72,7 @@ type Config struct {
 
 // NewConfig checks parameters
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
-	warnings := []string{}
+	var warnings []string
 
 	err := config.Decode(c, &config.DecodeOpts{
 		Interpolate: true,
@@ -81,59 +90,63 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.AccessKey == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("access_key is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("`access_key` is required"))
 	}
 
 	if c.SecretKey == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("secret_key is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("`secret_key` is required"))
 	}
 
 	if c.MemberServerImageNo == "" && c.ServerImageProductCode == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("server_image_product_code or member_server_image_no is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("`server_image_product_code` or `member_server_image_no` is required"))
 	}
 
 	if c.MemberServerImageNo != "" && c.ServerImageProductCode != "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("Only one of server_image_product_code and member_server_image_no can be set"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("only one of `server_image_product_code` and `member_server_image_no` can be set"))
 	}
 
-	if c.ServerImageProductCode != "" && len(c.ServerImageProductCode) > 20 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If server_image_product_code field is set, length of server_image_product_code should be max 20"))
+	if c.ServerImageProductCode != "" && len(c.ServerImageProductCode) > 50 {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_product_code` field is set, length of `server_image_product_code` should be max 20"))
 	}
 
-	if c.ServerProductCode != "" && len(c.ServerProductCode) > 20 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If server_product_code field is set, length of server_product_code should be max 20"))
+	if c.ServerProductCode != "" && len(c.ServerProductCode) > 50 {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_product_code` field is set, length of `server_product_code` should be max 20"))
 	}
 
 	if c.ServerImageName != "" && (len(c.ServerImageName) < 3 || len(c.ServerImageName) > 30) {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If server_image_name field is set, length of server_image_name should be min 3 and max 20"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_name` field is set, length of `server_image_name` should be min 3 and max 20"))
 	}
 
 	if c.ServerImageDescription != "" && len(c.ServerImageDescription) > 1000 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If server_image_description field is set, length of server_image_description should be max 1000"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_description` field is set, length of `server_image_description` should be max 1000"))
 	}
 
 	if c.BlockStorageSize != 0 {
 		if c.BlockStorageSize < 10 || c.BlockStorageSize > 2000 {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("The size of BlockStorageSize is at least 10 GB and up to 2000GB"))
+			errs = packersdk.MultiErrorAppend(errs, errors.New("the size of `block_storage_size` is at least 10 GB and up to 2000GB"))
 		} else if int(c.BlockStorageSize/10)*10 != c.BlockStorageSize {
 			return nil, errors.New("BlockStorageSize must be a multiple of 10 GB")
 		}
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("Only one of user_data or user_data_file can be specified."))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("only one of user_data or `user_data`_file can be specified."))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
-			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("user_data_file not found: %s", c.UserDataFile))
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("`user_data_file` not found: %s", c.UserDataFile))
 		}
 	}
 
 	if c.UserData != "" && len(c.UserData) > 21847 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If user_data field is set, length of UserData should be max 21847"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `user_data` field is set, length of UserData should be max 21847"))
 	}
 
 	if c.Comm.Type == "winrm" && c.AccessControlGroupConfigurationNo == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("If Communicator is winrm, access_control_group_configuration_no is required"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if Communicator is winrm, `access_control_group_configuration_no` (allow 5986 port) is required"))
+	}
+
+	if c.VpcNo != "" || c.SubnetNo != "" {
+		c.SupportVPC = true
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -144,7 +157,9 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 }
 
 type NcloudAPIClient struct {
-	server *server.APIClient
+	server  *server.APIClient
+	vserver *vserver.APIClient
+	vpc     *vpc.APIClient
 }
 
 func (c *Config) Client() (*NcloudAPIClient, error) {
@@ -153,6 +168,8 @@ func (c *Config) Client() (*NcloudAPIClient, error) {
 		SecretKey: c.SecretKey,
 	}
 	return &NcloudAPIClient{
-		server: server.NewAPIClient(server.NewConfiguration(apiKey)),
+		server:  server.NewAPIClient(server.NewConfiguration(apiKey)),
+		vserver: vserver.NewAPIClient(vserver.NewConfiguration(apiKey)),
+		vpc:     vpc.NewAPIClient(vpc.NewConfiguration(apiKey)),
 	}, nil
 }
