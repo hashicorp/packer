@@ -126,7 +126,7 @@ if [ -n "${PACKER_DEV+x}" ]; then
 fi
 
 export CGO_ENABLED=0
-set +e
+
 ${GOX:?command not found} \
     -os="${XC_OS:-$ALL_XC_OS}" \
     -arch="${XC_ARCH:-$ALL_XC_ARCH}" \
@@ -134,7 +134,6 @@ ${GOX:?command not found} \
     -ldflags "${GOLDFLAGS}" \
     -output "pkg/{{.OS}}_{{.Arch}}/packer" \
     .
-set -e
 
 # trim GOPATH to first element
 IFS="${PATHSEP}"
