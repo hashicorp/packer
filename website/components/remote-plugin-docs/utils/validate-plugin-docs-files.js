@@ -24,12 +24,11 @@ function validatePluginDocsFiles(filePaths) {
       const mdxPathRegex = new RegExp(`^docs/${type}/(.*).mdx$`)
       return acc || mdxPathRegex.test(filePath)
     }, false)
-    // Allow arbitrary .md files
-    const mdPathRegex = new RegExp(`^docs/(.*).md$`)
-    const isMdFile = mdPathRegex.test(filePath)
+    // Allow docs/README.md files
+    const isDocsReadme = filePath == 'docs/README.md'
     // Combine all allowed types
     const isValidPath =
-      isDocsRoot || isComponentRoot || isComponentMdx || isMdFile
+      isDocsRoot || isComponentRoot || isComponentMdx || isDocsReadme
     return isValidPath
   }
   const invalidPaths = filePaths.filter((f) => !isValidPath(f))
