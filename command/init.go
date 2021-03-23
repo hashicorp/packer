@@ -144,13 +144,11 @@ plugin. Unfortunately, this failed :
 
 				warn := fmt.Sprintf(`
 Warning, at least one component used in your config file(s) has moved out of 
-Packer into the %[2]q plugin.
-For that reason Packer implicitly required the installation of the latest
-version of the %[1]s plugin.
-Upon init, Packer will always fetch the latest possible version of implicitly
-required plugins and if a latest version is backward incompatible with your
-config file or your version of Packer: a build will fail. To avoid this, lock
-the plugin version by pasting the following to your config:
+Packer into the %[2]q plugin and is now being implicitly required. 
+For more details on implicitly required plugins see https://packer.io/docs/commands/init#implicit-required-plugin
+
+To avoid any backward incompatible changes with your
+config file you may want to lock the plugin version by pasting the following to your config:
 
 packer {
   required_plugins {
