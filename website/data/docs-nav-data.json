@@ -676,35 +676,6 @@
         "path": "builders/alicloud-ecs"
       },
       {
-        "title": "Amazon EC2",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/amazon"
-          },
-          {
-            "title": "chroot",
-            "path": "builders/amazon/chroot"
-          },
-          {
-            "title": "EBS",
-            "path": "builders/amazon/ebs"
-          },
-          {
-            "title": "EBS Surrogate",
-            "path": "builders/amazon/ebssurrogate"
-          },
-          {
-            "title": "EBS Volume",
-            "path": "builders/amazon/ebsvolume"
-          },
-          {
-            "title": "Instance",
-            "path": "builders/amazon/instance"
-          }
-        ]
-      },
-      {
         "title": "Azure",
         "routes": [
           {
@@ -964,23 +935,6 @@
       {
         "title": "Overview",
         "path": "datasources"
-      },
-      {
-        "title": "Amazon",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "datasources/amazon"
-          },
-          {
-            "title": "Amazon AMI",
-            "path": "datasources/amazon/ami"
-          },
-          {
-            "title": "Secrets Manager",
-            "path": "datasources/amazon/secretsmanager"
-          }
-        ]
       }
     ]
   },
@@ -1075,10 +1029,6 @@
       {
         "title": "Alicloud Import",
         "path": "post-processors/alicloud-import"
-      },
-      {
-        "title": "Amazon Import",
-        "path": "post-processors/amazon-import"
       },
       {
         "title": "Artifice",
