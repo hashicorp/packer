@@ -449,6 +449,10 @@
                   {
                     "title": "pathexpand",
                     "path": "templates/hcl_templates/functions/file/pathexpand"
+                  },
+                  {
+                    "title": "templatefile",
+                    "path": "templates/hcl_templates/functions/file/templatefile"
                   }
                 ]
               },
