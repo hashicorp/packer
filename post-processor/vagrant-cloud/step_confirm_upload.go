@@ -16,6 +16,11 @@ func (s *stepConfirmUpload) Run(ctx context.Context, state multistep.StateBag) m
 	ui := state.Get("ui").(packersdk.Ui)
 	upload := state.Get("upload").(*Upload)
 	url := upload.CallbackPath
+	config := state.Get("config").(*Config)
+
+	if config.NoDirectUpload {
+		return multistep.ActionContinue
+	}
 
 	ui.Say("Confirming direct box upload completion")
 
@@ -23,7 +28,7 @@ func (s *stepConfirmUpload) Run(ctx context.Context, state multistep.StateBag) m
 
 	if err != nil || resp.StatusCode != 200 {
 		if resp == nil || resp.Body == nil {
-			state.Put("error", "No response from server.")
+			state.Put("error", fmt.Errorf("No response from server."))
 		} else {
 			cloudErrors := &VagrantCloudErrors{}
 			err = decodeBody(resp, cloudErrors)
