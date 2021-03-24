@@ -9,7 +9,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-const VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT = 5000000000 // Upload limit is 5GB
+const VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT = 5368709120 // Upload limit is 5G
 
 type Upload struct {
 	UploadPath   string `json:"upload_path"`
@@ -52,7 +52,7 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 
 	if err != nil || (resp.StatusCode != 200) {
 		if resp == nil || resp.Body == nil {
-			state.Put("error", "No response from server.")
+			state.Put("error", fmt.Errorf("No response from server."))
 		} else {
 			cloudErrors := &VagrantCloudErrors{}
 			err = decodeBody(resp, cloudErrors)
