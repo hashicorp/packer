@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
+	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -128,11 +129,16 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef]
 			if !found {
+				availableSrcs := listAvailableSourceNames(cfg.Sources)
+				detail := fmt.Sprintf("Known: %v", availableSrcs)
+				if sugg := didyoumean.NameSuggestion(srcUsage.SourceRef.String(), availableSrcs); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + sourceLabel + " " + srcUsage.SourceRef.String(),
 					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
-					Detail:   fmt.Sprintf("Known: %v", listAvailableSourceNames(cfg.Sources)),
+					Detail:   detail,
 				})
 				continue
 			}
