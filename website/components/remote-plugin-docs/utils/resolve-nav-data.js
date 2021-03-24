@@ -139,7 +139,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry) {
     // Process into a NavLeaf, with a remoteFile attribute
     const dirs = path.dirname(filePath).split('/')
     const dirUrl = dirs.slice(2).join('/')
-    const basename = path.basename(filePath)
+    const basename = path.basename(filePath, path.extname(filePath))
     // build urlPath
     // note that this will be prefixed to get to our final path
     const isIndexFile = basename === 'index'
