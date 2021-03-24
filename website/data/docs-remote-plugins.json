@@ -9,6 +9,6 @@
     "title": "Amazon EC2",
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
-    "version": "v0.0.1"
+    "version": "latest"
   }
 ]
