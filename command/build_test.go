@@ -383,6 +383,18 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - dynamic source block in a build block",
+			args: []string{
+				testFixture("hcl", "dynamic", "build.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"dummy":       "layers/base/main/files",
+					"postgres/13": "layers/base/main/files\nlayers/base/init/files\nlayers/postgres/files",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
