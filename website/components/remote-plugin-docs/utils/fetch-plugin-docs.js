@@ -13,7 +13,10 @@ const parseDocsZip = require('./parse-docs-zip')
 // docs files were missing or invalid, with a path to resolution
 async function fetchDocsFiles({ repo, tag }) {
   // If there's a docs.zip asset, we'll prefer that
-  const docsZipUrl = `https://github.com/${repo}/releases/download/${tag}/docs.zip`
+  const docsZipUrl =
+    tag === 'latest'
+      ? `https://github.com/${repo}/releases/latest/download/docs.zip`
+      : `https://github.com/${repo}/releases/download/${tag}/docs.zip`
   const docsZipResponse = await fetch(docsZipUrl, { method: 'GET' })
   const hasDocsZip = docsZipResponse.status === 200
   // Note: early return!

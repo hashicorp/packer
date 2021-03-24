@@ -95,16 +95,19 @@ async function mergeRemotePlugins(remotePluginsFile, navData) {
     // console.log(JSON.stringify(routesWithPlugins, null, 2))
     // Also, sort the child routes so the order is alphabetical
     routesWithPlugins.sort((a, b) => {
+      // ensure casing does not affect ordering
+      const aTitle = a.title.toLowerCase()
+      const bTitle = b.title.toLowerCase()
       // (exception: "Overview" comes first)
-      if (a.title == 'Overview') return -1
-      if (b.title === 'Overview') return 1
+      if (aTitle === 'overview') return -1
+      if (bTitle === 'overview') return 1
       // (exception: "Community-Supported" comes last)
-      if (a.title == 'Community-Supported') return 1
-      if (b.title === 'Community-Supported') return -1
+      if (aTitle === 'community-supported') return 1
+      if (bTitle === 'community-supported') return -1
       // (exception: "Custom" comes second-last)
-      if (a.title == 'Custom') return 1
-      if (b.title === 'Custom') return -1
-      return a.title < b.title ? -1 : a.title > b.title ? 1 : 0
+      if (aTitle === 'custom') return 1
+      if (bTitle === 'custom') return -1
+      return aTitle < bTitle ? -1 : aTitle > bTitle ? 1 : 0
     })
     // return n
     return { ...n, routes: routesWithPlugins }
@@ -157,6 +160,16 @@ async function resolvePluginEntryDocs(pluginConfigEntry) {
       remoteFile: { filePath, fileString, sourceUrl },
       pluginTier,
     }
+  })
+  //
+  navNodes.sort((a, b) => {
+    // ensure casing does not affect ordering
+    const aTitle = a.title.toLowerCase()
+    const bTitle = b.title.toLowerCase()
+    // (exception: "Overview" comes first)
+    if (aTitle === 'overview') return -1
+    if (bTitle === 'overview') return 1
+    return aTitle < bTitle ? -1 : aTitle > bTitle ? 1 : 0
   })
   //
   const navNodesByComponent = navNodes.reduce((acc, navLeaf) => {
