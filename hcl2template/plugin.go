@@ -132,8 +132,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Summary:  "Unknown " + sourceLabel + " " + srcUsage.SourceRef.String(),
 					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
-					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
-					// TODO: show known sources as a string slice here ^.
+					Detail:   fmt.Sprintf("Known: %v", listAvailableSourceNames(cfg.Sources)),
 				})
 				continue
 			}
