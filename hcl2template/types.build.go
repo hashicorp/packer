@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
@@ -82,6 +81,7 @@ type Builds []*BuildBlock
 // load the references to the contents of the build block.
 func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildBlock, hcl.Diagnostics) {
 	build := &BuildBlock{}
+	body := block.Body
 
 	var b struct {
 		Name        string   `hcl:"name,optional"`
@@ -89,7 +89,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	diags := gohcl.DecodeBody(body, nil, &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
@@ -119,7 +119,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
-	body := dynblock.Expand(b.Config, cfg.EvalContext(BuildContext, nil))
+	body = b.Config
 	content, moreDiags := body.Content(buildSchema)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {

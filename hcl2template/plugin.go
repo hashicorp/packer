@@ -109,7 +109,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 }
 
 func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
-	// verify that all used plugins do exist and expand dynamic bodies
+	// verify that all used plugins do exist
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
@@ -148,8 +148,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				// merge additions into source definition to get a new body.
 				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})
 			}
-			// expand any dynamic block.
-			body = dynblock.Expand(body, cfg.EvalContext(BuildContext, nil))
 
 			srcUsage.Body = body
 		}
@@ -164,7 +162,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				})
 			}
 			// Allow rest of the body to have dynamic blocks
-			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
+			// provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		if build.ErrorCleanupProvisionerBlock != nil {
@@ -191,7 +189,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					})
 				}
 				// Allow the rest of the body to have dynamic blocks
-				ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
+				// ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 			}
 		}
 
