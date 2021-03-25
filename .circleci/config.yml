@@ -37,19 +37,6 @@ commands:
     parameters:
       GOOS:
         type: string
-    steps:
-      - checkout
-      - run: GOOS=<< parameters.GOOS >> go build -ldflags="-s -w -X github.com/hashicorp/packer/version.GitCommit=${CIRCLE_SHA1}" -o ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH) .
-      - run: zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH).zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
-      - run: rm ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
-      - persist_to_workspace:
-          root: .
-          paths:
-            - ./pkg/
-  build-and-persist-packer-binary:
-    parameters:
-      GOOS:
-        type: string
       GOARCH:
         default: "amd64"
         type: string
@@ -62,6 +49,7 @@ commands:
           root: .
           paths:
             - ./pkg/
+
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
