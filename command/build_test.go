@@ -390,13 +390,10 @@ func TestBuild(t *testing.T) {
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
-					"dummy.txt":            "layers/base/main/files",
-					"dummy-fooo.txt":       "1\n",
-					"dummy-baar.txt":       "1\n",
-					"postgres/13.txt":      "layers/base/main/files\nlayers/base/init/files\nlayers/postgres/files",
-					"postgres/13-fooo.txt": "1\n",
-					"postgres/13-baar.txt": "1\n",
+					"dummy.txt":       "layers/base/main/files",
+					"postgres/13.txt": "layers/base/main/files\nlayers/base/init/files\nlayers/postgres/files",
 				},
+				expected: []string{"dummy-fooo.txt", "dummy-baar.txt", "postgres/13-fooo.txt", "postgres/13-baar.txt"},
 			},
 		},
 	}

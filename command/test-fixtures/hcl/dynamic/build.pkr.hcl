@@ -41,7 +41,7 @@ build {
     for_each = local.files
     labels   = ["shell-local"]
     content {
-      inline = ["echo 1 > ${var.images[source.name].image}-${provisioner.value.destination}.txt"]
+      inline = ["echo '' > ${var.images[source.name].image}-${provisioner.value.destination}.txt"]
     }
   }
 }
