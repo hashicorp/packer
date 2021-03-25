@@ -31,7 +31,7 @@ It's not valid to mix both named and unnamed capture groups in the same pattern.
 
 If the given pattern does not match at all, the `regex` raises an error. To
 _test_ whether a given pattern matches a string, use
-[`regexall`](./regexall.mdx) and test that the result has length greater than
+[`regexall`](./regexall) and test that the result has length greater than
 zero.
 
 The pattern is a string containing a mixture of literal characters and special
@@ -153,8 +153,8 @@ string.
 
 ## Related Functions
 
-- [`regexall`](./regexall.mdx) searches for potentially multiple matches of a given pattern in a string.
-- [`replace`](./replace.mdx) replaces a substring of a string with another string, optionally matching using the same regular expression syntax as `regex`.
+- [`regexall`](./regexall) searches for potentially multiple matches of a given pattern in a string.
+- [`replace`](./replace) replaces a substring of a string with another string, optionally matching using the same regular expression syntax as `regex`.
 
 If Packer already has a more specialized function to parse the syntax you
 are trying to match, prefer to use that function instead. Regular expressions
