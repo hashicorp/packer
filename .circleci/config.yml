@@ -143,8 +143,9 @@ jobs:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
     steps:
-      - build-and-persist-packer-binary-arm64:
+      - build-and-persist-packer-binary:
           GOOS: darwin
+          GOARCH: arm64
   build_freebsd:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
