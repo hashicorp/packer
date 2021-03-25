@@ -68,8 +68,8 @@ type Config struct {
 }
 
 type interfaceConfig struct {
-    VMInterface string `mapstructure:"interface"`
-    VMIPv6 bool `mapstructure:"ipv6"`
+	VMInterface string `mapstructure:"interface"`
+	VMIPv6      bool   `mapstructure:"ipv6"`
 }
 type additionalISOsConfig struct {
 	commonsteps.ISOConfig `mapstructure:",squash"`

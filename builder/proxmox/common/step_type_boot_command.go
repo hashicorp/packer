@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"inet.af/netaddr"
 )
 
 // stepTypeBootCommand takes the started VM, and sends the keystrokes required to start
@@ -58,7 +59,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 	if c.HTTPAddress != "0.0.0.0" {
 		httpIP = c.HTTPAddress
 	} else {
-		httpIP, err = hostIP(c.HTTPInterface,c.HTTPIPv6)
+		httpIP, err = hostIP(c.HTTPInterface, c.HTTPIPv6)
 		if err != nil {
 			err := fmt.Errorf("Failed to determine host IP: %s", err)
 			state.Put("error", err)
@@ -104,7 +105,7 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func hostIP(ifname string, ipv6 bool) (string, error) {
-	var addrs []net.Addr
+	var addrs []netaddr.IP
 	var err error
 
 	if ifname != "" {
@@ -112,32 +113,44 @@ func hostIP(ifname string, ipv6 bool) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		addrs, err = iface.Addrs()
+		var addrbuff []net.Addr
+		addrbuff, err = iface.Addrs()
+		for _, addr := range addrbuff {
+            ipaddr, err := netaddr.ParseIP(addr.String())
+            if err !=nil{
+                return "", err
+            }
+            addrs = append(addrs, ipaddr)
+		}
 		if err != nil {
 			return "", err
 		}
 	} else {
-		addrs, err = net.InterfaceAddrs()
+        var addrbuff []net.Addr
+		addrbuff, err = net.InterfaceAddrs()
 		if err != nil {
 			return "", err
 		}
+		for _, addr := range addrbuff {
+            ipaddr,err := netaddr.ParseIP(addr.String())
+			if err != nil{
+                return "", err
+			}
+            addrs = append(addrs, ipaddr)
+		}
 	}
-    if ipv6{
-        for _, addr := range addrs {
-            if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-                if ipnet.IP.To16() != nil && ipv6 {
-                    return ipnet.IP.String(), nil
-                }
-            }
-        }
-    }else{
-        for _, addr := range addrs {
-            if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-                if ipnet.IP.To4() != nil {
-                    return ipnet.IP.String(), nil
-                }
-            }
-        }
-    }
+	if ipv6 {
+		for _, addr := range addrs {
+			if ipv6 && addr.Is6() && !addr.IsLoopback() {
+				return addr.String(), nil
+			}
+		}
+	} else {
+		for _, addr := range addrs {
+			if addr.Is4() && !addr.IsLoopback(){
+				return addr.String(), nil
+			}
+		}
+	}
 	return "", errors.New("No host IP found")
 }

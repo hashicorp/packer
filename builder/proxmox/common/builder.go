@@ -167,26 +167,25 @@ func getVMIP(state multistep.StateBag) (string, error) {
 		return "", fmt.Errorf("Interface %s not found in VM", config.VMInterface.VMInterface)
 	}
 
-    if config.VMInterface.VMIPv6 {
-        for _, iface := range ifs {
-            for _, addr := range iface.IPAddresses {
-                if addr.IsLoopback() || addr.To4() == nil {
-                    continue
-                }
-                return addr.String(), nil
-            }
-        }
-    } else{
-        for _, iface := range ifs {
-            for _, addr := range iface.IPAddresses {
-                if addr.IsLoopback() || addr.To16() == nil {
-                    continue
-                }
-                return addr.String(), nil
-            }
-        }
-    }
-
+	if config.VMInterface.VMIPv6 {
+		for _, iface := range ifs {
+			for _, addr := range iface.IPAddresses {
+				if addr.IsLoopback() || addr.To4() == nil {
+					continue
+				}
+				return addr.String(), nil
+			}
+		}
+	} else {
+		for _, iface := range ifs {
+			for _, addr := range iface.IPAddresses {
+				if addr.IsLoopback() || addr.To16() == nil {
+					continue
+				}
+				return addr.String(), nil
+			}
+		}
+	}
 
 	return "", fmt.Errorf("Found no IP addresses on VM")
 }
