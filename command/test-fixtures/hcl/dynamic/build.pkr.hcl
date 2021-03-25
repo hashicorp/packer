@@ -32,7 +32,7 @@ build {
     labels   = ["file.base"]
     content {
       name         = source.key
-      target       = "${source.value.image}"
+      target       = "${source.value.image}.txt"
       content      = join("\n", formatlist("layers/%s/files", var.images[source.key].layers))
     }
   }
@@ -41,7 +41,7 @@ build {
     for_each = local.files
     labels   = ["shell-local"]
     content {
-      inline = ["echo 1 > ${var.images[source.name].image}-${provisioner.value.destination}"]
+      inline = ["echo 1 > ${var.images[source.name].image}-${provisioner.value.destination}.txt"]
     }
   }
 }
