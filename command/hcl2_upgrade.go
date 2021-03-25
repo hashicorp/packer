@@ -16,9 +16,9 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	awscommon "github.com/hashicorp/packer-plugin-amazon/builder/common"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"
@@ -107,7 +107,7 @@ const (
 # Read the documentation for data blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon AMI Data Source here:
-# https://www.packer.io/docs/datasources/amazon/ami`
+# https://www.packer.io/docs/datasources/amazon/ami.mdx`
 
 	amazonSecretsManagerDataHeader = `
 # The amazon-secretsmanager data block is generated from your aws_secretsmanager template function; a data
@@ -115,7 +115,7 @@ const (
 # Read the documentation for data blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon Secrets Manager Data Source here:
-# https://www.packer.io/docs/datasources/amazon/secretsmanager`
+# https://www.packer.io/docs/datasources/amazon/secretsmanager.mdx`
 )
 
 var (

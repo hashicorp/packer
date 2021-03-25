@@ -14,11 +14,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
 	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
-	amazonchrootbuilder "github.com/hashicorp/packer/builder/amazon/chroot"
-	amazonebsbuilder "github.com/hashicorp/packer/builder/amazon/ebs"
-	amazonebssurrogatebuilder "github.com/hashicorp/packer/builder/amazon/ebssurrogate"
-	amazonebsvolumebuilder "github.com/hashicorp/packer/builder/amazon/ebsvolume"
-	amazoninstancebuilder "github.com/hashicorp/packer/builder/amazon/instance"
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
 	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
@@ -64,10 +59,7 @@ import (
 	vsphereclonebuilder "github.com/hashicorp/packer/builder/vsphere/clone"
 	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
-	amazonamidatasource "github.com/hashicorp/packer/datasource/amazon/ami"
-	amazonsecretsmanagerdatasource "github.com/hashicorp/packer/datasource/amazon/secretsmanager"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
-	amazonimportpostprocessor "github.com/hashicorp/packer/post-processor/amazon-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -108,57 +100,52 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packersdk.Builder{
-	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
-	"amazon-chroot":       new(amazonchrootbuilder.Builder),
-	"amazon-ebs":          new(amazonebsbuilder.Builder),
-	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
-	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
-	"amazon-instance":     new(amazoninstancebuilder.Builder),
-	"azure-arm":           new(azurearmbuilder.Builder),
-	"azure-chroot":        new(azurechrootbuilder.Builder),
-	"azure-dtl":           new(azuredtlbuilder.Builder),
-	"cloudstack":          new(cloudstackbuilder.Builder),
-	"digitalocean":        new(digitaloceanbuilder.Builder),
-	"file":                new(filebuilder.Builder),
-	"googlecompute":       new(googlecomputebuilder.Builder),
-	"hcloud":              new(hcloudbuilder.Builder),
-	"hyperone":            new(hyperonebuilder.Builder),
-	"hyperv-iso":          new(hypervisobuilder.Builder),
-	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
-	"jdcloud":             new(jdcloudbuilder.Builder),
-	"linode":              new(linodebuilder.Builder),
-	"lxc":                 new(lxcbuilder.Builder),
-	"lxd":                 new(lxdbuilder.Builder),
-	"ncloud":              new(ncloudbuilder.Builder),
-	"null":                new(nullbuilder.Builder),
-	"oneandone":           new(oneandonebuilder.Builder),
-	"openstack":           new(openstackbuilder.Builder),
-	"oracle-classic":      new(oracleclassicbuilder.Builder),
-	"oracle-oci":          new(oracleocibuilder.Builder),
-	"osc-bsu":             new(oscbsubuilder.Builder),
-	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
-	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
-	"osc-chroot":          new(oscchrootbuilder.Builder),
-	"parallels-iso":       new(parallelsisobuilder.Builder),
-	"parallels-pvm":       new(parallelspvmbuilder.Builder),
-	"profitbricks":        new(profitbricksbuilder.Builder),
-	"proxmox":             new(proxmoxbuilder.Builder),
-	"proxmox-clone":       new(proxmoxclonebuilder.Builder),
-	"proxmox-iso":         new(proxmoxisobuilder.Builder),
-	"qemu":                new(qemubuilder.Builder),
-	"scaleway":            new(scalewaybuilder.Builder),
-	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
-	"triton":              new(tritonbuilder.Builder),
-	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
-	"vagrant":             new(vagrantbuilder.Builder),
-	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
-	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
-	"vmware-iso":          new(vmwareisobuilder.Builder),
-	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
-	"vsphere-clone":       new(vsphereclonebuilder.Builder),
-	"vsphere-iso":         new(vsphereisobuilder.Builder),
-	"yandex":              new(yandexbuilder.Builder),
+	"alicloud-ecs":     new(alicloudecsbuilder.Builder),
+	"azure-arm":        new(azurearmbuilder.Builder),
+	"azure-chroot":     new(azurechrootbuilder.Builder),
+	"azure-dtl":        new(azuredtlbuilder.Builder),
+	"cloudstack":       new(cloudstackbuilder.Builder),
+	"digitalocean":     new(digitaloceanbuilder.Builder),
+	"file":             new(filebuilder.Builder),
+	"googlecompute":    new(googlecomputebuilder.Builder),
+	"hcloud":           new(hcloudbuilder.Builder),
+	"hyperone":         new(hyperonebuilder.Builder),
+	"hyperv-iso":       new(hypervisobuilder.Builder),
+	"hyperv-vmcx":      new(hypervvmcxbuilder.Builder),
+	"jdcloud":          new(jdcloudbuilder.Builder),
+	"linode":           new(linodebuilder.Builder),
+	"lxc":              new(lxcbuilder.Builder),
+	"lxd":              new(lxdbuilder.Builder),
+	"ncloud":           new(ncloudbuilder.Builder),
+	"null":             new(nullbuilder.Builder),
+	"oneandone":        new(oneandonebuilder.Builder),
+	"openstack":        new(openstackbuilder.Builder),
+	"oracle-classic":   new(oracleclassicbuilder.Builder),
+	"oracle-oci":       new(oracleocibuilder.Builder),
+	"osc-bsu":          new(oscbsubuilder.Builder),
+	"osc-bsusurrogate": new(oscbsusurrogatebuilder.Builder),
+	"osc-bsuvolume":    new(oscbsuvolumebuilder.Builder),
+	"osc-chroot":       new(oscchrootbuilder.Builder),
+	"parallels-iso":    new(parallelsisobuilder.Builder),
+	"parallels-pvm":    new(parallelspvmbuilder.Builder),
+	"profitbricks":     new(profitbricksbuilder.Builder),
+	"proxmox":          new(proxmoxbuilder.Builder),
+	"proxmox-clone":    new(proxmoxclonebuilder.Builder),
+	"proxmox-iso":      new(proxmoxisobuilder.Builder),
+	"qemu":             new(qemubuilder.Builder),
+	"scaleway":         new(scalewaybuilder.Builder),
+	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
+	"triton":           new(tritonbuilder.Builder),
+	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
+	"vagrant":          new(vagrantbuilder.Builder),
+	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
+	"virtualbox-vm":    new(virtualboxvmbuilder.Builder),
+	"vmware-iso":       new(vmwareisobuilder.Builder),
+	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
+	"vsphere-clone":    new(vsphereclonebuilder.Builder),
+	"vsphere-iso":      new(vsphereisobuilder.Builder),
+	"yandex":           new(yandexbuilder.Builder),
 }
 
 var Provisioners = map[string]packersdk.Provisioner{
@@ -184,7 +171,6 @@ var Provisioners = map[string]packersdk.Provisioner{
 
 var PostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
-	"amazon-import":        new(amazonimportpostprocessor.PostProcessor),
 	"artifice":             new(artificepostprocessor.PostProcessor),
 	"checksum":             new(checksumpostprocessor.PostProcessor),
 	"compress":             new(compresspostprocessor.PostProcessor),
@@ -202,10 +188,7 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
 
-var Datasources = map[string]packersdk.Datasource{
-	"amazon-ami":            new(amazonamidatasource.Datasource),
-	"amazon-secretsmanager": new(amazonsecretsmanagerdatasource.Datasource),
-}
+var Datasources = map[string]packersdk.Datasource{}
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 

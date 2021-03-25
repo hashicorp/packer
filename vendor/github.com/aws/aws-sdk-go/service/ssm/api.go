@@ -15209,6 +15209,12 @@ type AddTagsToResourceInput struct {
 	//
 	// PatchBaseline: pb-012345abcde
 	//
+	// OpsMetadata object: ResourceID for tagging is created from the Amazon Resource
+	// Name (ARN) for the object. Specifically, ResourceID is created from the strings
+	// that come after the word opsmetadata in the ARN. For example, an OpsMetadata
+	// object with an ARN of arn:aws:ssm:us-east-2:1234567890:opsmetadata/aws/ssm/MyGroup/appmanager
+	// has a ResourceID of either aws/ssm/MyGroup/appmanager or /aws/ssm/MyGroup/appmanager.
+	//
 	// For the Document and Parameter values, use the name of the resource.
 	//
 	// The ManagedInstance type for this API action is only for on-premises managed
@@ -17896,6 +17902,149 @@ func (s *AutomationStepNotFoundException) StatusCode() int {
 // RequestID returns the service's response RequestID for request.
 func (s *AutomationStepNotFoundException) RequestID() string {
 	return s.RespMetadata.RequestID
+}
+
+// Defines the basic information about a patch baseline override.
+type BaselineOverride struct {
+	_ struct{} `type:"structure"`
+
+	// A set of rules defining the approval rules for a patch baseline.
+	ApprovalRules *PatchRuleGroup `type:"structure"`
+
+	// A list of explicitly approved patches for the baseline.
+	//
+	// For information about accepted formats for lists of approved patches and
+	// rejected patches, see About package name formats for approved and rejected
+	// patch lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
+	// in the AWS Systems Manager User Guide.
+	ApprovedPatches []*string `type:"list"`
+
+	// Defines the compliance level for approved patches. When an approved patch
+	// is reported as missing, this value describes the severity of the compliance
+	// violation.
+	ApprovedPatchesComplianceLevel *string `type:"string" enum:"PatchComplianceLevel"`
+
+	// Indicates whether the list of approved patches includes non-security updates
+	// that should be applied to the instances. The default value is 'false'. Applies
+	// to Linux instances only.
+	ApprovedPatchesEnableNonSecurity *bool `type:"boolean"`
+
+	// A set of patch filters, typically used for approval rules.
+	GlobalFilters *PatchFilterGroup `type:"structure"`
+
+	// The operating system rule used by the patch baseline override.
+	OperatingSystem *string `type:"string" enum:"OperatingSystem"`
+
+	// A list of explicitly rejected patches for the baseline.
+	//
+	// For information about accepted formats for lists of approved patches and
+	// rejected patches, see About package name formats for approved and rejected
+	// patch lists (https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager-approved-rejected-package-name-formats.html)
+	// in the AWS Systems Manager User Guide.
+	RejectedPatches []*string `type:"list"`
+
+	// The action for Patch Manager to take on patches included in the RejectedPackages
+	// list. A patch can be allowed only if it is a dependency of another package,
+	// or blocked entirely along with packages that include it as a dependency.
+	RejectedPatchesAction *string `type:"string" enum:"PatchAction"`
+
+	// Information about the patches to use to update the instances, including target
+	// operating systems and source repositories. Applies to Linux instances only.
+	Sources []*PatchSource `type:"list"`
+}
+
+// String returns the string representation
+func (s BaselineOverride) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s BaselineOverride) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *BaselineOverride) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "BaselineOverride"}
+	if s.ApprovalRules != nil {
+		if err := s.ApprovalRules.Validate(); err != nil {
+			invalidParams.AddNested("ApprovalRules", err.(request.ErrInvalidParams))
+		}
+	}
+	if s.GlobalFilters != nil {
+		if err := s.GlobalFilters.Validate(); err != nil {
+			invalidParams.AddNested("GlobalFilters", err.(request.ErrInvalidParams))
+		}
+	}
+	if s.Sources != nil {
+		for i, v := range s.Sources {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "Sources", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetApprovalRules sets the ApprovalRules field's value.
+func (s *BaselineOverride) SetApprovalRules(v *PatchRuleGroup) *BaselineOverride {
+	s.ApprovalRules = v
+	return s
+}
+
+// SetApprovedPatches sets the ApprovedPatches field's value.
+func (s *BaselineOverride) SetApprovedPatches(v []*string) *BaselineOverride {
+	s.ApprovedPatches = v
+	return s
+}
+
+// SetApprovedPatchesComplianceLevel sets the ApprovedPatchesComplianceLevel field's value.
+func (s *BaselineOverride) SetApprovedPatchesComplianceLevel(v string) *BaselineOverride {
+	s.ApprovedPatchesComplianceLevel = &v
+	return s
+}
+
+// SetApprovedPatchesEnableNonSecurity sets the ApprovedPatchesEnableNonSecurity field's value.
+func (s *BaselineOverride) SetApprovedPatchesEnableNonSecurity(v bool) *BaselineOverride {
+	s.ApprovedPatchesEnableNonSecurity = &v
+	return s
+}
+
+// SetGlobalFilters sets the GlobalFilters field's value.
+func (s *BaselineOverride) SetGlobalFilters(v *PatchFilterGroup) *BaselineOverride {
+	s.GlobalFilters = v
+	return s
+}
+
+// SetOperatingSystem sets the OperatingSystem field's value.
+func (s *BaselineOverride) SetOperatingSystem(v string) *BaselineOverride {
+	s.OperatingSystem = &v
+	return s
+}
+
+// SetRejectedPatches sets the RejectedPatches field's value.
+func (s *BaselineOverride) SetRejectedPatches(v []*string) *BaselineOverride {
+	s.RejectedPatches = v
+	return s
+}
+
+// SetRejectedPatchesAction sets the RejectedPatchesAction field's value.
+func (s *BaselineOverride) SetRejectedPatchesAction(v string) *BaselineOverride {
+	s.RejectedPatchesAction = &v
+	return s
+}
+
+// SetSources sets the Sources field's value.
+func (s *BaselineOverride) SetSources(v []*PatchSource) *BaselineOverride {
+	s.Sources = v
+	return s
 }
 
 type CancelCommandInput struct {
@@ -20847,6 +20996,18 @@ type CreateOpsMetadataInput struct {
 	//
 	// ResourceId is a required field
 	ResourceId *string `min:"1" type:"string" required:"true"`
+
+	// Optional metadata that you assign to a resource. You can specify a maximum
+	// of five tags for an OpsMetadata object. Tags enable you to categorize a resource
+	// in different ways, such as by purpose, owner, or environment. For example,
+	// you might want to tag an OpsMetadata object to identify an environment or
+	// target AWS Region. In this case, you could specify the following key-value
+	// pairs:
+	//
+	//    * Key=Environment,Value=Production
+	//
+	//    * Key=Region,Value=us-east-2
+	Tags []*Tag `type:"list"`
 }
 
 // String returns the string representation
@@ -20881,6 +21042,16 @@ func (s *CreateOpsMetadataInput) Validate() error {
 			}
 		}
 	}
+	if s.Tags != nil {
+		for i, v := range s.Tags {
+			if v == nil {
+				continue
+			}
+			if err := v.Validate(); err != nil {
+				invalidParams.AddNested(fmt.Sprintf("%s[%v]", "Tags", i), err.(request.ErrInvalidParams))
+			}
+		}
+	}
 
 	if invalidParams.Len() > 0 {
 		return invalidParams
@@ -20897,6 +21068,12 @@ func (s *CreateOpsMetadataInput) SetMetadata(v map[string]*MetadataValue) *Creat
 // SetResourceId sets the ResourceId field's value.
 func (s *CreateOpsMetadataInput) SetResourceId(v string) *CreateOpsMetadataInput {
 	s.ResourceId = &v
+	return s
+}
+
+// SetTags sets the Tags field's value.
+func (s *CreateOpsMetadataInput) SetTags(v []*Tag) *CreateOpsMetadataInput {
+	s.Tags = v
 	return s
 }
 
@@ -20938,8 +21115,8 @@ type CreatePatchBaselineInput struct {
 	// in the AWS Systems Manager User Guide.
 	ApprovedPatches []*string `type:"list"`
 
-	// Defines the compliance level for approved patches. This means that if an
-	// approved patch is reported as missing, this is the severity of the compliance
+	// Defines the compliance level for approved patches. When an approved patch
+	// is reported as missing, this value describes the severity of the compliance
 	// violation. The default value is UNSPECIFIED.
 	ApprovedPatchesComplianceLevel *string `type:"string" enum:"PatchComplianceLevel"`
 
@@ -27871,11 +28048,13 @@ type GetCommandInvocationInput struct {
 	// InstanceId is a required field
 	InstanceId *string `type:"string" required:"true"`
 
-	// (Optional) The name of the plugin for which you want detailed results. If
-	// the document contains only one plugin, the name can be omitted and the details
-	// will be returned.
+	// The name of the plugin for which you want detailed results. If the document
+	// contains only one plugin, you can omit the name and details for that plugin
+	// are returned. If the document contains more than one plugin, you must specify
+	// the name of the plugin for which you want to view details.
 	//
 	// Plugin names are also referred to as step names in Systems Manager documents.
+	// For example, aws:RunShellScript is a plugin.
 	PluginName *string `min:"4" type:"string"`
 }
 
@@ -27973,8 +28152,8 @@ type GetCommandInvocationOutput struct {
 	// configured for Systems Manager.
 	InstanceId *string `type:"string"`
 
-	// The name of the plugin for which you want detailed results. For example,
-	// aws:RunShellScript is a plugin.
+	// The name of the plugin, or step name, for which details are reported. For
+	// example, aws:RunShellScript is a plugin.
 	PluginName *string `min:"4" type:"string"`
 
 	// The error level response code for the plugin script. If the response code
@@ -28297,6 +28476,9 @@ func (s *GetDefaultPatchBaselineOutput) SetOperatingSystem(v string) *GetDefault
 type GetDeployablePatchSnapshotForInstanceInput struct {
 	_ struct{} `type:"structure"`
 
+	// Defines the basic information about a patch baseline override.
+	BaselineOverride *BaselineOverride `type:"structure"`
+
 	// The ID of the instance for which the appropriate patch snapshot should be
 	// retrieved.
 	//
@@ -28331,11 +28513,22 @@ func (s *GetDeployablePatchSnapshotForInstanceInput) Validate() error {
 	if s.SnapshotId != nil && len(*s.SnapshotId) < 36 {
 		invalidParams.Add(request.NewErrParamMinLen("SnapshotId", 36))
 	}
+	if s.BaselineOverride != nil {
+		if err := s.BaselineOverride.Validate(); err != nil {
+			invalidParams.AddNested("BaselineOverride", err.(request.ErrInvalidParams))
+		}
+	}
 
 	if invalidParams.Len() > 0 {
 		return invalidParams
 	}
 	return nil
+}
+
+// SetBaselineOverride sets the BaselineOverride field's value.
+func (s *GetDeployablePatchSnapshotForInstanceInput) SetBaselineOverride(v *BaselineOverride) *GetDeployablePatchSnapshotForInstanceInput {
+	s.BaselineOverride = v
+	return s
 }
 
 // SetInstanceId sets the InstanceId field's value.
@@ -30830,7 +31023,8 @@ func (s *GetPatchBaselineOutput) SetSources(v []*PatchSource) *GetPatchBaselineO
 type GetServiceSettingInput struct {
 	_ struct{} `type:"structure"`
 
-	// The ID of the service setting to get. The setting ID can be /ssm/parameter-store/default-parameter-tier,
+	// The ID of the service setting to get. The setting ID can be /ssm/automation/customer-script-log-destination,
+	// /ssm/automation/customer-script-log-group-name, /ssm/parameter-store/default-parameter-tier,
 	// /ssm/parameter-store/high-throughput-enabled, or /ssm/managed-instance/activation-tier.
 	//
 	// SettingId is a required field
@@ -31215,6 +31409,10 @@ func (s *InstanceAssociation) SetInstanceId(v string) *InstanceAssociation {
 }
 
 // An S3 bucket where you want to store the results of this request.
+//
+// For the minimal permissions required to enable Amazon S3 output for an association,
+// see Creating associations (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-state-assoc.html)
+// in the Systems Manager User Guide.
 type InstanceAssociationOutputLocation struct {
 	_ struct{} `type:"structure"`
 
@@ -31676,6 +31874,10 @@ type InstanceInformationStringFilter struct {
 	//
 	// "InstanceIds"|"AgentVersion"|"PingStatus"|"PlatformTypes"|"ActivationIds"|"IamRole"|"ResourceType"|"AssociationStatus"|"Tag
 	// Key"
+	//
+	// Tag key is not a valid filter. You must specify either tag-key or tag:keyname
+	// and a string. Here are some valid examples: tag-key, tag:123, tag:al!, tag:Windows.
+	// Here are some invalid examples: tag-keys, Tag Key, tag:, tagKey, abc:keyname.
 	//
 	// Key is a required field
 	Key *string `min:"1" type:"string" required:"true"`
@@ -42335,12 +42537,12 @@ type PatchRule struct {
 	// The number of days after the release date of each patch matched by the rule
 	// that the patch is marked as approved in the patch baseline. For example,
 	// a value of 7 means that patches are approved seven days after they are released.
-	// Not supported on Ubuntu Server.
+	// Not supported on Debian Server or Ubuntu Server.
 	ApproveAfterDays *int64 `type:"integer"`
 
 	// The cutoff date for auto approval of released patches. Any patches released
-	// on or before this date are installed automatically. Not supported on Ubuntu
-	// Server.
+	// on or before this date are installed automatically. Not supported on Debian
+	// Server or Ubuntu Server.
 	//
 	// Enter dates in the format YYYY-MM-DD. For example, 2020-12-31.
 	ApproveUntilDate *string `min:"1" type:"string"`
@@ -43039,14 +43241,15 @@ type PutParameterInput struct {
 	//    * A parameter name can't be prefixed with "aws" or "ssm" (case-insensitive).
 	//
 	//    * Parameter names can include only the following symbols and letters:
-	//    a-zA-Z0-9_.-/
+	//    a-zA-Z0-9_.- In addition, the slash character ( / ) is used to delineate
+	//    hierarchies in parameter names. For example: /Dev/Production/East/Project-ABC/MyParameter
 	//
 	//    * A parameter name can't include spaces.
 	//
 	//    * Parameter hierarchies are limited to a maximum depth of fifteen levels.
 	//
-	// For additional information about valid values for parameter names, see About
-	// requirements and constraints for parameter names (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-parameter-name-constraints.html)
+	// For additional information about valid values for parameter names, see Creating
+	// Systems Manager parameters (https://docs.aws.amazon.com/systems-manager/latest/userguide/sysman-paramstore-su-create.html)
 	// in the AWS Systems Manager User Guide.
 	//
 	// The maximum length constraint listed below includes capacity for additional
@@ -43514,6 +43717,11 @@ type RegisterTargetWithMaintenanceWindowInput struct {
 
 	// The targets to register with the maintenance window. In other words, the
 	// instances to run commands on when the maintenance window runs.
+	//
+	// If a single maintenance window task is registered with multiple targets,
+	// its task invocations occur sequentially and not in parallel. If your task
+	// must run on multiple targets at the same time, register a task for each target
+	// individually and assign each task the same priority level.
 	//
 	// You can specify targets using instance IDs, resource group names, or tags
 	// that have been applied to instances.
@@ -44005,6 +44213,12 @@ type RemoveTagsFromResourceInput struct {
 	//
 	// PatchBaseline: pb-012345abcde
 	//
+	// OpsMetadata object: ResourceID for tagging is created from the Amazon Resource
+	// Name (ARN) for the object. Specifically, ResourceID is created from the strings
+	// that come after the word opsmetadata in the ARN. For example, an OpsMetadata
+	// object with an ARN of arn:aws:ssm:us-east-2:1234567890:opsmetadata/aws/ssm/MyGroup/appmanager
+	// has a ResourceID of either aws/ssm/MyGroup/appmanager or /aws/ssm/MyGroup/appmanager.
+	//
 	// For the Document and Parameter values, use the name of the resource.
 	//
 	// The ManagedInstance type for this API action is only for on-premises managed
@@ -44095,7 +44309,8 @@ type ResetServiceSettingInput struct {
 	_ struct{} `type:"structure"`
 
 	// The Amazon Resource Name (ARN) of the service setting to reset. The setting
-	// ID can be /ssm/parameter-store/default-parameter-tier, /ssm/parameter-store/high-throughput-enabled,
+	// ID can be /ssm/automation/customer-script-log-destination, /ssm/automation/customer-script-log-group-name,
+	// /ssm/parameter-store/default-parameter-tier, /ssm/parameter-store/high-throughput-enabled,
 	// or /ssm/managed-instance/activation-tier. For example, arn:aws:ssm:us-east-1:111122223333:servicesetting/ssm/parameter-store/high-throughput-enabled.
 	//
 	// SettingId is a required field
@@ -51007,6 +51222,10 @@ type UpdateServiceSettingInput struct {
 	// arn:aws:ssm:us-east-1:111122223333:servicesetting/ssm/parameter-store/high-throughput-enabled.
 	// The setting ID can be one of the following.
 	//
+	//    * /ssm/automation/customer-script-log-destination
+	//
+	//    * /ssm/automation/customer-script-log-group-name
+	//
 	//    * /ssm/parameter-store/default-parameter-tier
 	//
 	//    * /ssm/parameter-store/high-throughput-enabled
@@ -51027,6 +51246,12 @@ type UpdateServiceSettingInput struct {
 	//
 	// For the /ssm/parameter-store/high-throughput-enabled, and /ssm/managed-instance/activation-tier
 	// setting IDs, the setting value can be true or false.
+	//
+	// For the /ssm/automation/customer-script-log-destination setting ID, the setting
+	// value can be CloudWatch.
+	//
+	// For the /ssm/automation/customer-script-log-group-name setting ID, the setting
+	// value can be the name of a CloudWatch Logs log group.
 	//
 	// SettingValue is a required field
 	SettingValue *string `min:"1" type:"string" required:"true"`
@@ -53026,6 +53251,9 @@ const (
 
 	// ResourceTypeForTaggingOpsItem is a ResourceTypeForTagging enum value
 	ResourceTypeForTaggingOpsItem = "OpsItem"
+
+	// ResourceTypeForTaggingOpsMetadata is a ResourceTypeForTagging enum value
+	ResourceTypeForTaggingOpsMetadata = "OpsMetadata"
 )
 
 // ResourceTypeForTagging_Values returns all elements of the ResourceTypeForTagging enum
@@ -53037,6 +53265,7 @@ func ResourceTypeForTagging_Values() []string {
 		ResourceTypeForTaggingParameter,
 		ResourceTypeForTaggingPatchBaseline,
 		ResourceTypeForTaggingOpsItem,
+		ResourceTypeForTaggingOpsMetadata,
 	}
 }
 
