@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
@@ -161,8 +160,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 				})
 			}
-			// Allow rest of the body to have dynamic blocks
-			// provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		if build.ErrorCleanupProvisionerBlock != nil {
@@ -174,8 +171,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 				})
 			}
-			// Allow rest of the body to have dynamic blocks
-			build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest = dynblock.Expand(build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		for _, ppList := range build.PostProcessorsLists {
@@ -188,8 +183,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 						Severity: hcl.DiagError,
 					})
 				}
-				// Allow the rest of the body to have dynamic blocks
-				// ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 			}
 		}
 
