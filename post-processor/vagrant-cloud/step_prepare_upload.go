@@ -3,10 +3,13 @@ package vagrantcloud
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
+
+const VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT = 5368709120 // Upload limit is 5G
 
 type Upload struct {
 	UploadPath   string `json:"upload_path"`
@@ -25,6 +28,18 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 	provider := state.Get("provider").(*Provider)
 	artifactFilePath := state.Get("artifactFilePath").(string)
 
+	// If direct upload is enabled, the asset size must be <= 5 GB
+	if config.NoDirectUpload == false {
+		f, err := os.Stat(artifactFilePath)
+		if err != nil {
+			ui.Error(fmt.Sprintf("error determining size of upload artifact: %s", artifactFilePath))
+		}
+		if f.Size() > VAGRANT_CLOUD_DIRECT_UPLOAD_LIMIT {
+			ui.Say(fmt.Sprintf("Asset %s is larger than the direct upload limit. Setting `NoDirectUpload` to true", artifactFilePath))
+			config.NoDirectUpload = true
+		}
+	}
+
 	path := fmt.Sprintf("box/%s/version/%v/provider/%s/upload", box.Tag, version.Version, provider.Name)
 	if !config.NoDirectUpload {
 		path = path + "/direct"
@@ -37,7 +52,7 @@ func (s *stepPrepareUpload) Run(ctx context.Context, state multistep.StateBag) m
 
 	if err != nil || (resp.StatusCode != 200) {
 		if resp == nil || resp.Body == nil {
-			state.Put("error", "No response from server.")
+			state.Put("error", fmt.Errorf("No response from server."))
 		} else {
 			cloudErrors := &VagrantCloudErrors{}
 			err = decodeBody(resp, cloudErrors)
