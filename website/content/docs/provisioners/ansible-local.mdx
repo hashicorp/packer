@@ -193,6 +193,18 @@ Optional:
 - `galaxy_command` (string) - The command to invoke ansible-galaxy. By
   default, this is ansible-galaxy.
 
+- `galaxy_force_install` (bool) - Force overwriting an existing role or collection.
+   Adds `--force` option to `ansible-galaxy` command. By default, this is
+   `false`.
+
+- `galax_roles_path` (string) - The path to the directory on the remote system in which to
+    install the roles. Adds `--roles-path /path/to/your/roles` to
+    `ansible-galaxy` command. By default, this is `staging_directory`/galaxy_roles
+
+- `galaxy_collections_path` (string) - The path to the directory on the remote system in which to
+    install the collections. Adds `--collections-path /path/to/your/collections` to
+    `ansible-galaxy` command. By default, this is `staging_directory`/galaxy_collections.
+
 - `group_vars` (string) - a path to the directory containing ansible group
   variables on your local system to be copied to the remote machine. By
   default, this is empty.
@@ -203,7 +215,11 @@ Optional:
 
 - `role_paths` (array of strings) - An array of paths to role directories on
   your local system. These will be uploaded to the remote machine under
-  `staging_directory`/roles. By default, this is empty.
+  `staging_directory`/roles/roles. By default, this is empty.
+
+- `collection_paths` (array of strings) - An array of paths to collection
+  directories on your local system. These will be uploaded to the remote
+  machine under `staging_directory`/collections. By default, this is empty.
 
 - `staging_directory` (string) - The directory where all the configuration of
   Ansible by Packer will be placed. By default this is

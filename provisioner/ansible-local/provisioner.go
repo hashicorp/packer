@@ -80,13 +80,13 @@ type Config struct {
 	//  `false`.
 	GalaxyForceInstall bool `mapstructure:"galaxy_force_install"`
 
-	// The path to the directory on your local system in which to
+	// The path to the directory on the remote system in which to
 	//   install the roles. Adds `--roles-path /path/to/your/roles` to
 	//   `ansible-galaxy` command. By default, this will install to a 'galaxy_roles' subfolder in the
 	//   staging/roles directory.
 	GalaxyRolesPath string `mapstructure:"galaxy_roles_path"`
 
-	// The path to the directory on your local system in which to
+	// The path to the directory on the remote system in which to
 	//   install the collections. Adds `--collections-path /path/to/your/collections` to
 	//   `ansible-galaxy` command. By default, this will install to a 'galaxy_collections' subfolder in the
 	//   staging/collections directory.
