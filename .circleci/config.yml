@@ -46,12 +46,12 @@ commands:
           root: .
           paths:
             - ./pkg/
-  build-and-persist-packer-binary-arm64:
+  build-and-persist-packer-binary:
     parameters:
       GOOS:
         type: string
       GOARCH:
-        default: "arm64"
+        default: "amd64"
         type: string
     steps:
       - checkout
