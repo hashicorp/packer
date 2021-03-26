@@ -100,6 +100,11 @@ can also be supplied to override the typical auto-generated key:
   [ListShapes](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/Shape/ListShapes)
   operation available in the Core Services API.
 
+- `shape_config` (map of strings) - The shape configuration for an instance. The shape configuration determines the resources 
+  allocated to an instance. Options:
+  - `ocpus` - The total number of OCPUs available to the instance.
+  - `memory_in_gbs` - The total amount of memory, in gigabytes, available to the instance.
+
 - `subnet_ocid` (string) - The name of the subnet within which a new instance
   is launched and provisioned.
 

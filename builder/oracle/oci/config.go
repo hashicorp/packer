@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest
+//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest,FlexShapeConfig
 
 package oci
 
@@ -48,7 +48,7 @@ type ListImagesRequest struct {
 
 type FlexShapeConfig struct {
 	Ocpus       *float32 `mapstructure:"ocpus" required:"false"`
-	MemoryInGBs *float32 `mapstructure:"ocpus" required:"false"`
+	MemoryInGBs *float32 `mapstructure:"memory_in_gbs" required:"false"`
 }
 
 type Config struct {
