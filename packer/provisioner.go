@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hako/durafmt"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
@@ -135,6 +136,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, c
 type PausedProvisioner struct {
 	PauseBefore time.Duration
 	Provisioner packersdk.Provisioner
+	TickSeconds int
 }
 
 func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -154,12 +156,15 @@ func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
+func (p *PausedProvisioner) ableToPauseWithUpdate() bool {
+	return p.TickSeconds > 0 && p.PauseBefore.Seconds() > float64(p.TickSeconds)
+}
+
 func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
 	if p.PauseBefore == time.Duration(0) {
 		return nil
 	}
 
-	updateTime := 10
 	var C <-chan time.Time
 
 	// If ui is MachineReadableUi, then we don't make ticker that prints updates
@@ -167,8 +172,8 @@ func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
 	case *MachineReadableUi:
 	default:
 		// only if pause time is greater than ticker interval, then we create ticker
-		if p.PauseBefore.Seconds() > float64(updateTime) {
-			ticker := time.NewTicker(time.Duration(updateTime) * time.Second)
+		if p.ableToPauseWithUpdate() {
+			ticker := time.NewTicker(time.Duration(p.TickSeconds) * time.Second)
 			defer ticker.Stop()
 			C = ticker.C
 		}
@@ -178,29 +183,38 @@ func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
 	pausingCtx, cancel := context.WithTimeout(ctx, p.PauseBefore)
 	defer cancel()
 
-	startTime := time.Now()
+	deadlineTime, _ := pausingCtx.Deadline()
+
+	// Have to add a second so that time left messages displays properly
+	deadlineTimeAddSecond := deadlineTime.Add(time.Duration(time.Second))
 
 	for {
 		select {
 		case <-pausingCtx.Done():
 			currentTime := time.Now()
-			endTime := startTime.Add(p.PauseBefore)
-			if currentTime.After(endTime) {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if currentTime.After(deadlineTime) {
 				return nil
 			} else {
 				return pausingCtx.Err()
 			}
+
 		case <-C:
-			totalTime -= float64(updateTime)
+			totalTime -= float64(p.TickSeconds)
+
 			if isTimeRemaining(totalTime) {
-				ui.Say(fmt.Sprintf("%v seconds left until the next provisioner", totalTime))
+				timeLeft := time.Until(deadlineTimeAddSecond)
+				fmtBuildCommandDuration := durafmt.Parse(timeLeft).LimitFirstN(1)
+				ui.Say(fmt.Sprintf("%v left until the next provisioner", fmtBuildCommandDuration))
 			}
 		}
 	}
 }
 
 func isTimeRemaining(totalTime float64) bool {
-	result := totalTime != 0
+	result := totalTime > 0
 	return result
 }
 
