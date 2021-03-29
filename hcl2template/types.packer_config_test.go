@@ -131,7 +131,7 @@ func TestParser_complete(t *testing.T) {
 					},
 				},
 				Datasources: Datasources{
-					DatasourceRef{Type: "amazon-ami", Name: "test"}: Datasource{
+					DatasourceRef{Type: "amazon-ami", Name: "test"}: DatasourceBlock{
 						Type:  "amazon-ami",
 						Name:  "test",
 						value: cty.StringVal("foo"),

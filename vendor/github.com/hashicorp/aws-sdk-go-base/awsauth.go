@@ -201,10 +201,10 @@ func GetCredentialsFromSession(c *Config) (*awsCredentials.Credentials, error) {
 	return creds, nil
 }
 
-// GetCredentials gets credentials from the environment, shared credentials,
-// the session (which may include a credential process), or ECS/EC2 metadata endpoints.
-// GetCredentials also validates the credentials and the ability to assume a role
-// or will return an error if unsuccessful.
+// GetCredentials gets credentials from environment, shared credentials file,
+// environment AWS_SHARED_CREDENTIALS_FILE, the session (which may include a credential process),
+// or ECS/EC2 metadata endpoints. GetCredentials also validates the credentials
+// and the ability to assume a role or will return an error if unsuccessful.
 func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 	sharedCredentialsFilename, err := homedir.Expand(c.CredsFilename)
 
@@ -258,6 +258,11 @@ func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 		Region:           aws.String(c.Region),
 		MaxRetries:       aws.Int(c.MaxRetries),
 		HTTPClient:       cleanhttp.DefaultClient(),
+	}
+
+	if c.DebugLogging {
+		awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
+		awsConfig.Logger = DebugLogger{}
 	}
 
 	assumeRoleSession, err := session.NewSession(awsConfig)
