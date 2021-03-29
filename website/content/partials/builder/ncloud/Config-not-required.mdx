@@ -34,8 +34,7 @@
   access source (0.0.0.0/0) and allowed port (5985) must be created in
   advance.
 
-- `support_vpc` (bool) - Whether to use VPC. By default, the value is false on "public" site. If you want to use VPC environment. Please set this value true.
+- `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
+  (You are required to least one between two parameters if u want using VPC environment: `vpc_no` or `subnet_no`)
 
-- `subnet_no` (string) - The ID of the associated Subnet
-
-- `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance
+- `subnet_no` (string) - The ID of the Subnet where you want to place the Server Instance. If this field is left blank, Packer will try to get the Public Subnet ID from the `vpc_no`.
