@@ -283,6 +283,18 @@ func (c *Config) Prepare(raws ...interface{}) error {
 			errs, errors.New("'shape' must be specified"))
 	}
 
+	if strings.HasSuffix(c.Shape, "Flex") {
+		if c.ShapeConfig.Ocpus == nil {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("'Ocpus' must be specified when using flexible shapes"))
+		}
+	}
+
+	if c.ShapeConfig.MemoryInGBs != nil && c.ShapeConfig.Ocpus == nil {
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("'Ocpus' must be specified if memory_in_gbs is specified"))
+	}
+
 	if (c.SubnetID == "") && (c.CreateVnicDetails.SubnetId == nil) {
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'subnet_ocid' must be specified"))
