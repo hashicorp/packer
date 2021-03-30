@@ -290,7 +290,7 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 		if !variable.Sensitive {
 			continue
 		}
-		value, _ := variable.Value()
+		value := variable.Value()
 		_ = cty.Walk(value, func(_ cty.Path, nested cty.Value) (bool, error) {
 			if nested.IsWhollyKnown() && !nested.IsNull() && nested.Type().Equals(cty.String) {
 				packersdk.LogSecretFilter.Set(nested.AsString())
@@ -310,9 +310,9 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 		return diags
 	}
 
-	_, moreDiags = cfg.InputVariables.Values()
+	moreDiags = cfg.InputVariables.ValidateValues()
 	diags = append(diags, moreDiags...)
-	_, moreDiags = cfg.LocalVariables.Values()
+	moreDiags = cfg.LocalVariables.ValidateValues()
 	diags = append(diags, moreDiags...)
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)

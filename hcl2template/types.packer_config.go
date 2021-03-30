@@ -91,8 +91,8 @@ const (
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
 func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.Value) *hcl.EvalContext {
-	inputVariables, _ := cfg.InputVariables.Values()
-	localVariables, _ := cfg.LocalVariables.Values()
+	inputVariables := cfg.InputVariables.Values()
+	localVariables := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
 		Functions: Functions(cfg.Basedir),
 		Variables: map[string]cty.Value{
@@ -594,7 +594,7 @@ func (p *PackerConfig) printVariables() string {
 	sort.Strings(keys)
 	for _, key := range keys {
 		v := p.InputVariables[key]
-		val, _ := v.Value()
+		val := v.Value()
 		fmt.Fprintf(out, "var.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	out.WriteString("\n> local-variables:\n\n")
@@ -602,7 +602,7 @@ func (p *PackerConfig) printVariables() string {
 	sort.Strings(keys)
 	for _, key := range keys {
 		v := p.LocalVariables[key]
-		val, _ := v.Value()
+		val := v.Value()
 		fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	return out.String()
