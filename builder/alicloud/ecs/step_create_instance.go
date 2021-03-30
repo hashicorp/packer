@@ -39,6 +39,13 @@ var deleteInstanceRetryErrors = []string{
 	"IncorrectInstanceStatus.Initializing",
 }
 
+var diskCategories = []string{
+	"cloud",
+	"cloud_efficiency",
+	"cloud_ssd",
+	"cloud_essd",
+}
+
 func (s *stepCreateAlicloudInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	client := state.Get("client").(*ClientWrapper)
 	ui := state.Get("ui").(packersdk.Ui)
@@ -161,6 +168,13 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 
 	systemDisk := config.AlicloudImageConfig.ECSSystemDiskMapping
 	request.SystemDiskDiskName = systemDisk.DiskName
+	for index, category := range diskCategories {
+		if systemDisk.DiskCategory == category {
+			break
+		} else if index == len(diskCategories)-1 {
+			return nil, fmt.Errorf("The specified system disk category is incorrect.\n")
+		}
+	}
 	request.SystemDiskCategory = systemDisk.DiskCategory
 	request.SystemDiskSize = requests.Integer(convertNumber(systemDisk.DiskSize))
 	request.SystemDiskDescription = systemDisk.Description
@@ -170,6 +184,13 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 	for _, imageDisk := range imageDisks {
 		var dataDisk ecs.CreateInstanceDataDisk
 		dataDisk.DiskName = imageDisk.DiskName
+		for index, category := range diskCategories {
+			if imageDisk.DiskCategory == category {
+				break
+			} else if index == len(diskCategories)-1 {
+				return nil, fmt.Errorf("The specified disk category is incorrect.\n")
+			}
+		}
 		dataDisk.Category = imageDisk.DiskCategory
 		dataDisk.Size = string(convertNumber(imageDisk.DiskSize))
 		dataDisk.SnapshotId = imageDisk.SnapshotId
