@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/ext/dynblock"
+	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -109,7 +109,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 }
 
 func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
-	// verify that all used plugins do exist and expand dynamic bodies
+	// verify that all used plugins do exist
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
@@ -129,12 +129,16 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef]
 			if !found {
+				availableSrcs := listAvailableSourceNames(cfg.Sources)
+				detail := fmt.Sprintf("Known: %v", availableSrcs)
+				if sugg := didyoumean.NameSuggestion(srcUsage.SourceRef.String(), availableSrcs); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
 				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),
+					Summary:  "Unknown " + sourceLabel + " " + srcUsage.SourceRef.String(),
 					Subject:  build.HCL2Ref.DefRange.Ptr(),
 					Severity: hcl.DiagError,
-					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
-					// TODO: show known sources as a string slice here ^.
+					Detail:   detail,
 				})
 				continue
 			}
@@ -144,8 +148,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				// merge additions into source definition to get a new body.
 				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})
 			}
-			// expand any dynamic block.
-			body = dynblock.Expand(body, cfg.EvalContext(BuildContext, nil))
 
 			srcUsage.Body = body
 		}
@@ -159,8 +161,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 				})
 			}
-			// Allow rest of the body to have dynamic blocks
-			provBlock.HCL2Ref.Rest = dynblock.Expand(provBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		if build.ErrorCleanupProvisionerBlock != nil {
@@ -172,8 +172,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 				})
 			}
-			// Allow rest of the body to have dynamic blocks
-			build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest = dynblock.Expand(build.ErrorCleanupProvisionerBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 		}
 
 		for _, ppList := range build.PostProcessorsLists {
@@ -186,8 +184,6 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 						Severity: hcl.DiagError,
 					})
 				}
-				// Allow the rest of the body to have dynamic blocks
-				ppBlock.HCL2Ref.Rest = dynblock.Expand(ppBlock.HCL2Ref.Rest, cfg.EvalContext(BuildContext, nil))
 			}
 		}
 
