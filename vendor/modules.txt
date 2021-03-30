@@ -433,7 +433,7 @@ github.com/hashicorp/packer-plugin-amazon/builder/instance
 github.com/hashicorp/packer-plugin-amazon/datasource/ami
 github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager
 github.com/hashicorp/packer-plugin-amazon/post-processor/import
-# github.com/hashicorp/packer-plugin-docker v0.0.2
+# github.com/hashicorp/packer-plugin-docker v0.0.7
 ## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-import
@@ -583,8 +583,6 @@ github.com/mitchellh/go-testing-interface
 github.com/mitchellh/go-vnc
 # github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
-# github.com/mitchellh/gox v1.0.1
-## explicit
 # github.com/mitchellh/iochan v1.0.0
 github.com/mitchellh/iochan
 # github.com/mitchellh/mapstructure v1.4.0
@@ -608,8 +606,6 @@ github.com/nu7hatch/gouuid
 # github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 ## explicit
 github.com/olekukonko/tablewriter
-# github.com/oracle/oci-go-sdk v18.0.0+incompatible
-## explicit
 # github.com/oracle/oci-go-sdk/v36 v36.2.0
 ## explicit
 github.com/oracle/oci-go-sdk/v36/common
