@@ -307,9 +307,6 @@ func (s *StepCreatePublicIP) Run(ctx context.Context, state multistep.StateBag) 
 	if err == nil {
 		state.Put("public_ip", *publicIPInstance.PublicIp)
 		state.Put("public_ip_instance", publicIPInstance)
-		// instance_id is the generic term used so that users can have access to the
-		// instance id inside of the provisioners, used in step_provision.
-		state.Put("instance_id", *publicIPInstance)
 	}
 
 	return processStepResult(err, s.Error, state)
