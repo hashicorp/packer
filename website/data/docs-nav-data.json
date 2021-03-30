@@ -321,6 +321,10 @@
                     "path": "templates/hcl_templates/functions/collection/flatten"
                   },
                   {
+                    "title": "index",
+                    "path": "templates/hcl_templates/functions/collection/index-fn"
+                  },
+                  {
                     "title": "keys",
                     "path": "templates/hcl_templates/functions/collection/keys"
                   },
@@ -545,6 +549,10 @@
                   {
                     "title": "cidrsubnet",
                     "path": "templates/hcl_templates/functions/ipnet/cidrsubnet"
+                  },
+                  {
+                    "title": "cidrsubnets",
+                    "path": "templates/hcl_templates/functions/ipnet/cidrsubnets"
                   }
                 ]
               },
