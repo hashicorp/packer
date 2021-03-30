@@ -3,7 +3,6 @@ description: |
   The oracle-oci builder is able to create new custom images for use with Oracle
   Cloud Infrastructure (OCI).
 page_title: Oracle OCI - Builders
-sidebar_title: Oracle OCI
 ---
 
 # Oracle Cloud Infrastructure (OCI) Builder
@@ -189,18 +188,19 @@ can also be supplied to override the typical auto-generated key:
 - `use_private_ip` (boolean) - Use private ip addresses to connect to the
   instance via ssh.
 
-- `shape_config` (object) - The shape configuration for an instance. The shape configuration determines the resources 
+- `shape_config` (object) - The shape configuration for an instance. The shape configuration determines the resources
   allocated to an instance. Options:
   - `ocpus` (required when using flexible shapes or memory_in_gbs is set) (float32) - The total number of OCPUs available to the instance.
   - `memory_in_gbs` (optional) (float32) - The total amount of memory, in gigabytes, available to the instance.
 
 <!-- markdown-link-check-disable -->
+
 - `metadata` (map of strings) - Metadata optionally contains custom metadata
-  key/value pairs provided in the configuration. While this can be used to
-  set metadata\["user_data"\] the explicit "user_data" and
-  "user_data_file" values will have precedence. An instance's metadata can
-  be obtained from at [http://169.254.169.254](http://169.254.169.254) on
-  the launched instance.
+key/value pairs provided in the configuration. While this can be used to
+set metadata\["user_data"\] the explicit "user_data" and
+"user_data_file" values will have precedence. An instance's metadata can
+be obtained from at [http://169.254.169.254](http://169.254.169.254) on
+the launched instance.
 <!-- markdown-link-check-enable -->
 
 - `user_data` (string) - User data to be used by cloud-init. See [the Oracle

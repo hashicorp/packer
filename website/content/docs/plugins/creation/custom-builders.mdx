@@ -3,7 +3,6 @@ description: |
   It is possible to write custom builders using the Packer plugin interface, and
   this page documents how to do that.
 page_title: Custom Builders - Extending
-sidebar_title: Custom Builders
 ---
 
 # Custom Builders
@@ -24,7 +23,6 @@ basics](/docs/extending/plugins).
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
 recommend getting comfortable with using Packer and its officially maintained
 plugins before you dive into writing plugins of your own.
-
 
 Custom plugins are written in [golang](https://golang.org/), so this guide
 assumes that you have some familiarity with that programming language.
@@ -53,8 +51,7 @@ function, check our
 
 The `Prepare` method for each builder will be called by the Packer core
 at the beginning of the build. Its purpose is to parse and validate the
-configuration template provided to Packer with `packer build
-your_packer_template.json`, but not to execute API calls or begin creating any
+configuration template provided to Packer with `packer build your_packer_template.json`, but not to execute API calls or begin creating any
 resources or artifacts.
 
 The configuration from your Packer template is passed into the Prepare() method
@@ -107,7 +104,7 @@ the machine, provision it, and create the resulting machine image, which is
 returned as an implementation of the `packer.Artifact` interface.
 
 The `Run` method takes three parameters. The context.Context used to cancel the
-build.  The `packer.Ui` object is used to send output to the console.
+build. The `packer.Ui` object is used to send output to the console.
 `packer.Hook` is used to execute hooks, which are covered in more detail in the
 Provisioning section below.
 
@@ -143,7 +140,6 @@ is a rare use case.
 The `Cancel` method can be called at any time and requests cancellation of any
 builder run in progress. This method should block until the run actually stops.
 Note that the Cancel method will not be called by Packer versions >= 1.4.0.
-
 
 #### Context cancellation ( from Packer v1.4 )
 

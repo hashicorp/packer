@@ -4,7 +4,6 @@ description: |
   configuration template to it's formatted HCL2 counterpart. The command will
   return a zero exit status on success, and a non-zero exit status on failure.
 page_title: packer hcl2_upgrade - Commands
-sidebar_title: <tt>hcl2_upgrade</tt>
 ---
 
 -> **Note:** This command is Beta, and currently being improved upon; do not
@@ -35,16 +34,13 @@ From **v1.7.1**, the `hcl2_upgrade` command can upgrade a variables file.
 
 ```json
 {
-    "variables": {
-        "aws_region": null,
-        "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
-        "aws_secret_key": "",
-        "aws_access_key": "",
-    },
-    "sensitive-variables": [
-        "aws_secret_key",
-        "aws_access_key",
-    ]
+  "variables": {
+    "aws_region": null,
+    "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
+    "aws_secret_key": "",
+    "aws_access_key": ""
+  },
+  "sensitive-variables": ["aws_secret_key", "aws_access_key"]
 }
 ```
 

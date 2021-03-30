@@ -2,7 +2,6 @@
 description: |
   The `packer init` Packer command is used to download Packer plugin binaries.
 page_title: packer init - Commands
-sidebar_title: <tt>init</tt>
 ---
 
 # `init` Command
@@ -37,7 +36,6 @@ for the ones that are missing.
 
 `packer init -upgrade` will try to get the latest versions for all plugins.
 
-
 Import a plugin using the [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
 block :
 
@@ -55,6 +53,7 @@ packer {
 HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; as with all open source tools, please do your own due diligence when using a new tool.
 
 ## Plugin Selection
+
 Plugin selection depends on the source and version constraints defined within the `required_plugins` block.
 For each of the required plugins Packer will query the source repository `github.com/azr/happycloud` whose fully qualified address
 is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.

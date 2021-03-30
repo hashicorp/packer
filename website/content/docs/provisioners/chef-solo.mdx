@@ -4,7 +4,6 @@ description: |
   built by Packer using chef-solo. Cookbooks can be uploaded from your local
   machine to the remote machine or remote paths can be used.
 page_title: Chef Solo - Provisioners
-sidebar_title: Chef Solo
 ---
 
 # Chef Solo Provisioner
@@ -134,7 +133,7 @@ configuration is actually required, but at least `run_list` is recommended.
 
 @include 'provisioners/common-config.mdx'
 
-#####  Node Attribute Mapping
+##### Node Attribute Mapping
 
 An arbitrary mapping of JSON that will be available as node attributes while running Chef.
 
@@ -142,7 +141,7 @@ An arbitrary mapping of JSON that will be available as node attributes while run
 <Tab heading="HCL2">
 
 - `json_string` (string) - The JSON string can be encoded using the [jsonencode](/docs/templates/hcl_templates/functions/encoding/jsonencode)
-template function.
+  template function.
 
 ```hcl
 provisioner "chef-solo" {

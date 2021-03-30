@@ -5,7 +5,6 @@ description: |
   necessary on the image after launching it, then creates a virtual machine
   template.
 page_title: Proxmox ISO - Builders
-sidebar_title: ISO
 ---
 
 # Proxmox Builder (from an ISO)
@@ -223,7 +222,7 @@ builder.
   Defaults to `lsi`.
 
 - `cloud_init` (bool) - If true, add a Cloud-Init CDROM drive after the virtual machine has been converted to a template.
-   Defaults to `false`.
+  Defaults to `false`.
 
 - `cloud_init_storage_pool` - (string) - Name of the Proxmox storage pool
   to store the Cloud-Init CDROM on. If not given, the storage pool of the boot device will be used.
