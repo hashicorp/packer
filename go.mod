@@ -70,7 +70,8 @@ require (
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-	github.com/oracle/oci-go-sdk v24.3.0+incompatible
+	github.com/oracle/oci-go-sdk v18.0.0+incompatible // indirect
+	github.com/oracle/oci-go-sdk/v36 v36.2.0
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.9.1

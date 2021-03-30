@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	ocommon "github.com/hashicorp/packer/builder/oracle/common"
-	"github.com/oracle/oci-go-sdk/core"
+	"github.com/oracle/oci-go-sdk/v36/core"
 )
 
 // BuilderId uniquely identifies the builder

@@ -100,6 +100,8 @@ can also be supplied to override the typical auto-generated key:
   [ListShapes](https://docs.us-phoenix-1.oraclecloud.com/api/#/en/iaas/20160918/Shape/ListShapes)
   operation available in the Core Services API.
 
+  When using flexible shapes, ocpus must be set.
+
 - `subnet_ocid` (string) - The name of the subnet within which a new instance
   is launched and provisioned.
 
@@ -186,6 +188,11 @@ can also be supplied to override the typical auto-generated key:
 
 - `use_private_ip` (boolean) - Use private ip addresses to connect to the
   instance via ssh.
+
+- `shape_config` (object) - The shape configuration for an instance. The shape configuration determines the resources 
+  allocated to an instance. Options:
+  - `ocpus` (required when using flexible shapes or memory_in_gbs is set) (float32) - The total number of OCPUs available to the instance.
+  - `memory_in_gbs` (optional) (float32) - The total amount of memory, in gigabytes, available to the instance.
 
 <!-- markdown-link-check-disable -->
 - `metadata` (map of strings) - Metadata optionally contains custom metadata

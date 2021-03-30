@@ -3,7 +3,7 @@ package oci
 import (
 	"context"
 
-	"github.com/oracle/oci-go-sdk/core"
+	"github.com/oracle/oci-go-sdk/v36/core"
 )
 
 // driverMock implements the Driver interface and communicates with Oracle

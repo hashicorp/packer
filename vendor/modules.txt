@@ -608,11 +608,13 @@ github.com/nu7hatch/gouuid
 # github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 ## explicit
 github.com/olekukonko/tablewriter
-# github.com/oracle/oci-go-sdk v24.3.0+incompatible
+# github.com/oracle/oci-go-sdk v18.0.0+incompatible
 ## explicit
-github.com/oracle/oci-go-sdk/common
-github.com/oracle/oci-go-sdk/common/auth
-github.com/oracle/oci-go-sdk/core
+# github.com/oracle/oci-go-sdk/v36 v36.2.0
+## explicit
+github.com/oracle/oci-go-sdk/v36/common
+github.com/oracle/oci-go-sdk/v36/common/auth
+github.com/oracle/oci-go-sdk/v36/core
 # github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 ## explicit
 github.com/outscale/osc-sdk-go/osc
