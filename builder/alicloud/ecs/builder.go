@@ -135,11 +135,11 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			InstanceType:            b.config.InstanceType,
 			UserData:                b.config.UserData,
 			UserDataFile:            b.config.UserDataFile,
+			RamRoleName:             b.config.RamRoleName,
 			RegionId:                b.config.AlicloudRegion,
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
 			InstanceName:            b.config.InstanceName,
-			RamRoleName:             b.config.RamRoleName,
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == InstanceNetworkVpc {

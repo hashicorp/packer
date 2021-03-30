@@ -23,12 +23,12 @@ type stepCreateAlicloudInstance struct {
 	UserData                string
 	UserDataFile            string
 	instanceId              string
+	RamRoleName             string
 	RegionId                string
 	InternetChargeType      string
 	InternetMaxBandwidthOut int
 	InstanceName            string
 	ZoneId                  string
-	RamRoleName             string
 	instance                *ecs.Instance
 }
 
