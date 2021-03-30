@@ -7,19 +7,27 @@ import {
 import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import resolveNavData from './utils/resolve-nav-data'
 
-async function generateStaticPaths(navDataFile, contentDir, options = {}) {
-  const navData = await resolveNavData(navDataFile, contentDir, options)
+async function generateStaticPaths({
+  navDataFile,
+  localContentDir,
+  remotePluginsFile,
+}) {
+  const navData = await resolveNavData(navDataFile, localContentDir, {
+    remotePluginsFile,
+  })
   const paths = await getPathsFromNavData(navData)
   return paths
 }
 
-async function generateStaticProps(
-  navDataFile,
+async function generateStaticProps({
+  additionalComponents,
   localContentDir,
+  mainBranch = 'main',
+  navDataFile,
   params,
   product,
-  { remotePluginsFile, additionalComponents, mainBranch = 'main' } = {}
-) {
+  remotePluginsFile,
+}) {
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
   })
