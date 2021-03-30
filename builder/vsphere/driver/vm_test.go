@@ -60,3 +60,46 @@ func TestVirtualMachineDriver_Configure(t *testing.T) {
 		t.Fatalf("Configure should fail")
 	}
 }
+
+func TestVirtualMachineDriver_CreateVM(t *testing.T) {
+	sim, err := NewVCenterSimulator()
+	if err != nil {
+		t.Fatalf("should not fail: %s", err.Error())
+	}
+	defer sim.Close()
+
+	_, datastore := sim.ChooseSimulatorPreCreatedDatastore()
+
+	config := &CreateConfig{
+		Annotation: "mock annotation",
+		Name:       "mock name",
+		Host:       "DC0_H0",
+		Datastore:  datastore.Name,
+		NICs: []NIC{
+			{
+				Network:     "VM Network",
+				NetworkCard: "vmxnet3",
+			},
+		},
+		StorageConfig: StorageConfig{
+			DiskControllerType: []string{"pvscsi"},
+			Storage: []Disk{
+				{
+					DiskSize:            3072,
+					DiskThinProvisioned: true,
+					ControllerIndex:     0,
+				},
+				{
+					DiskSize:            20480,
+					DiskThinProvisioned: true,
+					ControllerIndex:     0,
+				},
+			},
+		},
+	}
+
+	_, err = sim.driver.CreateVM(config)
+	if err != nil {
+		t.Fatalf("unexpected error %s", err.Error())
+	}
+}
