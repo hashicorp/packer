@@ -59,6 +59,7 @@ func (c *StorageConfig) AddStorageDevices(existingDevices object.VirtualDeviceLi
 		}
 
 		existingDevices.AssignController(disk, controllers[dc.ControllerIndex])
+		existingDevices = append(existingDevices, disk)
 		newDevices = append(newDevices, disk)
 	}
 
