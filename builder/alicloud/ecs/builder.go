@@ -139,6 +139,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			InternetChargeType:      b.config.InternetChargeType,
 			InternetMaxBandwidthOut: b.config.InternetMaxBandwidthOut,
 			InstanceName:            b.config.InstanceName,
+			RamRoleName:             b.config.RamRoleName,
 			ZoneId:                  b.config.ZoneId,
 		})
 	if b.chooseNetworkType() == InstanceNetworkVpc {

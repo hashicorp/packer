@@ -48,6 +48,7 @@ type FlatConfig struct {
 	ZoneId                            *string                      `mapstructure:"zone_id" required:"false" cty:"zone_id" hcl:"zone_id"`
 	IOOptimized                       *bool                        `mapstructure:"io_optimized" required:"false" cty:"io_optimized" hcl:"io_optimized"`
 	InstanceType                      *string                      `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
+	RamRoleName                       *string                      `mapstructure:"ram_role_name" required:"false" cty:"ram_role_name" hcl:"ram_role_name"`
 	Description                       *string                      `mapstructure:"description" cty:"description" hcl:"description"`
 	AlicloudSourceImage               *string                      `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
 	ForceStopInstance                 *bool                        `mapstructure:"force_stop_instance" required:"false" cty:"force_stop_instance" hcl:"force_stop_instance"`

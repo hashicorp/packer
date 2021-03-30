@@ -64,6 +64,9 @@ type RunConfig struct {
 	// being JSON. It is often more convenient to use user_data_file, instead.
 	// Packer will not automatically wait for a user script to finish before
 	// shutting down the instance this must be handled in a provisioner.
+	RamRoleName string `mapstructure:"ram_role_name" required:"false"`
+	// Ram Role to apply when launching the instance.
+	// Ram role should exist
 	UserData string `mapstructure:"user_data" required:"false"`
 	// Path to a file that will be used for the user
 	// data when launching the instance.

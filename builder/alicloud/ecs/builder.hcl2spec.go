@@ -84,6 +84,7 @@ type FlatConfig struct {
 	ZoneId                            *string                  `mapstructure:"zone_id" required:"false" cty:"zone_id" hcl:"zone_id"`
 	IOOptimized                       *bool                    `mapstructure:"io_optimized" required:"false" cty:"io_optimized" hcl:"io_optimized"`
 	InstanceType                      *string                  `mapstructure:"instance_type" required:"true" cty:"instance_type" hcl:"instance_type"`
+	RamRoleName                       *string                  `mapstructure:"ram_role_name" required:"false" cty:"ram_role_name" hcl:"ram_role_name"`
 	Description                       *string                  `mapstructure:"description" cty:"description" hcl:"description"`
 	AlicloudSourceImage               *string                  `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
 	ForceStopInstance                 *bool                    `mapstructure:"force_stop_instance" required:"false" cty:"force_stop_instance" hcl:"force_stop_instance"`
@@ -215,6 +216,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"vswitch_id":                   &hcldec.AttrSpec{Name: "vswitch_id", Type: cty.String, Required: false},
 		"vswitch_name":                 &hcldec.AttrSpec{Name: "vswitch_name", Type: cty.String, Required: false},
 		"instance_name":                &hcldec.AttrSpec{Name: "instance_name", Type: cty.String, Required: false},
+		"ram_role_name":                &hcldec.AttrSpec{Name: "ram_role_name", Type: cty.String, Required: false},
 		"internet_charge_type":         &hcldec.AttrSpec{Name: "internet_charge_type", Type: cty.String, Required: false},
 		"internet_max_bandwidth_out":   &hcldec.AttrSpec{Name: "internet_max_bandwidth_out", Type: cty.Number, Required: false},
 		"wait_snapshot_ready_timeout":  &hcldec.AttrSpec{Name: "wait_snapshot_ready_timeout", Type: cty.Number, Required: false},
