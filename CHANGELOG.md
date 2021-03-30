@@ -8,23 +8,23 @@
     then, but for the latest offerings of the Amazon plugin, users are
     encourage to use the `packer init` command to install the latest release
     version. For more details see [Installing Packer
-    Plugins](https://www.packer.io/docs/plugins#installing- plugins)
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
 * builder/docker: Has been vendored in this release and will no longer be
     updated with Packer core. In Packer v1.8.0 the plugin will be removed
     entirely. The `docker` builder will continue to work as expected until
     then, but for the latest offerings of the Docker plugin, users are
     encourage to use the `packer init` command to install the latest release
     version. For more details see [Installing Packer
-    Plugins](https://www.packer.io/docs/plugins#installing- plugins)
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
 * darwin/arm64: Packer now includes the darwin/arm64 binary to its releases to
-    supports the new OSX M1.
+    supports the new OSX M1. [GH-10804]
 * post-processor/docker-\*: Have been vendored in this release and will no
     longer be updated with Packer core. In Packer v1.8.0 the plugin will be
     removed entirely. The `docker` builder will continue to work as expected
     until then, but for the latest offerings of the Docker plugin, users are
     encourage to use the `packer init` command to install the latest release
     version. For more details see [Installing Packer
-    Plugins](https://www.packer.io/docs/plugins#installing- plugins)
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
 * post-processor/exoscale-import: Has been vendored in this release and will no
     longer be updated with Packer core. In Packer v1.8.0 the plugin will be
     removed entirely. The `exoscale-import` post-processor will continue to
@@ -34,14 +34,15 @@
     Repostiroy](https://github.com/exoscale/packer-plugin-exoscale). [GH-10709]
 
 ### IMPROVEMENTS
-* builder/amazon: allow creation of ebs snapshots wihtout volumes. [GH-9591]
+* builder/amazon: allow creation of ebs snapshots without volumes. [GH-9591]
 * builder/amazon: Fix issue for multi-region AMI build that fail when
     encrypting with KMS and sharing across accounts. [GH-10754]
 * builder/azure: Add client_cert_token_timeout option. [GH-10528]
 * builder/google: Make Windows password timeout configurable. [GH-10727]
-* builder/google: Make Windows password timeout configurable. [GH-10727]
 * builder/google: Update public GCP image project as gce-uefi-images are
     deprecated. [GH-10724]
+* builder/oracle-oci: Update Oracle Go SDK to add support for OCI flexible
+    shapes.  [GH-10833]
 * builder/proxmox: Allow using API tokens for Proxmox authentication.
     [GH-10797]
 * builder/qemu: Added firmware option. [GH-10683]
@@ -60,6 +61,8 @@
 * command/fmt: Adding recursive flag to formatter to format subdirectories.
     [GH-10457]
 * core/hcl2: Add legacy_isotime function. [GH-10780]
+* core/hcl2: Add support for generating `dynamic` blocks within a `build`
+    block. [GH-10825]
 * core/hcl2: Add templatefile function. [GH-10776]
 * core/hcl2_upgrade: hcl2_upgrade command can now upgrade json var-files.
     [GH-10676]
@@ -100,6 +103,8 @@
     func. [GH-10748]
 * builder/vmware: Added a fallback file check when trying to determine the
     network-mapping configuration. [GH-10543]
+* builder/vsphere: Fix invalid device configuration issue when creating a
+    vm with multiple disk on the same controller. [GH-10844]
 * builder/vsphere: Fix issue where boot command would fail the build do to a
     key typing error. This change will now retry to type the key on error
     before giving up. [GH-10541]

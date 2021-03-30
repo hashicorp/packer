@@ -230,29 +230,65 @@ Here's what you need to create releases using GitHub Actions:
 `packer init` allows users to require and install remote Packer plugins, those not bundled with Packer core, that have been published to GitHub automatically.
 To help with the discovery of remote Packer plugins on GitHub, plugins maintainers can choose to register plugin documentation for each component directly on the [Packer Documentation Page](https://packer.io/docs).
 
-The registration process involves the creation of an additional `docs.zip` asset as part of the [`goreleaser.yml` workflow](https://github.com/hashicorp/packer-plugin-docker/blob/main/.goreleaser.yml). For details on this workflow, see [the "registering documentation" section of the packer-plugin-scaffolding README](https://github.com/hashicorp/packer-plugin-scaffolding#registering-documentation-on-packerio).
+The registration process requires the creation of a `docs.zip` file archive containing the `.mdx` files for each of the plugin components in the remote plugin's repository. A working example can be seen at the [packer-plugin-docker repository](https://github.com/hashicorp/packer-plugin-docker/releases/latest).
 
-After publishing a release from the plugin repository, open a pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin documentation.
-This is done by adding the block below for the respective plugin to the file [docs-remote-plugins.json](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
+Once in place the remote plugin can be added to Packer's website builds by opening a pull-request against [hashicorp/packer](https://github.com/packer), with the needed configuration for pulling in the remote documentation.
+
+Remote plugins will have their components listed under the respected types (i.e builders, provisioners, etc) using the names specified in the remote block configuration, and labeled with their respective [tier and namespace](/docs/plugins#tiers-and-namespaces).
+
+To register a plugin follow one of the following setups
+
+<Tabs>
+<Tab heading="Generating docs.zip on plugin release">
+
+Documentation for a plugin is maintained within the `docs` directory and served on GitHub.
+
+To include plugin docs on Packer.io a global pre-hook has been added to the main scaffolding [.goreleaser.yml](https://github.com/hashicorp/packer-plugin-scaffolding/blob/42e5b0b1e575879b0477cb6d4291e027f4d92f85/.goreleaser.yml#L10) file, that if uncommented will generate and include a docs.zip file as part of the plugin release.
+
+The `docs.zip` file will contain all of the `.mdx` files under the plugins root `docs/` directory that can be consumed remotely by Packer.io.
+
+Once the first `docs.zip` file has been included into a release you will need to open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
+
+This is done by adding the block below for the respective plugin to the file [website/data/docs-remote-navigation.js](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
 
 ```json
 {
-  "title": "Docker",
-  "path": "docker",
-  "repo": "hashicorp/packer-plugin-docker",
-  "version": "1.0.0"
-}
+   "title": "Scaffolding",
+   "path": "scaffolding",
+   "repo": "hashicorp/packer-plugin-scaffolding",
+   "version": "latest"
+ }
 ```
 
-#### Required fields
+If a plugin maintainer wishes to only include a specific version of released docs then the `"version"` key in the above configuration should be set to a released version of the plugin. Otherwise it should be set to "latest".
 
-`title`: The name of the plugin to be displayed in the sidebar - See [naming conventions](#naming-conventions)
+</Tab>
 
-`path`: The path name for the documentation page, which is usually the lower case version of `title` (e.g https)
+<Tab heading="Manually generating docs.zip">
 
-`repo`: The full name of the GitHub repository (i.e org/repo-name)
+The documentation structure needed for Packer.io can be generated manually, by creating a zip file called `docs.zip` of the docs directory and included in the plugin release.
 
-`version`: The release version from which docs will be pulled (e.g. `1.0.0`)
+```/bin/bash
+[[ -d docs/ ]] && zip -r docs.zip docs/
+```
+
+Once the first `docs.zip` file has been included into a release you will need to open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
+
+This is done by adding the block below for the respective plugin to the file [website/data/docs-remote-navigation.js](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
+
+```json
+{
+   "title": "Scaffolding",
+   "path": "scaffolding",
+   "repo": "hashicorp/packer-plugin-scaffolding",
+   "version": "latest"
+ }
+```
+
+If a plugin maintainer wishes to only include a specific version of released docs then the `"version"` key in the above configuration should be set to a released version of the plugin. Otherwise it should be set to "latest".
+
+</Tab>
+</Tabs>
 
 ### Plugin Development Tips and FAQs
 
