@@ -49,7 +49,7 @@ package:
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
 install-build-deps: ## Install dependencies for bin build
-	@go get github.com/mitchellh/gox
+	@go install github.com/mitchellh/gox@v1.0.1
 
 install-gen-deps: ## Install dependencies for code generation
 	# to avoid having to tidy our go deps, we `go get` our binaries from a temp
