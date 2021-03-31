@@ -32,7 +32,7 @@ type VirtualMachine interface {
 	Destroy() error
 	Configure(config *HardwareConfig) error
 	Customize(spec types.CustomizationSpec) error
-	ResizeDisk(diskSize int64) error
+	ResizeDisk(diskSize int64) ([]types.BaseVirtualDeviceConfigSpec, error)
 	WaitForIP(ctx context.Context, ipNet *net.IPNet) (string, error)
 	PowerOn() error
 	PowerOff() error
@@ -68,18 +68,19 @@ type VirtualMachineDriver struct {
 }
 
 type CloneConfig struct {
-	Name           string
-	Folder         string
-	Cluster        string
-	Host           string
-	ResourcePool   string
-	Datastore      string
-	LinkedClone    bool
-	Network        string
-	MacAddress     string
-	Annotation     string
-	VAppProperties map[string]string
-	StorageConfig  StorageConfig
+	Name            string
+	Folder          string
+	Cluster         string
+	Host            string
+	ResourcePool    string
+	Datastore       string
+	LinkedClone     bool
+	Network         string
+	MacAddress      string
+	Annotation      string
+	VAppProperties  map[string]string
+	PrimaryDiskSize int64
+	StorageConfig   StorageConfig
 }
 
 type HardwareConfig struct {
@@ -339,6 +340,15 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 	if err != nil {
 		return nil, err
 	}
+
+	if config.PrimaryDiskSize > 0 {
+		deviceResizeSpec, err := vm.ResizeDisk(config.PrimaryDiskSize)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resize primary disk: %s", err.Error())
+		}
+		configSpec.DeviceChange = append(configSpec.DeviceChange, deviceResizeSpec...)
+	}
+
 	virtualDisks := devices.SelectByType((*types.VirtualDisk)(nil))
 	virtualControllers := devices.SelectByType((*types.VirtualController)(nil))
 
@@ -349,7 +359,7 @@ func (vm *VirtualMachineDriver) Clone(ctx context.Context, config *CloneConfig) 
 
 	storageConfigSpec, err := config.StorageConfig.AddStorageDevices(existingDevices)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to add storage devices: %s", err.Error())
 	}
 	configSpec.DeviceChange = append(configSpec.DeviceChange, storageConfigSpec...)
 
@@ -597,35 +607,25 @@ func (vm *VirtualMachineDriver) Customize(spec types.CustomizationSpec) error {
 	return task.Wait(vm.driver.ctx)
 }
 
-func (vm *VirtualMachineDriver) ResizeDisk(diskSize int64) error {
-	var confSpec types.VirtualMachineConfigSpec
-
+func (vm *VirtualMachineDriver) ResizeDisk(diskSize int64) ([]types.BaseVirtualDeviceConfigSpec, error) {
 	devices, err := vm.vm.Device(vm.driver.ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	disk, err := findDisk(devices)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	disk.CapacityInKB = diskSize * 1024
 
-	confSpec.DeviceChange = []types.BaseVirtualDeviceConfigSpec{
+	return []types.BaseVirtualDeviceConfigSpec{
 		&types.VirtualDeviceConfigSpec{
 			Device:    disk,
 			Operation: types.VirtualDeviceConfigSpecOperationEdit,
 		},
-	}
-
-	task, err := vm.vm.Reconfigure(vm.driver.ctx, confSpec)
-	if err != nil {
-		return err
-	}
-
-	_, err = task.WaitForResult(vm.driver.ctx, nil)
-	return err
+	}, nil
 }
 
 func (vm *VirtualMachineDriver) PowerOn() error {
