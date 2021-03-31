@@ -187,7 +187,7 @@ func wrappedMain() int {
 		// Set this so that we don't get colored output in our machine-
 		// readable UI.
 		if err := os.Setenv("PACKER_NO_COLOR", "1"); err != nil {
-			fmt.Fprintf(os.Stdout, "%s Packer failed to initialize UI: %s\n", ErrorPrefix, err)
+			ui.Error(fmt.Sprintf("Packer failed to initialize UI: %s\n", err))
 			return 1
 		}
 	} else {
@@ -202,13 +202,12 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				fmt.Fprintf(os.Stdout, "%s cannot determine if process is in "+
-					"background: %s\n", ErrorPrefix, err)
+				ui.Error(fmt.Sprintf("cannot determine if process is in background: %s\n", err))
 			}
 			if backgrounded {
-				fmt.Fprintf(os.Stdout, "%s Running in background, not using a TTY\n", ErrorPrefix)
+				ui.Error("Running in background, not using a TTY\n")
 			} else if TTY, err := openTTY(); err != nil {
-				fmt.Fprintf(os.Stdout, "%s No tty available: %s\n", ErrorPrefix, err)
+				ui.Error(fmt.Sprintf("No tty available: %s\n", err))
 			} else {
 				basicUi.TTY = TTY
 				basicUi.PB = &packer.UiProgressBar{}
@@ -246,7 +245,7 @@ func wrappedMain() int {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "%s Error executing CLI: %s\n", ErrorPrefix, err)
+		ui.Error(fmt.Sprintf("Error executing CLI: %s\n", err))
 		return 1
 	}
 
