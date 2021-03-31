@@ -362,9 +362,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 	// Set default boot volume size to 50 if not set
 	// Check if size set is allowed by OCI
-	if c.BootVolumeSizeInGBs == 0 {
-		c.BootVolumeSizeInGBs = 50
-	} else if c.BootVolumeSizeInGBs < 50 || c.BootVolumeSizeInGBs > 16384 {
+	if c.BootVolumeSizeInGBs != 0 && (c.BootVolumeSizeInGBs < 50 || c.BootVolumeSizeInGBs > 16384) {
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'disk_size' must be between 50 and 16384 GBs"))
 	}

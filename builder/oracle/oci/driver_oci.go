@@ -140,9 +140,10 @@ func (d *driverOCI) CreateInstance(ctx context.Context, publicKey string) (strin
 	}
 
 	// Create Source details which will be used to Launch Instance
-	InstanceSourceDetails := core.InstanceSourceViaImageDetails{
-		ImageId:             imageId,
-		BootVolumeSizeInGBs: &d.cfg.BootVolumeSizeInGBs,
+	InstanceSourceDetails := core.InstanceSourceViaImageDetails{ImageId: imageId}
+
+	if d.cfg.BootVolumeSizeInGBs != 0 {
+		InstanceSourceDetails.BootVolumeSizeInGBs = &d.cfg.BootVolumeSizeInGBs
 	}
 
 	// Build instance details
