@@ -92,8 +92,10 @@ func (s *StepCreateInitScript) deleteVpcInitScript(initScriptNo string) error {
 }
 
 func (s *StepCreateInitScript) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
+	if len(s.Config.UserData) == 0 && len(s.Config.UserDataFile) == 0 {
+		return multistep.ActionContinue
+	}
 	s.Say("Create Init script")
-
 	initScriptNo, err := s.CreateInitScript()
 	if err == nil && initScriptNo != "" {
 		state.Put("init_script_no", initScriptNo)

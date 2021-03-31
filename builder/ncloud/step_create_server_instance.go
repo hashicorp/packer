@@ -80,8 +80,8 @@ func (s *StepCreateServerInstance) createClassicServerInstance(loginKeyName stri
 		reqParams.UserData = ncloud.String(string(contents))
 	}
 
-	if s.Config.AccessControlGroupConfigurationNo != "" {
-		reqParams.AccessControlGroupConfigurationNoList = []*string{&s.Config.AccessControlGroupConfigurationNo}
+	if s.Config.AccessControlGroupNo != "" {
+		reqParams.AccessControlGroupConfigurationNoList = []*string{&s.Config.AccessControlGroupNo}
 	}
 
 	serverInstanceList, err := s.Conn.server.V2Api.CreateServerInstances(reqParams)
@@ -111,14 +111,10 @@ func (s *StepCreateServerInstance) createVpcServerInstance(loginKeyName string, 
 		initScriptNo = v.(string)
 	}
 
-	if s.Config.AccessControlGroupConfigurationNo != "" {
-		acgNo = s.Config.AccessControlGroupConfigurationNo
+	if s.Config.AccessControlGroupNo != "" {
+		acgNo = s.Config.AccessControlGroupNo
 	} else {
-		acgNo, err = s.getDefaultAccessControlGroup(s.Config.VpcNo)
-	}
-
-	if err != nil {
-		return "", err
+		acgNo = state.Get("access_control_group_no").(string)
 	}
 
 	reqParams := &vserver.CreateServerInstancesRequest{
@@ -158,31 +154,6 @@ func (s *StepCreateServerInstance) createVpcServerInstance(loginKeyName string, 
 	return s.serverInstanceNo, nil
 }
 
-func (s *StepCreateServerInstance) getDefaultAccessControlGroup(id string) (string, error) {
-	reqParams := &vserver.GetAccessControlGroupListRequest{
-		RegionCode: &s.Config.RegionCode,
-		VpcNo:      ncloud.String(id),
-	}
-
-	resp, err := s.Conn.vserver.V2Api.GetAccessControlGroupList(reqParams)
-
-	if err != nil {
-		return "", err
-	}
-
-	if resp == nil || len(resp.AccessControlGroupList) == 0 {
-		return "", fmt.Errorf("no matching Access Control Group found")
-	}
-
-	for _, i := range resp.AccessControlGroupList {
-		if *i.IsDefault {
-			return *i.AccessControlGroupNo, nil
-		}
-	}
-
-	return "", fmt.Errorf("no matching default Access Control Group found")
-}
-
 func (s *StepCreateServerInstance) getClassicServerInstance() (string, string, error) {
 	reqParams := &server.GetServerInstanceListRequest{
 		ServerInstanceNoList: []*string{&s.serverInstanceNo},
@@ -219,7 +190,7 @@ func (s *StepCreateServerInstance) getVpcServerInstance() (string, string, error
 
 func (s *StepCreateServerInstance) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Create Server Instance")
-	var loginKey = state.Get("login_key").(*LoginKey)
+	loginKey := state.Get("login_key").(*LoginKey)
 
 	feeSystemTypeCode := "MTRAT"
 	if _, ok := state.GetOk("fee_system_type_code"); ok {

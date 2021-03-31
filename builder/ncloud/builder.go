@@ -50,6 +50,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		NewStepValidateTemplate(conn, ui, &b.config),
 		NewStepCreateLoginKey(conn, ui, &b.config),
 		multistep.If(b.config.SupportVPC, NewStepCreateInitScript(conn, ui, &b.config)),
+		multistep.If(b.config.SupportVPC, NewStepCreateAccessControlGroup(conn, ui, &b.config)),
 		NewStepCreateServerInstance(conn, ui, &b.config),
 		NewStepCreateBlockStorage(conn, ui, &b.config),
 		NewStepGetRootPassword(conn, ui, &b.config),

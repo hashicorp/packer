@@ -54,16 +54,19 @@ type Config struct {
 	// (default: Korea)
 	Region     string `mapstructure:"region" required:"false"`
 	RegionCode string `mapstructure:"region_code" required:"false"`
+	// Deprecated
+	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no" required:"false"`
 	// This is used to allow
 	// winrm access when you create a Windows server. An ACG that specifies an
 	// access source (0.0.0.0/0) and allowed port (5985) must be created in
-	// advance.
-	AccessControlGroupConfigurationNo string `mapstructure:"access_control_group_configuration_no" required:"false"`
-	// Whether to use VPC. By default, the value is false on "public" site. If you want to use VPC environment. Please set this value true.
+	// advance if you use CLASSIC env. If this field is left blank,
+	// Packer will create temporary ACG for automatically in VPC environment.
+	AccessControlGroupNo string `mapstructure:"access_control_group_no" required:"false"`
 	SupportVPC bool `mapstructure:"support_vpc" required:"false"`
-	// The ID of the associated Subnet
+	// The ID of the Subnet where you want to place the Server Instance. If this field is left blank, Packer will try to get the Public Subnet ID from the `vpc_no`.
 	SubnetNo string `mapstructure:"subnet_no" required:"false"`
-	// The ID of the VPC where you want to place the Server Instance
+	// The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
+	// (You are required to least one between two parameters if u want using VPC environment: `vpc_no` or `subnet_no`)
 	VpcNo string `mapstructure:"vpc_no" required:"false"`
 
 	Comm communicator.Config `mapstructure:",squash"`
@@ -141,12 +144,16 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packersdk.MultiErrorAppend(errs, errors.New("if `user_data` field is set, length of UserData should be max 21847"))
 	}
 
-	if c.Comm.Type == "winrm" && c.AccessControlGroupConfigurationNo == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("if Communicator is winrm, `access_control_group_configuration_no` (allow 5986 port) is required"))
+	if c.AccessControlGroupConfigurationNo != "" {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("`access_control_group_configuration_no` is deprecated, please use `access_control_group_no` instead"))
 	}
 
 	if c.VpcNo != "" || c.SubnetNo != "" {
 		c.SupportVPC = true
+	}
+
+	if c.Comm.Type == "winrm" && c.AccessControlGroupNo == "" && !c.SupportVPC {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if Communicator is winrm, `access_control_group_no` (allow 5986 port) is required in `CLASSIC` environment"))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {

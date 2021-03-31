@@ -8,18 +8,18 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 )
 
-func TestStepCreateInitScriptShouldFailIfOperationCreateInitScriptFails(t *testing.T) {
-	var testSubject = &StepCreateInitScript{
-		CreateInitScript: func() (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
-		Say:              func(message string) {},
-		Error:            func(e error) {},
+func TestStepCreateAccessControlGroupShouldFailIfOperationCreateAccessControlGroupFails(t *testing.T) {
+	var testSubject = &StepCreateAccessControlGroup{
+		CreateAccessControlGroup: func() (string, error) { return "", fmt.Errorf("!! Unit Test FAIL !!") },
+		Say:                      func(message string) {},
+		Error:                    func(e error) {},
 		Config: &Config{
 			Region:     "Korea",
 			SupportVPC: true,
 		},
 	}
 
-	stateBag := createTestStateBagStepCreateInitScript()
+	stateBag := createTestStateBagStepCreateAccessControlGroup()
 
 	var result = testSubject.Run(context.Background(), stateBag)
 
@@ -32,18 +32,21 @@ func TestStepCreateInitScriptShouldFailIfOperationCreateInitScriptFails(t *testi
 	}
 }
 
-func TestStepCreateInitScriptShouldPassIfOperationCreateInitScriptPasses(t *testing.T) {
-	var testSubject = &StepCreateInitScript{
-		CreateInitScript: func() (string, error) { return "123", nil },
-		Say:              func(message string) {},
-		Error:            func(e error) {},
+func TestStepCreateAccessControlGroupShouldPassIfOperationCreateAccessControlGroupPasses(t *testing.T) {
+	var testSubject = &StepCreateAccessControlGroup{
+		CreateAccessControlGroup: func() (string, error) { return "123", nil },
+		AddAccessControlGroupRule: func(acgNo string) error {
+			return nil
+		},
+		Say:   func(message string) {},
+		Error: func(error) {},
 		Config: &Config{
 			Region:     "Korea",
 			SupportVPC: true,
 		},
 	}
 
-	stateBag := createTestStateBagStepCreateInitScript()
+	stateBag := createTestStateBagStepCreateAccessControlGroup()
 
 	var result = testSubject.Run(context.Background(), stateBag)
 
@@ -56,7 +59,7 @@ func TestStepCreateInitScriptShouldPassIfOperationCreateInitScriptPasses(t *test
 	}
 }
 
-func createTestStateBagStepCreateInitScript() multistep.StateBag {
+func createTestStateBagStepCreateAccessControlGroup() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
 	return stateBag

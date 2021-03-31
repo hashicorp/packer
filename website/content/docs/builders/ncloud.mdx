@@ -31,9 +31,8 @@ Platform](https://www.ncloud.com/).
 - `server_image_product_code` (string) - Product code of an image to create.
   (member_server_image_no is required if not specified)
 
-- `server_product_code` (string) - Product (spec) code to create.
-
 ### Optional:
+- `server_product_code` (string) - Product (spec) code to create.
 
 - `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
   (You are required to least one between two parameters if u want using VPC environment: `vpc_no` or `subnet_no`)
@@ -51,10 +50,10 @@ Platform](https://www.ncloud.com/).
 - `block_storage_size` (number) - You can add block storage ranging from 10
   GB to 2000 GB, in increments of 10 GB.
 
-- `access_control_group_configuration_no` (string) - This is used to allow
+- `access_control_group_no` (string) - This is used to allow
   winrm access when you create a Windows server. An ACG that specifies an
   access source (`0.0.0.0/0`) and allowed port (5985) must be created in
-  advance.
+  advance if you use CLASSIC env. If this field is left blank, Packer will create temporary ACG for automatically in VPC environment.
 
 - `user_data` (string) - User data to apply when launching the instance. Note
   that you need to be careful about escaping characters due to the templates
@@ -104,6 +103,7 @@ source "ncloud" "example-windows" {
   subnet_no                             = "{{YOUR_SUBNET_ID}}" // Remove this if you use CLASSIC environment.
   communicator                          = "winrm"
   winrm_username                        = "Administrator"
+  # access_control_group_no             = "{{YOUR_ACG_ID}}" // Specific ACG ID allowed port (5985) if you use CLASSIC environment.
 }
 
 build {
@@ -111,7 +111,7 @@ build {
 
   provisioner "powershell" {
     inline = [
-      "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet /mode:vm \"/unattend:C:\\Program Files (x86)\\example\\nserver64.xml\" "
+      "Write-Output 1,2,3 | Measure-Object"
     ]
   }
 }
@@ -144,7 +144,7 @@ build {
     {
       "type": "powershell",
       "inline": [
-        "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet /mode:vm \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
+        "Write-Output 1,2,3 | Measure-Object"
       ]
     }
   ]
@@ -195,7 +195,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "sleep 30", "yum install redis.x86_64 -y"
+      "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'"
     ]
   }
 }
@@ -226,7 +226,7 @@ build {
     {
       "type": "shell",
       "inline": [
-        "sleep 30", "yum install redis.x86_64 -y"
+        "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'"
       ]
     }
   ]

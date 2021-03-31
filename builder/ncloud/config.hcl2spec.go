@@ -31,6 +31,7 @@ type FlatConfig struct {
 	Region                            *string           `mapstructure:"region" required:"false" cty:"region" hcl:"region"`
 	RegionCode                        *string           `mapstructure:"region_code" required:"false" cty:"region_code" hcl:"region_code"`
 	AccessControlGroupConfigurationNo *string           `mapstructure:"access_control_group_configuration_no" required:"false" cty:"access_control_group_configuration_no" hcl:"access_control_group_configuration_no"`
+	AccessControlGroupNo              *string           `mapstructure:"access_control_group_no" required:"false" cty:"access_control_group_no" hcl:"access_control_group_no"`
 	SupportVPC                        *bool             `mapstructure:"support_vpc" required:"false" cty:"support_vpc" hcl:"support_vpc"`
 	SubnetNo                          *string           `mapstructure:"subnet_no" required:"false" cty:"subnet_no" hcl:"subnet_no"`
 	VpcNo                             *string           `mapstructure:"vpc_no" required:"false" cty:"vpc_no" hcl:"vpc_no"`
@@ -118,6 +119,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"region":                                &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
 		"region_code":                           &hcldec.AttrSpec{Name: "region_code", Type: cty.String, Required: false},
 		"access_control_group_configuration_no": &hcldec.AttrSpec{Name: "access_control_group_configuration_no", Type: cty.String, Required: false},
+		"access_control_group_no":               &hcldec.AttrSpec{Name: "access_control_group_no", Type: cty.String, Required: false},
 		"support_vpc":                           &hcldec.AttrSpec{Name: "support_vpc", Type: cty.Bool, Required: false},
 		"subnet_no":                             &hcldec.AttrSpec{Name: "subnet_no", Type: cty.String, Required: false},
 		"vpc_no":                                &hcldec.AttrSpec{Name: "vpc_no", Type: cty.String, Required: false},
