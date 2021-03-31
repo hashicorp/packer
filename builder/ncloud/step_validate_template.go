@@ -417,13 +417,11 @@ func (s *StepValidateTemplate) validateVpc() error {
 			return err
 		}
 
-		if resp != nil && *resp.TotalRows > 0 && *resp.SubnetList[0].SubnetType.Code != "PUBLIC" {
-			if s.Config.VpcNo == "" {
-				s.Config.VpcNo = *resp.SubnetList[0].VpcNo
-				s.Say("Set `vpc_no` is " + s.Config.VpcNo)
-			}
+		if resp != nil && *resp.TotalRows > 0 && *resp.SubnetList[0].SubnetType.Code == "PUBLIC" {
+			s.Config.VpcNo = *resp.SubnetList[0].VpcNo
+			s.Say("Set `vpc_no` is " + s.Config.VpcNo)
 		} else {
-			return fmt.Errorf("cloud not found public subnet in `vpc_no` [%s]", s.Config.VpcNo)
+			return fmt.Errorf("cloud not found public subnet in `subnet_no` [%s]", s.Config.SubnetNo)
 		}
 	}
 
