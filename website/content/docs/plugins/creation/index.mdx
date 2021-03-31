@@ -4,7 +4,6 @@ description: |
   infinite, Packer supports plugins for builders, provisioners, and
   post-processors.
 page_title: Extending
-sidebar_title: Extending Packer
 ---
 
 # Extending Packer
@@ -43,8 +42,9 @@ provisioners, post-processors, and data sources.
 Each of these components has a corresponding [interface](https://golang.org/doc/effective_go.html#interfaces_and_types).
 
 All you need to do to create a plugin is:
-  1. create an implementation of the desired interface, and
-  2. serve it using the server provided in the [packer-plugin-sdk](https://github.com/hashicorp/packer-plugin-sdk).
+
+1. create an implementation of the desired interface, and
+2. serve it using the server provided in the [packer-plugin-sdk](https://github.com/hashicorp/packer-plugin-sdk).
 
 The core and the SDK handle all of the communication details inside the server.
 
@@ -110,10 +110,10 @@ be referenced by using only the plugin name. For example:
 If your plugin is named `packer-plugin-my`, the above set definition would make
 the following components available:
 
-* the `my-example` builder
-* the `my` builder
-* the `my-foo` post-processor
-* the `my-bar` provisioner
+- the `my-example` builder
+- the `my` builder
+- the `my-foo` post-processor
+- the `my-bar` provisioner
 
 </Tab>
 
@@ -152,7 +152,6 @@ because the `packer init` command only supports multi-component plugins.
 </Tab>
 </Tabs>
 
-
 Next, build your plugin as you would any other Go application. The resulting
 binary is the plugin that can be installed using
 [standard installation procedures](/docs/plugins#installing-plugins).
@@ -190,7 +189,7 @@ the logs to be helpful.
 
 `packer init` does not work using a centralized registry. Instead, it requires
 you to publish your plugin in a GitHub repo with the name
-`packer-plugin-*` where * represents the name of your plugin. You also need to
+`packer-plugin-*` where \* represents the name of your plugin. You also need to
 create a GitHub release of your plugin with specific assets for the
 `packer init` download to work. We provide a pre-defined release workflow
 configuration using
@@ -200,28 +199,29 @@ release contains the right assets with the right names for Packer to leverage
 `packer init` installation.
 
 Here's what you need to create releases using GitHub Actions:
+
 1. Generate a GPG key to be used when signing releases (See [GitHub's detailed instructions](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/generating-a-new-gpg-key)
-for help with this step)
+   for help with this step)
 2. Copy the [GoReleaser configuration from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.goreleaser.yml) to the root of your repository.
-	```sh
-	curl -L -o .goreleaser.yml \
-	https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.goreleaser.yml
-	```
+   ```sh
+   curl -L -o .goreleaser.yml \
+   https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.goreleaser.yml
+   ```
 3. Copy the [GitHub Actions workflow from the packer-plugin-scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.github/workflows/release.yml) to `.github/workflows/release.yml` in your repository.
-	```sh
-  mkdir -p .github/workflows &&
-  curl -L -o .github/workflows/release.yml \
-  https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.github/workflows/release.yml
-	```
+   ```sh
+   mkdir -p .github/workflows &&
+   curl -L -o .github/workflows/release.yml \
+   https://raw.githubusercontent.com/hashicorp/packer-plugin-scaffolding/main/.github/workflows/release.yml
+   ```
 4. Go to your repository page on GitHub and navigate to Settings > Secrets. Add
-	the following secrets:
-    - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
-    - `PASSPHRASE` - The passphrase for your GPG private key.
+   the following secrets:
+   - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
+   - `PASSPHRASE` - The passphrase for your GPG private key.
 5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions
-releaser is working. The tag must be a valid
-[Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
-to install a plugin using `packer init`, see the
-[init docs](/docs/commands/init).
+   releaser is working. The tag must be a valid
+   [Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
+   to install a plugin using `packer init`, see the
+   [init docs](/docs/commands/init).
 
 ### Registering Plugin Documentation
 
@@ -296,9 +296,9 @@ If a plugin maintainer wishes to only include a specific version of released doc
 
 Here's a non exaustive list of Packer plugins that you can check out:
 
-* [github.com/hashicorp/packer-plugin-docker](https://github.com/hashicorp/packer-plugin-docker)
-* [github.com/exoscale/packer-plugin-exoscale](https://github.com/exoscale/packer-plugin-exoscale)
-* [github.com/sylviamoss/packer-plugin-comment](https://github.com/sylviamoss/packer-plugin-comment)
+- [github.com/hashicorp/packer-plugin-docker](https://github.com/hashicorp/packer-plugin-docker)
+- [github.com/exoscale/packer-plugin-exoscale](https://github.com/exoscale/packer-plugin-exoscale)
+- [github.com/sylviamoss/packer-plugin-comment](https://github.com/sylviamoss/packer-plugin-comment)
 
 Looking at their code will give you good examples.
 
@@ -314,8 +314,8 @@ scope of a plugin.
 
 Making your unpublished plugin available to Packer is possible by either:
 
-* Starting Packer from the directory where the plugin binary is located.
-* Putting the plugin binary in the same directory as Packer.
+- Starting Packer from the directory where the plugin binary is located.
+- Putting the plugin binary in the same directory as Packer.
 
 In both these cases, if the binary is called `packer-plugin-myawesomecloud` and
 defines an `ebs` builder then you will be able to use an `myawesomecloud-ebs`

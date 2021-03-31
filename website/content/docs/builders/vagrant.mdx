@@ -3,7 +3,6 @@ description: |
   The Vagrant Packer builder is able to launch Vagrant boxes and
   re-package them into .box files
 page_title: Vagrant - Builders
-sidebar_title: Vagrant
 ---
 
 # Vagrant Builder
@@ -185,13 +184,13 @@ build {
 
 ## Regarding output directory and new box
 
-After Packer completes building and provisioning a new Vagrant Box file, it is worth 
-noting that the new box file will need to be added to Vagrant. For a beginner to Packer 
+After Packer completes building and provisioning a new Vagrant Box file, it is worth
+noting that the new box file will need to be added to Vagrant. For a beginner to Packer
 and Vagrant, it may seem as if a simple 'vagrant up' in the output directory will run the
-the newly created Box. This is not the case. 
+the newly created Box. This is not the case.
 
-Rather, create a new directory (to avoid Vagarant init collisions), add the new 
-package.box to Vagrant and init. Then run vagrant up to bring up the new box created 
+Rather, create a new directory (to avoid Vagarant init collisions), add the new
+package.box to Vagrant and init. Then run vagrant up to bring up the new box created
 by Packer. You will now be able to connect to the new box with provisioned changes.
 
 ```

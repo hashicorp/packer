@@ -4,7 +4,6 @@ description: |
   the core source code. Packer plugins are able to add new builders,
   provisioners, hooks, and more.
 page_title: Plugins
-sidebar_title: Packer Plugins
 ---
 
 # Packer Plugins
@@ -40,11 +39,10 @@ build.
 
 Packer plugins are published and maintained by a variety of sources, including HashiCorp, and the Packer community. The Packer website uses tiers and badges to denote the source of a provider. Additionally, namespaces are used to help users identify the organization or publisher responsible for the integration, as shown in the table below.
 
-
-| Tier     | Description | Namespace |
-| ---------| ------------| ----------|
-| <PluginTierLabel tier="official" /> |Official plugins are owned and maintained by HashiCorp. | hashicorp |
-| <PluginTierLabel tier="community" /> | Community providers are published by individual maintainers, groups of maintainers, or other members of the Packer community.| Third-party organization or maintainer's individual account |
+| Tier                                 | Description                                                                                                                   | Namespace                                                   |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| <PluginTierLabel tier="official" />  | Official plugins are owned and maintained by HashiCorp.                                                                       | hashicorp                                                   |
+| <PluginTierLabel tier="community" /> | Community providers are published by individual maintainers, groups of maintainers, or other members of the Packer community. | Third-party organization or maintainer's individual account |
 
 ## Installing Plugins
 
@@ -65,7 +63,7 @@ it is a single-component plugin.
 <Tab heading="Packer init (from Packer v1.7.0)">
 
 ~> **Note**: Only _multi-component plugin binaries_ -- that is plugins named
-packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
+packer-plugin-\*, like the `packer-plugin-amazon` -- are expected to work with
 Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
 If a plugin you use has not been upgraded to use the multi-component plugin
@@ -74,39 +72,40 @@ architecture, contact your maintainer to request an upgrade.
 ### Create a required_plugins block
 
 1. Add a
-[`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your [packer block](/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
-particular plugin can be installed. Make sure to set a valid [version
-constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+   [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+   block to your [packer block](/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
+   particular plugin can be installed. Make sure to set a valid [version
+   constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
 
 Here is an example `required_plugins` block:
 
-  ```hcl
-  packer {
-    required_plugins {
-      myawesomecloud = {
-        version = ">= 2.7.0"
-        source = "github.com/azr/myawesomecloud"
-      }
-      happycloud = {
-        version = ">= 1.1.3"
-        source = "github.com/azr/happycloud"
-      }
+```hcl
+packer {
+  required_plugins {
+    myawesomecloud = {
+      version = ">= 2.7.0"
+      source = "github.com/azr/myawesomecloud"
+    }
+    happycloud = {
+      version = ">= 1.1.3"
+      source = "github.com/azr/happycloud"
     }
   }
-  ```
+}
+```
 
 2. Run [`packer init`](/docs/commands/init) from your project directory (the
-directory containing your Packer templates) to install all missing plugin
-binaries. Given the above example, Packer will try to look for a GitHub
-repository owned by user or organization `azr` named
-`packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
+   directory containing your Packer templates) to install all missing plugin
+   binaries. Given the above example, Packer will try to look for a GitHub
+   repository owned by user or organization `azr` named
+   `packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
 
 ## Names and Addresses
+
 Each plugin has two identifiers:
 
-* A `source` address, which is only necessary when requiring a plugin outside the HashiCorp domain.
-* A unique **local name**, which is used everywhere else in a Packer
+- A `source` address, which is only necessary when requiring a plugin outside the HashiCorp domain.
+- A unique **local name**, which is used everywhere else in a Packer
   configuration.
 
 ### Local Names
@@ -163,14 +162,14 @@ follows:
 
 `<HOSTNAME>/<NAMESPACE>/<TYPE>`
 
-* **Hostname:** The hostname of the location/service that
+- **Hostname:** The hostname of the location/service that
   distributes the plugin. Currently, the only valid "hostname" is github.com,
   but we plan to eventually support plugins downloaded from other domains.
 
-* **Namespace:** An organizational namespace within the specified host.
+- **Namespace:** An organizational namespace within the specified host.
   This often is the organization that publishes the plugin.
 
-* **Type:** A short name for the platform or system the plugin manages. The
+- **Type:** A short name for the platform or system the plugin manages. The
   type is usually the plugin's preferred local name.
 
 For example, the fictional `myawesomecloud` plugin could belong to the
@@ -192,6 +191,7 @@ various outputs, like error messages.
 ## Implicit Github urls
 
 Using the following example :
+
 ```hcl
     required_plugins {
       happycloud = {
@@ -202,7 +202,8 @@ Using the following example :
 ```
 
 The plugin getter will look for plugins located at:
-* github.com/azr/packer-plugin-happycloud
+
+- github.com/azr/packer-plugin-happycloud
 
 Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.
