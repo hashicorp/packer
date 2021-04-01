@@ -178,6 +178,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image":                 &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
 		"force_stop_instance":          &hcldec.AttrSpec{Name: "force_stop_instance", Type: cty.Bool, Required: false},
 		"disable_stop_instance":        &hcldec.AttrSpec{Name: "disable_stop_instance", Type: cty.Bool, Required: false},
+		"ram_role_name":                &hcldec.AttrSpec{Name: "ram_role_name", Type: cty.String, Required: false},
 		"security_group_id":            &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_name":          &hcldec.AttrSpec{Name: "security_group_name", Type: cty.String, Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},
