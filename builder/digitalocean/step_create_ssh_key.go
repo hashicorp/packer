@@ -51,10 +51,7 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 
 		// Marshal the public key into SSH compatible format
 		// TODO properly handle the public key error
-		publicKey, err = ssh.NewPublicKey(&priv.PublicKey)
-		if err != nil {
-			panic(err) // TODO
-		}
+		publicKey, _ = ssh.NewPublicKey(&priv.PublicKey)
 	case "ecdsa":
 		priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		if err != nil {
@@ -65,10 +62,10 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 
 		privateKey = priv
-		publicKey, err = ssh.NewPublicKey(&priv.PublicKey)
-		if err != nil {
-			panic(err)
-		}
+
+		// Marshal the public key into SSH compatible format
+		// TODO properly handle the public key error
+		publicKey, _ = ssh.NewPublicKey(&priv.PublicKey)
 	case "ed25519":
 		pub, priv, err := ed25519.GenerateKey(rand.Reader)
 		if err != nil {
@@ -79,10 +76,10 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 		}
 
 		privateKey = priv
-		publicKey, err = ssh.NewPublicKey(pub)
-		if err != nil {
-			panic(err)
-		}
+
+		// Marshal the public key into SSH compatible format
+		// TODO properly handle the public key error
+		publicKey, _ = ssh.NewPublicKey(pub)
 	default:
 		err := fmt.Errorf("Invalid temporary SSH key algorithm: %s", c.SSHTemporaryKeyPairAlgorithm)
 		state.Put("error", err)
