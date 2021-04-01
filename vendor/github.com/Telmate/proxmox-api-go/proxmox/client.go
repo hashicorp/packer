@@ -301,7 +301,7 @@ func (a *AgentNetworkInterface) UnmarshalJSON(b []byte) error {
 
 	a.IPAddresses = make([]net.IP, len(intermediate.IPAddresses))
 	for idx, ip := range intermediate.IPAddresses {
-		a.IPAddresses[idx] = net.ParseIP(ip.IPAddress)
+		a.IPAddresses[idx] = net.ParseIP((strings.Split(ip.IPAddress, "%"))[0])
 		if a.IPAddresses[idx] == nil {
 			return fmt.Errorf("Could not parse %s as IP", ip.IPAddress)
 		}
