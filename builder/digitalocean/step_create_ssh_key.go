@@ -2,6 +2,9 @@ package digitalocean
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/ed25519"
+	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -30,31 +33,74 @@ func (s *stepCreateSSHKey) Run(ctx context.Context, state multistep.StateBag) mu
 	ui := state.Get("ui").(packersdk.Ui)
 	c := state.Get("config").(*Config)
 
-	ui.Say("Creating temporary ssh key for droplet...")
+	ui.Say(fmt.Sprintf("Creating temporary ssh key (%s) for droplet...", c.SSHTemporaryKeyPairAlgorithm))
 
-	priv, err := rsa.GenerateKey(rand.Reader, 2014)
-	if err != nil {
-		err := fmt.Errorf("error generating RSA key: %s", err)
+	var privateKey interface{}
+	var publicKey ssh.PublicKey
+	switch c.SSHTemporaryKeyPairAlgorithm {
+	case "rsa":
+		priv, err := rsa.GenerateKey(rand.Reader, 2014)
+		if err != nil {
+			err := fmt.Errorf("error generating RSA key: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		privateKey = priv
+
+		// Marshal the public key into SSH compatible format
+		// TODO properly handle the public key error
+		publicKey, err = ssh.NewPublicKey(&priv.PublicKey)
+		if err != nil {
+			panic(err) // TODO
+		}
+	case "ecdsa":
+		priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+		if err != nil {
+			err := fmt.Errorf("error generating ecdsa key: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		privateKey = priv
+		publicKey, err = ssh.NewPublicKey(&priv.PublicKey)
+		if err != nil {
+			panic(err)
+		}
+	case "ed25519":
+		pub, priv, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			err := fmt.Errorf("error generating ed25519 key: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
+
+		privateKey = priv
+		publicKey, err = ssh.NewPublicKey(pub)
+		if err != nil {
+			panic(err)
+		}
+	default:
+		err := fmt.Errorf("Invalid temporary SSH key algorithm: %s", c.SSHTemporaryKeyPairAlgorithm)
 		state.Put("error", err)
 		ui.Error(err.Error())
 		return multistep.ActionHalt
 	}
 
 	// ASN.1 DER encoded form
-	priv_der := x509.MarshalPKCS1PrivateKey(priv)
+	priv_der, _ := x509.MarshalPKCS8PrivateKey(privateKey)
 	priv_blk := pem.Block{
-		Type:    "RSA PRIVATE KEY",
+		Type:    "PRIVATE KEY",
 		Headers: nil,
 		Bytes:   priv_der,
 	}
 
 	// Set the private key in the config for later
 	c.Comm.SSHPrivateKey = pem.EncodeToMemory(&priv_blk)
-
-	// Marshal the public key into SSH compatible format
-	// TODO properly handle the public key error
-	pub, _ := ssh.NewPublicKey(&priv.PublicKey)
-	pub_sshformat := string(ssh.MarshalAuthorizedKey(pub))
+	pub_sshformat := string(ssh.MarshalAuthorizedKey(publicKey))
 
 	// The name of the public key on DO
 	name := fmt.Sprintf("packer-%s", uuid.TimeOrderedUUID())
