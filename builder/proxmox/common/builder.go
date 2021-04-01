@@ -155,10 +155,10 @@ func getVMIP(state multistep.StateBag) (string, error) {
 
 	for _, iface := range ifs {
 		for _, addr := range iface.IPAddresses {
-			if addr.To4() == nil {
+			if addr.IsLoopback() {
 				continue
 			}
-			if addr.IsLoopback() {
+			if addr.To4() == nil {
 				continue
 			}
 			return addr.String(), nil
