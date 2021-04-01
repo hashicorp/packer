@@ -152,6 +152,10 @@ func wrappedMain() int {
 	// passed into commands like `packer build`
 	config, err := loadConfig()
 	if err != nil {
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
 		fmt.Fprintf(os.Stdout, "%s Error loading configuration: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
@@ -166,6 +170,10 @@ func wrappedMain() int {
 
 	cacheDir, err := packersdk.CachePath()
 	if err != nil {
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
 		fmt.Fprintf(os.Stdout, "%s Error preparing cache directory: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
@@ -187,6 +195,7 @@ func wrappedMain() int {
 		// Set this so that we don't get colored output in our machine-
 		// readable UI.
 		if err := os.Setenv("PACKER_NO_COLOR", "1"); err != nil {
+			// Outputting error using Ui here to conform to the machine readable format.
 			ui.Error(fmt.Sprintf("Packer failed to initialize UI: %s\n", err))
 			return 1
 		}
@@ -202,12 +211,16 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				ui.Error(fmt.Sprintf("cannot determine if process is in background: %s\n", err))
+				// Writing to Stderr will ensure that the output gets captured by panicwrap.
+				// This error message and any other message writing to Stderr after this point will only show up with PACKER_LOG=1
+				// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout without panicwrap.
+				fmt.Fprintf(os.Stderr, "%s cannot determine if process is in background: %s\n", ErrorPrefix, err)
 			}
+
 			if backgrounded {
-				ui.Error("Running in background, not using a TTY\n")
+				fmt.Fprintf(os.Stderr, "%s Running in background, not using a TTY\n", ErrorPrefix)
 			} else if TTY, err := openTTY(); err != nil {
-				ui.Error(fmt.Sprintf("No tty available: %s\n", err))
+				fmt.Fprintf(os.Stderr, "%s No tty available: %s\n", ErrorPrefix, err)
 			} else {
 				basicUi.TTY = TTY
 				basicUi.PB = &packer.UiProgressBar{}
@@ -245,7 +258,11 @@ func wrappedMain() int {
 	}
 
 	if err != nil {
-		ui.Error(fmt.Sprintf("Error executing CLI: %s\n", err))
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
+		fmt.Fprintf(os.Stdout, "%s Error executing CLI: %s\n", ErrorPrefix, err)
 		return 1
 	}
 
