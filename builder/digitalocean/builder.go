@@ -90,9 +90,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 				SSH:  &b.config.Comm.SSH,
 			},
 		),
-		&stepCreateSSHKey{
-			Debug: b.config.PackerDebug,
-		},
+		&stepCreateSSHKey{},
 		new(stepCreateDroplet),
 		new(stepDropletInfo),
 		&communicator.StepConnect{

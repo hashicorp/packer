@@ -12,9 +12,6 @@ import (
 )
 
 type stepCreateSSHKey struct {
-	Debug        bool
-	DebugKeyPath string
-
 	keyId int
 }
 
