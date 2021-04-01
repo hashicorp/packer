@@ -105,8 +105,6 @@ func (s *stepTypeBootCommand) Run(ctx context.Context, state multistep.StateBag)
 func (*stepTypeBootCommand) Cleanup(multistep.StateBag) {}
 
 func hostIP(ifname string, ipv6 bool) (string, error) {
-	var addrs []netaddr.IP
-	var err error
 
 	if ifname != "" {
 		iface, err := net.InterfaceByName(ifname)
@@ -116,41 +114,41 @@ func hostIP(ifname string, ipv6 bool) (string, error) {
 		var addrbuff []net.Addr
 		addrbuff, err = iface.Addrs()
 		for _, addr := range addrbuff {
-            ipaddr, err := netaddr.ParseIP(addr.String())
-            if err !=nil{
-                return "", err
-            }
-            addrs = append(addrs, ipaddr)
-		}
-		if err != nil {
-			return "", err
-		}
-	} else {
-        var addrbuff []net.Addr
-		addrbuff, err = net.InterfaceAddrs()
-		if err != nil {
-			return "", err
-		}
-		for _, addr := range addrbuff {
-            ipaddr,err := netaddr.ParseIP(addr.String())
-			if err != nil{
-                return "", err
+			ipaddr, err := netaddr.ParseIP(addr.String())
+			if err != nil || ipaddr.IsLoopback() {
+				continue
 			}
-            addrs = append(addrs, ipaddr)
+			if ipv6 && !ipaddr.Is6() {
+				continue
+			}
+			return ipaddr.String(), nil
 		}
+		if ipv6 {
+			return "", fmt.Errorf("Interface %s has no IPv6 address", ifname)
+		} else {
+			return "", fmt.Errorf("Interface %s only has loopback addresses", ifname)
+		}
+	}
+
+	var addrbuff []net.Addr
+	addrbuff, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, addr := range addrbuff {
+		ipaddr, err := netaddr.ParseIP(addr.String())
+		if err != nil || ipaddr.IsLoopback() {
+			continue
+		}
+		if ipv6 && !ipaddr.Is6() {
+			continue
+		}
+		return ipaddr.String(), nil
 	}
 	if ipv6 {
-		for _, addr := range addrs {
-			if ipv6 && addr.Is6() && !addr.IsLoopback() {
-				return addr.String(), nil
-			}
-		}
+		return "", errors.New("No IPv6 address found")
 	} else {
-		for _, addr := range addrs {
-			if addr.Is4() && !addr.IsLoopback(){
-				return addr.String(), nil
-			}
-		}
+		return "", errors.New("No IPv4 address found")
 	}
-	return "", errors.New("No host IP found")
 }

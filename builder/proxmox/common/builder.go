@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"inet.af/netaddr"
 )
 
 func NewSharedBuilder(id string, config Config, preSteps []multistep.Step, postSteps []multistep.Step, vmCreator ProxmoxVMCreator) *Builder {
@@ -144,6 +145,7 @@ func getVMIP(state multistep.StateBag) (string, error) {
 	client := state.Get("proxmoxClient").(*proxmox.Client)
 	config := state.Get("config").(*Config)
 	vmRef := state.Get("vmRef").(*proxmox.VmRef)
+	ipv6 := config.VMInterface.VMIPv6
 
 	ifs, err := client.GetVmAgentNetworkInterfaces(vmRef)
 	if err != nil {
@@ -157,35 +159,41 @@ func getVMIP(state multistep.StateBag) (string, error) {
 			}
 
 			for _, addr := range iface.IPAddresses {
-				if addr.IsLoopback() {
+				ipaddr, err := netaddr.FromStdIP(addr)
+				if err || ipaddr.IsLoopback() {
 					continue
 				}
-				return addr.String(), nil
+				if ipv6 && !ipaddr.Is6() {
+					continue
+				}
+				return ipaddr.String(), nil
 			}
-			return "", fmt.Errorf("Interface %s only has loopback addresses", config.VMInterface.VMInterface)
+			if ipv6 {
+				return "", fmt.Errorf("Interface %s has no IPv6 addresses", config.VMInterface.VMInterface)
+			} else {
+				return "", fmt.Errorf("Interface %s only has loopback addresses", config.VMInterface.VMInterface)
+			}
 		}
 		return "", fmt.Errorf("Interface %s not found in VM", config.VMInterface.VMInterface)
 	}
 
-	if config.VMInterface.VMIPv6 {
-		for _, iface := range ifs {
-			for _, addr := range iface.IPAddresses {
-				if addr.IsLoopback() || addr.To4() == nil {
-					continue
-				}
-				return addr.String(), nil
+	for _, iface := range ifs {
+		for _, addr := range iface.IPAddresses {
+			ipaddr, err := netaddr.FromStdIP(addr)
+			if err || ipaddr.IsLoopback() {
+				continue
 			}
-		}
-	} else {
-		for _, iface := range ifs {
-			for _, addr := range iface.IPAddresses {
-				if addr.IsLoopback() || addr.To16() == nil {
-					continue
-				}
-				return addr.String(), nil
+			if ipv6 && !ipaddr.Is6() {
+				continue
 			}
+			return ipaddr.String(), nil
 		}
 	}
 
-	return "", fmt.Errorf("Found no IP addresses on VM")
+	if ipv6 {
+		return "", fmt.Errorf("Found no valid IPv6 addresses on VM")
+	} else {
+		return "", fmt.Errorf("Found no valid IPv4 addresses on VM")
+	}
+
 }
