@@ -94,9 +94,6 @@ type Config struct {
 	// instead of the public IP. Before using this, private_networking should be enabled.
 	ConnectWithPrivateIP bool `mapstructure:"connect_with_private_ip" required:"false"`
 
-	// The private key algorithm to use; supports "rsa", "ecdsa", "ed25519", defaults to "rsa".
-	SSHTemporaryKeyPairAlgorithm string `mapstructure:"temporary_key_pair_algorithm" required:"false"`
-
 	ctx interpolate.Context
 }
 
@@ -210,11 +207,6 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		if c.PrivateNetworking != true {
 			errs = packersdk.MultiErrorAppend(errs, errors.New("private networking should be enabled to use connect_with_private_ip"))
 		}
-	}
-
-	// Default the SSH temporary key algorithm to RSA
-	if c.SSHTemporaryKeyPairAlgorithm == "" {
-		c.SSHTemporaryKeyPairAlgorithm = "rsa"
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
