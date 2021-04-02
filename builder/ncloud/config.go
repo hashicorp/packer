@@ -109,15 +109,15 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.ServerImageProductCode != "" && len(c.ServerImageProductCode) > 50 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_product_code` field is set, length of `server_image_product_code` should be max 20"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_product_code` field is set, length of `server_image_product_code` should be max 50"))
 	}
 
 	if c.ServerProductCode != "" && len(c.ServerProductCode) > 50 {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_product_code` field is set, length of `server_product_code` should be max 20"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_product_code` field is set, length of `server_product_code` should be max 50"))
 	}
 
 	if c.ServerImageName != "" && (len(c.ServerImageName) < 3 || len(c.ServerImageName) > 30) {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_name` field is set, length of `server_image_name` should be min 3 and max 20"))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("if `server_image_name` field is set, length of `server_image_name` should be min 3 and max 30"))
 	}
 
 	if c.ServerImageDescription != "" && len(c.ServerImageDescription) > 1000 {
