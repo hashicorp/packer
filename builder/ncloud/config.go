@@ -133,7 +133,7 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 	}
 
 	if c.UserData != "" && c.UserDataFile != "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("only one of user_data or `user_data`_file can be specified."))
+		errs = packersdk.MultiErrorAppend(errs, errors.New("only one of `user_data` or `user_data_file` can be specified."))
 	} else if c.UserDataFile != "" {
 		if _, err := os.Stat(c.UserDataFile); err != nil {
 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("`user_data_file` not found: %s", c.UserDataFile))

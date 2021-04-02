@@ -22,7 +22,7 @@ type StepValidateTemplate struct {
 	Validate                  func() error
 	getZone                   func() error
 	getMemberServerImageList  func() ([]*server.MemberServerImage, error)
-	getServerImageProductList func(blockStorageSize *int32) ([]*server.Product, error)
+	getServerImageProductList func() ([]*server.Product, error)
 	getServerProductList      func(serverImageProductCode string) ([]*server.Product, error)
 	Say                       func(message string)
 	Error                     func(e error)
@@ -199,10 +199,9 @@ func (s *StepValidateTemplate) getVpcMemberServerImageList() ([]*server.MemberSe
 	return results, nil
 }
 
-func (s *StepValidateTemplate) getClassicServerImageProductList(blockStorageSize *int32) ([]*server.Product, error) {
+func (s *StepValidateTemplate) getClassicServerImageProductList() ([]*server.Product, error) {
 	reqParams := &server.GetServerImageProductListRequest{
-		RegionNo:         &s.regionNo,
-		BlockStorageSize: blockStorageSize,
+		RegionNo: &s.regionNo,
 	}
 
 	resp, err := s.Conn.server.V2Api.GetServerImageProductList(reqParams)
@@ -213,10 +212,9 @@ func (s *StepValidateTemplate) getClassicServerImageProductList(blockStorageSize
 	return resp.ProductList, nil
 }
 
-func (s *StepValidateTemplate) getVpcServerImageProductList(blockStorageSize *int32) ([]*server.Product, error) {
+func (s *StepValidateTemplate) getVpcServerImageProductList() ([]*server.Product, error) {
 	reqParams := &vserver.GetServerImageProductListRequest{
-		RegionCode:       &s.regionCode,
-		BlockStorageSize: blockStorageSize,
+		RegionCode: &s.regionCode,
 	}
 
 	resp, err := s.Conn.vserver.V2Api.GetServerImageProductList(reqParams)
@@ -241,7 +239,7 @@ func (s *StepValidateTemplate) validateServerImageProduct() error {
 		return nil
 	}
 
-	serverImageProductList, err := s.getServerImageProductList(nil)
+	serverImageProductList, err := s.getServerImageProductList()
 	if err != nil {
 		return err
 	}
@@ -261,24 +259,6 @@ func (s *StepValidateTemplate) validateServerImageProduct() error {
 		}
 
 		table.Append([]string{*product.ProductName, *product.ProductCode})
-	}
-
-	if !isExistServerImage {
-		serverImageProductList, err := s.getServerImageProductList(ncloud.Int32(100))
-		if err != nil {
-			return err
-		}
-
-		for _, product := range serverImageProductList {
-			// Check exist server image product code
-			if *product.ProductCode == serverImageProductCode {
-				isExistServerImage = true
-				productName = *product.ProductName
-				break
-			}
-
-			table.Append([]string{*product.ProductName, *product.ProductCode})
-		}
 	}
 
 	if !isExistServerImage {
