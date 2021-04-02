@@ -16,7 +16,7 @@ const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/vali
  * @returns {array} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
 async function resolveNavData(navDataFile, localContentDir, options = {}) {
-  const { remotePluginsFile } = options
+  const { remotePluginsFile, currentPath } = options
   // Read in files
   const navDataPath = path.join(process.cwd(), navDataFile)
   const navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
@@ -24,7 +24,11 @@ async function resolveNavData(navDataFile, localContentDir, options = {}) {
   let withPlugins = navData
   if (remotePluginsFile) {
     // Resolve plugins, this yields branches with NavLeafRemote nodes
-    withPlugins = await mergeRemotePlugins(remotePluginsFile, navData)
+    withPlugins = await mergeRemotePlugins(
+      remotePluginsFile,
+      navData,
+      currentPath
+    )
   }
   // Resolve local filePaths for NavLeaf nodes
   const withFilePaths = await validateFilePaths(withPlugins, localContentDir)
@@ -40,14 +44,16 @@ async function resolveNavData(navDataFile, localContentDir, options = {}) {
 // fetch and parse all remote plugin docs, merge them into the
 // broader tree of docs navData, and return the docs navData
 // with the merged plugin docs
-async function mergeRemotePlugins(remotePluginsFile, navData) {
+async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
   // Read in and parse the plugin configuration JSON
   const remotePluginsPath = path.join(process.cwd(), remotePluginsFile)
   const pluginEntries = JSON.parse(fs.readFileSync(remotePluginsPath, 'utf-8'))
   // Add navData for each plugin's component.
   // Note that leaf nodes include a remoteFile property object with the full MDX fileString
   const pluginEntriesWithDocs = await Promise.all(
-    pluginEntries.map(resolvePluginEntryDocs)
+    pluginEntries.map(
+      async (entry) => await resolvePluginEntryDocs(entry, currentPath)
+    )
   )
   // group navData by component type, to prepare to merge plugin docs
   // into the broader tree of navData.
@@ -113,7 +119,7 @@ async function mergeRemotePlugins(remotePluginsFile, navData) {
     return { ...n, routes: routesWithPlugins }
   })
   // return the merged navData, which now includes special NavLeaf nodes
-  // for plugin docs with { filePath, fileString } remoteFile properties
+  // for plugin docs with remoteFile properties
   return navDataWithPlugins
 }
 
@@ -125,7 +131,7 @@ async function mergeRemotePlugins(remotePluginsFile, navData) {
 // Note that navData leaf nodes have a special remoteFile property,
 // which contains { filePath, fileString } data for the remote
 // plugin doc .mdx file
-async function resolvePluginEntryDocs(pluginConfigEntry) {
+async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
   const { title, path: slug, repo, version } = pluginConfigEntry
   const docsMdxFiles = await fetchPluginDocs({ repo, tag: version })
   // We construct a special kind of "NavLeaf" node, with a remoteFile property,
@@ -192,8 +198,21 @@ async function resolvePluginEntryDocs(pluginConfigEntry) {
       const prefixedPath = path.join(pathPrefix, n.path)
       return { ...n, path: prefixedPath }
     })
-    //
-    return { type, navData: withPrefixedPaths }
+    // If currentPath is provided, then remove the remoteFile
+    // from all nodes except the currentPath. This ensures we deliver
+    // only a single fileString in our getStaticProps JSON.
+    // Without this optimization, we would send all fileStrings
+    // for all NavLeafRemote nodes
+    const withOptimizedFileStrings = visitNavLeaves(withPrefixedPaths, (n) => {
+      if (!n.remoteFile) return n
+      const noCurrentPath = typeof currentPath === 'undefined'
+      const isPathMatch = currentPath === n.path
+      if (noCurrentPath || isPathMatch) return n
+      const { filePath } = n.remoteFile
+      return { ...n, remoteFile: { filePath } }
+    })
+    // Return the component, with processed navData
+    return { type, navData: withOptimizedFileStrings }
   })
   const componentsObj = components.reduce((acc, component) => {
     if (!component) return acc
