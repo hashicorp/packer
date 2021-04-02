@@ -158,6 +158,9 @@ func getVMIP(state multistep.StateBag) (string, error) {
 			if addr.IsLoopback() {
 				continue
 			}
+			if addr.To4() == nil {
+				continue
+			}
 			return addr.String(), nil
 		}
 	}
