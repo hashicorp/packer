@@ -28,11 +28,16 @@ async function generateStaticProps({
   product,
   remotePluginsFile,
 }) {
+  // Build the currentPath from page parameters
+  const currentPath = params.page ? params.page.join('/') : ''
+  // Resolve navData, including the possibility that this
+  // page is a remote plugin docs, in which case we'll provide
+  // the MDX fileString in the resolved navData
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
+    currentPath,
   })
-  const pathToMatch = params.page ? params.page.join('/') : ''
-  const navNode = getNodeFromPath(pathToMatch, navData, localContentDir)
+  const navNode = getNodeFromPath(currentPath, navData, localContentDir)
   const { filePath, remoteFile, pluginTier } = navNode
   //  Fetch the MDX file content
   const mdxString = remoteFile
@@ -59,8 +64,6 @@ async function generateStaticProps({
     productName: product.name,
     mdxContentHook,
   })
-  // Build the currentPath from page parameters
-  const currentPath = !params.page ? '' : params.page.join('/')
 
   return {
     currentPath,
