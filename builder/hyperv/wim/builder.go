@@ -404,7 +404,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			SkipExport: b.config.SkipExport,
 		},
 
-		&StepCollateArtifacts{
+		&hypervcommon.StepCollateArtifacts{
 			OutputDir:  b.config.OutputDir,
 			SkipExport: b.config.SkipExport,
 		},

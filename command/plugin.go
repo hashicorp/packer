@@ -88,6 +88,7 @@ import (
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
+	wimexportpostprocessor "github.com/hashicorp/packer/post-processor/wim-export"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
@@ -212,6 +213,7 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
+	"wim-export":           new(wimexportpostprocessor.PostProcessor),
 	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
