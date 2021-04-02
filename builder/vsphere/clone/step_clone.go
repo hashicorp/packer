@@ -75,7 +75,7 @@ type StepCloneVM struct {
 
 func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	ui := state.Get("ui").(packersdk.Ui)
-	d := state.Get("driver").(*driver.VCenterDriver)
+	d := state.Get("driver").(driver.Driver)
 	vmPath := path.Join(s.Location.Folder, s.Location.VMName)
 
 	err := d.PreCleanVM(ui, vmPath, s.Force)
@@ -102,17 +102,18 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 	}
 
 	vm, err := template.Clone(ctx, &driver.CloneConfig{
-		Name:           s.Location.VMName,
-		Folder:         s.Location.Folder,
-		Cluster:        s.Location.Cluster,
-		Host:           s.Location.Host,
-		ResourcePool:   s.Location.ResourcePool,
-		Datastore:      s.Location.Datastore,
-		LinkedClone:    s.Config.LinkedClone,
-		Network:        s.Config.Network,
-		MacAddress:     s.Config.MacAddress,
-		Annotation:     s.Config.Notes,
-		VAppProperties: s.Config.VAppConfig.Properties,
+		Name:            s.Location.VMName,
+		Folder:          s.Location.Folder,
+		Cluster:         s.Location.Cluster,
+		Host:            s.Location.Host,
+		ResourcePool:    s.Location.ResourcePool,
+		Datastore:       s.Location.Datastore,
+		LinkedClone:     s.Config.LinkedClone,
+		Network:         s.Config.Network,
+		MacAddress:      s.Config.MacAddress,
+		Annotation:      s.Config.Notes,
+		VAppProperties:  s.Config.VAppConfig.Properties,
+		PrimaryDiskSize: s.Config.DiskSize,
 		StorageConfig: driver.StorageConfig{
 			DiskControllerType: s.Config.StorageConfig.DiskControllerType,
 			Storage:            disks,
@@ -126,14 +127,6 @@ func (s *StepCloneVM) Run(ctx context.Context, state multistep.StateBag) multist
 		return multistep.ActionHalt
 	}
 	state.Put("vm", vm)
-
-	if s.Config.DiskSize > 0 {
-		err = vm.ResizeDisk(s.Config.DiskSize)
-		if err != nil {
-			state.Put("error", err)
-			return multistep.ActionHalt
-		}
-	}
 
 	return multistep.ActionContinue
 }

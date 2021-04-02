@@ -24,6 +24,9 @@ type DriverMock struct {
 	CreateVMCalled     bool
 	CreateConfig       *CreateConfig
 	VM                 VirtualMachine
+
+	FindVMCalled bool
+	FindVMName   string
 }
 
 func NewDriverMock() *DriverMock {
@@ -45,7 +48,12 @@ func (d *DriverMock) NewVM(ref *types.ManagedObjectReference) VirtualMachine {
 }
 
 func (d *DriverMock) FindVM(name string) (VirtualMachine, error) {
-	return nil, nil
+	d.FindVMCalled = true
+	if d.VM == nil {
+		d.VM = new(VirtualMachineMock)
+	}
+	d.FindVMName = name
+	return d.VM, d.FindDatastoreErr
 }
 
 func (d *DriverMock) FindCluster(name string) (*Cluster, error) {
