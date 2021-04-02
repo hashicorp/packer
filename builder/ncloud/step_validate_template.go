@@ -326,6 +326,10 @@ func (s *StepValidateTemplate) validateServerProductCode() error {
 		return err
 	}
 
+	if productCode == "" {
+		return nil
+	}
+
 	var isExistProductCode = false
 	for _, product := range productList {
 		// Check exist server image product code
@@ -339,11 +343,6 @@ func (s *StepValidateTemplate) validateServerProductCode() error {
 				return errors.New("You cannot create my server image for VDS servers")
 			}
 
-			break
-		} else if productCode == "" && *product.ProductType.Code == "STAND" {
-			isExistProductCode = true
-			s.Config.ServerProductCode = *product.ProductCode
-			s.Say("server_product_code '" + *product.ProductCode + "' is configured automatically")
 			break
 		}
 	}
