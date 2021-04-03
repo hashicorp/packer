@@ -64,6 +64,7 @@ func createTestStateBagStepPublishToSharedImageGallery() multistep.StateBag {
 	}
 	stateBag.Put(constants.ArmTags, tags)
 	stateBag.Put(constants.ArmManagedImageSharedGalleryReplicationRegions, []string{"ManagedImageSharedGalleryReplicationRegionA", "ManagedImageSharedGalleryReplicationRegionB"})
+	stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionStorageAccountType, "Standard_LRS")
 	stateBag.Put(constants.ArmManagedImageResourceGroupName, "Unit Test: ManagedImageResourceGroupName")
 	stateBag.Put(constants.ArmManagedImageName, "Unit Test: ManagedImageName")
 	stateBag.Put(constants.ArmManagedImageSubscription, "Unit Test: ManagedImageSubscription")

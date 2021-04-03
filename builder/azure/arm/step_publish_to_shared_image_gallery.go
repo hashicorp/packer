@@ -37,6 +37,17 @@ func NewStepPublishToSharedImageGallery(client *AzureClient, ui packersdk.Ui, co
 	return step
 }
 
+func getSigDestinationStorageAccountType(s string) (compute.StorageAccountType, error) {
+	switch s {
+	case "", string(compute.StorageAccountTypeStandardLRS):
+		return compute.StorageAccountTypeStandardLRS, nil
+	case string(compute.StorageAccountTypeStandardZRS):
+		return compute.StorageAccountTypeStandardZRS, nil
+	default:
+		return "", fmt.Errorf("not an accepted value for shared_image_gallery_destination.storage_account_type")
+	}
+}
+
 func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 	subscription := state.Get(constants.ArmManagedImageSubscription).(string)
 	resourceGroup := state.Get(constants.ArmManagedImageSigPublishResourceGroup).(string)
@@ -44,6 +55,7 @@ func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 	imageName := state.Get(constants.ArmManagedImageSharedGalleryImageName).(string)
 	imageVersion := state.Get(constants.ArmManagedImageSharedGalleryImageVersion).(string)
 	replicationRegions := state.Get(constants.ArmManagedImageSharedGalleryReplicationRegions).([]string)
+	storageAccountType := state.Get(constants.ArmManagedImageSharedGalleryImageVersionStorageAccountType).(string)
 
 	return SharedImageGalleryDestination{
 		SigDestinationSubscription:       subscription,
@@ -52,6 +64,7 @@ func getSigDestination(state multistep.StateBag) SharedImageGalleryDestination {
 		SigDestinationImageName:          imageName,
 		SigDestinationImageVersion:       imageVersion,
 		SigDestinationReplicationRegions: replicationRegions,
+		SigDestinationStorageAccountType: storageAccountType,
 	}
 }
 
@@ -73,6 +86,13 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 	} else {
 		endOfLifeDate = (*date.Time)(nil)
 	}
+
+	storageAccountType, err := getSigDestinationStorageAccountType(string(sharedImageGallery.SigDestinationStorageAccountType))
+	if err != nil {
+		s.error(err)
+		return "", err
+	}
+
 	galleryImageVersion := compute.GalleryImageVersion{
 		Location: &location,
 		Tags:     tags,
@@ -83,10 +103,11 @@ func (s *StepPublishToSharedImageGallery) publishToSig(ctx context.Context, mdiI
 						ID: &mdiID,
 					},
 				},
-				TargetRegions:     &replicationRegions,
-				EndOfLifeDate:     endOfLifeDate,
-				ExcludeFromLatest: &miSGImageVersionExcludeFromLatest,
-				ReplicaCount:      &miSigReplicaCount,
+				TargetRegions:      &replicationRegions,
+				EndOfLifeDate:      endOfLifeDate,
+				ExcludeFromLatest:  &miSGImageVersionExcludeFromLatest,
+				ReplicaCount:       &miSigReplicaCount,
+				StorageAccountType: storageAccountType,
 			},
 		},
 	}
@@ -149,6 +170,7 @@ func (s *StepPublishToSharedImageGallery) Run(ctx context.Context, stateBag mult
 	s.say(fmt.Sprintf(" -> SIG image name                        : '%s'", sharedImageGallery.SigDestinationImageName))
 	s.say(fmt.Sprintf(" -> SIG image version                     : '%s'", sharedImageGallery.SigDestinationImageVersion))
 	s.say(fmt.Sprintf(" -> SIG replication regions               : '%v'", sharedImageGallery.SigDestinationReplicationRegions))
+	s.say(fmt.Sprintf(" -> SIG storage account type              : '%s'", sharedImageGallery.SigDestinationStorageAccountType))
 	s.say(fmt.Sprintf(" -> SIG image version endoflife date      : '%s'", miSGImageVersionEndOfLifeDate))
 	s.say(fmt.Sprintf(" -> SIG image version exclude from latest : '%t'", miSGImageVersionExcludeFromLatest))
 	s.say(fmt.Sprintf(" -> SIG replica count [1, 10]             : '%d'", miSigReplicaCount))

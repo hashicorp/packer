@@ -95,6 +95,9 @@ type SharedImageGalleryDestination struct {
 	SigDestinationImageName          string   `mapstructure:"image_name"`
 	SigDestinationImageVersion       string   `mapstructure:"image_version"`
 	SigDestinationReplicationRegions []string `mapstructure:"replication_regions"`
+	// Specify a storage account type for the Shared Image Gallery Image Version.
+	// Defaults to `Standard_LRS`. Accepted values are `Standard_LRS` and `Standard_ZRS`
+	SigDestinationStorageAccountType string `mapstructure:"storage_account_type"`
 }
 
 type Config struct {
@@ -158,7 +161,8 @@ type Config struct {
 	//     "gallery_name": "GalleryName",
 	//     "image_name": "ImageName",
 	//     "image_version": "1.0.0",
-	//     "replication_regions": ["regionA", "regionB", "regionC"]
+	//     "replication_regions": ["regionA", "regionB", "regionC"],
+	//     "storage_account_type": "Standard_LRS"
 	// }
 	// "managed_image_name": "TargetImageName",
 	// "managed_image_resource_group_name": "TargetResourceGroup"
@@ -172,6 +176,7 @@ type Config struct {
 	//     image_name = "ImageName"
 	//     image_version = "1.0.0"
 	//     replication_regions = ["regionA", "regionB", "regionC"]
+	//     storage_account_type = "Standard_LRS"
 	// }
 	// managed_image_name = "TargetImageName"
 	// managed_image_resource_group_name = "TargetResourceGroup"
@@ -1111,6 +1116,8 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The os_type %q is invalid", c.OSType))
 	}
 
+	/////////////////////////////////////////////
+	// Storage
 	switch c.ManagedImageStorageAccountType {
 	case "", string(compute.StorageAccountTypesStandardLRS):
 		c.managedImageStorageAccountType = compute.StorageAccountTypesStandardLRS
@@ -1118,6 +1125,10 @@ func assertRequiredParametersSet(c *Config, errs *packersdk.MultiError) {
 		c.managedImageStorageAccountType = compute.StorageAccountTypesPremiumLRS
 	default:
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The managed_image_storage_account_type %q is invalid", c.ManagedImageStorageAccountType))
+	}
+
+	if ok, err := assertSigAllowedStorageAccountType(c.SharedGalleryDestination.SigDestinationStorageAccountType); !ok {
+		errs = packersdk.MultiErrorAppend(errs, err)
 	}
 
 	switch c.DiskCachingType {
@@ -1167,6 +1178,14 @@ func assertAllowedInboundIpAddresses(ipAddresses []string, setting string) (bool
 				return false, fmt.Errorf("The setting %s must only contain valid IP addresses or CIDR blocks", setting)
 			}
 		}
+	}
+	return true, nil
+}
+
+func assertSigAllowedStorageAccountType(s string) (bool, error) {
+	_, err := getSigDestinationStorageAccountType(s)
+	if err != nil {
+		return false, err
 	}
 	return true, nil
 }
