@@ -29,6 +29,7 @@ type FlatConfig struct {
 	ImageGuestOsFeatures       []string          `mapstructure:"image_guest_os_features" cty:"image_guest_os_features" hcl:"image_guest_os_features"`
 	ImageLabels                map[string]string `mapstructure:"image_labels" cty:"image_labels" hcl:"image_labels"`
 	ImageName                  *string           `mapstructure:"image_name" required:"true" cty:"image_name" hcl:"image_name"`
+	ImageStorageLocations      []string          `mapstructure:"image_storage_locations" cty:"image_storage_locations" hcl:"image_storage_locations"`
 	SkipClean                  *bool             `mapstructure:"skip_clean" cty:"skip_clean" hcl:"skip_clean"`
 	VaultGCPOauthEngine        *string           `mapstructure:"vault_gcp_oauth_engine" cty:"vault_gcp_oauth_engine" hcl:"vault_gcp_oauth_engine"`
 	ImagePlatformKey           *string           `mapstructure:"image_platform_key" cty:"image_platform_key" hcl:"image_platform_key"`
@@ -68,6 +69,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"image_guest_os_features":       &hcldec.AttrSpec{Name: "image_guest_os_features", Type: cty.List(cty.String), Required: false},
 		"image_labels":                  &hcldec.AttrSpec{Name: "image_labels", Type: cty.Map(cty.String), Required: false},
 		"image_name":                    &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
+		"image_storage_locations":       &hcldec.AttrSpec{Name: "image_storage_locations", Type: cty.List(cty.String), Required: false},
 		"skip_clean":                    &hcldec.AttrSpec{Name: "skip_clean", Type: cty.Bool, Required: false},
 		"vault_gcp_oauth_engine":        &hcldec.AttrSpec{Name: "vault_gcp_oauth_engine", Type: cty.String, Required: false},
 		"image_platform_key":            &hcldec.AttrSpec{Name: "image_platform_key", Type: cty.String, Required: false},
