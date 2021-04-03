@@ -467,6 +467,8 @@ vmci0.present = "TRUE"
 vmci0.id = "1861462627"
 vmci0.pciSlotNumber = "35"
 
+hpet0.present = "TRUE"
+
 // Network Adapter
 ethernet0.addressType = "generated"
 ethernet0.bsdName = "en0"
