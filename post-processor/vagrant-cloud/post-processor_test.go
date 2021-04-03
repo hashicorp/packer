@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -361,6 +362,138 @@ func TestPostProcessor_PostProcess_uploadsAndNoRelease(t *testing.T) {
 	}
 }
 
+func TestPostProcessor_PostProcess_directUpload5GFile(t *testing.T) {
+	// Disable test on Windows due to unreliable sparse file creation
+	if runtime.GOOS == "windows" {
+		return
+	}
+
+	// Boxes up to 5GB are supported for direct upload so
+	// set the box asset to be 5GB exactly
+	fSize := int64(5368709120)
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	f, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(f.Name())
+
+	if err := expandFile(f, fSize); err != nil {
+		t.Fatalf("failed to expand box file - %s", err)
+	}
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{f.Name()},
+	}
+	f.Close()
+
+	s := newStackServer(
+		[]stubResponse{
+			stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"},
+		},
+	)
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload/direct"},
+		stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-complete"},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_release"] = true
+
+	// Set response here so we have API server URL available
+	stack[4].Response = `{"upload_path": "` + s.URL + `/box-upload-path", "callback": "` + server.URL + `/box-upload-complete"}`
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
+func TestPostProcessor_PostProcess_directUploadOver5GFile(t *testing.T) {
+	// Disable test on Windows due to unreliable sparse file creation
+	if runtime.GOOS == "windows" {
+		return
+	}
+
+	// Boxes over 5GB are not supported for direct upload so
+	// set the box asset to be one byte over 5GB
+	fSize := int64(5368709121)
+	files := tarFiles{
+		{"foo.txt", "This is a foo file"},
+		{"bar.txt", "This is a bar file"},
+		{"metadata.json", `{"provider": "virtualbox"}`},
+	}
+	f, err := createBox(files)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	defer os.Remove(f.Name())
+
+	if err := expandFile(f, fSize); err != nil {
+		t.Fatalf("failed to expand box file - %s", err)
+	}
+	f.Close()
+
+	artifact := &packersdk.MockArtifact{
+		BuilderIdValue: "mitchellh.post-processor.vagrant",
+		FilesValue:     []string{f.Name()},
+	}
+
+	s := newStackServer(
+		[]stubResponse{
+			stubResponse{StatusCode: 200, Method: "PUT", Path: "/box-upload-path"},
+		},
+	)
+	defer s.Close()
+
+	stack := []stubResponse{
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/authenticate"},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64", Response: `{"tag": "hashicorp/precise64"}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/versions", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "POST", Path: "/box/hashicorp/precise64/version/0.5/providers", Response: `{}`},
+		stubResponse{StatusCode: 200, Method: "GET", Path: "/box/hashicorp/precise64/version/0.5/provider/id/upload", Response: `{"upload_path": "` + s.URL + `/box-upload-path"}`},
+	}
+
+	server := newStackServer(stack)
+	defer server.Close()
+	config := testGoodConfig()
+	config["vagrant_cloud_url"] = server.URL
+	config["no_release"] = true
+
+	var p PostProcessor
+
+	err = p.Configure(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	_, _, _, err = p.PostProcess(context.Background(), testUi(), artifact)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+}
+
 func TestPostProcessor_PostProcess_uploadsDirectAndReleases(t *testing.T) {
 	files := tarFiles{
 		{"foo.txt", "This is a foo file"},
@@ -696,4 +829,22 @@ func createBox(files tarFiles) (boxfile *os.File, err error) {
 	}
 
 	return boxfile, nil
+}
+
+func expandFile(f *os.File, finalSize int64) (err error) {
+	s, err := f.Stat()
+	if err != nil {
+		return
+	}
+	size := finalSize - s.Size()
+	if size < 1 {
+		return
+	}
+	if _, err = f.Seek(size-1, 2); err != nil {
+		return
+	}
+	if _, err = f.Write([]byte{0}); err != nil {
+		return
+	}
+	return nil
 }

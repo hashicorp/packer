@@ -23,6 +23,7 @@ type stepCreateAlicloudInstance struct {
 	UserData                string
 	UserDataFile            string
 	instanceId              string
+	RamRoleName             string
 	RegionId                string
 	InternetChargeType      string
 	InternetMaxBandwidthOut int
@@ -115,6 +116,7 @@ func (s *stepCreateAlicloudInstance) buildCreateInstanceRequest(state multistep.
 	request.RegionId = s.RegionId
 	request.InstanceType = s.InstanceType
 	request.InstanceName = s.InstanceName
+	request.RamRoleName = s.RamRoleName
 	request.ZoneId = s.ZoneId
 
 	sourceImage := state.Get("source_image").(*ecs.Image)

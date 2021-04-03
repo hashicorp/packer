@@ -84,6 +84,10 @@ func mismatchMessageObjects(got, want cty.Type) string {
 			continue
 		}
 
+		if gotAty.Equals(wantAty) {
+			continue // exact match, so no problem
+		}
+
 		// We'll now try to convert these attributes in isolation and
 		// see if we have a nested conversion error to report.
 		// We'll try an unsafe conversion first, and then fall back on

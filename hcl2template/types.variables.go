@@ -152,9 +152,19 @@ func (v *Variable) validateValue(val VariableAssignment) (diags hcl.Diagnostics)
 }
 
 // Value returns the last found value from the list of variable settings.
-func (v *Variable) Value() (cty.Value, hcl.Diagnostics) {
+func (v *Variable) Value() cty.Value {
 	if len(v.Values) == 0 {
-		return cty.UnknownVal(v.Type), hcl.Diagnostics{&hcl.Diagnostic{
+		return cty.UnknownVal(v.Type)
+	}
+	val := v.Values[len(v.Values)-1]
+	return val.Value
+}
+
+// ValidateValue tells if the selected value for the Variable is valid according
+// to its validation settings.
+func (v *Variable) ValidateValue() hcl.Diagnostics {
+	if len(v.Values) == 0 {
+		return hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  fmt.Sprintf("Unset variable %q", v.Name),
 			Detail: "A used variable must be set or have a default value; see " +
@@ -163,8 +173,8 @@ func (v *Variable) Value() (cty.Value, hcl.Diagnostics) {
 			Context: v.Range.Ptr(),
 		}}
 	}
-	val := v.Values[len(v.Values)-1]
-	return val.Value, v.validateValue(v.Values[len(v.Values)-1])
+
+	return v.validateValue(v.Values[len(v.Values)-1])
 }
 
 type Variables map[string]*Variable
@@ -177,15 +187,21 @@ func (variables Variables) Keys() []string {
 	return keys
 }
 
-func (variables Variables) Values() (map[string]cty.Value, hcl.Diagnostics) {
+func (variables Variables) Values() map[string]cty.Value {
 	res := map[string]cty.Value{}
-	var diags hcl.Diagnostics
 	for k, v := range variables {
-		value, moreDiags := v.Value()
-		diags = append(diags, moreDiags...)
+		value := v.Value()
 		res[k] = value
 	}
-	return res, diags
+	return res
+}
+
+func (variables Variables) ValidateValues() hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	for _, v := range variables {
+		diags = append(diags, v.ValidateValue()...)
+	}
+	return diags
 }
 
 // decodeVariable decodes a variable key and value into Variables

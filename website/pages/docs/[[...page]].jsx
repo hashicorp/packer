@@ -8,17 +8,14 @@ import {
   generateStaticProps,
 } from 'components/remote-plugin-docs/server'
 
-//  Configure the docs path
-const BASE_ROUTE = 'docs'
-const NAV_DATA = 'data/docs-nav-data.json'
-const CONTENT_DIR = 'content/docs'
-// override default "main" value for branch for "edit on this page"
-const MAIN_BRANCH = 'master'
-// add remote plugin docs loading
-const OPTIONS = {
-  remotePluginsFile: 'data/docs-remote-plugins.json',
-  additionalComponents: { PluginTierLabel },
-}
+//  Configure the docs path and remote plugin docs loading
+const additionalComponents = { PluginTierLabel }
+const baseRoute = 'docs'
+const localContentDir = 'content/docs'
+const mainBranch = 'master'
+const navDataFile = 'data/docs-nav-data.json'
+const product = { name: productName, slug: productSlug }
+const remotePluginsFile = 'data/docs-remote-plugins.json'
 
 function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
   return (
@@ -47,10 +44,9 @@ function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
         </DevAlert>
       ) : null}
       <DocsPage
-        additionalComponents={OPTIONS.additionalComponents}
-        baseRoute={BASE_ROUTE}
-        mainBranch="master" // used for "edit on this page", default "main"
-        product={{ name: productName, slug: productSlug }}
+        additionalComponents={additionalComponents}
+        baseRoute={baseRoute}
+        product={product}
         staticProps={props}
       />
     </>
@@ -58,17 +54,24 @@ function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
 }
 
 export async function getStaticPaths() {
-  const paths = await generateStaticPaths(NAV_DATA, CONTENT_DIR, OPTIONS)
+  const paths = await generateStaticPaths({
+    localContentDir,
+    navDataFile,
+    remotePluginsFile,
+  })
   return { paths, fallback: false }
 }
 
 export async function getStaticProps({ params }) {
-  const props = await generateStaticProps(
-    NAV_DATA,
-    CONTENT_DIR,
+  const props = await generateStaticProps({
+    additionalComponents,
+    localContentDir,
+    mainBranch,
+    navDataFile,
     params,
-    OPTIONS
-  )
+    product,
+    remotePluginsFile,
+  })
   return { props }
 }
 

@@ -81,6 +81,7 @@ type Builds []*BuildBlock
 // load the references to the contents of the build block.
 func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildBlock, hcl.Diagnostics) {
 	build := &BuildBlock{}
+	body := block.Body
 
 	var b struct {
 		Name        string   `hcl:"name,optional"`
@@ -88,7 +89,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	diags := gohcl.DecodeBody(body, nil, &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
@@ -118,7 +119,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
-	content, moreDiags := b.Config.Content(buildSchema)
+	body = b.Config
+	content, moreDiags := body.Content(buildSchema)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return nil, diags

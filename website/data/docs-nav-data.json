@@ -321,6 +321,10 @@
                     "path": "templates/hcl_templates/functions/collection/flatten"
                   },
                   {
+                    "title": "index",
+                    "path": "templates/hcl_templates/functions/collection/index-fn"
+                  },
+                  {
                     "title": "keys",
                     "path": "templates/hcl_templates/functions/collection/keys"
                   },
@@ -449,6 +453,10 @@
                   {
                     "title": "pathexpand",
                     "path": "templates/hcl_templates/functions/file/pathexpand"
+                  },
+                  {
+                    "title": "templatefile",
+                    "path": "templates/hcl_templates/functions/file/templatefile"
                   }
                 ]
               },
@@ -541,6 +549,10 @@
                   {
                     "title": "cidrsubnet",
                     "path": "templates/hcl_templates/functions/ipnet/cidrsubnet"
+                  },
+                  {
+                    "title": "cidrsubnets",
+                    "path": "templates/hcl_templates/functions/ipnet/cidrsubnets"
                   }
                 ]
               },
@@ -670,35 +682,6 @@
       {
         "title": "Alicloud ECS",
         "path": "builders/alicloud-ecs"
-      },
-      {
-        "title": "Amazon EC2",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/amazon"
-          },
-          {
-            "title": "chroot",
-            "path": "builders/amazon/chroot"
-          },
-          {
-            "title": "EBS",
-            "path": "builders/amazon/ebs"
-          },
-          {
-            "title": "EBS Surrogate",
-            "path": "builders/amazon/ebssurrogate"
-          },
-          {
-            "title": "EBS Volume",
-            "path": "builders/amazon/ebsvolume"
-          },
-          {
-            "title": "Instance",
-            "path": "builders/amazon/instance"
-          }
-        ]
       },
       {
         "title": "Azure",
@@ -960,23 +943,6 @@
       {
         "title": "Overview",
         "path": "datasources"
-      },
-      {
-        "title": "Amazon",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "datasources/amazon"
-          },
-          {
-            "title": "Amazon AMI",
-            "path": "datasources/amazon/ami"
-          },
-          {
-            "title": "Secrets Manager",
-            "path": "datasources/amazon/secretsmanager"
-          }
-        ]
       }
     ]
   },
@@ -1071,10 +1037,6 @@
       {
         "title": "Alicloud Import",
         "path": "post-processors/alicloud-import"
-      },
-      {
-        "title": "Amazon Import",
-        "path": "post-processors/amazon-import"
       },
       {
         "title": "Artifice",

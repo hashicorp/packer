@@ -1,6 +1,7 @@
 package proxmox
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -51,12 +52,57 @@ func ParseConf(
 	kvString string,
 	confSeparator string,
 	subConfSeparator string,
+	implicitFirstKey string,
 ) QemuDevice {
 	var confMap = QemuDevice{}
 	confList := strings.Split(kvString, confSeparator)
+
+	if implicitFirstKey != "" {
+		if !strings.Contains(confList[0], "=") {
+			confMap[implicitFirstKey] = confList[0]
+			confList = confList[1:]
+		}
+	}
+
 	for _, item := range confList {
 		key, value := ParseSubConf(item, subConfSeparator)
 		confMap[key] = value
 	}
 	return confMap
+}
+
+func ParsePMConf(
+	kvString string,
+	implicitFirstKey string,
+) QemuDevice {
+	return ParseConf(kvString, ",", "=", implicitFirstKey)
+}
+
+// Convert a disk-size string to a GB float
+func DiskSizeGB(dcSize interface{}) float64 {
+	var diskSize float64
+	switch dcSize.(type) {
+	case string:
+		diskString := strings.ToUpper(dcSize.(string))
+		re := regexp.MustCompile("([0-9]+)([A-Z]*)")
+		diskArray := re.FindStringSubmatch(diskString)
+
+		diskSize, _ = strconv.ParseFloat(diskArray[1], 64)
+
+		if len(diskArray) >= 3 {
+			switch diskArray[2] {
+			case "T", "TB":
+				diskSize *= 1024
+			case "G", "GB":
+				//Nothing to do
+			case "M", "MB":
+				diskSize /= 1024
+			case "K", "KB":
+				diskSize /= 1048576
+			}
+		}
+	case float64:
+		diskSize = dcSize.(float64)
+	}
+	return diskSize
 }

@@ -20,6 +20,7 @@ type FlatConfig struct {
 	PackerUserVars            map[string]string                  `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars       []string                           `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	HTTPDir                   *string                            `mapstructure:"http_directory" cty:"http_directory" hcl:"http_directory"`
+	HTTPContent               map[string]string                  `mapstructure:"http_content" cty:"http_content" hcl:"http_content"`
 	HTTPPortMin               *int                               `mapstructure:"http_port_min" cty:"http_port_min" hcl:"http_port_min"`
 	HTTPPortMax               *int                               `mapstructure:"http_port_max" cty:"http_port_max" hcl:"http_port_max"`
 	HTTPAddress               *string                            `mapstructure:"http_bind_address" cty:"http_bind_address" hcl:"http_bind_address"`
@@ -81,6 +82,7 @@ type FlatConfig struct {
 	SkipCertValidation        *bool                              `mapstructure:"insecure_skip_tls_verify" cty:"insecure_skip_tls_verify" hcl:"insecure_skip_tls_verify"`
 	Username                  *string                            `mapstructure:"username" cty:"username" hcl:"username"`
 	Password                  *string                            `mapstructure:"password" cty:"password" hcl:"password"`
+	Token                     *string                            `mapstructure:"token" cty:"token" hcl:"token"`
 	Node                      *string                            `mapstructure:"node" cty:"node" hcl:"node"`
 	Pool                      *string                            `mapstructure:"pool" cty:"pool" hcl:"pool"`
 	VMName                    *string                            `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
@@ -135,6 +137,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":        &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables":   &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"http_directory":               &hcldec.AttrSpec{Name: "http_directory", Type: cty.String, Required: false},
+		"http_content":                 &hcldec.AttrSpec{Name: "http_content", Type: cty.Map(cty.String), Required: false},
 		"http_port_min":                &hcldec.AttrSpec{Name: "http_port_min", Type: cty.Number, Required: false},
 		"http_port_max":                &hcldec.AttrSpec{Name: "http_port_max", Type: cty.Number, Required: false},
 		"http_bind_address":            &hcldec.AttrSpec{Name: "http_bind_address", Type: cty.String, Required: false},
@@ -196,6 +199,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"insecure_skip_tls_verify":     &hcldec.AttrSpec{Name: "insecure_skip_tls_verify", Type: cty.Bool, Required: false},
 		"username":                     &hcldec.AttrSpec{Name: "username", Type: cty.String, Required: false},
 		"password":                     &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
+		"token":                        &hcldec.AttrSpec{Name: "token", Type: cty.String, Required: false},
 		"node":                         &hcldec.AttrSpec{Name: "node", Type: cty.String, Required: false},
 		"pool":                         &hcldec.AttrSpec{Name: "pool", Type: cty.String, Required: false},
 		"vm_name":                      &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},

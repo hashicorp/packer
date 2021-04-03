@@ -21,7 +21,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	Repository string `mapstructure:"repository"`
-	// Kept for backwards compatability
+	// Kept for backwards compatibility
 	Tag   []string `mapstructure:"tag"`
 	Tags  []string `mapstructure:"tags"`
 	Force bool

@@ -35,6 +35,7 @@ type Config struct {
 	SkipCertValidation bool   `mapstructure:"insecure_skip_tls_verify"`
 	Username           string `mapstructure:"username"`
 	Password           string `mapstructure:"password"`
+	Token              string `mapstructure:"token"`
 	Node               string `mapstructure:"node"`
 	Pool               string `mapstructure:"pool"`
 
@@ -135,6 +136,9 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	if c.Password == "" {
 		c.Password = os.Getenv("PROXMOX_PASSWORD")
 	}
+	if c.Token == "" {
+		c.Token = os.Getenv("PROXMOX_TOKEN")
+	}
 	if c.BootKeyInterval == 0 && os.Getenv(bootcommand.PackerKeyEnv) != "" {
 		var err error
 		c.BootKeyInterval, err = time.ParseDuration(os.Getenv(bootcommand.PackerKeyEnv))
@@ -220,8 +224,8 @@ func (c *Config) Prepare(upper interface{}, raws ...interface{}) ([]string, []st
 	if c.Username == "" {
 		errs = packersdk.MultiErrorAppend(errs, errors.New("username must be specified"))
 	}
-	if c.Password == "" {
-		errs = packersdk.MultiErrorAppend(errs, errors.New("password must be specified"))
+	if c.Password == "" && c.Token == "" {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("password or token must be specified"))
 	}
 	if c.ProxmoxURLRaw == "" {
 		errs = packersdk.MultiErrorAppend(errs, errors.New("proxmox_url must be specified"))

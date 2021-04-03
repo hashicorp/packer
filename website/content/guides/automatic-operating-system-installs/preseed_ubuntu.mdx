@@ -1,6 +1,5 @@
 ---
 page_title: Unattended Debian/Ubuntu Installation
-sidebar_title: Unattended Installation for Debian
 description: |-
   Learn how to use a preseed file to automatically answer installation
   questions and enable Packer to connect to your Debian instnace.
@@ -41,10 +40,10 @@ comment or uncomment the options as you need them.
 
 ## Where to put the preseed file
 
-The `-iso` builders mentioned above all have an `http_dir` option. Any file
-inside of your `http_dir` will be served on a local fileserver for your virtual
-machine to be able to access. One very common use for this directory is to use
-it to provide your preseed file.
+The `-iso` builders mentioned above all have an `http_dir` or an `http_content`
+option. Any file inside of your `http_dir` or `http_content` will be served on a
+local fileserver for your virtual machine to be able to access. One very common
+use for this directory is to use it to provide your preseed file.
 
 You then reference the file using a `boot_command` to kick off the installation.
 In the example below, see how the `preseed/url` command line option is being

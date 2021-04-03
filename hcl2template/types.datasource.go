@@ -11,8 +11,8 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-// DataBlock references an HCL 'data' block.
-type Datasource struct {
+// DatasourceBlock references an HCL 'data' block.
+type DatasourceBlock struct {
 	Type string
 	Name string
 
@@ -25,9 +25,9 @@ type DatasourceRef struct {
 	Name string
 }
 
-type Datasources map[DatasourceRef]Datasource
+type Datasources map[DatasourceRef]DatasourceBlock
 
-func (data *Datasource) Ref() DatasourceRef {
+func (data *DatasourceBlock) Ref() DatasourceRef {
 	return DatasourceRef{
 		Type: data.Type,
 		Name: data.Name,
@@ -124,9 +124,9 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 	return datasource, diags
 }
 
-func (p *Parser) decodeDataBlock(block *hcl.Block) (*Datasource, hcl.Diagnostics) {
+func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	r := &Datasource{
+	r := &DatasourceBlock{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
 		block: block,

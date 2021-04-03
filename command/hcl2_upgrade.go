@@ -8,15 +8,17 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	texttemplate "text/template"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	awscommon "github.com/hashicorp/packer-plugin-amazon/builder/common"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"
@@ -437,7 +439,22 @@ func transposeTemplatingCalls(s []byte) []byte {
 		Parse(string(s))
 
 	if err != nil {
-		return fallbackReturn(err, s)
+		if strings.Contains(err.Error(), "unexpected \"\\\\\" in operand") {
+			// This error occurs if the operand in the text template used
+			// escaped quoting \" instead of bactick quoting `
+			// Create a regex to do a string replace on this block, to fix
+			// quoting.
+			q := fixQuoting(string(s))
+			unquoted := []byte(q)
+			tpl, err = texttemplate.New("hcl2_upgrade").
+				Funcs(funcMap).
+				Parse(string(unquoted))
+			if err != nil {
+				return fallbackReturn(err, unquoted)
+			}
+		} else {
+			return fallbackReturn(err, s)
+		}
 	}
 
 	str := &bytes.Buffer{}
@@ -502,7 +519,22 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		Parse(string(s))
 
 	if err != nil {
-		return isLocal, fallbackReturn(err, s)
+		if strings.Contains(err.Error(), "unexpected \"\\\\\" in operand") {
+			// This error occurs if the operand in the text template used
+			// escaped quoting \" instead of bactick quoting `
+			// Create a regex to do a string replace on this block, to fix
+			// quoting.
+			q := fixQuoting(string(s))
+			unquoted := []byte(q)
+			tpl, err = texttemplate.New("hcl2_upgrade").
+				Funcs(funcMap).
+				Parse(string(unquoted))
+			if err != nil {
+				return isLocal, fallbackReturn(err, unquoted)
+			}
+		} else {
+			return isLocal, fallbackReturn(err, s)
+		}
 	}
 
 	str := &bytes.Buffer{}
@@ -1184,6 +1216,7 @@ var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
 	"WinRMPassword":              "{{ .WinRMPassword }}",
 	"DefaultOrganizationID":      "{{ .DefaultOrganizationID }}",
 	"HTTPDir":                    "{{ .HTTPDir }}",
+	"HTTPContent":                "{{ .HTTPContent }}",
 	"SegmentPath":                "{{ .SegmentPath }}",
 	"NewVHDSizeBytes":            "{{ .NewVHDSizeBytes }}",
 	"CTyp":                       "{{ .CTyp }}",
@@ -1246,4 +1279,24 @@ var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
 	"DiskName":                   "{{ .DiskName }}",
 	"ProviderVagrantfile":        "{{ .ProviderVagrantfile }}",
 	"Sound_Present":              "{{ .Sound_Present }}",
+}
+
+func fixQuoting(old string) string {
+	// This regex captures golang template functions that use escaped quotes:
+	// {{ env \"myvar\" }}
+	re := regexp.MustCompile(`{{\s*\w*\s*(\\".*\\")\s*}}`)
+
+	body := re.ReplaceAllFunc([]byte(old), func(s []byte) []byte {
+		// Get the capture group
+		group := re.ReplaceAllString(string(s), `$1`)
+
+		unquoted, err := strconv.Unquote(fmt.Sprintf("\"%s\"", group))
+		if err != nil {
+			return s
+		}
+		return []byte(strings.Replace(string(s), group, unquoted, 1))
+
+	})
+
+	return string(body)
 }

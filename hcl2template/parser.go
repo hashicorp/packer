@@ -76,12 +76,15 @@ const (
 
 // Parse will Parse all HCL files in filename. Path can be a folder or a file.
 //
-// Parse will first Parse variables and then the rest; so that interpolation
-// can happen.
+// Parse will first Parse packer and variables blocks, omitting the rest, which
+// can be expanded with dynamic blocks. We need to evaluate all variables for
+// that, so that data sources can expand dynamic blocks too.
 //
 // Parse returns a PackerConfig that contains configuration layout of a packer
 // build; sources(builders)/provisioners/posts-processors will not be started
-// and their contents wont be verified; Most syntax errors will cause an error.
+// and their contents wont be verified; Most syntax errors will cause an error,
+// init should be called next to expand dynamic blocks and verify that used
+// things do exist.
 func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
 	var files []*hcl.File
 	var diags hcl.Diagnostics
@@ -235,10 +238,6 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
 	}
 
-	// parse the actual content // rest
-	for _, file := range cfg.files {
-		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
-	}
 	return cfg, diags
 }
 
@@ -291,7 +290,7 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 		if !variable.Sensitive {
 			continue
 		}
-		value, _ := variable.Value()
+		value := variable.Value()
 		_ = cty.Walk(value, func(_ cty.Path, nested cty.Value) (bool, error) {
 			if nested.IsWhollyKnown() && !nested.IsNull() && nested.Type().Equals(cty.String) {
 				packersdk.LogSecretFilter.Set(nested.AsString())
@@ -311,15 +310,20 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 		return diags
 	}
 
-	_, moreDiags = cfg.InputVariables.Values()
+	moreDiags = cfg.InputVariables.ValidateValues()
 	diags = append(diags, moreDiags...)
-	_, moreDiags = cfg.LocalVariables.Values()
+	moreDiags = cfg.LocalVariables.ValidateValues()
 	diags = append(diags, moreDiags...)
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
+
+	// parse the actual content // rest
+	for _, file := range cfg.files {
+		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
+	}
 
 	diags = append(diags, cfg.initializeBlocks()...)
 
@@ -332,6 +336,7 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	body := f.Body
+	body = dynblock.Expand(body, cfg.EvalContext(DatasourceContext, nil))
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
@@ -380,7 +385,7 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := dynblock.Expand(file.Body, cfg.EvalContext(DatasourceContext, nil))
+	body := file.Body
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
