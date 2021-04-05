@@ -7,9 +7,10 @@
 ### BUG FIXES:
 
 * builder/proxmox: Update Proxmox Go API to ensure only the first non-loopback
-  IPv4 address gets returned. [GH-10858]
+    IPv4 address gets returned. [GH-10858]
 * builder/vsphere: Fix primary disk resize on clone. [GH-10848]
-
+* core: Fix bug where call to "packer version" sent output to stderr instead of
+    stdout. [GH-10850]
 
 ## 1.7.1 (March 31, 2021)
 
