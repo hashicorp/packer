@@ -1,5 +1,16 @@
 ## 1.7.2 (Upcoming)
 
+### IMPROVEMENTS:
+
+* builder/alicloud: Add `ramrole` configuration to ECS instance. [GH-10845]
+
+### BUG FIXES:
+
+* builder/proxmox: Update Proxmox Go API to ensure only the first non-loopback
+  IPv4 address gets returned. [GH-10858]
+* builder/vsphere: Fix primary disk resize on clone. [GH-10848]
+
+
 ## 1.7.1 (March 31, 2021)
 
 ### NOTES:
