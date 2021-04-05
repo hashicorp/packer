@@ -126,6 +126,15 @@ func realMain() int {
 // wrappedMain is called only when we're wrapped by panicwrap and
 // returns the exit status to exit with.
 func wrappedMain() int {
+	// WARNING: WrappedMain causes unexpected behaviors when writing to stderr
+	// and stdout.  Anything in this function written to stderr will be captured
+	// by the logger, but will not be written to the terminal. Anything in
+	// this function written to standard out must be prefixed with ErrorPrefix
+	// or OutputPrefix to be sent to the right terminal stream, but adding
+	// these prefixes can cause nondeterministic results for output from
+	// other, asynchronous methods. Try to avoid modifying output in this
+	// function if at all possible.
+
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
 		runtime.GOMAXPROCS(runtime.NumCPU())
