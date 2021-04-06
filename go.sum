@@ -77,7 +77,6 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022 h1:y8Gs8CzNfDF5AZvjr+5UyGQvQEBL7pwo+v+wX6q9JI8=
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0 h1:0nxjOH7NurPGUWNG5BCrASWjB0uuhGbgJAKLqj2ZDTo=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7 h1:Kpnbe19WkzVPpLLdAus4LkpNJ+pzLpfAViOUuvPcCqA=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
