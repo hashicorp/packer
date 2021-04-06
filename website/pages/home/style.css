@@ -12,7 +12,7 @@
     }
 
     & img {
-      max-width: 358px;
+      width: 300px;
       margin: 0 30px;
     }
 
@@ -113,6 +113,10 @@
 
     & h2 {
       margin: 20px 0 10px 0;
+    }
+
+    & .text {
+      color: var(--packer-text-on-primary);
     }
 
     & .logos,
