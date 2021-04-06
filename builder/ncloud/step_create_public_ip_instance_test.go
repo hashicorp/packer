@@ -12,8 +12,8 @@ import (
 )
 
 func TestStepCreatePublicIPInstanceShouldFailIfOperationCreatePublicIPInstanceFails(t *testing.T) {
-	var testSubject = &StepCreatePublicIPInstance{
-		CreatePublicIPInstance: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
+	var testSubject = &StepCreatePublicIP{
+		CreatePublicIP: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
 			return nil, fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		Say:   func(message string) {},
@@ -28,7 +28,7 @@ func TestStepCreatePublicIPInstanceShouldFailIfOperationCreatePublicIPInstanceFa
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == false {
+	if _, ok := stateBag.GetOk("error"); ok == false {
 		t.Fatal("Expected the step to set stateBag['Error'], but it was not.")
 	}
 }
@@ -38,8 +38,8 @@ func TestStepCreatePublicIPInstanceShouldPassIfOperationCreatePublicIPInstancePa
 	c.Comm.Prepare(nil)
 	c.Comm.Type = "ssh"
 
-	var testSubject = &StepCreatePublicIPInstance{
-		CreatePublicIPInstance: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
+	var testSubject = &StepCreatePublicIP{
+		CreatePublicIP: func(serverInstanceNo string) (*server.PublicIpInstance, error) {
 			return &server.PublicIpInstance{PublicIpInstanceNo: ncloud.String("a"), PublicIp: ncloud.String("b")}, nil
 		},
 		Say:    func(message string) {},
@@ -55,7 +55,7 @@ func TestStepCreatePublicIPInstanceShouldPassIfOperationCreatePublicIPInstancePa
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == true {
+	if _, ok := stateBag.GetOk("error"); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['Error'], but it was.")
 	}
 }
@@ -63,7 +63,7 @@ func TestStepCreatePublicIPInstanceShouldPassIfOperationCreatePublicIPInstancePa
 func createTestStateBagStepCreatePublicIPInstance() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
-	stateBag.Put("InstanceNo", "a")
+	stateBag.Put("instance_no", "a")
 
 	return stateBag
 }

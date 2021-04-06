@@ -9,11 +9,11 @@ import (
 )
 
 func TestStepDeleteBlockStorageInstanceShouldFailIfOperationDeleteBlockStorageInstanceFails(t *testing.T) {
-	var testSubject = &StepDeleteBlockStorageInstance{
-		DeleteBlockStorageInstance: func(blockStorageInstanceNo string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
-		Say:                        func(message string) {},
-		Error:                      func(e error) {},
-		Config:                     &Config{BlockStorageSize: 10},
+	var testSubject = &StepDeleteBlockStorage{
+		DeleteBlockStorage: func(blockStorageNo string) error { return fmt.Errorf("!! Unit Test FAIL !!") },
+		Say:                func(message string) {},
+		Error:              func(e error) {},
+		Config:             &Config{BlockStorageSize: 10},
 	}
 
 	stateBag := createTestStateBagStepDeleteBlockStorageInstance()
@@ -24,17 +24,17 @@ func TestStepDeleteBlockStorageInstanceShouldFailIfOperationDeleteBlockStorageIn
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == false {
+	if _, ok := stateBag.GetOk("error"); ok == false {
 		t.Fatal("Expected the step to set stateBag['Error'], but it was not.")
 	}
 }
 
 func TestStepDeleteBlockStorageInstanceShouldPassIfOperationDeleteBlockStorageInstancePasses(t *testing.T) {
-	var testSubject = &StepDeleteBlockStorageInstance{
-		DeleteBlockStorageInstance: func(blockStorageInstanceNo string) error { return nil },
-		Say:                        func(message string) {},
-		Error:                      func(e error) {},
-		Config:                     &Config{BlockStorageSize: 10},
+	var testSubject = &StepDeleteBlockStorage{
+		DeleteBlockStorage: func(blockStorageNo string) error { return nil },
+		Say:                func(message string) {},
+		Error:              func(e error) {},
+		Config:             &Config{BlockStorageSize: 10},
 	}
 
 	stateBag := createTestStateBagStepDeleteBlockStorageInstance()
@@ -45,7 +45,7 @@ func TestStepDeleteBlockStorageInstanceShouldPassIfOperationDeleteBlockStorageIn
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == true {
+	if _, ok := stateBag.GetOk("error"); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['Error'], but it was.")
 	}
 }
@@ -53,7 +53,7 @@ func TestStepDeleteBlockStorageInstanceShouldPassIfOperationDeleteBlockStorageIn
 func createTestStateBagStepDeleteBlockStorageInstance() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
-	stateBag.Put("InstanceNo", "1")
+	stateBag.Put("instance_no", "1")
 
 	return stateBag
 }

@@ -10,7 +10,7 @@ import (
 
 func TestStepCreateServerInstanceShouldFailIfOperationCreateFails(t *testing.T) {
 	var testSubject = &StepCreateServerInstance{
-		CreateServerInstance: func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) {
+		CreateServerInstance: func(loginKeyName string, feeSystemTypeCode string, state multistep.StateBag) (string, error) {
 			return "", fmt.Errorf("!! Unit Test FAIL !!")
 		},
 		Say:   func(message string) {},
@@ -25,16 +25,18 @@ func TestStepCreateServerInstanceShouldFailIfOperationCreateFails(t *testing.T) 
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == false {
+	if _, ok := stateBag.GetOk("error"); ok == false {
 		t.Fatal("Expected the step to set stateBag['Error'], but it was not.")
 	}
 }
 
 func TestStepCreateServerInstanceShouldPassIfOperationCreatePasses(t *testing.T) {
 	var testSubject = &StepCreateServerInstance{
-		CreateServerInstance: func(loginKeyName string, zoneNo string, feeSystemTypeCode string) (string, error) { return "", nil },
-		Say:                  func(message string) {},
-		Error:                func(e error) {},
+		CreateServerInstance: func(loginKeyName string, feeSystemTypeCode string, state multistep.StateBag) (string, error) {
+			return "", nil
+		},
+		Say:   func(message string) {},
+		Error: func(e error) {},
 	}
 
 	stateBag := createTestStateBagStepCreateServerInstance()
@@ -45,7 +47,7 @@ func TestStepCreateServerInstanceShouldPassIfOperationCreatePasses(t *testing.T)
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == true {
+	if _, ok := stateBag.GetOk("error"); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['Error'], but it was.")
 	}
 }
@@ -53,8 +55,8 @@ func TestStepCreateServerInstanceShouldPassIfOperationCreatePasses(t *testing.T)
 func createTestStateBagStepCreateServerInstance() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
-	stateBag.Put("LoginKey", &LoginKey{"a", "b"})
-	stateBag.Put("ZoneNo", "1")
+	stateBag.Put("login_key", &LoginKey{"a", "b"})
+	stateBag.Put("zone_no", "1")
 
 	return stateBag
 }

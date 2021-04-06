@@ -23,7 +23,7 @@ func TestStepCreateLoginKeyShouldFailIfOperationCreateLoginKeyFails(t *testing.T
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == false {
+	if _, ok := stateBag.GetOk("error"); ok == false {
 		t.Fatal("Expected the step to set stateBag['Error'], but it was not.")
 	}
 }
@@ -43,7 +43,7 @@ func TestStepCreateLoginKeyShouldPassIfOperationCreateLoginKeyPasses(t *testing.
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == true {
+	if _, ok := stateBag.GetOk("error"); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['Error'], but it was.")
 	}
 }

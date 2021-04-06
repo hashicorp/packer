@@ -23,7 +23,7 @@ func TestStepStopServerInstanceShouldFailIfOperationStopFails(t *testing.T) {
 		t.Fatalf("Expected the step to return 'ActionHalt', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == false {
+	if _, ok := stateBag.GetOk("error"); ok == false {
 		t.Fatal("Expected the step to set stateBag['Error'], but it was not.")
 	}
 }
@@ -43,7 +43,7 @@ func TestStepStopServerInstanceShouldPassIfOperationStopPasses(t *testing.T) {
 		t.Fatalf("Expected the step to return 'ActionContinue', but got '%d'.", result)
 	}
 
-	if _, ok := stateBag.GetOk("Error"); ok == true {
+	if _, ok := stateBag.GetOk("error"); ok == true {
 		t.Fatalf("Expected the step to not set stateBag['Error'], but it was.")
 	}
 }
@@ -51,6 +51,6 @@ func TestStepStopServerInstanceShouldPassIfOperationStopPasses(t *testing.T) {
 func createTestStateBagStepStopServerInstance() multistep.StateBag {
 	stateBag := new(multistep.BasicStateBag)
 
-	stateBag.Put("InstanceNo", "a")
+	stateBag.Put("instance_no", "a")
 	return stateBag
 }
