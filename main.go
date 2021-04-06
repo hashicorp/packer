@@ -475,6 +475,7 @@ func inPlugin() bool {
 	return os.Getenv(pluginsdk.MagicCookieKey) == pluginsdk.MagicCookieValue
 }
 
+// junk
 func init() {
 	// Seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
