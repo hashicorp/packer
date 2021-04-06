@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
@@ -169,4 +170,13 @@ var NoSource SourceRef
 
 func (r SourceRef) String() string {
 	return fmt.Sprintf("%s.%s", r.Type, r.Name)
+}
+
+func listAvailableSourceNames(srcs map[SourceRef]SourceBlock) []string {
+	res := make([]string, 0, len(srcs))
+	for k := range srcs {
+		res = append(res, k.String())
+	}
+	sort.Strings(res)
+	return res
 }

@@ -3,7 +3,6 @@ description: |
   The ansible Packer provisioner allows Ansible playbooks to be run to provision
   the machine.
 page_title: Ansible - Provisioners
-sidebar_title: Ansible (Remote)
 ---
 
 # Ansible Provisioner
@@ -442,7 +441,7 @@ Platform:
         "--connection",
         "packer",
         "--extra-vars",
-        "ansible_shell_type=powershell ansible_shell_executable=None"
+        "\"ansible_shell_type=powershell ansible_shell_executable=None\""
       ]
     }
   ],

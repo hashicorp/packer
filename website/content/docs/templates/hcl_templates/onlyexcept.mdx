@@ -1,6 +1,5 @@
 ---
 page_title: Only Except - HCL Configuration Language
-sidebar_title: Only Except
 description: >-
   Only and Except can be used as a command line argument to selectively run
   builds. Only and Except can also be used in a provisioner to not run it for a
@@ -25,9 +24,10 @@ build {
   sources [
     "source.amazon-ebs.first-example",
   ]
-  source "source.amazon-ebs.second-example" {
-    // setting the name field allows to rename the source only for this build
-    // section.
+  source "source.amazon-ebs.second-example"
+    // setting the name field allows you to rename the source only for this
+    // build section. To match this builder, you need to use
+    // second-example-local-name, not second-example
     name = "second-example-local-name"
   }
 
@@ -68,4 +68,4 @@ configuration:
 
 -> Note: In the cli `only` and `except` will match agains **build names** (for
 example:`my_build.amazon-ebs.first-example`) but in a provisioner they will
-match on the **source type** (for example:`source.amazon-ebs.third-example`).
+match on the **source name** (for example:`amazon-ebs.third-example`).

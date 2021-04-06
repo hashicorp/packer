@@ -8,14 +8,17 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	texttemplate "text/template"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
+	awscommon "github.com/hashicorp/packer-plugin-amazon/builder/common"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
-	awscommon "github.com/hashicorp/packer/builder/amazon/common"
 	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"github.com/posener/complete"
@@ -119,6 +122,7 @@ var (
 	amazonSecretsManagerMap = map[string]map[string]interface{}{}
 	localsVariableMap       = map[string]string{}
 	timestamp               = false
+	isotime                 = false
 )
 
 type BlockParser interface {
@@ -268,39 +272,40 @@ func (uc UnhandleableArgumentError) Error() string {
 # Visit %s for more infos.`, uc.Call, uc.Correspondance, uc.Docs)
 }
 
+func fallbackReturn(err error, s []byte) []byte {
+	if strings.Contains(err.Error(), "unhandled") {
+		return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
+	}
+
+	return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
+}
+
 // transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
 func transposeTemplatingCalls(s []byte) []byte {
-	fallbackReturn := func(err error) []byte {
-		if strings.Contains(err.Error(), "unhandled") {
-			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
-		}
+	funcErrors := &multierror.Error{
+		ErrorFormat: func(es []error) string {
+			if len(es) == 1 {
+				return fmt.Sprintf("# 1 error occurred upgrading the following block:\n\t# %s\n", es[0])
+			}
 
-		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
-	}
-	funcMap := templateCommonFunctionMap()
+			points := make([]string, len(es))
+			for i, err := range es {
+				if i == len(es)-1 {
+					points[i] = fmt.Sprintf("# %s", err)
+					continue
+				}
+				points[i] = fmt.Sprintf("# %s\n", err)
+			}
 
-	tpl, err := texttemplate.New("hcl2_upgrade").
-		Funcs(funcMap).
-		Parse(string(s))
-
-	if err != nil {
-		return fallbackReturn(err)
-	}
-
-	str := &bytes.Buffer{}
-	// PASSTHROUGHS is a map of variable-specific golang text template fields
-	// that should remain in the text template format.
-	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
-		return fallbackReturn(err)
+			return fmt.Sprintf(
+				"# %d errors occurred upgrading the following block:\n\t%s",
+				len(es), strings.Join(points, "\n\t"))
+		},
 	}
 
-	return str.Bytes()
-}
-
-func templateCommonFunctionMap() texttemplate.FuncMap {
-	return texttemplate.FuncMap{
+	funcMap := texttemplate.FuncMap{
 		"aws_secretsmanager": func(a ...string) string {
 			if len(a) == 2 {
 				for key, config := range amazonSecretsManagerMap {
@@ -328,13 +333,20 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 				"name": a[0],
 			}
 			return fmt.Sprintf("${data.amazon-secretsmanager.%s.value}", id)
-		}, "timestamp": func() string {
+		},
+		"timestamp": func() string {
 			timestamp = true
 			return "${local.timestamp}"
 		},
-		"isotime": func() string {
-			timestamp = true
-			return "${local.timestamp}"
+		"isotime": func(a ...string) string {
+			if len(a) == 0 {
+				// returns rfc3339 formatted string.
+				return "${timestamp()}"
+			}
+			// otherwise a valid isotime func has one input.
+			isotime = true
+			return fmt.Sprintf("${legacy_isotime(\"%s\")}", a[0])
+
 		},
 		"user": func(in string) string {
 			if _, ok := localsVariableMap[in]; ok {
@@ -364,49 +376,55 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 		"uuid": func() string {
 			return fmt.Sprintf("${uuidv4()}")
 		},
-		"lower": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"lower": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"lower",
 				"`lower(var.example)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/lower",
-			}
+			})
+			return fmt.Sprintf("{{ lower `%s` }}", a), nil
 		},
-		"upper": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"upper": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"upper",
 				"`upper(var.example)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/upper",
-			}
+			})
+			return fmt.Sprintf("{{ upper `%s` }}", a), nil
 		},
-		"split": func(_, _ string, _ int) (string, error) {
-			return "", UnhandleableArgumentError{
+		"split": func(a, b string, n int) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"split",
 				"`split(separator, string)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/split",
-			}
+			})
+			return fmt.Sprintf("{{ split `%s` `%s` %d }}", a, b, n), nil
 		},
-		"replace": func(_, _, _ string, _ int) (string, error) {
-			return "", UnhandleableArgumentError{
+		"replace": func(a, b string, n int, c string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ replace `%s` `%s` `%s` %d }}", a, b, c, n), nil
 		},
-		"replace_all": func(_, _, _ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"replace_all": func(a, b, c string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace_all",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ replace_all `%s` `%s` `%s` }}", a, b, c), nil
 		},
-		"clean_resource_name": func(_ string) (string, error) {
-			return "", UnhandleableArgumentError{
+		"clean_resource_name": func(a string) (string, error) {
+			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"clean_resource_name",
 				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://packer.io/docs/templates/hcl_templates/variables#custom-validation-rules" +
 					" , https://www.packer.io/docs/templates/hcl_templates/functions/string/replace" +
 					" or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
-			}
+			})
+			return fmt.Sprintf("{{ clean_resource_name `%s` }}", a), nil
 		},
 		"build_name": func() string {
 			return fmt.Sprintf("${build.name}")
@@ -415,6 +433,43 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 			return fmt.Sprintf("${build.type}")
 		},
 	}
+
+	tpl, err := texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(string(s))
+
+	if err != nil {
+		if strings.Contains(err.Error(), "unexpected \"\\\\\" in operand") {
+			// This error occurs if the operand in the text template used
+			// escaped quoting \" instead of bactick quoting `
+			// Create a regex to do a string replace on this block, to fix
+			// quoting.
+			q := fixQuoting(string(s))
+			unquoted := []byte(q)
+			tpl, err = texttemplate.New("hcl2_upgrade").
+				Funcs(funcMap).
+				Parse(string(unquoted))
+			if err != nil {
+				return fallbackReturn(err, unquoted)
+			}
+		} else {
+			return fallbackReturn(err, s)
+		}
+	}
+
+	str := &bytes.Buffer{}
+	// PASSTHROUGHS is a map of variable-specific golang text template fields
+	// that should remain in the text template format.
+	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
+		return fallbackReturn(err, s)
+	}
+
+	out := str.Bytes()
+
+	if funcErrors.Len() > 0 {
+		return append([]byte(fmt.Sprintf("\n%s", funcErrors)), out...)
+	}
+	return out
 }
 
 // variableTransposeTemplatingCalls executes parts of blocks as go template files and replaces
@@ -423,18 +478,40 @@ func templateCommonFunctionMap() texttemplate.FuncMap {
 // In variableTransposeTemplatingCalls the definition of aws_secretsmanager function will create a data source
 // with the same name as the variable.
 func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
-	fallbackReturn := func(err error) []byte {
-		if strings.Contains(err.Error(), "unhandled") {
-			return append([]byte(fmt.Sprintf("\n# %s\n", err)), s...)
-		}
-
-		return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
-	}
-
-	funcMap := templateCommonFunctionMap()
-	funcMap["aws_secretsmanager"] = func(a ...string) string {
+	setIsLocal := func(a ...string) string {
 		isLocal = true
 		return ""
+	}
+
+	// Make locals from variables using valid template engine,
+	// expect the ones using only 'env'
+	// ref: https://www.packer.io/docs/templates/legacy_json_templates/engine#template-engine
+	funcMap := texttemplate.FuncMap{
+		"aws_secretsmanager": setIsLocal,
+		"timestamp":          setIsLocal,
+		"isotime":            setIsLocal,
+		"user":               setIsLocal,
+		"env": func(in string) string {
+			return fmt.Sprintf("${env(%q)}", in)
+		},
+		"template_dir":   setIsLocal,
+		"pwd":            setIsLocal,
+		"packer_version": setIsLocal,
+		"uuid":           setIsLocal,
+		"lower":          setIsLocal,
+		"upper":          setIsLocal,
+		"split": func(_, _ string, _ int) (string, error) {
+			isLocal = true
+			return "", nil
+		},
+		"replace": func(_, _ string, _ int, _ string) (string, error) {
+			isLocal = true
+			return "", nil
+		},
+		"replace_all": func(_, _, _ string) (string, error) {
+			isLocal = true
+			return "", nil
+		},
 	}
 
 	tpl, err := texttemplate.New("hcl2_upgrade").
@@ -442,14 +519,29 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		Parse(string(s))
 
 	if err != nil {
-		return isLocal, fallbackReturn(err)
+		if strings.Contains(err.Error(), "unexpected \"\\\\\" in operand") {
+			// This error occurs if the operand in the text template used
+			// escaped quoting \" instead of bactick quoting `
+			// Create a regex to do a string replace on this block, to fix
+			// quoting.
+			q := fixQuoting(string(s))
+			unquoted := []byte(q)
+			tpl, err = texttemplate.New("hcl2_upgrade").
+				Funcs(funcMap).
+				Parse(string(unquoted))
+			if err != nil {
+				return isLocal, fallbackReturn(err, unquoted)
+			}
+		} else {
+			return isLocal, fallbackReturn(err, s)
+		}
 	}
 
 	str := &bytes.Buffer{}
 	// PASSTHROUGHS is a map of variable-specific golang text template fields
 	// that should remain in the text template format.
 	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
-		return isLocal, fallbackReturn(err)
+		return isLocal, fallbackReturn(err, s)
 	}
 
 	return isLocal, str.Bytes()
@@ -614,12 +706,49 @@ type VariableParser struct {
 	localsOut       []byte
 }
 
+func makeLocal(variable *template.Variable, sensitive bool, localBody *hclwrite.Body, localsContent *hclwrite.File, hasLocals *bool) []byte {
+	if sensitive {
+		// Create Local block because this is sensitive
+		sensitiveLocalContent := hclwrite.NewEmptyFile()
+		body := sensitiveLocalContent.Body()
+		body.AppendNewline()
+		sensitiveLocalBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
+		sensitiveLocalBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+		sensitiveLocalBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+		localsVariableMap[variable.Key] = "local"
+		return sensitiveLocalContent.Bytes()
+	}
+	localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
+	localsVariableMap[variable.Key] = "locals"
+	*hasLocals = true
+	return []byte{}
+}
+
+func makeVariable(variable *template.Variable, sensitive bool) []byte {
+	variablesContent := hclwrite.NewEmptyFile()
+	variablesBody := variablesContent.Body()
+	variablesBody.AppendNewline()
+	variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
+	variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
+
+	if variable.Default != "" || !variable.Required {
+		shimmed := hcl2shim.HCL2ValueFromConfigValue(variable.Default)
+		variableBody.SetAttributeValue("default", shimmed)
+	}
+	if sensitive {
+		variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
+	}
+
+	return variablesContent.Bytes()
+}
+
 func (p *VariableParser) Parse(tpl *template.Template) error {
-	// OutPut Locals and Local blocks
+	// Output Locals and Local blocks
 	localsContent := hclwrite.NewEmptyFile()
 	localsBody := localsContent.Body()
 	localsBody.AppendNewline()
 	localBody := localsBody.AppendNewBlock("locals", nil).Body()
+	hasLocals := false
 
 	if len(p.variablesOut) == 0 {
 		p.variablesOut = []byte{}
@@ -639,47 +768,34 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 		})
 	}
 
-	hasLocals := false
 	for _, variable := range variables {
-		variablesContent := hclwrite.NewEmptyFile()
-		variablesBody := variablesContent.Body()
-		variablesBody.AppendNewline()
-		variableBody := variablesBody.AppendNewBlock("variable", []string{variable.Key}).Body()
-		variableBody.SetAttributeRaw("type", hclwrite.Tokens{&hclwrite.Token{Bytes: []byte("string")}})
+		// Create new HCL2 "variables" block, and populate the "value"
+		// field with the "Default" value from the JSON variable.
 
-		if variable.Default != "" || !variable.Required {
-			variableBody.SetAttributeValue("default", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-		}
+		// Interpolate Jsonval first as an hcl variable to determine if it is
+		// a local.
+		isLocal, _ := variableTransposeTemplatingCalls([]byte(variable.Default))
 		sensitive := false
 		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
 			sensitive = true
-			variableBody.SetAttributeValue("sensitive", cty.BoolVal(true))
 		}
-		isLocal, out := variableTransposeTemplatingCalls(variablesContent.Bytes())
+		// Create final HCL block and append.
 		if isLocal {
-			if sensitive {
-				// Create Local block because this is sensitive
-				localContent := hclwrite.NewEmptyFile()
-				body := localContent.Body()
-				body.AppendNewline()
-				localBody := body.AppendNewBlock("local", []string{variable.Key}).Body()
-				localBody.SetAttributeValue("sensitive", cty.BoolVal(true))
-				localBody.SetAttributeValue("expression", hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-				p.localsOut = append(p.localsOut, transposeTemplatingCalls(localContent.Bytes())...)
-				localsVariableMap[variable.Key] = "local"
-				continue
+			sensitiveBlocks := makeLocal(variable, sensitive, localBody, localsContent, &hasLocals)
+			if len(sensitiveBlocks) > 0 {
+				p.localsOut = append(p.localsOut, transposeTemplatingCalls(sensitiveBlocks)...)
 			}
-			localBody.SetAttributeValue(variable.Key, hcl2shim.HCL2ValueFromConfigValue(variable.Default))
-			localsVariableMap[variable.Key] = "locals"
-			hasLocals = true
 			continue
 		}
+		varbytes := makeVariable(variable, sensitive)
+		_, out := variableTransposeTemplatingCalls(varbytes)
 		p.variablesOut = append(p.variablesOut, out...)
 	}
 
-	if hasLocals {
+	if hasLocals == true {
 		p.localsOut = append(p.localsOut, transposeTemplatingCalls(localsContent.Bytes())...)
 	}
+
 	return nil
 }
 
@@ -709,6 +825,9 @@ func (p *LocalsParser) Write(out *bytes.Buffer) {
 			fmt.Fprintln(out, `# "timestamp" template function replacement`)
 		}
 		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
+	}
+	if isotime {
+		fmt.Fprintln(out, `# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
 	}
 	if len(p.LocalsOut) > 0 {
 		if p.WithAnnotations {
@@ -896,6 +1015,10 @@ type BuildParser struct {
 }
 
 func (p *BuildParser) Parse(tpl *template.Template) error {
+	if len(p.Builders) == 0 {
+		return nil
+	}
+
 	buildContent := hclwrite.NewEmptyFile()
 	buildBody := buildContent.Body()
 	if tpl.Description != "" {
@@ -968,7 +1091,12 @@ func writeProvisioner(typeName string, provisioner *template.Provisioner) []byte
 	provisionerContent := hclwrite.NewEmptyFile()
 	body := provisionerContent.Body()
 	block := body.AppendNewBlock(typeName, []string{provisioner.Type})
+
 	cfg := provisioner.Config
+	if cfg == nil {
+		cfg = map[string]interface{}{}
+	}
+
 	if len(provisioner.Except) > 0 {
 		cfg["except"] = provisioner.Except
 	}
@@ -1021,6 +1149,10 @@ func (p *PostProcessorParser) Parse(tpl *template.Template) error {
 				ppBody.SetAttributeValue("keep_input_artifact", cty.BoolVal(*pp.KeepInputArtifact))
 			}
 			cfg := pp.Config
+			if cfg == nil {
+				cfg = map[string]interface{}{}
+			}
+
 			if len(pp.Except) > 0 {
 				cfg["except"] = pp.Except
 			}
@@ -1084,6 +1216,7 @@ var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
 	"WinRMPassword":              "{{ .WinRMPassword }}",
 	"DefaultOrganizationID":      "{{ .DefaultOrganizationID }}",
 	"HTTPDir":                    "{{ .HTTPDir }}",
+	"HTTPContent":                "{{ .HTTPContent }}",
 	"SegmentPath":                "{{ .SegmentPath }}",
 	"NewVHDSizeBytes":            "{{ .NewVHDSizeBytes }}",
 	"CTyp":                       "{{ .CTyp }}",
@@ -1146,4 +1279,24 @@ var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
 	"DiskName":                   "{{ .DiskName }}",
 	"ProviderVagrantfile":        "{{ .ProviderVagrantfile }}",
 	"Sound_Present":              "{{ .Sound_Present }}",
+}
+
+func fixQuoting(old string) string {
+	// This regex captures golang template functions that use escaped quotes:
+	// {{ env \"myvar\" }}
+	re := regexp.MustCompile(`{{\s*\w*\s*(\\".*\\")\s*}}`)
+
+	body := re.ReplaceAllFunc([]byte(old), func(s []byte) []byte {
+		// Get the capture group
+		group := re.ReplaceAllString(string(s), `$1`)
+
+		unquoted, err := strconv.Unquote(fmt.Sprintf("\"%s\"", group))
+		if err != nil {
+			return s
+		}
+		return []byte(strings.Replace(string(s), group, unquoted, 1))
+
+	})
+
+	return string(body)
 }

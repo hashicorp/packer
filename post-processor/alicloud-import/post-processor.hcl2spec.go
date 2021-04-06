@@ -52,6 +52,7 @@ type FlatConfig struct {
 	AlicloudSourceImage               *string                      `mapstructure:"source_image" required:"true" cty:"source_image" hcl:"source_image"`
 	ForceStopInstance                 *bool                        `mapstructure:"force_stop_instance" required:"false" cty:"force_stop_instance" hcl:"force_stop_instance"`
 	DisableStopInstance               *bool                        `mapstructure:"disable_stop_instance" required:"false" cty:"disable_stop_instance" hcl:"disable_stop_instance"`
+	RamRoleName                       *string                      `mapstructure:"ram_role_name" required:"false" cty:"ram_role_name" hcl:"ram_role_name"`
 	SecurityGroupId                   *string                      `mapstructure:"security_group_id" required:"false" cty:"security_group_id" hcl:"security_group_id"`
 	SecurityGroupName                 *string                      `mapstructure:"security_group_name" required:"false" cty:"security_group_name" hcl:"security_group_name"`
 	UserData                          *string                      `mapstructure:"user_data" required:"false" cty:"user_data" hcl:"user_data"`
@@ -177,6 +178,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source_image":                 &hcldec.AttrSpec{Name: "source_image", Type: cty.String, Required: false},
 		"force_stop_instance":          &hcldec.AttrSpec{Name: "force_stop_instance", Type: cty.Bool, Required: false},
 		"disable_stop_instance":        &hcldec.AttrSpec{Name: "disable_stop_instance", Type: cty.Bool, Required: false},
+		"ram_role_name":                &hcldec.AttrSpec{Name: "ram_role_name", Type: cty.String, Required: false},
 		"security_group_id":            &hcldec.AttrSpec{Name: "security_group_id", Type: cty.String, Required: false},
 		"security_group_name":          &hcldec.AttrSpec{Name: "security_group_name", Type: cty.String, Required: false},
 		"user_data":                    &hcldec.AttrSpec{Name: "user_data", Type: cty.String, Required: false},

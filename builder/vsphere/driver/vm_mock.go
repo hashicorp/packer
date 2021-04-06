@@ -55,6 +55,9 @@ type VirtualMachineMock struct {
 
 	RemoveCdromsCalled bool
 	RemoveCdromsErr    error
+	CloneCalled        bool
+	CloneConfig        *CloneConfig
+	CloneError         error
 }
 
 func (vm *VirtualMachineMock) Info(params ...string) (*mo.VirtualMachine, error) {
@@ -71,7 +74,9 @@ func (vm *VirtualMachineMock) FloppyDevices() (object.VirtualDeviceList, error) 
 }
 
 func (vm *VirtualMachineMock) Clone(ctx context.Context, config *CloneConfig) (VirtualMachine, error) {
-	return nil, nil
+	vm.CloneCalled = true
+	vm.CloneConfig = config
+	return vm, vm.CloneError
 }
 
 func (vm *VirtualMachineMock) updateVAppConfig(ctx context.Context, newProps map[string]string) (*types.VmConfigSpec, error) {
@@ -107,8 +112,8 @@ func (vm *VirtualMachineMock) Customize(spec types.CustomizationSpec) error {
 	return nil
 }
 
-func (vm *VirtualMachineMock) ResizeDisk(diskSize int64) error {
-	return nil
+func (vm *VirtualMachineMock) ResizeDisk(diskSize int64) ([]types.BaseVirtualDeviceConfigSpec, error) {
+	return nil, nil
 }
 
 func (vm *VirtualMachineMock) PowerOn() error {

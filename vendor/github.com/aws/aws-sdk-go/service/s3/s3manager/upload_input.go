@@ -23,21 +23,21 @@ type UploadInput struct {
 	// The readable body payload to send to S3.
 	Body io.Reader
 
-	// The bucket name to which the PUT operation was initiated.
+	// The bucket name to which the PUT action was initiated.
 	//
-	// When using this API with an access point, you must direct requests to the
-	// access point hostname. The access point hostname takes the form AccessPointName-AccountId.s3-accesspoint.Region.amazonaws.com.
-	// When using this operation with an access point through the AWS SDKs, you
-	// provide the access point ARN in place of the bucket name. For more information
-	// about access point ARNs, see Using Access Points (https://docs.aws.amazon.com/AmazonS3/latest/dev/using-access-points.html)
+	// When using this action with an access point, you must direct requests to
+	// the access point hostname. The access point hostname takes the form AccessPointName-AccountId.s3-accesspoint.Region.amazonaws.com.
+	// When using this action with an access point through the AWS SDKs, you provide
+	// the access point ARN in place of the bucket name. For more information about
+	// access point ARNs, see Using Access Points (https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-access-points.html)
 	// in the Amazon Simple Storage Service Developer Guide.
 	//
-	// When using this API with Amazon S3 on Outposts, you must direct requests
+	// When using this action with Amazon S3 on Outposts, you must direct requests
 	// to the S3 on Outposts hostname. The S3 on Outposts hostname takes the form
 	// AccessPointName-AccountId.outpostID.s3-outposts.Region.amazonaws.com. When
-	// using this operation using S3 on Outposts through the AWS SDKs, you provide
+	// using this action using S3 on Outposts through the AWS SDKs, you provide
 	// the Outposts bucket ARN in place of the bucket name. For more information
-	// about S3 on Outposts ARNs, see Using S3 on Outposts (https://docs.aws.amazon.com/AmazonS3/latest/dev/S3onOutposts.html)
+	// about S3 on Outposts ARNs, see Using S3 on Outposts (https://docs.aws.amazon.com/AmazonS3/latest/userguide/S3onOutposts.html)
 	// in the Amazon Simple Storage Service Developer Guide.
 	//
 	// Bucket is a required field
@@ -48,8 +48,8 @@ type UploadInput struct {
 	// to true causes Amazon S3 to use an S3 Bucket Key for object encryption with
 	// SSE-KMS.
 	//
-	// Specifying this header with a PUT operation doesn’t affect bucket-level
-	// settings for S3 Bucket Key.
+	// Specifying this header with a PUT action doesn’t affect bucket-level settings
+	// for S3 Bucket Key.
 	BucketKeyEnabled *bool `location:"header" locationName:"x-amz-server-side-encryption-bucket-key-enabled" type:"boolean"`
 
 	// Can be used to specify caching behavior along the request/reply chain. For
@@ -82,7 +82,7 @@ type UploadInput struct {
 	// see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17 (http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17).
 	ContentType *string `location:"header" locationName:"Content-Type" type:"string"`
 
-	// The account id of the expected bucket owner. If the bucket is owned by a
+	// The account ID of the expected bucket owner. If the bucket is owned by a
 	// different account, the request will fail with an HTTP 403 (Access Denied)
 	// error.
 	ExpectedBucketOwner *string `location:"header" locationName:"x-amz-expected-bucket-owner" type:"string"`
@@ -111,7 +111,7 @@ type UploadInput struct {
 	// This action is not supported by Amazon S3 on Outposts.
 	GrantWriteACP *string `location:"header" locationName:"x-amz-grant-write-acp" type:"string"`
 
-	// Object key for which the PUT operation was initiated.
+	// Object key for which the PUT action was initiated.
 	//
 	// Key is a required field
 	Key *string `location:"uri" locationName:"Key" min:"1" type:"string" required:"true"`

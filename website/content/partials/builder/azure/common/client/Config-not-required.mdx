@@ -12,6 +12,8 @@
 - `client_cert_path` (string) - The path to a pem-encoded certificate that will be used to authenticate
   as the specified AAD SP.
 
+- `client_cert_token_timeout` (duration string | ex: "1h5m2s") - The timeout for the JWT Token when using a [client certificate](#client_cert_path). Defaults to 1 hour.
+
 - `client_jwt` (string) - A JWT bearer token for client auth (RFC 7523, Sec. 2.2) that will be used
   to authenticate the AAD SP. Provides more control over token the expiration
   when using certificate authentication than when using `client_cert_path`.

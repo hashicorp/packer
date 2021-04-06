@@ -11,7 +11,6 @@ description: >
 
   within OpenStack.
 page_title: OpenStack - Builders
-sidebar_title: OpenStack
 ---
 
 # OpenStack Builder
@@ -132,6 +131,7 @@ builders "openstack" {
   insecure = "true"
 }
 ```
+
 </Tab>
 </Tabs>
 
@@ -155,6 +155,7 @@ Here is a basic example. This is a working example to build a Ubuntu 12.04 LTS
   "flavor": "2"
 }
 ```
+
 </Tab>
 
 <Tab heading="HCL2">
@@ -170,6 +171,7 @@ builders "openstack" {
   flavor = "2"
 }
 ```
+
 </Tab>
 </Tabs>
 
@@ -190,6 +192,7 @@ by Metacloud.
   "flavor": "2"
 }
 ```
+
 </Tab>
 
 <Tab heading="HCL2">
@@ -202,9 +205,9 @@ builders "openstack" {
   flavor = "2"
 }
 ```
+
 </Tab>
 </Tabs>
-
 
 In this case, the connection information for connecting to OpenStack doesn't
 appear in the template. That is because I source a standard OpenStack script
@@ -266,6 +269,7 @@ by Selectel VPC.
   "volume_type": "fast.ru-3a"
 }
 ```
+
 </Tab>
 
 <Tab heading="HCL2">
@@ -287,9 +291,9 @@ builders "openstack" {
   volume_type = "fast.ru-3a"
 }
 ```
+
 </Tab>
 </Tabs>
-
 
 ## Notes on OpenStack Authorization
 

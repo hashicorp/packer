@@ -1,6 +1,5 @@
 ---
 page_title: Upgrading your template to use Packer init
-sidebar_title: Upgrade Your Template to use Packer init
 ---
 
 # Upgrading your template to be compatible with `packer init`
@@ -28,7 +27,6 @@ We strongly encourage you to upgrade and start using `required_plugins` block wi
 installation, but if you prefer not to use the `required_plugins` block you can continue to
 [install plugins manually](/docs/plugins#installing-plugins).
 
-
 ### What if you only use components that are built into the Packer core?
 
 You don't need `packer init` for this, as of v1.7.0. But it's a good idea to get familiar with the required_plugins
@@ -44,8 +42,8 @@ version v5.0. The plugin repository on GitHub also needs to use a specific relea
 the plugin you use fits those requirements, you can reach out to your maintainer to ask. You can also look for clues
 that the plugin is ready for use with `packer init`:
 
-* Check the plugin's CHANGELOG for notes about migrating to the packer-plugin-sdk.
-* Check the name of the repository the plugin resides in. Chances are that if the repository follows the naming
+- Check the plugin's CHANGELOG for notes about migrating to the packer-plugin-sdk.
+- Check the name of the repository the plugin resides in. Chances are that if the repository follows the naming
   convention `packer-plugin-*` (e.g. `packer-plugin-comment`), then the plugin has been upgraded to be compatible with
   `packer init`. If the repository has a name that references a specific Packer component (for example,
   `packer-provisioner-*`, `packer-builder-*`, or `packer-post-processor-*`) then the plugin likely still needs to be
@@ -67,8 +65,8 @@ maintainer-focused guide [here](/guides/1.7-plugin-upgrade).
 Check the table below to better understand whether your plugin is compatible with `packer init`, with manual
 installation, or with both for the the Packer version you are using.
 
-| Packer Core Version | Single Component Plugin - API v4                  | Single Component Plugin - API v5.0                | Multi Component Plugin - API v5.0                        |
-| ------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| Packer Core Version | Single Component Plugin - API v4                  | Single Component Plugin - API v5.0                | Multi Component Plugin - API v5.0                         |
+| ------------------- | ------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------- |
 | v1.5.0 to v1.6.6    | ✋ Plugin must be manually installed              | ⛔ Plugin cannot be used with this Packer version | ⛔ Plugin cannot be used with this Packer version         |
 | v1.7.0              | ⛔ Plugin cannot be used with this Packer version | ✋ Plugin must be manually installed              | 📦 Plugin can be installed manually or with `packer init` |
 
@@ -134,34 +132,36 @@ than `v0.2.23`. Finally, the local_name of the plugin will be `comment`, which m
 in the rest of the template.
 
 Here it is a brief explanation of each field:
+
 - `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
-- `source` - Should have the GitHub hostname, the plugin's organizational namespace, and its short name. 
-Packer will be responsible for determining the full GitHub
+- `source` - Should have the GitHub hostname, the plugin's organizational namespace, and its short name.
+  Packer will be responsible for determining the full GitHub
   address. For example, if the source is `github.com/sylviamoss/comment`, Packer
   will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
   To learn more about the source field, check out the [Source
   Address](/docs/plugins#source-addresses) documentation.
 - `local_name`- Can be replaced with whatever you want, and the new value will become the name of the plugin.
   For example:
-    ```hcl
-    packer {
-        required_plugins {
-            bubbled_up = {
-                # ...
-            }
-        }
-    }
 
-    # ...
+  ```hcl
+  packer {
+      required_plugins {
+          bubbled_up = {
+              # ...
+          }
+      }
+  }
 
-    build {
-        # ...
+  # ...
 
-        provisioner "bubbled_up" {
-            # ...
-        }
-    }
-    ```
+  build {
+      # ...
+
+      provisioner "bubbled_up" {
+          # ...
+      }
+  }
+  ```
 
 Once the template is upgraded, you can run `packer init example.pkr.hcl` and the output should tell you the installed
 plugin, and the place where it was installed.
@@ -181,4 +181,3 @@ and won't need to run `init` again unless you want to upgrade the plugin version
 
 A template with a `required_plugins` block should **always** be initialised at least once with `packer init` before
 `packer build`. If the template is built before init, Packer will fail and ask for initialisation.
-

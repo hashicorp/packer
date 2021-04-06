@@ -3,6 +3,7 @@ package egoscale
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -22,7 +23,7 @@ type RunstatusPage struct {
 	Logo             string                 `json:"logo,omitempty"`
 	Maintenances     []RunstatusMaintenance `json:"maintenances,omitempty"`
 	MaintenancesURL  string                 `json:"maintenances_url,omitempty"`
-	Name             string                 `json:"name"` //fake field (used to post a new runstatus page)
+	Name             string                 `json:"name"` // fake field (used to post a new runstatus page)
 	OkText           string                 `json:"ok_text,omitempty"`
 	Plan             string                 `json:"plan,omitempty"`
 	PublicURL        string                 `json:"public_url,omitempty"`
@@ -99,7 +100,7 @@ func (client *Client) GetRunstatusPage(ctx context.Context, page RunstatusPage) 
 		}
 	}
 
-	return nil, fmt.Errorf("%#v not found", page)
+	return nil, errors.New("page not found")
 }
 
 func (client *Client) getRunstatusPage(ctx context.Context, pageURL string) (*RunstatusPage, error) {
@@ -143,7 +144,7 @@ func (client *Client) ListRunstatusPages(ctx context.Context) ([]RunstatusPage, 
 	return p.Pages, nil
 }
 
-//PaginateRunstatusPages paginate on runstatus pages
+// PaginateRunstatusPages paginate on runstatus pages
 func (client *Client) PaginateRunstatusPages(ctx context.Context, callback func(pages []RunstatusPage, e error) bool) {
 	pageURL := client.Endpoint + runstatusPagesURL
 	for pageURL != "" {

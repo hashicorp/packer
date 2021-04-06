@@ -11,7 +11,6 @@ description: >
 
   servers that are launched within Scaleway.
 page_title: Scaleway - Builders
-sidebar_title: Scaleway
 ---
 
 # Scaleway Builder
@@ -70,6 +69,7 @@ access tokens:
   "ssh_private_key_file": "~/.ssh/id_rsa"
 }
 ```
+
 </Tab>
 
 <Tab heading="HCL2">
@@ -86,9 +86,9 @@ builders "scaleway" {
   ssh_private_key_file = "~/.ssh/id_rsa"
 }
 ```
+
 </Tab>
 </Tabs>
-
 
 When you do not specify the `ssh_private_key_file`, a temporary SSH keypair
 is generated to connect the server. This key will only allow the `root` user to

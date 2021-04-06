@@ -1,12 +1,15 @@
 package inspec
 
 import (
+	"bytes"
+	"context"
 	"crypto/rand"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -268,12 +271,17 @@ func TestProvisionerPrepare_LocalPort(t *testing.T) {
 }
 
 func TestInspecGetVersion(t *testing.T) {
-	if os.Getenv("PACKER_ACC") == "" {
-		t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+	var p Provisioner
+	if os.Getenv("PACKER_ACC") == "1" {
+		p.config.Command = "inspec"
+	} else {
+		p.config.Command = "./test-fixtures/inspec_version.sh"
+		if runtime.GOOS == "windows" {
+			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+		}
 	}
 
-	var p Provisioner
-	p.config.Command = "inspec exec"
+	p.config.Backend = "local"
 	err := p.getVersion()
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -289,5 +297,34 @@ func TestInspecGetVersionError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "./test-fixtures/exit1 version") {
 		t.Fatal("Error message should include command name")
+	}
+}
+
+func TestInspecValidExitCodes(t *testing.T) {
+	var p Provisioner
+	if os.Getenv("PACKER_ACC") == "1" {
+		p.config.Command = "inspec"
+	} else {
+		p.config.Command = "./test-fixtures/valid_exit_codes.sh"
+		if runtime.GOOS == "windows" {
+			t.Skip("This test is only run with PACKER_ACC=1 and it requires InSpec to be installed")
+		}
+	}
+	p.config.Backend = "local"
+	p.config.Profile = "test-fixtures/skip_control.rb"
+	err := p.Prepare()
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	comm := &packersdk.MockCommunicator{}
+	ui := &packersdk.BasicUi{
+		Reader: new(bytes.Buffer),
+		Writer: new(bytes.Buffer),
+	}
+
+	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("err: %s", err)
 	}
 }

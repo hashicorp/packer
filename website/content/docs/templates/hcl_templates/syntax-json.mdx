@@ -1,6 +1,5 @@
 ---
 page_title: JSON Configuration Syntax - Configuration Language
-sidebar_title: JSON Syntax
 description: |-
   In addition to the native syntax that is most commonly used with Packer,
   the HCL language can also be expressed in a JSON-compatible syntax.
@@ -117,14 +116,14 @@ Since JSON grammar is not able to represent all of the Packer language
 [expression syntax](/docs/templates/hcl_templates/expressions), JSON values interpreted as expressions
 are mapped as follows:
 
-| JSON    | Packer Language Interpretation                                                                                    |
-| ------- | ----------------------------------------------------------------------------------------------------------------- |
-| Boolean | A literal `bool` value.                                                                                           |
-| Number  | A literal `number` value.                                                                                         |
+| JSON    | Packer Language Interpretation                                                                                                   |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Boolean | A literal `bool` value.                                                                                                          |
+| Number  | A literal `number` value.                                                                                                        |
 | String  | Parsed as a [string template](/docs/templates/hcl_templates/expressions#string-templates) and then evaluated as described below. |
-| Object  | Each property value is mapped per this table, producing an `object(...)` value with suitable attribute types.     |
-| Array   | Each element is mapped per this table, producing a `tuple(...)` value with suitable element types.                |
-| Null    | A literal `null`.                                                                                                 |
+| Object  | Each property value is mapped per this table, producing an `object(...)` value with suitable attribute types.                    |
+| Array   | Each element is mapped per this table, producing a `tuple(...)` value with suitable element types.                               |
+| Null    | A literal `null`.                                                                                                                |
 
 When a JSON string is encountered in a location where arbitrary expressions are
 expected, its value is first parsed as a [string template](/docs/templates/hcl_templates/expressions#string-templates)

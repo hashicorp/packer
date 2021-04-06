@@ -7,7 +7,7 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.15
+      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
     resource_class: medium+
   darwin:
     macos:
@@ -37,15 +37,19 @@ commands:
     parameters:
       GOOS:
         type: string
+      GOARCH:
+        default: "amd64"
+        type: string
     steps:
       - checkout
-      - run: GOOS=<< parameters.GOOS >> go build -ldflags="-s -w -X github.com/hashicorp/packer/version.GitCommit=${CIRCLE_SHA1}" -o ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH) .
-      - run: zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH).zip ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
-      - run: rm ./pkg/packer_<< parameters.GOOS >>_$(go env GOARCH)
+      - run: GOOS=<< parameters.GOOS >> GOARCH=<<parameters.GOARCH>> go build -ldflags="-s -w -X github.com/hashicorp/packer/version.GitCommit=${CIRCLE_SHA1}" -o ./pkg/packer_<< parameters.GOOS >>_<< parameters.GOARCH >> .
+      - run: zip ./pkg/packer_<< parameters.GOOS >>_<< parameters.GOARCH >>.zip ./pkg/packer_<< parameters.GOOS >>_<< parameters.GOARCH >>
+      - run: rm ./pkg/packer_<< parameters.GOOS >>_<< parameters.GOARCH >>
       - persist_to_workspace:
           root: .
           paths:
             - ./pkg/
+
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
@@ -61,13 +65,11 @@ jobs:
           file: coverage.txt
   test-darwin:
     executor: darwin
-    working_directory: ~/go/src/github.com/hashicorp/packer
-    environment:
-      GO111MODULE: "off"
+    working_directory: ~/go/github.com/hashicorp/packer
     steps:
       - install-go-run-tests-unix:
           GOOS: darwin
-          GOVERSION: "1.15"
+          GOVERSION: "1.16"
       - codecov/upload:
           file: coverage.txt
   test-windows:
@@ -76,7 +78,7 @@ jobs:
       shell: bash.exe
     steps:
       - install-go-run-tests-windows:
-          GOVERSION: "1.15"
+          GOVERSION: "1.16"
       - codecov/upload:
           file: coverage.txt
   check-lint:
@@ -125,6 +127,13 @@ jobs:
     steps:
       - build-and-persist-packer-binary:
           GOOS: darwin
+  build_darwin_arm64:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - build-and-persist-packer-binary:
+          GOOS: darwin
+          GOARCH: arm64
   build_freebsd:
     executor: golang
     working_directory: /go/src/github.com/hashicorp/packer
@@ -205,6 +214,7 @@ workflows:
     jobs:
       - build_linux
       - build_darwin
+      - build_darwin_arm64
       - build_windows
       - build_freebsd
       - build_openbsd
@@ -213,6 +223,7 @@ workflows:
           requires:
             - build_linux
             - build_darwin
+            - build_darwin_arm64
             - build_windows
             - build_freebsd
             - build_openbsd

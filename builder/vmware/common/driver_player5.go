@@ -204,12 +204,32 @@ func (d *Player5Driver) Verify() error {
 
 	d.VmwareDriver.NetworkMapper = func() (NetworkNameMapper, error) {
 		pathNetmap := playerNetmapConfPath()
-		if _, err := os.Stat(pathNetmap); err != nil {
-			return nil, fmt.Errorf("Could not find netmap conf file: %s", pathNetmap)
-		}
-		log.Printf("Located networkmapper configuration file using Player: %s", pathNetmap)
 
-		return ReadNetmapConfig(pathNetmap)
+		// If we were able to find the file (no error), then we can proceed with reading
+		// the networkmapper configuration.
+		if _, err := os.Stat(pathNetmap); err == nil {
+			log.Printf("Located networkmapper configuration file using Player: %s", pathNetmap)
+			return ReadNetmapConfig(pathNetmap)
+		}
+
+		// If we weren't able to find the networkmapper configuration file, then fall back
+		// to the networking file which might also be in the configuration directory.
+		libpath, _ := playerVMwareRoot()
+		pathNetworking := filepath.Join(libpath, "networking")
+		if _, err := os.Stat(pathNetworking); err != nil {
+			return nil, fmt.Errorf("Could not determine network mappings from files in path: %s", libpath)
+		}
+
+		// We were able to successfully stat the file.. So, now we can open a handle to it.
+		log.Printf("Located networking configuration file using Player: %s", pathNetworking)
+		fd, err := os.Open(pathNetworking)
+		if err != nil {
+			return nil, err
+		}
+		defer fd.Close()
+
+		// Then we pass the handle to the networking configuration parser.
+		return ReadNetworkingConfig(fd)
 	}
 	return nil
 }

@@ -99,7 +99,19 @@ func (s *StepBootCommand) Run(ctx context.Context, state multistep.StateBag) mul
 			Shift:    shift,
 		})
 		if err != nil {
-			return fmt.Errorf("error typing a boot command (code, down) `%d, %t`: %w", code, down, err)
+			// retry once if error
+			ui.Error(fmt.Errorf("error typing a boot command (code, down) `%d, %t`: %w", code, down, err).Error())
+			ui.Say("trying key input again")
+			time.Sleep(s.Config.BootGroupInterval)
+			_, err = vm.TypeOnKeyboard(driver.KeyInput{
+				Scancode: code,
+				Ctrl:     keyCtrl,
+				Alt:      keyAlt,
+				Shift:    shift,
+			})
+			if err != nil {
+				return fmt.Errorf("error typing a boot command (code, down) `%d, %t`: %w", code, down, err)
+			}
 		}
 		return nil
 	}

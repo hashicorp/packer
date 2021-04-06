@@ -4,7 +4,6 @@ description: |
   configuration template to it's formatted HCL2 counterpart. The command will
   return a zero exit status on success, and a non-zero exit status on failure.
 page_title: packer hcl2_upgrade - Commands
-sidebar_title: <tt>hcl2_upgrade</tt>
 ---
 
 -> **Note:** This command is Beta, and currently being improved upon; do not
@@ -26,30 +25,53 @@ $ packer hcl2_upgrade my-template.json
 Successfully created my-template.json.pkr.hcl
 ```
 
-## User variables using other user variables
+## Upgrading variables file
 
-Packer JSON recently started allowing using user variables from variables. In
-HCL2, input variables cannot use functions nor other variables and are
-virtually static, local variables must be used instead to craft more dynamic
-variables. For that reason `hcl2_upgrade` cannot decide for you what local
-variables to create and the `hcl2_upgrade` command will simply output all seen
-variables as an input variable, it is now up to you to create a local variable.
+From **v1.7.1**, the `hcl2_upgrade` command can upgrade a variables file.
 
-Here is an example of a local variable using a string input variables:
+<Tabs>
+<Tab heading="Original file (variables.json)">
 
-```hcl
-variable "foo" {
-  default = "Hello,"
-}
-
-variable "bar" {
-  default = "World!"
-}
-
-locals {
-  baz = "${var.foo} ${var.bar}"
+```json
+{
+  "variables": {
+    "aws_region": null,
+    "aws_secondary_region": "{{ env `AWS_DEFAULT_REGION` }}",
+    "aws_secret_key": "",
+    "aws_access_key": ""
+  },
+  "sensitive-variables": ["aws_secret_key", "aws_access_key"]
 }
 ```
+
+</Tab>
+<Tab heading="Result file (variables.pkr.hcl)">
+
+```hcl
+variable "aws_access_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
+variable "aws_region" {
+  type = string
+}
+
+variable "aws_secondary_region" {
+  type    = string
+  default = "${env("AWS_DEFAULT_REGION")}"
+}
+
+variable "aws_secret_key" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Go template functions
 
@@ -79,3 +101,30 @@ working on improving this part of the transformer.
 - `-output-file` - File where to put the hcl2 generated config. Defaults to
   JSON_TEMPLATE.pkr.hcl
 - `-with-annotations` - Adds helper annotations with information about the generated HCL2 blocks.
+
+## User variables using other user variables
+
+Packer JSON recently started allowing using user variables from variables. In
+HCL2, input variables cannot use functions nor other variables and are
+virtually static, local variables must be used instead to craft more dynamic
+variables.
+
+For v1.7.0 and lower, `hcl2_upgrade` doesn't upgrade variables to local variables,
+and it is up to you to upgrade them manually. Upgrade to **v1.7.1** to let the command do it
+automatically for you.
+
+Here is an example of a local variable using a string input variables:
+
+```hcl
+variable "foo" {
+  default = "Hello,"
+}
+
+variable "bar" {
+  default = "World!"
+}
+
+locals {
+  baz = "${var.foo} ${var.bar}"
+}
+```

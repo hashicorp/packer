@@ -96,6 +96,16 @@ func Test_ClientConfig_RequiredParametersSet(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "client_cert_token_timeout should be 5 minutes or more",
+			config: Config{
+				SubscriptionID:          "ok",
+				ClientID:                "ok",
+				ClientCertPath:          "/dev/null",
+				ClientCertExpireTimeout: 1 * time.Minute,
+			},
+			wantErr: true,
+		},
+		{
 			name: "too many client_* values",
 			config: Config{
 				SubscriptionID: "ok",

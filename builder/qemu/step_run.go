@@ -104,6 +104,11 @@ func (s *stepRun) getDefaultArgs(config *Config, state multistep.StateBag) map[s
 			config.MachineType, config.Accelerator)
 	}
 
+	// Firmware
+	if config.Firmware != "" {
+		defaultArgs["-bios"] = config.Firmware
+	}
+
 	// Configure "-netdev" arguments
 	defaultArgs["-netdev"] = fmt.Sprintf("bridge,id=user.0,br=%s", config.NetBridge)
 	if config.NetBridge == "" {
@@ -293,6 +298,7 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 			HTTPIP      string
 			HTTPPort    int
 			HTTPDir     string
+			HTTPContent map[string]string
 			OutputDir   string
 			Name        string
 			SSHHostPort int
@@ -303,6 +309,7 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 			HTTPIP:      httpIp,
 			HTTPPort:    httpPort,
 			HTTPDir:     config.HTTPDir,
+			HTTPContent: config.HTTPContent,
 			OutputDir:   config.OutputDir,
 			Name:        config.VMName,
 			SSHHostPort: commHostPort,

@@ -11,6 +11,12 @@ contribute to the project, read on. This document will cover what we're looking
 for. By addressing all the points we're looking for, it raises the chances we
 can quickly merge or address your contributions.
 
+When contributing in any way to the Packer project (new issue, PR, etc), please 
+be aware that our team identifies with many gender pronouns. Please remember to 
+use nonbinary pronouns (they/them) and gender neutral language ("Hello folks") 
+when addressing our team. For more reading on our code of conduct, please see the 
+[HashiCorp community guidelines](https://www.hashicorp.com/community-guidelines).
+
 ## Issues
 
 ### Reporting an Issue
@@ -64,7 +70,9 @@ can quickly merge or address your contributions.
 If you have never worked with Go before, you will have to install its
 runtime in order to build packer.
 
-1. This project always releases from the latest version of golang. [Install go](https://golang.org/doc/install#install)
+1. This project always releases from the latest version of golang.
+[Install go](https://golang.org/doc/install#install) To properly build from
+source, you need to have golang >= v1.16
 
 ## Setting up Packer for dev
 
@@ -72,7 +80,6 @@ If/when you have go installed you can already `go get` packer and `make` in
 order to compile and test Packer. These instructions target
 POSIX-like environments (macOS, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
-The instructions below are for go 1.7. or later.
 
 1. Download the Packer source (and its dependencies) by running
    `go get github.com/hashicorp/packer`. This will download the Packer source to

@@ -4,6 +4,15 @@ package egoscale
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[Pending-0]
+	_ = x[Success-1]
+	_ = x[Failure-2]
+}
+
 const _JobStatusType_name = "PendingSuccessFailure"
 
 var _JobStatusType_index = [...]uint8{0, 7, 14, 21}

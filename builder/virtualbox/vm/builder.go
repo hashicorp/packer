@@ -64,12 +64,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			KeepRegistered: b.config.KeepRegistered,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&vboxcommon.StepDownloadGuestAdditions{
 			GuestAdditionsMode:   b.config.GuestAdditionsMode,
 			GuestAdditionsURL:    b.config.GuestAdditionsURL,
@@ -114,7 +109,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.CommConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.Host()),
 			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.CommPort,
 			WinRMPort: vboxcommon.CommPort,

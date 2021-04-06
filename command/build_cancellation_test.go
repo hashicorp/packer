@@ -64,7 +64,8 @@ func TestBuildCommand_RunContext_CtxCancel(t *testing.T) {
 				defer close(codeC)
 				cfg, ret := c.ParseArgs(tt.args)
 				if ret != 0 {
-					t.Fatal("ParseArgs failed.")
+					t.Error("ParseArgs failed.")
+					return
 				}
 				codeC <- c.RunContext(ctx, cfg)
 			}()

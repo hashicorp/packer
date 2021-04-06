@@ -27,6 +27,32 @@ var (
 	pluginFolderWrongChecksums = filepath.Join("testdata", "wrong_checksums")
 )
 
+func TestChecksumFileEntry_init(t *testing.T) {
+	expectedVersion := "v0.3.0"
+	req := &Requirement{
+		Identifier: &addrs.Plugin{
+			Hostname:  "github.com",
+			Namespace: "ddelnano",
+			Type:      "xenserver",
+		},
+	}
+
+	checkSum := &ChecksumFileEntry{
+		Filename: fmt.Sprintf("packer-plugin-xenserver_%s_x5.0_darwin_amd64.zip", expectedVersion),
+		Checksum: "0f5969b069b9c0a58f2d5786c422341c70dfe17bd68f896fcbd46677e8c913f1",
+	}
+
+	err := checkSum.init(req)
+
+	if err != nil {
+		t.Fatalf("ChecksumFileEntry.init failure: %v", err)
+	}
+
+	if checkSum.binVersion != expectedVersion {
+		t.Errorf("failed to parse ChecksumFileEntry properly expected version '%s' but found '%s'", expectedVersion, checkSum.binVersion)
+	}
+}
+
 func TestPlugin_ListInstallations(t *testing.T) {
 
 	type fields struct {

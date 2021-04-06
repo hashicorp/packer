@@ -126,6 +126,15 @@ func realMain() int {
 // wrappedMain is called only when we're wrapped by panicwrap and
 // returns the exit status to exit with.
 func wrappedMain() int {
+	// WARNING: WrappedMain causes unexpected behaviors when writing to stderr
+	// and stdout.  Anything in this function written to stderr will be captured
+	// by the logger, but will not be written to the terminal. Anything in
+	// this function written to standard out must be prefixed with ErrorPrefix
+	// or OutputPrefix to be sent to the right terminal stream, but adding
+	// these prefixes can cause nondeterministic results for output from
+	// other, asynchronous methods. Try to avoid modifying output in this
+	// function if at all possible.
+
 	// If there is no explicit number of Go threads to use, then set it
 	if os.Getenv("GOMAXPROCS") == "" {
 		runtime.GOMAXPROCS(runtime.NumCPU())
@@ -152,7 +161,11 @@ func wrappedMain() int {
 	// passed into commands like `packer build`
 	config, err := loadConfig()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error loading configuration: \n\n%s\n", err)
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
+		fmt.Fprintf(os.Stdout, "%s Error loading configuration: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
 
@@ -166,7 +179,11 @@ func wrappedMain() int {
 
 	cacheDir, err := packersdk.CachePath()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error preparing cache directory: \n\n%s\n", err)
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
+		fmt.Fprintf(os.Stdout, "%s Error preparing cache directory: \n\n%s\n", ErrorPrefix, err)
 		return 1
 	}
 	log.Printf("[INFO] Setting cache directory: %s", cacheDir)
@@ -187,7 +204,8 @@ func wrappedMain() int {
 		// Set this so that we don't get colored output in our machine-
 		// readable UI.
 		if err := os.Setenv("PACKER_NO_COLOR", "1"); err != nil {
-			fmt.Fprintf(os.Stderr, "Packer failed to initialize UI: %s\n", err)
+			// Outputting error using Ui here to conform to the machine readable format.
+			ui.Error(fmt.Sprintf("Packer failed to initialize UI: %s\n", err))
 			return 1
 		}
 	} else {
@@ -202,13 +220,16 @@ func wrappedMain() int {
 			currentPID := os.Getpid()
 			backgrounded, err := checkProcess(currentPID)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "cannot determine if process is in "+
-					"background: %s\n", err)
+				// Writing to Stderr will ensure that the output gets captured by panicwrap.
+				// This error message and any other message writing to Stderr after this point will only show up with PACKER_LOG=1
+				// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout without panicwrap.
+				fmt.Fprintf(os.Stderr, "%s cannot determine if process is in background: %s\n", ErrorPrefix, err)
 			}
+
 			if backgrounded {
-				fmt.Fprint(os.Stderr, "Running in background, not using a TTY\n")
+				fmt.Fprintf(os.Stderr, "%s Running in background, not using a TTY\n", ErrorPrefix)
 			} else if TTY, err := openTTY(); err != nil {
-				fmt.Fprintf(os.Stderr, "No tty available: %s\n", err)
+				fmt.Fprintf(os.Stderr, "%s No tty available: %s\n", ErrorPrefix, err)
 			} else {
 				basicUi.TTY = TTY
 				basicUi.PB = &packer.UiProgressBar{}
@@ -246,7 +267,11 @@ func wrappedMain() int {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error executing CLI: %s\n", err)
+		// Writing to Stdout here so that the error message bypasses panicwrap. By using the
+		// ErrorPrefix this output will be redirected to Stderr by the copyOutput func.
+		// TODO: nywilken need to revisit this setup to better output errors to Stderr, and output to Stdout
+		// without panicwrap
+		fmt.Fprintf(os.Stdout, "%s Error executing CLI: %s\n", ErrorPrefix, err)
 		return 1
 	}
 
@@ -297,6 +322,67 @@ func loadConfig() (*config, error) {
 		PluginMinPort:      10000,
 		PluginMaxPort:      25000,
 		KnownPluginFolders: packer.PluginFolders("."),
+
+		// BuilderRedirects
+		BuilderRedirects: map[string]string{
+
+			// "amazon-chroot":       "github.com/hashicorp/amazon",
+			// "amazon-ebs":          "github.com/hashicorp/amazon",
+			// "amazon-ebssurrogate": "github.com/hashicorp/amazon",
+			// "amazon-ebsvolume":    "github.com/hashicorp/amazon",
+			// "amazon-instance":     "github.com/hashicorp/amazon",
+
+			// "azure-arm":    "github.com/hashicorp/azure",
+			// "azure-chroot": "github.com/hashicorp/azure",
+			// "dtl":          "github.com/hashicorp/azure",
+
+			// "docker": "github.com/hashicorp/docker",
+
+			// "googlecompute": "github.com/hashicorp/googlecompute",
+
+			// "parallels-iso": "github.com/hashicorp/parallels",
+			// "parallels-pvm": "github.com/hashicorp/parallels",
+
+			// "qemu": "github.com/hashicorp/qemu",
+
+			// "vagrant": "github.com/hashicorp/vagrant",
+
+			// "virtualbox-iso": "github.com/hashicorp/virtualbox",
+			// "virtualbox-ovf": "github.com/hashicorp/virtualbox",
+			// "virtualbox-vm":  "github.com/hashicorp/virtualbox",
+
+			// "vmware-iso": "github.com/hashicorp/vmware",
+			// "vmware-vmx": "github.com/hashicorp/vmware",
+
+			// "vsphere-iso":   "github.com/hashicorp/vsphere",
+			// "vsphere-clone": "github.com/hashicorp/vsphere",
+		},
+		DatasourceRedirects: map[string]string{
+			// "amazon-ami": "github.com/hashicorp/amazon",
+		},
+		ProvisionerRedirects: map[string]string{
+			// "ansible":       "github.com/hashicorp/ansible",
+			// "ansible-local": "github.com/hashicorp/ansible",
+
+			// "azure-dtlartifact": "github.com/hashicorp/azure",
+		},
+		PostProcessorRedirects: map[string]string{
+			// "amazon-import": "github.com/hashicorp/amazon",
+
+			// "docker-import": "github.com/hashicorp/docker",
+			// "docker-push":   "github.com/hashicorp/docker",
+			// "docker-save":   "github.com/hashicorp/docker",
+			// "docker-tag":    "github.com/hashicorp/docker",
+
+			// "googlecompute-export": "github.com/hashicorp/googlecompute",
+			// "googlecompute-import": "github.com/hashicorp/googlecompute",
+
+			// "vagrant":       "github.com/hashicorp/vagrant",
+			// "vagrant-cloud": "github.com/hashicorp/vagrant",
+
+			// "vsphere":          "github.com/hashicorp/vsphere",
+			// "vsphere-template": "github.com/hashicorp/vsphere",
+		},
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err

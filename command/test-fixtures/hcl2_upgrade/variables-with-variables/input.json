@@ -1,0 +1,14 @@
+{
+    "variables": {
+        "aws_region": null,
+        "aws_secondary_region": "{{ user `aws_region` }}",
+        "aws_secret_key": "",
+        "aws_access_key": "",
+        "password": "{{ user `aws_secret_key` }}-{{ user `aws_access_key` }}"
+    },
+    "sensitive-variables": [
+        "aws_secret_key",
+        "aws_access_key",
+        "password"
+    ]
+}

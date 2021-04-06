@@ -26,6 +26,10 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "source-name", flags: []string{"-with-annotations"}},
 		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}},
 		{folder: "aws-access-config", flags: []string{}},
+		{folder: "variables-only", flags: []string{}},
+		{folder: "variables-with-variables", flags: []string{}},
+		{folder: "complete-variables-with-template-engine", flags: []string{}},
+		{folder: "escaping", flags: []string{}},
 	}
 
 	for _, tc := range tc {
@@ -43,8 +47,8 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if err != nil {
 				t.Fatalf("%v %s", err, bs)
 			}
-			expected := mustBytes(ioutil.ReadFile(expectedPath))
-			actual := mustBytes(ioutil.ReadFile(outputPath))
+			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
+			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
 
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)

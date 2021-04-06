@@ -188,10 +188,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		new(stepCreateProvider),
 	}
 	if p.config.BoxDownloadUrl == "" {
-		steps = append(steps, new(stepPrepareUpload), new(stepUpload))
-		if !p.config.NoDirectUpload {
-			steps = append(steps, new(stepConfirmUpload))
-		}
+		steps = append(steps,
+			new(stepPrepareUpload),
+			new(stepUpload),
+			new(stepConfirmUpload))
 	}
 	steps = append(steps, new(stepReleaseVersion))
 

@@ -1,18 +1,151 @@
-## 1.7.1 (Upcoming)
+## 1.7.3 (Upcoming)
 
-### FEATURES
+## 1.7.2 (April 05, 2021)
+
+### IMPROVEMENTS:
+
+* builder/alicloud: Add `ramrole` configuration to ECS instance. [GH-10845]
+
+### BUG FIXES:
+
+* builder/proxmox: Update Proxmox Go API to ensure only the first non-loopback
+    IPv4 address gets returned. [GH-10858]
+* builder/vsphere: Fix primary disk resize on clone. [GH-10848]
+* core: Fix bug where call to "packer version" sent output to stderr instead of
+    stdout. [GH-10850]
+
+## 1.7.1 (March 31, 2021)
+
+### NOTES:
+
+* builder/amazon: Has been vendored in this release and will no longer be
+    updated with Packer core. In Packer v1.8.0 the plugin will be removed
+    entirely. The `amazon` components will continue to work as expected until
+    then, but for the latest offerings of the Amazon plugin, users are
+    encourage to use the `packer init` command to install the latest release
+    version. For more details see [Installing Packer
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
+* builder/docker: Has been vendored in this release and will no longer be
+    updated with Packer core. In Packer v1.8.0 the plugin will be removed
+    entirely. The `docker` builder will continue to work as expected until
+    then, but for the latest offerings of the Docker plugin, users are
+    encourage to use the `packer init` command to install the latest release
+    version. For more details see [Installing Packer
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
+* darwin/arm64: Packer now includes the darwin/arm64 binary to its releases to
+    supports the new OSX M1. [GH-10804]
+* post-processor/docker-\*: Have been vendored in this release and will no
+    longer be updated with Packer core. In Packer v1.8.0 the plugin will be
+    removed entirely. The `docker` builder will continue to work as expected
+    until then, but for the latest offerings of the Docker plugin, users are
+    encourage to use the `packer init` command to install the latest release
+    version. For more details see [Installing Packer
+    Plugins](https://www.packer.io/docs/plugins#installing-plugins)
+* post-processor/exoscale-import: Has been vendored in this release and will no
+    longer be updated with Packer core. In Packer v1.8.0 the plugin will be
+    removed entirely. The `exoscale-import` post-processor will continue to
+    work as expected until then, but for the latest offerings of the Exoscale
+    plugin, users are encourage to use the `packer init` command to install the
+    latest release version. For more details see [Exoscale Plugin
+    Repostiroy](https://github.com/exoscale/packer-plugin-exoscale). [GH-10709]
+
 ### IMPROVEMENTS
+* builder/amazon: allow creation of ebs snapshots without volumes. [GH-9591]
+* builder/amazon: Fix issue for multi-region AMI build that fail when
+    encrypting with KMS and sharing across accounts. [GH-10754]
+* builder/azure: Add client_cert_token_timeout option. [GH-10528]
+* builder/google: Make Windows password timeout configurable. [GH-10727]
+* builder/google: Update public GCP image project as gce-uefi-images are
+    deprecated. [GH-10724]
+* builder/oracle-oci: Update Oracle Go SDK to add support for OCI flexible
+    shapes.  [GH-10833]
+* builder/proxmox: Allow using API tokens for Proxmox authentication.
+    [GH-10797]
+* builder/qemu: Added firmware option. [GH-10683]
+* builder/scaleway: add support for timeout in shutdown step. [GH-10503]
+* builder/vagrant: Fix logging to be clearer when Vagrant builder overrides
+    values retrieved from vagrant's ssh_config call. [GH-10743]
+* builder/virtualbox:  Added ISO builder option to create additional disks.
+    [GH-10674]
+* builder/virtualbox: Add options for nested virtualisation and RTC time base.
+    [GH-10736]
+* builder/virtualbox: Add template options for chipset, firmware, nic, graphics
+    controller, and audio controller. [GH-10671]
+* builder/virtualbox: Support for "virtio" storage and ISO drive. [GH-10632]
+* builder/vmware: Added "attach_snapshot" parameter to vmware vmx builder.
+    [GH-10651]
+* command/fmt: Adding recursive flag to formatter to format subdirectories.
+    [GH-10457]
+* core/hcl2: Add legacy_isotime function. [GH-10780]
+* core/hcl2: Add support for generating `dynamic` blocks within a `build`
+    block. [GH-10825]
+* core/hcl2: Add templatefile function. [GH-10776]
+* core/hcl2_upgrade: hcl2_upgrade command can now upgrade json var-files.
+    [GH-10676]
+* core/init: Add implicit required_plugin blocks feature. [GH-10732]
+* core: Add http_content option to serve variables from HTTP at preseed.
+    [GH-10801]
 * core: Change template parsing error to include warning about file extensions.
     [GH-10652]
+* core: Update to gopsutil v3.21.1 to allow builds to work for darwin arm64.
+    [GH-10697]
+* provisioner/inspec: Allow non-zero exit codes for inspec provisioner.
+    [GH-10723]
 
 ### BUG FIXES
+* buider/azure: Update builder to ensure a proper clean up Azure temporary
+    managed Os disks. [GH-10713]
+* builder/amazon: Update amazon SDK to fix an SSO login issue. [GH-10668]
 * builder/azure: Don't overwrite subscription id if unset. [GH-10659]
+* builder/azure: Set default for the parameter client_cert_token_timeout
+    [GH-10783]
+* builder/google: Add new configuration field `windows_password_timeout` to
+    allow user to set configurable timeouts. [GH-10727]
+* builder/hyperv: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/openstack: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
 * builder/oracle-oci: Update Oracle Go SDK to fix issue with reading key file.
-    [GH-10560]
+    [GH-10560] [GH-10774]
+* builder/outscale: Fix omi_description that was ignored in Osc builder
+    [GH-10792]
+* builder/parallels: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/proxmox: Fixes issue when using `additional_iso_files` in HCL enabled
+    templates. [GH-10772]
+* builder/qemu: Make Packer respect winrm_host flag in winrm connect func.
+    [GH-10748]
+* builder/virtualbox: Make Packer respect winrm_host flag in winrm connect
+    func. [GH-10748]
+* builder/vmware: Added a fallback file check when trying to determine the
+    network-mapping configuration. [GH-10543]
+* builder/vsphere: Fix invalid device configuration issue when creating a
+    vm with multiple disk on the same controller. [GH-10844]
+* builder/vsphere: Fix issue where boot command would fail the build do to a
+    key typing error. This change will now retry to type the key on error
+    before giving up. [GH-10541]
+* core/hcl2_upgrade: Check for nil config map when provisioner/post-processor
+    doesn't have config. [GH-10730]
+* core/hcl2_upgrade: Fix escaped quotes in template functions [GH-10794]
 * core/hcl2_upgrade: Make hcl2_upgrade command correctly translate
     pause_before. [GH-10654]
+* core/hcl2_upgrade: Make json variables using template engines get stored as
+    locals so they can be properly interpolated. [GH-10685]
+* core/init: Fixes issue where `packer init` was failing to install valid
+    plugins containing a 'v' within its name. [GH-10760]
+* core: Packer will now show a proper error message when failing to load the
+    contents of PACKER_CONFIG. [GH-10766]
+* core: Pin Packer to Golang 1.16 to fix code generation issues. [GH-10702]
 * core: Templates previously could not interpolate the environment variable
     PACKER_LOG_PATH. [GH-10660]
+* post-processor/vagrant-cloud: Override direct upload based on box size
+    [GH-10820]
+* provisioner/chef-solo: HCL2 templates can support the json_string option.
+    [GH-10655]
+* provisioner/inspec: Add new configuration field `valid_exit_codes` to allow
+    for non-zero exit codes. [GH-10723]
+* provisioner/salt-masterless: Update urls for the bootstrap scripts used by
+    salt-masterless provide. [GH-10755]
 
 ## 1.7.0 (February 17, 2021)
 

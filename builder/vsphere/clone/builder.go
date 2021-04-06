@@ -89,12 +89,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 				HTTPIP:  b.config.BootConfig.HTTPIP,
 				Network: b.config.WaitIpConfig.GetIPNet(),
 			},
-			&commonsteps.StepHTTPServer{
-				HTTPDir:     b.config.HTTPDir,
-				HTTPPortMin: b.config.HTTPPortMin,
-				HTTPPortMax: b.config.HTTPPortMax,
-				HTTPAddress: b.config.HTTPAddress,
-			},
+			commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 			&common.StepSshKeyPair{
 				Debug:        b.config.PackerDebug,
 				DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
