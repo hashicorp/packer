@@ -1,4 +1,5 @@
 #p-downloads {
+  /** DEBT: short-term color override until an upgread to the most recent product downloader */
   --brand: var(--packer);
 
   color: black !important;
