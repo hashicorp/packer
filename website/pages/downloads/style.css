@@ -1,4 +1,15 @@
 #p-downloads {
+  --brand: var(--packer);
+
+  color: black !important;
   margin-top: 72px;
   margin-bottom: 72px;
+
+  & .g-type-buttons-and-standalone-links {
+    color: black;
+  }
+
+  & .g-product-downloader.product-packer {
+    --highlight-color: var(--packer-link);
+  }
 }
