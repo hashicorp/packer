@@ -1,0 +1,52 @@
+{
+  "name": "packer-docs",
+  "description": "Documentation website for HashiCorp Packer",
+  "version": "1.0.0",
+  "author": "HashiCorp",
+  "dependencies": {
+    "@hashicorp/mktg-global-styles": "3.0.1",
+    "@hashicorp/mktg-logos": "1.0.2",
+    "@hashicorp/nextjs-scripts": "17.1.0",
+    "@hashicorp/react-button": "5.0.0",
+    "@hashicorp/react-docs-page": "13.0.3",
+    "@hashicorp/react-hashi-stack-menu": "2.0.0",
+    "@hashicorp/react-head": "2.0.0",
+    "@hashicorp/react-inline-svg": "6.0.0",
+    "@hashicorp/react-markdown-page": "1.0.0",
+    "@hashicorp/react-product-downloader": "4.0.2",
+    "@hashicorp/react-search": "5.0.1",
+    "@hashicorp/react-section-header": "5.0.0",
+    "@hashicorp/react-subnav": "8.0.0",
+    "@hashicorp/react-vertical-text-block-list": "5.0.0",
+    "adm-zip": "^0.5.4",
+    "gray-matter": "^4.0.2",
+    "next": "10.0.6",
+    "next-mdx-remote": "^1.0.1",
+    "next-remote-watch": "0.3.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
+  },
+  "devDependencies": {
+    "dart-linkcheck": "2.0.15",
+    "husky": "4.3.5",
+    "prettier": "2.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "next-hashicorp precommit"
+    }
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "node --max-old-space-size=8192 ./node_modules/.bin/next build",
+    "dynamic": "NODE_ENV=production next build && next start",
+    "export": "node --max-old-space-size=8192 ./node_modules/.bin/next export",
+    "format": "next-hashicorp format",
+    "generate:component": "next-hashicorp generate component",
+    "generate:readme": "next-hashicorp markdown-blocks README.md",
+    "lint": "next-hashicorp lint",
+    "start": "next-remote-watch ./content/**/*.mdx",
+    "static": "npm run build && npm run export && cp _redirects out/.",
+    "linkcheck": "linkcheck https://packer.io"
+  }
+}
