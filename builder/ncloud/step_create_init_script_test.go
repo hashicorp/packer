@@ -16,6 +16,7 @@ func TestStepCreateInitScriptShouldFailIfOperationCreateInitScriptFails(t *testi
 		Config: &Config{
 			Region:     "Korea",
 			SupportVPC: true,
+			UserData:   "test",
 		},
 	}
 

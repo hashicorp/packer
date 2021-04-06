@@ -37,6 +37,8 @@
   advance if you use CLASSIC env. If this field is left blank,
   Packer will create temporary ACG for automatically in VPC environment.
 
+- `support_vpc` (bool) - Support VPC
+
 - `subnet_no` (string) - The ID of the Subnet where you want to place the Server Instance. If this field is left blank, Packer will try to get the Public Subnet ID from the `vpc_no`.
 
 - `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.

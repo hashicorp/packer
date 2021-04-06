@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"log"
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -92,7 +92,7 @@ func (s *StepDeleteBlockStorage) getVpcBlockList(serverInstanceNo string) []*str
 
 func (s *StepDeleteBlockStorage) deleteClassicBlockStorage(serverInstanceNo string) error {
 	blockStorageInstanceList := s.getClassicBlockList(serverInstanceNo)
-	if blockStorageInstanceList == nil || len(blockStorageInstanceList) == 0 {
+	if len(blockStorageInstanceList) == 0 {
 		return nil
 	}
 	reqParams := server.DeleteBlockStorageInstancesRequest{
@@ -114,7 +114,7 @@ func (s *StepDeleteBlockStorage) deleteClassicBlockStorage(serverInstanceNo stri
 
 func (s *StepDeleteBlockStorage) deleteVpcBlockStorage(serverInstanceNo string) error {
 	blockStorageInstanceList := s.getVpcBlockList(serverInstanceNo)
-	if blockStorageInstanceList == nil || len(blockStorageInstanceList) == 0 {
+	if len(blockStorageInstanceList) == 0 {
 		return nil
 	}
 	reqParams := vserver.DeleteBlockStorageInstancesRequest{

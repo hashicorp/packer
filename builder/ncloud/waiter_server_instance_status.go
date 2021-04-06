@@ -2,11 +2,11 @@ package ncloud
 
 import (
 	"fmt"
-	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"log"
 	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 )
 
 func waiterClassicServerInstanceStatus(conn *NcloudAPIClient, serverInstanceNo string, status string, timeout time.Duration) error {

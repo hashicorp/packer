@@ -6,9 +6,10 @@ package ncloud
 import (
 	"errors"
 	"fmt"
+	"os"
+
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vpc"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
-	"os"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
@@ -62,7 +63,7 @@ type Config struct {
 	// advance if you use CLASSIC env. If this field is left blank,
 	// Packer will create temporary ACG for automatically in VPC environment.
 	AccessControlGroupNo string `mapstructure:"access_control_group_no" required:"false"`
-	SupportVPC bool `mapstructure:"support_vpc" required:"false"`
+	SupportVPC           bool   `mapstructure:"support_vpc" required:"false"`
 	// The ID of the Subnet where you want to place the Server Instance. If this field is left blank, Packer will try to get the Public Subnet ID from the `vpc_no`.
 	SubnetNo string `mapstructure:"subnet_no" required:"false"`
 	// The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
