@@ -54,7 +54,7 @@ async function generateStaticProps({
   // (current options are "Official" or "Community")
   function mdxContentHook(mdxContent) {
     if (pluginTier) {
-      const tierMdx = `<br /><br/><PluginTierLabel tier="${pluginTier}" />\n\n`
+      const tierMdx = `<br/><PluginTierLabel tier="${pluginTier}" />\n\n`
       mdxContent = tierMdx + mdxContent
     }
     return mdxContent
