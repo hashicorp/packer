@@ -51,7 +51,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
-	github.com/hashicorp/packer-plugin-sdk v0.1.2
+	github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407090040-d1eff9fe99e8
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4

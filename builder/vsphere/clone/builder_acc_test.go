@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	builderT "github.com/hashicorp/packer/acctest"
 	"github.com/hashicorp/packer/builder/vsphere/common"
 	commonT "github.com/hashicorp/packer/builder/vsphere/common/testing"
 	"github.com/vmware/govmomi/vim25/types"

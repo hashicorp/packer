@@ -11,6 +11,9 @@ import (
 	"testing"
 )
 
+// TestEnvVar must be set to a non-empty value for acceptance tests to run.
+const TestEnvVar = "PACKER_ACC"
+
 // PluginTestCase is a single set of tests to run for a plugin.
 // A PluginTestCase should generally map 1:1 to each test method for your
 // acceptance tests.
@@ -40,6 +43,9 @@ type PluginTestCase struct {
 	// Type is the type of the plugin.
 	Type string
 }
+
+// TestTeardownFunc is the callback used for Teardown in TestCase.
+type TestTeardownFunc func() error
 
 //nolint:errcheck
 func TestPlugin(t *testing.T, testCase *PluginTestCase) {
