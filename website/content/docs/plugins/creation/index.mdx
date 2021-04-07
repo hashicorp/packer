@@ -276,7 +276,7 @@ This is done by adding the block below for the respective plugin to the file [we
 
 If a plugin maintainer wishes to only include a specific version of released docs, then the `"version"` key in the above configuration should be set to a released version of the plugin. Otherwise it should be set to `"latest"`.
 
-The `"sourceBranch"` key in the above configuration ensures potential contributors can link back to the plugin repository from the Packer docs site.
+The `"sourceBranch"` key in the above configuration ensures potential contributors can link back to source files in the plugin repository from the Packer docs site. If a `"sourceBranch"` value is not present, it will default to `"main"`.
 
 ### Plugin Development Tips and FAQs
 
