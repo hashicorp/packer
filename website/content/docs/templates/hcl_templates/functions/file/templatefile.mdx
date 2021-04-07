@@ -120,14 +120,15 @@ by using a for expression rather than by using template directives.
 
 If the resulting template is small, you can choose instead to write jsonencode or yamlencode calls inline in your main configuration files, and avoid creating separate template files at all:
 
+```hcl
 locals {
-backend_config_json = jsonencode({
-"backends": [for addr in ip_addrs : "${addr}:${port}"],
-})
+  backend_config_json = jsonencode({
+    "backends": [for addr in ip_addrs : "${addr}:${port}"],
+  })
 }
-For more information, see the main documentation for jsonencode and yamlencode.
+```
 
-»
+For more information, see the main documentation for jsonencode and yamlencode.
 
 ## Related Functions
 
