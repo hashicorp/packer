@@ -12,6 +12,12 @@
     "version": "latest"
   },
   {
+    "title": "Google Cloud Platform",
+    "path": "googlecompute",
+    "repo": "hashicorp/packer-plugin-googlecompute",
+    "version": "latest"
+  },
+  {
     "title": "VMware vSphere",
     "path": "vsphere",
     "repo": "hashicorp/packer-plugin-vsphere",
