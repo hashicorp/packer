@@ -132,7 +132,13 @@ async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
 // which contains { filePath, fileString } data for the remote
 // plugin doc .mdx file
 async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
-  const { title, path: slug, repo, version } = pluginConfigEntry
+  const {
+    title,
+    path: slug,
+    repo,
+    version,
+    sourceBranch = 'main',
+  } = pluginConfigEntry
   const docsMdxFiles = await fetchPluginDocs({ repo, tag: version })
   // We construct a special kind of "NavLeaf" node, with a remoteFile property,
   // consisting of a { filePath, fileString, sourceUrl }, where:
@@ -155,7 +161,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     const { nav_title, sidebar_title } = frontmatter
     const title = nav_title || sidebar_title || basename
     // construct sourceUrl (used for "Edit this page" link)
-    const sourceUrl = `https://github.com/${repo}/blob/${version}/${filePath}`
+    const sourceUrl = `https://github.com/${repo}/blob/${sourceBranch}/${filePath}`
     // determine pluginTier
     const pluginOwner = repo.split('/')[0]
     const pluginTier = pluginOwner === 'hashicorp' ? 'official' : 'community'

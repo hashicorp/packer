@@ -29,12 +29,6 @@ to match Terraform Registry tier labels.
   }
 }
 
-/* add margin-top to separate from the adjacent
-search bar present on docs pages */
-:global(.g-search) + .root {
-  margin-top: 40px;
-}
-
 .text {
   /* composes */
   composes: g-type-body-small-strong from global;
