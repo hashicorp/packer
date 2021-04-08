@@ -18,6 +18,25 @@ some task with packer outputs and variables.
 The example below is a fully functional self-contained build.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "file" "example" {
+    content = "example content"
+}
+
+build {
+  source "source.file.example" {
+    target = "./test_artifact.txt"
+  }
+
+  post-processor "shell-local" {
+    inline = ["echo foo"]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -36,25 +55,6 @@ The example below is a fully functional self-contained build.
       "inline": ["echo foo"]
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "file" "example" {
-    content = "example content"
-}
-
-build {
-  source "source.file.example" {
-    target = "./test_artifact.txt"
-  }
-
-  post-processor "shell-local" {
-    inline = ["echo foo"]
-  }
 }
 ```
 
@@ -178,7 +178,7 @@ Optional parameters:
   a beta feature.
 
 - `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
-  default this is just 0.
+  default this is `0`.
 
 ## Execute Command
 
@@ -209,6 +209,34 @@ likely not work unless both Packer and the scripts you want to run are both on
 the C drive.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+    communicator = "none"
+}
+
+build {
+    sources = [
+        "source.null.example"
+    ]
+
+    post-processor "shell-local"{
+        environment_vars  = ["PROVISIONERTEST=ProvisionerTest1"]
+        execute_command   = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+        use_linux_pathing = true
+        scripts           = ["C:/Users/me/scripts/example_bash.sh"]
+    }
+    post-processor "shell-local"{
+        environment_vars  = ["PROVISIONERTEST=ProvisionerTest2"]
+        execute_command   = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+        use_linux_pathing = true
+        script            = "C:/Users/me/scripts/example_bash.sh"
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -235,34 +263,6 @@ the C drive.
       "script": "C:/Users/me/scripts/example_bash.sh"
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "null" "example" {
-    communicator = "none"
-}
-
-build {
-    sources = [
-        "source.null.example"
-    ]
-
-    post-processor "shell-local"{
-        environment_vars = ["PROVISIONERTEST=ProvisionerTest1"]
-        execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
-        use_linux_pathing = true
-        scripts = ["C:/Users/me/scripts/example_bash.sh"]
-    }
-    post-processor "shell-local"{
-        environment_vars = ["PROVISIONERTEST=ProvisionerTest2"]
-        execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
-        use_linux_pathing = true
-        script = "C:/Users/me/scripts/example_bash.sh"
-    }
 }
 ```
 
@@ -294,7 +294,7 @@ you much time in the process.
 
 ### Once Per Builder
 
-The `shell-local` script(s) you pass are run once per builder. That means that
+The `shell-local` script(s) you pass are run once per builder. This means that
 if you have an `amazon-ebs` builder and a `docker` builder, your script will be
 run twice. If you have 3 builders, it will run 3 times, once for each builder.
 
@@ -343,21 +343,21 @@ tarball, you might write this:
 ```hcl
 source "file" "example" {
     content = "Lorem ipsum dolor sit amet"
-    target = "dummy_artifact.txt"
+    target  = "dummy_artifact.txt"
 }
 build {
   sources = [
     "source.file.example"
   ]
   post-processor "manifest" {
-    output = "manifest.json"
+    output     = "manifest.json"
     strip_path = true
   }
 
   post-processor "shell-local" {
     inline = [
         "jq \".builds[].files[].name\" manifest.json | xargs tar cfz artifacts.tgz"
-      ]
+    ]
   }
 }
 ```
@@ -383,6 +383,16 @@ _must_ be extra careful to `exit 0` when necessary.
 Example of running a .cmd file on windows:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  environment_vars = ["SHELLLOCALTEST=ShellTest1"]
+  scripts          = ["./scripts/test_cmd.cmd"]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -394,19 +404,9 @@ Example of running a .cmd file on windows:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  environment_vars = ["SHELLLOCALTEST=ShellTest1"]
-  scripts = ["./scripts/test_cmd.cmd"]
-}
-```
-
-</Tab>
 </Tabs>
 
-Contents of "test_cmd.cmd":
+Contents of `test_cmd.cmd`:
 
     echo %SHELLLOCALTEST%
 
@@ -414,6 +414,17 @@ Example of running an inline command on windows: Required customization:
 tempfile_extension
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  environment_vars   = ["SHELLLOCALTEST=ShellTest2"],
+  tempfile_extension = ".cmd",
+  inline             = ["echo %SHELLLOCALTEST%"]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -426,23 +437,24 @@ tempfile_extension
 ```
 
 </Tab>
+</Tabs>
+
+Example of running a bash command on windows using WSL: Required
+customizations: `use_linux_pathing` and `execute_command`:
+
+<Tabs>
 <Tab heading="HCL2">
 
 ```hcl
 post-processor "shell-local" {
-  environment_vars = ["SHELLLOCALTEST=ShellTest2"],
-  tempfile_extension = ".cmd",
-  inline = [echo %SHELLLOCALTEST%"]
+  environment_vars  = ["SHELLLOCALTEST=ShellTest3"],
+  execute_command   = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+  use_linux_pathing = true
+  script            = "./scripts/example_bash.sh"
 }
 ```
 
 </Tab>
-</Tabs>
-
-Example of running a bash command on windows using WSL: Required
-customizations: use_linux_pathing and execute_command
-
-<Tabs>
 <Tab heading="JSON">
 
 ```json
@@ -456,29 +468,29 @@ customizations: use_linux_pathing and execute_command
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  environment_vars = ["SHELLLOCALTEST=ShellTest3"],
-  execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
-  use_linux_pathing = true
-  script = "./scripts/example_bash.sh"
-}
-```
-
-</Tab>
 </Tabs>
 
-Contents of "example_bash.sh":
+Contents of `example_bash.sh`:
 
     #!/bin/bash
     echo $SHELLLOCALTEST
 
-Example of running a powershell script on windows: Required customizations:
-env_var_format and execute_command
+Example of running a PowerShell script on Windows:
+Required customizations: `env_var_format` and `execute_command`.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  environment_vars = ["SHELLLOCALTEST=ShellTest4"]
+  execute_command  = ["powershell.exe", "{{.Vars}} {{.Script}}"]
+  env_var_format   = "$env:%s=\"%s\"; "
+  script           = "./scripts/example_ps.ps1"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -492,24 +504,25 @@ env_var_format and execute_command
 ```
 
 </Tab>
+</Tabs>
+
+Example of running a powershell script on windows as "inline": Required
+customizations: `env_var_format`, `tempfile_extension`, and `execute_command`
+
+<Tabs>
 <Tab heading="HCL2">
 
 ```hcl
 post-processor "shell-local" {
-  environment_vars = ["SHELLLOCALTEST=ShellTest4"]
-  execute_command = ["powershell.exe", "{{.Vars}} {{.Script}}"]
-  env_var_format = "$env:%s=\"%s\"; "
-  script = "./scripts/example_ps.ps1"
+  tempfile_extension = ".ps1"
+  environment_vars   = ["SHELLLOCALTEST=ShellTest5"]
+  execute_command    = ["powershell.exe", "{{.Vars}} {{.Script}}"]
+  env_var_format     = "$env:%s=\"%s\"; "
+  inline             = ["write-output $env:SHELLLOCALTEST"]
 }
 ```
 
 </Tab>
-</Tabs>
-
-Example of running a powershell script on windows as "inline": Required
-customizations: env_var_format, tempfile_extension, and execute_command
-
-<Tabs>
 <Tab heading="JSON">
 
 ```json
@@ -524,26 +537,23 @@ customizations: env_var_format, tempfile_extension, and execute_command
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  tempfile_extension = ".ps1"
-  environment_vars = ["SHELLLOCALTEST=ShellTest5"]
-  execute_command = ["powershell.exe", "{{.Vars}} {{.Script}}"]
-  env_var_format = "$env:%s=\"%s\"; "
-  inline = ["write-output $env:SHELLLOCALTEST"]
-}
-```
-
-</Tab>
 </Tabs>
 
 ### Unix Host
 
-Example of running a bash script on unix:
+Example of running a Shell script on unix:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  environment_vars = ["PROVISIONERTEST=ProvisionerTest1"]
+  scripts = ["./scripts/example_bash.sh"]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -555,21 +565,22 @@ Example of running a bash script on unix:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  environment_vars = ["PROVISIONERTEST=ProvisionerTest1"]
-  scripts = ["./scripts/example_bash.sh"]
-}
-```
-
-</Tab>
 </Tabs>
 
 Example of running a bash "inline" on unix:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  environment_vars = ["PROVISIONERTEST=ProvisionerTest2"]
+  inline           = ["echo hello", "echo $PROVISIONERTEST"]
+}
+
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -581,22 +592,27 @@ Example of running a bash "inline" on unix:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  environment_vars = ["PROVISIONERTEST=ProvisionerTest2"]
-  inline = ["echo hello", "echo $PROVISIONERTEST"]
-}
-
-```
-
-</Tab>
 </Tabs>
 
 Example of running a python script on unix:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "shell-local" {
+  script           = "hello.py"
+  environment_vars = ["HELLO_USER=packeruser"]
+  execute_command  = [
+    "/bin/sh",
+    "-c",
+    "{{.Vars}} /usr/local/bin/python {{.Script}}"
+  ]
+}
+
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -613,26 +629,12 @@ Example of running a python script on unix:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "shell-local" {
-  script = "hello.py"
-  environment_vars = ["HELLO_USER=packeruser"]
-  execute_command = [
-    "/bin/sh",
-    "-c",
-    "{{.Vars}} /usr/local/bin/python {{.Script}}"
-  ]
-}
-
-```
-
-</Tab>
 </Tabs>
 
+```text
 Where "hello.py" contains:
 
     import os
 
     print('Hello, %s!' % os.getenv("HELLO_USER"))
+```

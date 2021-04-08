@@ -90,18 +90,18 @@ on Vagrant Cloud, as well as authentication and version information.
 
 - `no_release` (string) - If set to true, does not release the version on
   Vagrant Cloud, making it active. You can manually release the version via
-  the API or Web UI. Defaults to false.
+  the API or Web UI. Defaults to `false`.
 
 - `insecure_skip_tls_verify` (boolean) - If set to true _and_ `vagrant_cloud_url`
   is set to something different than its default, it will set TLS InsecureSkipVerify
   to true. In other words, this will disable security checks of SSL. You may need
-  to set this option to true if your host at vagrant_cloud_url is using a
+  to set this option to true if your host at `vagrant_cloud_url` is using a
   self-signed certificate.
 
 - `keep_input_artifact` (boolean) - When true, preserve the local box
   after uploading to Vagrant cloud. Defaults to `true`.
 
-- `version_description` (string) - Optionally markdown text used as a
+- `version_description` (string) - Optional Markdown text used as a
   full-length and in-depth description of the version, typically for denoting
   changes introduced
 
@@ -109,12 +109,12 @@ on Vagrant Cloud, as well as authentication and version information.
   is set the box will not be uploaded to the Vagrant Cloud.
   This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
   may use user variables and template functions in this field.
-  The following extra variables are also avilable in this engine:
+  The following extra variables are also available in this engine:
 
   - `Provider`: The Vagrant provider the box is for
   - `ArtifactId`: The ID of the input artifact.
 
-- `no_direct_upload` (boolean) - When true, upload the box artifact through
+- `no_direct_upload` (boolean) - When `true`, upload the box artifact through
   Vagrant Cloud instead of directly to the backend storage.
 
 ## Use with the Vagrant Post-Processor
