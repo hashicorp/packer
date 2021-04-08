@@ -134,10 +134,10 @@ Optional Parameters:
   different location.
 
 - `backend` (string) - Backend used by InSpec for connection. Defaults to
-  SSH.
+  `ssh`.
 
 - `host` (string) - Host used for by InSpec for connection. Defaults to
-  localhost.
+  `localhost`.
 
 - `local_port` (uint) - The port on which to attempt to listen for SSH
   connections. This value is a starting point. The provisioner will attempt to
@@ -149,7 +149,7 @@ Optional Parameters:
   server on the host machine to forward commands to the target machine.
   InSpec connects to this server and will validate the identity of the server
   using the system known_hosts. The default behavior is to generate and use
-  a onetime key.
+  a one-time key.
 
 - `ssh_authorized_key_file` (string) - The SSH public key of the InSpec
   `ssh_user`. The default behavior is to generate and use a onetime key. If
@@ -160,7 +160,7 @@ Optional Parameters:
 
 - `valid_exit_codes` (list of ints) - A list of valid exit codes returned by
   inspec to be accepted by the provisioner. The default is (0,101) (accept
-  skipped tests). See [inspec exit codes](https://docs.chef.io/inspec/cli/#exec)
+  skipped tests). See [InSpec exit codes](https://docs.chef.io/inspec/cli/#exec)
   for a list and explanation of inspec exit codes.
 
 @include 'provisioners/common-config.mdx'
