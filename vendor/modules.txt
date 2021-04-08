@@ -498,6 +498,7 @@ github.com/hashicorp/packer-plugin-amazon/builder/common
 github.com/hashicorp/packer-plugin-amazon/builder/common/awserrors
 github.com/hashicorp/packer-plugin-amazon/builder/common/ssm
 github.com/hashicorp/packer-plugin-amazon/builder/ebs
+github.com/hashicorp/packer-plugin-amazon/builder/ebs/acceptance
 github.com/hashicorp/packer-plugin-amazon/builder/ebssurrogate
 github.com/hashicorp/packer-plugin-amazon/builder/ebsvolume
 github.com/hashicorp/packer-plugin-amazon/builder/instance
@@ -511,7 +512,7 @@ github.com/hashicorp/packer-plugin-docker/post-processor/docker-import
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-push
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-save
 github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag
-# github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407090040-d1eff9fe99e8
+# github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407132324-af39c7839daf
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
 github.com/hashicorp/packer-plugin-sdk/acctest/provisioneracc
