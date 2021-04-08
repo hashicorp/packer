@@ -1,4 +1,5 @@
 //go:generate mapstructure-to-hcl2 -type Config
+//go:generate struct-markdown
 
 package ansiblelocal
 
@@ -23,51 +24,126 @@ const DefaultStagingDir = "/tmp/packer-provisioner-ansible-local"
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	ctx                 interpolate.Context
-
-	// The command to run ansible
-	Command string
-
-	// Extra options to pass to the ansible command
+	// The command to invoke ansible. Defaults to
+	//  `ansible-playbook`. If you would like to provide a more complex command,
+	//  for example, something that sets up a virtual environment before calling
+	//  ansible, take a look at the ansible wrapper guide below for inspiration.
+	//  Please note that Packer expects Command to be a path to an executable.
+	//  Arbitrary bash scripting will not work and needs to go inside an
+	//  executable script.
+	Command string `mapstructure:"command"`
+	// Extra arguments to pass to Ansible.
+	// These arguments _will not_ be passed through a shell and arguments should
+	// not be quoted. Usage example:
+	//
+	// ```json
+	//   "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
+	// ```
+	// In certain scenarios where you want to pass ansible command line arguments
+	// that include parameter and value (for example `--vault-password-file pwfile`),
+	// from ansible documentation this is correct format but that is NOT accepted here.
+	// Instead you need to do it like `--vault-password-file=pwfile`.
+	//
+	// If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
+	// and would like to access the auto-generated password that Packer uses to
+	// connect to a Windows instance via WinRM, you can use the template variable
+	// `{{.WinRMPassword}}` in this option. For example:
+	//
+	// ```json
+	//   "extra_arguments": [
+	//     "--extra-vars", "winrm_password={{ .WinRMPassword }}"
+	//   ]
+	// ```
 	ExtraArguments []string `mapstructure:"extra_arguments"`
-
-	// Path to group_vars directory
+	// A path to the directory containing ansible group
+	// variables on your local system to be copied to the remote machine. By
+	// default, this is empty.
 	GroupVars string `mapstructure:"group_vars"`
-
-	// Path to host_vars directory
+	// A path to the directory containing ansible host variables on your local
+	// system to be copied to the remote machine. By default, this is empty.
 	HostVars string `mapstructure:"host_vars"`
-
-	// The playbook dir to upload.
+	// A path to the complete ansible directory structure on your local system
+	// to be copied to the remote machine as the `staging_directory` before all
+	// other files and directories.
 	PlaybookDir string `mapstructure:"playbook_dir"`
-
-	// The main playbook file to execute.
+	// The playbook file to be executed by ansible. This file must exist on your
+	// local system and will be uploaded to the remote machine. This option is
+	// exclusive with `playbook_files`.
 	PlaybookFile string `mapstructure:"playbook_file"`
-
-	// The playbook files to execute.
+	// The playbook files to be executed by ansible. These files must exist on
+	// your local system. If the files don't exist in the `playbook_dir` or you
+	// don't set `playbook_dir` they will be uploaded to the remote machine. This
+	// option is exclusive with `playbook_file`.
 	PlaybookFiles []string `mapstructure:"playbook_files"`
-
-	// An array of local paths of playbook files to upload.
+	// An array of directories of playbook files on your local system. These
+	// will be uploaded to the remote machine under `staging_directory`/playbooks.
+	// By default, this is empty.
 	PlaybookPaths []string `mapstructure:"playbook_paths"`
-
-	// An array of local paths of roles to upload.
+	// An array of paths to role directories on your local system. These will be
+	// uploaded to the remote machine under `staging_directory`/roles. By default,
+	// this is empty.
 	RolePaths []string `mapstructure:"role_paths"`
-
-	// The directory where files will be uploaded. Packer requires write
-	// permissions in this directory.
+	// The directory where all the configuration of Ansible by Packer will be placed.
+	// By default this is `/tmp/packer-provisioner-ansible-local/<uuid>`, where
+	// `<uuid>` is replaced with a unique ID so that this provisioner can be run more
+	// than once. If you'd like to know the location of the staging directory in
+	// advance, you should set this to a known location. This directory doesn't need
+	// to exist but must have proper permissions so that the SSH user that Packer uses
+	// is able to create directories and write into this folder. If the permissions
+	// are not correct, use a shell provisioner prior to this to configure it
+	// properly.
 	StagingDir string `mapstructure:"staging_directory"`
-
-	// If true, staging directory is removed after executing ansible.
+	// If set to `true`, the content of the `staging_directory` will be removed after
+	// executing ansible. By default this is set to `false`.
 	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
-
-	// The optional inventory file
+	// The inventory file to be used by ansible. This
+	// file must exist on your local system and will be uploaded to the remote
+	// machine.
+	//
+	// When using an inventory file, it's also required to `--limit` the hosts to the
+	// specified host you're building. The `--limit` argument can be provided in the
+	// `extra_arguments` option.
+	//
+	// An example inventory file may look like:
+	//
+	// ```text
+	// [chi-dbservers]
+	// db-01 ansible_connection=local
+	// db-02 ansible_connection=local
+	//
+	// [chi-appservers]
+	// app-01 ansible_connection=local
+	// app-02 ansible_connection=local
+	//
+	// [chi:children]
+	// chi-dbservers
+	// chi-appservers
+	//
+	// [dbservers:children]
+	// chi-dbservers
+	//
+	// [appservers:children]
+	// chi-appservers
+	// ```
 	InventoryFile string `mapstructure:"inventory_file"`
-
-	// The optional inventory groups
+	// `inventory_groups` (string) - A comma-separated list of groups to which
+	// packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
+	// will generate an Ansible inventory like:
+	//
+	// ```text
+	// [my_group_1]
+	// 127.0.0.1
+	// [my_group_2]
+	// 127.0.0.1
+	// ```
 	InventoryGroups []string `mapstructure:"inventory_groups"`
-
-	// The optional ansible-galaxy requirements file
+	// A requirements file which provides a way to
+	//  install roles or collections with the [ansible-galaxy
+	//  cli](https://docs.ansible.com/ansible/latest/galaxy/user_guide.html#the-ansible-galaxy-command-line-tool)
+	//  on the local machine before executing `ansible-playbook`. By default, this is empty.
 	GalaxyFile string `mapstructure:"galaxy_file"`
-
-	// The command to run ansible-galaxy
+	// The command to invoke ansible-galaxy. By default, this is
+	// `ansible-galaxy`.
 	GalaxyCommand string `mapstructure:"galaxy_command"`
 }
 
