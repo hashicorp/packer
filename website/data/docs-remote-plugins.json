@@ -2,8 +2,8 @@
   {
     "title": "Docker",
     "path": "docker",
-    "repo": "hashicorp/packer-plugin-docker",
-    "version": "latest"
+    "repo": "zchsh/packer-plugin-docker",
+    "version": "v0.0.4"
   },
   {
     "title": "Amazon EC2",
