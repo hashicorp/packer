@@ -56,8 +56,8 @@ type Config struct {
 	// ```
 	ExtraArguments []string `mapstructure:"extra_arguments"`
 	// A path to the directory containing ansible group
-    // variables on your local system to be copied to the remote machine. By
-    // default, this is empty.
+	// variables on your local system to be copied to the remote machine. By
+	// default, this is empty.
 	GroupVars string `mapstructure:"group_vars"`
 	// A path to the directory containing ansible host variables on your local
 	// system to be copied to the remote machine. By default, this is empty.
@@ -93,49 +93,49 @@ type Config struct {
 	// are not correct, use a shell provisioner prior to this to configure it
 	// properly.
 	StagingDir string `mapstructure:"staging_directory"`
-    // If set to `true`, the content of the `staging_directory` will be removed after
-    // executing ansible. By default this is set to `false`.
+	// If set to `true`, the content of the `staging_directory` will be removed after
+	// executing ansible. By default this is set to `false`.
 	CleanStagingDir bool `mapstructure:"clean_staging_directory"`
-    // The inventory file to be used by ansible. This
-    // file must exist on your local system and will be uploaded to the remote
-    // machine.
-    //
-    // When using an inventory file, it's also required to `--limit` the hosts to the
-    // specified host you're building. The `--limit` argument can be provided in the
-    // `extra_arguments` option.
-    //
-    // An example inventory file may look like:
-    //
-    // ```text
-    // [chi-dbservers]
-    // db-01 ansible_connection=local
-    // db-02 ansible_connection=local
-    //
-    // [chi-appservers]
-    // app-01 ansible_connection=local
-    // app-02 ansible_connection=local
-    //
-    // [chi:children]
-    // chi-dbservers
-    // chi-appservers
-    //
-    // [dbservers:children]
-    // chi-dbservers
-    //
-    // [appservers:children]
-    // chi-appservers
-    // ```
+	// The inventory file to be used by ansible. This
+	// file must exist on your local system and will be uploaded to the remote
+	// machine.
+	//
+	// When using an inventory file, it's also required to `--limit` the hosts to the
+	// specified host you're building. The `--limit` argument can be provided in the
+	// `extra_arguments` option.
+	//
+	// An example inventory file may look like:
+	//
+	// ```text
+	// [chi-dbservers]
+	// db-01 ansible_connection=local
+	// db-02 ansible_connection=local
+	//
+	// [chi-appservers]
+	// app-01 ansible_connection=local
+	// app-02 ansible_connection=local
+	//
+	// [chi:children]
+	// chi-dbservers
+	// chi-appservers
+	//
+	// [dbservers:children]
+	// chi-dbservers
+	//
+	// [appservers:children]
+	// chi-appservers
+	// ```
 	InventoryFile string `mapstructure:"inventory_file"`
-    // `inventory_groups` (string) - A comma-separated list of groups to which
-    // packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
-    // will generate an Ansible inventory like:
-    //
-    // ```text
-    // [my_group_1]
-    // 127.0.0.1
-    // [my_group_2]
-    // 127.0.0.1
-    // ```
+	// `inventory_groups` (string) - A comma-separated list of groups to which
+	// packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
+	// will generate an Ansible inventory like:
+	//
+	// ```text
+	// [my_group_1]
+	// 127.0.0.1
+	// [my_group_2]
+	// 127.0.0.1
+	// ```
 	InventoryGroups []string `mapstructure:"inventory_groups"`
 	// A requirements file which provides a way to
 	//  install roles or collections with the [ansible-galaxy
