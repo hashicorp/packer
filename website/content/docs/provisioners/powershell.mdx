@@ -21,21 +21,21 @@ for details.
 The example below is fully functional.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+  inline = ["dir c:\\"]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
 {
   "type": "powershell",
   "inline": ["dir c:\\"]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-  inline = ["dir c:\\"]
 }
 ```
 
@@ -82,6 +82,16 @@ provisioner "powershell" {
   accessing the `build` variables For example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+  environment_vars = ["WINRMPASS=${build.Password}"]
+  inline = ["Write-Host \"Automatically generated aws password is: $Env:WINRMPASS\""]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -90,16 +100,6 @@ provisioner "powershell" {
   "environment_vars": ["WINRMPASS={{ build `Password`}}"],
   "inline": ["Write-Host \"Automatically generated aws password is: $Env:WINRMPASS\""]
 },
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-  environment_vars = ["WINRMPASS=${build.Password}"]
-  inline = ["Write-Host \"Automatically generated aws password is: $Env:WINRMPASS\""]
-}
 ```
 
 </Tab>
@@ -140,6 +140,16 @@ provisioner "powershell" {
   accessing the `build` variables For example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+    elevated_user = "Administrator"
+    elevated_password = build.Password
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -152,22 +162,22 @@ provisioner "powershell" {
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-    elevated_user = "Administrator"
-    elevated_password = build.Password
-}
-```
-
-</Tab>
 </Tabs>
 
 If you specify an empty `elevated_password` value then the PowerShell
 script is run as a service account. For example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+  elevated_user = "SYSTEM"
+  elevated_password = ""
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -180,23 +190,13 @@ script is run as a service account. For example:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-  elevated_user = "SYSTEM"
-  elevated_password = ""
-}
-```
-
-</Tab>
 </Tabs>
 
 - `execution_policy` - To run ps scripts on windows packer defaults this to
   "bypass" and wraps the command to run. Setting this to "none" will prevent
   wrapping, allowing to see exit codes on docker for windows. Possible values
-  are "bypass", "allsigned", "default", "remotesigned", "restricted",
-  "undefined", "unrestricted", "none".
+  are `bypass`, `allsigned`, `default`, `remotesigned`, `restricted`,
+  `undefined`, `unrestricted`, `none`.
 
 - `remote_path` (string) - The path where the PowerShell script will be
   uploaded to within the target build machine. This defaults to
@@ -250,7 +250,7 @@ commonly useful environmental variables:
   builders.
 
 - `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
-  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+  transfer (such as `hyperv`, `parallels`, `qemu`, `virtualbox`, and `vmware`), this
   will be set to the address. You can use this address in your provisioner to
   download large files over http. This may be useful if you're experiencing
   slower speeds using the default file provisioner. A file provisioner using
@@ -276,6 +276,16 @@ dollar sign backslash escaped so that it is not interpreted by the remote Bash
 shell - Bash being the default shell for Cygwin environments.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+    execute_command = "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\""
+    inline = [ "Write-Host \"Hello from PowerShell\""]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -286,16 +296,6 @@ shell - Bash being the default shell for Cygwin environments.
     "inline": ["Write-Host \"Hello from PowerShell\""]
   }
 ]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-    execute_command = "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\""
-    inline = [ "Write-Host \"Hello from PowerShell\""]
-}
 ```
 
 </Tab>
@@ -316,6 +316,21 @@ quotes appear within double quotes, the addition of a backslash escape is
 required for the JSON template to be parsed correctly.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "powershell" {
+    inline = [
+        "Write-Host \"A literal dollar `$ must be escaped\"",
+        "Write-Host \"A literal backtick `` must be escaped\"",
+        "Write-Host \"Here `\"double quotes`\" must be escaped\"",
+        "Write-Host \"Here `'single quotes`' don`'t really need to be\"",
+        "Write-Host \"escaped... but it doesn`'t hurt to do so.\"",
+    ]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -331,21 +346,6 @@ required for the JSON template to be parsed correctly.
       ]
     }
   ]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "powershell" {
-    inline = [
-        "Write-Host \"A literal dollar `$ must be escaped\"",
-        "Write-Host \"A literal backtick `` must be escaped\"",
-        "Write-Host \"Here `\"double quotes`\" must be escaped\"",
-        "Write-Host \"Here `'single quotes`' don`'t really need to be\"",
-        "Write-Host \"escaped... but it doesn`'t hurt to do so.\"",
-    ]
-}
 ```
 
 </Tab>
@@ -370,6 +370,43 @@ Special characters appearing in user environment variable values and in the
 for the user. There is no need to use escapes in these instances.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+variable "psvar" {
+  type    = string
+  default = "My$tring"
+}
+
+build {
+  sources = ["source.amazon-ebs.example"]
+
+  provisioner "powershell" {
+      elevated_user = "Administrator"
+      elevated_password = "Super$3cr3t!"
+      inline = ["Write-Output \"The dollar in the elevated_password is interpreted correctly\""]
+  }
+  provisioner "powershell" {
+    environment_vars = [
+        "VAR1=A$Dollar",
+        "VAR2=A`Backtick",
+        "VAR3=A'SingleQuote",
+        "VAR4=A\"DoubleQuote",
+        "VAR5=${var.psvar}",
+    ]
+    inline = [
+      "Write-Output \"In the following examples the special character is interpreted correctly:\"",
+      "Write-Output \"The dollar in VAR1:                            $Env:VAR1\"",
+      "Write-Output \"The backtick in VAR2:                          $Env:VAR2\"",
+      "Write-Output \"The single quote in VAR3:                      $Env:VAR3\"",
+      "Write-Output \"The double quote in VAR4:                      $Env:VAR4\"",
+      "Write-Output \"The dollar in VAR5 (expanded from a user var): $Env:VAR5\"",
+    ]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -405,43 +442,6 @@ for the user. There is no need to use escapes in these instances.
     }
   ]
   ...
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-variable "psvar" {
-  type    = string
-  default = "My$tring"
-}
-
-build {
-  sources = ["source.amazon-ebs.example"]
-
-  provisioner "powershell" {
-      elevated_user = "Administrator"
-      elevated_password = "Super$3cr3t!"
-      inline = ["Write-Output \"The dollar in the elevated_password is interpreted correctly\""]
-  }
-  provisioner "powershell" {
-    environment_vars = [
-        "VAR1=A$Dollar",
-        "VAR2=A`Backtick",
-        "VAR3=A'SingleQuote",
-        "VAR4=A\"DoubleQuote",
-        "VAR5=${var.psvar}",
-    ]
-    inline = [
-      "Write-Output \"In the following examples the special character is interpreted correctly:\"",
-      "Write-Output \"The dollar in VAR1:                            $Env:VAR1\"",
-      "Write-Output \"The backtick in VAR2:                          $Env:VAR2\"",
-      "Write-Output \"The single quote in VAR3:                      $Env:VAR3\"",
-      "Write-Output \"The double quote in VAR4:                      $Env:VAR4\"",
-      "Write-Output \"The dollar in VAR5 (expanded from a user var): $Env:VAR5\"",
-    ]
-  }
 }
 ```
 

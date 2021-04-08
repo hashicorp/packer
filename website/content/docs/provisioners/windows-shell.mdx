@@ -17,21 +17,21 @@ The windows-shell Packer provisioner runs commands on a Windows machine using
 The example below is fully functional.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-shell" {
+  inline = ["dir c:\\"]
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
 {
   "type": "windows-shell",
   "inline": ["dir c:\\"]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "windows-shell" {
-  inline = ["dir c:\\"]
 }
 ```
 
@@ -85,7 +85,7 @@ commonly useful environmental variables:
   builders.
 
 - `PACKER_HTTP_ADDR` If using a builder that provides an http server for file
-  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+  transfer (such as `hyperv`, `parallels`, `qemu`, `virtualbox`, and `vmware`), this
   will be set to the address. You can use this address in your provisioner to
   download large files over http. This may be useful if you're experiencing
   slower speeds using the default file provisioner. A file provisioner using

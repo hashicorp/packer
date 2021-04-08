@@ -25,19 +25,19 @@ so Windows must be completely booted in order to continue.
 The example below is fully functional.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-restart" {}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
 {
   "type": "windows-restart"
 }
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "windows-restart" {}
 ```
 
 </Tab>
@@ -54,13 +54,14 @@ Optional parameters:
   installation kicks off a reboot and you want the provisioner to wait for
   that reboot to complete before reconnecting. Please note that this option
   is a beta feature, and we generally recommend that you finish installs that
-  auto-reboot (like windows updates) during your autounattend phase before
-  our winrm provisioner connects.
+  auto-reboot (like Windows Updates) during your _autounattend_ phase before
+  the `winrm` provisioner connects.
 
 - `registry_keys` (array of strings) - if `check-registry` is `true`,
-  windows-restart will not reconnect until after all of the listed keys are
+  `windows-restart` will not reconnect until after all of the listed keys are
   no longer present in the registry.
 
+```
   default:
 
       var DefaultRegistryKeys = []string{
@@ -68,6 +69,7 @@ Optional parameters:
         "HKLM:SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\PackagesPending",
         "HKLM:Software\\Microsoft\\Windows\\CurrentVersion\\Component Based Servicing\\RebootInProgress",
       }
+```
 
 - `restart_command` (string) - The command to execute to initiate the
   restart. By default this is `shutdown /r /f /t 0 /c "packer restart"`.
@@ -76,21 +78,21 @@ Optional parameters:
   restart succeeded. This will be done in a loop. Example usage:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "windows-restart" {
+  restart_check_command = "powershell -command \"& {Write-Output 'restarted.'}\""
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
 {
   "type": "windows-restart",
   "restart_check_command": "powershell -command \"& {Write-Output 'restarted.'}\""
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "windows-restart" {
-  restart_check_command = "powershell -command \"& {Write-Output 'restarted.'}\""
 }
 ```
 
