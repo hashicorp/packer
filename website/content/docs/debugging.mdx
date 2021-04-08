@@ -24,7 +24,7 @@ In debug mode once the remote instance is instantiated, Packer will emit to the
 current directory an ephemeral private ssh key as a .pem file. Using that you
 can `ssh -i <key.pem>` into the remote build instance and see what is going on
 for debugging. The key will only be emitted for cloud-based builders. The
-ephemeral key will be deleted at the end of the packer run during cleanup.
+ephemeral key will be deleted at the end of the Packer run during cleanup.
 
 For a local builder, the SSH session initiated will be visible in the detail
 provided when `PACKER_LOG=1` environment variable is set prior to a build, and
@@ -34,7 +34,7 @@ the kickstart or preseed associated with initializing the local VM.
 It should be noted that one of the options `-on-error` is to `retry`, the retry
 of the step in question has limitations:
 
-- the template packer is building is **not** reloaded from file.
+- the template Packer is building is **not** reloaded from file.
 - the resources specified from builders **are** reloaded from file.
 
 Check the specfics on your builder to confirm their behavior.

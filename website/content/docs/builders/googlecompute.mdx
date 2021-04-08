@@ -104,7 +104,7 @@ straightforwarded, it is documented here.
 Packer looks for credentials in the following places, preferring the first
 location found:
 
-1.  An `account_file` option in your packer file.
+1.  An `account_file` option in your Packer file.
 
 2.  A JSON file (Service Account) whose path is specified by the
     `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
@@ -178,7 +178,7 @@ using the gcloud command.
 
 Or alternatively by navigating to [https://console.cloud.google.com/networking/firewalls/list](https://console.cloud.google.com/networking/firewalls/list).
 
-Once this is set up, the following is a complete working packer config after
+Once this is set up, the following is a complete working Packer config after
 setting a valid `project_id`:
 
 <Tabs>
@@ -403,7 +403,7 @@ The GCS location must be writeable by the service account of the instance that P
 ### Gotchas
 
 CentOS and recent Debian images have root ssh access disabled by default. Set
-`ssh_username` to any user, which will be created by packer with sudo access.
+`ssh_username` to any user, which will be created by Packer with sudo access.
 
 The machine type must have a scratch disk, which means you can't use an
 `f1-micro` or `g1-small` to build images.
