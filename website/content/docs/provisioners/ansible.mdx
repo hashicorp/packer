@@ -39,7 +39,7 @@ Example Packer template:
 ```hcl
 source "digitalocean" "example"{
     api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
-    image     = "ubuntu-14-04-x64"
+    image     = "ubuntu-20-04-x64"
     region    = "sfo1"
 }
 
@@ -63,7 +63,7 @@ build {
     {
       "type": "digitalocean",
       "api_token": "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb",
-      "image": "ubuntu-14-04-x64",
+      "image": "ubuntu-20-04-x64",
       "region": "sfo1"
     }
   ],
@@ -246,20 +246,27 @@ Below is a fully functioning Ansible example using WinRM:
 <Tab heading="HCL2">
 
 ```hcl
+data "amazon-ami" "ubuntu" {
+  access_key = var.aws_access_key
+  
+  filters = {
+    name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  
+  most_recent = true
+  owners      = ["099720109477"]
+  region      = var.aws_region
+  secret_key  = var.aws_secret_key
+}
+
 source "amazon-ebs" "example" {
     region        = "us-east-1"
     instance_type = "t2.micro"
 
-    source_ami_filter {
-        filters =  {
-          "virtualization-type": "hvm",
-          "name": "*Windows_Server-2012*English-64Bit-Base*",
-          "root-device-type": "ebs"
-        }
-
-        most_recent = true
-        owners      = ["amazon"]
-    }
+    source_ami       = data.amazon-ami.ubuntu.id
+    
     ami_name         = "test-ansible-packer"
     user_data_file   = "windows_bootstrap.txt"
     communicator     = "winrm"
