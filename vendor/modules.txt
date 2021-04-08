@@ -520,6 +520,8 @@ github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag
 ## explicit
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
+github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
+github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
 # github.com/hashicorp/packer-plugin-sdk v0.1.2
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
