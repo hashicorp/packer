@@ -29,8 +29,8 @@ Replace the mock `api_token` value with your own.
 ```hcl
 source "digitalocean" "example"{
     api_token = "<digital ocean api token>"
-    image = "ubuntu-14-04-x64"
-    region = "sfo1"
+    image     = "ubuntu-14-04-x64"
+    region    = "sfo1"
 }
 
 build {
@@ -176,7 +176,7 @@ This can be done via `inspec_env_vars` in the template:
 ```hcl
  provisioner "inspec" {
     inspec_env_vars = [ "CHEF_LICENSE=accept"]
-    profile = "https://github.com/dev-sec/linux-baseline"
+    profile         = "https://github.com/dev-sec/linux-baseline"
  }
 ```
 
