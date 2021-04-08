@@ -11,20 +11,20 @@
 - `extra_arguments` ([]string) - Extra arguments to pass to Ansible.
   These arguments _will not_ be passed through a shell and arguments should
   not be quoted. Usage example:
-
+  
   ```json
-    "extra_arguments": [ "--extra-vars", "Region={{ user `Region` }} Stage={{ user `Stage` }}" ]
+    "extra_arguments": [ "--extra-vars", "Region={{user `Region`}} Stage={{user `Stage`}}" ]
   ```
   In certain scenarios where you want to pass ansible command line arguments
   that include parameter and value (for example `--vault-password-file pwfile`),
   from ansible documentation this is correct format but that is NOT accepted here.
   Instead you need to do it like `--vault-password-file=pwfile`.
-
+  
   If you are running a Windows build on AWS, Azure, Google Compute, or OpenStack
   and would like to access the auto-generated password that Packer uses to
   connect to a Windows instance via WinRM, you can use the template variable
-  `{{ .WinRMPassword }}` in this option. For example:
-
+  `{{.WinRMPassword}}` in this option. For example:
+  
   ```json
     "extra_arguments": [
       "--extra-vars", "winrm_password={{ .WinRMPassword }}"
@@ -75,29 +75,29 @@
 - `inventory_file` (string) - The inventory file to be used by ansible. This
   file must exist on your local system and will be uploaded to the remote
   machine.
-
+  
   When using an inventory file, it's also required to `--limit` the hosts to the
   specified host you're building. The `--limit` argument can be provided in the
   `extra_arguments` option.
-
+  
   An example inventory file may look like:
-
+  
   ```text
   [chi-dbservers]
   db-01 ansible_connection=local
   db-02 ansible_connection=local
-
+  
   [chi-appservers]
   app-01 ansible_connection=local
   app-02 ansible_connection=local
-
+  
   [chi:children]
   chi-dbservers
   chi-appservers
-
+  
   [dbservers:children]
   chi-dbservers
-
+  
   [appservers:children]
   chi-appservers
   ```
@@ -105,7 +105,7 @@
 - `inventory_groups` ([]string) - `inventory_groups` (string) - A comma-separated list of groups to which
   packer will assign the host `127.0.0.1`. A value of `my_group_1,my_group_2`
   will generate an Ansible inventory like:
-
+  
   ```text
   [my_group_1]
   127.0.0.1
