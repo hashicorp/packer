@@ -281,7 +281,7 @@ shell - Bash being the default shell for Cygwin environments.
 ```hcl
 provisioner "powershell" {
     execute_command = "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){\\$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit \\$LastExitCode }\""
-    inline = [ "Write-Host \"Hello from PowerShell\""]
+    inline          = [ "Write-Host \"Hello from PowerShell\""]
 }
 ```
 
@@ -382,9 +382,9 @@ build {
   sources = ["source.amazon-ebs.example"]
 
   provisioner "powershell" {
-      elevated_user = "Administrator"
+      elevated_user     = "Administrator"
       elevated_password = "Super$3cr3t!"
-      inline = ["Write-Output \"The dollar in the elevated_password is interpreted correctly\""]
+      inline            = ["Write-Output \"The dollar in the elevated_password is interpreted correctly\""]
   }
   provisioner "powershell" {
     environment_vars = [

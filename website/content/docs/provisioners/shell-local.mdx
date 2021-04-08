@@ -315,7 +315,7 @@ Example of running a .cmd file on windows:
 ```hcl
 provisioner "shell-local" {
   environment_vars = ["SHELLLOCALTEST=ShellTest1"]
-  scripts = ["./scripts/test_cmd.cmd"]
+  scripts          = ["./scripts/test_cmd.cmd"]
 }
 ```
 
@@ -374,10 +374,10 @@ customizations: use_linux_pathing and execute_command
 
 ```hcl
 provisioner "shell-local" {
-  environment_vars = ["SHELLLOCALTEST=ShellTest3"],
-  execute_command = ["bash", "-c", "{{.Vars}} {{.Script}}"]
+  environment_vars  = ["SHELLLOCALTEST=ShellTest3"],
+  execute_command   = ["bash", "-c", "{{.Vars}} {{.Script}}"]
   use_linux_pathing = true
-  script = "./scripts/example_bash.sh"
+  script            = "./scripts/example_bash.sh"
 }
 ```
 
@@ -411,9 +411,9 @@ Example of running a powershell script on windows: Required customizations:
 ```hcl
 provisioner "shell-local" {
   environment_vars = ["SHELLLOCALTEST=ShellTest4"]
-  execute_command = ["powershell.exe", "{{.Vars}} {{.Script}}"]
-  env_var_format = "$env:%s=\"%s\"; "
-  script = "./scripts/example_ps.ps1"
+  execute_command  = ["powershell.exe", "{{.Vars}} {{.Script}}"]
+  env_var_format   = "$env:%s=\"%s\"; "
+  script           = "./scripts/example_ps.ps1"
 }
 ```
 
@@ -442,10 +442,10 @@ customizations: `env_var_format`, `tempfile_extension`, and `execute_command`
 ```hcl
 provisioner "shell-local" {
   tempfile_extension = ".ps1"
-  environment_vars = ["SHELLLOCALTEST=ShellTest5"]
-  execute_command = ["powershell.exe", "{{.Vars}} {{.Script}}"]
-  env_var_format = "$env:%s=\"%s\"; "
-  inline = ["write-output $env:SHELLLOCALTEST"]
+  environment_vars   = ["SHELLLOCALTEST=ShellTest5"]
+  execute_command    = ["powershell.exe", "{{.Vars}} {{.Script}}"]
+  env_var_format     = "$env:%s=\"%s\"; "
+  inline             = ["write-output $env:SHELLLOCALTEST"]
 }
 ```
 
@@ -476,7 +476,7 @@ Example of running a Shell script on unix:
 ```hcl
 provisioner "shell-local" {
   environment_vars = ["PROVISIONERTEST=ProvisionerTest1"]
-  scripts = ["./scripts/example_bash.sh"]
+  scripts          = ["./scripts/example_bash.sh"]
 }
 ```
 
@@ -502,7 +502,7 @@ Example of running a Shell script "inline" on unix:
 ```hcl
 provisioner "shell-local" {
   environment_vars = ["PROVISIONERTEST=ProvisionerTest2"]
-  inline = ["echo hello", "echo $PROVISIONERTEST"]
+  inline           = ["echo hello", "echo $PROVISIONERTEST"]
 }
 
 ```
@@ -530,7 +530,7 @@ Example of running a Python script on unix:
 provisioner "shell-local" {
   script = "hello.py"
   environment_vars = ["HELLO_USER=packeruser"]
-  execute_command = [
+  execute_command  = [
     "/bin/sh",
     "-c",
     "{{.Vars}} /usr/local/bin/python {{.Script}}"

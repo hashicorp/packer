@@ -47,6 +47,7 @@ build {
     sources = [
         "source.digitalocean.example"
     ]
+
     provisioner "ansible" {
       playbook_file = "./playbook.yml"
     }
@@ -173,7 +174,7 @@ connection to chroot and running Ansible as root/sudo.
 ```hcl
 source "amazon-chroot" "example" {
   mount_path = "/mnt/packer-amazon-chroot"
-  region = "us-east-1"
+  region     = "us-east-1"
   source_ami = "ami-123456"
 }
 
@@ -181,11 +182,13 @@ build {
   sources = [
     "source.amazon-chroot.example"
   ]
+
   provisioner "ansible" {
     extra_arguments = [
         "--connection=chroot",
         "--inventory-file=/mnt/packer-amazon-chroot"
       ]
+
     playbook_file = "main.yml"
   }
 }
@@ -244,36 +247,40 @@ Below is a fully functioning Ansible example using WinRM:
 
 ```hcl
 source "amazon-ebs" "example" {
-    region = "us-east-1"
+    region        = "us-east-1"
     instance_type = "t2.micro"
+
     source_ami_filter {
         filters =  {
           "virtualization-type": "hvm",
           "name": "*Windows_Server-2012*English-64Bit-Base*",
           "root-device-type": "ebs"
         }
+
         most_recent = true
-        owners = ["amazon"]
+        owners      = ["amazon"]
     }
-    ami_name = "test-ansible-packer"
-    user_data_file = "windows_bootstrap.txt"
-    communicator = "winrm"
+    ami_name         = "test-ansible-packer"
+    user_data_file   = "windows_bootstrap.txt"
+    communicator     = "winrm"
     force_deregister = true
-    winrm_username = "Administrator"
-    winrm_insecure = true
-    winrm_use_ssl = true
+    winrm_username   = "Administrator"
+    winrm_insecure   = true
+    winrm_use_ssl    = true
 }
 
 build {
     sources = [
         "source.amazon-ebs.example",
     ]
+
     provisioner "ansible" {
-      playbook_file = "./playbooks/playbook-windows.yml"
-      user = "Administrator"
-      use_proxy = false
+      playbook_file   = "./playbooks/playbook-windows.yml"
+      user            = "Administrator"
+      use_proxy       = false
       extra_arguments = [
-        "-e", "ansible_winrm_server_cert_validation=ignore"
+        "-e",
+        "ansible_winrm_server_cert_validation=ignore"
       ]
     }
 }
@@ -518,7 +525,7 @@ The Ansible provisioner template remains very simple. For example:
 
 ```hcl
 provisioner "ansible" {
-  command = "/Path/To/call_ansible.sh"
+  command       = "/Path/To/call_ansible.sh"
   playbook_file = "./playbook.yml"
 }
 ```
@@ -568,8 +575,8 @@ variable "ansible_connection" {
 }
 
 source "docker" "example" {
-      image = "centos:7"
-      commit = true
+      image       = "centos:7"
+      commit      = true
       run_command = [ "-d", "-i", "-t", "--name", var.ansible_host, "{{.Image}}", "/bin/bash" ]
 }
 
@@ -579,8 +586,8 @@ build {
   ]
 
   provisioner "ansible" {
-      groups = [ "webserver" ]
-      playbook_file = "./webserver.yml"
+      groups          = [ "webserver" ]
+      playbook_file   = "./webserver.yml"
       extra_arguments = [
           "--extra-vars",
           "ansible_host=${var.ansible_host} ansible_connection=${var.ansible_connection}"
@@ -709,6 +716,7 @@ source "amazon-ebs" "ansible-example" {
   region        = "us-east-1"
   ami_name      = "packer-ami-ansible"
   instance_type = "t2.micro"
+  
   source_ami_filter {
       filters = {
           name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
