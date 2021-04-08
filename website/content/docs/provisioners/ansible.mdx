@@ -222,7 +222,7 @@ build {
 
 ### WinRM Communicator
 
-There are two possible methods for using ansible with the WinRM communicator.
+There are two possible methods for using Ansible with the WinRM communicator.
 
 Please note that if you're having trouble getting Ansible to connect, you may
 want to take a look at the script that the Ansible project provides to help
@@ -496,9 +496,9 @@ $ ssh-add -D
 ### Become: yes
 
 We recommend against running Packer as root; if you do then you won't be able
-to successfully run your ansible playbook as root; `become: yes` will fail.
+to successfully run your Ansible playbook as root; `become: yes` will fail.
 
-### Using a wrapping script for your ansible call
+### Using a wrapping script for your Ansible call
 
 Sometimes, you may have extra setup that needs to be called as part of your
 ansible run. The easiest way to do this is by writing a small bash script and
@@ -539,7 +539,7 @@ provisioner "ansible" {
 
 Note that we're calling ansible-playbook at the end of this command and passing
 all command line arguments through into this call; this is necessary for
-making sure that --extra-vars and other important ansible arguments get set.
+making sure that --extra-vars and other important Ansible arguments get set.
 Note the quoting around the bash array, too; if you don't use quotes, any
 arguments with spaces will not be read properly.
 
