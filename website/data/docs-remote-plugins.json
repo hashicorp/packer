@@ -21,6 +21,6 @@
     "title": "VMware vSphere",
     "path": "vsphere",
     "repo": "hashicorp/packer-plugin-vsphere",
-    "version": "latest"
+    "version": "v0.0.1-pre"
   }
 ]
