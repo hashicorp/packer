@@ -24,6 +24,26 @@ This is a fully functional template that will test an image on DigitalOcean.
 Replace the mock `api_token` value with your own.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "digitalocean" "example"{
+    api_token = "<digital ocean api token>"
+    image     = "ubuntu-14-04-x64"
+    region    = "sfo1"
+}
+
+build {
+    sources = [
+        "source.digitalocean.example"
+    ]
+    provisioner "inspec" {
+        profile = "https://github.com/dev-sec/linux-baseline"
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -47,26 +67,6 @@ Replace the mock `api_token` value with your own.
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "digitalocean" "example"{
-    api_token = "<digital ocean api token>"
-    image = "ubuntu-14-04-x64"
-    region = "sfo1"
-}
-
-build {
-    sources = [
-        "source.digitalocean.example"
-    ]
-    provisioner "inspec" {
-        profile = "https://github.com/dev-sec/linux-baseline"
-    }
-}
-```
-
-</Tab>
 </Tabs>
 
 ## Configuration Reference
@@ -81,17 +81,17 @@ Optional Parameters:
   running InSpec. Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-  "inspec_env_vars": [ "FOO=bar" ]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
    inspec_env_vars = [ "FOO=bar" ]
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+  "inspec_env_vars": [ "FOO=bar" ]
 ```
 
 </Tab>
@@ -104,17 +104,17 @@ Optional Parameters:
   not be quoted. Usage example:
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-  "extra_arguments": [ "--sudo", "--reporter", "json" ]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
    extra_arguments = [ "--sudo", "--reporter", "json" ]
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+  "extra_arguments": [ "--sudo", "--reporter", "json" ]
 ```
 
 </Tab>
@@ -123,7 +123,7 @@ Optional Parameters:
 - `attributes` (array of strings) - Attribute Files used by InSpec which will
   be passed to the `--input-file` argument of the `inspec` command when this
   provisioner runs InSpec. Specify this if you want a different location.
-  Note using also `"--input-file"` in `extra_arguments` will override this
+  Note that also using `"--input-file"` in `extra_arguments` will override this
   setting.
 
 - `attributes_directory` (string) - The directory in which to place the
@@ -171,6 +171,16 @@ Chef InSpec requires accepting the license before starting to use the tool.
 This can be done via `inspec_env_vars` in the template:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+ provisioner "inspec" {
+    inspec_env_vars = [ "CHEF_LICENSE=accept"]
+    profile         = "https://github.com/dev-sec/linux-baseline"
+ }
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -181,16 +191,6 @@ This can be done via `inspec_env_vars` in the template:
         "profile": "https://github.com/dev-sec/linux-baseline"
       }
   ]
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
- provisioner "inspec" {
-    inspec_env_vars = [ "CHEF_LICENSE=accept"]
-    profile = "https://github.com/dev-sec/linux-baseline"
- }
 ```
 
 </Tab>
@@ -219,17 +219,17 @@ To debug underlying issues with InSpec, add `"-l"` to `"extra_arguments"` to
 enable verbose logging.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-  "extra_arguments": ["-l", "debug"]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
   extra_arguments = ["-l", "debug"]
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+  "extra_arguments": ["-l", "debug"]
 ```
 
 </Tab>

@@ -34,6 +34,27 @@ DigitalOcean. Replace the mock `api_token` value with your own.
 Example Packer template:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "digitalocean" "example"{
+    api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
+    image     = "ubuntu-20-04-x64"
+    region    = "sfo1"
+}
+
+build {
+    sources = [
+        "source.digitalocean.example"
+    ]
+
+    provisioner "ansible" {
+      playbook_file = "./playbook.yml"
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -42,7 +63,7 @@ Example Packer template:
     {
       "type": "digitalocean",
       "api_token": "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb",
-      "image": "ubuntu-14-04-x64",
+      "image": "ubuntu-20-04-x64",
       "region": "sfo1"
     }
   ],
@@ -52,26 +73,6 @@ Example Packer template:
       "playbook_file": "./playbook.yml"
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "digitalocean" "example"{
-    api_token = "6a561151587389c7cf8faa2d83e94150a4202da0e2bad34dd2bf236018ffaeeb"
-    image = "ubuntu-14-04-x64"
-    region = "sfo1"
-}
-
-build {
-    sources = [
-        "source.digitalocean.example"
-    ]
-    provisioner "ansible" {
-      playbook_file = "./playbook.yml"
-    }
 }
 ```
 
@@ -121,10 +122,10 @@ commonly useful Ansible variables:
   run only certain parts of the playbook on systems built with certain
   builders.
 
-- `packer_http_addr` If using a builder that provides an http server for file
-  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+- `packer_http_addr` If using a builder that provides an HTTP server for file
+  transfer (such as `hyperv`, `parallels`, `qemu`, `virtualbox`, and `vmware`), this
   will be set to the address. You can use this address in your provisioner to
-  download large files over http. This may be useful if you're experiencing
+  download large files over HTTP. This may be useful if you're experiencing
   slower speeds using the default file provisioner. A file provisioner using
   the `winrm` communicator may experience these types of difficulties.
 
@@ -134,17 +135,17 @@ To debug underlying issues with Ansible, add `"-vvvv"` to `"extra_arguments"`
 to enable verbose logging.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-  "extra_arguments": [ "-vvvv" ]
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
   extra_arguments = [ "-vvvv" ]
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+  "extra_arguments": [ "-vvvv" ]
 ```
 
 </Tab>
@@ -168,6 +169,32 @@ Building within a chroot (e.g. `amazon-chroot`) requires changing the Ansible
 connection to chroot and running Ansible as root/sudo.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "amazon-chroot" "example" {
+  mount_path = "/mnt/packer-amazon-chroot"
+  region     = "us-east-1"
+  source_ami = "ami-123456"
+}
+
+build {
+  sources = [
+    "source.amazon-chroot.example"
+  ]
+
+  provisioner "ansible" {
+    extra_arguments = [
+        "--connection=chroot",
+        "--inventory-file=/mnt/packer-amazon-chroot"
+      ]
+
+    playbook_file = "main.yml"
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -194,35 +221,11 @@ connection to chroot and running Ansible as root/sudo.
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-chroot" "example" {
-  mount_path = "/mnt/packer-amazon-chroot"
-  region = "us-east-1"
-  source_ami = "ami-123456"
-}
-
-build {
-  sources = [
-    "source.amazon-chroot.example"
-  ]
-  provisioner "ansible" {
-    extra_arguments = [
-        "--connection=chroot",
-        "--inventory-file=/mnt/packer-amazon-chroot"
-      ]
-    playbook_file = "main.yml"
-  }
-}
-```
-
-</Tab>
 </Tabs>
 
 ### WinRM Communicator
 
-There are two possible methods for using ansible with the WinRM communicator.
+There are two possible methods for using Ansible with the WinRM communicator.
 
 Please note that if you're having trouble getting Ansible to connect, you may
 want to take a look at the script that the Ansible project provides to help
@@ -240,6 +243,57 @@ extra_arguments.
 Below is a fully functioning Ansible example using WinRM:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+data "amazon-ami" "ubuntu" {
+  access_key = var.aws_access_key
+  
+  filters = {
+    name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+    root-device-type    = "ebs"
+    virtualization-type = "hvm"
+  }
+  
+  most_recent = true
+  owners      = ["099720109477"]
+  region      = var.aws_region
+  secret_key  = var.aws_secret_key
+}
+
+source "amazon-ebs" "example" {
+    region        = "us-east-1"
+    instance_type = "t2.micro"
+
+    source_ami       = data.amazon-ami.ubuntu.id
+    
+    ami_name         = "test-ansible-packer"
+    user_data_file   = "windows_bootstrap.txt"
+    communicator     = "winrm"
+    force_deregister = true
+    winrm_username   = "Administrator"
+    winrm_insecure   = true
+    winrm_use_ssl    = true
+}
+
+build {
+    sources = [
+        "source.amazon-ebs.example",
+    ]
+
+    provisioner "ansible" {
+      playbook_file   = "./playbooks/playbook-windows.yml"
+      user            = "Administrator"
+      use_proxy       = false
+      extra_arguments = [
+        "-e",
+        "ansible_winrm_server_cert_validation=ignore"
+      ]
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -280,52 +334,12 @@ Below is a fully functioning Ansible example using WinRM:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "amazon-ebs" "example" {
-    region = "us-east-1"
-    instance_type = "t2.micro"
-    source_ami_filter {
-        filters =  {
-          "virtualization-type": "hvm",
-          "name": "*Windows_Server-2012*English-64Bit-Base*",
-          "root-device-type": "ebs"
-        }
-        most_recent = true
-        owners = ["amazon"]
-    }
-    ami_name = "test-ansible-packer"
-    user_data_file = "windows_bootstrap.txt"
-    communicator = "winrm"
-    force_deregister = true
-    winrm_username = "Administrator"
-    winrm_insecure = true
-    winrm_use_ssl = true
-}
-
-build {
-    sources = [
-        "source.amazon-ebs.example",
-    ]
-    provisioner "ansible" {
-      playbook_file = "./playbooks/playbook-windows.yml"
-      user = "Administrator"
-      use_proxy = false
-      extra_arguments = [
-        "-e", "ansible_winrm_server_cert_validation=ignore"
-      ]
-    }
-}
-```
-
-</Tab>
 </Tabs>
 
 Note that you do have to set the "Administrator" user, because otherwise Ansible
 will default to using the user that is calling Packer, rather than the user
 configured inside of the Packer communicator. For the contents of
-windows_bootstrap.txt, see the winrm docs for the amazon-ebs communicator.
+windows_bootstrap.txt, see the WinRM docs for the amazon-ebs communicator.
 
 When running from OSX, you may see an error like:
 
@@ -339,17 +353,17 @@ If you see this, you may be able to work around the issue by telling Ansible to
 explicitly not use any proxying; you can do this by setting the template option
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-"ansible_env_vars": ["no_proxy=\"*\""],
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
 ansible_env_vars = ["no_proxy=\"*\""]
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+"ansible_env_vars": ["no_proxy=\"*\""],
 ```
 
 </Tab>
@@ -359,7 +373,7 @@ in the above Ansible template.
 
 #### Method 2 (Not recommended)
 
-If you want to use the Packer ssh proxy, then you need a custom Ansible
+If you want to use the Packer SSH proxy, then you need a custom Ansible
 connection plugin and a particular configuration. You need a directory named
 `connection_plugins` next to the playbook which contains a file named
 packer.py` which implements the connection plugin. On versions of Ansible
@@ -496,24 +510,34 @@ $ ssh-add -D
 ### Become: yes
 
 We recommend against running Packer as root; if you do then you won't be able
-to successfully run your ansible playbook as root; `become: yes` will fail.
+to successfully run your Ansible playbook as root; `become: yes` will fail.
 
-### Using a wrapping script for your ansible call
+### Using a wrapping script for your Ansible call
 
 Sometimes, you may have extra setup that needs to be called as part of your
 ansible run. The easiest way to do this is by writing a small bash script and
 using that bash script in your "command" in place of the default
 "ansible-playbook". For example, you may need to launch a Python virtualenv
-before calling ansible. To do this, you'd want to create a bash script like
+before calling Ansible. To do this, you'd want to create a bash script like
 
 ```shell
 #!/bin/bash
 source /tmp/venv/bin/activate && ANSIBLE_FORCE_COLOR=1 PYTHONUNBUFFERED=1 /tmp/venv/bin/ansible-playbook "$@"
 ```
 
-The ansible provisioner template remains very simple. For example:
+The Ansible provisioner template remains very simple. For example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "ansible" {
+  command       = "/Path/To/call_ansible.sh"
+  playbook_file = "./playbook.yml"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -525,21 +549,11 @@ The ansible provisioner template remains very simple. For example:
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "ansible" {
-  command = "/Path/To/call_ansible.sh"
-  playbook_file = "./playbook.yml"
-}
-```
-
-</Tab>
 </Tabs>
 
 Note that we're calling ansible-playbook at the end of this command and passing
 all command line arguments through into this call; this is necessary for
-making sure that --extra-vars and other important ansible arguments get set.
+making sure that --extra-vars and other important Ansible arguments get set.
 Note the quoting around the bash array, too; if you don't use quotes, any
 arguments with spaces will not be read properly.
 
@@ -556,6 +570,40 @@ On a CI server you probably want to overwrite ansible_host with a random name.
 Example Packer template:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+variable "ansible_host" {
+  default = "default"
+}
+
+variable "ansible_connection" {
+  default = "docker"
+}
+
+source "docker" "example" {
+      image       = "centos:7"
+      commit      = true
+      run_command = [ "-d", "-i", "-t", "--name", var.ansible_host, "{{.Image}}", "/bin/bash" ]
+}
+
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  provisioner "ansible" {
+      groups          = [ "webserver" ]
+      playbook_file   = "./webserver.yml"
+      extra_arguments = [
+          "--extra-vars",
+          "ansible_host=${var.ansible_host} ansible_connection=${var.ansible_connection}"
+      ]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -591,40 +639,6 @@ Example Packer template:
       ]
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-variable "ansible_host" {
-  default = "default"
-}
-
-variable "ansible_connection" {
-  default = "docker"
-}
-
-source "docker" "example" {
-      image = "centos:7"
-      commit = true
-      run_command = [ "-d", "-i", "-t", "--name", var.ansible_host, "{{.Image}}", "/bin/bash" ]
-}
-
-build {
-  sources = [
-    "source.docker.example"
-  ]
-
-  provisioner "ansible" {
-      groups = [ "webserver" ]
-      playbook_file = "./webserver.yml"
-      extra_arguments = [
-          "--extra-vars",
-          "ansible_host=${var.ansible_host} ansible_connection=${var.ansible_connection}"
-      ]
-  }
 }
 ```
 
@@ -665,6 +679,18 @@ provisioned otherwise you may run into a TargetNotConnected error. Users can use
 their configured region.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+  provisioner "ansible" {
+      use_proxy               =  false
+      playbook_file           =  "./playbooks/playbook_remote.yml"
+      ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
+      inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
+  }
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -680,23 +706,52 @@ their configured region.
 ```
 
 </Tab>
+</Tabs>
+
+Full Packer template example:
+
+<Tabs>
 <Tab heading="HCL2">
 
 ```hcl
+
+variables {
+  instance_role = "SSMInstanceProfile"
+}
+
+source "amazon-ebs" "ansible-example" {
+  region        = "us-east-1"
+  ami_name      = "packer-ami-ansible"
+  instance_type = "t2.micro"
+  
+  source_ami_filter {
+      filters = {
+          name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+          virtualization-type = "hvm"
+          root-device-type    = "ebs"
+      }
+      owners      = [ "099720109477" ]
+      most_recent =  true
+  }
+  communicator         = "ssh"
+  ssh_username         = "ubuntu"
+  ssh_interface        = "session_manager"
+  iam_instance_profile = var.instance_role
+}
+
+build {
+  sources = ["source.amazon-ebs.ansible-example"]
+
   provisioner "ansible" {
       use_proxy               =  false
       playbook_file           =    "./playbooks/playbook_remote.yml"
       ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
       inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
     }
+}
 ```
 
 </Tab>
-</Tabs>
-
-Full Packer template example:
-
-<Tabs>
 <Tab heading="JSON">
 
 ```json
@@ -735,46 +790,6 @@ Full Packer template example:
       "inventory_file_template": "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-
-variables {
-  instance_role = "SSMInstanceProfile"
-}
-
-source "amazon-ebs" "ansible-example" {
-  region        = "us-east-1"
-  ami_name      = "packer-ami-ansible"
-  instance_type = "t2.micro"
-  source_ami_filter {
-      filters = {
-          name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
-          virtualization-type = "hvm"
-          root-device-type    = "ebs"
-      }
-      owners      = [ "099720109477" ]
-      most_recent =  true
-  }
-  communicator         = "ssh"
-  ssh_username         = "ubuntu"
-  ssh_interface        = "session_manager"
-  iam_instance_profile = var.instance_role
-}
-
-build {
-  sources = ["source.amazon-ebs.ansible-example"]
-
-  provisioner "ansible" {
-      use_proxy               =  false
-      playbook_file           =    "./playbooks/playbook_remote.yml"
-      ansible_env_vars        =  ["PACKER_BUILD_NAME={{ build_name }}"]
-      inventory_file_template =  "{{ .HostAlias }} ansible_host={{ .ID }} ansible_user={{ .User }} ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand=\"sh -c \\\"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p\\\"\"'\n"
-    }
 }
 ```
 

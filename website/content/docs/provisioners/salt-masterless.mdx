@@ -20,21 +20,21 @@ master.
 The example below is fully functional.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "salt-masterless" {
+  local_state_tree = "/Users/me/salt"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
 {
   "type": "salt-masterless",
   "local_state_tree": "/Users/me/salt"
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "salt-masterless" {
-  local_state_tree = "/Users/me/salt"
 }
 ```
 

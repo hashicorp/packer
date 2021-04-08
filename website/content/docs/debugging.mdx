@@ -21,10 +21,10 @@ usually will stop between each step, waiting for keyboard input before
 continuing. This will allow you to inspect state and so on.
 
 In debug mode once the remote instance is instantiated, Packer will emit to the
-current directory an ephemeral private ssh key as a .pem file. Using that you
+current directory an ephemeral private SSH key as a .pem file. Using that you
 can `ssh -i <key.pem>` into the remote build instance and see what is going on
 for debugging. The key will only be emitted for cloud-based builders. The
-ephemeral key will be deleted at the end of the packer run during cleanup.
+ephemeral key will be deleted at the end of the Packer run during cleanup.
 
 For a local builder, the SSH session initiated will be visible in the detail
 provided when `PACKER_LOG=1` environment variable is set prior to a build, and
@@ -34,10 +34,10 @@ the kickstart or preseed associated with initializing the local VM.
 It should be noted that one of the options `-on-error` is to `retry`, the retry
 of the step in question has limitations:
 
-- the template packer is building is **not** reloaded from file.
+- the template Packer is building is **not** reloaded from file.
 - the resources specified from builders **are** reloaded from file.
 
-Check the specfics on your builder to confirm their behavior.
+Check the specifics on your builder to confirm their behavior.
 
 ### Windows
 
@@ -108,7 +108,7 @@ successfully as the proper packages cannot be provisioned correctly. The
 problem arises when cloud-init has not finished fully running on the source AMI
 by the time that packer starts any provisioning steps.
 
-Adding the following provisioner to the packer template, allows for the
+Adding the following provisioner to the Packer template, allows for the
 cloud-init process to fully finish before packer starts provisioning the source
 AMI.
 

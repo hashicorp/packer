@@ -2,7 +2,7 @@
 description: >
   The ansible-local Packer provisioner will run ansible in ansible's "local"
   mode on the remote/guest VM using Playbook and Role files that exist on the
-  guest VM. This means ansible must be installed on the remote/guest VM.
+  guest VM. This means Ansible must be installed on the remote/guest VM.
   Playbooks and Roles can be uploaded from your build machine (the one running
   Packer) to the vm.
 page_title: Ansible Local - Provisioners
@@ -12,9 +12,9 @@ page_title: Ansible Local - Provisioners
 
 Type: `ansible-local`
 
-The `ansible-local` Packer provisioner will run ansible in ansible's "local"
+The `ansible-local` Packer provisioner will execute `ansible` in Ansible's "local"
 mode on the remote/guest VM using Playbook and Role files that exist on the
-guest VM. This means ansible must be installed on the remote/guest VM.
+guest VM. This means Ansible must be installed on the remote/guest VM.
 Playbooks and Roles can be uploaded from your build machine (the one running
 Packer) to the vm. Ansible is then run on the guest machine in [local
 mode](https://docs.ansible.com/ansible/latest/playbooks_delegation.html#local-playbooks)
@@ -128,9 +128,9 @@ commonly useful Ansible variables:
   run only certain parts of the playbook on systems built with certain
   builders.
 
-- `packer_http_addr` If using a builder that provides an http server for file
-  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+- `packer_http_addr` If using a builder that provides an HTTP server for file
+  transfer (such as `hyperv`, `parallels`, `qemu`, `virtualbox`, and `vmware`), this
   will be set to the address. You can use this address in your provisioner to
-  download large files over http. This may be useful if you're experiencing
+  download large files over HTTP. This may be useful if you're experiencing
   slower speeds using the default file provisioner. A file provisioner using
   the `winrm` communicator may experience these types of difficulties.
