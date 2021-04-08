@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/digitalocean/godo"
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
+	builderT "github.com/hashicorp/packer/acctest"
 	"golang.org/x/oauth2"
 )
 
