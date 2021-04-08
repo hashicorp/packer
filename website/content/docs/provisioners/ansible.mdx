@@ -121,8 +121,8 @@ commonly useful Ansible variables:
   run only certain parts of the playbook on systems built with certain
   builders.
 
-- `packer_http_addr` If using a builder that provides an http server for file
-  transfer (such as hyperv, parallels, qemu, virtualbox, and vmware), this
+- `packer_http_addr` If using a builder that provides an HTTP server for file
+  transfer (such as `hyperv`, `parallels`, `qemu`, `virtualbox`, and `vmware`), this
   will be set to the address. You can use this address in your provisioner to
   download large files over HTTP. This may be useful if you're experiencing
   slower speeds using the default file provisioner. A file provisioner using

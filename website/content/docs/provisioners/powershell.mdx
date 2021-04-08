@@ -196,7 +196,7 @@ provisioner "powershell" {
   "bypass" and wraps the command to run. Setting this to "none" will prevent
   wrapping, allowing to see exit codes on docker for windows. Possible values
   are `bypass`, `allsigned`, `default`, `remotesigned`, `restricted`,
-  `undefined`, `unrestricted`, `none`.
+  `undefined`, `unrestricted`, and `none`.
 
 - `remote_path` (string) - The path where the PowerShell script will be
   uploaded to within the target build machine. This defaults to
@@ -227,7 +227,7 @@ provisioner "powershell" {
   value set for `skip_clean`.
 
 - `start_retry_timeout` (string) - The amount of time to attempt to _start_
-  the remote process. By default this is "5m" or 5 minutes. This setting
+  the remote process. By default this is `5m` or 5 minutes. This setting
   exists in order to deal with times when SSH may restart, such as a system
   reboot. Set this to a higher value if reboots take a longer amount of time.
 
