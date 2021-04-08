@@ -237,8 +237,8 @@ For example, on Gentoo:
 Some provisioning requires connecting to remote SSH servers from within the
 packer instance. The below example is for pulling code from a private git
 repository utilizing openssh on the client. Make sure you are running
-`ssh-agent` and add your git repo ssh keys into it using
-`ssh-add /path/to/key`. When the packer instance needs access to the ssh keys
+`ssh-agent` and add your git repo SSH keys into it using
+`ssh-add /path/to/key`. When the Packer instance needs access to the SSH keys
 the agent will forward the request back to your `ssh-agent`.
 
 Note: when provisioning via git you should add the git server keys into the
