@@ -25,14 +25,3 @@ the following VMware builders:
   an existing VMware VM you want to use as the source. As an additional
   benefit, you can feed the artifact of this builder back into Packer to
   iterate on a machine.
-
-- [vsphere-iso](/docs/builders/vsphere-iso) - This builder starts from an
-  ISO file, but utilizes the vSphere API rather than the esxcli to build on a
-  remote esx instance. This allows you to build vms even if you do not have
-  SSH access to your vSphere cluster.
-
-- [vsphere-clone](/docs/builders/vsphere-clone) - This builder clones a
-  vm from an existing template, then modifies it and saves it as a new
-  template. It uses the vSphere API rather than the esxcli to build on a
-  remote esx instance. This allows you to build vms even if you do not have
-  SSH access to your vSphere cluster.

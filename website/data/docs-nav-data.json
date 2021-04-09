@@ -912,14 +912,6 @@
           {
             "title": "VMWare VMX",
             "path": "builders/vmware/vmx"
-          },
-          {
-            "title": "VSphere ISO",
-            "path": "builders/vmware/vsphere-iso"
-          },
-          {
-            "title": "VSphere Clone",
-            "path": "builders/vmware/vsphere-clone"
           }
         ]
       },
@@ -1081,14 +1073,6 @@
       {
         "title": "Vagrant Cloud",
         "path": "post-processors/vagrant-cloud"
-      },
-      {
-        "title": "vSphere",
-        "path": "post-processors/vsphere"
-      },
-      {
-        "title": "vSphere Template",
-        "path": "post-processors/vsphere-template"
       },
       {
         "title": "Yandex.Cloud Compute Export",
