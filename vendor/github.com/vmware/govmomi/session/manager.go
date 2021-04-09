@@ -281,3 +281,14 @@ func (sm *Manager) CloneSession(ctx context.Context, ticket string) error {
 	sm.userSession = &res.Returnval
 	return nil
 }
+
+func (sm *Manager) UpdateServiceMessage(ctx context.Context, message string) error {
+	req := types.UpdateServiceMessage{
+		This:    sm.Reference(),
+		Message: message,
+	}
+
+	_, err := methods.UpdateServiceMessage(ctx, sm.client, &req)
+
+	return err
+}

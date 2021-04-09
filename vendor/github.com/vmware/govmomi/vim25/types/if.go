@@ -798,7 +798,6 @@ func (b *DvsFilterConfig) GetDvsFilterConfig() *DvsFilterConfig { return b }
 
 type BaseDvsFilterConfig interface {
 	GetDvsFilterConfig() *DvsFilterConfig
-	GetDvsTrafficFilterConfig() *DvsTrafficFilterConfig
 }
 
 func init() {
@@ -841,19 +840,10 @@ func (b *DvsNetworkRuleQualifier) GetDvsNetworkRuleQualifier() *DvsNetworkRuleQu
 
 type BaseDvsNetworkRuleQualifier interface {
 	GetDvsNetworkRuleQualifier() *DvsNetworkRuleQualifier
-	GetDvsIpNetworkRuleQualifier() *DvsIpNetworkRuleQualifier
 }
 
 func init() {
 	t["BaseDvsNetworkRuleQualifier"] = reflect.TypeOf((*DvsNetworkRuleQualifier)(nil)).Elem()
-}
-
-func (b *DvsIpNetworkRuleQualifier) GetDvsIpNetworkRuleQualifier() *DvsIpNetworkRuleQualifier {
-	return b
-}
-
-type BaseDvsIpNetworkRuleQualifier interface {
-	GetDvsIpNetworkRuleQualifier() *DvsIpNetworkRuleQualifier
 }
 
 func (b *DvsTrafficFilterConfig) GetDvsTrafficFilterConfig() *DvsTrafficFilterConfig { return b }
@@ -3020,6 +3010,16 @@ type BaseVirtualMachineBootOptionsBootableDevice interface {
 
 func init() {
 	t["BaseVirtualMachineBootOptionsBootableDevice"] = reflect.TypeOf((*VirtualMachineBootOptionsBootableDevice)(nil)).Elem()
+}
+
+func (b *VirtualMachineConnection) GetVirtualMachineConnection() *VirtualMachineConnection { return b }
+
+type BaseVirtualMachineConnection interface {
+	GetVirtualMachineConnection() *VirtualMachineConnection
+}
+
+func init() {
+	t["BaseVirtualMachineConnection"] = reflect.TypeOf((*VirtualMachineConnection)(nil)).Elem()
 }
 
 func (b *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState) GetVirtualMachineDeviceRuntimeInfoDeviceRuntimeState() *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState {

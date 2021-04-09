@@ -479,8 +479,11 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		xmlname := tinfo.xmlname
 		if xmlname.name != "" {
 			start.Name.Space, start.Name.Local = xmlname.xmlns, xmlname.name
-		} else if v, ok := xmlname.value(val).Interface().(Name); ok && v.Local != "" {
-			start.Name = v
+		} else {
+			fv := xmlname.value(val, dontInitNilPointers)
+			if v, ok := fv.Interface().(Name); ok && v.Local != "" {
+				start.Name = v
+			}
 		}
 	}
 	if start.Name.Local == "" && finfo != nil {
@@ -505,7 +508,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		if finfo.flags&fAttr == 0 {
 			continue
 		}
-		fv := finfo.value(val)
+		fv := finfo.value(val, dontInitNilPointers)
 
 		if finfo.flags&fOmitEmpty != 0 && isEmptyValue(fv) {
 			continue
@@ -814,7 +817,12 @@ func (p *printer) marshalStruct(tinfo *typeInfo, val reflect.Value) error {
 		if finfo.flags&fAttr != 0 {
 			continue
 		}
-		vf := finfo.value(val)
+		vf := finfo.value(val, dontInitNilPointers)
+		if !vf.IsValid() {
+			// The field is behind an anonymous struct field that's
+			// nil. Skip it.
+			continue
+		}
 
 		switch finfo.flags & fMode {
 		case fCDATA, fCharData:
@@ -925,7 +933,7 @@ func (p *printer) marshalStruct(tinfo *typeInfo, val reflect.Value) error {
 			p.WriteString("-->")
 			continue
 
-		case fInnerXml:
+		case fInnerXML:
 			vf = indirect(vf)
 			iface := vf.Interface()
 			switch raw := iface.(type) {

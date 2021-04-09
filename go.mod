@@ -53,6 +53,7 @@ require (
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407132324-af39c7839daf
+	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210409154313-881202ca3ffe
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
@@ -83,7 +84,8 @@ require (
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ulikunitz/xz v0.5.6
-	github.com/vmware/govmomi v0.23.1
+	github.com/ulikunitz/xz v0.5.5
+	github.com/vmware/govmomi v0.24.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c

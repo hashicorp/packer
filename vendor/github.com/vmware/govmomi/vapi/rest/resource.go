@@ -48,11 +48,12 @@ func (r *Resource) WithAction(action string) *Resource {
 	return r.WithParam("~action", action)
 }
 
-// WithParam sets adds a parameter to the URL.RawQuery
+// WithParam adds one parameter on the URL.RawQuery
 func (r *Resource) WithParam(name string, value string) *Resource {
-	r.u.RawQuery = url.Values{
-		name: []string{value},
-	}.Encode()
+	// ParseQuery handles empty case, and we control access to query string so shouldn't encounter an error case
+	params, _ := url.ParseQuery(r.u.RawQuery)
+	params[name] = []string{value}
+	r.u.RawQuery = params.Encode()
 	return r
 }
 

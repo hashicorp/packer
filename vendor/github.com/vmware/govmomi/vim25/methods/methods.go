@@ -4843,6 +4843,26 @@ func DownloadDescriptionTree(ctx context.Context, r soap.RoundTripper, req *type
 	return resBody.Res, nil
 }
 
+type DropConnectionsBody struct {
+	Req    *types.DropConnections         `xml:"urn:vim25 DropConnections,omitempty"`
+	Res    *types.DropConnectionsResponse `xml:"DropConnectionsResponse,omitempty"`
+	Fault_ *soap.Fault                    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *DropConnectionsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func DropConnections(ctx context.Context, r soap.RoundTripper, req *types.DropConnections) (*types.DropConnectionsResponse, error) {
+	var reqBody, resBody DropConnectionsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type DuplicateCustomizationSpecBody struct {
 	Req    *types.DuplicateCustomizationSpec         `xml:"urn:vim25 DuplicateCustomizationSpec,omitempty"`
 	Res    *types.DuplicateCustomizationSpecResponse `xml:"DuplicateCustomizationSpecResponse,omitempty"`
@@ -9513,6 +9533,26 @@ func (b *QueryConnectionInfoViaSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
 func QueryConnectionInfoViaSpec(ctx context.Context, r soap.RoundTripper, req *types.QueryConnectionInfoViaSpec) (*types.QueryConnectionInfoViaSpecResponse, error) {
 	var reqBody, resBody QueryConnectionInfoViaSpecBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type QueryConnectionsBody struct {
+	Req    *types.QueryConnections         `xml:"urn:vim25 QueryConnections,omitempty"`
+	Res    *types.QueryConnectionsResponse `xml:"QueryConnectionsResponse,omitempty"`
+	Fault_ *soap.Fault                     `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *QueryConnectionsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func QueryConnections(ctx context.Context, r soap.RoundTripper, req *types.QueryConnections) (*types.QueryConnectionsResponse, error) {
+	var reqBody, resBody QueryConnectionsBody
 
 	reqBody.Req = req
 

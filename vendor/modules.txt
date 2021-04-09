@@ -564,6 +564,14 @@ github.com/hashicorp/packer-plugin-sdk/tmp
 github.com/hashicorp/packer-plugin-sdk/useragent
 github.com/hashicorp/packer-plugin-sdk/uuid
 github.com/hashicorp/packer-plugin-sdk/version
+# github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210409154313-881202ca3ffe
+## explicit
+github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone
+github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/common
+github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/driver
+github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso
+github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere
+github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere-template
 # github.com/hashicorp/serf v0.9.2
 github.com/hashicorp/serf/coordinate
 # github.com/hashicorp/vault/api v1.0.4
@@ -789,19 +797,23 @@ github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
-# github.com/vmware/govmomi v0.23.1
+# github.com/vmware/govmomi v0.24.1
 ## explicit
 github.com/vmware/govmomi
 github.com/vmware/govmomi/find
+github.com/vmware/govmomi/internal
 github.com/vmware/govmomi/list
 github.com/vmware/govmomi/nfc
 github.com/vmware/govmomi/object
+github.com/vmware/govmomi/ovf
 github.com/vmware/govmomi/property
 github.com/vmware/govmomi/session
 github.com/vmware/govmomi/session/keepalive
 github.com/vmware/govmomi/task
 github.com/vmware/govmomi/vapi/internal
+github.com/vmware/govmomi/vapi/library
 github.com/vmware/govmomi/vapi/rest
+github.com/vmware/govmomi/vapi/vcenter
 github.com/vmware/govmomi/vim25
 github.com/vmware/govmomi/vim25/debug
 github.com/vmware/govmomi/vim25/methods
@@ -947,7 +959,7 @@ golang.org/x/crypto/ssh/terminal
 # golang.org/x/lint v0.0.0-20200302205851-738671d3881b
 golang.org/x/lint
 golang.org/x/lint/golint
-# golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
+# golang.org/x/mobile v0.0.0-20210220033013-bdb1ca9a1e08
 golang.org/x/mobile/event/key
 # golang.org/x/mod v0.3.0
 ## explicit

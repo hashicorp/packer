@@ -89,6 +89,8 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [OPS](https://github.com/nanovms/ops)
 
+* [VMware Event Broker Appliance](https://github.com/vmware-samples/vcenter-event-broker-appliance/tree/development/vmware-event-router)
+
 ## Related projects
 
 * [rbvmomi](https://github.com/vmware/rbvmomi)
