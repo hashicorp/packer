@@ -103,7 +103,7 @@ func (RemoveIPFromNic) AsyncResponse() interface{} {
 
 // ActivateIP6 (Async) activates the IP6 on the given NIC
 //
-// Exoscale specific API: https://community.exoscale.ch/api/compute/#activateip6_GET
+// Exoscale specific API: https://community.exoscale.com/api/compute/#activateip6_GET
 type ActivateIP6 struct {
 	NicID *UUID `json:"nicid" doc:"the ID of the nic to which you want to assign the IPv6"`
 	_     bool  `name:"activateIp6" description:"Activate the IPv6 on the VM's nic"`

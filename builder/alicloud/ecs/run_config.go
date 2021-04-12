@@ -47,6 +47,8 @@ type RunConfig struct {
 	// E.g., Sysprep a windows which may shutdown the instance within its command.
 	// The default value is false.
 	DisableStopInstance bool `mapstructure:"disable_stop_instance" required:"false"`
+	// Ram Role to apply when launching the instance.
+	RamRoleName string `mapstructure:"ram_role_name" required:"false"`
 	// ID of the security group to which a newly
 	// created instance belongs. Mutual access is allowed between instances in one
 	// security group. If not specified, the newly created instance will be added

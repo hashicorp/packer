@@ -32,6 +32,9 @@ func (s *stepCreateOMI) Run(ctx context.Context, state multistep.StateBag) multi
 		ImageName:           omiName,
 		BlockDeviceMappings: config.BlockDevices.BuildOscOMIDevices(),
 	}
+	if config.OMIDescription != "" {
+		createOpts.Description = config.OMIDescription
+	}
 
 	resp, _, err := oscconn.ImageApi.CreateImage(context.Background(), &osc.CreateImageOpts{
 		CreateImageRequest: optional.NewInterface(createOpts),

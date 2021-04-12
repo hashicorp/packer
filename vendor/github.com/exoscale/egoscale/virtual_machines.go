@@ -73,6 +73,8 @@ type VirtualMachine struct {
 	IsoID               *UUID             `json:"isoid,omitempty" doc:"the ID of the ISO attached to the virtual machine"`
 	IsoName             string            `json:"isoname,omitempty" doc:"the name of the ISO attached to the virtual machine"`
 	KeyPair             string            `json:"keypair,omitempty" doc:"ssh key-pair"`
+	Manager             string            `json:"manager,omitempty" doc:"type of virtual machine manager"`
+	ManagerID           *UUID             `json:"managerid,omitempty" doc:"ID of the virtual machine manager"`
 	Memory              int               `json:"memory,omitempty" doc:"the memory allocated for the virtual machine"`
 	Name                string            `json:"name,omitempty" doc:"the name of the virtual machine"`
 	NetworkKbsRead      int64             `json:"networkkbsread,omitempty" doc:"the incoming network traffic on the vm"`
@@ -124,6 +126,7 @@ func (vm VirtualMachine) ListRequest() (ListCommand, error) {
 	req := &ListVirtualMachines{
 		GroupID:    vm.GroupID,
 		ID:         vm.ID,
+		ManagerID:  vm.ManagerID,
 		Name:       vm.Name,
 		State:      vm.State,
 		TemplateID: vm.TemplateID,
@@ -223,8 +226,6 @@ type PCIDevice struct {
 }
 
 // Password represents an encrypted password
-//
-// TODO: method to decrypt it, https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=34014652
 type Password struct {
 	EncryptedPassword string `json:"encryptedpassword"`
 }
@@ -424,6 +425,23 @@ func (UpdateVirtualMachine) Response() interface{} {
 	return new(VirtualMachine)
 }
 
+// UpdateVirtualMachineSecurityGroups represents the update of the virtual machine security group membership
+type UpdateVirtualMachineSecurityGroups struct {
+	ID               *UUID  `json:"id" doc:"The ID of the virtual machine"`
+	SecurityGroupIDs []UUID `json:"securitygroupids,omitempty" doc:"list of security group ids to be applied on the virtual machine."`
+	_                bool   `name:"updateVirtualMachineSecurityGroups" description:"Updates a virtual machine Security Group membership'."`
+}
+
+// Response returns the struct to unmarshal
+func (UpdateVirtualMachineSecurityGroups) Response() interface{} {
+	return new(AsyncJobResult)
+}
+
+// AsyncResponse returns the struct to unmarshal the async job
+func (UpdateVirtualMachineSecurityGroups) AsyncResponse() interface{} {
+	return new(VirtualMachine)
+}
+
 // ExpungeVirtualMachine represents the annihilation of a VM
 type ExpungeVirtualMachine struct {
 	ID *UUID `json:"id" doc:"The ID of the virtual machine"`
@@ -514,13 +532,14 @@ type ListVirtualMachines struct {
 	IPAddress         net.IP        `json:"ipaddress,omitempty" doc:"an IP address to filter the result"`
 	IsoID             *UUID         `json:"isoid,omitempty" doc:"list vms by iso"`
 	Keyword           string        `json:"keyword,omitempty" doc:"List by keyword"`
+	ManagerID         *UUID         `json:"managerid,omitempty" doc:"list by manager id"`
 	Name              string        `json:"name,omitempty" doc:"name of the virtual machine"`
 	NetworkID         *UUID         `json:"networkid,omitempty" doc:"list by network id"`
 	Page              int           `json:"page,omitempty"`
 	PageSize          int           `json:"pagesize,omitempty"`
 	ServiceOfferindID *UUID         `json:"serviceofferingid,omitempty" doc:"list by the service offering"`
 	State             string        `json:"state,omitempty" doc:"state of the virtual machine"`
-	Tags              []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs)"`
+	Tags              []ResourceTag `json:"tags,omitempty" doc:"List resources by tags (key/value pairs). Note: multiple tags are OR'ed, not AND'ed."`
 	TemplateID        *UUID         `json:"templateid,omitempty" doc:"list vms by template"`
 	ZoneID            *UUID         `json:"zoneid,omitempty" doc:"the availability zone ID"`
 	_                 bool          `name:"listVirtualMachines" description:"List the virtual machines owned by the account."`

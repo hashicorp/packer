@@ -112,7 +112,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.VagrantCloudUrl == VAGRANT_CLOUD_URL && p.config.AccessToken == "" {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overriden"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overridden"))
 	}
 
 	// Create the HTTP client
@@ -188,10 +188,10 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		new(stepCreateProvider),
 	}
 	if p.config.BoxDownloadUrl == "" {
-		steps = append(steps, new(stepPrepareUpload), new(stepUpload))
-		if !p.config.NoDirectUpload {
-			steps = append(steps, new(stepConfirmUpload))
-		}
+		steps = append(steps,
+			new(stepPrepareUpload),
+			new(stepUpload),
+			new(stepConfirmUpload))
 	}
 	steps = append(steps, new(stepReleaseVersion))
 

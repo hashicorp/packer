@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/bootcommand"
@@ -52,6 +53,14 @@ type Config struct {
 	// When set to bios, the firmare is BIOS. This is the default.
 	// When set to efi, the firmare is EFI.
 	Firmware string `mapstructure:"firmware" required:"false"`
+	// Nested virtualization: false or true.
+	// When set to true, nested virtualisation (VT-x/AMD-V) is enabled.
+	// When set to false, nested virtualisation is disabled. This is the default.
+	NestedVirt bool `mapstructure:"nested_virt" required:"false"`
+	// RTC time base: UTC or local.
+	// When set to true, the RTC is set as UTC time.
+	// When set to false, the RTC is set as local time. This is the default.
+	RTCTimeBase string `mapstructure:"rtc_time_base" required:"false"`
 	// The size, in megabytes, of the hard disk to create for the VM. By
 	// default, this is 40000 (about 40 GB).
 	DiskSize uint `mapstructure:"disk_size" required:"false"`
@@ -75,6 +84,17 @@ type Config struct {
 	// When set to vmsvga, the graphics controller is VMware SVGA.
 	// When set to none, the graphics controller is disabled.
 	GfxController string `mapstructure:"gfx_controller" required:"false"`
+	// The VRAM size to be used. By default, this is 4 MiB.
+	GfxVramSize uint `mapstructure:"gfx_vram_size" required:"false"`
+	// 3D acceleration: true or false.
+	// When set to true, 3D acceleration is enabled.
+	// When set to false, 3D acceleration is disabled. This is the default.
+	GfxAccelerate3D bool `mapstructure:"gfx_accelerate_3d" required:"false"`
+	// Screen resolution in EFI mode: WIDTHxHEIGHT.
+	// When set to WIDTHxHEIGHT, it provides the given width and height as screen resolution
+	// to EFI, for example 1920x1080 for Full-HD resolution. By default, no screen resolution
+	// is set. Note, that this option only affects EFI boot, not the (default) BIOS boot.
+	GfxEFIResolution string `mapstructure:"gfx_efi_resolution" required:"false"`
 	// The guest OS type being installed. By default this is other, but you can
 	// get dramatic performance improvements by setting this to the proper
 	// value. To view all available values for this run VBoxManage list
@@ -129,6 +149,12 @@ type Config struct {
 	// When set to sata, the drive is attached to an AHCI SATA controller.
 	// When set to virtio, the drive is attached to a VirtIO controller.
 	ISOInterface string `mapstructure:"iso_interface" required:"false"`
+	// Additional disks to create. Uses `vm_name` as the disk name template and
+	// appends `-#` where `#` is the position in the array. `#` starts at 1 since 0
+	// is the default disk. Each value represents the disk image size in MiB.
+	// Each additional disk uses the same disk parameters as the default disk.
+	// Unset by default.
+	AdditionalDiskSize []uint `mapstructure:"disk_additional_size" required:"false"`
 	// Set this to true if you would like to keep the VM registered with
 	// virtualbox. Defaults to false.
 	KeepRegistered bool `mapstructure:"keep_registered" required:"false"`
@@ -212,6 +238,17 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 			errs, errors.New("firmware can only be bios or efi"))
 	}
 
+	if b.config.RTCTimeBase == "" {
+		b.config.RTCTimeBase = "local"
+	}
+	switch b.config.RTCTimeBase {
+	case "UTC", "local":
+		// do nothing
+	default:
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("rtc_time_base can only be UTC or local"))
+	}
+
 	if b.config.DiskSize == 0 {
 		b.config.DiskSize = 40000
 	}
@@ -240,6 +277,24 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	default:
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("Graphics controller type can only be vboxvga, vboxsvga, vmsvga, none"))
+	}
+
+	if b.config.GfxVramSize == 0 {
+		b.config.GfxVramSize = 4
+	} else {
+		if b.config.GfxVramSize < 1 || b.config.GfxVramSize > 128 {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("VGRAM size must be from 0 (use default) to 128"))
+		}
+	}
+
+	if b.config.GfxEFIResolution != "" {
+		re := regexp.MustCompile(`^[\d]+x[\d]+$`)
+		matched := re.MatchString(b.config.GfxEFIResolution)
+		if !matched {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("EFI resolution must be in the format WIDTHxHEIGHT, e.g. 1920x1080"))
+		}
 	}
 
 	if b.config.AudioController == "" {
@@ -351,12 +406,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			Label: b.config.CDConfig.CDLabel,
 		},
 		new(vboxcommon.StepHTTPIPDiscover),
-		&commonsteps.StepHTTPServer{
-			HTTPDir:     b.config.HTTPDir,
-			HTTPPortMin: b.config.HTTPPortMin,
-			HTTPPortMax: b.config.HTTPPortMax,
-			HTTPAddress: b.config.HTTPAddress,
-		},
+		commonsteps.HTTPServerFromHTTPConfig(&b.config.HTTPConfig),
 		&vboxcommon.StepSshKeyPair{
 			Debug:        b.config.PackerDebug,
 			DebugKeyPath: fmt.Sprintf("%s.pem", b.config.PackerBuildName),
@@ -400,7 +450,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		},
 		&communicator.StepConnect{
 			Config:    &b.config.CommConfig.Comm,
-			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.SSHHost),
+			Host:      vboxcommon.CommHost(b.config.CommConfig.Comm.Host()),
 			SSHConfig: b.config.CommConfig.Comm.SSHConfigFunc(),
 			SSHPort:   vboxcommon.CommPort,
 			WinRMPort: vboxcommon.CommPort,

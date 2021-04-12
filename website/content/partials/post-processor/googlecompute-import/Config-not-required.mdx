@@ -18,6 +18,8 @@
 
 - `image_labels` (map[string]string) - Key/value pair labels to apply to the created image.
 
+- `image_storage_locations` ([]string) - Specifies a Cloud Storage location, either regional or multi-regional, where image content is to be stored. If not specified, the multi-region location closest to the source is chosen automatically.
+
 - `skip_clean` (bool) - Skip removing the TAR file uploaded to the GCS
   bucket after the import process has completed. "true" means that we should
   leave it in the GCS bucket, "false" means to clean it out. Defaults to

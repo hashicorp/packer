@@ -22,31 +22,50 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 	driver := state.Get("driver").(vboxcommon.Driver)
 	ui := state.Get("ui").(packersdk.Ui)
 	vmName := state.Get("vmName").(string)
-
 	format := "VDI"
-	path := filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName, strings.ToLower(format)))
 
-	command := []string{
-		"createhd",
-		"--filename", path,
-		"--size", strconv.FormatUint(uint64(config.DiskSize), 10),
-		"--format", format,
-		"--variant", "Standard",
+	// The main disk and additional disks
+	diskFullPaths := []string{}
+	diskSizes := []uint{config.DiskSize}
+	if len(config.AdditionalDiskSize) == 0 {
+		// If there are no additional disks, use disk naming as before
+		diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, fmt.Sprintf("%s.%s", config.VMName, strings.ToLower(format))))
+	} else {
+		// If there are additional disks, use consistent naming with numbers
+		diskFullPaths = append(diskFullPaths, filepath.Join(config.OutputDir, fmt.Sprintf("%s-0.%s", config.VMName, strings.ToLower(format))))
+
+		for i, diskSize := range config.AdditionalDiskSize {
+			path := filepath.Join(config.OutputDir, fmt.Sprintf("%s-%d.%s", config.VMName, i+1, strings.ToLower(format)))
+			diskFullPaths = append(diskFullPaths, path)
+			diskSizes = append(diskSizes, diskSize)
+		}
 	}
 
-	ui.Say("Creating hard drive...")
-	err := driver.VBoxManage(command...)
-	if err != nil {
-		err := fmt.Errorf("Error creating hard drive: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	// Create all required disks
+	for i := range diskFullPaths {
+		ui.Say(fmt.Sprintf("Creating hard drive %s with size %d MiB...", diskFullPaths[i], diskSizes[i]))
+
+		command := []string{
+			"createhd",
+			"--filename", diskFullPaths[i],
+			"--size", strconv.FormatUint(uint64(diskSizes[i]), 10),
+			"--format", format,
+			"--variant", "Standard",
+		}
+
+		err := driver.VBoxManage(command...)
+		if err != nil {
+			err := fmt.Errorf("Error creating hard drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	// Add the IDE controller so we can later attach the disk.
 	// When the hard disk controller is not IDE, this device is still used
 	// by VirtualBox to deliver the guest extensions.
-	err = driver.VBoxManage("storagectl", vmName, "--name", "IDE Controller", "--add", "ide")
+	err := driver.VBoxManage("storagectl", vmName, "--name", "IDE Controller", "--add", "ide")
 	if err != nil {
 		err := fmt.Errorf("Error creating disk controller: %s", err)
 		state.Put("error", err)
@@ -116,21 +135,23 @@ func (s *stepCreateDisk) Run(ctx context.Context, state multistep.StateBag) mult
 		discard = "on"
 	}
 
-	command = []string{
-		"storageattach", vmName,
-		"--storagectl", controllerName,
-		"--port", "0",
-		"--device", "0",
-		"--type", "hdd",
-		"--medium", path,
-		"--nonrotational", nonrotational,
-		"--discard", discard,
-	}
-	if err := driver.VBoxManage(command...); err != nil {
-		err := fmt.Errorf("Error attaching hard drive: %s", err)
-		state.Put("error", err)
-		ui.Error(err.Error())
-		return multistep.ActionHalt
+	for i := range diskFullPaths {
+		command := []string{
+			"storageattach", vmName,
+			"--storagectl", controllerName,
+			"--port", strconv.FormatUint(uint64(i), 10),
+			"--device", "0",
+			"--type", "hdd",
+			"--medium", diskFullPaths[i],
+			"--nonrotational", nonrotational,
+			"--discard", discard,
+		}
+		if err := driver.VBoxManage(command...); err != nil {
+			err := fmt.Errorf("Error attaching hard drive: %s", err)
+			state.Put("error", err)
+			ui.Error(err.Error())
+			return multistep.ActionHalt
+		}
 	}
 
 	return multistep.ActionContinue

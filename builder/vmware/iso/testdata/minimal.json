@@ -1,7 +1,7 @@
 {
   "builders": [
     {
-      "type": "test",
+      "type": "vmware-iso",
       "boot_command": [
         "<esc><wait>",
         "<esc><wait>",

@@ -131,7 +131,7 @@ func TestParser_complete(t *testing.T) {
 					},
 				},
 				Datasources: Datasources{
-					DatasourceRef{Type: "amazon-ami", Name: "test"}: Datasource{
+					DatasourceRef{Type: "amazon-ami", Name: "test"}: DatasourceBlock{
 						Type:  "amazon-ami",
 						Name:  "test",
 						value: cty.StringVal("foo"),
@@ -538,65 +538,8 @@ func TestParser_no_init(t *testing.T) {
 						Type: cty.List(cty.String),
 					},
 				},
-				Sources: map[SourceRef]SourceBlock{
-					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
-					refAWSV3MyImage:    {Type: "amazon-v3-ebs", Name: "my-image"},
-				},
-				Builds: Builds{
-					&BuildBlock{
-						Sources: []SourceUseBlock{
-							{
-								SourceRef: refVBIsoUbuntu1204,
-							},
-							{
-								SourceRef: refAWSV3MyImage,
-							},
-						},
-						ProvisionerBlocks: []*ProvisionerBlock{
-							{
-								PType: "shell",
-								PName: "provisioner that does something",
-							},
-							{
-								PType: "file",
-							},
-						},
-						PostProcessorsLists: [][]*PostProcessorBlock{
-							{
-								{
-									PType:             "amazon-import",
-									PName:             "something",
-									KeepInputArtifact: pTrue,
-								},
-							},
-							{
-								{
-									PType: "amazon-import",
-								},
-							},
-							{
-								{
-									PType: "amazon-import",
-									PName: "first-nested-post-processor",
-								},
-								{
-									PType: "amazon-import",
-									PName: "second-nested-post-processor",
-								},
-							},
-							{
-								{
-									PType: "amazon-import",
-									PName: "third-nested-post-processor",
-								},
-								{
-									PType: "amazon-import",
-									PName: "fourth-nested-post-processor",
-								},
-							},
-						},
-					},
-				},
+				Sources: nil,
+				Builds:  nil,
 			},
 			false, false,
 			[]packersdk.Build{},

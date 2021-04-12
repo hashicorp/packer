@@ -59,6 +59,8 @@ type Config struct {
 	ImageLabels map[string]string `mapstructure:"image_labels"`
 	//The unique name of the resulting image.
 	ImageName string `mapstructure:"image_name" required:"true"`
+	//Specifies a Cloud Storage location, either regional or multi-regional, where image content is to be stored. If not specified, the multi-region location closest to the source is chosen automatically.
+	ImageStorageLocations []string `mapstructure:"image_storage_locations"`
 	//Skip removing the TAR file uploaded to the GCS
 	//bucket after the import process has completed. "true" means that we should
 	//leave it in the GCS bucket, "false" means to clean it out. Defaults to
@@ -182,7 +184,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 		return nil, false, false, err
 	}
 
-	gceImageArtifact, err := CreateGceImage(opts, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures, shieldedVMStateConfig)
+	gceImageArtifact, err := CreateGceImage(opts, ui, p.config.ProjectId, rawImageGcsPath, p.config.ImageName, p.config.ImageDescription, p.config.ImageFamily, p.config.ImageLabels, p.config.ImageGuestOsFeatures, shieldedVMStateConfig, p.config.ImageStorageLocations)
 	if err != nil {
 		return nil, false, false, err
 	}
@@ -295,7 +297,7 @@ func UploadToBucket(opts option.ClientOption, ui packersdk.Ui, artifact packersd
 	return storageObject.SelfLink, nil
 }
 
-func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig) (packersdk.Artifact, error) {
+func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, rawImageURL string, imageName string, imageDescription string, imageFamily string, imageLabels map[string]string, imageGuestOsFeatures []string, shieldedVMStateConfig *compute.InitialStateConfig, imageStorageLocations []string) (packersdk.Artifact, error) {
 	service, err := compute.NewService(context.TODO(), opts)
 
 	if err != nil {
@@ -319,6 +321,7 @@ func CreateGceImage(opts option.ClientOption, ui packersdk.Ui, project string, r
 		RawDisk:                      &compute.ImageRawDisk{Source: rawImageURL},
 		SourceType:                   "RAW",
 		ShieldedInstanceInitialState: shieldedVMStateConfig,
+		StorageLocations:             imageStorageLocations,
 	}
 
 	ui.Say(fmt.Sprintf("Creating GCE image %v...", imageName))

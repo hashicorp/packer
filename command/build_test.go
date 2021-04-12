@@ -383,13 +383,26 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - dynamic source blocks in a build block",
+			args: []string{
+				testFixture("hcl", "dynamic", "build.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"dummy.txt":       "layers/base/main/files",
+					"postgres/13.txt": "layers/base/main/files\nlayers/base/init/files\nlayers/postgres/files",
+				},
+				expected: []string{"dummy-fooo.txt", "dummy-baar.txt", "postgres/13-fooo.txt", "postgres/13-baar.txt"},
+			},
+		},
 	}
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			defer tt.cleanup(t)
 			run(t, tt.args, tt.expectedCode)
-			tt.fileCheck.verify(t)
+			tt.fileCheck.verify(t, "")
 		})
 	}
 }
@@ -732,7 +745,7 @@ func TestHCL2PostProcessorForceFlag(t *testing.T) {
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
-	fCheck.verify(t)
+	fCheck.verify(t, "")
 
 	// Second build should override previous manifest
 	UUID, _ = uuid.GenerateUUID()
@@ -766,7 +779,7 @@ func TestHCL2PostProcessorForceFlag(t *testing.T) {
 	if code := c.Run(args); code != 0 {
 		fatalCommand(t, c.Meta)
 	}
-	fCheck.verify(t)
+	fCheck.verify(t, "")
 }
 
 func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
@@ -887,19 +900,19 @@ func (fc fileCheck) expectedFiles() []string {
 	return expected
 }
 
-func (fc fileCheck) verify(t *testing.T) {
+func (fc fileCheck) verify(t *testing.T, dir string) {
 	for _, f := range fc.expectedFiles() {
-		if !fileExists(f) {
-			t.Errorf("Expected to find %s", f)
+		if _, err := os.Stat(filepath.Join(dir, f)); err != nil {
+			t.Errorf("Expected to find %s: %v", f, err)
 		}
 	}
 	for _, f := range fc.notExpected {
-		if fileExists(f) {
+		if _, err := os.Stat(filepath.Join(dir, f)); err == nil {
 			t.Errorf("Expected to not find %s", f)
 		}
 	}
 	for file, expectedContent := range fc.expectedContent {
-		content, err := ioutil.ReadFile(file)
+		content, err := ioutil.ReadFile(filepath.Join(dir, file))
 		if err != nil {
 			t.Fatalf("ioutil.ReadFile: %v", err)
 		}
@@ -907,14 +920,6 @@ func (fc fileCheck) verify(t *testing.T) {
 			t.Errorf("content of %s differs: %s", file, diff)
 		}
 	}
-}
-
-// fileExists returns true if the filename is found
-func fileExists(filename string) bool {
-	if _, err := os.Stat(filename); err == nil {
-		return true
-	}
-	return false
 }
 
 // testCoreConfigBuilder creates a packer CoreConfig that has a file builder

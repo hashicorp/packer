@@ -1,6 +1,5 @@
 ---
 page_title: vault - Functions - Configuration Language
-sidebar_title: vault
 description: The vault function retrieves secrets from HashiCorp Vault KV stores.
 ---
 
@@ -18,7 +17,7 @@ can access it using the following:
 
 ```hcl
 locals {
-    foo = vault("/secret/data/hello" "foo")
+    foo = vault("/secret/data/hello", "foo")
 }
 ```
 

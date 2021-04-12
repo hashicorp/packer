@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	builderT "github.com/hashicorp/packer/acctest"
 )
 
 const defaultTestRegion = "cn-beijing"

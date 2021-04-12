@@ -68,7 +68,7 @@ const (
 	// ErrCodeMalformedPolicyDocumentException for service response error code
 	// "MalformedPolicyDocumentException".
 	//
-	// The policy document that you provided isn't valid.
+	// You provided a resource-based policy with syntax errors.
 	ErrCodeMalformedPolicyDocumentException = "MalformedPolicyDocumentException"
 
 	// ErrCodePreconditionNotMetException for service response error code
@@ -80,7 +80,8 @@ const (
 	// ErrCodePublicPolicyException for service response error code
 	// "PublicPolicyException".
 	//
-	// The resource policy did not prevent broad access to the secret.
+	// The BlockPublicPolicy parameter is set to true and the resource policy did
+	// not prevent broad access to the secret.
 	ErrCodePublicPolicyException = "PublicPolicyException"
 
 	// ErrCodeResourceExistsException for service response error code

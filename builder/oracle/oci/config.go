@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest
+//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest,FlexShapeConfig
 
 package oci
 
@@ -19,8 +19,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	ocicommon "github.com/oracle/oci-go-sdk/common"
-	ociauth "github.com/oracle/oci-go-sdk/common/auth"
+	ocicommon "github.com/oracle/oci-go-sdk/v36/common"
+	ociauth "github.com/oracle/oci-go-sdk/v36/common/auth"
 )
 
 type CreateVNICDetails struct {
@@ -44,6 +44,11 @@ type ListImagesRequest struct {
 	OperatingSystem        *string `mapstructure:"operating_system"`
 	OperatingSystemVersion *string `mapstructure:"operating_system_version"`
 	Shape                  *string `mapstructure:"shape"`
+}
+
+type FlexShapeConfig struct {
+	Ocpus       *float32 `mapstructure:"ocpus" required:"false"`
+	MemoryInGBs *float32 `mapstructure:"memory_in_gbs" required:"false"`
 }
 
 type Config struct {
@@ -91,6 +96,7 @@ type Config struct {
 	InstanceTags        map[string]string                 `mapstructure:"instance_tags"`
 	InstanceDefinedTags map[string]map[string]interface{} `mapstructure:"instance_defined_tags"`
 	Shape               string                            `mapstructure:"shape"`
+	ShapeConfig         FlexShapeConfig                   `mapstructure:"shape_config"`
 	BootVolumeSizeInGBs int64                             `mapstructure:"disk_size"`
 
 	// Metadata optionally contains custom metadata key/value pairs provided in the
@@ -222,7 +228,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 		}
 
 		providers := []ocicommon.ConfigurationProvider{
-			NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
+			ocicommon.NewRawConfigurationProvider(c.TenancyID, c.UserID, c.Region, c.Fingerprint, string(keyContent), &c.PassPhrase),
 		}
 
 		if fileProvider != nil {
@@ -253,7 +259,7 @@ func (c *Config) Prepare(raws ...interface{}) error {
 
 		if _, err := configProvider.PrivateRSAKey(); err != nil {
 			errs = packersdk.MultiErrorAppend(
-				errs, errors.New("'key_file' must be specified"))
+				errs, fmt.Errorf("'key_file' must be correctly specified. %w", err))
 		}
 
 		c.configProvider = configProvider
@@ -275,6 +281,18 @@ func (c *Config) Prepare(raws ...interface{}) error {
 	if c.Shape == "" {
 		errs = packersdk.MultiErrorAppend(
 			errs, errors.New("'shape' must be specified"))
+	}
+
+	if strings.HasSuffix(c.Shape, "Flex") {
+		if c.ShapeConfig.Ocpus == nil {
+			errs = packersdk.MultiErrorAppend(
+				errs, errors.New("'Ocpus' must be specified when using flexible shapes"))
+		}
+	}
+
+	if c.ShapeConfig.MemoryInGBs != nil && c.ShapeConfig.Ocpus == nil {
+		errs = packersdk.MultiErrorAppend(
+			errs, errors.New("'Ocpus' must be specified if memory_in_gbs is specified"))
 	}
 
 	if (c.SubnetID == "") && (c.CreateVnicDetails.SubnetId == nil) {

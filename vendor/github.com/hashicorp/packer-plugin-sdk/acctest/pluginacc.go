@@ -11,13 +11,23 @@ import (
 	"testing"
 )
 
+// TestEnvVar must be set to a non-empty value for acceptance tests to run.
+const TestEnvVar = "PACKER_ACC"
+
 // PluginTestCase is a single set of tests to run for a plugin.
 // A PluginTestCase should generally map 1:1 to each test method for your
 // acceptance tests.
 // Requirements:
-// - The plugin to be tested must be previously installed so that Packer can discover it.
-// - Packer must also be installed
+// - If not using 'packer init', the plugin must be previously installed
+// - Packer must be installed locally
 type PluginTestCase struct {
+	// Init, if true `packer init` will be executed prior to `packer build`.
+	Init bool
+	// CheckInit is called after packer init step is executed in order to test that
+	// the step executed successfully. If this is not set, then the next
+	// step will be called
+	CheckInit func(*exec.Cmd, string) error
+
 	// Check is called after this step is executed in order to test that
 	// the step executed successfully. If this is not set, then the next
 	// step will be called
@@ -40,6 +50,9 @@ type PluginTestCase struct {
 	// Type is the type of the plugin.
 	Type string
 }
+
+// TestTeardownFunc is the callback used for Teardown in TestCase.
+type TestTeardownFunc func() error
 
 //nolint:errcheck
 func TestPlugin(t *testing.T, testCase *PluginTestCase) {
@@ -83,6 +96,28 @@ func TestPlugin(t *testing.T, testCase *PluginTestCase) {
 	if err != nil {
 		t.Fatalf("Couldn't find packer binary installed on system: %s", err.Error())
 	}
+
+	if testCase.Init {
+		initLogfile := fmt.Sprintf("packer_init_log_%s.txt", testCase.Name)
+		initCommand := exec.Command(packerbin, "init", templatePath)
+		initCommand.Env = append(initCommand.Env, os.Environ()...)
+		initCommand.Env = append(initCommand.Env, "PACKER_LOG=1", fmt.Sprintf("PACKER_LOG_PATH=%s", initLogfile))
+		initCommand.Run()
+
+		if testCase.CheckInit != nil {
+			if err := testCase.CheckInit(initCommand, initLogfile); err != nil {
+				cwd, _ := os.Getwd()
+				t.Fatalf(fmt.Sprintf("Error running plugin acceptance"+
+					" tests: %s\nLogs can be found at %s\nand the "+
+					"acceptance test template can be found at %s",
+					err.Error(), filepath.Join(cwd, initLogfile),
+					filepath.Join(cwd, templatePath)))
+			} else {
+				os.Remove(initLogfile)
+			}
+		}
+	}
+
 	// Run build
 	buildCommand := exec.Command(packerbin, "build", "--machine-readable", templatePath)
 	buildCommand.Env = append(buildCommand.Env, os.Environ()...)

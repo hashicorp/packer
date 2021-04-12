@@ -11,6 +11,12 @@ contribute to the project, read on. This document will cover what we're looking
 for. By addressing all the points we're looking for, it raises the chances we
 can quickly merge or address your contributions.
 
+When contributing in any way to the Packer project (new issue, PR, etc), please 
+be aware that our team identifies with many gender pronouns. Please remember to 
+use nonbinary pronouns (they/them) and gender neutral language ("Hello folks") 
+when addressing our team. For more reading on our code of conduct, please see the 
+[HashiCorp community guidelines](https://www.hashicorp.com/community-guidelines).
+
 ## Issues
 
 ### Reporting an Issue

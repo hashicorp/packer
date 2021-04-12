@@ -5,7 +5,10 @@ export default function Homepage() {
   return (
     <div id="p-home">
       <section id="hero">
-        <img src="/img/logo-hashicorp.svg" alt="HashiCorp Packer Logo" />
+        <img
+          src={require('@hashicorp/mktg-logos/product/packer/primary/attributed_color.svg')}
+          alt="HashiCorp Packer Logo"
+        />
         <h1 className="g-type-display-3">Build Automated Machine Images</h1>
         <div className="buttons">
           <Button

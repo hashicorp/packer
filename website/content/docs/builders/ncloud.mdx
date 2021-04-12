@@ -3,7 +3,6 @@ description: |
   The ncloud builder allows you to create server images using the NAVER Cloud
   Platform.
 page_title: Naver Cloud Platform - Builders
-sidebar_title: NAVER Cloud
 ---
 
 # NAVER CLOUD PLATFORM Builder
@@ -121,7 +120,7 @@ Here is a basic example for linux server.
 
 ## Requirements for creating Windows images
 
-You should include the following code in the packer configuration file for
+You should include the following code in the Packer configuration file for
 provision when creating a Windows server.
 
       "builders": [
@@ -149,7 +148,7 @@ provision when creating a Windows server.
   instances you own. Before running Packer, please make sure that the number
   of public IP addresses previously created is not larger than the number of
   server instances (including those to be used to create server images).
-- When you forcibly terminate the packer process or close the terminal
+- When you forcibly terminate the Packer process or close the terminal
   (command) window where the process is running, the resources may not be
-  cleaned up as the packer process no longer runs. In this case, you should
+  cleaned up as the Packer process no longer runs. In this case, you should
   manually clean up the resources associated with the process.

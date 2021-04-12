@@ -1,0 +1,21 @@
+{
+	"variables": {
+		"conf": "{{ env \"ONE\" }}-{{env \"ANOTHER\"}}-{{ env  `BACKTICKED` }}",
+		"nospaces": "{{env \"SOMETHING\"}}",
+		"manyspaces": "{{   env \"ASDFASDF\"}}"
+	},
+	"builders": [
+		{
+			"type": "null",
+			"communicator": "none"
+		}
+	],
+	"provisioners": [
+		{
+			"type": "shell-local",
+			"inline": [
+				"echo {{user \"conf\"}}-{{timestamp}}-{{isotime \"01-02-2006\"}}"
+			]
+		}
+	]
+}

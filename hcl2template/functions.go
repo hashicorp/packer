@@ -68,6 +68,7 @@ func Functions(basedir string) map[string]function.Function {
 		"jsondecode":         stdlib.JSONDecodeFunc,
 		"jsonencode":         stdlib.JSONEncodeFunc,
 		"keys":               stdlib.KeysFunc,
+		"legacy_isotime":     pkrfunction.LegacyIsotimeFunc,
 		"length":             pkrfunction.LengthFunc,
 		"log":                stdlib.LogFunc,
 		"lookup":             stdlib.LookupFunc,
@@ -116,6 +117,12 @@ func Functions(basedir string) map[string]function.Function {
 		"yamlencode":         ctyyaml.YAMLEncodeFunc,
 		"zipmap":             stdlib.ZipmapFunc,
 	}
+
+	funcs["templatefile"] = pkrfunction.MakeTemplateFileFunc(basedir, func() map[string]function.Function {
+		// The templatefile function prevents recursive calls to itself
+		// by copying this map and overwriting the "templatefile" entry.
+		return funcs
+	})
 
 	return funcs
 }

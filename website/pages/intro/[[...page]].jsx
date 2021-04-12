@@ -7,27 +7,30 @@ import {
 } from '@hashicorp/react-docs-page/server'
 
 //  Configure the docs path
-const BASE_ROUTE = 'intro'
-const NAV_DATA = 'data/intro-nav-data.json'
-const CONTENT_DIR = 'content/intro'
+const baseRoute = 'intro'
+const navDataFile = 'data/intro-nav-data.json'
+const localContentDir = 'content/intro'
+const mainBranch = 'master'
+const product = { name: productName, slug: productSlug }
 
 export default function IntroLayout(props) {
   return (
-    <DocsPage
-      baseRoute={BASE_ROUTE}
-      mainBranch="master" // used for "edit on this page", default "main"
-      product={{ name: productName, slug: productSlug }}
-      staticProps={props}
-    />
+    <DocsPage baseRoute={baseRoute} product={product} staticProps={props} />
   )
 }
 
 export async function getStaticPaths() {
-  const paths = await generateStaticPaths(NAV_DATA, CONTENT_DIR)
+  const paths = await generateStaticPaths({ localContentDir, navDataFile })
   return { paths, fallback: false }
 }
 
 export async function getStaticProps({ params }) {
-  const props = await generateStaticProps(NAV_DATA, CONTENT_DIR, params)
+  const props = await generateStaticProps({
+    localContentDir,
+    mainBranch,
+    navDataFile,
+    params,
+    product,
+  })
   return { props }
 }

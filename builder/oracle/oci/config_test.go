@@ -131,13 +131,17 @@ func TestConfig(t *testing.T) {
 
 	t.Run("NoAccessConfig", func(t *testing.T) {
 		raw := testConfig(cfgFile)
-		delete(raw, "access_cfg_file")
+		raw["access_cfg_file"] = "/tmp/random/access/config/file/should/not/exist"
 
 		var c Config
 		errs := c.Prepare(raw)
 
 		expectedErrors := []string{
 			"'user_ocid'", "'tenancy_ocid'", "'fingerprint'", "'key_file'",
+		}
+
+		if errs == nil {
+			t.Fatalf("Expected errors %q but got none", expectedErrors)
 		}
 
 		s := errs.Error()

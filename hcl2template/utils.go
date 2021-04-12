@@ -57,7 +57,6 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  "Cannot tell wether " + filename + " is a directory",
 			Detail:   err.Error(),
 		})
 		return nil, nil, diags

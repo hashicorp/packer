@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -15,16 +16,17 @@ import (
 )
 
 type StepDeployTemplate struct {
-	client     *AzureClient
-	deploy     func(ctx context.Context, resourceGroupName string, deploymentName string) error
-	delete     func(ctx context.Context, deploymentName, resourceGroupName string) error
-	disk       func(ctx context.Context, resourceGroupName string, computeName string) (string, string, error)
-	deleteDisk func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error
-	say        func(message string)
-	error      func(e error)
-	config     *Config
-	factory    templateFactoryFunc
-	name       string
+	client           *AzureClient
+	deploy           func(ctx context.Context, resourceGroupName string, deploymentName string) error
+	delete           func(ctx context.Context, deploymentName, resourceGroupName string) error
+	disk             func(ctx context.Context, resourceGroupName string, computeName string) (string, string, error)
+	deleteDisk       func(ctx context.Context, imageType string, imageName string, resourceGroupName string) error
+	deleteDeployment func(ctx context.Context, state multistep.StateBag) error
+	say              func(message string)
+	error            func(e error)
+	config           *Config
+	factory          templateFactoryFunc
+	name             string
 }
 
 func NewStepDeployTemplate(client *AzureClient, ui packersdk.Ui, config *Config, deploymentName string, factory templateFactoryFunc) *StepDeployTemplate {
@@ -41,6 +43,7 @@ func NewStepDeployTemplate(client *AzureClient, ui packersdk.Ui, config *Config,
 	step.delete = step.deleteDeploymentResources
 	step.disk = step.getImageDetails
 	step.deleteDisk = step.deleteImage
+	step.deleteDeployment = step.deleteDeploymentObject
 	return step
 }
 
@@ -58,32 +61,45 @@ func (s *StepDeployTemplate) Run(ctx context.Context, state multistep.StateBag) 
 
 func (s *StepDeployTemplate) Cleanup(state multistep.StateBag) {
 	defer func() {
-		err := s.deleteTemplate(context.Background(), state)
+		err := s.deleteDeployment(context.Background(), state)
 		if err != nil {
-			s.say(s.client.LastError.Error())
+			s.say(err.Error())
 		}
 	}()
 
-	// Only clean up if this is an existing resource group that has been verified to exist.
-	// ArmIsResourceGroupCreated is set in step_create_resource_group to true, when Packer has verified that the resource group exists.
-	// ArmIsExistingResourceGroup is set to true when build_resource_group is set in the Packer configuration.
-	existingResourceGroup := state.Get(constants.ArmIsExistingResourceGroup).(bool)
-	resourceGroupCreated := state.Get(constants.ArmIsResourceGroupCreated).(bool)
-	if !existingResourceGroup || !resourceGroupCreated {
-		return
-	}
-
 	ui := state.Get("ui").(packersdk.Ui)
-	ui.Say("\nThe resource group was not created by Packer, deleting individual resources ...")
+	ui.Say("\nDeleting individual resources ...")
 
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
-	err := s.deleteDeploymentResources(context.TODO(), deploymentName, resourceGroupName)
+	// Get image disk details before deleting the image; otherwise we won't be able to
+	// delete the disk as the image request will return a 404
+	computeName := state.Get(constants.ArmComputeName).(string)
+	imageType, imageName, err := s.disk(context.TODO(), resourceGroupName, computeName)
+
+	if err != nil && !strings.Contains(err.Error(), "ResourceNotFound") {
+		ui.Error(fmt.Sprintf("Could not retrieve OS Image details: %s", err))
+	}
+	err = s.delete(context.TODO(), deploymentName, resourceGroupName)
 	if err != nil {
 		s.reportIfError(err, resourceGroupName)
 	}
 
-	NewStepDeleteAdditionalDisks(s.client, ui).Run(context.TODO(), state)
+	// The disk was not found on the VM, this is an error.
+	if imageType == "" && imageName == "" {
+		ui.Error(fmt.Sprintf("Failed to find temporary OS disk on VM.  Please delete manually.\n\n"+
+			"VM Name: %s\n"+
+			"Error: %s", computeName, err))
+		return
+	}
+
+	ui.Say(fmt.Sprintf(" Deleting -> %s : '%s'", imageType, imageName))
+	err = s.deleteDisk(context.TODO(), imageType, imageName, resourceGroupName)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Error deleting resource.  Please delete manually.\n\n"+
+			"Name: %s\n"+
+			"Error: %s", imageName, err))
+	}
 }
 
 func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupName string, deploymentName string) error {
@@ -106,7 +122,7 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	return err
 }
 
-func (s *StepDeployTemplate) deleteTemplate(ctx context.Context, state multistep.StateBag) error {
+func (s *StepDeployTemplate) deleteDeploymentObject(ctx context.Context, state multistep.StateBag) error {
 	deploymentName := s.name
 	resourceGroupName := state.Get(constants.ArmResourceGroupName).(string)
 	ui := state.Get("ui").(packersdk.Ui)
@@ -222,6 +238,8 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 		return err
 	}
 
+	resources := map[string]string{}
+
 	for deploymentOperations.NotDone() {
 		deploymentOperation := deploymentOperations.Value()
 		// Sometimes an empty operation is added to the list by Azure
@@ -233,29 +251,46 @@ func (s *StepDeployTemplate) deleteDeploymentResources(ctx context.Context, depl
 		resourceName := *deploymentOperation.Properties.TargetResource.ResourceName
 		resourceType := *deploymentOperation.Properties.TargetResource.ResourceType
 
-		s.say(fmt.Sprintf(" -> %s : '%s'", resourceType, resourceName))
-
-		err = retry.Config{
-			Tries:      10,
-			RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
-		}.Run(ctx, func(ctx context.Context) error {
-			err := deleteResource(ctx, s.client,
-				resourceType,
-				resourceName,
-				resourceGroupName)
-			if err != nil {
-				s.reportIfError(err, resourceName)
-			}
-			return nil
-		})
-		if err != nil {
-			s.reportIfError(err, resourceName)
-		}
+		s.say(fmt.Sprintf("Adding to deletion queue -> %s : '%s'", resourceType, resourceName))
+		resources[resourceType] = resourceName
 
 		if err = deploymentOperations.Next(); err != nil {
 			return err
 		}
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(resources))
+
+	for resourceType, resourceName := range resources {
+		go func(resourceType, resourceName string) {
+			defer wg.Done()
+			retryConfig := retry.Config{
+				Tries:      10,
+				RetryDelay: (&retry.Backoff{InitialBackoff: 10 * time.Second, MaxBackoff: 600 * time.Second, Multiplier: 2}).Linear,
+			}
+
+			err = retryConfig.Run(ctx, func(ctx context.Context) error {
+				s.say(fmt.Sprintf("Attempting deletion -> %s : '%s'", resourceType, resourceName))
+				err := deleteResource(ctx, s.client,
+					resourceType,
+					resourceName,
+					resourceGroupName)
+				if err != nil {
+					s.say(fmt.Sprintf("Error deleting resource. Will retry.\n"+
+						"Name: %s\n"+
+						"Error: %s\n", resourceName, err.Error()))
+				}
+				return err
+			})
+			if err != nil {
+				s.reportIfError(err, resourceName)
+			}
+		}(resourceType, resourceName)
+	}
+
+	s.say("Waiting for deletion of all resources...")
+	wg.Wait()
 
 	return nil
 }

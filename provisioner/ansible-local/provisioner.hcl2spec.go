@@ -18,7 +18,7 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Command             *string           `cty:"command" hcl:"command"`
+	Command             *string           `mapstructure:"command" cty:"command" hcl:"command"`
 	ExtraArguments      []string          `mapstructure:"extra_arguments" cty:"extra_arguments" hcl:"extra_arguments"`
 	GroupVars           *string           `mapstructure:"group_vars" cty:"group_vars" hcl:"group_vars"`
 	HostVars            *string           `mapstructure:"host_vars" cty:"host_vars" hcl:"host_vars"`

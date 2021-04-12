@@ -298,6 +298,7 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 			HTTPIP      string
 			HTTPPort    int
 			HTTPDir     string
+			HTTPContent map[string]string
 			OutputDir   string
 			Name        string
 			SSHHostPort int
@@ -308,6 +309,7 @@ func (s *stepRun) applyUserOverrides(defaultArgs map[string]interface{}, config 
 			HTTPIP:      httpIp,
 			HTTPPort:    httpPort,
 			HTTPDir:     config.HTTPDir,
+			HTTPContent: config.HTTPContent,
 			OutputDir:   config.OutputDir,
 			Name:        config.VMName,
 			SSHHostPort: commHostPort,

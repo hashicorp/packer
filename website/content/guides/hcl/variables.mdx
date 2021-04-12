@@ -1,6 +1,5 @@
 ---
 page_title: Input and Local Variables guide
-sidebar_title: Variables
 description: |-
   This page introduces input variables and local variables as a way to
   parameterize a configuration.
@@ -17,15 +16,15 @@ Local variables can be a compound of input variables and local variables.
 
 ## Defining Variables and locals
 
-In the legacy JSON packer templates, any variables we hadn't already defined in
+In the legacy JSON Packer templates, any variables we hadn't already defined in
 the "variables" stanza of our json template could simply be passed in via the
-command line or a var-file; if a variable was never defined it would generally
+command line or a `var-file`; if a variable was never defined it would generally
 be interpolated to an empty string.
 
-_In the HCL2 packer templates, we must always pre-define our variables in the
+_In the HCL2 Packer templates, we must always pre-define our variables in the
 HCL equivalent of the "variables" stanza._
 
-Another difference between JSON and HCL packer templates is that in JSON packer
+Another difference between JSON and HCL Packer templates is that in JSON packer
 templates, the "variables" stanza, if used, was always in the same .json file
 as the builds and builders. In HCL, it can exist in its own file if you want it
 to.

@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "title": "Docker",
+    "path": "docker",
+    "repo": "hashicorp/packer-plugin-docker",
+    "version": "latest"
+  },
+  {
+    "title": "Amazon EC2",
+    "path": "amazon",
+    "repo": "hashicorp/packer-plugin-amazon",
+    "version": "latest"
+  }
+]

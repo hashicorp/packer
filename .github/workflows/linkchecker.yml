@@ -7,7 +7,7 @@ name: Check markdown links on modified website files
 jobs:
   vercel-deployment-poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 3 #cancel job if no deployment is found within x minutes
+    timeout-minutes: 5 #cancel job if no deployment is found within x minutes
     outputs:
       url: ${{ steps.waitForVercelPreviewDeployment.outputs.url }}
     steps:
