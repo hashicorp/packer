@@ -83,14 +83,15 @@ from the command line, you can do so:
 
 `packer build --except=checksum mytemplate.pkr.hcl` will not run the checksum
 post-processor. This command line exclusion works by referencing post-processor
-_name_. The default post-processor name is its type, as demonstrated above. You
-can make a post-processor's name unique by adding a "name" field to each
-post-processor block.
+_name_. By default, the post-processor is named after is its type, as
+demonstrated above in the `checksum` example. You can make a post-processor's
+name unique by adding a "name" field to each post-processor block.
 
-While the command line "except" option can exclude post-processors, the command
-line "only" option ignores post-processors. To use "only" to select
-post-processors for particular builds, you must use the `only=[source]` syntax
-inside of your hcl templates, as described above.
+While the `-except` flag can be used to filter out post-processors on the
+command line, the `-only` flag does not work for post-processors. If you wish
+to only run a post-processor for a given source build  you must use the
+`only=[source]` syntax inside of your hcl templates, as described above.
+
 
 ## Build Contextual Variables
 
