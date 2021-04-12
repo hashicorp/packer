@@ -186,7 +186,7 @@ func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
 	deadlineTime, _ := pausingCtx.Deadline()
 
 	// Have to add a second so that time left messages displays properly
-	deadlineTimeAddSecond := deadlineTime.Add(time.Duration(time.Second))
+	deadlineTimeAddSecond := deadlineTime.Add(time.Second)
 
 	for {
 		select {
