@@ -10,5 +10,11 @@
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
     "version": "latest"
+  },
+  {
+    "title": "Vultr",
+    "path": "vultr",
+    "repo": "vultr/packer-plugin-vultr",
+    "version": "latest"
   }
 ]
