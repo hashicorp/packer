@@ -71,11 +71,13 @@ github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
 github.com/ChrisTrenkamp/goxpath/xconst
-# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0
+# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7
 ## explicit
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vpc
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa

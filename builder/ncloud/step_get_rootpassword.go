@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server"
+	"github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -25,17 +26,39 @@ func NewStepGetRootPassword(conn *NcloudAPIClient, ui packersdk.Ui, config *Conf
 		Config: config,
 	}
 
-	step.GetRootPassword = step.getRootPassword
+	if config.SupportVPC {
+		step.GetRootPassword = step.getVpcRootPassword
+	} else {
+		step.GetRootPassword = step.getClassicRootPassword
+	}
 
 	return step
 }
 
-func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKey string) (string, error) {
-	reqParams := new(server.GetRootPasswordRequest)
-	reqParams.ServerInstanceNo = &serverInstanceNo
-	reqParams.PrivateKey = &privateKey
+func (s *StepGetRootPassword) getClassicRootPassword(serverInstanceNo string, privateKey string) (string, error) {
+	reqParams := &server.GetRootPasswordRequest{
+		ServerInstanceNo: &serverInstanceNo,
+		PrivateKey:       &privateKey,
+	}
 
 	rootPassword, err := s.Conn.server.V2Api.GetRootPassword(reqParams)
+	if err != nil {
+		return "", err
+	}
+
+	s.Say(fmt.Sprintf("Root password is %s", *rootPassword.RootPassword))
+
+	return *rootPassword.RootPassword, nil
+}
+
+func (s *StepGetRootPassword) getVpcRootPassword(serverInstanceNo string, privateKey string) (string, error) {
+	reqParams := &vserver.GetRootPasswordRequest{
+		RegionCode:       &s.Config.RegionCode,
+		ServerInstanceNo: &serverInstanceNo,
+		PrivateKey:       &privateKey,
+	}
+
+	rootPassword, err := s.Conn.vserver.V2Api.GetRootPassword(reqParams)
 	if err != nil {
 		return "", err
 	}
@@ -48,8 +71,8 @@ func (s *StepGetRootPassword) getRootPassword(serverInstanceNo string, privateKe
 func (s *StepGetRootPassword) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	s.Say("Get Root Password")
 
-	serverInstanceNo := state.Get("InstanceNo").(string)
-	loginKey := state.Get("LoginKey").(*LoginKey)
+	serverInstanceNo := state.Get("instance_no").(string)
+	loginKey := state.Get("login_key").(*LoginKey)
 
 	rootPassword, err := s.GetRootPassword(serverInstanceNo, loginKey.PrivateKey)
 

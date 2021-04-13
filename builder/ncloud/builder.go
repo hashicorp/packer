@@ -32,7 +32,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 }
 
 func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
-	ui.Message("Creating Naver Cloud Platform Connection ...")
+	ui.Message("Creating NAVER CLOUD PLATFORM Connection ...")
 	config := Config{
 		AccessKey: b.config.AccessKey,
 		SecretKey: b.config.SecretKey,
@@ -46,60 +46,42 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	b.stateBag.Put("hook", hook)
 	b.stateBag.Put("ui", ui)
 
-	var steps []multistep.Step
-
-	steps = []multistep.Step{}
-
-	if b.config.Comm.Type == "ssh" {
-		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, &b.config),
-			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, &b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
-			NewStepGetRootPassword(conn, ui, &b.config),
-			NewStepCreatePublicIPInstance(conn, ui, &b.config),
-			&communicator.StepConnectSSH{
-				Config: &b.config.Comm,
-				Host: func(stateBag multistep.StateBag) (string, error) {
-					return stateBag.Get("PublicIP").(string), nil
-				},
-				SSHConfig: b.config.Comm.SSHConfigFunc(),
+	steps := []multistep.Step{
+		NewStepValidateTemplate(conn, ui, &b.config),
+		NewStepCreateLoginKey(conn, ui, &b.config),
+		multistep.If(b.config.SupportVPC, NewStepCreateInitScript(conn, ui, &b.config)),
+		multistep.If(b.config.SupportVPC, NewStepCreateAccessControlGroup(conn, ui, &b.config)),
+		NewStepCreateServerInstance(conn, ui, &b.config),
+		NewStepCreateBlockStorage(conn, ui, &b.config),
+		NewStepGetRootPassword(conn, ui, &b.config),
+		NewStepCreatePublicIP(conn, ui, &b.config),
+		multistep.If(b.config.Comm.Type == "ssh", &communicator.StepConnectSSH{
+			Config: &b.config.Comm,
+			Host: func(stateBag multistep.StateBag) (string, error) {
+				return stateBag.Get("public_ip").(string), nil
 			},
-			&commonsteps.StepProvision{},
-			&commonsteps.StepCleanupTempKeys{
-				Comm: &b.config.Comm,
+			SSHConfig: b.config.Comm.SSHConfigFunc(),
+		}),
+		multistep.If(b.config.Comm.Type == "winrm", &communicator.StepConnectWinRM{
+			Config: &b.config.Comm,
+			Host: func(stateBag multistep.StateBag) (string, error) {
+				return stateBag.Get("public_ip").(string), nil
 			},
-			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, &b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
-			NewStepTerminateServerInstance(conn, ui),
-		}
-	} else if b.config.Comm.Type == "winrm" {
-		steps = []multistep.Step{
-			NewStepValidateTemplate(conn, ui, &b.config),
-			NewStepCreateLoginKey(conn, ui),
-			NewStepCreateServerInstance(conn, ui, &b.config),
-			NewStepCreateBlockStorageInstance(conn, ui, &b.config),
-			NewStepGetRootPassword(conn, ui, &b.config),
-			NewStepCreatePublicIPInstance(conn, ui, &b.config),
-			&communicator.StepConnectWinRM{
-				Config: &b.config.Comm,
-				Host: func(stateBag multistep.StateBag) (string, error) {
-					return stateBag.Get("PublicIP").(string), nil
-				},
-				WinRMConfig: func(state multistep.StateBag) (*communicator.WinRMConfig, error) {
-					return &communicator.WinRMConfig{
-						Username: b.config.Comm.WinRMUser,
-						Password: b.config.Comm.WinRMPassword,
-					}, nil
-				},
+			WinRMConfig: func(state multistep.StateBag) (*communicator.WinRMConfig, error) {
+				return &communicator.WinRMConfig{
+					Username: b.config.Comm.WinRMUser,
+					Password: b.config.Comm.WinRMPassword,
+				}, nil
 			},
-			&commonsteps.StepProvision{},
-			NewStepStopServerInstance(conn, ui),
-			NewStepCreateServerImage(conn, ui, &b.config),
-			NewStepDeleteBlockStorageInstance(conn, ui, &b.config),
-			NewStepTerminateServerInstance(conn, ui),
-		}
+		}),
+		&commonsteps.StepProvision{},
+		multistep.If(b.config.Comm.Type == "ssh", &commonsteps.StepCleanupTempKeys{
+			Comm: &b.config.Comm,
+		}),
+		NewStepStopServerInstance(conn, ui, &b.config),
+		NewStepCreateServerImage(conn, ui, &b.config),
+		NewStepDeleteBlockStorage(conn, ui, &b.config),
+		NewStepTerminateServerInstance(conn, ui, &b.config),
 	}
 
 	// Run!
@@ -107,7 +89,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	b.runner.Run(ctx, b.stateBag)
 
 	// If there was an error, return that
-	if rawErr, ok := b.stateBag.GetOk("Error"); ok {
+	if rawErr, ok := b.stateBag.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
@@ -116,7 +98,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		StateData: map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")},
 	}
 
-	if serverImage, ok := b.stateBag.GetOk("memberServerImage"); ok {
+	if serverImage, ok := b.stateBag.GetOk("member_server_image"); ok {
 		artifact.MemberServerImage = serverImage.(*server.MemberServerImage)
 	}
 

@@ -27,7 +27,19 @@
 - `region` (string) - Name of the region where you want to create an image.
   (default: Korea)
 
-- `access_control_group_configuration_no` (string) - This is used to allow
+- `region_code` (string) - Region Code
+
+- `access_control_group_configuration_no` (string) - Deprecated
+
+- `access_control_group_no` (string) - This is used to allow
   winrm access when you create a Windows server. An ACG that specifies an
   access source (0.0.0.0/0) and allowed port (5985) must be created in
-  advance.
+  advance if you use CLASSIC env. If this field is left blank,
+  Packer will create temporary ACG for automatically in VPC environment.
+
+- `support_vpc` (bool) - Support VPC
+
+- `subnet_no` (string) - The ID of the Subnet where you want to place the Server Instance. If this field is left blank, Packer will try to get the Public Subnet ID from the `vpc_no`.
+
+- `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
+  (You are required to least one between two parameters if u want using VPC environment: `vpc_no` or `subnet_no`)

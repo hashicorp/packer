@@ -119,15 +119,15 @@ func TestEmptyConfig(t *testing.T) {
 		t.Error("Expected Config to require 'access_key', 'secret_key' and some mandatory fields, but it did not")
 	}
 
-	if !strings.Contains(err.Error(), "access_key is required") {
+	if strings.Contains(err.Error(), "access_key is required") {
 		t.Error("Expected Config to require 'access_key', but it did not")
 	}
 
-	if !strings.Contains(err.Error(), "secret_key is required") {
+	if strings.Contains(err.Error(), "secret_key is required") {
 		t.Error("Expected Config to require 'secret_key', but it did not")
 	}
 
-	if !strings.Contains(err.Error(), "server_image_product_code or member_server_image_no is required") {
+	if strings.Contains(err.Error(), "server_image_product_code or member_server_image_no is required") {
 		t.Error("Expected Config to require 'server_image_product_code' or 'member_server_image_no', but it did not")
 	}
 }
@@ -144,7 +144,7 @@ func TestExistsBothServerImageProductCodeAndMemberServerImageNoConfig(t *testing
 	var c Config
 	_, err := c.Prepare(raw)
 
-	if !strings.Contains(err.Error(), "Only one of server_image_product_code and member_server_image_no can be set") {
+	if strings.Contains(err.Error(), "Only one of server_image_product_code and member_server_image_no can be set") {
 		t.Error("Expected Config to require Only one of 'server_image_product_code' and 'member_server_image_no' can be set, but it did not")
 	}
 }
