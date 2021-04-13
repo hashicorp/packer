@@ -5,6 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/exoscale/egoscale"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
@@ -27,6 +31,7 @@ type PostProcessor struct {
 	config *Config
 	runner multistep.Runner
 	exo    *egoscale.Client
+	sos    *s3.Client
 }
 
 func (p *PostProcessor) Configure(raws ...interface{}) error {
@@ -53,9 +58,35 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packer.Ui, a packer.
 
 	p.exo = egoscale.NewClient(p.config.APIEndpoint, p.config.APIKey, p.config.APISecret)
 
+	cfg, err := awsconfig.LoadDefaultConfig(
+		ctx,
+		awsconfig.WithRegion(p.config.TemplateZone),
+
+		awsconfig.WithEndpointResolver(aws.EndpointResolverFunc(
+			func(service, region string) (aws.Endpoint, error) {
+				return aws.Endpoint{
+					URL:           p.config.SOSEndpoint,
+					SigningRegion: p.config.TemplateZone,
+				}, nil
+			})),
+
+		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			p.config.APIKey,
+			p.config.APISecret,
+			"")),
+	)
+	if err != nil {
+		return nil, false, false, fmt.Errorf("unable to initialize SOS client: %s", err)
+	}
+
+	p.sos = s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+	})
+
 	state := new(multistep.BasicStateBag)
 	state.Put("config", p.config)
 	state.Put("exo", p.exo)
+	state.Put("sos", p.sos)
 	state.Put("ui", ui)
 	state.Put("artifact", a)
 

@@ -5,7 +5,7 @@
 @import '~@hashicorp/mktg-global-styles/_temporary-to-remove/tables.css';
 
 :root {
-  --highlight-color: var(--packer);
+  --highlight-color: var(--packer-link);
 }
 
 @import '~@hashicorp/react-button/styles/index.css';

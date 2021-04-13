@@ -78,8 +78,8 @@ Optional:
 - `reregister_vm` (boolean) - Use the method of unregister VM and reregister
   as a template, rather than using the markAsTemplate method in vmWare.
   NOTE: If you are getting permission denied errors when trying to mark as a
-  template, but it works fine in the vSphere UI, try setting this to false.
-  Default is true.
+  template, but it works fine in the vSphere UI, try setting this to `false`.
+  Default is `true`.
 
 ## Using the vSphere Template with local builders
 
@@ -162,7 +162,7 @@ And this role must be authorized on the:
 Some users have reported that vSphere templates created from local VMWare builds
 get their boot order reset to cdrom only instead of the original boot order
 defined by the template. If this issue affects you, the solution is to set
-`"bios.hddOrder": "scsi0:0"` in your builder's vmx_data.
+`"bios.hddOrder": "scsi0:0"` in your builder's `vmx_data`.
 
 Packer doesn't automatically do this for you because it causes strange upload
-behavior in certain versions of ovftool.
+behavior in certain versions of `ovftool`.

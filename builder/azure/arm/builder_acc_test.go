@@ -30,8 +30,8 @@ import (
 
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	builderT "github.com/hashicorp/packer/acctest"
 )
 
 const DeviceLoginAcceptanceTest = "DEVICELOGIN_TEST"

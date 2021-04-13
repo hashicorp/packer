@@ -6,10 +6,9 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	builderT "github.com/hashicorp/packer/acctest"
 	ucloudcommon "github.com/hashicorp/packer/builder/ucloud/common"
 	"github.com/stretchr/testify/assert"
-
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
 )
 
 func TestBuilderAcc_validateRegion(t *testing.T) {

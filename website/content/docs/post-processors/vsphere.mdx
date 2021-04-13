@@ -47,13 +47,13 @@ Optional:
 - `esxi_host` (string) - Target vSphere host. Used to assign specific esx
   host to upload the resulting VM to, when a vCenter Server is used as
   `host`. Can be either a hostname (e.g. "packer-esxi1", requires proper DNS
-  setup and/or correct DNS search domain setting) or an ipv4 address.
+  setup and/or correct DNS search domain setting) or an IPv4 address.
 
 - `disk_mode` (string) - Target disk format. See `ovftool` manual for
-  available options. By default, "thick" will be used.
+  available options. By default, `thick` will be used.
 
 - `insecure` (boolean) - Whether or not the connection to vSphere can be done
-  over an insecure connection. By default this is false.
+  over an insecure connection. By default this is `false`.
 
 - `keep_input_artifact` (boolean) - When `true`, preserve the local VM files,
   even after importing them to vsphere. Defaults to `false`.
@@ -66,9 +66,9 @@ Optional:
   to.
 
 - `overwrite` (boolean) - If it's true force the system to overwrite the
-  existing files instead create new ones. Default is false
+  existing files instead create new ones. Default is `false`
 
-- `options` (array of strings) - Custom options to add in ovftool. See
+- `options` (array of strings) - Custom options to add in `ovftool`. See
   `ovftool --help` to list all the options
 
 # Example
@@ -80,6 +80,39 @@ to a vSphere cluster.
 You can also use this post-processor with the vmx artifact from a vmware build.
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+    communicator = "none"
+}
+
+build {
+    sources = [
+        "source.null.example"
+    ]
+
+    post-processors{
+      post-processor "artifice"{
+          files = ["output-vmware-iso/packer-vmware-iso.vmx"]
+      }
+
+      post-processor "vsphere"{
+          keep_input_artifact = true
+          vm_name    = "packerparty"
+          vm_network = "VM Network"
+          cluster    = "123.45.678.1"
+          datacenter = "PackerDatacenter"
+          datastore  = "datastore1"
+          host       = "123.45.678.9"
+          password   = "SuperSecretPassword"
+          username   = "Administrator@vsphere.local"
+      }
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -114,45 +147,12 @@ You can also use this post-processor with the vmx artifact from a vmware build.
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "null" "example" {
-    communicator = "none"
-}
-
-build {
-    sources = [
-        "source.null.example"
-    ]
-
-    post-processors{
-      post-processor "artifice"{
-          files = ["output-vmware-iso/packer-vmware-iso.vmx"]
-      }
-
-      post-processor "vsphere"{
-          keep_input_artifact = true
-          vm_name = "packerparty"
-          vm_network = "VM Network"
-          cluster = "123.45.678.1"
-          datacenter = "PackerDatacenter"
-          datastore = "datastore1"
-          host = "123.45.678.9"
-          password = "SuperSecretPassword"
-          username = "Administrator@vsphere.local"
-      }
-    }
-}
-```
-
-</Tab>
 </Tabs>
 
 # Permissions
 
-The vsphere post processor uses ovftool and therefore needs the same privileges
-as ovftool. Rather than giving full administrator access, you can create a role
+The vsphere post processor uses `ovftool` and therefore needs the same privileges
+as `ovftool`. Rather than giving full administrator access, you can create a role
 to give the post-processor the permissions necessary to run. Below is an example
 role. Please note that this is a user-supplied list so there may be a few
 extraneous permissions that are not strictly required.

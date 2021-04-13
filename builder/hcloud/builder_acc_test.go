@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	builderT "github.com/hashicorp/packer-plugin-sdk/acctest"
+	builderT "github.com/hashicorp/packer/acctest"
 )
 
 func TestBuilderAcc_basic(t *testing.T) {

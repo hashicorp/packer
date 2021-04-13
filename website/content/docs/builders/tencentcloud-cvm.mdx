@@ -98,14 +98,14 @@ a [communicator](/docs/templates/legacy_json_templates/communicator) can be conf
 
 - `vpc_id` (string) - Specify vpc your cvm will be launched by.
 
-- `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, packer will
+- `vpc_name` (string) - Specify vpc name you will create. if `vpc_id` is not set, Packer will
   create a vpc for you named this parameter.
 
 - `cidr_block` (boolean) - Specify cider block of the vpc you will create if `vpc_id` is not set.
 
 - `subnet_id` (string) - Specify subnet your cvm will be launched by.
 
-- `subnet_name` (string) - Specify subnet name you will create. if `subnet_id` is not set, packer will
+- `subnet_name` (string) - Specify subnet name you will create. if `subnet_id` is not set, Packer will
   create a subnet for you named this parameter.
 
 - `subnect_cidr_block` (boolean) - Specify cider block of the subnet you will create if
@@ -183,4 +183,4 @@ Here is a basic example for Tencentcloud.
 
 See the
 [examples/tencentcloud](https://github.com/hashicorp/packer/tree/master/builder/tencentcloud/examples)
-folder in the packer project for more examples.
+folder in the Packer project for more examples.

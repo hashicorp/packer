@@ -112,7 +112,7 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 	}
 
 	if p.config.VagrantCloudUrl == VAGRANT_CLOUD_URL && p.config.AccessToken == "" {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overriden"))
+		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("access_token must be set if vagrant_cloud_url has not been overridden"))
 	}
 
 	// Create the HTTP client

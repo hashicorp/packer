@@ -33,7 +33,7 @@ options. In addition to the options listed here, a [communicator](/docs/template
 
 #### Managed Identity
 
-If you're running packer on an Azure VM with a [managed identity](/docs/builders/azure#azure-managed-identity) you don't need to specify any additional configuration options. As Packer will attempt to use the Managed Identity and subscription of the VM that Packer is running on.
+If you're running Packer on an Azure VM with a [managed identity](/docs/builders/azure#azure-managed-identity) you don't need to specify any additional configuration options. As Packer will attempt to use the Managed Identity and subscription of the VM that Packer is running on.
 
 #### Interactive User Authentication
 
@@ -123,7 +123,7 @@ By using an existing resource group you can scope the provided credentials to
 just this group, however failed builds are more likely to leave unused
 artifacts.
 
-To have packer create a resource group you **must** provide:
+To have Packer create a resource group you **must** provide:
 
 - `location` (string) Azure datacenter in which your VM will build.
 
@@ -360,7 +360,7 @@ Packer from cleaning up any helper scripts uploaded to the VM during the build.
 The Azure builder attempts to pick default values that provide for a just works
 experience. These values can be changed by the user to more suitable values.
 
-- The default user name is packer not root as in other builders. Most distros
+- The default user name is Packer not root as in other builders. Most distros
   on Azure do not allow root to SSH to a VM hence the need for a non-root
   default user. Set the ssh_username option to override the default value.
 - The default VM size is Standard_A1. Set the vm_size option to override
@@ -493,4 +493,4 @@ minimal, so overall impact is small.
 
 See the
 [examples/azure](https://github.com/hashicorp/packer/tree/master/builder/azure/examples)
-folder in the packer project for more examples.
+folder in the Packer project for more examples.

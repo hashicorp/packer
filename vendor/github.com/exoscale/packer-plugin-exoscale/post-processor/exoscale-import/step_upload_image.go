@@ -9,10 +9,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	s3manager "github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	s3types "github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
@@ -58,23 +58,16 @@ func (s *stepUploadImage) Run(ctx context.Context, state multistep.StateBag) mul
 		return multistep.ActionHalt
 	}
 
-	sess, err := session.NewSessionWithOptions(session.Options{Config: aws.Config{
-		Region:      aws.String(config.TemplateZone),
-		Endpoint:    aws.String(config.SOSEndpoint),
-		Credentials: credentials.NewStaticCredentials(config.APIKey, config.APISecret, "")}})
-	if err != nil {
-		ui.Error(fmt.Sprintf("unable to initialize session: %v", err))
-		return multistep.ActionHalt
-	}
-
-	uploader := s3manager.NewUploader(sess)
-	output, err := uploader.UploadWithContext(ctx, &s3manager.UploadInput{
-		Body:       pf,
-		Bucket:     aws.String(config.ImageBucket),
-		Key:        aws.String(bucketFile),
-		ContentMD5: aws.String(base64.StdEncoding.EncodeToString(hash.Sum(nil))),
-		ACL:        aws.String("public-read"),
-	})
+	output, err := s3manager.
+		NewUploader(state.Get("sos").(*s3.Client)).
+		Upload(ctx,
+			&s3.PutObjectInput{
+				Bucket:     aws.String(config.ImageBucket),
+				Key:        aws.String(bucketFile),
+				Body:       pf,
+				ContentMD5: aws.String(base64.StdEncoding.EncodeToString(hash.Sum(nil))),
+				ACL:        s3types.ObjectCannedACLPublicRead,
+			})
 	if err != nil {
 		ui.Error(fmt.Sprintf("unable to upload template image: %v", err))
 		return multistep.ActionHalt

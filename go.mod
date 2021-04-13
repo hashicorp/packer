@@ -25,7 +25,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
-	github.com/exoscale/packer-plugin-exoscale v0.1.0
+	github.com/exoscale/packer-plugin-exoscale v0.1.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
@@ -51,7 +51,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
-	github.com/hashicorp/packer-plugin-sdk v0.1.1
+	github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407132324-af39c7839daf
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
