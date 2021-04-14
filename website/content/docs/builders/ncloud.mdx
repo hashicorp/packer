@@ -31,6 +31,7 @@ Platform](https://www.ncloud.com/).
   (member_server_image_no is required if not specified)
 
 ### Optional:
+
 - `server_product_code` (string) - Product (spec) code to create.
 
 - `vpc_no` (string) - The ID of the VPC where you want to place the Server Instance. If this field is left blank, Packer will try to get the VPC ID from the `subnet_no`.
@@ -136,19 +137,18 @@ build {
       "user_data": "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm quickconfig -q & sc config WinRM start= auto & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm get winrm/config/service\")",
       "region": "Korea",
       "communicator": "winrm",
-      "winrm_username": "Administrator",
+      "winrm_username": "Administrator"
     }
   ],
   "provisioners": [
     {
       "type": "powershell",
-      "inline": [
-        "Write-Output 1,2,3 | Measure-Object"
-      ]
+      "inline": ["Write-Output 1,2,3 | Measure-Object"]
     }
   ]
 }
 ```
+
 </Tab>
 </Tabs>
 
@@ -202,6 +202,7 @@ build {
 
 </Tab>
 <Tab heading="JSON">
+
 ```json
 {
   "variables": {
@@ -226,36 +227,40 @@ build {
       "type": "shell",
       "inline": [
         "echo Connected via SSM at '${build.User}@${build.Host}:${build.Port}'"
+      ]
+    }
+  ]
+}
+```
+
+</Tab>
+</Tabs>
 
 ## Requirements for creating Windows images
 
 You should include the following code in the Packer configuration file for
 provision when creating a Windows server.
 
-      "builders": [
-        {
-          "type": "ncloud",
-          ...
-          "user_data":
-            "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm quickconfig -q & sc config WinRM start= auto & winrm get winrm/config/service\")",
-          "communicator": "winrm",
-          "winrm_username": "Administrator"
-        }
-      ],
-      "provisioners": [
-        {
-          "type": "powershell",
-          "inline": [
-            "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet /mode:vm \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
-          ]
-        }
+```json
+  "builders": [
+    {
+      "type": "ncloud",
+      ...
+      "user_data":
+        "CreateObject(\"WScript.Shell\").run(\"cmd.exe /c powershell Set-ExecutionPolicy RemoteSigned & winrm set winrm/config/service/auth @{Basic=\"\"true\"\"} & winrm set winrm/config/service @{AllowUnencrypted=\"\"true\"\"} & winrm quickconfig -q & sc config WinRM start= auto & winrm get winrm/config/service\")",
+      "communicator": "winrm",
+      "winrm_username": "Administrator"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "inline": [
+        "$Env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /shutdown /quiet /mode:vm \"/unattend:C:\\Program Files (x86)\\NBP\\nserver64.xml\" "
       ]
     }
   ]
-}
 ```
-</Tab>
-</Tabs>
 
 ## Note
 
