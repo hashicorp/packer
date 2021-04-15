@@ -10,5 +10,11 @@
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
     "version": "latest"
+  },
+  {
+    "title": "VMware vSphere",
+    "path": "vsphere",
+    "repo": "hashicorp/packer-plugin-vsphere",
+    "version": "latest"
   }
 ]
