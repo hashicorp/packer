@@ -71,8 +71,6 @@ import (
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
-	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
@@ -143,8 +141,6 @@ var Builders = map[string]packersdk.Builder{
 }
 
 var Provisioners = map[string]packersdk.Provisioner{
-	"ansible":           new(ansibleprovisioner.Provisioner),
-	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"breakpoint":        new(breakpointprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),

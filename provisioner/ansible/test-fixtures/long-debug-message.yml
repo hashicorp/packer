@@ -1,8 +1,0 @@
-- name: Stub for Packer testing long Ansible messages
-  hosts: localhost
-  connection: local
-
-  tasks:
-    - name: Very long Ansible output (>65535 chars) (Issue https://github.com/hashicorp/packer/issues/3268)
-      debug:
-        msg: "{{ lipsum(n=300, html=false) }}"
