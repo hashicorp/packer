@@ -249,7 +249,12 @@ func TestArchive(t *testing.T) {
 		`, format)
 
 			artifact := testArchive(t, config)
-			defer artifact.Destroy()
+			defer func() {
+				err := artifact.Destroy()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}()
 
 			filename := fmt.Sprintf("package.%s", format)
 			// Verify things look good
