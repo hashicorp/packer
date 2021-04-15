@@ -1,6 +1,7 @@
 package compress
 
 import (
+	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -245,4 +246,16 @@ func testArchive(t *testing.T, config string) packersdk.Artifact {
 	}
 
 	return artifactOut
+}
+
+func Test_makeBZIP2Writer(t *testing.T) {
+	buf := bytes.NewBufferString("BZIP2 test")
+	got, err := makeBZIP2Writer(buf, 9)
+	if err != nil {
+		t.Fatalf("Failed to create writer: %s", err)
+	}
+	err = got.Close()
+	if err != nil {
+		t.Fatalf("Failed to compress artifact: %s", err)
+	}
 }
