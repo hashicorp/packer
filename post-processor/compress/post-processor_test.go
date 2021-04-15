@@ -1,6 +1,8 @@
 package compress
 
 import (
+	"archive/tar"
+	"archive/zip"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -9,9 +11,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dsnet/compress/bzip2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/builder/file"
+	"github.com/pierrec/lz4"
 )
 
 func TestDetectFilename(t *testing.T) {
@@ -181,17 +185,59 @@ func testArchive(t *testing.T, config string) packersdk.Artifact {
 }
 
 func TestArchive(t *testing.T) {
-	tc := []string{
-		"bzip2",
-		"zip",
-		"tar",
-		"tar.gz",
-		"gz",
-		"lz4",
+	tc := map[string]func(*os.File) ([]byte, error){
+		"bzip2": func(archive *os.File) ([]byte, error) {
+			bzipReader, err := bzip2.NewReader(archive, nil)
+			if err != nil {
+				return nil, err
+			}
+			return ioutil.ReadAll(bzipReader)
+		},
+		"zip": func(archive *os.File) ([]byte, error) {
+			fi, _ := archive.Stat()
+			zipReader, err := zip.NewReader(archive, fi.Size())
+			if err != nil {
+				return nil, err
+			}
+			ctt, err := zipReader.File[0].Open()
+			if err != nil {
+				return nil, err
+			}
+			return ioutil.ReadAll(ctt)
+		},
+		"tar": func(archive *os.File) ([]byte, error) {
+			tarReader := tar.NewReader(archive)
+			_, err := tarReader.Next()
+			if err != nil {
+				return nil, err
+			}
+			return ioutil.ReadAll(tarReader)
+		},
+		"tar.gz": func(archive *os.File) ([]byte, error) {
+			gzipReader, err := gzip.NewReader(archive)
+			if err != nil {
+				return nil, err
+			}
+			tarReader := tar.NewReader(gzipReader)
+			_, err = tarReader.Next()
+			if err != nil {
+				return nil, err
+			}
+			return ioutil.ReadAll(tarReader)
+		},
+		"gz": func(archive *os.File) ([]byte, error) {
+			gzipReader, _ := gzip.NewReader(archive)
+			return ioutil.ReadAll(gzipReader)
+		},
+		"lz4": func(archive *os.File) ([]byte, error) {
+			lz4Reader := lz4.NewReader(archive)
+			return ioutil.ReadAll(lz4Reader)
+		},
 	}
 
-	for _, format := range tc {
-		config := fmt.Sprintf(`
+	for format, unzip := range tc {
+		t.Run(format, func(t *testing.T) {
+			config := fmt.Sprintf(`
 		{
 			"post-processors": [
 				{
@@ -202,13 +248,28 @@ func TestArchive(t *testing.T) {
 		}
 		`, format)
 
-		artifact := testArchive(t, config)
-		defer artifact.Destroy()
+			artifact := testArchive(t, config)
+			defer artifact.Destroy()
 
-		// Verify things look good
-		_, err := os.Stat(fmt.Sprintf("package.%s", format))
-		if err != nil {
-			t.Errorf("Unable to read archive: %s", err)
-		}
+			filename := fmt.Sprintf("package.%s", format)
+			// Verify things look good
+			_, err := os.Stat(filename)
+			if err != nil {
+				t.Errorf("Unable to read archive: %s", err)
+			}
+
+			archive, err := os.Open(filename)
+			if err != nil {
+				t.Fatal(err)
+			}
+			found, err := unzip(archive)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(found) != expectedFileContents {
+				t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, string(found))
+			}
+		})
 	}
+
 }
