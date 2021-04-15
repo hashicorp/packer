@@ -25,6 +25,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
+	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
 	github.com/fatih/camelcase v1.0.0
 	github.com/fatih/structtag v1.0.0
@@ -81,7 +82,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
-	github.com/ulikunitz/xz v0.5.5
+	github.com/ulikunitz/xz v0.5.6
 	github.com/vmware/govmomi v0.23.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd

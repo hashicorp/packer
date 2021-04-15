@@ -14,6 +14,7 @@ import (
 	"runtime"
 
 	"github.com/biogo/hts/bgzf"
+	"github.com/dsnet/compress/bzip2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -160,6 +161,14 @@ func (p *PostProcessor) PostProcess(
 			return nil, false, false, fmt.Errorf(errTmpl, p.config.Algorithm, err)
 		}
 		defer output.Close()
+	case "bzip2":
+		ui.Say(fmt.Sprintf("Using bzip2 compression with 1 core for %s (library does not support MT)",
+			target))
+		output, err = makeBZIP2Writer(outputFile, p.config.CompressionLevel)
+		if err != nil {
+			return nil, false, false, fmt.Errorf(errTmpl, p.config.Algorithm, err)
+		}
+		defer output.Close()
 	case "lz4":
 		ui.Say(fmt.Sprintf("Using lz4 compression with %d cores for %s",
 			runtime.GOMAXPROCS(-1), target))
@@ -242,12 +251,13 @@ func (config *Config) detectFromFilename() {
 	var result [][]string
 
 	extensions := map[string]string{
-		"tar":  "tar",
-		"zip":  "zip",
-		"gz":   "pgzip",
-		"lz4":  "lz4",
-		"bgzf": "bgzf",
-		"xz":   "xz",
+		"tar":   "tar",
+		"zip":   "zip",
+		"gz":    "pgzip",
+		"lz4":   "lz4",
+		"bgzf":  "bgzf",
+		"xz":    "xz",
+		"bzip2": "bzip2",
 	}
 
 	if config.Format == "" {
@@ -302,6 +312,20 @@ func makeBGZFWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser
 		return nil, ErrInvalidCompressionLevel
 	}
 	return bgzfWriter, nil
+}
+
+func makeBZIP2Writer(output io.Writer, compressionLevel int) (io.WriteCloser, error) {
+	// Set the default to highest level compression
+	bzipCFG := &bzip2.WriterConfig{Level: 9}
+	// Override our set defaults
+	if compressionLevel > 0 {
+		bzipCFG.Level = compressionLevel
+	}
+	bzipWriter, err := bzip2.NewWriter(output, bzipCFG)
+	if err != nil {
+		return nil, err
+	}
+	return bzipWriter, nil
 }
 
 func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
