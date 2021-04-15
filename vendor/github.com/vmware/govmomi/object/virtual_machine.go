@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,6 +38,34 @@ const (
 
 type VirtualMachine struct {
 	Common
+}
+
+// extractDiskLayoutFiles is a helper function used to extract file keys for
+// all disk files attached to the virtual machine at the current point of
+// running.
+func extractDiskLayoutFiles(diskLayoutList []types.VirtualMachineFileLayoutExDiskLayout) []int {
+	var result []int
+
+	for _, layoutExDisk := range diskLayoutList {
+		for _, link := range layoutExDisk.Chain {
+			for i := range link.FileKey { // diskDescriptor, diskExtent pairs
+				result = append(result, int(link.FileKey[i]))
+			}
+		}
+	}
+
+	return result
+}
+
+// removeKey is a helper function for removing a specific file key from a list
+// of keys associated with disks attached to a virtual machine.
+func removeKey(l *[]int, key int) {
+	for i, k := range *l {
+		if k == key {
+			*l = append((*l)[:i], (*l)[i+1:]...)
+			break
+		}
+	}
 }
 
 func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *VirtualMachine {
@@ -174,6 +202,20 @@ func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, 
 	}
 
 	res, err := methods.CloneVM_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
+func (v VirtualMachine) InstantClone(ctx context.Context, config types.VirtualMachineInstantCloneSpec) (*Task, error) {
+	req := types.InstantClone_Task{
+		This: v.Reference(),
+		Spec: config,
+	}
+
+	res, err := methods.InstantClone_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -469,6 +511,41 @@ func (v VirtualMachine) RemoveDevice(ctx context.Context, keepFiles bool, device
 	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationRemove, fop, device...)
 }
 
+// AttachDisk attaches the given disk to the VirtualMachine
+func (v VirtualMachine) AttachDisk(ctx context.Context, id string, datastore *Datastore, controllerKey int32, unitNumber int32) error {
+	req := types.AttachDisk_Task{
+		This:          v.Reference(),
+		DiskId:        types.ID{Id: id},
+		Datastore:     datastore.Reference(),
+		ControllerKey: controllerKey,
+		UnitNumber:    &unitNumber,
+	}
+
+	res, err := methods.AttachDisk_Task(ctx, v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	task := NewTask(v.c, res.Returnval)
+	return task.Wait(ctx)
+}
+
+// DetachDisk detaches the given disk from the VirtualMachine
+func (v VirtualMachine) DetachDisk(ctx context.Context, id string) error {
+	req := types.DetachDisk_Task{
+		This:   v.Reference(),
+		DiskId: types.ID{Id: id},
+	}
+
+	res, err := methods.DetachDisk_Task(ctx, v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	task := NewTask(v.c, res.Returnval)
+	return task.Wait(ctx)
+}
+
 // BootOptions returns the VirtualMachine's config.bootOptions property.
 func (v VirtualMachine) BootOptions(ctx context.Context) (*types.VirtualMachineBootOptions, error) {
 	var o mo.VirtualMachine
@@ -577,6 +654,63 @@ func (m snapshotMap) add(parent string, tree []types.VirtualMachineSnapshotTree)
 
 		m.add(sname, st.ChildSnapshotList)
 	}
+}
+
+// SnapshotSize calculates the size of a given snapshot in bytes. If the
+// snapshot is current, disk files not associated with any parent snapshot are
+// included in size calculations. This allows for measuring and including the
+// growth from the last fixed snapshot to the present state.
+func SnapshotSize(info types.ManagedObjectReference, parent *types.ManagedObjectReference, vmlayout *types.VirtualMachineFileLayoutEx, isCurrent bool) int {
+	var fileKeyList []int
+	var parentFiles []int
+	var allSnapshotFiles []int
+
+	diskFiles := extractDiskLayoutFiles(vmlayout.Disk)
+
+	for _, layout := range vmlayout.Snapshot {
+		diskLayout := extractDiskLayoutFiles(layout.Disk)
+		allSnapshotFiles = append(allSnapshotFiles, diskLayout...)
+
+		if layout.Key.Value == info.Value {
+			fileKeyList = append(fileKeyList, int(layout.DataKey)) // The .vmsn file
+			fileKeyList = append(fileKeyList, diskLayout...)       // The .vmdk files
+		} else if parent != nil && layout.Key.Value == parent.Value {
+			parentFiles = append(parentFiles, diskLayout...)
+		}
+	}
+
+	for _, parentFile := range parentFiles {
+		removeKey(&fileKeyList, parentFile)
+	}
+
+	for _, file := range allSnapshotFiles {
+		removeKey(&diskFiles, file)
+	}
+
+	fileKeyMap := make(map[int]types.VirtualMachineFileLayoutExFileInfo)
+	for _, file := range vmlayout.File {
+		fileKeyMap[int(file.Key)] = file
+	}
+
+	size := 0
+
+	for _, fileKey := range fileKeyList {
+		file := fileKeyMap[fileKey]
+		if parent != nil ||
+			(file.Type != string(types.VirtualMachineFileLayoutExFileTypeDiskDescriptor) &&
+				file.Type != string(types.VirtualMachineFileLayoutExFileTypeDiskExtent)) {
+			size += int(file.Size)
+		}
+	}
+
+	if isCurrent {
+		for _, diskFile := range diskFiles {
+			file := fileKeyMap[diskFile]
+			size += int(file.Size)
+		}
+	}
+
+	return size
 }
 
 // FindSnapshot supports snapshot lookup by name, where name can be:

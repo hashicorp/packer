@@ -148,6 +148,12 @@ type EulaSection struct {
 	License string `xml:"License"`
 }
 
+type Config struct {
+	Required *bool  `xml:"required,attr"`
+	Key      string `xml:"key,attr"`
+	Value    string `xml:"value,attr"`
+}
+
 type VirtualHardwareSection struct {
 	Section
 
@@ -157,6 +163,8 @@ type VirtualHardwareSection struct {
 	System      *VirtualSystemSettingData       `xml:"System"`
 	Item        []ResourceAllocationSettingData `xml:"Item"`
 	StorageItem []StorageAllocationSettingData  `xml:"StorageItem"`
+	Config      []Config                        `xml:"Config"`
+	ExtraConfig []Config                        `xml:"ExtraConfig"`
 }
 
 type VirtualSystemSettingData struct {

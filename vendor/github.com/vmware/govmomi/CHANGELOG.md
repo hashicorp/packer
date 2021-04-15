@@ -1,5 +1,19 @@
 # changelog
 
+### 0.24.0 (2020-12-20)
+
+* Update generated API bindings to vSphere 7.0U1 release
+
+* Add vSAN 7.0 API bindings
+
+* Add AuthorizationManager.HasUserPrivilegeOnEntities wrapper
+
+* Add sms generated types and methods
+
+* Add ExtendDisk and InflateDisk wrappers to vlsm.ObjectManager
+
+* Add vSAN Performance Data Collection API
+
 ### 0.23.0 (2020-06-11)
 
 * Finder: support DistributedVirtualSwitch traversal

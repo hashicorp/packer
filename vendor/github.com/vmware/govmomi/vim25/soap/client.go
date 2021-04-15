@@ -74,7 +74,8 @@ type Client struct {
 	Types     types.Func
 	UserAgent string
 
-	cookie string
+	cookie          string
+	insecureCookies bool
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
@@ -155,6 +156,10 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	// Remove user information from a copy of the URL
 	c.u = c.URL()
 	c.u.User = nil
+
+	if c.u.Scheme == "http" {
+		c.insecureCookies = os.Getenv("GOVMOMI_INSECURE_COOKIES") == "true"
+	}
 
 	return &c
 }
@@ -476,6 +481,16 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 
 type kindContext struct{}
 
+func (c *Client) setInsecureCookies(res *http.Response) {
+	cookies := res.Cookies()
+	if len(cookies) != 0 {
+		for _, cookie := range cookies {
+			cookie.Secure = false
+		}
+		c.Jar.SetCookies(c.u, cookies)
+	}
+}
+
 func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Response) error) error {
 	if ctx == nil {
 		ctx = context.Background()
@@ -519,6 +534,10 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 		d.debugResponse(res, ext)
 	}
 
+	if c.insecureCookies {
+		c.setInsecureCookies(res)
+	}
+
 	return f(res)
 }
 
@@ -541,7 +560,7 @@ type statusError struct {
 }
 
 // Temporary returns true for HTTP response codes that can be retried
-// See vim25.TemporaryNetworkError
+// See vim25.IsTemporaryNetworkError
 func (e *statusError) Temporary() bool {
 	switch e.res.StatusCode {
 	case http.StatusBadGateway:

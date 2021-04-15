@@ -12,7 +12,7 @@ services:       false
 
 # Set the version of Go.
 language:       go
-go:             1.14
+go:             1.15
 
 # Always set the project's Go import path to ensure that forked
 # builds get cloned to the correct location.
@@ -45,22 +45,13 @@ jobs:
       script:        make install
 
     - <<:            *build-stage
-      env:           GOOS=linux   GOARCH=386
-
-    - <<:            *build-stage
       env:           GOOS=darwin  GOARCH=amd64
-    - <<:            *build-stage
-      env:           GOOS=darwin  GOARCH=386
 
     - <<:            *build-stage
       env:           GOOS=freebsd GOARCH=amd64
-    - <<:            *build-stage
-      env:           GOOS=freebsd GOARCH=386
 
     - <<:            *build-stage
       env:           GOOS=windows GOARCH=amd64
-    - <<:            *build-stage
-      env:           GOOS=windows GOARCH=386
 
     # The test stage executes the test target.
     - stage:         test

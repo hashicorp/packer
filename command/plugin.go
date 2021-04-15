@@ -56,8 +56,6 @@ import (
 	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
-	vsphereclonebuilder "github.com/hashicorp/packer/builder/vsphere/clone"
-	vsphereisobuilder "github.com/hashicorp/packer/builder/vsphere/iso"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
@@ -71,8 +69,6 @@ import (
 	ucloudimportpostprocessor "github.com/hashicorp/packer/post-processor/ucloud-import"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
-	vspherepostprocessor "github.com/hashicorp/packer/post-processor/vsphere"
-	vspheretemplatepostprocessor "github.com/hashicorp/packer/post-processor/vsphere-template"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
 	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
@@ -143,8 +139,6 @@ var Builders = map[string]packersdk.Builder{
 	"virtualbox-vm":    new(virtualboxvmbuilder.Builder),
 	"vmware-iso":       new(vmwareisobuilder.Builder),
 	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
-	"vsphere-clone":    new(vsphereclonebuilder.Builder),
-	"vsphere-iso":      new(vsphereisobuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
@@ -182,8 +176,6 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
-	"vsphere":              new(vspherepostprocessor.PostProcessor),
-	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
