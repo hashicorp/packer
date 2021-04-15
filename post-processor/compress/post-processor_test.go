@@ -267,6 +267,13 @@ func TestArchive(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			defer func() {
+				err := archive.Close()
+				if err != nil {
+					t.Fatal(err)
+				}
+			}()
+
 			found, err := unzip(archive)
 			if err != nil {
 				t.Fatal(err)
