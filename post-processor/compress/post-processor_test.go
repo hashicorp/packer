@@ -1,7 +1,6 @@
 package compress
 
 import (
-	"bytes"
 	"compress/gzip"
 	"context"
 	"fmt"
@@ -58,73 +57,6 @@ func TestDetectFilename(t *testing.T) {
 }
 
 const expectedFileContents = "Hello world!"
-
-func TestSimpleCompress(t *testing.T) {
-	const config = `
-	{
-	    "post-processors": [
-	        {
-	            "type": "compress",
-	            "output": "package.tar.gz"
-	        }
-	    ]
-	}
-	`
-	artifact := testArchive(t, config)
-	defer artifact.Destroy()
-
-	fi, err := os.Stat("package.tar.gz")
-	if err != nil {
-		t.Errorf("Unable to read archive: %s", err)
-	}
-	if fi.IsDir() {
-		t.Error("Archive should not be a directory")
-	}
-}
-
-func TestZipArchive(t *testing.T) {
-	const config = `
-	{
-	    "post-processors": [
-	        {
-	            "type": "compress",
-	            "output": "package.zip"
-	        }
-	    ]
-	}
-	`
-
-	artifact := testArchive(t, config)
-	defer artifact.Destroy()
-
-	// Verify things look good
-	_, err := os.Stat("package.zip")
-	if err != nil {
-		t.Errorf("Unable to read archive: %s", err)
-	}
-}
-
-func TestTarArchive(t *testing.T) {
-	const config = `
-	{
-	    "post-processors": [
-	        {
-	            "type": "compress",
-	            "output": "package.tar"
-	        }
-	    ]
-	}
-	`
-
-	artifact := testArchive(t, config)
-	defer artifact.Destroy()
-
-	// Verify things look good
-	_, err := os.Stat("package.tar")
-	if err != nil {
-		t.Errorf("Unable to read archive: %s", err)
-	}
-}
 
 func TestCompressOptions(t *testing.T) {
 	const config = `
@@ -248,14 +180,35 @@ func testArchive(t *testing.T, config string) packersdk.Artifact {
 	return artifactOut
 }
 
-func Test_makeBZIP2Writer(t *testing.T) {
-	buf := bytes.NewBufferString("BZIP2 test")
-	got, err := makeBZIP2Writer(buf, 9)
-	if err != nil {
-		t.Fatalf("Failed to create writer: %s", err)
+func TestArchive(t *testing.T) {
+	tc := []string{
+		"bzip2",
+		"zip",
+		"tar",
+		"tar.gz",
+		"gz",
+		"lz4",
 	}
-	err = got.Close()
-	if err != nil {
-		t.Fatalf("Failed to compress artifact: %s", err)
+
+	for _, format := range tc {
+		config := fmt.Sprintf(`
+		{
+			"post-processors": [
+				{
+					"type": "compress",
+					"output": "package.%s"
+				}
+			]
+		}
+		`, format)
+
+		artifact := testArchive(t, config)
+		defer artifact.Destroy()
+
+		// Verify things look good
+		_, err := os.Stat(fmt.Sprintf("package.%s", format))
+		if err != nil {
+			t.Errorf("Unable to read archive: %s", err)
+		}
 	}
 }
