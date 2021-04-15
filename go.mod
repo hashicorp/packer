@@ -84,7 +84,6 @@ require (
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ulikunitz/xz v0.5.6
-	github.com/ulikunitz/xz v0.5.5
 	github.com/vmware/govmomi v0.24.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
