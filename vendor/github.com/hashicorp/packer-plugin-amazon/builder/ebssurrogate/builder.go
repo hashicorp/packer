@@ -1,5 +1,5 @@
 //go:generate packer-sdc struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config,RootBlockDevice,BlockDevice
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,RootBlockDevice,BlockDevice
 
 // The ebssurrogate package contains a packersdk.Builder implementation that
 // builds a new EBS-backed AMI using an ephemeral instance.

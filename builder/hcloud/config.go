@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,imageFilter
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,imageFilter
 
 package hcloud
 

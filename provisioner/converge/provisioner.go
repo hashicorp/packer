@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,ModuleDir
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,ModuleDir
 
 // This package implements a provisioner for Packer that executes
 // Converge to provision a remote machine

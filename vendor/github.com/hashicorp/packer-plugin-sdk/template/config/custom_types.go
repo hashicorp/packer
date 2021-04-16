@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type KeyValue,KeyValues,KeyValueFilter,NameValue,NameValues,NameValueFilter
+//go:generate packer-sdc mapstructure-to-hcl2 -type KeyValue,KeyValues,KeyValueFilter,NameValue,NameValues,NameValueFilter
 package config
 
 import (

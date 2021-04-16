@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // Package puppetserver implements a provisioner for Packer that executes
 // Puppet on the remote machine connecting to a Puppet master.

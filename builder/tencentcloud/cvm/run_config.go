@@ -1,5 +1,5 @@
 //go:generate packer-sdc struct-markdown
-//go:generate mapstructure-to-hcl2 -type tencentCloudDataDisk
+//go:generate packer-sdc mapstructure-to-hcl2 -type tencentCloudDataDisk
 
 package cvm
 

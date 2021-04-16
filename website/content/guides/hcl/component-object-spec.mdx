@@ -18,7 +18,7 @@ follow to make it HCL2 enabled:
 
 - run `go install github.com/hashicorp/packer/cmd/mapstructure-to-hcl2`
 
-- Add `//go:generate mapstructure-to-hcl2 -type Config` at the top of
+- Add `//go:generate packer-sdc mapstructure-to-hcl2 -type Config` at the top of
   `config.go`
 
 - run `go generate ./my/example-plugin/...`

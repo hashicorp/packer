@@ -1,5 +1,5 @@
 //go:generate packer-sdc struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // The amazonebs package contains a packersdk.Builder implementation that
 // builds AMIs for Amazon EC2.

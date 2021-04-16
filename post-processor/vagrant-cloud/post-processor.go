@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // vagrant_cloud implements the packersdk.PostProcessor interface and adds a
 // post-processor that uploads artifacts from the vagrant post-processor

@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type SecurityGroupFilterOptions,OmiFilterOptions,SubnetFilterOptions,NetFilterOptions,BlockDevice
+//go:generate packer-sdc mapstructure-to-hcl2 -type SecurityGroupFilterOptions,OmiFilterOptions,SubnetFilterOptions,NetFilterOptions,BlockDevice
 
 package common
 

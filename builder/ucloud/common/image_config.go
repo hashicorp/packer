@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type ImageDestination
+//go:generate packer-sdc mapstructure-to-hcl2 -type ImageDestination
 //go:generate packer-sdc struct-markdown
 
 package common
