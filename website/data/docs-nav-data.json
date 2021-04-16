@@ -874,23 +874,6 @@
         "path": "builders/vagrant"
       },
       {
-        "title": "VMware",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/vmware"
-          },
-          {
-            "title": "VMWare ISO",
-            "path": "builders/vmware/iso"
-          },
-          {
-            "title": "VMWare VMX",
-            "path": "builders/vmware/vmx"
-          }
-        ]
-      },
-      {
         "title": "Yandex.Cloud",
         "path": "builders/yandex"
       },
