@@ -22,7 +22,7 @@ commands:
         type: string
       HOME:
         type: string
-        default: "/home/circleci"
+        default: "~"
     steps:
       - checkout
       - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.<< parameters.GOOS >>-amd64.tar.gz | tar -C << parameters.HOME >>/ -xz
