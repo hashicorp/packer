@@ -146,7 +146,7 @@ testacc: # install-build-deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
 testrace: mode-check vet ## Test with race detection enabled
-	@GO111MODULE=off go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
+	@go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 # Runs code coverage and open a html page with report
 cover:
