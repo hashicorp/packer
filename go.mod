@@ -27,8 +27,6 @@ require (
 	github.com/digitalocean/godo v1.11.1
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
-	github.com/fatih/camelcase v1.0.0
-	github.com/fatih/structtag v1.0.0
 	github.com/go-ini/ini v1.25.4
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3

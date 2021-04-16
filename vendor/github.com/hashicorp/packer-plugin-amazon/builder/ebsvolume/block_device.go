@@ -1,4 +1,4 @@
-//go:generate packer-sdc struct-markdown
+//go:generate struct-markdown
 
 package ebsvolume
 

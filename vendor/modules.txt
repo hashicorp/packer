@@ -308,14 +308,8 @@ github.com/exoscale/egoscale/v2/internal/public-api
 # github.com/exoscale/packer-plugin-exoscale v0.1.1
 ## explicit
 github.com/exoscale/packer-plugin-exoscale/post-processor/exoscale-import
-# github.com/fatih/camelcase v1.0.0
-## explicit
-github.com/fatih/camelcase
 # github.com/fatih/color v1.9.0
 github.com/fatih/color
-# github.com/fatih/structtag v1.0.0
-## explicit
-github.com/fatih/structtag
 # github.com/ghodss/yaml v1.0.0
 github.com/ghodss/yaml
 # github.com/go-ini/ini v1.25.4
@@ -1033,8 +1027,6 @@ golang.org/x/tools/cmd/goimports
 golang.org/x/tools/go/ast/astutil
 golang.org/x/tools/go/gcexportdata
 golang.org/x/tools/go/internal/gcimporter
-golang.org/x/tools/go/internal/packagesdriver
-golang.org/x/tools/go/packages
 golang.org/x/tools/imports
 golang.org/x/tools/internal/event
 golang.org/x/tools/internal/event/core
@@ -1044,8 +1036,6 @@ golang.org/x/tools/internal/fastwalk
 golang.org/x/tools/internal/gocommand
 golang.org/x/tools/internal/gopathwalk
 golang.org/x/tools/internal/imports
-golang.org/x/tools/internal/packagesinternal
-golang.org/x/tools/internal/typesinternal
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 golang.org/x/xerrors
 golang.org/x/xerrors/internal

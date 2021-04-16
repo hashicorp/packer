@@ -1,5 +1,5 @@
-//go:generate packer-sdc struct-markdown
-//go:generate packer-sdc mapstructure-to-hcl2 -type DatasourceOutput,Config
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type DatasourceOutput,Config
 package ami
 
 import (

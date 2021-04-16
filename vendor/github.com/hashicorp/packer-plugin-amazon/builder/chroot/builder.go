@@ -1,5 +1,5 @@
-//go:generate packer-sdc struct-markdown
-//go:generate packer-sdc mapstructure-to-hcl2 -type Config,BlockDevices,BlockDevice
+//go:generate struct-markdown
+//go:generate mapstructure-to-hcl2 -type Config,BlockDevices,BlockDevice
 
 // The chroot package is able to create an Amazon AMI without requiring the
 // launch of a new instance for every build. It does this by attaching and
