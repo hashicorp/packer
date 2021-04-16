@@ -561,7 +561,7 @@ github.com/hashicorp/packer-plugin-sdk/tmp
 github.com/hashicorp/packer-plugin-sdk/useragent
 github.com/hashicorp/packer-plugin-sdk/uuid
 github.com/hashicorp/packer-plugin-sdk/version
-# github.com/hashicorp/packer-plugin-virtualbox v0.0.0-20210415132603-5d753f7335b4
+# github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/common
 github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso

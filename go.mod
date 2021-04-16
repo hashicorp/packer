@@ -51,7 +51,7 @@ require (
 	github.com/hashicorp/packer-plugin-ansible v0.0.2
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-sdk v0.1.3
-	github.com/hashicorp/packer-plugin-virtualbox v0.0.0-20210415132603-5d753f7335b4
+	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/hetznercloud/hcloud-go v1.15.1
