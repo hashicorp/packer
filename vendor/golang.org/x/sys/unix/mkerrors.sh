@@ -56,6 +56,7 @@ includes_Darwin='
 #define _DARWIN_C_SOURCE
 #define KERNEL
 #define _DARWIN_USE_64_BIT_INODE
+#define __APPLE_USE_RFC_3542
 #include <stdint.h>
 #include <sys/attr.h>
 #include <sys/clonefile.h>
@@ -501,7 +502,7 @@ ccflags="$@"
 		$2 ~ /^(AF|SOCK|SO|SOL|IPPROTO|IP|IPV6|ICMP6|TCP|MCAST|EVFILT|NOTE|SHUT|PROT|MAP|MFD|T?PACKET|MSG|SCM|MCL|DT|MADV|PR|LOCAL)_/ ||
 		$2 ~ /^TP_STATUS_/ ||
 		$2 ~ /^FALLOC_/ ||
-		$2 ~ /^ICMP(V6)?_FILTER$/ ||
+		$2 ~ /^ICMP(V6)?_FILTER/ ||
 		$2 == "SOMAXCONN" ||
 		$2 == "NAME_MAX" ||
 		$2 == "IFNAMSIZ" ||

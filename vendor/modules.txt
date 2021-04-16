@@ -572,6 +572,11 @@ github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/common
 github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso
 github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf
 github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm
+# github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a
+## explicit
+github.com/hashicorp/packer-plugin-vmware/builder/vmware/common
+github.com/hashicorp/packer-plugin-vmware/builder/vmware/iso
+github.com/hashicorp/packer-plugin-vmware/builder/vmware/vmx
 # github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
 ## explicit
 github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone
@@ -805,7 +810,6 @@ github.com/ulikunitz/xz/internal/hash
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
 # github.com/vmware/govmomi v0.24.1
-## explicit
 github.com/vmware/govmomi
 github.com/vmware/govmomi/find
 github.com/vmware/govmomi/internal
@@ -938,7 +942,7 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+# golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 ## explicit
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
@@ -973,7 +977,7 @@ golang.org/x/mobile/event/key
 golang.org/x/mod/module
 golang.org/x/mod/semver
 golang.org/x/mod/sumdb/dirhash
-# golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
+# golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -1003,7 +1007,7 @@ golang.org/x/oauth2/jwt
 ## explicit
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4
+# golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/execabs
@@ -1013,7 +1017,7 @@ golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
 golang.org/x/term
-# golang.org/x/text v0.3.5
+# golang.org/x/text v0.3.6
 golang.org/x/text/encoding
 golang.org/x/text/encoding/charmap
 golang.org/x/text/encoding/htmlindex
