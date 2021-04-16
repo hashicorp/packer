@@ -56,6 +56,7 @@ import (
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
+	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -159,6 +160,7 @@ var Provisioners = map[string]packersdk.Provisioner{
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{
+	"alicloud-import":     new(alicloudimportpostprocessor.PostProcessor),
 	"artifice":            new(artificepostprocessor.PostProcessor),
 	"checksum":            new(checksumpostprocessor.PostProcessor),
 	"compress":            new(compresspostprocessor.PostProcessor),
