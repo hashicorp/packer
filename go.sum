@@ -480,8 +480,8 @@ github.com/hashicorp/packer-plugin-virtualbox v0.0.1 h1:vTfy7a10RUVMdNnDLo0EQrCV
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
 github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a h1:LpZ+8Y1vozsI4vuAjUpUOEzFl+jNSY4SL1kfGkVMmb8=
 github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a/go.mod h1:NsiT4IOeDKf/aszQNX+/B1xHrfBR3RdUM3sSqANgNec=
-github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6 h1:pOv7Apd4P3KEpNBHLV4E7tKlwHoInCU/bnPVadGSDxY=
-github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6/go.mod h1:XMhsLDDT7sD2BWaruLvGPynnn4IqdbrfvuKhb1GK1RI=
+github.com/hashicorp/packer-plugin-vsphere v0.0.1 h1:4SUmRP+mGpBJHp6dLL4dmBCC+yDseTktb9YNLj11mVI=
+github.com/hashicorp/packer-plugin-vsphere v0.0.1/go.mod h1:XMhsLDDT7sD2BWaruLvGPynnn4IqdbrfvuKhb1GK1RI=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=
 github.com/hashicorp/serf v0.9.2 h1:yJoyfZXo4Pk2p/M/viW+YLibBFiIbKoP79gu7kDAFP0=
 github.com/hashicorp/serf v0.9.2/go.mod h1:UWDWwZeL5cuWDJdl0C6wrvrUwEqtQ4ZKBKKENpqIUyk=

@@ -577,7 +577,7 @@ github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm
 github.com/hashicorp/packer-plugin-vmware/builder/vmware/common
 github.com/hashicorp/packer-plugin-vmware/builder/vmware/iso
 github.com/hashicorp/packer-plugin-vmware/builder/vmware/vmx
-# github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
+# github.com/hashicorp/packer-plugin-vsphere v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone
 github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/common

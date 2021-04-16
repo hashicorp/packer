@@ -53,7 +53,7 @@ require (
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a
-	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
+	github.com/hashicorp/packer-plugin-vsphere v0.0.1
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
