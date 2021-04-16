@@ -68,8 +68,8 @@
 /builder/yandex/                      @GennadySpb @alexanderKhaustov @seukyaso
 /website/pages/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
 
-/builder/osc/                      @marinsalinas @Hakujou
-/website/pages/docs/builders/osc* @marinsalinas @Hakujou
+/builder/osc/                      @marinsalinas @Hakujou @outscale-mgo
+/website/pages/docs/builders/osc* @marinsalinas @Hakujou @outscale-mgo
 
 /examples/tencentcloud/                      @likexian
 /builder/tencentcloud/                      @likexian
