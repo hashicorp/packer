@@ -49,11 +49,9 @@ require (
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
+	github.com/hashicorp/packer-plugin-googlecompute v0.0.1-pre
 	github.com/hashicorp/packer-plugin-sdk v0.1.3
 	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
-	github.com/hashicorp/vault/api v1.0.4
-	github.com/hashicorp/packer-plugin-googlecompute v0.0.1-pre
-	github.com/hashicorp/packer-plugin-sdk v0.1.2
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
@@ -90,15 +88,6 @@ require (
 	github.com/zclconf/go-cty v1.8.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/mod v0.3.0
-	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
-	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d
-	golang.org/x/tools v0.0.0-20201111133315-69daaf961d65
-	google.golang.org/api v0.32.0
-	google.golang.org/grpc v1.32.0
-	golang.org/x/mobile v0.0.0-20201208152944-da85bec010a2
 	golang.org/x/mod v0.4.1
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
