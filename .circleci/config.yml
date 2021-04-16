@@ -20,10 +20,13 @@ commands:
         type: string
       GOVERSION:
         type: string
+      HOME:
+        type: string
+        default: "/home/circleci"
     steps:
       - checkout
-      - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.<< parameters.GOOS >>-amd64.tar.gz | tar -C ~/ -xz
-      - run: ~/go/bin/go test ./... -coverprofile=coverage.txt  -covermode=atomic
+      - run: curl https://dl.google.com/go/go<< parameters.GOVERSION >>.<< parameters.GOOS >>-amd64.tar.gz | tar -C << parameters.HOME >>/ -xz
+      - run: << parameters.HOME >>/go/bin/go test ./... -coverprofile=coverage.txt  -covermode=atomic
   install-go-run-tests-windows:
     parameters:
       GOVERSION:
