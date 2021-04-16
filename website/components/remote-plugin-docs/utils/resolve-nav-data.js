@@ -137,6 +137,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     path: slug,
     repo,
     version,
+    pluginTier,
     sourceBranch = 'main',
   } = pluginConfigEntry
   const docsMdxFiles = await fetchPluginDocs({ repo, tag: version })
@@ -164,13 +165,14 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     const sourceUrl = `https://github.com/${repo}/blob/${sourceBranch}/${filePath}`
     // determine pluginTier
     const pluginOwner = repo.split('/')[0]
-    const pluginTier = pluginOwner === 'hashicorp' ? 'official' : 'community'
+    const parsedPluginTier =
+      pluginTier || (pluginOwner === 'hashicorp' ? 'official' : 'community')
     // Construct and return a NavLeafRemote node
     return {
       title,
       path: urlPath,
       remoteFile: { filePath, fileString, sourceUrl },
-      pluginTier,
+      pluginTier: parsedPluginTier,
     }
   })
   //
