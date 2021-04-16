@@ -22,6 +22,9 @@ import (
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
 	dockersavepostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-save"
 	dockertagpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag"
+	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
+	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
+	virtualboxvmbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm"
 	vsphereclonebuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone"
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
@@ -46,6 +49,9 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
+	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
+	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the

@@ -878,27 +878,6 @@
         "path": "builders/vagrant"
       },
       {
-        "title": "VirtualBox",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/virtualbox"
-          },
-          {
-            "title": "ISO",
-            "path": "builders/virtualbox/iso"
-          },
-          {
-            "title": "OVF",
-            "path": "builders/virtualbox/ovf"
-          },
-          {
-            "title": "VM",
-            "path": "builders/virtualbox/vm"
-          }
-        ]
-      },
-      {
         "title": "VMware",
         "routes": [
           {

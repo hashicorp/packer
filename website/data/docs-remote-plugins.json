@@ -22,5 +22,11 @@
     "path": "ansible",
     "repo": "hashicorp/packer-plugin-ansible",
     "version": "latest"
+  },
+  {
+    "title": "VirtualBox",
+    "path": "virtualbox",
+    "repo": "hashicorp/packer-plugin-virtualbox",
+    "version": "latest"
   }
 ]
