@@ -20,6 +20,7 @@ async function checkPluginDocs() {
     console.log(`\n${COLOR_BLUE}${repo}${COLOR_RESET} | ${title}`);
     console.log(`Fetching docs from release "${version}" …`);
     try {
+      // Validate that all required properties are present
       const undefinedProps = ["title", "repo", "version", "path"].filter(
         (key) => typeof pluginEntry[key] == "undefined"
       );
@@ -34,6 +35,22 @@ async function checkPluginDocs() {
           )} are defined. Additional information on this configuration can be found in "website/README.md".`
         );
       }
+      // Validate pluginTier property
+      const { pluginTier } = pluginEntry;
+      if (typeof pluginTier !== "undefined") {
+        const validPluginTiers = ["official", "community"];
+        const isValid = validPluginTiers.indexOf(pluginTier) !== -1;
+        if (!isValid) {
+          throw new Error(
+            `Failed to validate plugin docs config. Invalid pluginTier "${pluginTier}" found for "${
+              title || pluginEntry.path || repo
+            }". In "website/data/docs-remote-plugins.json", the optional pluginTier property must be one of ${JSON.stringify(
+              validPluginTiers
+            )}. The pluginTier property can also be omitted, in which case it will be determined from the plugin repository owner.`
+          );
+        }
+      }
+      // Attempt to fetch plugin docs files
       const docsMdxFiles = await fetchPluginDocs({ repo, tag: version });
       const mdxFilesByComponent = docsMdxFiles.reduce((acc, mdxFile) => {
         const componentType = mdxFile.filePath.split("/")[1];
