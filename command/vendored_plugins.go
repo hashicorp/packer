@@ -15,6 +15,8 @@ import (
 	amazonamidatasource "github.com/hashicorp/packer-plugin-amazon/datasource/ami"
 	amazonsecretsmanagerdatasource "github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager"
 	anazibimportpostprocessor "github.com/hashicorp/packer-plugin-amazon/post-processor/import"
+	ansibleprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible"
+	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -48,7 +50,10 @@ var VendoredBuilders = map[string]packersdk.Builder{
 
 // VendoredProvisioners are provisioner components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
-var VendoredProvisioners = map[string]packersdk.Provisioner{}
+var VendoredProvisioners = map[string]packersdk.Provisioner{
+	"ansible":       new(ansibleprovisioner.Provisioner),
+	"ansible-local": new(ansiblelocalprovisioner.Provisioner),
+}
 
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos

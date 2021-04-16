@@ -36,5 +36,6 @@ func (c *communicatorMock) DownloadDir(src, dst string, exclude []string) error 
 	return nil
 }
 
+//nolint:unused
 func (c *communicatorMock) verify() {
 }

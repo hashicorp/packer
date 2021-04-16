@@ -509,6 +509,10 @@ github.com/hashicorp/packer-plugin-amazon/builder/instance
 github.com/hashicorp/packer-plugin-amazon/datasource/ami
 github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager
 github.com/hashicorp/packer-plugin-amazon/post-processor/import
+# github.com/hashicorp/packer-plugin-ansible v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-ansible/provisioner/ansible
+github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local
 # github.com/hashicorp/packer-plugin-docker v0.0.7
 ## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker

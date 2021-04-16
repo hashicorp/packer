@@ -946,14 +946,6 @@
         "path": "provisioners"
       },
       {
-        "title": "Ansible Local",
-        "path": "provisioners/ansible-local"
-      },
-      {
-        "title": "Ansible (Remote)",
-        "path": "provisioners/ansible"
-      },
-      {
         "title": "Breakpoint",
         "path": "provisioners/breakpoint"
       },

@@ -485,7 +485,9 @@ func (p *Provisioner) createInventoryFile() error {
 	}
 
 	w := bufio.NewWriter(tf)
-	w.WriteString(host)
+	if _, err := w.WriteString(host); err != nil {
+		log.Printf("[TRACE] error writing the generated inventory file: %s", err)
+	}
 
 	for _, group := range p.config.Groups {
 		fmt.Fprintf(w, "[%s]\n%s", group, host)
@@ -681,7 +683,7 @@ func (p *Provisioner) executeGalaxy(ui packersdk.Ui, comm packersdk.Communicator
 
 // Intended to be invoked from p.executeGalaxy depending on the Ansible Galaxy parameters passed to Packer
 func (p *Provisioner) invokeGalaxyCommand(args []string, ui packersdk.Ui, comm packersdk.Communicator) error {
-	ui.Message(fmt.Sprintf("Executing Ansible Galaxy"))
+	ui.Message("Executing Ansible Galaxy")
 	cmd := exec.Command(p.config.GalaxyCommand, args...)
 
 	stdout, err := cmd.StdoutPipe()
