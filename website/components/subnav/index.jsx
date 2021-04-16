@@ -14,7 +14,7 @@ export default function PackerSubnav() {
         { text: 'GitHub', url: 'https://www.github.com/hashicorp/packer' },
         { text: 'Download', url: '/downloads' },
       ]}
-      currentPath={router.pathname}
+      currentPath={router.asPath}
       menuItemsAlign="right"
       menuItems={subnavItems}
       constrainWidth
