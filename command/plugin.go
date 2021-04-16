@@ -56,7 +56,6 @@ import (
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
-	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
