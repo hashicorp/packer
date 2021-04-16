@@ -99,7 +99,7 @@
   }
 
   & #integrations {
-    background: var(--packer);
+    background: var(--packer-secondary);
     color: white;
 
     & > .g-container {
