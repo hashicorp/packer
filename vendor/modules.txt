@@ -335,7 +335,6 @@ github.com/gofrs/flock
 # github.com/gofrs/uuid v4.0.0+incompatible
 github.com/gofrs/uuid
 # github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3
-## explicit
 github.com/golang-collections/collections/stack
 # github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
 github.com/golang/groupcache/lru
@@ -466,7 +465,7 @@ github.com/hashicorp/go-sockaddr
 # github.com/hashicorp/go-uuid v1.0.2
 ## explicit
 github.com/hashicorp/go-uuid
-# github.com/hashicorp/go-version v1.2.0
+# github.com/hashicorp/go-version v1.3.0
 ## explicit
 github.com/hashicorp/go-version
 # github.com/hashicorp/golang-lru v0.5.3
@@ -508,6 +507,10 @@ github.com/hashicorp/packer-plugin-amazon/builder/instance
 github.com/hashicorp/packer-plugin-amazon/datasource/ami
 github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager
 github.com/hashicorp/packer-plugin-amazon/post-processor/import
+# github.com/hashicorp/packer-plugin-ansible v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-ansible/provisioner/ansible
+github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local
 # github.com/hashicorp/packer-plugin-docker v0.0.7
 ## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker
@@ -563,6 +566,12 @@ github.com/hashicorp/packer-plugin-sdk/tmp
 github.com/hashicorp/packer-plugin-sdk/useragent
 github.com/hashicorp/packer-plugin-sdk/uuid
 github.com/hashicorp/packer-plugin-sdk/version
+# github.com/hashicorp/packer-plugin-virtualbox v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/common
+github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso
+github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf
+github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm
 # github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
 ## explicit
 github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone

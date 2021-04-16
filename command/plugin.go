@@ -50,9 +50,6 @@ import (
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
-	virtualboxisobuilder "github.com/hashicorp/packer/builder/virtualbox/iso"
-	virtualboxovfbuilder "github.com/hashicorp/packer/builder/virtualbox/ovf"
-	virtualboxvmbuilder "github.com/hashicorp/packer/builder/virtualbox/vm"
 	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
 	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
@@ -68,8 +65,6 @@ import (
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
-	ansibleprovisioner "github.com/hashicorp/packer/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/hashicorp/packer/provisioner/ansible-local"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	chefclientprovisioner "github.com/hashicorp/packer/provisioner/chef-client"
@@ -130,17 +125,12 @@ var Builders = map[string]packersdk.Builder{
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
 	"vagrant":          new(vagrantbuilder.Builder),
-	"virtualbox-iso":   new(virtualboxisobuilder.Builder),
-	"virtualbox-ovf":   new(virtualboxovfbuilder.Builder),
-	"virtualbox-vm":    new(virtualboxvmbuilder.Builder),
 	"vmware-iso":       new(vmwareisobuilder.Builder),
 	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
 var Provisioners = map[string]packersdk.Provisioner{
-	"ansible":           new(ansibleprovisioner.Provisioner),
-	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"breakpoint":        new(breakpointprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),

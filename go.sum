@@ -422,8 +422,9 @@ github.com/hashicorp/go-uuid v1.0.2 h1:cfejS+Tpcp13yd5nYHWDI6qVCny6wyX2Mt5SGur2I
 github.com/hashicorp/go-uuid v1.0.2/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-version v1.0.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go-version v1.1.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
-github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
 github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
+github.com/hashicorp/go-version v1.3.0 h1:McDWVJIU/y+u1BRV06dPaLfLCaT7fUTJLp5r04x7iNw=
+github.com/hashicorp/go-version v1.3.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hashicorp/go.net v0.0.1/go.mod h1:hjKkEWcCURg++eb33jQU7oqQcI9XDCnUzHA0oac0k90=
 github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
@@ -453,6 +454,8 @@ github.com/hashicorp/packer v1.7.0/go.mod h1:3KRJcwOctl2JaAGpQMI1bWQRArfWNWqcYjO
 github.com/hashicorp/packer v1.7.1/go.mod h1:ApnmMINvuhhnfPyTVqZu6jznDWPVYDJUw7e188DFCmo=
 github.com/hashicorp/packer-plugin-amazon v0.0.1 h1:EuyjNK9bL7WhQeIJzhBJxOx8nyc61ai5UbOsb1PIVwI=
 github.com/hashicorp/packer-plugin-amazon v0.0.1/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
+github.com/hashicorp/packer-plugin-ansible v0.0.2 h1:nvBtCedXhUI5T6Up5+bmhlY7rmk8FjWuFv9A2joK7TU=
+github.com/hashicorp/packer-plugin-ansible v0.0.2/go.mod h1:ocXB4KTU+I+DBRGfMP4XE7dPlURaUnb7NJvyddZ6bh0=
 github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjMNgxayo2DPLz9y+c=
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=
@@ -471,6 +474,10 @@ github.com/hashicorp/packer-plugin-sdk v0.1.2/go.mod h1:KRjczE1/c9NV5Re+PXt3myJs
 github.com/hashicorp/packer-plugin-sdk v0.1.3/go.mod h1:xePpgQgQYv/bamiypx3hH9ukidxDdcN8q0R0wLi8IEQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.0 h1:A4Dq7p4y1vscY4gMzp7GQaXyDJYYhP4ukp4fapPSOY4=
 github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
+github.com/hashicorp/packer-plugin-virtualbox v0.0.0-20210415132603-5d753f7335b4 h1:AQk/P0QydTRFda9br8Dv3DDv7DCjGLHwfLjXmudA900=
+github.com/hashicorp/packer-plugin-virtualbox v0.0.0-20210415132603-5d753f7335b4/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
+github.com/hashicorp/packer-plugin-virtualbox v0.0.1 h1:vTfy7a10RUVMdNnDLo0EQrCVbAG4rGWkaDTMC7MVBi4=
+github.com/hashicorp/packer-plugin-virtualbox v0.0.1/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
 github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6 h1:pOv7Apd4P3KEpNBHLV4E7tKlwHoInCU/bnPVadGSDxY=
 github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6/go.mod h1:XMhsLDDT7sD2BWaruLvGPynnn4IqdbrfvuKhb1GK1RI=
 github.com/hashicorp/serf v0.8.2/go.mod h1:6hOLApaqBFA1NXqRQAsxw9QxuDEvNxSQRwA/JwenrHc=

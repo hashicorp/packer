@@ -15,6 +15,8 @@ import (
 	amazonamidatasource "github.com/hashicorp/packer-plugin-amazon/datasource/ami"
 	amazonsecretsmanagerdatasource "github.com/hashicorp/packer-plugin-amazon/datasource/secretsmanager"
 	anazibimportpostprocessor "github.com/hashicorp/packer-plugin-amazon/post-processor/import"
+	ansibleprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible"
+	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -23,6 +25,9 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
+	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
+	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
+	virtualboxvmbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm"
 	vsphereclonebuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone"
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
@@ -48,11 +53,17 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
+	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
+	"virtualbox-ovf":      new(virtualboxovfbuilder.Builder),
+	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
-var VendoredProvisioners = map[string]packersdk.Provisioner{}
+var VendoredProvisioners = map[string]packersdk.Provisioner{
+	"ansible":       new(ansibleprovisioner.Provisioner),
+	"ansible-local": new(ansiblelocalprovisioner.Provisioner),
+}
 
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
