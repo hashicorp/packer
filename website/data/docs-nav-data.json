@@ -829,14 +829,6 @@
         "path": "provisioners/breakpoint"
       },
       {
-        "title": "Chef Client",
-        "path": "provisioners/chef-client"
-      },
-      {
-        "title": "Chef Solo",
-        "path": "provisioners/chef-solo"
-      },
-      {
         "title": "Converge",
         "path": "provisioners/converge"
       },
