@@ -154,13 +154,6 @@ cover:
 	go tool cover -html=coverage.out
 	rm coverage.out
 
-check-vendor-vs-mod: ## Check that go modules and vendored code are on par
-	@GO111MODULE=on go mod vendor
-	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
-		echo "ERROR: vendor dir is not on par with go modules definition." && \
-		exit 1; \
-	fi
-
 vet: ## Vet Go code
 	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
 		echo "ERROR: Vet found problems in the code."; \

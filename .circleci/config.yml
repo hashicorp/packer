@@ -90,15 +90,6 @@ jobs:
       - run:
           command: make ci-lint
           no_output_timeout: 30m
-  check-vendor-vs-mod:
-    executor: golang
-    working_directory: /go/src/github.com/hashicorp/packer
-    environment:
-      GO111MODULE: "off"
-    steps:
-      - checkout
-      - run: GO111MODULE=on go run . --help
-      - run: make check-vendor-vs-mod
   check-fmt:
     executor: golang
     steps:
@@ -207,7 +198,6 @@ workflows:
   check-code:
     jobs:
       - check-lint
-      - check-vendor-vs-mod
       - check-fmt
       - check-generate
   build_packer_binaries:

@@ -1,7 +1,0 @@
-character at
-
-
-[Christopher,0] => C
-[Christopher,1] => h
-[Llewellyn,0] => L
-[Llewellyn,1] => l
