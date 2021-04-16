@@ -217,13 +217,11 @@ github.com/exoscale/egoscale v0.43.1/go.mod h1:mpEXBpROAa/2i5GC0r33rfxG+TxSEka11
 github.com/exoscale/packer-plugin-exoscale v0.1.0/go.mod h1:ZmJRkxsAlmEsVYOMxYPupDkax54uZ+ph0h3W59aIMZ8=
 github.com/exoscale/packer-plugin-exoscale v0.1.1 h1:NJ9UvMvSe3LK3H50hJv9nMG2reqgWKBAUhAEs4JJNso=
 github.com/exoscale/packer-plugin-exoscale v0.1.1/go.mod h1:5S07HizadGVKST/m0a5+aNmDiFfY7EbPvnkU4rJWRE8=
-github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
 github.com/fatih/camelcase v1.0.0/go.mod h1:yN2Sb0lFhZJUdVvtELVWefmrXpuZESvPmqwoZc+/fpc=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.9.0 h1:8xPHl4/q1VyqGIPif1F+1V3Y3lSmrq01EabUW3CoW5s=
 github.com/fatih/color v1.9.0/go.mod h1:eQcE1qtQxscV5RaZvpXrrb8Drkc3/DdQ+uUYCNjL+zU=
 github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
-github.com/fatih/structtag v1.0.0 h1:pTHj65+u3RKWYPSGaU290FpI/dXxTaHdVwVwbcPKmEc=
 github.com/fatih/structtag v1.0.0/go.mod h1:IKitwq45uXL/yqi5mYghiD3w9H6eTOvI9vnk8tXMphA=
 github.com/getkin/kin-openapi v0.13.0/go.mod h1:WGRs2ZMM1Q8LR1QBEwUxC6RJEfaBcD0s+pcEVXFuAjw=
 github.com/getkin/kin-openapi v0.37.0/go.mod h1:ZJSfy1PxJv2QQvH9EdBj3nupRTVvV42mkW6zKUlRBwk=

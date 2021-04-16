@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest,FlexShapeConfig
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,CreateVNICDetails,ListImagesRequest,FlexShapeConfig
 
 package oci
 

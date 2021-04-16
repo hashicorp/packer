@@ -1,5 +1,5 @@
-//go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type SharedImageGalleryDestination,TargetRegion
+//go:generate packer-sdc struct-markdown
+//go:generate packer-sdc mapstructure-to-hcl2 -type SharedImageGalleryDestination,TargetRegion
 
 package chroot
 

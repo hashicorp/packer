@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config,ImageFilter,ImageFilterOptions
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,ImageFilter,ImageFilterOptions
 
 // The openstack package contains a packersdk.Builder implementation that
 // builds Images for openstack.

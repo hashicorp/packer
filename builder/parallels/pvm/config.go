@@ -1,5 +1,5 @@
-//go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc struct-markdown
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 package pvm
 

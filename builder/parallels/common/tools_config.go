@@ -1,4 +1,4 @@
-//go:generate struct-markdown
+//go:generate packer-sdc struct-markdown
 
 package common
 

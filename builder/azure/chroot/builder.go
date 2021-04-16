@@ -1,5 +1,5 @@
-//go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc struct-markdown
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // Package chroot is able to create an Azure managed image without requiring the
 // launch of a new virtual machine for every build. It does this by attaching and

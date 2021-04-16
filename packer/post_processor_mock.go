@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockPostProcessor
+//go:generate packer-sdc mapstructure-to-hcl2 -type MockPostProcessor
 package packer
 
 import (

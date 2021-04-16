@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // Package bsu contains a packersdk.Builder implementation that
 // builds OMIs for Outscale OAPI.

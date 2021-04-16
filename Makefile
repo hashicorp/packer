@@ -58,8 +58,7 @@ install-gen-deps: ## Install dependencies for code generation
 	# install` seems to install the last tagged version and we want to install
 	# master.
 	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/alvaroloes/enumer@master)
-	@go install ./cmd/struct-markdown
-	@go install ./cmd/mapstructure-to-hcl2
+	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
 
 install-lint-deps: ## Install linter dependencies
 	# Pinning golangci-lint at v1.23.8 as --new-from-rev seems to work properly; the latest 1.24.0 has caused issues with memory consumption
