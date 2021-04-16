@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -134,7 +133,7 @@ func TestPlugin(t *testing.T, testCase *PluginTestCase) {
 	if testCase.Teardown != nil {
 		cleanErr := testCase.Teardown()
 		if cleanErr != nil {
-			log.Printf("bad: failed to clean up test-created resources: %s", cleanErr.Error())
+			t.Logf("bad: failed to clean up test-created resources: %s", cleanErr.Error())
 		}
 	}
 

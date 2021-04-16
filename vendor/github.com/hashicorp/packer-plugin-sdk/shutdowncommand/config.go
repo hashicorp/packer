@@ -1,4 +1,4 @@
-//go:generate struct-markdown
+//go:generate packer-sdc struct-markdown
 
 //Package shutdowncommand is a helper module for builder plugin configuration.
 package shutdowncommand

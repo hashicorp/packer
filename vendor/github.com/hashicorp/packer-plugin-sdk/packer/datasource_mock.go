@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockDatasource,MockDatasourceResponse
+//go:generate packer-sdc mapstructure-to-hcl2 -type MockDatasource,MockDatasourceResponse
 package packer
 
 import (

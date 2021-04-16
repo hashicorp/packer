@@ -49,8 +49,8 @@ require (
 	github.com/hashicorp/hcl/v2 v2.9.1
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
-	github.com/hashicorp/packer-plugin-googlecompute v0.0.1-pre
-	github.com/hashicorp/packer-plugin-sdk v0.1.3
+	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
+	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4

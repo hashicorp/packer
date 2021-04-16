@@ -111,10 +111,10 @@ func (d *vncDriver) SendKey(key rune, action KeyAction) error {
 		}
 		d.keyEvent(keyCode, true)
 	case KeyOff:
+		d.keyEvent(keyCode, false)
 		if keyShift {
 			d.keyEvent(KeyLeftShift, false)
 		}
-		d.keyEvent(keyCode, false)
 	case KeyPress:
 		if keyShift {
 			d.keyEvent(KeyLeftShift, true)

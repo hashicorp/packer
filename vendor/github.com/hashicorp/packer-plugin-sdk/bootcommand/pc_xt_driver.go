@@ -48,7 +48,7 @@ func NewPCXTDriver(send SendCodeFunc, chunkSize int, interval time.Duration) *pc
 		keyInterval = interval
 	}
 	// Scancodes reference: https://www.win.tue.nl/~aeb/linux/kbd/scancodes-1.html
-	//						https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
+	//                      https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html
 	//
 	// Scancodes are recorded here in pairs. The first entry represents
 	// the key press and the second entry represents the key release and is
@@ -156,10 +156,10 @@ func (d *pcXTDriver) SendKey(key rune, action KeyAction) error {
 
 	if action&(KeyOff|KeyPress) != 0 {
 		scInt := d.scancodeMap[key] + 0x80
+		sc = append(sc, fmt.Sprintf("%02x", scInt))
 		if keyShift {
 			sc = append(sc, "aa")
 		}
-		sc = append(sc, fmt.Sprintf("%02x", scInt))
 	}
 
 	log.Printf("Sending char '%c', code '%s', shift %v",
