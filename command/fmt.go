@@ -76,8 +76,8 @@ Usage: packer fmt [options] [TEMPLATE]
   configuration files (.pkr.hcl) and variable files (.pkrvars.hcl) are updated.
   JSON files (.json) are not modified.
 
-  If TEMPATE is "." the current directory will be used.
-  If TEMPATE is "-" then content will be read from STDIN.
+  If TEMPLATE is "." the current directory will be used.
+  If TEMPLATE is "-" then content will be read from STDIN.
 
   The given content must be in Packer's HCL2 configuration language; JSON is
   not supported.
