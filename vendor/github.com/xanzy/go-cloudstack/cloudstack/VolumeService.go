@@ -116,6 +116,7 @@ func (s *VolumeService) AttachVolume(p *AttachVolumeParams) (*AttachVolumeRespon
 }
 
 type AttachVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -140,8 +141,6 @@ type AttachVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -163,7 +162,6 @@ type AttachVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -381,6 +379,7 @@ func (s *VolumeService) CreateVolume(p *CreateVolumeParams) (*CreateVolumeRespon
 }
 
 type CreateVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -405,8 +404,6 @@ type CreateVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -428,7 +425,6 @@ type CreateVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -492,8 +488,6 @@ func (s *VolumeService) DeleteVolume(p *DeleteVolumeParams) (*DeleteVolumeRespon
 
 type DeleteVolumeResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -506,14 +500,6 @@ func (r *DeleteVolumeResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -614,6 +600,7 @@ func (s *VolumeService) DetachVolume(p *DetachVolumeParams) (*DetachVolumeRespon
 }
 
 type DetachVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -638,8 +625,6 @@ type DetachVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -661,7 +646,6 @@ type DetachVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -779,13 +763,12 @@ func (s *VolumeService) ExtractVolume(p *ExtractVolumeParams) (*ExtractVolumeRes
 }
 
 type ExtractVolumeResponse struct {
+	JobID            string `json:"jobid"`
 	Accountid        string `json:"accountid"`
 	Created          string `json:"created"`
 	ExtractId        string `json:"extractId"`
 	ExtractMode      string `json:"extractMode"`
 	Id               string `json:"id"`
-	JobID            string `json:"jobid"`
-	Jobstatus        int    `json:"jobstatus"`
 	Name             string `json:"name"`
 	Resultstring     string `json:"resultstring"`
 	State            string `json:"state"`
@@ -845,9 +828,7 @@ func (s *VolumeService) GetPathForVolume(p *GetPathForVolumeParams) (*GetPathFor
 }
 
 type GetPathForVolumeResponse struct {
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Path      string `json:"path"`
+	Path string `json:"path"`
 }
 
 type GetSolidFireVolumeSizeParams struct {
@@ -898,9 +879,7 @@ func (s *VolumeService) GetSolidFireVolumeSize(p *GetSolidFireVolumeSizeParams) 
 }
 
 type GetSolidFireVolumeSizeResponse struct {
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
-	SolidFireVolumeSize int64  `json:"solidFireVolumeSize"`
+	SolidFireVolumeSize int64 `json:"solidFireVolumeSize"`
 }
 
 type GetUploadParamsForVolumeParams struct {
@@ -1043,8 +1022,6 @@ func (s *VolumeService) GetUploadParamsForVolume(p *GetUploadParamsForVolumePara
 type GetUploadParamsForVolumeResponse struct {
 	Expires   string `json:"expires"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Metadata  string `json:"metadata"`
 	PostURL   string `json:"postURL"`
 	Signature string `json:"signature"`
@@ -1098,8 +1075,6 @@ func (s *VolumeService) GetVolumeiScsiName(p *GetVolumeiScsiNameParams) (*GetVol
 }
 
 type GetVolumeiScsiNameResponse struct {
-	JobID           string `json:"jobid"`
-	Jobstatus       int    `json:"jobstatus"`
 	VolumeiScsiName string `json:"volumeiScsiName"`
 }
 
@@ -1493,8 +1468,6 @@ type Volume struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -1516,7 +1489,6 @@ type Volume struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -1544,9 +1516,6 @@ func (p *MigrateVolumeParams) toURLValues() url.Values {
 		vv := strconv.FormatBool(v.(bool))
 		u.Set("livemigrate", vv)
 	}
-	if v, found := p.p["newdiskofferingid"]; found {
-		u.Set("newdiskofferingid", v.(string))
-	}
 	if v, found := p.p["storageid"]; found {
 		u.Set("storageid", v.(string))
 	}
@@ -1561,14 +1530,6 @@ func (p *MigrateVolumeParams) SetLivemigrate(v bool) {
 		p.p = make(map[string]interface{})
 	}
 	p.p["livemigrate"] = v
-	return
-}
-
-func (p *MigrateVolumeParams) SetNewdiskofferingid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["newdiskofferingid"] = v
 	return
 }
 
@@ -1634,6 +1595,7 @@ func (s *VolumeService) MigrateVolume(p *MigrateVolumeParams) (*MigrateVolumeRes
 }
 
 type MigrateVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -1658,8 +1620,6 @@ type MigrateVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -1681,7 +1641,6 @@ type MigrateVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -1823,6 +1782,7 @@ func (s *VolumeService) ResizeVolume(p *ResizeVolumeParams) (*ResizeVolumeRespon
 }
 
 type ResizeVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -1847,8 +1807,6 @@ type ResizeVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -1870,7 +1828,6 @@ type ResizeVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -2019,6 +1976,7 @@ func (s *VolumeService) UpdateVolume(p *UpdateVolumeParams) (*UpdateVolumeRespon
 }
 
 type UpdateVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -2043,8 +2001,6 @@ type UpdateVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -2066,7 +2022,6 @@ type UpdateVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`
@@ -2251,6 +2206,7 @@ func (s *VolumeService) UploadVolume(p *UploadVolumeParams) (*UploadVolumeRespon
 }
 
 type UploadVolumeResponse struct {
+	JobID                      string `json:"jobid"`
 	Account                    string `json:"account"`
 	Attached                   string `json:"attached"`
 	Chaininfo                  string `json:"chaininfo"`
@@ -2275,8 +2231,6 @@ type UploadVolumeResponse struct {
 	Isodisplaytext             string `json:"isodisplaytext"`
 	Isoid                      string `json:"isoid"`
 	Isoname                    string `json:"isoname"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Maxiops                    int64  `json:"maxiops"`
 	Miniops                    int64  `json:"miniops"`
 	Name                       string `json:"name"`
@@ -2298,7 +2252,6 @@ type UploadVolumeResponse struct {
 	Storage                    string `json:"storage"`
 	Storageid                  string `json:"storageid"`
 	Storagetype                string `json:"storagetype"`
-	Tags                       []Tags `json:"tags"`
 	Templatedisplaytext        string `json:"templatedisplaytext"`
 	Templateid                 string `json:"templateid"`
 	Templatename               string `json:"templatename"`

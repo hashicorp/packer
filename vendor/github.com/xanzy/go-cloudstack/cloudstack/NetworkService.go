@@ -127,11 +127,10 @@ func (s *NetworkService) AddNetworkServiceProvider(p *AddNetworkServiceProviderP
 }
 
 type AddNetworkServiceProviderResponse struct {
+	JobID                        string   `json:"jobid"`
 	Canenableindividualservice   bool     `json:"canenableindividualservice"`
 	Destinationphysicalnetworkid string   `json:"destinationphysicalnetworkid"`
 	Id                           string   `json:"id"`
-	JobID                        string   `json:"jobid"`
-	Jobstatus                    int      `json:"jobstatus"`
 	Name                         string   `json:"name"`
 	Physicalnetworkid            string   `json:"physicalnetworkid"`
 	Servicelist                  []string `json:"servicelist"`
@@ -242,9 +241,8 @@ func (s *NetworkService) AddOpenDaylightController(p *AddOpenDaylightControllerP
 }
 
 type AddOpenDaylightControllerResponse struct {
-	Id                string `json:"id"`
 	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
+	Id                string `json:"id"`
 	Name              string `json:"name"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Url               string `json:"url"`
@@ -605,8 +603,6 @@ type CreateNetworkResponse struct {
 	Isdefault                   bool                           `json:"isdefault"`
 	Ispersistent                bool                           `json:"ispersistent"`
 	Issystem                    bool                           `json:"issystem"`
-	JobID                       string                         `json:"jobid"`
-	Jobstatus                   int                            `json:"jobstatus"`
 	Name                        string                         `json:"name"`
 	Netmask                     string                         `json:"netmask"`
 	Networkcidr                 string                         `json:"networkcidr"`
@@ -808,12 +804,11 @@ func (s *NetworkService) CreatePhysicalNetwork(p *CreatePhysicalNetworkParams) (
 }
 
 type CreatePhysicalNetworkResponse struct {
+	JobID                string `json:"jobid"`
 	Broadcastdomainrange string `json:"broadcastdomainrange"`
 	Domainid             string `json:"domainid"`
 	Id                   string `json:"id"`
 	Isolationmethods     string `json:"isolationmethods"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	Name                 string `json:"name"`
 	Networkspeed         string `json:"networkspeed"`
 	State                string `json:"state"`
@@ -983,13 +978,12 @@ func (s *NetworkService) CreateServiceInstance(p *CreateServiceInstanceParams) (
 }
 
 type CreateServiceInstanceResponse struct {
+	JobID       string `json:"jobid"`
 	Account     string `json:"account"`
 	Displayname string `json:"displayname"`
 	Domain      string `json:"domain"`
 	Domainid    string `json:"domainid"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Project     string `json:"project"`
 	Projectid   string `json:"projectid"`
@@ -1122,11 +1116,10 @@ func (s *NetworkService) CreateStorageNetworkIpRange(p *CreateStorageNetworkIpRa
 }
 
 type CreateStorageNetworkIpRangeResponse struct {
+	JobID     string `json:"jobid"`
 	Endip     string `json:"endip"`
 	Gateway   string `json:"gateway"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Netmask   string `json:"netmask"`
 	Networkid string `json:"networkid"`
 	Podid     string `json:"podid"`
@@ -1229,8 +1222,6 @@ type DedicatePublicIpRangeResponse struct {
 	Id                string `json:"id"`
 	Ip6cidr           string `json:"ip6cidr"`
 	Ip6gateway        string `json:"ip6gateway"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Netmask           string `json:"netmask"`
 	Networkid         string `json:"networkid"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
@@ -1319,9 +1310,8 @@ func (s *NetworkService) DeleteNetwork(p *DeleteNetworkParams) (*DeleteNetworkRe
 }
 
 type DeleteNetworkResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -1388,9 +1378,8 @@ func (s *NetworkService) DeleteNetworkServiceProvider(p *DeleteNetworkServicePro
 }
 
 type DeleteNetworkServiceProviderResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -1462,9 +1451,8 @@ func (s *NetworkService) DeleteOpenDaylightController(p *DeleteOpenDaylightContr
 }
 
 type DeleteOpenDaylightControllerResponse struct {
-	Id                string `json:"id"`
 	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
+	Id                string `json:"id"`
 	Name              string `json:"name"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Url               string `json:"url"`
@@ -1534,9 +1522,8 @@ func (s *NetworkService) DeletePhysicalNetwork(p *DeletePhysicalNetworkParams) (
 }
 
 type DeletePhysicalNetworkResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -1603,9 +1590,8 @@ func (s *NetworkService) DeleteStorageNetworkIpRange(p *DeleteStorageNetworkIpRa
 }
 
 type DeleteStorageNetworkIpRangeResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -1755,8 +1741,6 @@ type NetscalerLoadBalancerNetwork struct {
 	Isdefault                   bool                                  `json:"isdefault"`
 	Ispersistent                bool                                  `json:"ispersistent"`
 	Issystem                    bool                                  `json:"issystem"`
-	JobID                       string                                `json:"jobid"`
-	Jobstatus                   int                                   `json:"jobstatus"`
 	Name                        string                                `json:"name"`
 	Netmask                     string                                `json:"netmask"`
 	Networkcidr                 string                                `json:"networkcidr"`
@@ -1886,9 +1870,7 @@ type ListNetworkIsolationMethodsResponse struct {
 }
 
 type NetworkIsolationMethod struct {
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Name      string `json:"name"`
+	Name string `json:"name"`
 }
 
 type ListNetworkServiceProvidersParams struct {
@@ -2039,8 +2021,6 @@ type NetworkServiceProvider struct {
 	Canenableindividualservice   bool     `json:"canenableindividualservice"`
 	Destinationphysicalnetworkid string   `json:"destinationphysicalnetworkid"`
 	Id                           string   `json:"id"`
-	JobID                        string   `json:"jobid"`
-	Jobstatus                    int      `json:"jobstatus"`
 	Name                         string   `json:"name"`
 	Physicalnetworkid            string   `json:"physicalnetworkid"`
 	Servicelist                  []string `json:"servicelist"`
@@ -2461,8 +2441,6 @@ type Network struct {
 	Isdefault                   bool                     `json:"isdefault"`
 	Ispersistent                bool                     `json:"ispersistent"`
 	Issystem                    bool                     `json:"issystem"`
-	JobID                       string                   `json:"jobid"`
-	Jobstatus                   int                      `json:"jobstatus"`
 	Name                        string                   `json:"name"`
 	Netmask                     string                   `json:"netmask"`
 	Networkcidr                 string                   `json:"networkcidr"`
@@ -2662,8 +2640,6 @@ type NiciraNvpDeviceNetwork struct {
 	Isdefault                   bool                            `json:"isdefault"`
 	Ispersistent                bool                            `json:"ispersistent"`
 	Issystem                    bool                            `json:"issystem"`
-	JobID                       string                          `json:"jobid"`
-	Jobstatus                   int                             `json:"jobstatus"`
 	Name                        string                          `json:"name"`
 	Netmask                     string                          `json:"netmask"`
 	Networkcidr                 string                          `json:"networkcidr"`
@@ -2814,8 +2790,6 @@ type ListOpenDaylightControllersResponse struct {
 
 type OpenDaylightController struct {
 	Id                string `json:"id"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Name              string `json:"name"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Url               string `json:"url"`
@@ -2968,8 +2942,6 @@ type PaloAltoFirewallNetwork struct {
 	Isdefault                   bool                             `json:"isdefault"`
 	Ispersistent                bool                             `json:"ispersistent"`
 	Issystem                    bool                             `json:"issystem"`
-	JobID                       string                           `json:"jobid"`
-	Jobstatus                   int                              `json:"jobstatus"`
 	Name                        string                           `json:"name"`
 	Netmask                     string                           `json:"netmask"`
 	Networkcidr                 string                           `json:"networkcidr"`
@@ -3219,8 +3191,6 @@ type PhysicalNetwork struct {
 	Domainid             string `json:"domainid"`
 	Id                   string `json:"id"`
 	Isolationmethods     string `json:"isolationmethods"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	Name                 string `json:"name"`
 	Networkspeed         string `json:"networkspeed"`
 	State                string `json:"state"`
@@ -3374,8 +3344,6 @@ type StorageNetworkIpRange struct {
 	Endip     string `json:"endip"`
 	Gateway   string `json:"gateway"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Netmask   string `json:"netmask"`
 	Networkid string `json:"networkid"`
 	Podid     string `json:"podid"`
@@ -3483,8 +3451,6 @@ type ListSupportedNetworkServicesResponse struct {
 
 type SupportedNetworkService struct {
 	Capability []SupportedNetworkServiceCapability `json:"capability"`
-	JobID      string                              `json:"jobid"`
-	Jobstatus  int                                 `json:"jobstatus"`
 	Name       string                              `json:"name"`
 	Provider   []SupportedNetworkServiceProvider   `json:"provider"`
 }
@@ -3554,8 +3520,6 @@ func (s *NetworkService) ReleasePublicIpRange(p *ReleasePublicIpRangeParams) (*R
 
 type ReleasePublicIpRangeResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -3568,14 +3532,6 @@ func (r *ReleasePublicIpRangeResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -3678,6 +3634,7 @@ func (s *NetworkService) RestartNetwork(p *RestartNetworkParams) (*RestartNetwor
 }
 
 type RestartNetworkResponse struct {
+	JobID                     string `json:"jobid"`
 	Account                   string `json:"account"`
 	Allocated                 string `json:"allocated"`
 	Associatednetworkid       string `json:"associatednetworkid"`
@@ -3692,8 +3649,6 @@ type RestartNetworkResponse struct {
 	Issourcenat               bool   `json:"issourcenat"`
 	Isstaticnat               bool   `json:"isstaticnat"`
 	Issystem                  bool   `json:"issystem"`
-	JobID                     string `json:"jobid"`
-	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Physicalnetworkid         string `json:"physicalnetworkid"`
 	Project                   string `json:"project"`
@@ -3894,6 +3849,7 @@ func (s *NetworkService) UpdateNetwork(p *UpdateNetworkParams) (*UpdateNetworkRe
 }
 
 type UpdateNetworkResponse struct {
+	JobID                       string                         `json:"jobid"`
 	Account                     string                         `json:"account"`
 	Aclid                       string                         `json:"aclid"`
 	Acltype                     string                         `json:"acltype"`
@@ -3915,8 +3871,6 @@ type UpdateNetworkResponse struct {
 	Isdefault                   bool                           `json:"isdefault"`
 	Ispersistent                bool                           `json:"ispersistent"`
 	Issystem                    bool                           `json:"issystem"`
-	JobID                       string                         `json:"jobid"`
-	Jobstatus                   int                            `json:"jobstatus"`
 	Name                        string                         `json:"name"`
 	Netmask                     string                         `json:"netmask"`
 	Networkcidr                 string                         `json:"networkcidr"`
@@ -4061,11 +4015,10 @@ func (s *NetworkService) UpdateNetworkServiceProvider(p *UpdateNetworkServicePro
 }
 
 type UpdateNetworkServiceProviderResponse struct {
+	JobID                        string   `json:"jobid"`
 	Canenableindividualservice   bool     `json:"canenableindividualservice"`
 	Destinationphysicalnetworkid string   `json:"destinationphysicalnetworkid"`
 	Id                           string   `json:"id"`
-	JobID                        string   `json:"jobid"`
-	Jobstatus                    int      `json:"jobstatus"`
 	Name                         string   `json:"name"`
 	Physicalnetworkid            string   `json:"physicalnetworkid"`
 	Servicelist                  []string `json:"servicelist"`
@@ -4185,12 +4138,11 @@ func (s *NetworkService) UpdatePhysicalNetwork(p *UpdatePhysicalNetworkParams) (
 }
 
 type UpdatePhysicalNetworkResponse struct {
+	JobID                string `json:"jobid"`
 	Broadcastdomainrange string `json:"broadcastdomainrange"`
 	Domainid             string `json:"domainid"`
 	Id                   string `json:"id"`
 	Isolationmethods     string `json:"isolationmethods"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	Name                 string `json:"name"`
 	Networkspeed         string `json:"networkspeed"`
 	State                string `json:"state"`
@@ -4312,11 +4264,10 @@ func (s *NetworkService) UpdateStorageNetworkIpRange(p *UpdateStorageNetworkIpRa
 }
 
 type UpdateStorageNetworkIpRangeResponse struct {
+	JobID     string `json:"jobid"`
 	Endip     string `json:"endip"`
 	Gateway   string `json:"gateway"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Netmask   string `json:"netmask"`
 	Networkid string `json:"networkid"`
 	Podid     string `json:"podid"`

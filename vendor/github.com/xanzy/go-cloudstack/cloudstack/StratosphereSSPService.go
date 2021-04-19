@@ -19,7 +19,6 @@ package cloudstack
 import (
 	"encoding/json"
 	"net/url"
-	"strconv"
 )
 
 type AddStratosphereSspParams struct {
@@ -127,12 +126,10 @@ func (s *StratosphereSSPService) AddStratosphereSsp(p *AddStratosphereSspParams)
 }
 
 type AddStratosphereSspResponse struct {
-	Hostid    string `json:"hostid"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Name      string `json:"name"`
-	Url       string `json:"url"`
-	Zoneid    string `json:"zoneid"`
+	Hostid string `json:"hostid"`
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Zoneid string `json:"zoneid"`
 }
 
 type DeleteStratosphereSspParams struct {
@@ -184,8 +181,6 @@ func (s *StratosphereSSPService) DeleteStratosphereSsp(p *DeleteStratosphereSspP
 
 type DeleteStratosphereSspResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -198,14 +193,6 @@ func (r *DeleteStratosphereSspResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err

@@ -108,8 +108,6 @@ type LoginResponse struct {
 	Account        string `json:"account"`
 	Domainid       string `json:"domainid"`
 	Firstname      string `json:"firstname"`
-	JobID          string `json:"jobid"`
-	Jobstatus      int    `json:"jobstatus"`
 	Lastname       string `json:"lastname"`
 	Registered     string `json:"registered"`
 	Sessionkey     string `json:"sessionkey"`
@@ -158,6 +156,4 @@ func (s *AuthenticationService) Logout(p *LogoutParams) (*LogoutResponse, error)
 
 type LogoutResponse struct {
 	Description string `json:"description"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 }

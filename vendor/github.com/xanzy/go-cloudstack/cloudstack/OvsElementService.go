@@ -105,13 +105,12 @@ func (s *OvsElementService) ConfigureOvsElement(p *ConfigureOvsElementParams) (*
 }
 
 type OvsElementResponse struct {
+	JobID     string `json:"jobid"`
 	Account   string `json:"account"`
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Enabled   bool   `json:"enabled"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Nspid     string `json:"nspid"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -265,8 +264,6 @@ type OvsElement struct {
 	Domainid  string `json:"domainid"`
 	Enabled   bool   `json:"enabled"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Nspid     string `json:"nspid"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`

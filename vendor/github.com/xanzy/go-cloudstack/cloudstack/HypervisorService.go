@@ -158,8 +158,6 @@ type HypervisorCapability struct {
 	Hypervisor           string `json:"hypervisor"`
 	Hypervisorversion    string `json:"hypervisorversion"`
 	Id                   string `json:"id"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit"`
 	Maxguestslimit       int64  `json:"maxguestslimit"`
 	Maxhostspercluster   int    `json:"maxhostspercluster"`
@@ -219,9 +217,7 @@ type ListHypervisorsResponse struct {
 }
 
 type Hypervisor struct {
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Name      string `json:"name"`
+	Name string `json:"name"`
 }
 
 type UpdateHypervisorCapabilitiesParams struct {
@@ -298,8 +294,6 @@ type UpdateHypervisorCapabilitiesResponse struct {
 	Hypervisor           string `json:"hypervisor"`
 	Hypervisorversion    string `json:"hypervisorversion"`
 	Id                   string `json:"id"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	Maxdatavolumeslimit  int    `json:"maxdatavolumeslimit"`
 	Maxguestslimit       int64  `json:"maxguestslimit"`
 	Maxhostspercluster   int    `json:"maxhostspercluster"`

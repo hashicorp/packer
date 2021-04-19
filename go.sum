@@ -470,6 +470,8 @@ github.com/hashicorp/packer-plugin-ansible v0.0.2 h1:nvBtCedXhUI5T6Up5+bmhlY7rmk
 github.com/hashicorp/packer-plugin-ansible v0.0.2/go.mod h1:ocXB4KTU+I+DBRGfMP4XE7dPlURaUnb7NJvyddZ6bh0=
 github.com/hashicorp/packer-plugin-chef v0.0.1 h1:1zQwnnvftwg9PJyWjMfHfDyzfWDdb0eo9IX8fX6kd+Y=
 github.com/hashicorp/packer-plugin-chef v0.0.1/go.mod h1:4iSyWfvrb4QwUDZqJ3iCb+kIsnDwOTL1yTEDXBtk3Ew=
+github.com/hashicorp/packer-plugin-cloudstack v0.0.1 h1:BF9nXRlA0xQV5W/+CoLjWn0aLO60gTbsxnLi/o37ktc=
+github.com/hashicorp/packer-plugin-cloudstack v0.0.1/go.mod h1:fx13TY2szz6cm2e99xzU3gQzKdGVwysxY2TyKr0r8MQ=
 github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjMNgxayo2DPLz9y+c=
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=
@@ -767,8 +769,9 @@ github.com/vmware/govmomi v0.23.1/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAu
 github.com/vmware/govmomi v0.24.1 h1:ecVvrxF28/5g738gLTiYgc62fpGfIPRKheQ1Dj1p35w=
 github.com/vmware/govmomi v0.24.1/go.mod h1:Y+Wq4lst78L85Ge/F8+ORXIWiKYqaro1vhAulACy9Lc=
 github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728/go.mod h1:x9oS4Wk2s2u4tS29nEaDLdzvuHdB19CvSGJjPgkZJNk=
-github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0 h1:NJrcIkdzq0C3I8ypAZwFE9RHtGbfp+mJvqIcoFATZuk=
 github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0/go.mod h1:sBh287mCRwCz6zyXHMmw7sSZGPohVpnx+o+OY4M+i3A=
+github.com/xanzy/go-cloudstack v2.4.1+incompatible h1:Oc4xa2+I94h1g/QJ+nHoq597nJz2KXzxuQx/weOx0AU=
+github.com/xanzy/go-cloudstack v2.4.1+incompatible/go.mod h1:s3eL3z5pNXF5FVybcT+LIVdId8pYn709yv6v5mrkrQE=
 github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd h1:o4pvS7D4OErKOM6y+/q6IfOa65OaentKbEDh1ABirE8=
 github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd/go.mod h1:HEUYX/p8966tMUHHT+TsS0hF/Ca/NYwqprC5WXSDMfE=
 github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c h1:LJrgyICodRAgtBvOO2eCbhDDIoaJgeLa1tGQecqW9ac=

@@ -216,8 +216,6 @@ type AddBaremetalHostResponse struct {
 	Id                         string                             `json:"id"`
 	Ipaddress                  string                             `json:"ipaddress"`
 	Islocalstorageactive       bool                               `json:"islocalstorageactive"`
-	JobID                      string                             `json:"jobid"`
-	Jobstatus                  int                                `json:"jobstatus"`
 	Lastannotated              string                             `json:"lastannotated"`
 	Lastpinged                 string                             `json:"lastpinged"`
 	Managementserverid         int64                              `json:"managementserverid"`
@@ -359,9 +357,8 @@ func (s *HostService) AddGloboDnsHost(p *AddGloboDnsHostParams) (*AddGloboDnsHos
 }
 
 type AddGloboDnsHostResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -546,8 +543,6 @@ type AddHostResponse struct {
 	Id                         string                      `json:"id"`
 	Ipaddress                  string                      `json:"ipaddress"`
 	Islocalstorageactive       bool                        `json:"islocalstorageactive"`
-	JobID                      string                      `json:"jobid"`
-	Jobstatus                  int                         `json:"jobstatus"`
 	Lastannotated              string                      `json:"lastannotated"`
 	Lastpinged                 string                      `json:"lastpinged"`
 	Managementserverid         int64                       `json:"managementserverid"`
@@ -650,8 +645,6 @@ func (s *HostService) AddSecondaryStorage(p *AddSecondaryStorageParams) (*AddSec
 
 type AddSecondaryStorageResponse struct {
 	Id           string `json:"id"`
-	JobID        string `json:"jobid"`
-	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -729,6 +722,7 @@ func (s *HostService) CancelHostMaintenance(p *CancelHostMaintenanceParams) (*Ca
 }
 
 type CancelHostMaintenanceResponse struct {
+	JobID                      string                                  `json:"jobid"`
 	Annotation                 string                                  `json:"annotation"`
 	Averageload                int64                                   `json:"averageload"`
 	Capabilities               string                                  `json:"capabilities"`
@@ -757,8 +751,6 @@ type CancelHostMaintenanceResponse struct {
 	Id                         string                                  `json:"id"`
 	Ipaddress                  string                                  `json:"ipaddress"`
 	Islocalstorageactive       bool                                    `json:"islocalstorageactive"`
-	JobID                      string                                  `json:"jobid"`
-	Jobstatus                  int                                     `json:"jobstatus"`
 	Lastannotated              string                                  `json:"lastannotated"`
 	Lastpinged                 string                                  `json:"lastpinged"`
 	Managementserverid         int64                                   `json:"managementserverid"`
@@ -892,14 +884,13 @@ func (s *HostService) DedicateHost(p *DedicateHostParams) (*DedicateHostResponse
 }
 
 type DedicateHostResponse struct {
+	JobID           string `json:"jobid"`
 	Accountid       string `json:"accountid"`
 	Affinitygroupid string `json:"affinitygroupid"`
 	Domainid        string `json:"domainid"`
 	Hostid          string `json:"hostid"`
 	Hostname        string `json:"hostname"`
 	Id              string `json:"id"`
-	JobID           string `json:"jobid"`
-	Jobstatus       int    `json:"jobstatus"`
 }
 
 type DeleteHostParams struct {
@@ -975,8 +966,6 @@ func (s *HostService) DeleteHost(p *DeleteHostParams) (*DeleteHostResponse, erro
 
 type DeleteHostResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -989,14 +978,6 @@ func (r *DeleteHostResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -1075,14 +1056,13 @@ func (s *HostService) DisableOutOfBandManagementForHost(p *DisableOutOfBandManag
 }
 
 type DisableOutOfBandManagementForHostResponse struct {
+	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -1158,14 +1138,13 @@ func (s *HostService) EnableOutOfBandManagementForHost(p *EnableOutOfBandManagem
 }
 
 type EnableOutOfBandManagementForHostResponse struct {
+	JobID       string `json:"jobid"`
 	Action      string `json:"action"`
 	Address     string `json:"address"`
 	Description string `json:"description"`
 	Driver      string `json:"driver"`
 	Enabled     bool   `json:"enabled"`
 	Hostid      string `json:"hostid"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Password    string `json:"password"`
 	Port        string `json:"port"`
 	Powerstate  string `json:"powerstate"`
@@ -1279,8 +1258,6 @@ type FindHostsForMigrationResponse struct {
 	Id                         string `json:"id"`
 	Ipaddress                  string `json:"ipaddress"`
 	Islocalstorageactive       bool   `json:"islocalstorageactive"`
-	JobID                      string `json:"jobid"`
-	Jobstatus                  int    `json:"jobstatus"`
 	Lastpinged                 string `json:"lastpinged"`
 	Managementserverid         int64  `json:"managementserverid"`
 	Memoryallocated            string `json:"memoryallocated"`
@@ -1431,8 +1408,6 @@ type DedicatedHost struct {
 	Hostid          string `json:"hostid"`
 	Hostname        string `json:"hostname"`
 	Id              string `json:"id"`
-	JobID           string `json:"jobid"`
-	Jobstatus       int    `json:"jobstatus"`
 }
 
 type ListHostTagsParams struct {
@@ -1547,11 +1522,9 @@ type ListHostTagsResponse struct {
 }
 
 type HostTag struct {
-	Hostid    int64  `json:"hostid"`
-	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Name      string `json:"name"`
+	Hostid int64  `json:"hostid"`
+	Id     string `json:"id"`
+	Name   string `json:"name"`
 }
 
 type ListHostsParams struct {
@@ -1898,8 +1871,6 @@ type Host struct {
 	Id                         string                      `json:"id"`
 	Ipaddress                  string                      `json:"ipaddress"`
 	Islocalstorageactive       bool                        `json:"islocalstorageactive"`
-	JobID                      string                      `json:"jobid"`
-	Jobstatus                  int                         `json:"jobstatus"`
 	Lastannotated              string                      `json:"lastannotated"`
 	Lastpinged                 string                      `json:"lastpinged"`
 	Managementserverid         int64                       `json:"managementserverid"`
@@ -2010,6 +1981,7 @@ func (s *HostService) PrepareHostForMaintenance(p *PrepareHostForMaintenancePara
 }
 
 type PrepareHostForMaintenanceResponse struct {
+	JobID                      string                                      `json:"jobid"`
 	Annotation                 string                                      `json:"annotation"`
 	Averageload                int64                                       `json:"averageload"`
 	Capabilities               string                                      `json:"capabilities"`
@@ -2038,8 +2010,6 @@ type PrepareHostForMaintenanceResponse struct {
 	Id                         string                                      `json:"id"`
 	Ipaddress                  string                                      `json:"ipaddress"`
 	Islocalstorageactive       bool                                        `json:"islocalstorageactive"`
-	JobID                      string                                      `json:"jobid"`
-	Jobstatus                  int                                         `json:"jobstatus"`
 	Lastannotated              string                                      `json:"lastannotated"`
 	Lastpinged                 string                                      `json:"lastpinged"`
 	Managementserverid         int64                                       `json:"managementserverid"`
@@ -2150,6 +2120,7 @@ func (s *HostService) ReconnectHost(p *ReconnectHostParams) (*ReconnectHostRespo
 }
 
 type ReconnectHostResponse struct {
+	JobID                      string                          `json:"jobid"`
 	Annotation                 string                          `json:"annotation"`
 	Averageload                int64                           `json:"averageload"`
 	Capabilities               string                          `json:"capabilities"`
@@ -2178,8 +2149,6 @@ type ReconnectHostResponse struct {
 	Id                         string                          `json:"id"`
 	Ipaddress                  string                          `json:"ipaddress"`
 	Islocalstorageactive       bool                            `json:"islocalstorageactive"`
-	JobID                      string                          `json:"jobid"`
-	Jobstatus                  int                             `json:"jobstatus"`
 	Lastannotated              string                          `json:"lastannotated"`
 	Lastpinged                 string                          `json:"lastpinged"`
 	Managementserverid         int64                           `json:"managementserverid"`
@@ -2285,9 +2254,8 @@ func (s *HostService) ReleaseDedicatedHost(p *ReleaseDedicatedHostParams) (*Rele
 }
 
 type ReleaseDedicatedHostResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -2354,9 +2322,8 @@ func (s *HostService) ReleaseHostReservation(p *ReleaseHostReservationParams) (*
 }
 
 type ReleaseHostReservationResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -2492,8 +2459,6 @@ type UpdateHostResponse struct {
 	Id                         string                       `json:"id"`
 	Ipaddress                  string                       `json:"ipaddress"`
 	Islocalstorageactive       bool                         `json:"islocalstorageactive"`
-	JobID                      string                       `json:"jobid"`
-	Jobstatus                  int                          `json:"jobstatus"`
 	Lastannotated              string                       `json:"lastannotated"`
 	Lastpinged                 string                       `json:"lastpinged"`
 	Managementserverid         int64                        `json:"managementserverid"`
@@ -2631,8 +2596,6 @@ func (s *HostService) UpdateHostPassword(p *UpdateHostPasswordParams) (*UpdateHo
 
 type UpdateHostPasswordResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -2645,14 +2608,6 @@ func (r *UpdateHostPasswordResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err

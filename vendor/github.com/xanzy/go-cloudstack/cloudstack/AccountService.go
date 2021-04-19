@@ -109,9 +109,8 @@ func (s *AccountService) AddAccountToProject(p *AddAccountToProjectParams) (*Add
 }
 
 type AddAccountToProjectResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -335,8 +334,6 @@ type CreateAccountResponse struct {
 	Iptotal                   int64                       `json:"iptotal"`
 	Iscleanuprequired         bool                        `json:"iscleanuprequired"`
 	Isdefault                 bool                        `json:"isdefault"`
-	JobID                     string                      `json:"jobid"`
-	Jobstatus                 int                         `json:"jobstatus"`
 	Memoryavailable           string                      `json:"memoryavailable"`
 	Memorylimit               string                      `json:"memorylimit"`
 	Memorytotal               int64                       `json:"memorytotal"`
@@ -467,9 +464,8 @@ func (s *AccountService) DeleteAccount(p *DeleteAccountParams) (*DeleteAccountRe
 }
 
 type DeleteAccountResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -548,9 +544,8 @@ func (s *AccountService) DeleteAccountFromProject(p *DeleteAccountFromProjectPar
 }
 
 type DeleteAccountFromProjectResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -656,6 +651,7 @@ func (s *AccountService) DisableAccount(p *DisableAccountParams) (*DisableAccoun
 }
 
 type DisableAccountResponse struct {
+	JobID                     string                       `json:"jobid"`
 	Accountdetails            map[string]string            `json:"accountdetails"`
 	Accounttype               int                          `json:"accounttype"`
 	Cpuavailable              string                       `json:"cpuavailable"`
@@ -671,8 +667,6 @@ type DisableAccountResponse struct {
 	Iptotal                   int64                        `json:"iptotal"`
 	Iscleanuprequired         bool                         `json:"iscleanuprequired"`
 	Isdefault                 bool                         `json:"isdefault"`
-	JobID                     string                       `json:"jobid"`
-	Jobstatus                 int                          `json:"jobstatus"`
 	Memoryavailable           string                       `json:"memoryavailable"`
 	Memorylimit               string                       `json:"memorylimit"`
 	Memorytotal               int64                        `json:"memorytotal"`
@@ -824,8 +818,6 @@ type EnableAccountResponse struct {
 	Iptotal                   int64                       `json:"iptotal"`
 	Iscleanuprequired         bool                        `json:"iscleanuprequired"`
 	Isdefault                 bool                        `json:"isdefault"`
-	JobID                     string                      `json:"jobid"`
-	Jobstatus                 int                         `json:"jobstatus"`
 	Memoryavailable           string                      `json:"memoryavailable"`
 	Memorylimit               string                      `json:"memorylimit"`
 	Memorytotal               int64                       `json:"memorytotal"`
@@ -953,9 +945,7 @@ func (s *AccountService) GetSolidFireAccountId(p *GetSolidFireAccountIdParams) (
 }
 
 type GetSolidFireAccountIdResponse struct {
-	JobID              string `json:"jobid"`
-	Jobstatus          int    `json:"jobstatus"`
-	SolidFireAccountId int64  `json:"solidFireAccountId"`
+	SolidFireAccountId int64 `json:"solidFireAccountId"`
 }
 
 type ListAccountsParams struct {
@@ -1224,8 +1214,6 @@ type Account struct {
 	Iptotal                   int64             `json:"iptotal"`
 	Iscleanuprequired         bool              `json:"iscleanuprequired"`
 	Isdefault                 bool              `json:"isdefault"`
-	JobID                     string            `json:"jobid"`
-	Jobstatus                 int               `json:"jobstatus"`
 	Memoryavailable           string            `json:"memoryavailable"`
 	Memorylimit               string            `json:"memorylimit"`
 	Memorytotal               int64             `json:"memorytotal"`
@@ -1451,8 +1439,6 @@ type ProjectAccount struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -1576,8 +1562,6 @@ type LockAccountResponse struct {
 	Iptotal                   int64                     `json:"iptotal"`
 	Iscleanuprequired         bool                      `json:"iscleanuprequired"`
 	Isdefault                 bool                      `json:"isdefault"`
-	JobID                     string                    `json:"jobid"`
-	Jobstatus                 int                       `json:"jobstatus"`
 	Memoryavailable           string                    `json:"memoryavailable"`
 	Memorylimit               string                    `json:"memorylimit"`
 	Memorytotal               int64                     `json:"memorytotal"`
@@ -1737,6 +1721,7 @@ func (s *AccountService) MarkDefaultZoneForAccount(p *MarkDefaultZoneForAccountP
 }
 
 type MarkDefaultZoneForAccountResponse struct {
+	JobID                     string                                  `json:"jobid"`
 	Accountdetails            map[string]string                       `json:"accountdetails"`
 	Accounttype               int                                     `json:"accounttype"`
 	Cpuavailable              string                                  `json:"cpuavailable"`
@@ -1752,8 +1737,6 @@ type MarkDefaultZoneForAccountResponse struct {
 	Iptotal                   int64                                   `json:"iptotal"`
 	Iscleanuprequired         bool                                    `json:"iscleanuprequired"`
 	Isdefault                 bool                                    `json:"isdefault"`
-	JobID                     string                                  `json:"jobid"`
-	Jobstatus                 int                                     `json:"jobstatus"`
 	Memoryavailable           string                                  `json:"memoryavailable"`
 	Memorylimit               string                                  `json:"memorylimit"`
 	Memorytotal               int64                                   `json:"memorytotal"`
@@ -1853,9 +1836,6 @@ func (p *UpdateAccountParams) toURLValues() url.Values {
 	if v, found := p.p["newname"]; found {
 		u.Set("newname", v.(string))
 	}
-	if v, found := p.p["roleid"]; found {
-		u.Set("roleid", v.(string))
-	}
 	return u
 }
 
@@ -1907,19 +1887,12 @@ func (p *UpdateAccountParams) SetNewname(v string) {
 	return
 }
 
-func (p *UpdateAccountParams) SetRoleid(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["roleid"] = v
-	return
-}
-
 // You should always use this function to get a new UpdateAccountParams instance,
 // as then you are sure you have configured all required params
-func (s *AccountService) NewUpdateAccountParams() *UpdateAccountParams {
+func (s *AccountService) NewUpdateAccountParams(newname string) *UpdateAccountParams {
 	p := &UpdateAccountParams{}
 	p.p = make(map[string]interface{})
+	p.p["newname"] = newname
 	return p
 }
 
@@ -1954,8 +1927,6 @@ type UpdateAccountResponse struct {
 	Iptotal                   int64                       `json:"iptotal"`
 	Iscleanuprequired         bool                        `json:"iscleanuprequired"`
 	Isdefault                 bool                        `json:"isdefault"`
-	JobID                     string                      `json:"jobid"`
-	Jobstatus                 int                         `json:"jobstatus"`
 	Memoryavailable           string                      `json:"memoryavailable"`
 	Memorylimit               string                      `json:"memorylimit"`
 	Memorytotal               int64                       `json:"memorytotal"`

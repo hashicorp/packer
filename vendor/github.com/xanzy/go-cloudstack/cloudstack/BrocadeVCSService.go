@@ -127,10 +127,9 @@ func (s *BrocadeVCSService) AddBrocadeVcsDevice(p *AddBrocadeVcsDeviceParams) (*
 }
 
 type AddBrocadeVcsDeviceResponse struct {
+	JobID             string `json:"jobid"`
 	Brocadedevicename string `json:"brocadedevicename"`
 	Hostname          string `json:"hostname"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Provider          string `json:"provider"`
 	Vcsdeviceid       string `json:"vcsdeviceid"`
@@ -199,9 +198,8 @@ func (s *BrocadeVCSService) DeleteBrocadeVcsDevice(p *DeleteBrocadeVcsDevicePara
 }
 
 type DeleteBrocadeVcsDeviceResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -351,8 +349,6 @@ type BrocadeVcsDeviceNetwork struct {
 	Isdefault                   bool                             `json:"isdefault"`
 	Ispersistent                bool                             `json:"ispersistent"`
 	Issystem                    bool                             `json:"issystem"`
-	JobID                       string                           `json:"jobid"`
-	Jobstatus                   int                              `json:"jobstatus"`
 	Name                        string                           `json:"name"`
 	Netmask                     string                           `json:"netmask"`
 	Networkcidr                 string                           `json:"networkcidr"`
@@ -506,8 +502,6 @@ type ListBrocadeVcsDevicesResponse struct {
 type BrocadeVcsDevice struct {
 	Brocadedevicename string `json:"brocadedevicename"`
 	Hostname          string `json:"hostname"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Physicalnetworkid string `json:"physicalnetworkid"`
 	Provider          string `json:"provider"`
 	Vcsdeviceid       string `json:"vcsdeviceid"`

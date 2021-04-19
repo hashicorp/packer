@@ -126,9 +126,8 @@ func (s *ResourcemetadataService) AddResourceDetail(p *AddResourceDetailParams) 
 }
 
 type AddResourceDetailResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -180,8 +179,6 @@ func (s *ResourcemetadataService) GetVolumeSnapshotDetails(p *GetVolumeSnapshotD
 }
 
 type GetVolumeSnapshotDetailsResponse struct {
-	JobID           string `json:"jobid"`
-	Jobstatus       int    `json:"jobstatus"`
 	VolumeiScsiName string `json:"volumeiScsiName"`
 }
 
@@ -379,8 +376,6 @@ type ResourceDetail struct {
 	Customer     string `json:"customer"`
 	Domain       string `json:"domain"`
 	Domainid     string `json:"domainid"`
-	JobID        string `json:"jobid"`
-	Jobstatus    int    `json:"jobstatus"`
 	Key          string `json:"key"`
 	Project      string `json:"project"`
 	Projectid    string `json:"projectid"`
@@ -475,8 +470,7 @@ func (s *ResourcemetadataService) RemoveResourceDetail(p *RemoveResourceDetailPa
 }
 
 type RemoveResourceDetailResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }

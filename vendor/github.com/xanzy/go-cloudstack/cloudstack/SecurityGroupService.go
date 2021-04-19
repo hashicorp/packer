@@ -259,13 +259,12 @@ func (s *SecurityGroupService) AuthorizeSecurityGroupEgress(p *AuthorizeSecurity
 }
 
 type AuthorizeSecurityGroupEgressResponse struct {
+	JobID             string `json:"jobid"`
 	Account           string `json:"account"`
 	Cidr              string `json:"cidr"`
 	Endport           int    `json:"endport"`
 	Icmpcode          int    `json:"icmpcode"`
 	Icmptype          int    `json:"icmptype"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Protocol          string `json:"protocol"`
 	Ruleid            string `json:"ruleid"`
 	Securitygroupname string `json:"securitygroupname"`
@@ -476,13 +475,12 @@ func (s *SecurityGroupService) AuthorizeSecurityGroupIngress(p *AuthorizeSecurit
 }
 
 type AuthorizeSecurityGroupIngressResponse struct {
+	JobID             string `json:"jobid"`
 	Account           string `json:"account"`
 	Cidr              string `json:"cidr"`
 	Endport           int    `json:"endport"`
 	Icmpcode          int    `json:"icmpcode"`
 	Icmptype          int    `json:"icmptype"`
-	JobID             string `json:"jobid"`
-	Jobstatus         int    `json:"jobstatus"`
 	Protocol          string `json:"protocol"`
 	Ruleid            string `json:"ruleid"`
 	Securitygroupname string `json:"securitygroupname"`
@@ -593,8 +591,6 @@ type CreateSecurityGroupResponse struct {
 	Egressrule          []CreateSecurityGroupResponseRule `json:"egressrule"`
 	Id                  string                            `json:"id"`
 	Ingressrule         []CreateSecurityGroupResponseRule `json:"ingressrule"`
-	JobID               string                            `json:"jobid"`
-	Jobstatus           int                               `json:"jobstatus"`
 	Name                string                            `json:"name"`
 	Project             string                            `json:"project"`
 	Projectid           string                            `json:"projectid"`
@@ -708,8 +704,6 @@ func (s *SecurityGroupService) DeleteSecurityGroup(p *DeleteSecurityGroupParams)
 
 type DeleteSecurityGroupResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -722,14 +716,6 @@ func (r *DeleteSecurityGroupResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -1012,8 +998,6 @@ type SecurityGroup struct {
 	Egressrule          []SecurityGroupRule `json:"egressrule"`
 	Id                  string              `json:"id"`
 	Ingressrule         []SecurityGroupRule `json:"ingressrule"`
-	JobID               string              `json:"jobid"`
-	Jobstatus           int                 `json:"jobstatus"`
 	Name                string              `json:"name"`
 	Project             string              `json:"project"`
 	Projectid           string              `json:"projectid"`
@@ -1098,9 +1082,8 @@ func (s *SecurityGroupService) RevokeSecurityGroupEgress(p *RevokeSecurityGroupE
 }
 
 type RevokeSecurityGroupEgressResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -1167,8 +1150,7 @@ func (s *SecurityGroupService) RevokeSecurityGroupIngress(p *RevokeSecurityGroup
 }
 
 type RevokeSecurityGroupIngressResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }

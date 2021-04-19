@@ -16,7 +16,6 @@ import (
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
 	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
-	cloudstackbuilder "github.com/hashicorp/packer/builder/cloudstack"
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
@@ -70,7 +69,6 @@ var Builders = map[string]packersdk.Builder{
 	"azure-arm":        new(azurearmbuilder.Builder),
 	"azure-chroot":     new(azurechrootbuilder.Builder),
 	"azure-dtl":        new(azuredtlbuilder.Builder),
-	"cloudstack":       new(cloudstackbuilder.Builder),
 	"digitalocean":     new(digitaloceanbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"hcloud":           new(hcloudbuilder.Builder),
