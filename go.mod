@@ -45,6 +45,7 @@ require (
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
+	github.com/hashicorp/packer-plugin-openstack v0.0.1
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
