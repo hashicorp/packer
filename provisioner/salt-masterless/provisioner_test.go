@@ -202,6 +202,31 @@ func TestProvisionerSudo(t *testing.T) {
 	}
 }
 
+func TestProvisionerExecuteCommand(t *testing.T) {
+	var p Provisioner
+	config := testConfig()
+
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	withoutOverride := p.sudo("echo hello")
+	if withoutOverride != "sudo echo hello" {
+		t.Fatalf("execute command not generated correctly")
+	}
+
+	config["execute_command"] = "echo 'testing' | sudo -S -E"
+	err = p.Prepare(config)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	withOverride := p.sudo("echo hello")
+	if withOverride != "echo 'testing' | sudo -S -E echo hello" {
+		t.Fatalf("execute command not generated correctly")
+	}
+}
+
 func TestProvisionerPrepare_RemoteStateTree(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
