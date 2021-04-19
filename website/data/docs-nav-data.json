@@ -846,10 +846,6 @@
         ]
       },
       {
-        "title": "QEMU",
-        "path": "builders/qemu"
-      },
-      {
         "title": "Scaleway",
         "path": "builders/scaleway"
       },
