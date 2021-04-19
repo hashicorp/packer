@@ -88,7 +88,7 @@ type Driver interface {
 // NewDriver returns a new driver implementation for this operating
 // system, or an error if the driver couldn't be initialized.
 func NewDriver(dconfig *DriverConfig, config *SSHConfig, vmName string) (Driver, error) {
-	drivers := []Driver{}
+	var drivers []Driver
 
 	if dconfig.RemoteType != "" {
 		esx5Driver, err := NewESX5Driver(dconfig, config, vmName)

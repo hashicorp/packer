@@ -34,5 +34,11 @@
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
     "version": "latest"
+  },
+  {
+    "title": "VMware",
+    "path": "vmware",
+    "repo": "hashicorp/packer-plugin-vmware",
+    "version": "latest"
   }
 ]

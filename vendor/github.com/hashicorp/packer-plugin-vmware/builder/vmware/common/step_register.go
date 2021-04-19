@@ -75,7 +75,7 @@ func (s *StepRegister) Cleanup(state multistep.StateBag) {
 				}
 				log.Printf("error destroying vm: %s", err)
 				time.Sleep(1 * time.Second)
-				if time.Since(start) >= time.Duration(30*time.Minute) {
+				if time.Since(start) >= 30*time.Minute {
 					ui.Error("Error unregistering VM; timed out. You may " +
 						"need to manually clean up your machine")
 					break

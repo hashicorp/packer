@@ -138,9 +138,7 @@ type tkParameter struct {
 
 func (e *tkParameter) String() string {
 	var values []string
-	for _, val := range e.operand {
-		values = append(values, val)
-	}
+	values = append(values, e.operand...)
 	return fmt.Sprintf("%s [%s]", e.name, strings.Join(values, ","))
 }
 
@@ -156,9 +154,7 @@ func (e *tkGroup) String() string {
 	var id []string
 
 	id = append(id, e.id.name)
-	for _, val := range e.id.operand {
-		id = append(id, val)
-	}
+	id = append(id, e.id.operand...)
 
 	var config []string
 	for _, val := range e.params {
@@ -640,10 +636,6 @@ type pDeclarationGroup struct{}
 
 func (e pDeclarationGroup) repr() string { return fmt.Sprintf("{group}") }
 
-type pDeclarationClass struct{ name string }
-
-func (e pDeclarationClass) repr() string { return fmt.Sprintf("{class}") }
-
 /** parsers */
 func parseParameter(val tkParameter) (pParameter, error) {
 	switch val.name {
@@ -1024,9 +1016,9 @@ func (e *configDeclaration) IP4() (net.IP, error) {
 	var result []string
 
 	for _, entry := range e.address {
-		switch entry.(type) {
+		switch v := entry.(type) {
 		case pParameterAddress4:
-			for _, s := range entry.(pParameterAddress4) {
+			for _, s := range v {
 				result = append(result, s)
 			}
 		}
@@ -1057,9 +1049,9 @@ func (e *configDeclaration) IP6() (net.IP, error) {
 	var result []string
 
 	for _, entry := range e.address {
-		switch entry.(type) {
+		switch v := entry.(type) {
 		case pParameterAddress6:
-			for _, s := range entry.(pParameterAddress6) {
+			for _, s := range v {
 				result = append(result, s)
 			}
 		}
@@ -1089,9 +1081,9 @@ func (e *configDeclaration) Hardware() (net.HardwareAddr, error) {
 	var result []pParameterHardware
 
 	for _, addr := range e.address {
-		switch addr.(type) {
+		switch v := addr.(type) {
 		case pParameterHardware:
-			result = append(result, addr.(pParameterHardware))
+			result = append(result, v)
 		}
 	}
 

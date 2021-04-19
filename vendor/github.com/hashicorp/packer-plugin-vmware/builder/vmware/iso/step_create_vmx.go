@@ -161,8 +161,8 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 
 		Network_Adapter: "e1000",
 
-		Sound_Present: map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.HWConfig.Sound)],
-		Usb_Present:   map[bool]string{true: "TRUE", false: "FALSE"}[bool(config.HWConfig.USB)],
+		Sound_Present: map[bool]string{true: "TRUE", false: "FALSE"}[config.HWConfig.Sound],
+		Usb_Present:   map[bool]string{true: "TRUE", false: "FALSE"}[config.HWConfig.USB],
 
 		Serial_Present:   "FALSE",
 		Parallel_Present: "FALSE",
@@ -284,8 +284,6 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 			templateData.Serial_Auto = "TRUE"
 		case nil:
 			templateData.Serial_Present = "FALSE"
-			break
-
 		default:
 			err := fmt.Errorf("Error processing VMX template: %v", serial)
 			state.Put("error", err)
@@ -322,8 +320,6 @@ func (s *stepCreateVMX) Run(ctx context.Context, state multistep.StateBag) multi
 			templateData.Parallel_Bidirectional = parallel.Auto.Bidirectional
 		case nil:
 			templateData.Parallel_Present = "FALSE"
-			break
-
 		default:
 			err := fmt.Errorf("Error processing VMX template: %v", parallel)
 			state.Put("error", err)

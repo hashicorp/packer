@@ -199,7 +199,7 @@ func (d *ESX5Driver) ReloadVM() error {
 func (d *ESX5Driver) Start(vmxPathLocal string, headless bool) error {
 	for i := 0; i < 20; i++ {
 		//intentionally not checking for error since poweron may fail specially after initial VM registration
-		d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
+		_ = d.sh("vim-cmd", "vmsvc/power.on", d.vmId)
 		time.Sleep((time.Duration(i) * time.Second) + 1)
 		running, err := d.IsRunning(vmxPathLocal)
 		if err != nil {
@@ -525,7 +525,7 @@ func (d *ESX5Driver) VNCAddress(ctx context.Context, _ string, portMin, portMax 
 		}
 	}
 
-	vncTimeout := time.Duration(15 * time.Second)
+	vncTimeout := 15 * time.Second
 	envTimeout := os.Getenv("PACKER_ESXI_VNC_PROBE_TIMEOUT")
 	if envTimeout != "" {
 		if parsedTimeout, err := time.ParseDuration(envTimeout); err != nil {
