@@ -281,8 +281,7 @@ github.com/digitalocean/go-libvirt
 github.com/digitalocean/go-libvirt/internal/constants
 github.com/digitalocean/go-libvirt/internal/event
 github.com/digitalocean/go-libvirt/internal/go-xdr/xdr2
-# github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
-## explicit
+# github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001
 github.com/digitalocean/go-qemu/qmp
 # github.com/digitalocean/godo v1.11.1
 ## explicit
@@ -524,6 +523,9 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
+# github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364
+## explicit
+github.com/hashicorp/packer-plugin-qemu/builder/qemu
 # github.com/hashicorp/packer-plugin-sdk v0.2.0
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
@@ -681,7 +683,6 @@ github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v1.0.3
 github.com/mitchellh/go-testing-interface
 # github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
-## explicit
 github.com/mitchellh/go-vnc
 # github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap

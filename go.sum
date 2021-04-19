@@ -199,8 +199,9 @@ github.com/digitalocean/go-libvirt v0.0.0-20210108193637-3a8ae49ba8cd/go.mod h1:
 github.com/digitalocean/go-libvirt v0.0.0-20210112203132-25518eb2c840 h1:F3RVNV8SLLNhkNFcbDTgD3wAPMcrMJW6xjjI0JXy9z8=
 github.com/digitalocean/go-libvirt v0.0.0-20210112203132-25518eb2c840/go.mod h1:gtar3MgGsIO64GgphCHw1cbyxSI6qEuTIm9+izMmlfk=
 github.com/digitalocean/go-qemu v0.0.0-20181112162955-dd7bb9c771b8/go.mod h1:/YnlngP1PARC0SKAZx6kaAEMOp8bNTQGqS+Ka3MctNI=
-github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f h1:BYkBJhHxUJJn27mhqfqWycWaEOWv9JQqLgQ2pOFJMqE=
 github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f/go.mod h1:y4Eq3ZfZQFWQwVyW0qvgo5seXUIq2C7BlHsdE+xtXL4=
+github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001 h1:WAg57gnaAWWjMAELcwHjc2xy0PoXQ5G+vn3+XS6s1jI=
+github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001/go.mod h1:IetBE52JfFxK46p2n2Rqm+p5Gx1gpu2hRHsrbnPOWZQ=
 github.com/digitalocean/godo v1.11.1 h1:OsTh37YFKk+g6DnAOrkXJ9oDArTkRx5UTkBJ2EWAO38=
 github.com/digitalocean/godo v1.11.1/go.mod h1:h6faOIcZ8lWIwNQ+DN7b3CgX4Kwby5T+nbpNqkUIozU=
 github.com/dimchansky/utfbom v1.1.0 h1:FcM3g+nofKgUteL8dm/UpdRXNC9KmADgTpLKsu0TRo4=
@@ -461,6 +462,8 @@ github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjM
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1/go.mod h1:MfV898IrEMpKH6wVnvOI5Tkhxm2snf3QxwVqV4k3bNI=
+github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364 h1:9vTNg4xYdp+PzBFSi+G2Nfc8qw7X1ebrBFKt4wmvARk=
+github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0/go.mod h1:YdWTt5w6cYfaQG7IOi5iorL+3SXnz8hI0gJCi8Db/LI=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210120105339-f6fd68d2570a/go.mod h1:exN0C+Pe+3zu18l4nxueNjX5cfmslxUX/m/xk4IVmZQ=
@@ -478,8 +481,6 @@ github.com/hashicorp/packer-plugin-sdk v0.2.0 h1:A4Dq7p4y1vscY4gMzp7GQaXyDJYYhP4
 github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1 h1:vTfy7a10RUVMdNnDLo0EQrCVbAG4rGWkaDTMC7MVBi4=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
-github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a h1:LpZ+8Y1vozsI4vuAjUpUOEzFl+jNSY4SL1kfGkVMmb8=
-github.com/hashicorp/packer-plugin-vmware v0.0.0-20210416150724-592c0637562a/go.mod h1:NsiT4IOeDKf/aszQNX+/B1xHrfBR3RdUM3sSqANgNec=
 github.com/hashicorp/packer-plugin-vmware v0.0.1 h1:jRQAdjHwg3zeCBb52KoZsuxugrHcQhjgQln72o9eGgM=
 github.com/hashicorp/packer-plugin-vmware v0.0.1/go.mod h1:NsiT4IOeDKf/aszQNX+/B1xHrfBR3RdUM3sSqANgNec=
 github.com/hashicorp/packer-plugin-vsphere v0.0.1 h1:4SUmRP+mGpBJHp6dLL4dmBCC+yDseTktb9YNLj11mVI=
