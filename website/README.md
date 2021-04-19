@@ -240,16 +240,7 @@ $ terraform apply
 
 <!-- END: editing-markdown -->
 
-<!--
-
-NOTE: The "Editing Navigation Sidebars" section is forked from editing-docs-sidebars.
-
-We plan on rolling these changes back into our "readme partials" source once all docs sites
-have been transitioned to the JSON navigation format. See MKTG_032 for details:
-
-https://docs.google.com/document/d/1kYvbyd6njHFSscoE1dtDNHQ3U8IzaMdcjOS0jg87rHg/
-
--->
+<!-- BEGIN: editing-docs-sidebars -->
 
 ## Editing Navigation Sidebars
 
@@ -368,6 +359,8 @@ Sometimes you may have a need to include a link that is not directly to a file w
 ```
 
 If the link provided in the `href` property is external, it will display a small icon indicating this. If it's internal, it will appear the same way as any other direct file link.
+
+<!-- END: editing-docs-sidebars -->
 
 ### Plugin Docs
 
