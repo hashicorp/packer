@@ -26,6 +26,8 @@ import (
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
+	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
+	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
 	virtualboxvmbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm"
@@ -54,6 +56,9 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
+	"proxmox":             new(proxmoxiso.Builder),
+	"proxmox-iso":         new(proxmoxiso.Builder),
+	"proxmox-clone":       new(proxmoxclone.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
@@ -70,7 +75,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"ansible":       new(ansibleprovisioner.Provisioner),
 	"ansible-local": new(ansiblelocalprovisioner.Provisioner),
 }
-
+ 
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
