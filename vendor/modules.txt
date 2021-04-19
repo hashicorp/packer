@@ -80,7 +80,6 @@ github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20210402150908-b9cc6607c070
-## explicit
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
