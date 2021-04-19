@@ -24,6 +24,12 @@
     "version": "latest"
   },
   {
+    "title": "Proxmox",
+    "path": "proxmox",
+    "repo": "hashicorp/packer-plugin-proxmox",
+    "version": "latest"
+  },
+  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
