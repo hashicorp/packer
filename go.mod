@@ -52,7 +52,8 @@ require (
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
-	github.com/hashicorp/packer-plugin-vsphere v0.0.0-20210415100050-d0269b5646e6
+	github.com/hashicorp/packer-plugin-vmware v0.0.1
+	github.com/hashicorp/packer-plugin-vsphere v0.0.1
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
@@ -82,18 +83,17 @@ require (
 	github.com/ucloud/ucloud-sdk-go v0.16.3
 	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ulikunitz/xz v0.5.6
-	github.com/vmware/govmomi v0.24.1
 	github.com/xanzy/go-cloudstack v0.0.0-20190526095453-42f262b63ed0
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
 	github.com/zclconf/go-cty v1.8.1
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 	golang.org/x/mod v0.4.1
-	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
+	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4
+	golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44
 	golang.org/x/tools v0.1.0
 	google.golang.org/grpc v1.36.1
 )

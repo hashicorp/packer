@@ -50,8 +50,6 @@ import (
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
-	vmwareisobuilder "github.com/hashicorp/packer/builder/vmware/iso"
-	vmwarevmxbuilder "github.com/hashicorp/packer/builder/vmware/vmx"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
@@ -125,8 +123,6 @@ var Builders = map[string]packersdk.Builder{
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
 	"vagrant":          new(vagrantbuilder.Builder),
-	"vmware-iso":       new(vmwareisobuilder.Builder),
-	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
