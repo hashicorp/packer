@@ -1,8 +1,8 @@
 [
   {
-    "title": "Docker",
-    "path": "docker",
-    "repo": "hashicorp/packer-plugin-docker",
+    "title": "Ansible",
+    "path": "ansible",
+    "repo": "hashicorp/packer-plugin-ansible",
     "version": "latest"
   },
   {
@@ -12,27 +12,27 @@
     "version": "latest"
   },
   {
+    "title": "Docker",
+    "path": "docker",
+    "repo": "hashicorp/packer-plugin-docker",
+    "version": "latest"
+  },
+  {
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
     "version": "latest"
   },
   {
-    "title": "VMware vSphere",
-    "path": "vsphere",
-    "repo": "hashicorp/packer-plugin-vsphere",
-    "version": "latest"
-  },
-  {
-    "title": "Ansible",
-    "path": "ansible",
-    "repo": "hashicorp/packer-plugin-ansible",
-    "version": "latest"
-  },
-  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
+    "version": "latest"
+  },
+  {
+    "title": "VMware vSphere",
+    "path": "vsphere",
+    "repo": "hashicorp/packer-plugin-vsphere",
     "version": "latest"
   },
   {
