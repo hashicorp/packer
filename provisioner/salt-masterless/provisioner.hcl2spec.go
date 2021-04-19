@@ -21,6 +21,7 @@ type FlatConfig struct {
 	SkipBootstrap       *bool             `mapstructure:"skip_bootstrap" cty:"skip_bootstrap" hcl:"skip_bootstrap"`
 	BootstrapArgs       *string           `mapstructure:"bootstrap_args" cty:"bootstrap_args" hcl:"bootstrap_args"`
 	DisableSudo         *bool             `mapstructure:"disable_sudo" cty:"disable_sudo" hcl:"disable_sudo"`
+	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
 	CustomState         *string           `mapstructure:"custom_state" cty:"custom_state" hcl:"custom_state"`
 	MinionConfig        *string           `mapstructure:"minion_config" cty:"minion_config" hcl:"minion_config"`
 	GrainsFile          *string           `mapstructure:"grains_file" cty:"grains_file" hcl:"grains_file"`
@@ -60,6 +61,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"skip_bootstrap":             &hcldec.AttrSpec{Name: "skip_bootstrap", Type: cty.Bool, Required: false},
 		"bootstrap_args":             &hcldec.AttrSpec{Name: "bootstrap_args", Type: cty.String, Required: false},
 		"disable_sudo":               &hcldec.AttrSpec{Name: "disable_sudo", Type: cty.Bool, Required: false},
+		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"custom_state":               &hcldec.AttrSpec{Name: "custom_state", Type: cty.String, Required: false},
 		"minion_config":              &hcldec.AttrSpec{Name: "minion_config", Type: cty.String, Required: false},
 		"grains_file":                &hcldec.AttrSpec{Name: "grains_file", Type: cty.String, Required: false},

@@ -30,7 +30,8 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
-	DisableSudo bool `mapstructure:"disable_sudo"`
+	DisableSudo    bool   `mapstructure:"disable_sudo"`
+	ExecuteCommand string `mapstructure:"execute_command"`
 
 	// Custom state to run instead of highstate
 	CustomState string `mapstructure:"custom_state"`
@@ -469,7 +470,12 @@ func (p *Provisioner) sudo(cmd string) string {
 		return cmd
 	}
 
-	return "sudo " + cmd
+	executeCommand := "sudo"
+	if p.config.ExecuteCommand != "" {
+		executeCommand = p.config.ExecuteCommand
+	}
+
+	return fmt.Sprintf("%s %s", executeCommand, cmd)
 }
 
 func validateDirConfig(path string, name string, required bool) error {
