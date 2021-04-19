@@ -697,10 +697,6 @@
         ]
       },
       {
-        "title": "CloudStack",
-        "path": "builders/cloudstack"
-      },
-      {
         "title": "DigitalOcean",
         "path": "builders/digitalocean"
       },

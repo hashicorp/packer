@@ -23,12 +23,21 @@
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
+    "title": "Cloudstack",
+    "path": "cloudstack",
+    "repo": "hashicorp/packer-plugin-cloudstack",
+    "pluginTier": "community",
+    "version": "latest"
   },
   {
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
+
     "version": "latest"
   },
   {
