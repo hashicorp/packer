@@ -21,7 +21,6 @@ import (
 )
 
 // ListTagResources invokes the ecs.ListTagResources API synchronously
-// api document: https://help.aliyun.com/api/ecs/listtagresources.html
 func (client *Client) ListTagResources(request *ListTagResourcesRequest) (response *ListTagResourcesResponse, err error) {
 	response = CreateListTagResourcesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ListTagResources(request *ListTagResourcesRequest) (respon
 }
 
 // ListTagResourcesWithChan invokes the ecs.ListTagResources API asynchronously
-// api document: https://help.aliyun.com/api/ecs/listtagresources.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ListTagResourcesWithChan(request *ListTagResourcesRequest) (<-chan *ListTagResourcesResponse, <-chan error) {
 	responseChan := make(chan *ListTagResourcesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ListTagResourcesWithChan(request *ListTagResourcesRequest)
 }
 
 // ListTagResourcesWithCallback invokes the ecs.ListTagResources API asynchronously
-// api document: https://help.aliyun.com/api/ecs/listtagresources.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ListTagResourcesWithCallback(request *ListTagResourcesRequest, callback func(response *ListTagResourcesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,20 +71,27 @@ func (client *Client) ListTagResourcesWithCallback(request *ListTagResourcesRequ
 // ListTagResourcesRequest is the request struct for api ListTagResources
 type ListTagResourcesRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer       `position:"Query" name:"ResourceOwnerId"`
-	NextToken            string                 `position:"Query" name:"NextToken"`
-	Tag                  *[]ListTagResourcesTag `position:"Query" name:"Tag"  type:"Repeated"`
-	ResourceId           *[]string              `position:"Query" name:"ResourceId"  type:"Repeated"`
-	ResourceOwnerAccount string                 `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string                 `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer       `position:"Query" name:"OwnerId"`
-	ResourceType         string                 `position:"Query" name:"ResourceType"`
+	ResourceOwnerId      requests.Integer             `position:"Query" name:"ResourceOwnerId"`
+	NextToken            string                       `position:"Query" name:"NextToken"`
+	Tag                  *[]ListTagResourcesTag       `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceId           *[]string                    `position:"Query" name:"ResourceId"  type:"Repeated"`
+	ResourceOwnerAccount string                       `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                       `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer             `position:"Query" name:"OwnerId"`
+	TagFilter            *[]ListTagResourcesTagFilter `position:"Query" name:"TagFilter"  type:"Repeated"`
+	ResourceType         string                       `position:"Query" name:"ResourceType"`
 }
 
 // ListTagResourcesTag is a repeated param struct in ListTagResourcesRequest
 type ListTagResourcesTag struct {
 	Key   string `name:"Key"`
 	Value string `name:"Value"`
+}
+
+// ListTagResourcesTagFilter is a repeated param struct in ListTagResourcesRequest
+type ListTagResourcesTagFilter struct {
+	TagKey    string    `name:"TagKey"`
+	TagValues *[]string `name:"TagValues" type:"Repeated"`
 }
 
 // ListTagResourcesResponse is the response struct for api ListTagResources
@@ -106,6 +108,7 @@ func CreateListTagResourcesRequest() (request *ListTagResourcesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ListTagResources", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

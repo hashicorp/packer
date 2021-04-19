@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyRouterInterfaceAttribute invokes the ecs.ModifyRouterInterfaceAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyrouterinterfaceattribute.html
 func (client *Client) ModifyRouterInterfaceAttribute(request *ModifyRouterInterfaceAttributeRequest) (response *ModifyRouterInterfaceAttributeResponse, err error) {
 	response = CreateModifyRouterInterfaceAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyRouterInterfaceAttribute(request *ModifyRouterInterf
 }
 
 // ModifyRouterInterfaceAttributeWithChan invokes the ecs.ModifyRouterInterfaceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyrouterinterfaceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyRouterInterfaceAttributeWithChan(request *ModifyRouterInterfaceAttributeRequest) (<-chan *ModifyRouterInterfaceAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyRouterInterfaceAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyRouterInterfaceAttributeWithChan(request *ModifyRout
 }
 
 // ModifyRouterInterfaceAttributeWithCallback invokes the ecs.ModifyRouterInterfaceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyrouterinterfaceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyRouterInterfaceAttributeWithCallback(request *ModifyRouterInterfaceAttributeRequest, callback func(response *ModifyRouterInterfaceAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,16 +73,16 @@ type ModifyRouterInterfaceAttributeRequest struct {
 	*requests.RpcRequest
 	OppositeRouterId         string           `position:"Query" name:"OppositeRouterId"`
 	ResourceOwnerId          requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount     string           `position:"Query" name:"ResourceOwnerAccount"`
 	Description              string           `position:"Query" name:"Description"`
 	HealthCheckTargetIp      string           `position:"Query" name:"HealthCheckTargetIp"`
+	OppositeInterfaceId      string           `position:"Query" name:"OppositeInterfaceId"`
+	ResourceOwnerAccount     string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId                  requests.Integer `position:"Query" name:"OwnerId"`
 	RouterInterfaceId        string           `position:"Query" name:"RouterInterfaceId"`
 	OppositeInterfaceOwnerId requests.Integer `position:"Query" name:"OppositeInterfaceOwnerId"`
 	HealthCheckSourceIp      string           `position:"Query" name:"HealthCheckSourceIp"`
 	Name                     string           `position:"Query" name:"Name"`
 	OppositeRouterType       string           `position:"Query" name:"OppositeRouterType"`
-	OppositeInterfaceId      string           `position:"Query" name:"OppositeInterfaceId"`
 }
 
 // ModifyRouterInterfaceAttributeResponse is the response struct for api ModifyRouterInterfaceAttribute
@@ -102,6 +97,7 @@ func CreateModifyRouterInterfaceAttributeRequest() (request *ModifyRouterInterfa
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyRouterInterfaceAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

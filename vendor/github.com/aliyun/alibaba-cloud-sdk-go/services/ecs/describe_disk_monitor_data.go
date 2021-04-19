@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDiskMonitorData invokes the ecs.DescribeDiskMonitorData API synchronously
-// api document: https://help.aliyun.com/api/ecs/describediskmonitordata.html
 func (client *Client) DescribeDiskMonitorData(request *DescribeDiskMonitorDataRequest) (response *DescribeDiskMonitorDataResponse, err error) {
 	response = CreateDescribeDiskMonitorDataResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDiskMonitorData(request *DescribeDiskMonitorDataRe
 }
 
 // DescribeDiskMonitorDataWithChan invokes the ecs.DescribeDiskMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describediskmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDiskMonitorDataWithChan(request *DescribeDiskMonitorDataRequest) (<-chan *DescribeDiskMonitorDataResponse, <-chan error) {
 	responseChan := make(chan *DescribeDiskMonitorDataResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDiskMonitorDataWithChan(request *DescribeDiskMonit
 }
 
 // DescribeDiskMonitorDataWithCallback invokes the ecs.DescribeDiskMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describediskmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDiskMonitorDataWithCallback(request *DescribeDiskMonitorDataRequest, callback func(response *DescribeDiskMonitorDataResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -100,6 +95,7 @@ func CreateDescribeDiskMonitorDataRequest() (request *DescribeDiskMonitorDataReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDiskMonitorData", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

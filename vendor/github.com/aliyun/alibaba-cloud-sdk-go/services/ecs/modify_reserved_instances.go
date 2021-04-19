@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyReservedInstances invokes the ecs.ModifyReservedInstances API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyreservedinstances.html
 func (client *Client) ModifyReservedInstances(request *ModifyReservedInstancesRequest) (response *ModifyReservedInstancesResponse, err error) {
 	response = CreateModifyReservedInstancesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyReservedInstances(request *ModifyReservedInstancesRe
 }
 
 // ModifyReservedInstancesWithChan invokes the ecs.ModifyReservedInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyreservedinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyReservedInstancesWithChan(request *ModifyReservedInstancesRequest) (<-chan *ModifyReservedInstancesResponse, <-chan error) {
 	responseChan := make(chan *ModifyReservedInstancesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyReservedInstancesWithChan(request *ModifyReservedIns
 }
 
 // ModifyReservedInstancesWithCallback invokes the ecs.ModifyReservedInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyreservedinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyReservedInstancesWithCallback(request *ModifyReservedInstancesRequest, callback func(response *ModifyReservedInstancesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -106,6 +101,7 @@ func CreateModifyReservedInstancesRequest() (request *ModifyReservedInstancesReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyReservedInstances", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

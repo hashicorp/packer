@@ -25,11 +25,14 @@ type ReservedInstance struct {
 	InstanceType         string                                    `json:"InstanceType" xml:"InstanceType"`
 	Scope                string                                    `json:"Scope" xml:"Scope"`
 	OfferingType         string                                    `json:"OfferingType" xml:"OfferingType"`
+	Platform             string                                    `json:"Platform" xml:"Platform"`
 	InstanceAmount       int                                       `json:"InstanceAmount" xml:"InstanceAmount"`
 	Status               string                                    `json:"Status" xml:"Status"`
 	CreationTime         string                                    `json:"CreationTime" xml:"CreationTime"`
 	ExpiredTime          string                                    `json:"ExpiredTime" xml:"ExpiredTime"`
 	StartTime            string                                    `json:"StartTime" xml:"StartTime"`
 	ResourceGroupId      string                                    `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	AllocationStatus     string                                    `json:"AllocationStatus" xml:"AllocationStatus"`
 	OperationLocks       OperationLocksInDescribeReservedInstances `json:"OperationLocks" xml:"OperationLocks"`
+	Tags                 TagsInDescribeReservedInstances           `json:"Tags" xml:"Tags"`
 }

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeBandwidthLimitation invokes the ecs.DescribeBandwidthLimitation API synchronously
-// api document: https://help.aliyun.com/api/ecs/describebandwidthlimitation.html
 func (client *Client) DescribeBandwidthLimitation(request *DescribeBandwidthLimitationRequest) (response *DescribeBandwidthLimitationResponse, err error) {
 	response = CreateDescribeBandwidthLimitationResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeBandwidthLimitation(request *DescribeBandwidthLimi
 }
 
 // DescribeBandwidthLimitationWithChan invokes the ecs.DescribeBandwidthLimitation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describebandwidthlimitation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeBandwidthLimitationWithChan(request *DescribeBandwidthLimitationRequest) (<-chan *DescribeBandwidthLimitationResponse, <-chan error) {
 	responseChan := make(chan *DescribeBandwidthLimitationResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeBandwidthLimitationWithChan(request *DescribeBandw
 }
 
 // DescribeBandwidthLimitationWithCallback invokes the ecs.DescribeBandwidthLimitation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describebandwidthlimitation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeBandwidthLimitationWithCallback(request *DescribeBandwidthLimitationRequest, callback func(response *DescribeBandwidthLimitationResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -100,6 +95,7 @@ func CreateDescribeBandwidthLimitationRequest() (request *DescribeBandwidthLimit
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeBandwidthLimitation", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

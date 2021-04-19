@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteRouterInterface invokes the ecs.DeleteRouterInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/deleterouterinterface.html
 func (client *Client) DeleteRouterInterface(request *DeleteRouterInterfaceRequest) (response *DeleteRouterInterfaceResponse, err error) {
 	response = CreateDeleteRouterInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteRouterInterface(request *DeleteRouterInterfaceReques
 }
 
 // DeleteRouterInterfaceWithChan invokes the ecs.DeleteRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deleterouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteRouterInterfaceWithChan(request *DeleteRouterInterfaceRequest) (<-chan *DeleteRouterInterfaceResponse, <-chan error) {
 	responseChan := make(chan *DeleteRouterInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteRouterInterfaceWithChan(request *DeleteRouterInterfa
 }
 
 // DeleteRouterInterfaceWithCallback invokes the ecs.DeleteRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deleterouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteRouterInterfaceWithCallback(request *DeleteRouterInterfaceRequest, callback func(response *DeleteRouterInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DeleteRouterInterfaceWithCallback(request *DeleteRouterInt
 type DeleteRouterInterfaceRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	RouterInterfaceId    string           `position:"Query" name:"RouterInterfaceId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
@@ -97,6 +92,7 @@ func CreateDeleteRouterInterfaceRequest() (request *DeleteRouterInterfaceRequest
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteRouterInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

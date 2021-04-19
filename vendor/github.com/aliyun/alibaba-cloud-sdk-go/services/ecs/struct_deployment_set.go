@@ -17,14 +17,15 @@ package ecs
 
 // DeploymentSet is a nested struct in ecs response
 type DeploymentSet struct {
-	DeploymentSetId          string      `json:"DeploymentSetId" xml:"DeploymentSetId"`
-	DeploymentSetDescription string      `json:"DeploymentSetDescription" xml:"DeploymentSetDescription"`
-	DeploymentSetName        string      `json:"DeploymentSetName" xml:"DeploymentSetName"`
-	Strategy                 string      `json:"Strategy" xml:"Strategy"`
-	DeploymentStrategy       string      `json:"DeploymentStrategy" xml:"DeploymentStrategy"`
-	Domain                   string      `json:"Domain" xml:"Domain"`
-	Granularity              string      `json:"Granularity" xml:"Granularity"`
-	InstanceAmount           int         `json:"InstanceAmount" xml:"InstanceAmount"`
-	CreationTime             string      `json:"CreationTime" xml:"CreationTime"`
-	InstanceIds              InstanceIds `json:"InstanceIds" xml:"InstanceIds"`
+	DeploymentSetId          string                              `json:"DeploymentSetId" xml:"DeploymentSetId"`
+	DeploymentSetDescription string                              `json:"DeploymentSetDescription" xml:"DeploymentSetDescription"`
+	DeploymentSetName        string                              `json:"DeploymentSetName" xml:"DeploymentSetName"`
+	Strategy                 string                              `json:"Strategy" xml:"Strategy"`
+	DeploymentStrategy       string                              `json:"DeploymentStrategy" xml:"DeploymentStrategy"`
+	Domain                   string                              `json:"Domain" xml:"Domain"`
+	Granularity              string                              `json:"Granularity" xml:"Granularity"`
+	GroupCount               int                                 `json:"GroupCount" xml:"GroupCount"`
+	InstanceAmount           int                                 `json:"InstanceAmount" xml:"InstanceAmount"`
+	CreationTime             string                              `json:"CreationTime" xml:"CreationTime"`
+	InstanceIds              InstanceIdsInDescribeDeploymentSets `json:"InstanceIds" xml:"InstanceIds"`
 }

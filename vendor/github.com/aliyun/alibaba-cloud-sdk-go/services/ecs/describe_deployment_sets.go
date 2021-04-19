@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDeploymentSets invokes the ecs.DescribeDeploymentSets API synchronously
-// api document: https://help.aliyun.com/api/ecs/describedeploymentsets.html
 func (client *Client) DescribeDeploymentSets(request *DescribeDeploymentSetsRequest) (response *DescribeDeploymentSetsResponse, err error) {
 	response = CreateDescribeDeploymentSetsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDeploymentSets(request *DescribeDeploymentSetsRequ
 }
 
 // DescribeDeploymentSetsWithChan invokes the ecs.DescribeDeploymentSets API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedeploymentsets.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDeploymentSetsWithChan(request *DescribeDeploymentSetsRequest) (<-chan *DescribeDeploymentSetsResponse, <-chan error) {
 	responseChan := make(chan *DescribeDeploymentSetsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDeploymentSetsWithChan(request *DescribeDeployment
 }
 
 // DescribeDeploymentSetsWithCallback invokes the ecs.DescribeDeploymentSets API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedeploymentsets.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDeploymentSetsWithCallback(request *DescribeDeploymentSetsRequest, callback func(response *DescribeDeploymentSetsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,16 +72,16 @@ func (client *Client) DescribeDeploymentSetsWithCallback(request *DescribeDeploy
 type DescribeDeploymentSetsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	NetworkType          string           `position:"Query" name:"NetworkType"`
-	DeploymentSetName    string           `position:"Query" name:"DeploymentSetName"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 	DeploymentSetIds     string           `position:"Query" name:"DeploymentSetIds"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	DeploymentSetName    string           `position:"Query" name:"DeploymentSetName"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	Granularity          string           `position:"Query" name:"Granularity"`
 	Domain               string           `position:"Query" name:"Domain"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	Strategy             string           `position:"Query" name:"Strategy"`
 }
 
@@ -107,6 +102,7 @@ func CreateDescribeDeploymentSetsRequest() (request *DescribeDeploymentSetsReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDeploymentSets", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

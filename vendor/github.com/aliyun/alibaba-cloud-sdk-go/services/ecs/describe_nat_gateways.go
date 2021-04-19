@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeNatGateways invokes the ecs.DescribeNatGateways API synchronously
-// api document: https://help.aliyun.com/api/ecs/describenatgateways.html
 func (client *Client) DescribeNatGateways(request *DescribeNatGatewaysRequest) (response *DescribeNatGatewaysResponse, err error) {
 	response = CreateDescribeNatGatewaysResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeNatGateways(request *DescribeNatGatewaysRequest) (
 }
 
 // DescribeNatGatewaysWithChan invokes the ecs.DescribeNatGateways API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describenatgateways.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeNatGatewaysWithChan(request *DescribeNatGatewaysRequest) (<-chan *DescribeNatGatewaysResponse, <-chan error) {
 	responseChan := make(chan *DescribeNatGatewaysResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeNatGatewaysWithChan(request *DescribeNatGatewaysRe
 }
 
 // DescribeNatGatewaysWithCallback invokes the ecs.DescribeNatGateways API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describenatgateways.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeNatGatewaysWithCallback(request *DescribeNatGatewaysRequest, callback func(response *DescribeNatGatewaysResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,13 @@ func (client *Client) DescribeNatGatewaysWithCallback(request *DescribeNatGatewa
 type DescribeNatGatewaysRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	NatGatewayId         string           `position:"Query" name:"NatGatewayId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // DescribeNatGatewaysResponse is the response struct for api DescribeNatGateways
@@ -102,6 +97,7 @@ func CreateDescribeNatGatewaysRequest() (request *DescribeNatGatewaysRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeNatGateways", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

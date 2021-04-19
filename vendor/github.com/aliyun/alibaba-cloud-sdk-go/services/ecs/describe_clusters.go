@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeClusters invokes the ecs.DescribeClusters API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeclusters.html
 func (client *Client) DescribeClusters(request *DescribeClustersRequest) (response *DescribeClustersResponse, err error) {
 	response = CreateDescribeClustersResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeClusters(request *DescribeClustersRequest) (respon
 }
 
 // DescribeClustersWithChan invokes the ecs.DescribeClusters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeclusters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeClustersWithChan(request *DescribeClustersRequest) (<-chan *DescribeClustersResponse, <-chan error) {
 	responseChan := make(chan *DescribeClustersResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeClustersWithChan(request *DescribeClustersRequest)
 }
 
 // DescribeClustersWithCallback invokes the ecs.DescribeClusters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeclusters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeClustersWithCallback(request *DescribeClustersRequest, callback func(response *DescribeClustersResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateDescribeClustersRequest() (request *DescribeClustersRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeClusters", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

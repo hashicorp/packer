@@ -17,28 +17,29 @@ package ecs
 
 // Image is a nested struct in ecs response
 type Image struct {
-	Progress             string               `json:"Progress" xml:"Progress"`
-	ImageId              string               `json:"ImageId" xml:"ImageId"`
-	ImageName            string               `json:"ImageName" xml:"ImageName"`
-	ImageVersion         string               `json:"ImageVersion" xml:"ImageVersion"`
-	Description          string               `json:"Description" xml:"Description"`
-	Size                 int                  `json:"Size" xml:"Size"`
-	ImageOwnerAlias      string               `json:"ImageOwnerAlias" xml:"ImageOwnerAlias"`
-	IsSupportIoOptimized bool                 `json:"IsSupportIoOptimized" xml:"IsSupportIoOptimized"`
-	IsSupportCloudinit   bool                 `json:"IsSupportCloudinit" xml:"IsSupportCloudinit"`
-	OSName               string               `json:"OSName" xml:"OSName"`
-	OSNameEn             string               `json:"OSNameEn" xml:"OSNameEn"`
-	Architecture         string               `json:"Architecture" xml:"Architecture"`
-	Status               string               `json:"Status" xml:"Status"`
-	ProductCode          string               `json:"ProductCode" xml:"ProductCode"`
-	IsSubscribed         bool                 `json:"IsSubscribed" xml:"IsSubscribed"`
-	CreationTime         string               `json:"CreationTime" xml:"CreationTime"`
-	IsSelfShared         string               `json:"IsSelfShared" xml:"IsSelfShared"`
-	OSType               string               `json:"OSType" xml:"OSType"`
-	Platform             string               `json:"Platform" xml:"Platform"`
-	Usage                string               `json:"Usage" xml:"Usage"`
-	IsCopied             bool                 `json:"IsCopied" xml:"IsCopied"`
-	ResourceGroupId      string               `json:"ResourceGroupId" xml:"ResourceGroupId"`
-	DiskDeviceMappings   DiskDeviceMappings   `json:"DiskDeviceMappings" xml:"DiskDeviceMappings"`
-	Tags                 TagsInDescribeImages `json:"Tags" xml:"Tags"`
+	ImageId              string                             `json:"ImageId" xml:"ImageId"`
+	ImageOwnerAlias      string                             `json:"ImageOwnerAlias" xml:"ImageOwnerAlias"`
+	OSName               string                             `json:"OSName" xml:"OSName"`
+	OSNameEn             string                             `json:"OSNameEn" xml:"OSNameEn"`
+	ImageFamily          string                             `json:"ImageFamily" xml:"ImageFamily"`
+	Architecture         string                             `json:"Architecture" xml:"Architecture"`
+	Size                 int                                `json:"Size" xml:"Size"`
+	IsSupportIoOptimized bool                               `json:"IsSupportIoOptimized" xml:"IsSupportIoOptimized"`
+	ResourceGroupId      string                             `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	Description          string                             `json:"Description" xml:"Description"`
+	Usage                string                             `json:"Usage" xml:"Usage"`
+	IsCopied             bool                               `json:"IsCopied" xml:"IsCopied"`
+	ImageVersion         string                             `json:"ImageVersion" xml:"ImageVersion"`
+	OSType               string                             `json:"OSType" xml:"OSType"`
+	IsSubscribed         bool                               `json:"IsSubscribed" xml:"IsSubscribed"`
+	IsSupportCloudinit   bool                               `json:"IsSupportCloudinit" xml:"IsSupportCloudinit"`
+	CreationTime         string                             `json:"CreationTime" xml:"CreationTime"`
+	ProductCode          string                             `json:"ProductCode" xml:"ProductCode"`
+	Progress             string                             `json:"Progress" xml:"Progress"`
+	Platform             string                             `json:"Platform" xml:"Platform"`
+	IsSelfShared         string                             `json:"IsSelfShared" xml:"IsSelfShared"`
+	ImageName            string                             `json:"ImageName" xml:"ImageName"`
+	Status               string                             `json:"Status" xml:"Status"`
+	Tags                 TagsInDescribeImageFromFamily      `json:"Tags" xml:"Tags"`
+	DiskDeviceMappings   DiskDeviceMappingsInDescribeImages `json:"DiskDeviceMappings" xml:"DiskDeviceMappings"`
 }

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceTypeFamilies invokes the ecs.DescribeInstanceTypeFamilies API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancetypefamilies.html
 func (client *Client) DescribeInstanceTypeFamilies(request *DescribeInstanceTypeFamiliesRequest) (response *DescribeInstanceTypeFamiliesResponse, err error) {
 	response = CreateDescribeInstanceTypeFamiliesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceTypeFamilies(request *DescribeInstanceType
 }
 
 // DescribeInstanceTypeFamiliesWithChan invokes the ecs.DescribeInstanceTypeFamilies API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancetypefamilies.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceTypeFamiliesWithChan(request *DescribeInstanceTypeFamiliesRequest) (<-chan *DescribeInstanceTypeFamiliesResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceTypeFamiliesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceTypeFamiliesWithChan(request *DescribeInst
 }
 
 // DescribeInstanceTypeFamiliesWithCallback invokes the ecs.DescribeInstanceTypeFamilies API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancetypefamilies.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceTypeFamiliesWithCallback(request *DescribeInstanceTypeFamiliesRequest, callback func(response *DescribeInstanceTypeFamiliesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,8 +71,8 @@ func (client *Client) DescribeInstanceTypeFamiliesWithCallback(request *Describe
 // DescribeInstanceTypeFamiliesRequest is the request struct for api DescribeInstanceTypeFamilies
 type DescribeInstanceTypeFamiliesRequest struct {
 	*requests.RpcRequest
-	Generation           string           `position:"Query" name:"Generation"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Generation           string           `position:"Query" name:"Generation"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
@@ -96,6 +91,7 @@ func CreateDescribeInstanceTypeFamiliesRequest() (request *DescribeInstanceTypeF
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceTypeFamilies", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DetachNetworkInterface invokes the ecs.DetachNetworkInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/detachnetworkinterface.html
 func (client *Client) DetachNetworkInterface(request *DetachNetworkInterfaceRequest) (response *DetachNetworkInterfaceResponse, err error) {
 	response = CreateDetachNetworkInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DetachNetworkInterface(request *DetachNetworkInterfaceRequ
 }
 
 // DetachNetworkInterfaceWithChan invokes the ecs.DetachNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachnetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachNetworkInterfaceWithChan(request *DetachNetworkInterfaceRequest) (<-chan *DetachNetworkInterfaceResponse, <-chan error) {
 	responseChan := make(chan *DetachNetworkInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DetachNetworkInterfaceWithChan(request *DetachNetworkInter
 }
 
 // DetachNetworkInterfaceWithCallback invokes the ecs.DetachNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachnetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachNetworkInterfaceWithCallback(request *DetachNetworkInterfaceRequest, callback func(response *DetachNetworkInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,13 @@ func (client *Client) DetachNetworkInterfaceWithCallback(request *DetachNetworkI
 // DetachNetworkInterfaceRequest is the request struct for api DetachNetworkInterface
 type DetachNetworkInterfaceRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	NetworkInterfaceId   string           `position:"Query" name:"NetworkInterfaceId"`
+	ResourceOwnerId        requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	TrunkNetworkInstanceId string           `position:"Query" name:"TrunkNetworkInstanceId"`
+	ResourceOwnerAccount   string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount           string           `position:"Query" name:"OwnerAccount"`
+	OwnerId                requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId             string           `position:"Query" name:"InstanceId"`
+	NetworkInterfaceId     string           `position:"Query" name:"NetworkInterfaceId"`
 }
 
 // DetachNetworkInterfaceResponse is the response struct for api DetachNetworkInterface
@@ -96,6 +92,7 @@ func CreateDetachNetworkInterfaceRequest() (request *DetachNetworkInterfaceReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DetachNetworkInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

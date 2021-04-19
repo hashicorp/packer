@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDedicatedHostTypes invokes the ecs.DescribeDedicatedHostTypes API synchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosttypes.html
 func (client *Client) DescribeDedicatedHostTypes(request *DescribeDedicatedHostTypesRequest) (response *DescribeDedicatedHostTypesResponse, err error) {
 	response = CreateDescribeDedicatedHostTypesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDedicatedHostTypes(request *DescribeDedicatedHostT
 }
 
 // DescribeDedicatedHostTypesWithChan invokes the ecs.DescribeDedicatedHostTypes API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosttypes.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostTypesWithChan(request *DescribeDedicatedHostTypesRequest) (<-chan *DescribeDedicatedHostTypesResponse, <-chan error) {
 	responseChan := make(chan *DescribeDedicatedHostTypesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDedicatedHostTypesWithChan(request *DescribeDedica
 }
 
 // DescribeDedicatedHostTypesWithCallback invokes the ecs.DescribeDedicatedHostTypes API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosttypes.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostTypesWithCallback(request *DescribeDedicatedHostTypesRequest, callback func(response *DescribeDedicatedHostTypesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateDescribeDedicatedHostTypesRequest() (request *DescribeDedicatedHostTy
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDedicatedHostTypes", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

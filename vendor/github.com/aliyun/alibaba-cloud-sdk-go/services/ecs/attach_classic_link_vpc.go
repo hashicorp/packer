@@ -21,7 +21,6 @@ import (
 )
 
 // AttachClassicLinkVpc invokes the ecs.AttachClassicLinkVpc API synchronously
-// api document: https://help.aliyun.com/api/ecs/attachclassiclinkvpc.html
 func (client *Client) AttachClassicLinkVpc(request *AttachClassicLinkVpcRequest) (response *AttachClassicLinkVpcResponse, err error) {
 	response = CreateAttachClassicLinkVpcResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AttachClassicLinkVpc(request *AttachClassicLinkVpcRequest)
 }
 
 // AttachClassicLinkVpcWithChan invokes the ecs.AttachClassicLinkVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachclassiclinkvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachClassicLinkVpcWithChan(request *AttachClassicLinkVpcRequest) (<-chan *AttachClassicLinkVpcResponse, <-chan error) {
 	responseChan := make(chan *AttachClassicLinkVpcResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AttachClassicLinkVpcWithChan(request *AttachClassicLinkVpc
 }
 
 // AttachClassicLinkVpcWithCallback invokes the ecs.AttachClassicLinkVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachclassiclinkvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachClassicLinkVpcWithCallback(request *AttachClassicLinkVpcRequest, callback func(response *AttachClassicLinkVpcResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) AttachClassicLinkVpcWithCallback(request *AttachClassicLin
 type AttachClassicLinkVpcRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // AttachClassicLinkVpcResponse is the response struct for api AttachClassicLinkVpc
@@ -95,6 +90,7 @@ func CreateAttachClassicLinkVpcRequest() (request *AttachClassicLinkVpcRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AttachClassicLinkVpc", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

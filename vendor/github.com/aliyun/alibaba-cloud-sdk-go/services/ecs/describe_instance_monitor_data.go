@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceMonitorData invokes the ecs.DescribeInstanceMonitorData API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancemonitordata.html
 func (client *Client) DescribeInstanceMonitorData(request *DescribeInstanceMonitorDataRequest) (response *DescribeInstanceMonitorDataResponse, err error) {
 	response = CreateDescribeInstanceMonitorDataResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceMonitorData(request *DescribeInstanceMonit
 }
 
 // DescribeInstanceMonitorDataWithChan invokes the ecs.DescribeInstanceMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancemonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceMonitorDataWithChan(request *DescribeInstanceMonitorDataRequest) (<-chan *DescribeInstanceMonitorDataResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceMonitorDataResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceMonitorDataWithChan(request *DescribeInsta
 }
 
 // DescribeInstanceMonitorDataWithCallback invokes the ecs.DescribeInstanceMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancemonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceMonitorDataWithCallback(request *DescribeInstanceMonitorDataRequest, callback func(response *DescribeInstanceMonitorDataResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -99,6 +94,7 @@ func CreateDescribeInstanceMonitorDataRequest() (request *DescribeInstanceMonito
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceMonitorData", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

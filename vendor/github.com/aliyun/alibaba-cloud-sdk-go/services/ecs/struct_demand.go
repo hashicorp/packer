@@ -20,6 +20,10 @@ type Demand struct {
 	ZoneId             string      `json:"ZoneId" xml:"ZoneId"`
 	DemandTime         string      `json:"DemandTime" xml:"DemandTime"`
 	InstanceTypeFamily string      `json:"InstanceTypeFamily" xml:"InstanceTypeFamily"`
+	DemandId           string      `json:"DemandId" xml:"DemandId"`
+	DemandName         string      `json:"DemandName" xml:"DemandName"`
+	Comment            string      `json:"Comment" xml:"Comment"`
+	DemandDescription  string      `json:"DemandDescription" xml:"DemandDescription"`
 	InstanceType       string      `json:"InstanceType" xml:"InstanceType"`
 	InstanceChargeType string      `json:"InstanceChargeType" xml:"InstanceChargeType"`
 	Period             int         `json:"Period" xml:"Period"`

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeZones invokes the ecs.DescribeZones API synchronously
-// api document: https://help.aliyun.com/api/ecs/describezones.html
 func (client *Client) DescribeZones(request *DescribeZonesRequest) (response *DescribeZonesResponse, err error) {
 	response = CreateDescribeZonesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeZones(request *DescribeZonesRequest) (response *De
 }
 
 // DescribeZonesWithChan invokes the ecs.DescribeZones API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describezones.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeZonesWithChan(request *DescribeZonesRequest) (<-chan *DescribeZonesResponse, <-chan error) {
 	responseChan := make(chan *DescribeZonesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeZonesWithChan(request *DescribeZonesRequest) (<-ch
 }
 
 // DescribeZonesWithCallback invokes the ecs.DescribeZones API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describezones.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeZonesWithCallback(request *DescribeZonesRequest, callback func(response *DescribeZonesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,14 +71,14 @@ func (client *Client) DescribeZonesWithCallback(request *DescribeZonesRequest, c
 // DescribeZonesRequest is the request struct for api DescribeZones
 type DescribeZonesRequest struct {
 	*requests.RpcRequest
-	SpotStrategy         string           `position:"Query" name:"SpotStrategy"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	AcceptLanguage       string           `position:"Query" name:"AcceptLanguage"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 	Verbose              requests.Boolean `position:"Query" name:"Verbose"`
+	SpotStrategy         string           `position:"Query" name:"SpotStrategy"`
+	AcceptLanguage       string           `position:"Query" name:"AcceptLanguage"`
 }
 
 // DescribeZonesResponse is the response struct for api DescribeZones
@@ -99,6 +94,7 @@ func CreateDescribeZonesRequest() (request *DescribeZonesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeZones", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

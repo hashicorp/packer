@@ -21,7 +21,6 @@ import (
 )
 
 // CancelPhysicalConnection invokes the ecs.CancelPhysicalConnection API synchronously
-// api document: https://help.aliyun.com/api/ecs/cancelphysicalconnection.html
 func (client *Client) CancelPhysicalConnection(request *CancelPhysicalConnectionRequest) (response *CancelPhysicalConnectionResponse, err error) {
 	response = CreateCancelPhysicalConnectionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CancelPhysicalConnection(request *CancelPhysicalConnection
 }
 
 // CancelPhysicalConnectionWithChan invokes the ecs.CancelPhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/cancelphysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelPhysicalConnectionWithChan(request *CancelPhysicalConnectionRequest) (<-chan *CancelPhysicalConnectionResponse, <-chan error) {
 	responseChan := make(chan *CancelPhysicalConnectionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CancelPhysicalConnectionWithChan(request *CancelPhysicalCo
 }
 
 // CancelPhysicalConnectionWithCallback invokes the ecs.CancelPhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/cancelphysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelPhysicalConnectionWithCallback(request *CancelPhysicalConnectionRequest, callback func(response *CancelPhysicalConnectionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) CancelPhysicalConnectionWithCallback(request *CancelPhysic
 type CancelPhysicalConnectionRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
 }
 
 // CancelPhysicalConnectionResponse is the response struct for api CancelPhysicalConnection
@@ -97,6 +92,7 @@ func CreateCancelPhysicalConnectionRequest() (request *CancelPhysicalConnectionR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CancelPhysicalConnection", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

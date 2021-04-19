@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeVSwitches invokes the ecs.DescribeVSwitches API synchronously
-// api document: https://help.aliyun.com/api/ecs/describevswitches.html
 func (client *Client) DescribeVSwitches(request *DescribeVSwitchesRequest) (response *DescribeVSwitchesResponse, err error) {
 	response = CreateDescribeVSwitchesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeVSwitches(request *DescribeVSwitchesRequest) (resp
 }
 
 // DescribeVSwitchesWithChan invokes the ecs.DescribeVSwitches API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevswitches.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVSwitchesWithChan(request *DescribeVSwitchesRequest) (<-chan *DescribeVSwitchesResponse, <-chan error) {
 	responseChan := make(chan *DescribeVSwitchesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeVSwitchesWithChan(request *DescribeVSwitchesReques
 }
 
 // DescribeVSwitchesWithCallback invokes the ecs.DescribeVSwitches API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevswitches.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVSwitchesWithCallback(request *DescribeVSwitchesRequest, callback func(response *DescribeVSwitchesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,16 +71,16 @@ func (client *Client) DescribeVSwitchesWithCallback(request *DescribeVSwitchesRe
 // DescribeVSwitchesRequest is the request struct for api DescribeVSwitches
 type DescribeVSwitchesRequest struct {
 	*requests.RpcRequest
-	VSwitchId            string           `position:"Query" name:"VSwitchId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
-	ZoneId               string           `position:"Query" name:"ZoneId"`
-	IsDefault            requests.Boolean `position:"Query" name:"IsDefault"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
+	IsDefault            requests.Boolean `position:"Query" name:"IsDefault"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	VSwitchId            string           `position:"Query" name:"VSwitchId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
+	ZoneId               string           `position:"Query" name:"ZoneId"`
 }
 
 // DescribeVSwitchesResponse is the response struct for api DescribeVSwitches
@@ -104,6 +99,7 @@ func CreateDescribeVSwitchesRequest() (request *DescribeVSwitchesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeVSwitches", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

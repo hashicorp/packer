@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeForwardTableEntries invokes the ecs.DescribeForwardTableEntries API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeforwardtableentries.html
 func (client *Client) DescribeForwardTableEntries(request *DescribeForwardTableEntriesRequest) (response *DescribeForwardTableEntriesResponse, err error) {
 	response = CreateDescribeForwardTableEntriesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeForwardTableEntries(request *DescribeForwardTableE
 }
 
 // DescribeForwardTableEntriesWithChan invokes the ecs.DescribeForwardTableEntries API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeforwardtableentries.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeForwardTableEntriesWithChan(request *DescribeForwardTableEntriesRequest) (<-chan *DescribeForwardTableEntriesResponse, <-chan error) {
 	responseChan := make(chan *DescribeForwardTableEntriesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeForwardTableEntriesWithChan(request *DescribeForwa
 }
 
 // DescribeForwardTableEntriesWithCallback invokes the ecs.DescribeForwardTableEntries API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeforwardtableentries.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeForwardTableEntriesWithCallback(request *DescribeForwardTableEntriesRequest, callback func(response *DescribeForwardTableEntriesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,13 @@ func (client *Client) DescribeForwardTableEntriesWithCallback(request *DescribeF
 type DescribeForwardTableEntriesRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	ForwardTableId       string           `position:"Query" name:"ForwardTableId"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
 // DescribeForwardTableEntriesResponse is the response struct for api DescribeForwardTableEntries
@@ -102,6 +97,7 @@ func CreateDescribeForwardTableEntriesRequest() (request *DescribeForwardTableEn
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeForwardTableEntries", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

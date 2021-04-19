@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeNetworkInterfacePermissions invokes the ecs.DescribeNetworkInterfacePermissions API synchronously
-// api document: https://help.aliyun.com/api/ecs/describenetworkinterfacepermissions.html
 func (client *Client) DescribeNetworkInterfacePermissions(request *DescribeNetworkInterfacePermissionsRequest) (response *DescribeNetworkInterfacePermissionsResponse, err error) {
 	response = CreateDescribeNetworkInterfacePermissionsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeNetworkInterfacePermissions(request *DescribeNetwo
 }
 
 // DescribeNetworkInterfacePermissionsWithChan invokes the ecs.DescribeNetworkInterfacePermissions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describenetworkinterfacepermissions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeNetworkInterfacePermissionsWithChan(request *DescribeNetworkInterfacePermissionsRequest) (<-chan *DescribeNetworkInterfacePermissionsResponse, <-chan error) {
 	responseChan := make(chan *DescribeNetworkInterfacePermissionsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeNetworkInterfacePermissionsWithChan(request *Descr
 }
 
 // DescribeNetworkInterfacePermissionsWithCallback invokes the ecs.DescribeNetworkInterfacePermissions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describenetworkinterfacepermissions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeNetworkInterfacePermissionsWithCallback(request *DescribeNetworkInterfacePermissionsRequest, callback func(response *DescribeNetworkInterfacePermissionsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -102,6 +97,7 @@ func CreateDescribeNetworkInterfacePermissionsRequest() (request *DescribeNetwor
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeNetworkInterfacePermissions", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

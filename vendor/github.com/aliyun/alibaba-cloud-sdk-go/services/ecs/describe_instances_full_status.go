@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstancesFullStatus invokes the ecs.DescribeInstancesFullStatus API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancesfullstatus.html
 func (client *Client) DescribeInstancesFullStatus(request *DescribeInstancesFullStatusRequest) (response *DescribeInstancesFullStatusResponse, err error) {
 	response = CreateDescribeInstancesFullStatusResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstancesFullStatus(request *DescribeInstancesFull
 }
 
 // DescribeInstancesFullStatusWithChan invokes the ecs.DescribeInstancesFullStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancesfullstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstancesFullStatusWithChan(request *DescribeInstancesFullStatusRequest) (<-chan *DescribeInstancesFullStatusResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstancesFullStatusResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstancesFullStatusWithChan(request *DescribeInsta
 }
 
 // DescribeInstancesFullStatusWithCallback invokes the ecs.DescribeInstancesFullStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancesfullstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstancesFullStatusWithCallback(request *DescribeInstancesFullStatusRequest, callback func(response *DescribeInstancesFullStatusResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -110,6 +105,7 @@ func CreateDescribeInstancesFullStatusRequest() (request *DescribeInstancesFullS
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstancesFullStatus", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

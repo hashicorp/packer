@@ -21,7 +21,6 @@ import (
 )
 
 // ResetDisk invokes the ecs.ResetDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/resetdisk.html
 func (client *Client) ResetDisk(request *ResetDiskRequest) (response *ResetDiskResponse, err error) {
 	response = CreateResetDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ResetDisk(request *ResetDiskRequest) (response *ResetDiskR
 }
 
 // ResetDiskWithChan invokes the ecs.ResetDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/resetdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ResetDiskWithChan(request *ResetDiskRequest) (<-chan *ResetDiskResponse, <-chan error) {
 	responseChan := make(chan *ResetDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ResetDiskWithChan(request *ResetDiskRequest) (<-chan *Rese
 }
 
 // ResetDiskWithCallback invokes the ecs.ResetDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/resetdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ResetDiskWithCallback(request *ResetDiskRequest, callback func(response *ResetDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,9 +73,9 @@ type ResetDiskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	SnapshotId           string           `position:"Query" name:"SnapshotId"`
+	DiskId               string           `position:"Query" name:"DiskId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DiskId               string           `position:"Query" name:"DiskId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -96,6 +91,7 @@ func CreateResetDiskRequest() (request *ResetDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ResetDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

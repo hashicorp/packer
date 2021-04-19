@@ -21,7 +21,6 @@ import (
 )
 
 // RedeployInstance invokes the ecs.RedeployInstance API synchronously
-// api document: https://help.aliyun.com/api/ecs/redeployinstance.html
 func (client *Client) RedeployInstance(request *RedeployInstanceRequest) (response *RedeployInstanceResponse, err error) {
 	response = CreateRedeployInstanceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) RedeployInstance(request *RedeployInstanceRequest) (respon
 }
 
 // RedeployInstanceWithChan invokes the ecs.RedeployInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/redeployinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RedeployInstanceWithChan(request *RedeployInstanceRequest) (<-chan *RedeployInstanceResponse, <-chan error) {
 	responseChan := make(chan *RedeployInstanceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) RedeployInstanceWithChan(request *RedeployInstanceRequest)
 }
 
 // RedeployInstanceWithCallback invokes the ecs.RedeployInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/redeployinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RedeployInstanceWithCallback(request *RedeployInstanceRequest, callback func(response *RedeployInstanceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateRedeployInstanceRequest() (request *RedeployInstanceRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "RedeployInstance", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

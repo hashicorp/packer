@@ -21,7 +21,6 @@ import (
 )
 
 // ExportSnapshot invokes the ecs.ExportSnapshot API synchronously
-// api document: https://help.aliyun.com/api/ecs/exportsnapshot.html
 func (client *Client) ExportSnapshot(request *ExportSnapshotRequest) (response *ExportSnapshotResponse, err error) {
 	response = CreateExportSnapshotResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ExportSnapshot(request *ExportSnapshotRequest) (response *
 }
 
 // ExportSnapshotWithChan invokes the ecs.ExportSnapshot API asynchronously
-// api document: https://help.aliyun.com/api/ecs/exportsnapshot.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ExportSnapshotWithChan(request *ExportSnapshotRequest) (<-chan *ExportSnapshotResponse, <-chan error) {
 	responseChan := make(chan *ExportSnapshotResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ExportSnapshotWithChan(request *ExportSnapshotRequest) (<-
 }
 
 // ExportSnapshotWithCallback invokes the ecs.ExportSnapshot API asynchronously
-// api document: https://help.aliyun.com/api/ecs/exportsnapshot.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ExportSnapshotWithCallback(request *ExportSnapshotRequest, callback func(response *ExportSnapshotResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateExportSnapshotRequest() (request *ExportSnapshotRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ExportSnapshot", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

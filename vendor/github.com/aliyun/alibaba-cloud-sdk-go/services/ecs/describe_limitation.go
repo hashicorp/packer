@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeLimitation invokes the ecs.DescribeLimitation API synchronously
-// api document: https://help.aliyun.com/api/ecs/describelimitation.html
 func (client *Client) DescribeLimitation(request *DescribeLimitationRequest) (response *DescribeLimitationResponse, err error) {
 	response = CreateDescribeLimitationResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeLimitation(request *DescribeLimitationRequest) (re
 }
 
 // DescribeLimitationWithChan invokes the ecs.DescribeLimitation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describelimitation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeLimitationWithChan(request *DescribeLimitationRequest) (<-chan *DescribeLimitationResponse, <-chan error) {
 	responseChan := make(chan *DescribeLimitationResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeLimitationWithChan(request *DescribeLimitationRequ
 }
 
 // DescribeLimitationWithCallback invokes the ecs.DescribeLimitation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describelimitation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeLimitationWithCallback(request *DescribeLimitationRequest, callback func(response *DescribeLimitationResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateDescribeLimitationRequest() (request *DescribeLimitationRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeLimitation", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

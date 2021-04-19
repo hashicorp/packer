@@ -21,7 +21,6 @@ import (
 )
 
 // CreateDeploymentSet invokes the ecs.CreateDeploymentSet API synchronously
-// api document: https://help.aliyun.com/api/ecs/createdeploymentset.html
 func (client *Client) CreateDeploymentSet(request *CreateDeploymentSetRequest) (response *CreateDeploymentSetResponse, err error) {
 	response = CreateCreateDeploymentSetResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateDeploymentSet(request *CreateDeploymentSetRequest) (
 }
 
 // CreateDeploymentSetWithChan invokes the ecs.CreateDeploymentSet API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createdeploymentset.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDeploymentSetWithChan(request *CreateDeploymentSetRequest) (<-chan *CreateDeploymentSetResponse, <-chan error) {
 	responseChan := make(chan *CreateDeploymentSetResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateDeploymentSetWithChan(request *CreateDeploymentSetRe
 }
 
 // CreateDeploymentSetWithCallback invokes the ecs.CreateDeploymentSet API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createdeploymentset.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDeploymentSetWithCallback(request *CreateDeploymentSetRequest, callback func(response *CreateDeploymentSetResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,11 @@ func (client *Client) CreateDeploymentSetWithCallback(request *CreateDeploymentS
 type CreateDeploymentSetRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId                  requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount             string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken                      string           `position:"Query" name:"ClientToken"`
-	OwnerAccount                     string           `position:"Query" name:"OwnerAccount"`
 	Description                      string           `position:"Query" name:"Description"`
+	GroupCount                       requests.Integer `position:"Query" name:"GroupCount"`
+	ResourceOwnerAccount             string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                     string           `position:"Query" name:"OwnerAccount"`
 	DeploymentSetName                string           `position:"Query" name:"DeploymentSetName"`
 	OwnerId                          requests.Integer `position:"Query" name:"OwnerId"`
 	OnUnableToRedeployFailedInstance string           `position:"Query" name:"OnUnableToRedeployFailedInstance"`
@@ -102,6 +98,7 @@ func CreateCreateDeploymentSetRequest() (request *CreateDeploymentSetRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateDeploymentSet", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

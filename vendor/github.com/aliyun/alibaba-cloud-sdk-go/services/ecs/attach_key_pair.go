@@ -21,7 +21,6 @@ import (
 )
 
 // AttachKeyPair invokes the ecs.AttachKeyPair API synchronously
-// api document: https://help.aliyun.com/api/ecs/attachkeypair.html
 func (client *Client) AttachKeyPair(request *AttachKeyPairRequest) (response *AttachKeyPairResponse, err error) {
 	response = CreateAttachKeyPairResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AttachKeyPair(request *AttachKeyPairRequest) (response *At
 }
 
 // AttachKeyPairWithChan invokes the ecs.AttachKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachKeyPairWithChan(request *AttachKeyPairRequest) (<-chan *AttachKeyPairResponse, <-chan error) {
 	responseChan := make(chan *AttachKeyPairResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AttachKeyPairWithChan(request *AttachKeyPairRequest) (<-ch
 }
 
 // AttachKeyPairWithCallback invokes the ecs.AttachKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachKeyPairWithCallback(request *AttachKeyPairRequest, callback func(response *AttachKeyPairResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) AttachKeyPairWithCallback(request *AttachKeyPairRequest, c
 type AttachKeyPairRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	InstanceIds          string           `position:"Query" name:"InstanceIds"`
 	KeyPairName          string           `position:"Query" name:"KeyPairName"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceIds          string           `position:"Query" name:"InstanceIds"`
 }
 
 // AttachKeyPairResponse is the response struct for api AttachKeyPair
@@ -99,6 +94,7 @@ func CreateAttachKeyPairRequest() (request *AttachKeyPairRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AttachKeyPair", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

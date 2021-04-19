@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDedicatedHostAutoRenewAttribute invokes the ecs.ModifyDedicatedHostAutoRenewAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautorenewattribute.html
 func (client *Client) ModifyDedicatedHostAutoRenewAttribute(request *ModifyDedicatedHostAutoRenewAttributeRequest) (response *ModifyDedicatedHostAutoRenewAttributeResponse, err error) {
 	response = CreateModifyDedicatedHostAutoRenewAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDedicatedHostAutoRenewAttribute(request *ModifyDedic
 }
 
 // ModifyDedicatedHostAutoRenewAttributeWithChan invokes the ecs.ModifyDedicatedHostAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDedicatedHostAutoRenewAttributeWithChan(request *ModifyDedicatedHostAutoRenewAttributeRequest) (<-chan *ModifyDedicatedHostAutoRenewAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyDedicatedHostAutoRenewAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDedicatedHostAutoRenewAttributeWithChan(request *Mod
 }
 
 // ModifyDedicatedHostAutoRenewAttributeWithCallback invokes the ecs.ModifyDedicatedHostAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDedicatedHostAutoRenewAttributeWithCallback(request *ModifyDedicatedHostAutoRenewAttributeRequest, callback func(response *ModifyDedicatedHostAutoRenewAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,15 +71,15 @@ func (client *Client) ModifyDedicatedHostAutoRenewAttributeWithCallback(request 
 // ModifyDedicatedHostAutoRenewAttributeRequest is the request struct for api ModifyDedicatedHostAutoRenewAttribute
 type ModifyDedicatedHostAutoRenewAttributeRequest struct {
 	*requests.RpcRequest
-	Duration             requests.Integer `position:"Query" name:"Duration"`
 	DedicatedHostIds     string           `position:"Query" name:"DedicatedHostIds"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
-	AutoRenew            requests.Boolean `position:"Query" name:"AutoRenew"`
+	Duration             requests.Integer `position:"Query" name:"Duration"`
+	RenewalStatus        string           `position:"Query" name:"RenewalStatus"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	RenewalStatus        string           `position:"Query" name:"RenewalStatus"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
+	AutoRenew            requests.Boolean `position:"Query" name:"AutoRenew"`
 }
 
 // ModifyDedicatedHostAutoRenewAttributeResponse is the response struct for api ModifyDedicatedHostAutoRenewAttribute
@@ -99,6 +94,7 @@ func CreateModifyDedicatedHostAutoRenewAttributeRequest() (request *ModifyDedica
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyDedicatedHostAutoRenewAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

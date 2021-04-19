@@ -17,6 +17,18 @@ package ecs
 
 // InvokeInstance is a nested struct in ecs response
 type InvokeInstance struct {
-	InstanceId           string `json:"InstanceId" xml:"InstanceId"`
+	UpdateTime           string `json:"UpdateTime" xml:"UpdateTime"`
 	InstanceInvokeStatus string `json:"InstanceInvokeStatus" xml:"InstanceInvokeStatus"`
+	CreationTime         string `json:"CreationTime" xml:"CreationTime"`
+	ErrorInfo            string `json:"ErrorInfo" xml:"ErrorInfo"`
+	FinishTime           string `json:"FinishTime" xml:"FinishTime"`
+	ExitCode             int64  `json:"ExitCode" xml:"ExitCode"`
+	Repeats              int    `json:"Repeats" xml:"Repeats"`
+	StartTime            string `json:"StartTime" xml:"StartTime"`
+	Dropped              int    `json:"Dropped" xml:"Dropped"`
+	InstanceId           string `json:"InstanceId" xml:"InstanceId"`
+	Output               string `json:"Output" xml:"Output"`
+	InvocationStatus     string `json:"InvocationStatus" xml:"InvocationStatus"`
+	ErrorCode            string `json:"ErrorCode" xml:"ErrorCode"`
+	StopTime             string `json:"StopTime" xml:"StopTime"`
 }

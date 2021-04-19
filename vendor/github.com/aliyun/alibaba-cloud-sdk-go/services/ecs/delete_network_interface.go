@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteNetworkInterface invokes the ecs.DeleteNetworkInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterface.html
 func (client *Client) DeleteNetworkInterface(request *DeleteNetworkInterfaceRequest) (response *DeleteNetworkInterfaceResponse, err error) {
 	response = CreateDeleteNetworkInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteNetworkInterface(request *DeleteNetworkInterfaceRequ
 }
 
 // DeleteNetworkInterfaceWithChan invokes the ecs.DeleteNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteNetworkInterfaceWithChan(request *DeleteNetworkInterfaceRequest) (<-chan *DeleteNetworkInterfaceResponse, <-chan error) {
 	responseChan := make(chan *DeleteNetworkInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteNetworkInterfaceWithChan(request *DeleteNetworkInter
 }
 
 // DeleteNetworkInterfaceWithCallback invokes the ecs.DeleteNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteNetworkInterfaceWithCallback(request *DeleteNetworkInterfaceRequest, callback func(response *DeleteNetworkInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateDeleteNetworkInterfaceRequest() (request *DeleteNetworkInterfaceReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteNetworkInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

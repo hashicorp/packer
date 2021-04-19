@@ -21,7 +21,6 @@ import (
 )
 
 // DetachClassicLinkVpc invokes the ecs.DetachClassicLinkVpc API synchronously
-// api document: https://help.aliyun.com/api/ecs/detachclassiclinkvpc.html
 func (client *Client) DetachClassicLinkVpc(request *DetachClassicLinkVpcRequest) (response *DetachClassicLinkVpcResponse, err error) {
 	response = CreateDetachClassicLinkVpcResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DetachClassicLinkVpc(request *DetachClassicLinkVpcRequest)
 }
 
 // DetachClassicLinkVpcWithChan invokes the ecs.DetachClassicLinkVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachclassiclinkvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachClassicLinkVpcWithChan(request *DetachClassicLinkVpcRequest) (<-chan *DetachClassicLinkVpcResponse, <-chan error) {
 	responseChan := make(chan *DetachClassicLinkVpcResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DetachClassicLinkVpcWithChan(request *DetachClassicLinkVpc
 }
 
 // DetachClassicLinkVpcWithCallback invokes the ecs.DetachClassicLinkVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachclassiclinkvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachClassicLinkVpcWithCallback(request *DetachClassicLinkVpcRequest, callback func(response *DetachClassicLinkVpcResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DetachClassicLinkVpcWithCallback(request *DetachClassicLin
 type DetachClassicLinkVpcRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // DetachClassicLinkVpcResponse is the response struct for api DetachClassicLinkVpc
@@ -95,6 +90,7 @@ func CreateDetachClassicLinkVpcRequest() (request *DetachClassicLinkVpcRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DetachClassicLinkVpc", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

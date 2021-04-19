@@ -21,7 +21,6 @@ import (
 )
 
 // DeactivateRouterInterface invokes the ecs.DeactivateRouterInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/deactivaterouterinterface.html
 func (client *Client) DeactivateRouterInterface(request *DeactivateRouterInterfaceRequest) (response *DeactivateRouterInterfaceResponse, err error) {
 	response = CreateDeactivateRouterInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeactivateRouterInterface(request *DeactivateRouterInterfa
 }
 
 // DeactivateRouterInterfaceWithChan invokes the ecs.DeactivateRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deactivaterouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeactivateRouterInterfaceWithChan(request *DeactivateRouterInterfaceRequest) (<-chan *DeactivateRouterInterfaceResponse, <-chan error) {
 	responseChan := make(chan *DeactivateRouterInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeactivateRouterInterfaceWithChan(request *DeactivateRoute
 }
 
 // DeactivateRouterInterfaceWithCallback invokes the ecs.DeactivateRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deactivaterouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeactivateRouterInterfaceWithCallback(request *DeactivateRouterInterfaceRequest, callback func(response *DeactivateRouterInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -94,6 +89,7 @@ func CreateDeactivateRouterInterfaceRequest() (request *DeactivateRouterInterfac
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeactivateRouterInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // TagResources invokes the ecs.TagResources API synchronously
-// api document: https://help.aliyun.com/api/ecs/tagresources.html
 func (client *Client) TagResources(request *TagResourcesRequest) (response *TagResourcesResponse, err error) {
 	response = CreateTagResourcesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) TagResources(request *TagResourcesRequest) (response *TagR
 }
 
 // TagResourcesWithChan invokes the ecs.TagResources API asynchronously
-// api document: https://help.aliyun.com/api/ecs/tagresources.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) TagResourcesWithChan(request *TagResourcesRequest) (<-chan *TagResourcesResponse, <-chan error) {
 	responseChan := make(chan *TagResourcesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) TagResourcesWithChan(request *TagResourcesRequest) (<-chan
 }
 
 // TagResourcesWithCallback invokes the ecs.TagResources API asynchronously
-// api document: https://help.aliyun.com/api/ecs/tagresources.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) TagResourcesWithCallback(request *TagResourcesRequest, callback func(response *TagResourcesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -102,6 +97,7 @@ func CreateTagResourcesRequest() (request *TagResourcesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "TagResources", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

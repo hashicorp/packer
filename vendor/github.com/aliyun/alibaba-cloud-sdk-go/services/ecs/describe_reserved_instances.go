@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeReservedInstances invokes the ecs.DescribeReservedInstances API synchronously
-// api document: https://help.aliyun.com/api/ecs/describereservedinstances.html
 func (client *Client) DescribeReservedInstances(request *DescribeReservedInstancesRequest) (response *DescribeReservedInstancesResponse, err error) {
 	response = CreateDescribeReservedInstancesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeReservedInstances(request *DescribeReservedInstanc
 }
 
 // DescribeReservedInstancesWithChan invokes the ecs.DescribeReservedInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describereservedinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeReservedInstancesWithChan(request *DescribeReservedInstancesRequest) (<-chan *DescribeReservedInstancesResponse, <-chan error) {
 	responseChan := make(chan *DescribeReservedInstancesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeReservedInstancesWithChan(request *DescribeReserve
 }
 
 // DescribeReservedInstancesWithCallback invokes the ecs.DescribeReservedInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describereservedinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeReservedInstancesWithCallback(request *DescribeReservedInstancesRequest, callback func(response *DescribeReservedInstancesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,21 +71,29 @@ func (client *Client) DescribeReservedInstancesWithCallback(request *DescribeRes
 // DescribeReservedInstancesRequest is the request struct for api DescribeReservedInstances
 type DescribeReservedInstancesRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
-	LockReason           string           `position:"Query" name:"LockReason"`
-	Scope                string           `position:"Query" name:"Scope"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
-	InstanceType         string           `position:"Query" name:"InstanceType"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	InstanceTypeFamily   string           `position:"Query" name:"InstanceTypeFamily"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	ReservedInstanceId   *[]string        `position:"Query" name:"ReservedInstanceId"  type:"Repeated"`
-	OfferingType         string           `position:"Query" name:"OfferingType"`
-	ZoneId               string           `position:"Query" name:"ZoneId"`
-	ReservedInstanceName string           `position:"Query" name:"ReservedInstanceName"`
-	Status               *[]string        `position:"Query" name:"Status"  type:"Repeated"`
+	ResourceOwnerId      requests.Integer                `position:"Query" name:"ResourceOwnerId"`
+	PageNumber           requests.Integer                `position:"Query" name:"PageNumber"`
+	LockReason           string                          `position:"Query" name:"LockReason"`
+	Scope                string                          `position:"Query" name:"Scope"`
+	PageSize             requests.Integer                `position:"Query" name:"PageSize"`
+	InstanceType         string                          `position:"Query" name:"InstanceType"`
+	Tag                  *[]DescribeReservedInstancesTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string                          `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                          `position:"Query" name:"OwnerAccount"`
+	InstanceTypeFamily   string                          `position:"Query" name:"InstanceTypeFamily"`
+	OwnerId              requests.Integer                `position:"Query" name:"OwnerId"`
+	ReservedInstanceId   *[]string                       `position:"Query" name:"ReservedInstanceId"  type:"Repeated"`
+	OfferingType         string                          `position:"Query" name:"OfferingType"`
+	ZoneId               string                          `position:"Query" name:"ZoneId"`
+	ReservedInstanceName string                          `position:"Query" name:"ReservedInstanceName"`
+	Status               *[]string                       `position:"Query" name:"Status"  type:"Repeated"`
+	AllocationType       string                          `position:"Query" name:"AllocationType"`
+}
+
+// DescribeReservedInstancesTag is a repeated param struct in DescribeReservedInstancesRequest
+type DescribeReservedInstancesTag struct {
+	Key   string `name:"Key"`
+	Value string `name:"Value"`
 }
 
 // DescribeReservedInstancesResponse is the response struct for api DescribeReservedInstances
@@ -109,6 +112,7 @@ func CreateDescribeReservedInstancesRequest() (request *DescribeReservedInstance
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeReservedInstances", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

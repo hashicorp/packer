@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteForwardEntry invokes the ecs.DeleteForwardEntry API synchronously
-// api document: https://help.aliyun.com/api/ecs/deleteforwardentry.html
 func (client *Client) DeleteForwardEntry(request *DeleteForwardEntryRequest) (response *DeleteForwardEntryResponse, err error) {
 	response = CreateDeleteForwardEntryResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteForwardEntry(request *DeleteForwardEntryRequest) (re
 }
 
 // DeleteForwardEntryWithChan invokes the ecs.DeleteForwardEntry API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deleteforwardentry.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteForwardEntryWithChan(request *DeleteForwardEntryRequest) (<-chan *DeleteForwardEntryResponse, <-chan error) {
 	responseChan := make(chan *DeleteForwardEntryResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteForwardEntryWithChan(request *DeleteForwardEntryRequ
 }
 
 // DeleteForwardEntryWithCallback invokes the ecs.DeleteForwardEntry API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deleteforwardentry.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteForwardEntryWithCallback(request *DeleteForwardEntryRequest, callback func(response *DeleteForwardEntryResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DeleteForwardEntryWithCallback(request *DeleteForwardEntry
 type DeleteForwardEntryRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	ForwardTableId       string           `position:"Query" name:"ForwardTableId"`
+	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -96,6 +91,7 @@ func CreateDeleteForwardEntryRequest() (request *DeleteForwardEntryRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteForwardEntry", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

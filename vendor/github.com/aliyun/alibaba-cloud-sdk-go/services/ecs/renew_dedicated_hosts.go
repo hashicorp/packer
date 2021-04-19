@@ -21,7 +21,6 @@ import (
 )
 
 // RenewDedicatedHosts invokes the ecs.RenewDedicatedHosts API synchronously
-// api document: https://help.aliyun.com/api/ecs/renewdedicatedhosts.html
 func (client *Client) RenewDedicatedHosts(request *RenewDedicatedHostsRequest) (response *RenewDedicatedHostsResponse, err error) {
 	response = CreateRenewDedicatedHostsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) RenewDedicatedHosts(request *RenewDedicatedHostsRequest) (
 }
 
 // RenewDedicatedHostsWithChan invokes the ecs.RenewDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/renewdedicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RenewDedicatedHostsWithChan(request *RenewDedicatedHostsRequest) (<-chan *RenewDedicatedHostsResponse, <-chan error) {
 	responseChan := make(chan *RenewDedicatedHostsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) RenewDedicatedHostsWithChan(request *RenewDedicatedHostsRe
 }
 
 // RenewDedicatedHostsWithCallback invokes the ecs.RenewDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/renewdedicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RenewDedicatedHostsWithCallback(request *RenewDedicatedHostsRequest, callback func(response *RenewDedicatedHostsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -98,6 +93,7 @@ func CreateRenewDedicatedHostsRequest() (request *RenewDedicatedHostsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "RenewDedicatedHosts", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

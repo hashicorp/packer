@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteVSwitch invokes the ecs.DeleteVSwitch API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletevswitch.html
 func (client *Client) DeleteVSwitch(request *DeleteVSwitchRequest) (response *DeleteVSwitchResponse, err error) {
 	response = CreateDeleteVSwitchResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteVSwitch(request *DeleteVSwitchRequest) (response *De
 }
 
 // DeleteVSwitchWithChan invokes the ecs.DeleteVSwitch API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevswitch.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVSwitchWithChan(request *DeleteVSwitchRequest) (<-chan *DeleteVSwitchResponse, <-chan error) {
 	responseChan := make(chan *DeleteVSwitchResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteVSwitchWithChan(request *DeleteVSwitchRequest) (<-ch
 }
 
 // DeleteVSwitchWithCallback invokes the ecs.DeleteVSwitch API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevswitch.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVSwitchWithCallback(request *DeleteVSwitchRequest, callback func(response *DeleteVSwitchResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,11 +71,11 @@ func (client *Client) DeleteVSwitchWithCallback(request *DeleteVSwitchRequest, c
 // DeleteVSwitchRequest is the request struct for api DeleteVSwitch
 type DeleteVSwitchRequest struct {
 	*requests.RpcRequest
-	VSwitchId            string           `position:"Query" name:"VSwitchId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	VSwitchId            string           `position:"Query" name:"VSwitchId"`
 }
 
 // DeleteVSwitchResponse is the response struct for api DeleteVSwitch
@@ -95,6 +90,7 @@ func CreateDeleteVSwitchRequest() (request *DeleteVSwitchRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteVSwitch", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

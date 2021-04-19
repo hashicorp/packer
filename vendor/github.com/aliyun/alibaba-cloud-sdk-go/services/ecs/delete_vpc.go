@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteVpc invokes the ecs.DeleteVpc API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletevpc.html
 func (client *Client) DeleteVpc(request *DeleteVpcRequest) (response *DeleteVpcResponse, err error) {
 	response = CreateDeleteVpcResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteVpc(request *DeleteVpcRequest) (response *DeleteVpcR
 }
 
 // DeleteVpcWithChan invokes the ecs.DeleteVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVpcWithChan(request *DeleteVpcRequest) (<-chan *DeleteVpcResponse, <-chan error) {
 	responseChan := make(chan *DeleteVpcResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteVpcWithChan(request *DeleteVpcRequest) (<-chan *Dele
 }
 
 // DeleteVpcWithCallback invokes the ecs.DeleteVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVpcWithCallback(request *DeleteVpcRequest, callback func(response *DeleteVpcResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,9 +73,9 @@ type DeleteVpcRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // DeleteVpcResponse is the response struct for api DeleteVpc
@@ -95,6 +90,7 @@ func CreateDeleteVpcRequest() (request *DeleteVpcRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteVpc", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

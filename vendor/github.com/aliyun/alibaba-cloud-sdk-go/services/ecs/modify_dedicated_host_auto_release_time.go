@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDedicatedHostAutoReleaseTime invokes the ecs.ModifyDedicatedHostAutoReleaseTime API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautoreleasetime.html
 func (client *Client) ModifyDedicatedHostAutoReleaseTime(request *ModifyDedicatedHostAutoReleaseTimeRequest) (response *ModifyDedicatedHostAutoReleaseTimeResponse, err error) {
 	response = CreateModifyDedicatedHostAutoReleaseTimeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDedicatedHostAutoReleaseTime(request *ModifyDedicate
 }
 
 // ModifyDedicatedHostAutoReleaseTimeWithChan invokes the ecs.ModifyDedicatedHostAutoReleaseTime API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautoreleasetime.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDedicatedHostAutoReleaseTimeWithChan(request *ModifyDedicatedHostAutoReleaseTimeRequest) (<-chan *ModifyDedicatedHostAutoReleaseTimeResponse, <-chan error) {
 	responseChan := make(chan *ModifyDedicatedHostAutoReleaseTimeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDedicatedHostAutoReleaseTimeWithChan(request *Modify
 }
 
 // ModifyDedicatedHostAutoReleaseTimeWithCallback invokes the ecs.ModifyDedicatedHostAutoReleaseTime API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydedicatedhostautoreleasetime.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDedicatedHostAutoReleaseTimeWithCallback(request *ModifyDedicatedHostAutoReleaseTimeRequest, callback func(response *ModifyDedicatedHostAutoReleaseTimeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateModifyDedicatedHostAutoReleaseTimeRequest() (request *ModifyDedicated
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyDedicatedHostAutoReleaseTime", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

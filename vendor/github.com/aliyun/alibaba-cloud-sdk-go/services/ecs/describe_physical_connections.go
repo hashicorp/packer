@@ -21,7 +21,6 @@ import (
 )
 
 // DescribePhysicalConnections invokes the ecs.DescribePhysicalConnections API synchronously
-// api document: https://help.aliyun.com/api/ecs/describephysicalconnections.html
 func (client *Client) DescribePhysicalConnections(request *DescribePhysicalConnectionsRequest) (response *DescribePhysicalConnectionsResponse, err error) {
 	response = CreateDescribePhysicalConnectionsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribePhysicalConnections(request *DescribePhysicalConne
 }
 
 // DescribePhysicalConnectionsWithChan invokes the ecs.DescribePhysicalConnections API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describephysicalconnections.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribePhysicalConnectionsWithChan(request *DescribePhysicalConnectionsRequest) (<-chan *DescribePhysicalConnectionsResponse, <-chan error) {
 	responseChan := make(chan *DescribePhysicalConnectionsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribePhysicalConnectionsWithChan(request *DescribePhysi
 }
 
 // DescribePhysicalConnectionsWithCallback invokes the ecs.DescribePhysicalConnections API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describephysicalconnections.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribePhysicalConnectionsWithCallback(request *DescribePhysicalConnectionsRequest, callback func(response *DescribePhysicalConnectionsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,15 +71,15 @@ func (client *Client) DescribePhysicalConnectionsWithCallback(request *DescribeP
 // DescribePhysicalConnectionsRequest is the request struct for api DescribePhysicalConnections
 type DescribePhysicalConnectionsRequest struct {
 	*requests.RpcRequest
-	Filter               *[]DescribePhysicalConnectionsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer                     `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                               `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string                               `position:"Query" name:"ClientToken"`
-	OwnerAccount         string                               `position:"Query" name:"OwnerAccount"`
+	PageNumber           requests.Integer                     `position:"Query" name:"PageNumber"`
 	PageSize             requests.Integer                     `position:"Query" name:"PageSize"`
 	UserCidr             string                               `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string                               `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                               `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer                     `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer                     `position:"Query" name:"PageNumber"`
+	Filter               *[]DescribePhysicalConnectionsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 }
 
 // DescribePhysicalConnectionsFilter is a repeated param struct in DescribePhysicalConnectionsRequest
@@ -109,6 +104,7 @@ func CreateDescribePhysicalConnectionsRequest() (request *DescribePhysicalConnec
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribePhysicalConnections", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

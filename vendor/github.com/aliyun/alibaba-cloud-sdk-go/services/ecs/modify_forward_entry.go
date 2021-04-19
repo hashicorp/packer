@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyForwardEntry invokes the ecs.ModifyForwardEntry API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyforwardentry.html
 func (client *Client) ModifyForwardEntry(request *ModifyForwardEntryRequest) (response *ModifyForwardEntryResponse, err error) {
 	response = CreateModifyForwardEntryResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyForwardEntry(request *ModifyForwardEntryRequest) (re
 }
 
 // ModifyForwardEntryWithChan invokes the ecs.ModifyForwardEntry API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyforwardentry.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyForwardEntryWithChan(request *ModifyForwardEntryRequest) (<-chan *ModifyForwardEntryResponse, <-chan error) {
 	responseChan := make(chan *ModifyForwardEntryResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyForwardEntryWithChan(request *ModifyForwardEntryRequ
 }
 
 // ModifyForwardEntryWithCallback invokes the ecs.ModifyForwardEntry API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyforwardentry.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyForwardEntryWithCallback(request *ModifyForwardEntryRequest, callback func(response *ModifyForwardEntryResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,15 +72,15 @@ func (client *Client) ModifyForwardEntryWithCallback(request *ModifyForwardEntry
 type ModifyForwardEntryRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	ForwardTableId       string           `position:"Query" name:"ForwardTableId"`
+	InternalIp           string           `position:"Query" name:"InternalIp"`
+	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
+	ExternalIp           string           `position:"Query" name:"ExternalIp"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	IpProtocol           string           `position:"Query" name:"IpProtocol"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	ForwardTableId       string           `position:"Query" name:"ForwardTableId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InternalIp           string           `position:"Query" name:"InternalIp"`
-	ForwardEntryId       string           `position:"Query" name:"ForwardEntryId"`
 	InternalPort         string           `position:"Query" name:"InternalPort"`
-	ExternalIp           string           `position:"Query" name:"ExternalIp"`
 	ExternalPort         string           `position:"Query" name:"ExternalPort"`
 }
 
@@ -101,6 +96,7 @@ func CreateModifyForwardEntryRequest() (request *ModifyForwardEntryRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyForwardEntry", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

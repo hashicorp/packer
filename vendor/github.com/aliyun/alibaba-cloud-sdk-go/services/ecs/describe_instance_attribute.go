@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceAttribute invokes the ecs.DescribeInstanceAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceattribute.html
 func (client *Client) DescribeInstanceAttribute(request *DescribeInstanceAttributeRequest) (response *DescribeInstanceAttributeResponse, err error) {
 	response = CreateDescribeInstanceAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceAttribute(request *DescribeInstanceAttribu
 }
 
 // DescribeInstanceAttributeWithChan invokes the ecs.DescribeInstanceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceAttributeWithChan(request *DescribeInstanceAttributeRequest) (<-chan *DescribeInstanceAttributeResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceAttributeWithChan(request *DescribeInstanc
 }
 
 // DescribeInstanceAttributeWithCallback invokes the ecs.DescribeInstanceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceAttributeWithCallback(request *DescribeInstanceAttributeRequest, callback func(response *DescribeInstanceAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DescribeInstanceAttributeWithCallback(request *DescribeIns
 type DescribeInstanceAttributeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DescribeInstanceAttributeResponse is the response struct for api DescribeInstanceAttribute
@@ -115,7 +110,7 @@ type DescribeInstanceAttributeResponse struct {
 	PublicIpAddress         PublicIpAddressInDescribeInstanceAttribute  `json:"PublicIpAddress" xml:"PublicIpAddress"`
 	InnerIpAddress          InnerIpAddressInDescribeInstanceAttribute   `json:"InnerIpAddress" xml:"InnerIpAddress"`
 	VpcAttributes           VpcAttributes                               `json:"VpcAttributes" xml:"VpcAttributes"`
-	EipAddress              EipAddress                                  `json:"EipAddress" xml:"EipAddress"`
+	EipAddress              EipAddressInDescribeInstanceAttribute       `json:"EipAddress" xml:"EipAddress"`
 	DedicatedHostAttribute  DedicatedHostAttribute                      `json:"DedicatedHostAttribute" xml:"DedicatedHostAttribute"`
 	OperationLocks          OperationLocksInDescribeInstanceAttribute   `json:"OperationLocks" xml:"OperationLocks"`
 }
@@ -126,6 +121,7 @@ func CreateDescribeInstanceAttributeRequest() (request *DescribeInstanceAttribut
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

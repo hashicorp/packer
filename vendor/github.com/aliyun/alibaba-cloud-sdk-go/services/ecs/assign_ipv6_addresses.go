@@ -21,7 +21,6 @@ import (
 )
 
 // AssignIpv6Addresses invokes the ecs.AssignIpv6Addresses API synchronously
-// api document: https://help.aliyun.com/api/ecs/assignipv6addresses.html
 func (client *Client) AssignIpv6Addresses(request *AssignIpv6AddressesRequest) (response *AssignIpv6AddressesResponse, err error) {
 	response = CreateAssignIpv6AddressesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AssignIpv6Addresses(request *AssignIpv6AddressesRequest) (
 }
 
 // AssignIpv6AddressesWithChan invokes the ecs.AssignIpv6Addresses API asynchronously
-// api document: https://help.aliyun.com/api/ecs/assignipv6addresses.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AssignIpv6AddressesWithChan(request *AssignIpv6AddressesRequest) (<-chan *AssignIpv6AddressesResponse, <-chan error) {
 	responseChan := make(chan *AssignIpv6AddressesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AssignIpv6AddressesWithChan(request *AssignIpv6AddressesRe
 }
 
 // AssignIpv6AddressesWithCallback invokes the ecs.AssignIpv6Addresses API asynchronously
-// api document: https://help.aliyun.com/api/ecs/assignipv6addresses.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AssignIpv6AddressesWithCallback(request *AssignIpv6AddressesRequest, callback func(response *AssignIpv6AddressesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateAssignIpv6AddressesRequest() (request *AssignIpv6AddressesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AssignIpv6Addresses", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

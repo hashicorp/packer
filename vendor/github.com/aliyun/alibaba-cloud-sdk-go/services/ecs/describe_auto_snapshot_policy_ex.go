@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAutoSnapshotPolicyEx invokes the ecs.DescribeAutoSnapshotPolicyEx API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeautosnapshotpolicyex.html
 func (client *Client) DescribeAutoSnapshotPolicyEx(request *DescribeAutoSnapshotPolicyExRequest) (response *DescribeAutoSnapshotPolicyExResponse, err error) {
 	response = CreateDescribeAutoSnapshotPolicyExResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAutoSnapshotPolicyEx(request *DescribeAutoSnapshot
 }
 
 // DescribeAutoSnapshotPolicyExWithChan invokes the ecs.DescribeAutoSnapshotPolicyEx API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeautosnapshotpolicyex.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAutoSnapshotPolicyExWithChan(request *DescribeAutoSnapshotPolicyExRequest) (<-chan *DescribeAutoSnapshotPolicyExResponse, <-chan error) {
 	responseChan := make(chan *DescribeAutoSnapshotPolicyExResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAutoSnapshotPolicyExWithChan(request *DescribeAuto
 }
 
 // DescribeAutoSnapshotPolicyExWithCallback invokes the ecs.DescribeAutoSnapshotPolicyEx API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeautosnapshotpolicyex.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAutoSnapshotPolicyExWithCallback(request *DescribeAutoSnapshotPolicyExRequest, callback func(response *DescribeAutoSnapshotPolicyExResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,13 +71,20 @@ func (client *Client) DescribeAutoSnapshotPolicyExWithCallback(request *Describe
 // DescribeAutoSnapshotPolicyExRequest is the request struct for api DescribeAutoSnapshotPolicyEx
 type DescribeAutoSnapshotPolicyExRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	AutoSnapshotPolicyId string           `position:"Query" name:"AutoSnapshotPolicyId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	ResourceOwnerId      requests.Integer                   `position:"Query" name:"ResourceOwnerId"`
+	AutoSnapshotPolicyId string                             `position:"Query" name:"AutoSnapshotPolicyId"`
+	PageNumber           requests.Integer                   `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer                   `position:"Query" name:"PageSize"`
+	Tag                  *[]DescribeAutoSnapshotPolicyExTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string                             `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                             `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer                   `position:"Query" name:"OwnerId"`
+}
+
+// DescribeAutoSnapshotPolicyExTag is a repeated param struct in DescribeAutoSnapshotPolicyExRequest
+type DescribeAutoSnapshotPolicyExTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // DescribeAutoSnapshotPolicyExResponse is the response struct for api DescribeAutoSnapshotPolicyEx
@@ -101,6 +103,7 @@ func CreateDescribeAutoSnapshotPolicyExRequest() (request *DescribeAutoSnapshotP
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeAutoSnapshotPolicyEx", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyLaunchTemplateDefaultVersion invokes the ecs.ModifyLaunchTemplateDefaultVersion API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifylaunchtemplatedefaultversion.html
 func (client *Client) ModifyLaunchTemplateDefaultVersion(request *ModifyLaunchTemplateDefaultVersionRequest) (response *ModifyLaunchTemplateDefaultVersionResponse, err error) {
 	response = CreateModifyLaunchTemplateDefaultVersionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyLaunchTemplateDefaultVersion(request *ModifyLaunchTe
 }
 
 // ModifyLaunchTemplateDefaultVersionWithChan invokes the ecs.ModifyLaunchTemplateDefaultVersion API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifylaunchtemplatedefaultversion.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyLaunchTemplateDefaultVersionWithChan(request *ModifyLaunchTemplateDefaultVersionRequest) (<-chan *ModifyLaunchTemplateDefaultVersionResponse, <-chan error) {
 	responseChan := make(chan *ModifyLaunchTemplateDefaultVersionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyLaunchTemplateDefaultVersionWithChan(request *Modify
 }
 
 // ModifyLaunchTemplateDefaultVersionWithCallback invokes the ecs.ModifyLaunchTemplateDefaultVersion API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifylaunchtemplatedefaultversion.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyLaunchTemplateDefaultVersionWithCallback(request *ModifyLaunchTemplateDefaultVersionRequest, callback func(response *ModifyLaunchTemplateDefaultVersionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateModifyLaunchTemplateDefaultVersionRequest() (request *ModifyLaunchTem
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyLaunchTemplateDefaultVersion", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

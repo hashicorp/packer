@@ -21,7 +21,6 @@ import (
 )
 
 // ImportImage invokes the ecs.ImportImage API synchronously
-// api document: https://help.aliyun.com/api/ecs/importimage.html
 func (client *Client) ImportImage(request *ImportImageRequest) (response *ImportImageResponse, err error) {
 	response = CreateImportImageResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ImportImage(request *ImportImageRequest) (response *Import
 }
 
 // ImportImageWithChan invokes the ecs.ImportImage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/importimage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ImportImageWithChan(request *ImportImageRequest) (<-chan *ImportImageResponse, <-chan error) {
 	responseChan := make(chan *ImportImageResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ImportImageWithChan(request *ImportImageRequest) (<-chan *
 }
 
 // ImportImageWithCallback invokes the ecs.ImportImage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/importimage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ImportImageWithCallback(request *ImportImageRequest, callback func(response *ImportImageResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,14 +73,18 @@ type ImportImageRequest struct {
 	*requests.RpcRequest
 	DiskDeviceMapping    *[]ImportImageDiskDeviceMapping `position:"Query" name:"DiskDeviceMapping"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer                `position:"Query" name:"ResourceOwnerId"`
+	Description          string                          `position:"Query" name:"Description"`
+	Platform             string                          `position:"Query" name:"Platform"`
+	ResourceGroupId      string                          `position:"Query" name:"ResourceGroupId"`
+	BootMode             string                          `position:"Query" name:"BootMode"`
+	ImageName            string                          `position:"Query" name:"ImageName"`
+	Tag                  *[]ImportImageTag               `position:"Query" name:"Tag"  type:"Repeated"`
+	Architecture         string                          `position:"Query" name:"Architecture"`
+	LicenseType          string                          `position:"Query" name:"LicenseType"`
 	ResourceOwnerAccount string                          `position:"Query" name:"ResourceOwnerAccount"`
 	RoleName             string                          `position:"Query" name:"RoleName"`
-	Description          string                          `position:"Query" name:"Description"`
 	OSType               string                          `position:"Query" name:"OSType"`
 	OwnerId              requests.Integer                `position:"Query" name:"OwnerId"`
-	Platform             string                          `position:"Query" name:"Platform"`
-	ImageName            string                          `position:"Query" name:"ImageName"`
-	Architecture         string                          `position:"Query" name:"Architecture"`
 }
 
 // ImportImageDiskDeviceMapping is a repeated param struct in ImportImageRequest
@@ -96,6 +95,12 @@ type ImportImageDiskDeviceMapping struct {
 	Device        string `name:"Device"`
 	OSSObject     string `name:"OSSObject"`
 	DiskImageSize string `name:"DiskImageSize"`
+}
+
+// ImportImageTag is a repeated param struct in ImportImageRequest
+type ImportImageTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // ImportImageResponse is the response struct for api ImportImage
@@ -113,6 +118,7 @@ func CreateImportImageRequest() (request *ImportImageRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ImportImage", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

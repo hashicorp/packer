@@ -20,5 +20,6 @@ type DiskEventType struct {
 	EventId      string    `json:"EventId" xml:"EventId"`
 	EventTime    string    `json:"EventTime" xml:"EventTime"`
 	EventEndTime string    `json:"EventEndTime" xml:"EventEndTime"`
+	ImpactLevel  string    `json:"ImpactLevel" xml:"ImpactLevel"`
 	EventType    EventType `json:"EventType" xml:"EventType"`
 }

@@ -21,7 +21,6 @@ import (
 )
 
 // ReleaseDedicatedHost invokes the ecs.ReleaseDedicatedHost API synchronously
-// api document: https://help.aliyun.com/api/ecs/releasededicatedhost.html
 func (client *Client) ReleaseDedicatedHost(request *ReleaseDedicatedHostRequest) (response *ReleaseDedicatedHostResponse, err error) {
 	response = CreateReleaseDedicatedHostResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ReleaseDedicatedHost(request *ReleaseDedicatedHostRequest)
 }
 
 // ReleaseDedicatedHostWithChan invokes the ecs.ReleaseDedicatedHost API asynchronously
-// api document: https://help.aliyun.com/api/ecs/releasededicatedhost.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReleaseDedicatedHostWithChan(request *ReleaseDedicatedHostRequest) (<-chan *ReleaseDedicatedHostResponse, <-chan error) {
 	responseChan := make(chan *ReleaseDedicatedHostResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ReleaseDedicatedHostWithChan(request *ReleaseDedicatedHost
 }
 
 // ReleaseDedicatedHostWithCallback invokes the ecs.ReleaseDedicatedHost API asynchronously
-// api document: https://help.aliyun.com/api/ecs/releasededicatedhost.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReleaseDedicatedHostWithCallback(request *ReleaseDedicatedHostRequest, callback func(response *ReleaseDedicatedHostResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateReleaseDedicatedHostRequest() (request *ReleaseDedicatedHostRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ReleaseDedicatedHost", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

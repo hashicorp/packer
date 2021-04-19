@@ -17,12 +17,19 @@ package ecs
 
 // Command is a nested struct in ecs response
 type Command struct {
-	CommandId      string `json:"CommandId" xml:"CommandId"`
-	Name           string `json:"Name" xml:"Name"`
-	Type           string `json:"Type" xml:"Type"`
-	Description    string `json:"Description" xml:"Description"`
-	CommandContent string `json:"CommandContent" xml:"CommandContent"`
-	WorkingDir     string `json:"WorkingDir" xml:"WorkingDir"`
-	Timeout        int    `json:"Timeout" xml:"Timeout"`
-	CreationTime   string `json:"CreationTime" xml:"CreationTime"`
+	CommandId       string         `json:"CommandId" xml:"CommandId"`
+	Name            string         `json:"Name" xml:"Name"`
+	Type            string         `json:"Type" xml:"Type"`
+	Version         int            `json:"Version" xml:"Version"`
+	Latest          bool           `json:"Latest" xml:"Latest"`
+	Provider        string         `json:"Provider" xml:"Provider"`
+	Category        string         `json:"Category" xml:"Category"`
+	Description     string         `json:"Description" xml:"Description"`
+	CommandContent  string         `json:"CommandContent" xml:"CommandContent"`
+	WorkingDir      string         `json:"WorkingDir" xml:"WorkingDir"`
+	Timeout         int64          `json:"Timeout" xml:"Timeout"`
+	InvokeTimes     int            `json:"InvokeTimes" xml:"InvokeTimes"`
+	CreationTime    string         `json:"CreationTime" xml:"CreationTime"`
+	EnableParameter bool           `json:"EnableParameter" xml:"EnableParameter"`
+	ParameterNames  ParameterNames `json:"ParameterNames" xml:"ParameterNames"`
 }

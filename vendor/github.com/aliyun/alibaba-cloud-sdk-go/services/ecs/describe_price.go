@@ -21,7 +21,6 @@ import (
 )
 
 // DescribePrice invokes the ecs.DescribePrice API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeprice.html
 func (client *Client) DescribePrice(request *DescribePriceRequest) (response *DescribePriceResponse, err error) {
 	response = CreateDescribePriceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribePrice(request *DescribePriceRequest) (response *De
 }
 
 // DescribePriceWithChan invokes the ecs.DescribePrice API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeprice.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribePriceWithChan(request *DescribePriceRequest) (<-chan *DescribePriceResponse, <-chan error) {
 	responseChan := make(chan *DescribePriceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribePriceWithChan(request *DescribePriceRequest) (<-ch
 }
 
 // DescribePriceWithCallback invokes the ecs.DescribePrice API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeprice.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribePriceWithCallback(request *DescribePriceRequest, callback func(response *DescribePriceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,30 +71,45 @@ func (client *Client) DescribePriceWithCallback(request *DescribePriceRequest, c
 // DescribePriceRequest is the request struct for api DescribePrice
 type DescribePriceRequest struct {
 	*requests.RpcRequest
-	DataDisk3Size           requests.Integer `position:"Query" name:"DataDisk.3.Size"`
-	ResourceOwnerId         requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ImageId                 string           `position:"Query" name:"ImageId"`
-	DataDisk3Category       string           `position:"Query" name:"DataDisk.3.Category"`
-	IoOptimized             string           `position:"Query" name:"IoOptimized"`
-	InternetMaxBandwidthOut requests.Integer `position:"Query" name:"InternetMaxBandwidthOut"`
-	SystemDiskCategory      string           `position:"Query" name:"SystemDisk.Category"`
-	DataDisk4Category       string           `position:"Query" name:"DataDisk.4.Category"`
-	DataDisk4Size           requests.Integer `position:"Query" name:"DataDisk.4.Size"`
-	PriceUnit               string           `position:"Query" name:"PriceUnit"`
-	InstanceType            string           `position:"Query" name:"InstanceType"`
-	DataDisk2Category       string           `position:"Query" name:"DataDisk.2.Category"`
-	DataDisk1Size           requests.Integer `position:"Query" name:"DataDisk.1.Size"`
-	Period                  requests.Integer `position:"Query" name:"Period"`
-	Amount                  requests.Integer `position:"Query" name:"Amount"`
-	ResourceOwnerAccount    string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount            string           `position:"Query" name:"OwnerAccount"`
-	DataDisk2Size           requests.Integer `position:"Query" name:"DataDisk.2.Size"`
-	OwnerId                 requests.Integer `position:"Query" name:"OwnerId"`
-	ResourceType            string           `position:"Query" name:"ResourceType"`
-	DataDisk1Category       string           `position:"Query" name:"DataDisk.1.Category"`
-	SystemDiskSize          requests.Integer `position:"Query" name:"SystemDisk.Size"`
-	InternetChargeType      string           `position:"Query" name:"InternetChargeType"`
-	InstanceNetworkType     string           `position:"Query" name:"InstanceNetworkType"`
+	DataDisk3Size              requests.Integer `position:"Query" name:"DataDisk.3.Size"`
+	ResourceOwnerId            requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	DataDisk3Category          string           `position:"Query" name:"DataDisk.3.Category"`
+	Isp                        string           `position:"Query" name:"Isp"`
+	DataDisk4Size              requests.Integer `position:"Query" name:"DataDisk.4.Size"`
+	PriceUnit                  string           `position:"Query" name:"PriceUnit"`
+	Period                     requests.Integer `position:"Query" name:"Period"`
+	DataDisk1PerformanceLevel  string           `position:"Query" name:"DataDisk.1.PerformanceLevel"`
+	AssuranceTimes             string           `position:"Query" name:"AssuranceTimes"`
+	OwnerId                    requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceCpuCoreCount       requests.Integer `position:"Query" name:"InstanceCpuCoreCount"`
+	InternetChargeType         string           `position:"Query" name:"InternetChargeType"`
+	InstanceNetworkType        string           `position:"Query" name:"InstanceNetworkType"`
+	InstanceAmount             requests.Integer `position:"Query" name:"InstanceAmount"`
+	InstanceTypeList           *[]string        `position:"Query" name:"InstanceTypeList"  type:"Repeated"`
+	DataDisk3PerformanceLevel  string           `position:"Query" name:"DataDisk.3.PerformanceLevel"`
+	ImageId                    string           `position:"Query" name:"ImageId"`
+	IoOptimized                string           `position:"Query" name:"IoOptimized"`
+	InternetMaxBandwidthOut    requests.Integer `position:"Query" name:"InternetMaxBandwidthOut"`
+	SystemDiskCategory         string           `position:"Query" name:"SystemDisk.Category"`
+	Platform                   string           `position:"Query" name:"Platform"`
+	Capacity                   requests.Integer `position:"Query" name:"Capacity"`
+	SystemDiskPerformanceLevel string           `position:"Query" name:"SystemDisk.PerformanceLevel"`
+	DataDisk4Category          string           `position:"Query" name:"DataDisk.4.Category"`
+	DataDisk4PerformanceLevel  string           `position:"Query" name:"DataDisk.4.PerformanceLevel"`
+	Scope                      string           `position:"Query" name:"Scope"`
+	InstanceType               string           `position:"Query" name:"InstanceType"`
+	DedicatedHostType          string           `position:"Query" name:"DedicatedHostType"`
+	DataDisk2Category          string           `position:"Query" name:"DataDisk.2.Category"`
+	DataDisk1Size              requests.Integer `position:"Query" name:"DataDisk.1.Size"`
+	Amount                     requests.Integer `position:"Query" name:"Amount"`
+	ResourceOwnerAccount       string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount               string           `position:"Query" name:"OwnerAccount"`
+	DataDisk2Size              requests.Integer `position:"Query" name:"DataDisk.2.Size"`
+	ResourceType               string           `position:"Query" name:"ResourceType"`
+	DataDisk1Category          string           `position:"Query" name:"DataDisk.1.Category"`
+	DataDisk2PerformanceLevel  string           `position:"Query" name:"DataDisk.2.PerformanceLevel"`
+	SystemDiskSize             requests.Integer `position:"Query" name:"SystemDisk.Size"`
+	OfferingType               string           `position:"Query" name:"OfferingType"`
 }
 
 // DescribePriceResponse is the response struct for api DescribePrice
@@ -115,6 +125,7 @@ func CreateDescribePriceRequest() (request *DescribePriceRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribePrice", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

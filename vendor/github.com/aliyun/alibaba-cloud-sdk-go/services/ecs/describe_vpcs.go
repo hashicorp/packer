@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeVpcs invokes the ecs.DescribeVpcs API synchronously
-// api document: https://help.aliyun.com/api/ecs/describevpcs.html
 func (client *Client) DescribeVpcs(request *DescribeVpcsRequest) (response *DescribeVpcsResponse, err error) {
 	response = CreateDescribeVpcsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeVpcs(request *DescribeVpcsRequest) (response *Desc
 }
 
 // DescribeVpcsWithChan invokes the ecs.DescribeVpcs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevpcs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVpcsWithChan(request *DescribeVpcsRequest) (<-chan *DescribeVpcsResponse, <-chan error) {
 	responseChan := make(chan *DescribeVpcsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeVpcsWithChan(request *DescribeVpcsRequest) (<-chan
 }
 
 // DescribeVpcsWithCallback invokes the ecs.DescribeVpcs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevpcs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVpcsWithCallback(request *DescribeVpcsRequest, callback func(response *DescribeVpcsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,13 @@ func (client *Client) DescribeVpcsWithCallback(request *DescribeVpcsRequest, cal
 type DescribeVpcsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	IsDefault            requests.Boolean `position:"Query" name:"IsDefault"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // DescribeVpcsResponse is the response struct for api DescribeVpcs
@@ -102,6 +97,7 @@ func CreateDescribeVpcsRequest() (request *DescribeVpcsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeVpcs", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

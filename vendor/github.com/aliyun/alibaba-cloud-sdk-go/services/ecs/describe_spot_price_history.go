@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeSpotPriceHistory invokes the ecs.DescribeSpotPriceHistory API synchronously
-// api document: https://help.aliyun.com/api/ecs/describespotpricehistory.html
 func (client *Client) DescribeSpotPriceHistory(request *DescribeSpotPriceHistoryRequest) (response *DescribeSpotPriceHistoryResponse, err error) {
 	response = CreateDescribeSpotPriceHistoryResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeSpotPriceHistory(request *DescribeSpotPriceHistory
 }
 
 // DescribeSpotPriceHistoryWithChan invokes the ecs.DescribeSpotPriceHistory API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describespotpricehistory.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSpotPriceHistoryWithChan(request *DescribeSpotPriceHistoryRequest) (<-chan *DescribeSpotPriceHistoryResponse, <-chan error) {
 	responseChan := make(chan *DescribeSpotPriceHistoryResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeSpotPriceHistoryWithChan(request *DescribeSpotPric
 }
 
 // DescribeSpotPriceHistoryWithCallback invokes the ecs.DescribeSpotPriceHistory API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describespotpricehistory.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSpotPriceHistoryWithCallback(request *DescribeSpotPriceHistoryRequest, callback func(response *DescribeSpotPriceHistoryResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -87,6 +82,7 @@ type DescribeSpotPriceHistoryRequest struct {
 	EndTime              string           `position:"Query" name:"EndTime"`
 	OSType               string           `position:"Query" name:"OSType"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	SpotDuration         requests.Integer `position:"Query" name:"SpotDuration"`
 	ZoneId               string           `position:"Query" name:"ZoneId"`
 }
 
@@ -105,6 +101,7 @@ func CreateDescribeSpotPriceHistoryRequest() (request *DescribeSpotPriceHistoryR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeSpotPriceHistory", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

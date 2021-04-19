@@ -34,5 +34,5 @@ type PhysicalConnectionType struct {
 	AdLocation                    string `json:"AdLocation" xml:"AdLocation"`
 	PortNumber                    string `json:"PortNumber" xml:"PortNumber"`
 	CircuitCode                   string `json:"CircuitCode" xml:"CircuitCode"`
-	Bandwidth                     int    `json:"Bandwidth" xml:"Bandwidth"`
+	Bandwidth                     int64  `json:"Bandwidth" xml:"Bandwidth"`
 }

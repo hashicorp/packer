@@ -21,7 +21,6 @@ import (
 )
 
 // StopInvocation invokes the ecs.StopInvocation API synchronously
-// api document: https://help.aliyun.com/api/ecs/stopinvocation.html
 func (client *Client) StopInvocation(request *StopInvocationRequest) (response *StopInvocationResponse, err error) {
 	response = CreateStopInvocationResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) StopInvocation(request *StopInvocationRequest) (response *
 }
 
 // StopInvocationWithChan invokes the ecs.StopInvocation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/stopinvocation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) StopInvocationWithChan(request *StopInvocationRequest) (<-chan *StopInvocationResponse, <-chan error) {
 	responseChan := make(chan *StopInvocationResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) StopInvocationWithChan(request *StopInvocationRequest) (<-
 }
 
 // StopInvocationWithCallback invokes the ecs.StopInvocation API asynchronously
-// api document: https://help.aliyun.com/api/ecs/stopinvocation.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) StopInvocationWithCallback(request *StopInvocationRequest, callback func(response *StopInvocationResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateStopInvocationRequest() (request *StopInvocationRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "StopInvocation", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

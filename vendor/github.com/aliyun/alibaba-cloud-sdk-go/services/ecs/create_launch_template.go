@@ -21,7 +21,6 @@ import (
 )
 
 // CreateLaunchTemplate invokes the ecs.CreateLaunchTemplate API synchronously
-// api document: https://help.aliyun.com/api/ecs/createlaunchtemplate.html
 func (client *Client) CreateLaunchTemplate(request *CreateLaunchTemplateRequest) (response *CreateLaunchTemplateResponse, err error) {
 	response = CreateCreateLaunchTemplateResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateLaunchTemplate(request *CreateLaunchTemplateRequest)
 }
 
 // CreateLaunchTemplateWithChan invokes the ecs.CreateLaunchTemplate API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createlaunchtemplate.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateLaunchTemplateWithChan(request *CreateLaunchTemplateRequest) (<-chan *CreateLaunchTemplateResponse, <-chan error) {
 	responseChan := make(chan *CreateLaunchTemplateResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateLaunchTemplateWithChan(request *CreateLaunchTemplate
 }
 
 // CreateLaunchTemplateWithCallback invokes the ecs.CreateLaunchTemplate API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createlaunchtemplate.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateLaunchTemplateWithCallback(request *CreateLaunchTemplateRequest, callback func(response *CreateLaunchTemplateResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,50 +71,55 @@ func (client *Client) CreateLaunchTemplateWithCallback(request *CreateLaunchTemp
 // CreateLaunchTemplateRequest is the request struct for api CreateLaunchTemplate
 type CreateLaunchTemplateRequest struct {
 	*requests.RpcRequest
-	LaunchTemplateName          string                                  `position:"Query" name:"LaunchTemplateName"`
-	ResourceOwnerId             requests.Integer                        `position:"Query" name:"ResourceOwnerId"`
-	SecurityEnhancementStrategy string                                  `position:"Query" name:"SecurityEnhancementStrategy"`
-	NetworkType                 string                                  `position:"Query" name:"NetworkType"`
-	KeyPairName                 string                                  `position:"Query" name:"KeyPairName"`
-	SpotPriceLimit              requests.Float                          `position:"Query" name:"SpotPriceLimit"`
-	ImageOwnerAlias             string                                  `position:"Query" name:"ImageOwnerAlias"`
-	ResourceGroupId             string                                  `position:"Query" name:"ResourceGroupId"`
-	HostName                    string                                  `position:"Query" name:"HostName"`
-	SystemDiskIops              requests.Integer                        `position:"Query" name:"SystemDisk.Iops"`
-	TemplateTag                 *[]CreateLaunchTemplateTemplateTag      `position:"Query" name:"TemplateTag"  type:"Repeated"`
-	Tag                         *[]CreateLaunchTemplateTag              `position:"Query" name:"Tag"  type:"Repeated"`
-	Period                      requests.Integer                        `position:"Query" name:"Period"`
-	TemplateResourceGroupId     string                                  `position:"Query" name:"TemplateResourceGroupId"`
-	OwnerId                     requests.Integer                        `position:"Query" name:"OwnerId"`
-	VSwitchId                   string                                  `position:"Query" name:"VSwitchId"`
-	SpotStrategy                string                                  `position:"Query" name:"SpotStrategy"`
-	InstanceName                string                                  `position:"Query" name:"InstanceName"`
-	InternetChargeType          string                                  `position:"Query" name:"InternetChargeType"`
-	ZoneId                      string                                  `position:"Query" name:"ZoneId"`
-	InternetMaxBandwidthIn      requests.Integer                        `position:"Query" name:"InternetMaxBandwidthIn"`
-	VersionDescription          string                                  `position:"Query" name:"VersionDescription"`
-	ImageId                     string                                  `position:"Query" name:"ImageId"`
-	IoOptimized                 string                                  `position:"Query" name:"IoOptimized"`
-	SecurityGroupId             string                                  `position:"Query" name:"SecurityGroupId"`
-	InternetMaxBandwidthOut     requests.Integer                        `position:"Query" name:"InternetMaxBandwidthOut"`
-	Description                 string                                  `position:"Query" name:"Description"`
-	SystemDiskCategory          string                                  `position:"Query" name:"SystemDisk.Category"`
-	UserData                    string                                  `position:"Query" name:"UserData"`
-	PasswordInherit             requests.Boolean                        `position:"Query" name:"PasswordInherit"`
-	InstanceType                string                                  `position:"Query" name:"InstanceType"`
-	InstanceChargeType          string                                  `position:"Query" name:"InstanceChargeType"`
-	EnableVmOsConfig            requests.Boolean                        `position:"Query" name:"EnableVmOsConfig"`
-	NetworkInterface            *[]CreateLaunchTemplateNetworkInterface `position:"Query" name:"NetworkInterface"  type:"Repeated"`
-	ResourceOwnerAccount        string                                  `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount                string                                  `position:"Query" name:"OwnerAccount"`
-	SystemDiskDiskName          string                                  `position:"Query" name:"SystemDisk.DiskName"`
-	RamRoleName                 string                                  `position:"Query" name:"RamRoleName"`
-	AutoReleaseTime             string                                  `position:"Query" name:"AutoReleaseTime"`
-	SpotDuration                requests.Integer                        `position:"Query" name:"SpotDuration"`
-	DataDisk                    *[]CreateLaunchTemplateDataDisk         `position:"Query" name:"DataDisk"  type:"Repeated"`
-	SystemDiskSize              requests.Integer                        `position:"Query" name:"SystemDisk.Size"`
-	VpcId                       string                                  `position:"Query" name:"VpcId"`
-	SystemDiskDescription       string                                  `position:"Query" name:"SystemDisk.Description"`
+	LaunchTemplateName           string                                  `position:"Query" name:"LaunchTemplateName"`
+	ResourceOwnerId              requests.Integer                        `position:"Query" name:"ResourceOwnerId"`
+	SecurityEnhancementStrategy  string                                  `position:"Query" name:"SecurityEnhancementStrategy"`
+	NetworkType                  string                                  `position:"Query" name:"NetworkType"`
+	KeyPairName                  string                                  `position:"Query" name:"KeyPairName"`
+	SpotPriceLimit               requests.Float                          `position:"Query" name:"SpotPriceLimit"`
+	ImageOwnerAlias              string                                  `position:"Query" name:"ImageOwnerAlias"`
+	ResourceGroupId              string                                  `position:"Query" name:"ResourceGroupId"`
+	HostName                     string                                  `position:"Query" name:"HostName"`
+	SystemDiskIops               requests.Integer                        `position:"Query" name:"SystemDisk.Iops"`
+	TemplateTag                  *[]CreateLaunchTemplateTemplateTag      `position:"Query" name:"TemplateTag"  type:"Repeated"`
+	Tag                          *[]CreateLaunchTemplateTag              `position:"Query" name:"Tag"  type:"Repeated"`
+	Period                       requests.Integer                        `position:"Query" name:"Period"`
+	TemplateResourceGroupId      string                                  `position:"Query" name:"TemplateResourceGroupId"`
+	OwnerId                      requests.Integer                        `position:"Query" name:"OwnerId"`
+	VSwitchId                    string                                  `position:"Query" name:"VSwitchId"`
+	SpotStrategy                 string                                  `position:"Query" name:"SpotStrategy"`
+	PrivateIpAddress             string                                  `position:"Query" name:"PrivateIpAddress"`
+	InstanceName                 string                                  `position:"Query" name:"InstanceName"`
+	InternetChargeType           string                                  `position:"Query" name:"InternetChargeType"`
+	ZoneId                       string                                  `position:"Query" name:"ZoneId"`
+	InternetMaxBandwidthIn       requests.Integer                        `position:"Query" name:"InternetMaxBandwidthIn"`
+	VersionDescription           string                                  `position:"Query" name:"VersionDescription"`
+	SystemDiskDeleteWithInstance requests.Boolean                        `position:"Query" name:"SystemDisk.DeleteWithInstance"`
+	ImageId                      string                                  `position:"Query" name:"ImageId"`
+	IoOptimized                  string                                  `position:"Query" name:"IoOptimized"`
+	SecurityGroupId              string                                  `position:"Query" name:"SecurityGroupId"`
+	InternetMaxBandwidthOut      requests.Integer                        `position:"Query" name:"InternetMaxBandwidthOut"`
+	Description                  string                                  `position:"Query" name:"Description"`
+	SystemDiskCategory           string                                  `position:"Query" name:"SystemDisk.Category"`
+	SystemDiskPerformanceLevel   string                                  `position:"Query" name:"SystemDisk.PerformanceLevel"`
+	UserData                     string                                  `position:"Query" name:"UserData"`
+	PasswordInherit              requests.Boolean                        `position:"Query" name:"PasswordInherit"`
+	InstanceType                 string                                  `position:"Query" name:"InstanceType"`
+	InstanceChargeType           string                                  `position:"Query" name:"InstanceChargeType"`
+	EnableVmOsConfig             requests.Boolean                        `position:"Query" name:"EnableVmOsConfig"`
+	NetworkInterface             *[]CreateLaunchTemplateNetworkInterface `position:"Query" name:"NetworkInterface"  type:"Repeated"`
+	DeploymentSetId              string                                  `position:"Query" name:"DeploymentSetId"`
+	ResourceOwnerAccount         string                                  `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                 string                                  `position:"Query" name:"OwnerAccount"`
+	SystemDiskDiskName           string                                  `position:"Query" name:"SystemDisk.DiskName"`
+	RamRoleName                  string                                  `position:"Query" name:"RamRoleName"`
+	AutoReleaseTime              string                                  `position:"Query" name:"AutoReleaseTime"`
+	SpotDuration                 requests.Integer                        `position:"Query" name:"SpotDuration"`
+	SecurityGroupIds             *[]string                               `position:"Query" name:"SecurityGroupIds"  type:"Repeated"`
+	DataDisk                     *[]CreateLaunchTemplateDataDisk         `position:"Query" name:"DataDisk"  type:"Repeated"`
+	SystemDiskSize               requests.Integer                        `position:"Query" name:"SystemDisk.Size"`
+	VpcId                        string                                  `position:"Query" name:"VpcId"`
+	SystemDiskDescription        string                                  `position:"Query" name:"SystemDisk.Description"`
 }
 
 // CreateLaunchTemplateTemplateTag is a repeated param struct in CreateLaunchTemplateRequest
@@ -136,11 +136,12 @@ type CreateLaunchTemplateTag struct {
 
 // CreateLaunchTemplateNetworkInterface is a repeated param struct in CreateLaunchTemplateRequest
 type CreateLaunchTemplateNetworkInterface struct {
-	PrimaryIpAddress     string `name:"PrimaryIpAddress"`
-	VSwitchId            string `name:"VSwitchId"`
-	SecurityGroupId      string `name:"SecurityGroupId"`
-	NetworkInterfaceName string `name:"NetworkInterfaceName"`
-	Description          string `name:"Description"`
+	PrimaryIpAddress     string    `name:"PrimaryIpAddress"`
+	VSwitchId            string    `name:"VSwitchId"`
+	SecurityGroupId      string    `name:"SecurityGroupId"`
+	NetworkInterfaceName string    `name:"NetworkInterfaceName"`
+	Description          string    `name:"Description"`
+	SecurityGroupIds     *[]string `name:"SecurityGroupIds" type:"Repeated"`
 }
 
 // CreateLaunchTemplateDataDisk is a repeated param struct in CreateLaunchTemplateRequest
@@ -153,6 +154,7 @@ type CreateLaunchTemplateDataDisk struct {
 	Description        string `name:"Description"`
 	DeleteWithInstance string `name:"DeleteWithInstance"`
 	Device             string `name:"Device"`
+	PerformanceLevel   string `name:"PerformanceLevel"`
 }
 
 // CreateLaunchTemplateResponse is the response struct for api CreateLaunchTemplate
@@ -168,6 +170,7 @@ func CreateCreateLaunchTemplateRequest() (request *CreateLaunchTemplateRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateLaunchTemplate", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

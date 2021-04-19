@@ -17,14 +17,18 @@ package ecs
 
 // AutoSnapshotPolicy is a nested struct in ecs response
 type AutoSnapshotPolicy struct {
-	AutoSnapshotPolicyId   string `json:"AutoSnapshotPolicyId" xml:"AutoSnapshotPolicyId"`
-	RegionId               string `json:"RegionId" xml:"RegionId"`
-	AutoSnapshotPolicyName string `json:"AutoSnapshotPolicyName" xml:"AutoSnapshotPolicyName"`
-	TimePoints             string `json:"TimePoints" xml:"TimePoints"`
-	RepeatWeekdays         string `json:"RepeatWeekdays" xml:"RepeatWeekdays"`
-	RetentionDays          int    `json:"RetentionDays" xml:"RetentionDays"`
-	DiskNums               int    `json:"DiskNums" xml:"DiskNums"`
-	VolumeNums             int    `json:"VolumeNums" xml:"VolumeNums"`
-	CreationTime           string `json:"CreationTime" xml:"CreationTime"`
-	Status                 string `json:"Status" xml:"Status"`
+	AutoSnapshotPolicyId         string                             `json:"AutoSnapshotPolicyId" xml:"AutoSnapshotPolicyId"`
+	RegionId                     string                             `json:"RegionId" xml:"RegionId"`
+	AutoSnapshotPolicyName       string                             `json:"AutoSnapshotPolicyName" xml:"AutoSnapshotPolicyName"`
+	TimePoints                   string                             `json:"TimePoints" xml:"TimePoints"`
+	RepeatWeekdays               string                             `json:"RepeatWeekdays" xml:"RepeatWeekdays"`
+	RetentionDays                int                                `json:"RetentionDays" xml:"RetentionDays"`
+	DiskNums                     int                                `json:"DiskNums" xml:"DiskNums"`
+	VolumeNums                   int                                `json:"VolumeNums" xml:"VolumeNums"`
+	CreationTime                 string                             `json:"CreationTime" xml:"CreationTime"`
+	Status                       string                             `json:"Status" xml:"Status"`
+	EnableCrossRegionCopy        bool                               `json:"EnableCrossRegionCopy" xml:"EnableCrossRegionCopy"`
+	TargetCopyRegions            string                             `json:"TargetCopyRegions" xml:"TargetCopyRegions"`
+	CopiedSnapshotsRetentionDays int                                `json:"CopiedSnapshotsRetentionDays" xml:"CopiedSnapshotsRetentionDays"`
+	Tags                         TagsInDescribeAutoSnapshotPolicyEx `json:"Tags" xml:"Tags"`
 }

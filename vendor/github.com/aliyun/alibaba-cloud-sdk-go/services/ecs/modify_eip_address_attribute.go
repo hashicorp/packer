@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyEipAddressAttribute invokes the ecs.ModifyEipAddressAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyeipaddressattribute.html
 func (client *Client) ModifyEipAddressAttribute(request *ModifyEipAddressAttributeRequest) (response *ModifyEipAddressAttributeResponse, err error) {
 	response = CreateModifyEipAddressAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyEipAddressAttribute(request *ModifyEipAddressAttribu
 }
 
 // ModifyEipAddressAttributeWithChan invokes the ecs.ModifyEipAddressAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyeipaddressattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyEipAddressAttributeWithChan(request *ModifyEipAddressAttributeRequest) (<-chan *ModifyEipAddressAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyEipAddressAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyEipAddressAttributeWithChan(request *ModifyEipAddres
 }
 
 // ModifyEipAddressAttributeWithCallback invokes the ecs.ModifyEipAddressAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyeipaddressattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyEipAddressAttributeWithCallback(request *ModifyEipAddressAttributeRequest, callback func(response *ModifyEipAddressAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) ModifyEipAddressAttributeWithCallback(request *ModifyEipAd
 type ModifyEipAddressAttributeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	AllocationId         string           `position:"Query" name:"AllocationId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	Bandwidth            string           `position:"Query" name:"Bandwidth"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	AllocationId         string           `position:"Query" name:"AllocationId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -96,6 +91,7 @@ func CreateModifyEipAddressAttributeRequest() (request *ModifyEipAddressAttribut
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyEipAddressAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

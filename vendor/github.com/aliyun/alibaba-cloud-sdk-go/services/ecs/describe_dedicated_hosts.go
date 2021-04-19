@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDedicatedHosts invokes the ecs.DescribeDedicatedHosts API synchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosts.html
 func (client *Client) DescribeDedicatedHosts(request *DescribeDedicatedHostsRequest) (response *DescribeDedicatedHostsResponse, err error) {
 	response = CreateDescribeDedicatedHostsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDedicatedHosts(request *DescribeDedicatedHostsRequ
 }
 
 // DescribeDedicatedHostsWithChan invokes the ecs.DescribeDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostsWithChan(request *DescribeDedicatedHostsRequest) (<-chan *DescribeDedicatedHostsResponse, <-chan error) {
 	responseChan := make(chan *DescribeDedicatedHostsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDedicatedHostsWithChan(request *DescribeDedicatedH
 }
 
 // DescribeDedicatedHostsWithCallback invokes the ecs.DescribeDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostsWithCallback(request *DescribeDedicatedHostsRequest, callback func(response *DescribeDedicatedHostsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,17 +73,18 @@ type DescribeDedicatedHostsRequest struct {
 	*requests.RpcRequest
 	DedicatedHostIds     string                       `position:"Query" name:"DedicatedHostIds"`
 	ResourceOwnerId      requests.Integer             `position:"Query" name:"ResourceOwnerId"`
-	DedicatedHostName    string                       `position:"Query" name:"DedicatedHostName"`
-	ResourceOwnerAccount string                       `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string                       `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer             `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer             `position:"Query" name:"PageNumber"`
 	ResourceGroupId      string                       `position:"Query" name:"ResourceGroupId"`
 	LockReason           string                       `position:"Query" name:"LockReason"`
 	PageSize             requests.Integer             `position:"Query" name:"PageSize"`
-	ZoneId               string                       `position:"Query" name:"ZoneId"`
 	DedicatedHostType    string                       `position:"Query" name:"DedicatedHostType"`
 	Tag                  *[]DescribeDedicatedHostsTag `position:"Query" name:"Tag"  type:"Repeated"`
+	NeedHostDetail       string                       `position:"Query" name:"NeedHostDetail"`
+	DedicatedHostName    string                       `position:"Query" name:"DedicatedHostName"`
+	ResourceOwnerAccount string                       `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                       `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer             `position:"Query" name:"OwnerId"`
+	ZoneId               string                       `position:"Query" name:"ZoneId"`
 	Status               string                       `position:"Query" name:"Status"`
 }
 
@@ -114,6 +110,7 @@ func CreateDescribeDedicatedHostsRequest() (request *DescribeDedicatedHostsReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDedicatedHosts", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

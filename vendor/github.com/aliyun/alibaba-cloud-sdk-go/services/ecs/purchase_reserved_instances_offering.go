@@ -21,7 +21,6 @@ import (
 )
 
 // PurchaseReservedInstancesOffering invokes the ecs.PurchaseReservedInstancesOffering API synchronously
-// api document: https://help.aliyun.com/api/ecs/purchasereservedinstancesoffering.html
 func (client *Client) PurchaseReservedInstancesOffering(request *PurchaseReservedInstancesOfferingRequest) (response *PurchaseReservedInstancesOfferingResponse, err error) {
 	response = CreatePurchaseReservedInstancesOfferingResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) PurchaseReservedInstancesOffering(request *PurchaseReserve
 }
 
 // PurchaseReservedInstancesOfferingWithChan invokes the ecs.PurchaseReservedInstancesOffering API asynchronously
-// api document: https://help.aliyun.com/api/ecs/purchasereservedinstancesoffering.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) PurchaseReservedInstancesOfferingWithChan(request *PurchaseReservedInstancesOfferingRequest) (<-chan *PurchaseReservedInstancesOfferingResponse, <-chan error) {
 	responseChan := make(chan *PurchaseReservedInstancesOfferingResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) PurchaseReservedInstancesOfferingWithChan(request *Purchas
 }
 
 // PurchaseReservedInstancesOfferingWithCallback invokes the ecs.PurchaseReservedInstancesOffering API asynchronously
-// api document: https://help.aliyun.com/api/ecs/purchasereservedinstancesoffering.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) PurchaseReservedInstancesOfferingWithCallback(request *PurchaseReservedInstancesOfferingRequest, callback func(response *PurchaseReservedInstancesOfferingResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,21 +71,29 @@ func (client *Client) PurchaseReservedInstancesOfferingWithCallback(request *Pur
 // PurchaseReservedInstancesOfferingRequest is the request struct for api PurchaseReservedInstancesOffering
 type PurchaseReservedInstancesOfferingRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
-	Description          string           `position:"Query" name:"Description"`
-	ResourceGroupId      string           `position:"Query" name:"ResourceGroupId"`
-	Scope                string           `position:"Query" name:"Scope"`
-	InstanceType         string           `position:"Query" name:"InstanceType"`
-	Period               requests.Integer `position:"Query" name:"Period"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
-	OfferingType         string           `position:"Query" name:"OfferingType"`
-	ZoneId               string           `position:"Query" name:"ZoneId"`
-	ReservedInstanceName string           `position:"Query" name:"ReservedInstanceName"`
-	InstanceAmount       requests.Integer `position:"Query" name:"InstanceAmount"`
+	ResourceOwnerId      requests.Integer                        `position:"Query" name:"ResourceOwnerId"`
+	ClientToken          string                                  `position:"Query" name:"ClientToken"`
+	Description          string                                  `position:"Query" name:"Description"`
+	Platform             string                                  `position:"Query" name:"Platform"`
+	ResourceGroupId      string                                  `position:"Query" name:"ResourceGroupId"`
+	Scope                string                                  `position:"Query" name:"Scope"`
+	InstanceType         string                                  `position:"Query" name:"InstanceType"`
+	Tag                  *[]PurchaseReservedInstancesOfferingTag `position:"Query" name:"Tag"  type:"Repeated"`
+	Period               requests.Integer                        `position:"Query" name:"Period"`
+	ResourceOwnerAccount string                                  `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                                  `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer                        `position:"Query" name:"OwnerId"`
+	PeriodUnit           string                                  `position:"Query" name:"PeriodUnit"`
+	OfferingType         string                                  `position:"Query" name:"OfferingType"`
+	ZoneId               string                                  `position:"Query" name:"ZoneId"`
+	ReservedInstanceName string                                  `position:"Query" name:"ReservedInstanceName"`
+	InstanceAmount       requests.Integer                        `position:"Query" name:"InstanceAmount"`
+}
+
+// PurchaseReservedInstancesOfferingTag is a repeated param struct in PurchaseReservedInstancesOfferingRequest
+type PurchaseReservedInstancesOfferingTag struct {
+	Key   string `name:"Key"`
+	Value string `name:"Value"`
 }
 
 // PurchaseReservedInstancesOfferingResponse is the response struct for api PurchaseReservedInstancesOffering
@@ -106,6 +109,7 @@ func CreatePurchaseReservedInstancesOfferingRequest() (request *PurchaseReserved
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "PurchaseReservedInstancesOffering", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

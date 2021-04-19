@@ -21,7 +21,6 @@ import (
 )
 
 // ReleasePublicIpAddress invokes the ecs.ReleasePublicIpAddress API synchronously
-// api document: https://help.aliyun.com/api/ecs/releasepublicipaddress.html
 func (client *Client) ReleasePublicIpAddress(request *ReleasePublicIpAddressRequest) (response *ReleasePublicIpAddressResponse, err error) {
 	response = CreateReleasePublicIpAddressResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ReleasePublicIpAddress(request *ReleasePublicIpAddressRequ
 }
 
 // ReleasePublicIpAddressWithChan invokes the ecs.ReleasePublicIpAddress API asynchronously
-// api document: https://help.aliyun.com/api/ecs/releasepublicipaddress.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReleasePublicIpAddressWithChan(request *ReleasePublicIpAddressRequest) (<-chan *ReleasePublicIpAddressResponse, <-chan error) {
 	responseChan := make(chan *ReleasePublicIpAddressResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ReleasePublicIpAddressWithChan(request *ReleasePublicIpAdd
 }
 
 // ReleasePublicIpAddressWithCallback invokes the ecs.ReleasePublicIpAddress API asynchronously
-// api document: https://help.aliyun.com/api/ecs/releasepublicipaddress.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReleasePublicIpAddressWithCallback(request *ReleasePublicIpAddressRequest, callback func(response *ReleasePublicIpAddressResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,11 @@ func (client *Client) ReleasePublicIpAddressWithCallback(request *ReleasePublicI
 type ReleasePublicIpAddressRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	PublicIpAddress      string           `position:"Query" name:"PublicIpAddress"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PublicIpAddress      string           `position:"Query" name:"PublicIpAddress"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // ReleasePublicIpAddressResponse is the response struct for api ReleasePublicIpAddress
@@ -96,6 +91,7 @@ func CreateReleasePublicIpAddressRequest() (request *ReleasePublicIpAddressReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ReleasePublicIpAddress", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

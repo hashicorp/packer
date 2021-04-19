@@ -21,7 +21,6 @@ import (
 )
 
 // ConnectRouterInterface invokes the ecs.ConnectRouterInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/connectrouterinterface.html
 func (client *Client) ConnectRouterInterface(request *ConnectRouterInterfaceRequest) (response *ConnectRouterInterfaceResponse, err error) {
 	response = CreateConnectRouterInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ConnectRouterInterface(request *ConnectRouterInterfaceRequ
 }
 
 // ConnectRouterInterfaceWithChan invokes the ecs.ConnectRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/connectrouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ConnectRouterInterfaceWithChan(request *ConnectRouterInterfaceRequest) (<-chan *ConnectRouterInterfaceResponse, <-chan error) {
 	responseChan := make(chan *ConnectRouterInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ConnectRouterInterfaceWithChan(request *ConnectRouterInter
 }
 
 // ConnectRouterInterfaceWithCallback invokes the ecs.ConnectRouterInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/connectrouterinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ConnectRouterInterfaceWithCallback(request *ConnectRouterInterfaceRequest, callback func(response *ConnectRouterInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -94,6 +89,7 @@ func CreateConnectRouterInterfaceRequest() (request *ConnectRouterInterfaceReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ConnectRouterInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

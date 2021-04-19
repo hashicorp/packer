@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDisksFullStatus invokes the ecs.DescribeDisksFullStatus API synchronously
-// api document: https://help.aliyun.com/api/ecs/describedisksfullstatus.html
 func (client *Client) DescribeDisksFullStatus(request *DescribeDisksFullStatusRequest) (response *DescribeDisksFullStatusResponse, err error) {
 	response = CreateDescribeDisksFullStatusResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDisksFullStatus(request *DescribeDisksFullStatusRe
 }
 
 // DescribeDisksFullStatusWithChan invokes the ecs.DescribeDisksFullStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedisksfullstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDisksFullStatusWithChan(request *DescribeDisksFullStatusRequest) (<-chan *DescribeDisksFullStatusResponse, <-chan error) {
 	responseChan := make(chan *DescribeDisksFullStatusResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDisksFullStatusWithChan(request *DescribeDisksFull
 }
 
 // DescribeDisksFullStatusWithCallback invokes the ecs.DescribeDisksFullStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedisksfullstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDisksFullStatusWithCallback(request *DescribeDisksFullStatusRequest, callback func(response *DescribeDisksFullStatusResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -107,6 +102,7 @@ func CreateDescribeDisksFullStatusRequest() (request *DescribeDisksFullStatusReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDisksFullStatus", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

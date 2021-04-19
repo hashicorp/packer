@@ -22,7 +22,7 @@ type LaunchTemplateVersionSet struct {
 	LaunchTemplateId   string             `json:"LaunchTemplateId" xml:"LaunchTemplateId"`
 	LaunchTemplateName string             `json:"LaunchTemplateName" xml:"LaunchTemplateName"`
 	DefaultVersion     bool               `json:"DefaultVersion" xml:"DefaultVersion"`
-	VersionNumber      int                `json:"VersionNumber" xml:"VersionNumber"`
+	VersionNumber      int64              `json:"VersionNumber" xml:"VersionNumber"`
 	VersionDescription string             `json:"VersionDescription" xml:"VersionDescription"`
 	CreatedBy          string             `json:"CreatedBy" xml:"CreatedBy"`
 	LaunchTemplateData LaunchTemplateData `json:"LaunchTemplateData" xml:"LaunchTemplateData"`

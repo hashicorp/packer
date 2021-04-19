@@ -21,7 +21,6 @@ import (
 )
 
 // LeaveSecurityGroup invokes the ecs.LeaveSecurityGroup API synchronously
-// api document: https://help.aliyun.com/api/ecs/leavesecuritygroup.html
 func (client *Client) LeaveSecurityGroup(request *LeaveSecurityGroupRequest) (response *LeaveSecurityGroupResponse, err error) {
 	response = CreateLeaveSecurityGroupResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) LeaveSecurityGroup(request *LeaveSecurityGroupRequest) (re
 }
 
 // LeaveSecurityGroupWithChan invokes the ecs.LeaveSecurityGroup API asynchronously
-// api document: https://help.aliyun.com/api/ecs/leavesecuritygroup.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) LeaveSecurityGroupWithChan(request *LeaveSecurityGroupRequest) (<-chan *LeaveSecurityGroupResponse, <-chan error) {
 	responseChan := make(chan *LeaveSecurityGroupResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) LeaveSecurityGroupWithChan(request *LeaveSecurityGroupRequ
 }
 
 // LeaveSecurityGroupWithCallback invokes the ecs.LeaveSecurityGroup API asynchronously
-// api document: https://help.aliyun.com/api/ecs/leavesecuritygroup.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) LeaveSecurityGroupWithCallback(request *LeaveSecurityGroupRequest, callback func(response *LeaveSecurityGroupResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,12 @@ func (client *Client) LeaveSecurityGroupWithCallback(request *LeaveSecurityGroup
 type LeaveSecurityGroupRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	SecurityGroupId      string           `position:"Query" name:"SecurityGroupId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	SecurityGroupId      string           `position:"Query" name:"SecurityGroupId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
+	NetworkInterfaceId   string           `position:"Query" name:"NetworkInterfaceId"`
 }
 
 // LeaveSecurityGroupResponse is the response struct for api LeaveSecurityGroup
@@ -96,6 +92,7 @@ func CreateLeaveSecurityGroupRequest() (request *LeaveSecurityGroupRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "LeaveSecurityGroup", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

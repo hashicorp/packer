@@ -21,7 +21,6 @@ import (
 )
 
 // ApplyAutoSnapshotPolicy invokes the ecs.ApplyAutoSnapshotPolicy API synchronously
-// api document: https://help.aliyun.com/api/ecs/applyautosnapshotpolicy.html
 func (client *Client) ApplyAutoSnapshotPolicy(request *ApplyAutoSnapshotPolicyRequest) (response *ApplyAutoSnapshotPolicyResponse, err error) {
 	response = CreateApplyAutoSnapshotPolicyResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ApplyAutoSnapshotPolicy(request *ApplyAutoSnapshotPolicyRe
 }
 
 // ApplyAutoSnapshotPolicyWithChan invokes the ecs.ApplyAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/applyautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ApplyAutoSnapshotPolicyWithChan(request *ApplyAutoSnapshotPolicyRequest) (<-chan *ApplyAutoSnapshotPolicyResponse, <-chan error) {
 	responseChan := make(chan *ApplyAutoSnapshotPolicyResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ApplyAutoSnapshotPolicyWithChan(request *ApplyAutoSnapshot
 }
 
 // ApplyAutoSnapshotPolicyWithCallback invokes the ecs.ApplyAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/applyautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ApplyAutoSnapshotPolicyWithCallback(request *ApplyAutoSnapshotPolicyRequest, callback func(response *ApplyAutoSnapshotPolicyResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) ApplyAutoSnapshotPolicyWithCallback(request *ApplyAutoSnap
 type ApplyAutoSnapshotPolicyRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	AutoSnapshotPolicyId string           `position:"Query" name:"autoSnapshotPolicyId"`
 	DiskIds              string           `position:"Query" name:"diskIds"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -95,6 +90,7 @@ func CreateApplyAutoSnapshotPolicyRequest() (request *ApplyAutoSnapshotPolicyReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ApplyAutoSnapshotPolicy", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

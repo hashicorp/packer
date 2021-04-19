@@ -7,6 +7,8 @@ import (
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
 	exoscaleimportpostprocessor "github.com/exoscale/packer-plugin-exoscale/post-processor/exoscale-import"
+	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
+	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
 	amazonebsbuilder "github.com/hashicorp/packer-plugin-amazon/builder/ebs"
 	amazonebssurrogatebuilder "github.com/hashicorp/packer-plugin-amazon/builder/ebssurrogate"
@@ -57,6 +59,7 @@ var VendoredDatasources = map[string]packersdk.Datasource{
 // VendoredBuilders are builder components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredBuilders = map[string]packersdk.Builder{
+	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
@@ -95,6 +98,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
+	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(anazibimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),

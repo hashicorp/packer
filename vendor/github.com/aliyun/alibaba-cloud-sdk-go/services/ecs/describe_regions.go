@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeRegions invokes the ecs.DescribeRegions API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeregions.html
 func (client *Client) DescribeRegions(request *DescribeRegionsRequest) (response *DescribeRegionsResponse, err error) {
 	response = CreateDescribeRegionsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeRegions(request *DescribeRegionsRequest) (response
 }
 
 // DescribeRegionsWithChan invokes the ecs.DescribeRegions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeregions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRegionsWithChan(request *DescribeRegionsRequest) (<-chan *DescribeRegionsResponse, <-chan error) {
 	responseChan := make(chan *DescribeRegionsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeRegionsWithChan(request *DescribeRegionsRequest) (
 }
 
 // DescribeRegionsWithCallback invokes the ecs.DescribeRegions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeregions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRegionsWithCallback(request *DescribeRegionsRequest, callback func(response *DescribeRegionsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) DescribeRegionsWithCallback(request *DescribeRegionsReques
 type DescribeRegionsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	AcceptLanguage       string           `position:"Query" name:"AcceptLanguage"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 	ResourceType         string           `position:"Query" name:"ResourceType"`
+	AcceptLanguage       string           `position:"Query" name:"AcceptLanguage"`
 }
 
 // DescribeRegionsResponse is the response struct for api DescribeRegions
@@ -98,6 +93,7 @@ func CreateDescribeRegionsRequest() (request *DescribeRegionsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeRegions", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

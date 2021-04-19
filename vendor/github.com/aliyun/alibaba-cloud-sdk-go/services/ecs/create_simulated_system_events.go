@@ -21,7 +21,6 @@ import (
 )
 
 // CreateSimulatedSystemEvents invokes the ecs.CreateSimulatedSystemEvents API synchronously
-// api document: https://help.aliyun.com/api/ecs/createsimulatedsystemevents.html
 func (client *Client) CreateSimulatedSystemEvents(request *CreateSimulatedSystemEventsRequest) (response *CreateSimulatedSystemEventsResponse, err error) {
 	response = CreateCreateSimulatedSystemEventsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateSimulatedSystemEvents(request *CreateSimulatedSystem
 }
 
 // CreateSimulatedSystemEventsWithChan invokes the ecs.CreateSimulatedSystemEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createsimulatedsystemevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateSimulatedSystemEventsWithChan(request *CreateSimulatedSystemEventsRequest) (<-chan *CreateSimulatedSystemEventsResponse, <-chan error) {
 	responseChan := make(chan *CreateSimulatedSystemEventsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateSimulatedSystemEventsWithChan(request *CreateSimulat
 }
 
 // CreateSimulatedSystemEventsWithCallback invokes the ecs.CreateSimulatedSystemEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createsimulatedsystemevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateSimulatedSystemEventsWithCallback(request *CreateSimulatedSystemEventsRequest, callback func(response *CreateSimulatedSystemEventsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -98,6 +93,7 @@ func CreateCreateSimulatedSystemEventsRequest() (request *CreateSimulatedSystemE
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateSimulatedSystemEvents", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

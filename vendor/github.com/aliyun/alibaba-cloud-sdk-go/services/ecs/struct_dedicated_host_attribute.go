@@ -17,6 +17,7 @@ package ecs
 
 // DedicatedHostAttribute is a nested struct in ecs response
 type DedicatedHostAttribute struct {
-	DedicatedHostName string `json:"DedicatedHostName" xml:"DedicatedHostName"`
-	DedicatedHostId   string `json:"DedicatedHostId" xml:"DedicatedHostId"`
+	DedicatedHostName      string `json:"DedicatedHostName" xml:"DedicatedHostName"`
+	DedicatedHostClusterId string `json:"DedicatedHostClusterId" xml:"DedicatedHostClusterId"`
+	DedicatedHostId        string `json:"DedicatedHostId" xml:"DedicatedHostId"`
 }

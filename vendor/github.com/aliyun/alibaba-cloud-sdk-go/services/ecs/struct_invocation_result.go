@@ -20,8 +20,16 @@ type InvocationResult struct {
 	CommandId          string `json:"CommandId" xml:"CommandId"`
 	InvokeId           string `json:"InvokeId" xml:"InvokeId"`
 	InstanceId         string `json:"InstanceId" xml:"InstanceId"`
+	StartTime          string `json:"StartTime" xml:"StartTime"`
+	StopTime           string `json:"StopTime" xml:"StopTime"`
 	FinishedTime       string `json:"FinishedTime" xml:"FinishedTime"`
+	Repeats            int    `json:"Repeats" xml:"Repeats"`
 	Output             string `json:"Output" xml:"Output"`
+	Dropped            int    `json:"Dropped" xml:"Dropped"`
 	InvokeRecordStatus string `json:"InvokeRecordStatus" xml:"InvokeRecordStatus"`
-	ExitCode           int    `json:"ExitCode" xml:"ExitCode"`
+	InvocationStatus   string `json:"InvocationStatus" xml:"InvocationStatus"`
+	ExitCode           int64  `json:"ExitCode" xml:"ExitCode"`
+	ErrorCode          string `json:"ErrorCode" xml:"ErrorCode"`
+	ErrorInfo          string `json:"ErrorInfo" xml:"ErrorInfo"`
+	Username           string `json:"Username" xml:"Username"`
 }

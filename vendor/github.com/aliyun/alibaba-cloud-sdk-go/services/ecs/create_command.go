@@ -21,7 +21,6 @@ import (
 )
 
 // CreateCommand invokes the ecs.CreateCommand API synchronously
-// api document: https://help.aliyun.com/api/ecs/createcommand.html
 func (client *Client) CreateCommand(request *CreateCommandRequest) (response *CreateCommandResponse, err error) {
 	response = CreateCreateCommandResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateCommand(request *CreateCommandRequest) (response *Cr
 }
 
 // CreateCommandWithChan invokes the ecs.CreateCommand API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createcommand.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateCommandWithChan(request *CreateCommandRequest) (<-chan *CreateCommandResponse, <-chan error) {
 	responseChan := make(chan *CreateCommandResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateCommandWithChan(request *CreateCommandRequest) (<-ch
 }
 
 // CreateCommandWithCallback invokes the ecs.CreateCommand API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createcommand.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateCommandWithCallback(request *CreateCommandRequest, callback func(response *CreateCommandResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -86,6 +81,7 @@ type CreateCommandRequest struct {
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	Name                 string           `position:"Query" name:"Name"`
+	EnableParameter      requests.Boolean `position:"Query" name:"EnableParameter"`
 }
 
 // CreateCommandResponse is the response struct for api CreateCommand
@@ -101,6 +97,7 @@ func CreateCreateCommandRequest() (request *CreateCommandRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateCommand", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

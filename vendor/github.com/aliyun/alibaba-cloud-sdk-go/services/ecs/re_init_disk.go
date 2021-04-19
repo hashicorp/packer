@@ -21,7 +21,6 @@ import (
 )
 
 // ReInitDisk invokes the ecs.ReInitDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/reinitdisk.html
 func (client *Client) ReInitDisk(request *ReInitDiskRequest) (response *ReInitDiskResponse, err error) {
 	response = CreateReInitDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ReInitDisk(request *ReInitDiskRequest) (response *ReInitDi
 }
 
 // ReInitDiskWithChan invokes the ecs.ReInitDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/reinitdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReInitDiskWithChan(request *ReInitDiskRequest) (<-chan *ReInitDiskResponse, <-chan error) {
 	responseChan := make(chan *ReInitDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ReInitDiskWithChan(request *ReInitDiskRequest) (<-chan *Re
 }
 
 // ReInitDiskWithCallback invokes the ecs.ReInitDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/reinitdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReInitDiskWithCallback(request *ReInitDiskRequest, callback func(response *ReInitDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,13 @@ func (client *Client) ReInitDiskWithCallback(request *ReInitDiskRequest, callbac
 type ReInitDiskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId             requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	Password                    string           `position:"Query" name:"Password"`
-	ResourceOwnerAccount        string           `position:"Query" name:"ResourceOwnerAccount"`
 	AutoStartInstance           requests.Boolean `position:"Query" name:"AutoStartInstance"`
-	OwnerAccount                string           `position:"Query" name:"OwnerAccount"`
-	DiskId                      string           `position:"Query" name:"DiskId"`
 	SecurityEnhancementStrategy string           `position:"Query" name:"SecurityEnhancementStrategy"`
 	KeyPairName                 string           `position:"Query" name:"KeyPairName"`
+	Password                    string           `position:"Query" name:"Password"`
+	DiskId                      string           `position:"Query" name:"DiskId"`
+	ResourceOwnerAccount        string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                string           `position:"Query" name:"OwnerAccount"`
 	OwnerId                     requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -99,6 +94,7 @@ func CreateReInitDiskRequest() (request *ReInitDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ReInitDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

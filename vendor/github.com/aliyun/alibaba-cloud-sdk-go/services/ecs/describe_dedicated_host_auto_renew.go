@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDedicatedHostAutoRenew invokes the ecs.DescribeDedicatedHostAutoRenew API synchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhostautorenew.html
 func (client *Client) DescribeDedicatedHostAutoRenew(request *DescribeDedicatedHostAutoRenewRequest) (response *DescribeDedicatedHostAutoRenewResponse, err error) {
 	response = CreateDescribeDedicatedHostAutoRenewResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDedicatedHostAutoRenew(request *DescribeDedicatedH
 }
 
 // DescribeDedicatedHostAutoRenewWithChan invokes the ecs.DescribeDedicatedHostAutoRenew API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhostautorenew.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostAutoRenewWithChan(request *DescribeDedicatedHostAutoRenewRequest) (<-chan *DescribeDedicatedHostAutoRenewResponse, <-chan error) {
 	responseChan := make(chan *DescribeDedicatedHostAutoRenewResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDedicatedHostAutoRenewWithChan(request *DescribeDe
 }
 
 // DescribeDedicatedHostAutoRenewWithCallback invokes the ecs.DescribeDedicatedHostAutoRenew API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describededicatedhostautorenew.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDedicatedHostAutoRenewWithCallback(request *DescribeDedicatedHostAutoRenewRequest, callback func(response *DescribeDedicatedHostAutoRenewResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateDescribeDedicatedHostAutoRenewRequest() (request *DescribeDedicatedHo
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDedicatedHostAutoRenew", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

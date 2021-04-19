@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceRamRole invokes the ecs.DescribeInstanceRamRole API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceramrole.html
 func (client *Client) DescribeInstanceRamRole(request *DescribeInstanceRamRoleRequest) (response *DescribeInstanceRamRoleResponse, err error) {
 	response = CreateDescribeInstanceRamRoleResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceRamRole(request *DescribeInstanceRamRoleRe
 }
 
 // DescribeInstanceRamRoleWithChan invokes the ecs.DescribeInstanceRamRole API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceramrole.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceRamRoleWithChan(request *DescribeInstanceRamRoleRequest) (<-chan *DescribeInstanceRamRoleResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceRamRoleResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceRamRoleWithChan(request *DescribeInstanceR
 }
 
 // DescribeInstanceRamRoleWithCallback invokes the ecs.DescribeInstanceRamRole API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceramrole.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceRamRoleWithCallback(request *DescribeInstanceRamRoleRequest, callback func(response *DescribeInstanceRamRoleResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) DescribeInstanceRamRoleWithCallback(request *DescribeInsta
 type DescribeInstanceRamRoleRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	InstanceIds          string           `position:"Query" name:"InstanceIds"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 	PageSize             requests.Integer `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	RamRoleName          string           `position:"Query" name:"RamRoleName"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	InstanceIds          string           `position:"Query" name:"InstanceIds"`
 }
 
 // DescribeInstanceRamRoleResponse is the response struct for api DescribeInstanceRamRole
@@ -100,6 +95,7 @@ func CreateDescribeInstanceRamRoleRequest() (request *DescribeInstanceRamRoleReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceRamRole", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

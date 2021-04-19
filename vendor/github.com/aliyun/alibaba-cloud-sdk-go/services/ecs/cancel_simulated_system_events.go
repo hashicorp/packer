@@ -21,7 +21,6 @@ import (
 )
 
 // CancelSimulatedSystemEvents invokes the ecs.CancelSimulatedSystemEvents API synchronously
-// api document: https://help.aliyun.com/api/ecs/cancelsimulatedsystemevents.html
 func (client *Client) CancelSimulatedSystemEvents(request *CancelSimulatedSystemEventsRequest) (response *CancelSimulatedSystemEventsResponse, err error) {
 	response = CreateCancelSimulatedSystemEventsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CancelSimulatedSystemEvents(request *CancelSimulatedSystem
 }
 
 // CancelSimulatedSystemEventsWithChan invokes the ecs.CancelSimulatedSystemEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/cancelsimulatedsystemevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelSimulatedSystemEventsWithChan(request *CancelSimulatedSystemEventsRequest) (<-chan *CancelSimulatedSystemEventsResponse, <-chan error) {
 	responseChan := make(chan *CancelSimulatedSystemEventsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CancelSimulatedSystemEventsWithChan(request *CancelSimulat
 }
 
 // CancelSimulatedSystemEventsWithCallback invokes the ecs.CancelSimulatedSystemEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/cancelsimulatedsystemevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelSimulatedSystemEventsWithCallback(request *CancelSimulatedSystemEventsRequest, callback func(response *CancelSimulatedSystemEventsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateCancelSimulatedSystemEventsRequest() (request *CancelSimulatedSystemE
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CancelSimulatedSystemEvents", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

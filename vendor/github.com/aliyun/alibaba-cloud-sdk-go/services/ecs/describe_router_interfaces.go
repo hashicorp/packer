@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeRouterInterfaces invokes the ecs.DescribeRouterInterfaces API synchronously
-// api document: https://help.aliyun.com/api/ecs/describerouterinterfaces.html
 func (client *Client) DescribeRouterInterfaces(request *DescribeRouterInterfacesRequest) (response *DescribeRouterInterfacesResponse, err error) {
 	response = CreateDescribeRouterInterfacesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeRouterInterfaces(request *DescribeRouterInterfaces
 }
 
 // DescribeRouterInterfacesWithChan invokes the ecs.DescribeRouterInterfaces API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describerouterinterfaces.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRouterInterfacesWithChan(request *DescribeRouterInterfacesRequest) (<-chan *DescribeRouterInterfacesResponse, <-chan error) {
 	responseChan := make(chan *DescribeRouterInterfacesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeRouterInterfacesWithChan(request *DescribeRouterIn
 }
 
 // DescribeRouterInterfacesWithCallback invokes the ecs.DescribeRouterInterfaces API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describerouterinterfaces.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRouterInterfacesWithCallback(request *DescribeRouterInterfacesRequest, callback func(response *DescribeRouterInterfacesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,12 @@ func (client *Client) DescribeRouterInterfacesWithCallback(request *DescribeRout
 // DescribeRouterInterfacesRequest is the request struct for api DescribeRouterInterfaces
 type DescribeRouterInterfacesRequest struct {
 	*requests.RpcRequest
-	Filter               *[]DescribeRouterInterfacesFilter `position:"Query" name:"Filter"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer                  `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                            `position:"Query" name:"ResourceOwnerAccount"`
-	PageSize             requests.Integer                  `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer                  `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer                  `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer                  `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string                            `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId              requests.Integer                  `position:"Query" name:"OwnerId"`
+	Filter               *[]DescribeRouterInterfacesFilter `position:"Query" name:"Filter"  type:"Repeated"`
 }
 
 // DescribeRouterInterfacesFilter is a repeated param struct in DescribeRouterInterfacesRequest
@@ -106,6 +101,7 @@ func CreateDescribeRouterInterfacesRequest() (request *DescribeRouterInterfacesR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeRouterInterfaces", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

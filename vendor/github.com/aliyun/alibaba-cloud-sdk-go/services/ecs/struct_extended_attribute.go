@@ -17,6 +17,7 @@ package ecs
 
 // ExtendedAttribute is a nested struct in ecs response
 type ExtendedAttribute struct {
-	Device string `json:"Device" xml:"Device"`
-	DiskId string `json:"DiskId" xml:"DiskId"`
+	Device        string                                       `json:"Device" xml:"Device"`
+	DiskId        string                                       `json:"DiskId" xml:"DiskId"`
+	InactiveDisks InactiveDisksInDescribeInstanceHistoryEvents `json:"InactiveDisks" xml:"InactiveDisks"`
 }

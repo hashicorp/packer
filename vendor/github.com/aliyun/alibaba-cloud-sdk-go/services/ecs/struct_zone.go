@@ -22,7 +22,7 @@ type Zone struct {
 	LocalName                   string                                      `json:"LocalName" xml:"LocalName"`
 	AvailableResourceCreation   AvailableResourceCreation                   `json:"AvailableResourceCreation" xml:"AvailableResourceCreation"`
 	AvailableVolumeCategories   AvailableVolumeCategories                   `json:"AvailableVolumeCategories" xml:"AvailableVolumeCategories"`
-	AvailableInstanceTypes      AvailableInstanceTypes                      `json:"AvailableInstanceTypes" xml:"AvailableInstanceTypes"`
+	AvailableInstanceTypes      AvailableInstanceTypesInDescribeZones       `json:"AvailableInstanceTypes" xml:"AvailableInstanceTypes"`
 	AvailableDedicatedHostTypes AvailableDedicatedHostTypes                 `json:"AvailableDedicatedHostTypes" xml:"AvailableDedicatedHostTypes"`
 	NetworkTypes                NetworkTypesInDescribeRecommendInstanceType `json:"NetworkTypes" xml:"NetworkTypes"`
 	AvailableDiskCategories     AvailableDiskCategories                     `json:"AvailableDiskCategories" xml:"AvailableDiskCategories"`

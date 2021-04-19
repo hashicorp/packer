@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeLaunchTemplateVersions invokes the ecs.DescribeLaunchTemplateVersions API synchronously
-// api document: https://help.aliyun.com/api/ecs/describelaunchtemplateversions.html
 func (client *Client) DescribeLaunchTemplateVersions(request *DescribeLaunchTemplateVersionsRequest) (response *DescribeLaunchTemplateVersionsResponse, err error) {
 	response = CreateDescribeLaunchTemplateVersionsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeLaunchTemplateVersions(request *DescribeLaunchTemp
 }
 
 // DescribeLaunchTemplateVersionsWithChan invokes the ecs.DescribeLaunchTemplateVersions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describelaunchtemplateversions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeLaunchTemplateVersionsWithChan(request *DescribeLaunchTemplateVersionsRequest) (<-chan *DescribeLaunchTemplateVersionsResponse, <-chan error) {
 	responseChan := make(chan *DescribeLaunchTemplateVersionsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeLaunchTemplateVersionsWithChan(request *DescribeLa
 }
 
 // DescribeLaunchTemplateVersionsWithCallback invokes the ecs.DescribeLaunchTemplateVersions API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describelaunchtemplateversions.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeLaunchTemplateVersionsWithCallback(request *DescribeLaunchTemplateVersionsRequest, callback func(response *DescribeLaunchTemplateVersionsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -107,6 +102,7 @@ func CreateDescribeLaunchTemplateVersionsRequest() (request *DescribeLaunchTempl
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeLaunchTemplateVersions", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

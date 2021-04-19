@@ -81,8 +81,7 @@ github.com/StackExchange/wmi
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
-# github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
-## explicit
+# github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028
 github.com/aliyun/alibaba-cloud-sdk-go/sdk
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials
@@ -95,8 +94,7 @@ github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses
 github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils
 github.com/aliyun/alibaba-cloud-sdk-go/services/ecs
 github.com/aliyun/alibaba-cloud-sdk-go/services/ram
-# github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
-## explicit
+# github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible
 github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/antihax/optional v1.0.0
 github.com/antihax/optional
@@ -488,6 +486,11 @@ github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
+# github.com/hashicorp/packer-plugin-alicloud v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-alicloud/builder/ecs
+github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import
+github.com/hashicorp/packer-plugin-alicloud/version
 # github.com/hashicorp/packer-plugin-amazon v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-amazon/builder/chroot

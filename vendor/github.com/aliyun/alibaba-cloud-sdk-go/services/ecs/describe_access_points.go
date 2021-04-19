@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAccessPoints invokes the ecs.DescribeAccessPoints API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccesspoints.html
 func (client *Client) DescribeAccessPoints(request *DescribeAccessPointsRequest) (response *DescribeAccessPointsResponse, err error) {
 	response = CreateDescribeAccessPointsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAccessPoints(request *DescribeAccessPointsRequest)
 }
 
 // DescribeAccessPointsWithChan invokes the ecs.DescribeAccessPoints API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccesspoints.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAccessPointsWithChan(request *DescribeAccessPointsRequest) (<-chan *DescribeAccessPointsResponse, <-chan error) {
 	responseChan := make(chan *DescribeAccessPointsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAccessPointsWithChan(request *DescribeAccessPoints
 }
 
 // DescribeAccessPointsWithCallback invokes the ecs.DescribeAccessPoints API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccesspoints.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAccessPointsWithCallback(request *DescribeAccessPointsRequest, callback func(response *DescribeAccessPointsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,13 +71,13 @@ func (client *Client) DescribeAccessPointsWithCallback(request *DescribeAccessPo
 // DescribeAccessPointsRequest is the request struct for api DescribeAccessPoints
 type DescribeAccessPointsRequest struct {
 	*requests.RpcRequest
-	Filter               *[]DescribeAccessPointsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer              `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                        `position:"Query" name:"ResourceOwnerAccount"`
-	PageSize             requests.Integer              `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer              `position:"Query" name:"OwnerId"`
 	Type                 string                        `position:"Query" name:"Type"`
 	PageNumber           requests.Integer              `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer              `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string                        `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId              requests.Integer              `position:"Query" name:"OwnerId"`
+	Filter               *[]DescribeAccessPointsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 }
 
 // DescribeAccessPointsFilter is a repeated param struct in DescribeAccessPointsRequest
@@ -107,6 +102,7 @@ func CreateDescribeAccessPointsRequest() (request *DescribeAccessPointsRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeAccessPoints", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

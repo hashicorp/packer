@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeDisks invokes the ecs.DescribeDisks API synchronously
-// api document: https://help.aliyun.com/api/ecs/describedisks.html
 func (client *Client) DescribeDisks(request *DescribeDisksRequest) (response *DescribeDisksResponse, err error) {
 	response = CreateDescribeDisksResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeDisks(request *DescribeDisksRequest) (response *De
 }
 
 // DescribeDisksWithChan invokes the ecs.DescribeDisks API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedisks.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDisksWithChan(request *DescribeDisksRequest) (<-chan *DescribeDisksResponse, <-chan error) {
 	responseChan := make(chan *DescribeDisksResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeDisksWithChan(request *DescribeDisksRequest) (<-ch
 }
 
 // DescribeDisksWithCallback invokes the ecs.DescribeDisks API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describedisks.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeDisksWithCallback(request *DescribeDisksRequest, callback func(response *DescribeDisksResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,38 +72,40 @@ func (client *Client) DescribeDisksWithCallback(request *DescribeDisksRequest, c
 type DescribeDisksRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId               requests.Integer    `position:"Query" name:"ResourceOwnerId"`
-	SnapshotId                    string              `position:"Query" name:"SnapshotId"`
 	Filter2Value                  string              `position:"Query" name:"Filter.2.Value"`
 	AutoSnapshotPolicyId          string              `position:"Query" name:"AutoSnapshotPolicyId"`
-	PageNumber                    requests.Integer    `position:"Query" name:"PageNumber"`
 	DiskName                      string              `position:"Query" name:"DiskName"`
 	DeleteAutoSnapshot            requests.Boolean    `position:"Query" name:"DeleteAutoSnapshot"`
 	ResourceGroupId               string              `position:"Query" name:"ResourceGroupId"`
 	DiskChargeType                string              `position:"Query" name:"DiskChargeType"`
 	LockReason                    string              `position:"Query" name:"LockReason"`
 	Filter1Key                    string              `position:"Query" name:"Filter.1.Key"`
-	PageSize                      requests.Integer    `position:"Query" name:"PageSize"`
-	DiskIds                       string              `position:"Query" name:"DiskIds"`
 	Tag                           *[]DescribeDisksTag `position:"Query" name:"Tag"  type:"Repeated"`
-	DeleteWithInstance            requests.Boolean    `position:"Query" name:"DeleteWithInstance"`
 	EnableAutoSnapshot            requests.Boolean    `position:"Query" name:"EnableAutoSnapshot"`
 	DryRun                        requests.Boolean    `position:"Query" name:"DryRun"`
-	ResourceOwnerAccount          string              `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount                  string              `position:"Query" name:"OwnerAccount"`
 	Filter1Value                  string              `position:"Query" name:"Filter.1.Value"`
 	Portable                      requests.Boolean    `position:"Query" name:"Portable"`
+	OwnerId                       requests.Integer    `position:"Query" name:"OwnerId"`
+	AdditionalAttributes          *[]string           `position:"Query" name:"AdditionalAttributes"  type:"Repeated"`
+	InstanceId                    string              `position:"Query" name:"InstanceId"`
+	ZoneId                        string              `position:"Query" name:"ZoneId"`
+	MaxResults                    requests.Integer    `position:"Query" name:"MaxResults"`
+	Status                        string              `position:"Query" name:"Status"`
+	SnapshotId                    string              `position:"Query" name:"SnapshotId"`
+	PageNumber                    requests.Integer    `position:"Query" name:"PageNumber"`
+	NextToken                     string              `position:"Query" name:"NextToken"`
+	PageSize                      requests.Integer    `position:"Query" name:"PageSize"`
+	DiskIds                       string              `position:"Query" name:"DiskIds"`
+	DeleteWithInstance            requests.Boolean    `position:"Query" name:"DeleteWithInstance"`
+	ResourceOwnerAccount          string              `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                  string              `position:"Query" name:"OwnerAccount"`
 	EnableAutomatedSnapshotPolicy requests.Boolean    `position:"Query" name:"EnableAutomatedSnapshotPolicy"`
 	Filter2Key                    string              `position:"Query" name:"Filter.2.Key"`
-	OwnerId                       requests.Integer    `position:"Query" name:"OwnerId"`
 	DiskType                      string              `position:"Query" name:"DiskType"`
-	AdditionalAttributes          *[]string           `position:"Query" name:"AdditionalAttributes"  type:"Repeated"`
 	EnableShared                  requests.Boolean    `position:"Query" name:"EnableShared"`
-	InstanceId                    string              `position:"Query" name:"InstanceId"`
 	Encrypted                     requests.Boolean    `position:"Query" name:"Encrypted"`
-	ZoneId                        string              `position:"Query" name:"ZoneId"`
 	Category                      string              `position:"Query" name:"Category"`
 	KMSKeyId                      string              `position:"Query" name:"KMSKeyId"`
-	Status                        string              `position:"Query" name:"Status"`
 }
 
 // DescribeDisksTag is a repeated param struct in DescribeDisksRequest
@@ -120,11 +117,12 @@ type DescribeDisksTag struct {
 // DescribeDisksResponse is the response struct for api DescribeDisks
 type DescribeDisksResponse struct {
 	*responses.BaseResponse
-	RequestId  string `json:"RequestId" xml:"RequestId"`
-	TotalCount int    `json:"TotalCount" xml:"TotalCount"`
-	PageNumber int    `json:"PageNumber" xml:"PageNumber"`
-	PageSize   int    `json:"PageSize" xml:"PageSize"`
-	Disks      Disks  `json:"Disks" xml:"Disks"`
+	RequestId  string               `json:"RequestId" xml:"RequestId"`
+	TotalCount int                  `json:"TotalCount" xml:"TotalCount"`
+	PageNumber int                  `json:"PageNumber" xml:"PageNumber"`
+	PageSize   int                  `json:"PageSize" xml:"PageSize"`
+	NextToken  string               `json:"NextToken" xml:"NextToken"`
+	Disks      DisksInDescribeDisks `json:"Disks" xml:"Disks"`
 }
 
 // CreateDescribeDisksRequest creates a request to invoke DescribeDisks API
@@ -133,6 +131,7 @@ func CreateDescribeDisksRequest() (request *DescribeDisksRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeDisks", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

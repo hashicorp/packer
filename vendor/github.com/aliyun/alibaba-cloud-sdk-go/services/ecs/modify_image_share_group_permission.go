@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyImageShareGroupPermission invokes the ecs.ModifyImageShareGroupPermission API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimagesharegrouppermission.html
 func (client *Client) ModifyImageShareGroupPermission(request *ModifyImageShareGroupPermissionRequest) (response *ModifyImageShareGroupPermissionResponse, err error) {
 	response = CreateModifyImageShareGroupPermissionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyImageShareGroupPermission(request *ModifyImageShareG
 }
 
 // ModifyImageShareGroupPermissionWithChan invokes the ecs.ModifyImageShareGroupPermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimagesharegrouppermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyImageShareGroupPermissionWithChan(request *ModifyImageShareGroupPermissionRequest) (<-chan *ModifyImageShareGroupPermissionResponse, <-chan error) {
 	responseChan := make(chan *ModifyImageShareGroupPermissionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyImageShareGroupPermissionWithChan(request *ModifyIma
 }
 
 // ModifyImageShareGroupPermissionWithCallback invokes the ecs.ModifyImageShareGroupPermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimagesharegrouppermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyImageShareGroupPermissionWithCallback(request *ModifyImageShareGroupPermissionRequest, callback func(response *ModifyImageShareGroupPermissionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -81,8 +76,8 @@ type ModifyImageShareGroupPermissionRequest struct {
 	AddGroup1            string           `position:"Query" name:"AddGroup.1"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	RemoveGroup1         string           `position:"Query" name:"RemoveGroup.1"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	RemoveGroup1         string           `position:"Query" name:"RemoveGroup.1"`
 }
 
 // ModifyImageShareGroupPermissionResponse is the response struct for api ModifyImageShareGroupPermission
@@ -97,6 +92,7 @@ func CreateModifyImageShareGroupPermissionRequest() (request *ModifyImageShareGr
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyImageShareGroupPermission", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

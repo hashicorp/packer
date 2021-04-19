@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeSecurityGroupReferences invokes the ecs.DescribeSecurityGroupReferences API synchronously
-// api document: https://help.aliyun.com/api/ecs/describesecuritygroupreferences.html
 func (client *Client) DescribeSecurityGroupReferences(request *DescribeSecurityGroupReferencesRequest) (response *DescribeSecurityGroupReferencesResponse, err error) {
 	response = CreateDescribeSecurityGroupReferencesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeSecurityGroupReferences(request *DescribeSecurityG
 }
 
 // DescribeSecurityGroupReferencesWithChan invokes the ecs.DescribeSecurityGroupReferences API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesecuritygroupreferences.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSecurityGroupReferencesWithChan(request *DescribeSecurityGroupReferencesRequest) (<-chan *DescribeSecurityGroupReferencesResponse, <-chan error) {
 	responseChan := make(chan *DescribeSecurityGroupReferencesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeSecurityGroupReferencesWithChan(request *DescribeS
 }
 
 // DescribeSecurityGroupReferencesWithCallback invokes the ecs.DescribeSecurityGroupReferences API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesecuritygroupreferences.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSecurityGroupReferencesWithCallback(request *DescribeSecurityGroupReferencesRequest, callback func(response *DescribeSecurityGroupReferencesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) DescribeSecurityGroupReferencesWithCallback(request *Descr
 type DescribeSecurityGroupReferencesRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	SecurityGroupId      *[]string        `position:"Query" name:"SecurityGroupId"  type:"Repeated"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	SecurityGroupId      *[]string        `position:"Query" name:"SecurityGroupId"  type:"Repeated"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -96,6 +91,7 @@ func CreateDescribeSecurityGroupReferencesRequest() (request *DescribeSecurityGr
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeSecurityGroupReferences", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

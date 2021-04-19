@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyNetworkInterfaceAttribute invokes the ecs.ModifyNetworkInterfaceAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifynetworkinterfaceattribute.html
 func (client *Client) ModifyNetworkInterfaceAttribute(request *ModifyNetworkInterfaceAttributeRequest) (response *ModifyNetworkInterfaceAttributeResponse, err error) {
 	response = CreateModifyNetworkInterfaceAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyNetworkInterfaceAttribute(request *ModifyNetworkInte
 }
 
 // ModifyNetworkInterfaceAttributeWithChan invokes the ecs.ModifyNetworkInterfaceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifynetworkinterfaceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyNetworkInterfaceAttributeWithChan(request *ModifyNetworkInterfaceAttributeRequest) (<-chan *ModifyNetworkInterfaceAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyNetworkInterfaceAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyNetworkInterfaceAttributeWithChan(request *ModifyNet
 }
 
 // ModifyNetworkInterfaceAttributeWithCallback invokes the ecs.ModifyNetworkInterfaceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifynetworkinterfaceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyNetworkInterfaceAttributeWithCallback(request *ModifyNetworkInterfaceAttributeRequest, callback func(response *ModifyNetworkInterfaceAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,6 +71,7 @@ func (client *Client) ModifyNetworkInterfaceAttributeWithCallback(request *Modif
 // ModifyNetworkInterfaceAttributeRequest is the request struct for api ModifyNetworkInterfaceAttribute
 type ModifyNetworkInterfaceAttributeRequest struct {
 	*requests.RpcRequest
+	QueueNumber          requests.Integer `position:"Query" name:"QueueNumber"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	SecurityGroupId      *[]string        `position:"Query" name:"SecurityGroupId"  type:"Repeated"`
 	Description          string           `position:"Query" name:"Description"`
@@ -98,6 +94,7 @@ func CreateModifyNetworkInterfaceAttributeRequest() (request *ModifyNetworkInter
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyNetworkInterfaceAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

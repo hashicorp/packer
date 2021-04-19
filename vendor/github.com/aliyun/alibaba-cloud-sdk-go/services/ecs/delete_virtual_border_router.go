@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteVirtualBorderRouter invokes the ecs.DeleteVirtualBorderRouter API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletevirtualborderrouter.html
 func (client *Client) DeleteVirtualBorderRouter(request *DeleteVirtualBorderRouterRequest) (response *DeleteVirtualBorderRouterResponse, err error) {
 	response = CreateDeleteVirtualBorderRouterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteVirtualBorderRouter(request *DeleteVirtualBorderRout
 }
 
 // DeleteVirtualBorderRouterWithChan invokes the ecs.DeleteVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVirtualBorderRouterWithChan(request *DeleteVirtualBorderRouterRequest) (<-chan *DeleteVirtualBorderRouterResponse, <-chan error) {
 	responseChan := make(chan *DeleteVirtualBorderRouterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteVirtualBorderRouterWithChan(request *DeleteVirtualBo
 }
 
 // DeleteVirtualBorderRouterWithCallback invokes the ecs.DeleteVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletevirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteVirtualBorderRouterWithCallback(request *DeleteVirtualBorderRouterRequest, callback func(response *DeleteVirtualBorderRouterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,11 @@ func (client *Client) DeleteVirtualBorderRouterWithCallback(request *DeleteVirtu
 type DeleteVirtualBorderRouterRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	UserCidr             string           `position:"Query" name:"UserCidr"`
 	VbrId                string           `position:"Query" name:"VbrId"`
+	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -97,6 +92,7 @@ func CreateDeleteVirtualBorderRouterRequest() (request *DeleteVirtualBorderRoute
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteVirtualBorderRouter", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 
