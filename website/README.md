@@ -71,6 +71,8 @@ Documentation content is written in [Markdown](https://www.markdownguide.org/che
 
 To create a new page with Markdown, create a file ending in `.mdx` in a `content/<subdirectory>`. The path in the content directory will be the URL route. For example, `content/docs/hello.mdx` will be served from the `/docs/hello` URL.
 
+> **Important**: Files and directories will only be rendered and published to the website if they are [included in sidebar data](#editing-navigation-sidebars). Any file not included in sidebar data will not be rendered or published.
+
 This file can be standard Markdown and also supports [YAML frontmatter](https://middlemanapp.com/basics/frontmatter/). YAML frontmatter is optional, there are defaults for all keys.
 
 ```yaml
@@ -241,6 +243,7 @@ $ terraform apply
 <!-- END: editing-markdown -->
 
 <!-- BEGIN: editing-docs-sidebars -->
+<!-- Generated text, do not edit directly -->
 
 ## Editing Navigation Sidebars
 
