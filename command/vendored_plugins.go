@@ -46,12 +46,12 @@ var VendoredDatasources = map[string]packersdk.Datasource{
 // VendoredBuilders are builder components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredBuilders = map[string]packersdk.Builder{
-	"docker":              new(dockerbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
 	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
+	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
