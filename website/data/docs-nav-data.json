@@ -680,10 +680,6 @@
         "path": "builders"
       },
       {
-        "title": "Alicloud ECS",
-        "path": "builders/alicloud-ecs"
-      },
-      {
         "title": "Azure",
         "routes": [
           {
