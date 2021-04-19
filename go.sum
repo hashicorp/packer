@@ -89,8 +89,9 @@ github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUW
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
 github.com/Telmate/proxmox-api-go v0.0.0-20200715182505-ec97c70ba887/go.mod h1:OGWyIMJ87/k/GCz8CGiWB2HOXsOVDM6Lpe/nFPkC4IQ=
 github.com/Telmate/proxmox-api-go v0.0.0-20210320143302-fea68269e6b0/go.mod h1:ayPkdmEKnlssqLQ9K1BE1jlsaYhXVwkoduXI30oQF0I=
-github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa h1:n4g0+o4DDX6WGTRfdj1Ux+49vSwtxtqFGB5XtxoDphI=
 github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa/go.mod h1:ayPkdmEKnlssqLQ9K1BE1jlsaYhXVwkoduXI30oQF0I=
+github.com/Telmate/proxmox-api-go v0.0.0-20210402150908-b9cc6607c070 h1:Up56ddjq6/wc46Ng+MDQYuDqVDHQMmbV+q8qSUImask=
+github.com/Telmate/proxmox-api-go v0.0.0-20210402150908-b9cc6607c070/go.mod h1:ayPkdmEKnlssqLQ9K1BE1jlsaYhXVwkoduXI30oQF0I=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af h1:DBNMBMuMiWYu0b+8KMJuWmfCkcxl09JwdlqwDZZ6U14=
 github.com/abdullin/seq v0.0.0-20160510034733-d5467c17e7af/go.mod h1:5Jv4cbFiHJMsVxt52+i0Ha45fjshj6wxYr1r19tB9bw=
 github.com/agext/levenshtein v1.2.1 h1:QmvMAjj2aEICytGiWzmxoE0x2KZvE0fvmqMOfy2tjT8=
@@ -466,6 +467,8 @@ github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364 h1:9v
 github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
 github.com/hashicorp/packer-plugin-qemu v0.0.1 h1:yGnmWf4Z+ZmOJXJF6w23V2KChtTCiPHsFnfg7+LRu74=
 github.com/hashicorp/packer-plugin-qemu v0.0.1/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
+github.com/hashicorp/packer-plugin-proxmox v0.0.1 h1:nwfQtfcfV4Gx4aiX1OQD/FoZvWCt2L4qaRYY7zTJ8L0=
+github.com/hashicorp/packer-plugin-proxmox v0.0.1/go.mod h1:3URutEWX1yy10qcHNJncS4OMpZknA1FyvlrfL+5usYk=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0/go.mod h1:YdWTt5w6cYfaQG7IOi5iorL+3SXnz8hI0gJCi8Db/LI=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210120105339-f6fd68d2570a/go.mod h1:exN0C+Pe+3zu18l4nxueNjX5cfmslxUX/m/xk4IVmZQ=
