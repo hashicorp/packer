@@ -40,5 +40,11 @@
     "path": "vmware",
     "repo": "hashicorp/packer-plugin-vmware",
     "version": "latest"
+  },
+  {
+    "title": "QEMU",
+    "path": "qemu",
+    "repo": "hashicorp/packer-plugin-qemu",
+    "version": "latest"
   }
 ]
