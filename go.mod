@@ -22,7 +22,6 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/go-qemu v0.0.0-20201211181942-d361e7b4965f
 	github.com/digitalocean/godo v1.11.1
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
@@ -50,6 +49,7 @@ require (
 	github.com/hashicorp/packer-plugin-ansible v0.0.2
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
+	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
@@ -64,7 +64,6 @@ require (
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed
 	github.com/mitchellh/mapstructure v1.4.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
