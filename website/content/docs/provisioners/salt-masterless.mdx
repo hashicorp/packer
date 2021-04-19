@@ -65,6 +65,10 @@ Optional:
   prefixed with `sudo`. When using a Docker builder, you will likely want to
   pass `true` since `sudo` is often not pre-installed.
 
+- `execute_command` (string) - By default certain commands require sudo on linux
+  based systems, if necessary this allows overriding the default `sudo -S`. When
+  the SSH user is not in the sudoers file with no password, you will have to use this.
+
 - `remote_pillar_roots` (string) - The path to your remote [pillar
   roots](http://docs.saltproject.io/en/latest/ref/configuration/master.html#pillar-configuration).
   default: `/srv/pillar`. This option cannot be used with `minion_config`.
