@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockBuilder
+//go:generate packer-sdc mapstructure-to-hcl2 -type MockBuilder
 
 package packer
 

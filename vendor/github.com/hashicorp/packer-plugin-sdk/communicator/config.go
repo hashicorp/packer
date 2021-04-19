@@ -1,5 +1,5 @@
-//go:generate struct-markdown
-//go:generate mapstructure-to-hcl2 -type Config,SSH,WinRM,SSHTemporaryKeyPair
+//go:generate packer-sdc struct-markdown
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config,SSH,WinRM,SSHTemporaryKeyPair
 
 package communicator
 

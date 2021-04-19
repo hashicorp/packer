@@ -713,10 +713,6 @@
         "path": "builders/file"
       },
       {
-        "title": "Google Cloud",
-        "path": "builders/googlecompute"
-      },
-      {
         "title": "Hetzner Cloud",
         "path": "builders/hetzner-cloud"
       },
@@ -1016,14 +1012,6 @@
       {
         "title": "DigitalOcean Import",
         "path": "post-processors/digitalocean-import"
-      },
-      {
-        "title": "Google Compute Export",
-        "path": "post-processors/googlecompute-export"
-      },
-      {
-        "title": "Google Compute Import",
-        "path": "post-processors/googlecompute-import"
       },
       {
         "title": "Manifest",

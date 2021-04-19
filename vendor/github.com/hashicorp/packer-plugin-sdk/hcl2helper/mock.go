@@ -1,4 +1,4 @@
-//go:generate mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
+//go:generate packer-sdc mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
 
 package hcl2helper
 
