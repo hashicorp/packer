@@ -464,10 +464,6 @@
                 "title": "Date and Time Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/datetime"
-                  },
-                  {
                     "title": "formatdate",
                     "path": "templates/hcl_templates/functions/datetime/formatdate"
                   },
@@ -478,6 +474,10 @@
                   {
                     "title": "timestamp",
                     "path": "templates/hcl_templates/functions/datetime/timestamp"
+                  },
+                  {
+                    "title": "legacy_isotime",
+                    "path": "templates/hcl_templates/functions/datetime/legacy_isotime"
                   }
                 ]
               },
