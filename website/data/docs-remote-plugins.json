@@ -65,6 +65,7 @@
     "title": "Outscale",
     "path": "outscale",
     "repo": "hashicorp/packer-plugin-outscale",
-    "version": "latest"
+    "version": "latest",
+    "pluginTier": "community"
   }
 ]
