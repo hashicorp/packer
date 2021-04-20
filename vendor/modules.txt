@@ -539,6 +539,10 @@ github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu
+# github.com/hashicorp/packer-plugin-scaleway v0.0.1-pre
+## explicit
+github.com/hashicorp/packer-plugin-scaleway/builder/scaleway
+github.com/hashicorp/packer-plugin-scaleway/builder/scaleway/version
 # github.com/hashicorp/packer-plugin-sdk v0.2.0
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
