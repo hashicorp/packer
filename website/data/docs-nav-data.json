@@ -779,31 +779,6 @@
         ]
       },
       {
-        "title": "Outscale",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/outscale"
-          },
-          {
-            "title": "chroot",
-            "path": "builders/outscale/chroot"
-          },
-          {
-            "title": "BSU",
-            "path": "builders/outscale/bsu"
-          },
-          {
-            "title": "BSU Surrogate",
-            "path": "builders/outscale/bsusurrogate"
-          },
-          {
-            "title": "BSU Volume",
-            "path": "builders/outscale/bsuvolume"
-          }
-        ]
-      },
-      {
         "title": "Parallels",
         "routes": [
           {

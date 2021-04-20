@@ -60,5 +60,11 @@
     "path": "qemu",
     "repo": "hashicorp/packer-plugin-qemu",
     "version": "latest"
+  },
+  {
+    "title": "Outscale",
+    "path": "outscale",
+    "repo": "hashicorp/packer-plugin-outscale",
+    "version": "latest"
   }
 ]

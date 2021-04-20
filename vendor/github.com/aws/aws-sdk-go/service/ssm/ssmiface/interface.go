@@ -663,6 +663,10 @@ type SSMAPI interface {
 	TerminateSessionWithContext(aws.Context, *ssm.TerminateSessionInput, ...request.Option) (*ssm.TerminateSessionOutput, error)
 	TerminateSessionRequest(*ssm.TerminateSessionInput) (*request.Request, *ssm.TerminateSessionOutput)
 
+	UnlabelParameterVersion(*ssm.UnlabelParameterVersionInput) (*ssm.UnlabelParameterVersionOutput, error)
+	UnlabelParameterVersionWithContext(aws.Context, *ssm.UnlabelParameterVersionInput, ...request.Option) (*ssm.UnlabelParameterVersionOutput, error)
+	UnlabelParameterVersionRequest(*ssm.UnlabelParameterVersionInput) (*request.Request, *ssm.UnlabelParameterVersionOutput)
+
 	UpdateAssociation(*ssm.UpdateAssociationInput) (*ssm.UpdateAssociationOutput, error)
 	UpdateAssociationWithContext(aws.Context, *ssm.UpdateAssociationInput, ...request.Option) (*ssm.UpdateAssociationOutput, error)
 	UpdateAssociationRequest(*ssm.UpdateAssociationInput) (*request.Request, *ssm.UpdateAssociationOutput)
