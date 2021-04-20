@@ -719,7 +719,6 @@ func setRuntimeValues(c *Config) {
 	}
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
-	c.tmpOSDiskName = tempName.OSDiskName
 	if c.TempOSDiskName == "" {
 		c.tmpOSDiskName = tempName.OSDiskName
 	} else {	
