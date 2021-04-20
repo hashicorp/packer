@@ -10,7 +10,6 @@ require (
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
-	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7
 	github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
@@ -68,7 +67,6 @@ require (
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
-	github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
 	github.com/oracle/oci-go-sdk/v36 v36.2.0
 	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 	github.com/pierrec/lz4 v2.0.5+incompatible
