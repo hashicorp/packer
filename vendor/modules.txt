@@ -548,6 +548,10 @@ github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
+# github.com/hashicorp/packer-plugin-puppet v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-masterless
+github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu

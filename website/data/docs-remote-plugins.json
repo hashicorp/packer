@@ -116,13 +116,6 @@
     "version": "latest"
   },
   {
-    "title": "Chef",
-    "path": "chef",
-    "repo": "hashicorp/packer-plugin-chef",
-    "version": "latest",
-    "pluginTier": "community"
-  },
-  {
     "title": "Puppet",
     "path": "puppet",
     "repo": "hashicorp/packer-plugin-puppet",

@@ -48,6 +48,7 @@ require (
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
+	github.com/hashicorp/packer-plugin-puppet v0.0.1
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
