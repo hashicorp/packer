@@ -845,14 +845,6 @@
         "path": "provisioners/powershell"
       },
       {
-        "title": "Puppet Masterless",
-        "path": "provisioners/puppet-masterless"
-      },
-      {
-        "title": "Puppet Server",
-        "path": "provisioners/puppet-server"
-      },
-      {
         "title": "Salt Masterless",
         "path": "provisioners/salt-masterless"
       },
