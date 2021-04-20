@@ -39,6 +39,8 @@ import (
 	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
+	puppetmasterlessprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-masterless"
+	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	scalewaybuilder "github.com/hashicorp/packer-plugin-scaleway/builder/scaleway"
 	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
@@ -95,10 +97,12 @@ var VendoredBuilders = map[string]packersdk.Builder{
 // VendoredProvisioners are provisioner components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredProvisioners = map[string]packersdk.Provisioner{
-	"ansible":       new(ansibleprovisioner.Provisioner),
-	"ansible-local": new(ansiblelocalprovisioner.Provisioner),
-	"chef-client":   new(chefclientprovisioner.Provisioner),
-	"chef-solo":     new(chefsoloprovisioner.Provisioner),
+	"ansible":           new(ansibleprovisioner.Provisioner),
+	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
+	"chef-client":       new(chefclientprovisioner.Provisioner),
+	"chef-solo":         new(chefsoloprovisioner.Provisioner),
+	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
+	"puppet-server":     new(puppetserverprovisioner.Provisioner),
 }
 
 // VendoredPostProcessors are post-processor components that were once bundled with the

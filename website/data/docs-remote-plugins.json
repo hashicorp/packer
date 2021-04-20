@@ -72,6 +72,13 @@
     "version": "latest"
   },
   {
+    "title": "Puppet",
+    "path": "puppet",
+    "repo": "hashicorp/packer-plugin-puppet",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "hashicorp/packer-plugin-scaleway",

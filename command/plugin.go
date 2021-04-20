@@ -54,8 +54,6 @@ import (
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
-	puppetmasterlessprovisioner "github.com/hashicorp/packer/provisioner/puppet-masterless"
-	puppetserverprovisioner "github.com/hashicorp/packer/provisioner/puppet-server"
 	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
 	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
@@ -102,8 +100,6 @@ var Provisioners = map[string]packersdk.Provisioner{
 	"file":              new(fileprovisioner.Provisioner),
 	"inspec":            new(inspecprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
-	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
-	"puppet-server":     new(puppetserverprovisioner.Provisioner),
 	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
 	"shell":             new(shellprovisioner.Provisioner),
 	"shell-local":       new(shelllocalprovisioner.Provisioner),
