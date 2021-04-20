@@ -25,8 +25,6 @@ require (
 	github.com/google/go-cmp v0.5.5
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/uuid v1.1.2
-	github.com/gophercloud/gophercloud v0.12.0
-	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/errwrap v1.0.0
