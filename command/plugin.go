@@ -22,7 +22,6 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
-	linodebuilder "github.com/hashicorp/packer/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
@@ -74,7 +73,6 @@ var Builders = map[string]packersdk.Builder{
 	"hyperone":         new(hyperonebuilder.Builder),
 	"hyperv-iso":       new(hypervisobuilder.Builder),
 	"hyperv-vmcx":      new(hypervvmcxbuilder.Builder),
-	"linode":           new(linodebuilder.Builder),
 	"lxc":              new(lxcbuilder.Builder),
 	"lxd":              new(lxdbuilder.Builder),
 	"null":             new(nullbuilder.Builder),

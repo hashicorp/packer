@@ -730,10 +730,6 @@
         ]
       },
       {
-        "title": "Linode",
-        "path": "builders/linode"
-      },
-      {
         "title": "LXC",
         "path": "builders/lxc"
       },

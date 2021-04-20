@@ -31,6 +31,7 @@ import (
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
 	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
+	linodebuilder "github.com/hashicorp/packer-plugin-linode/builder/linode"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
@@ -76,6 +77,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"jdcloud":             new(jdcloudbuilder.Builder),
+	"linode":              new(linodebuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
 	"proxmox":             new(proxmoxiso.Builder),

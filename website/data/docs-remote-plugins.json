@@ -53,6 +53,13 @@
     "version": "latest"
   },
   {
+    "title": "Linode",
+    "path": "linode",
+    "repo": "hashicorp/packer-plugin-linode",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
