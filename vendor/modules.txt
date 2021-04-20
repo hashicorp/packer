@@ -79,8 +79,7 @@ github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vpc
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
-# github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa
-## explicit
+# github.com/Telmate/proxmox-api-go v0.0.0-20210402150908-b9cc6607c070
 github.com/Telmate/proxmox-api-go/proxmox
 # github.com/agext/levenshtein v1.2.1
 github.com/agext/levenshtein
@@ -523,6 +522,11 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
+# github.com/hashicorp/packer-plugin-proxmox v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
+github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common
+github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu

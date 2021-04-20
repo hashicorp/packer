@@ -41,9 +41,6 @@ import (
 	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
-	proxmoxbuilder "github.com/hashicorp/packer/builder/proxmox"
-	proxmoxclonebuilder "github.com/hashicorp/packer/builder/proxmox/clone"
-	proxmoxisobuilder "github.com/hashicorp/packer/builder/proxmox/iso"
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
@@ -113,9 +110,6 @@ var Builders = map[string]packersdk.Builder{
 	"parallels-iso":    new(parallelsisobuilder.Builder),
 	"parallels-pvm":    new(parallelspvmbuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
-	"proxmox":          new(proxmoxbuilder.Builder),
-	"proxmox-clone":    new(proxmoxclonebuilder.Builder),
-	"proxmox-iso":      new(proxmoxisobuilder.Builder),
 	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),

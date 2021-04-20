@@ -829,23 +829,6 @@
         "path": "builders/profitbricks"
       },
       {
-        "title": "Proxmox",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/proxmox"
-          },
-          {
-            "title": "ISO",
-            "path": "builders/proxmox/iso"
-          },
-          {
-            "title": "Clone",
-            "path": "builders/proxmox/clone"
-          }
-        ]
-      },
-      {
         "title": "Scaleway",
         "path": "builders/scaleway"
       },
