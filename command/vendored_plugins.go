@@ -26,6 +26,10 @@ import (
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
+	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
+	oscbsusurrogatebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate"
+	oscbsuvolumebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume"
+	oscchrootbuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
@@ -38,10 +42,6 @@ import (
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere-template"
-	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
-	oscbsusurrogatebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate"
-	oscbsuvolumebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume"
-	oscchrootbuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
@@ -73,10 +73,10 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
-	"osc-bsu":          new(oscbsubuilder.Builder),
-	"osc-bsusurrogate": new(oscbsusurrogatebuilder.Builder),
-	"osc-bsuvolume":    new(oscbsuvolumebuilder.Builder),
-	"osc-chroot":       new(oscchrootbuilder.Builder),
+	"osc-bsu":             new(oscbsubuilder.Builder),
+	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
+	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
+	"osc-chroot":          new(oscchrootbuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the
