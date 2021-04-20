@@ -40,6 +40,7 @@ require (
 	github.com/hashicorp/packer-plugin-alicloud v0.0.2
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-ansible v0.0.2
+	github.com/hashicorp/packer-plugin-chef v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2

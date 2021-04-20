@@ -507,6 +507,10 @@ github.com/hashicorp/packer-plugin-amazon/post-processor/import
 ## explicit
 github.com/hashicorp/packer-plugin-ansible/provisioner/ansible
 github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local
+# github.com/hashicorp/packer-plugin-chef v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-chef/provisioner/chef-client
+github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo
 # github.com/hashicorp/packer-plugin-docker v0.0.7
 ## explicit
 github.com/hashicorp/packer-plugin-docker/builder/docker
