@@ -902,10 +902,6 @@
         "path": "post-processors"
       },
       {
-        "title": "Alicloud Import",
-        "path": "post-processors/alicloud-import"
-      },
-      {
         "title": "Artifice",
         "path": "post-processors/artifice"
       },
