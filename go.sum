@@ -79,8 +79,9 @@ github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a h1:3FwiePtHk5YJro
 github.com/Azure/go-ntlmssp v0.0.0-20191115201650-bad6df29494a/go.mod h1:chxPXzSsl7ZWRAuOIE23GDNzjWuZquvFlgA8xmpunjU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022 h1:y8Gs8CzNfDF5AZvjr+5UyGQvQEBL7pwo+v+wX6q9JI8=
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
+github.com/ChrisTrenkamp/goxpath v0.0.0-20210404020558-97928f7e12b6 h1:w0E0fgc1YafGEh5cROhlROMWXiNoZqApk2PDN0M1+Ns=
+github.com/ChrisTrenkamp/goxpath v0.0.0-20210404020558-97928f7e12b6/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
 github.com/DataDog/datadog-go v2.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0 h1:c7GgSBfMt51UGM4SI1F7IFOokOVZO+uxNcJL3Xsmkp4=
@@ -468,6 +469,8 @@ github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VR
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-outscale v0.0.1 h1:BrL8hKypNYrvP3NR+d+xX03SZKB08yTgXPRnH9piUI8=
 github.com/hashicorp/packer-plugin-outscale v0.0.1/go.mod h1:6jEWfJO7TgAbaL3e+St1bN5PoIC/MmDIsYqNUzAHF1w=
+github.com/hashicorp/packer-plugin-parallels v0.0.1 h1:fcaaiGWdU1+X4IGadXdUhJ2si1ZA3apXS9tMNJXln2A=
+github.com/hashicorp/packer-plugin-parallels v0.0.1/go.mod h1:FGNtZ7XFBr3IYuj7uvJtSaNnyhAwe457zP464m06+20=
 github.com/hashicorp/packer-plugin-proxmox v0.0.2 h1:x6QW7PeKh+IJymPEt3QdpBhSRi5vqXb8qTWv7rMLuns=
 github.com/hashicorp/packer-plugin-proxmox v0.0.2/go.mod h1:3URutEWX1yy10qcHNJncS4OMpZknA1FyvlrfL+5usYk=
 github.com/hashicorp/packer-plugin-qemu v0.0.1 h1:yGnmWf4Z+ZmOJXJF6w23V2KChtTCiPHsFnfg7+LRu74=

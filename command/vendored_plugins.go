@@ -32,6 +32,8 @@ import (
 	oscchrootbuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
+	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
+	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
@@ -65,6 +67,8 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"proxmox":             new(proxmoxiso.Builder),
 	"proxmox-iso":         new(proxmoxiso.Builder),
 	"proxmox-clone":       new(proxmoxclone.Builder),
+	"parallels-iso":       new(parallelsisobuilder.Builder),
+	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
