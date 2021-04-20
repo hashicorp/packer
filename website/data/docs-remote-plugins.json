@@ -19,6 +19,13 @@
     "version": "latest"
   },
   {
+    "title": "Chef",
+    "path": "chef",
+    "repo": "hashicorp/packer-plugin-chef",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
