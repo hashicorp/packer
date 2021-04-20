@@ -43,9 +43,6 @@
 /builder/triton/                      @sean-
 /website/pages/docs/builders/triton* @sean-
 
-/builder/ncloud/                      @YuSungDuk
-/website/pages/docs/builders/ncloud* @YuSungDuk
-
 /builder/proxmox/                      @carlpett
 /website/pages/docs/builders/proxmox* @carlpett
 
