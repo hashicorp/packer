@@ -3,9 +3,9 @@
 package proxmoxclone
 
 import (
+	proxmox "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 )
 
 type Config struct {

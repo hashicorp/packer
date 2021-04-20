@@ -5,9 +5,9 @@ package proxmoxiso
 import (
 	"errors"
 
+	proxmox "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common"
 	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	proxmox "github.com/hashicorp/packer/builder/proxmox/common"
 )
 
 type Config struct {

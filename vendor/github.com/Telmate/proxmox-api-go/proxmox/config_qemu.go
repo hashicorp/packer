@@ -731,6 +731,11 @@ func NewConfigQemuFromApi(vmr *VmRef, client *Client) (config *ConfigQemu, err e
 		} else if nicConfMap["firewall"] == 0 {
 			nicConfMap["firewall"] = false
 		}
+		if nicConfMap["link_down"] == 1 {
+			nicConfMap["link_down"] = true
+		} else if nicConfMap["link_down"] == 0 {
+			nicConfMap["link_down"] = false
+		}
 
 		// And device config to networks.
 		if len(nicConfMap) > 0 {

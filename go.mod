@@ -11,6 +11,7 @@ require (
 	github.com/Azure/go-autorest/autorest/to v0.3.0
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa
+	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/antihax/optional v1.0.0
@@ -49,6 +50,7 @@ require (
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
+	github.com/hashicorp/packer-plugin-proxmox v0.0.1
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1

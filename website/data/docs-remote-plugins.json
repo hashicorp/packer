@@ -27,7 +27,13 @@
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
-    "version": "v0.0.2"
+    "version": "latest"
+  },
+  {
+    "title": "Proxmox",
+    "path": "proxmox",
+    "repo": "hashicorp/packer-plugin-proxmox",
+    "version": "latest"
   },
   {
     "title": "VirtualBox",
