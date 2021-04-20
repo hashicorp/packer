@@ -163,7 +163,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.StagingDir = p.guestOSTypeConfig.stagingDir
 	}
 
-	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+	if !p.config.SkipInstall && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
 		if p.config.ChefLicense == "" {
 			p.config.ChefLicense = "accept-silent"
 		}

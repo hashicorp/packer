@@ -19,6 +19,8 @@ import (
 	anazibimportpostprocessor "github.com/hashicorp/packer-plugin-amazon/post-processor/import"
 	ansibleprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
+	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
+	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -95,6 +97,8 @@ var VendoredBuilders = map[string]packersdk.Builder{
 var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"ansible":       new(ansibleprovisioner.Provisioner),
 	"ansible-local": new(ansiblelocalprovisioner.Provisioner),
+	"chef-client":   new(chefclientprovisioner.Provisioner),
+	"chef-solo":     new(chefsoloprovisioner.Provisioner),
 }
 
 // VendoredPostProcessors are post-processor components that were once bundled with the

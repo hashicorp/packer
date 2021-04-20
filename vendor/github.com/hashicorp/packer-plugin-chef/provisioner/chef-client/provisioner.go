@@ -195,7 +195,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs, fmt.Errorf("server_url must be set"))
 	}
 
-	if p.config.SkipInstall == false && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
+	if !p.config.SkipInstall && p.config.InstallCommand == p.guestOSTypeConfig.installCommand {
 		if p.config.ChefLicense == "" {
 			p.config.ChefLicense = "accept-silent"
 		}
