@@ -50,6 +50,10 @@
     & .text {
       width: calc(50%);
 
+      & p {
+        color: var(--gray-2);
+      }
+
       @media (max-width: 1000px) {
         width: 100%;
       }
