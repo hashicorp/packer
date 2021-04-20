@@ -79,7 +79,7 @@ import (
 
 type PluginCommand struct {
 	Meta
-} 
+}
 
 var Builders = map[string]packersdk.Builder{
 	"alicloud-ecs":     new(alicloudecsbuilder.Builder),
