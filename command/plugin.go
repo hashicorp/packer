@@ -34,7 +34,6 @@ import (
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
-	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
@@ -96,7 +95,6 @@ var Builders = map[string]packersdk.Builder{
 	"oracle-classic":   new(oracleclassicbuilder.Builder),
 	"oracle-oci":       new(oracleocibuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
-	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),

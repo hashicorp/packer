@@ -783,10 +783,6 @@
         "path": "builders/profitbricks"
       },
       {
-        "title": "Scaleway",
-        "path": "builders/scaleway"
-      },
-      {
         "title": "Tencent Cloud",
         "path": "builders/tencentcloud-cvm"
       },

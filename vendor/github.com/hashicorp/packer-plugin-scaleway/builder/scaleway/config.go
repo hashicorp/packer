@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/packer-plugin-scaleway/builder/scaleway/version"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -16,7 +17,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer-plugin-sdk/useragent"
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
-	"github.com/hashicorp/packer/builder/scaleway/version"
 	"github.com/mitchellh/mapstructure"
 	"github.com/scaleway/scaleway-sdk-go/api/instance/v1"
 	"github.com/scaleway/scaleway-sdk-go/scw"

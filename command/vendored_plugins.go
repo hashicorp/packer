@@ -35,6 +35,7 @@ import (
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
+	scalewaybuilder "github.com/hashicorp/packer-plugin-scaleway/builder/scaleway"
 	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
 	virtualboxvmbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm"
@@ -70,6 +71,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
+	"scaleway":            new(scalewaybuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
