@@ -142,7 +142,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
 
-	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, !p.config.DisableSudo)
+	// disable sudo here as we allow wrapping with execute_command to do
+	// dynamic sudo, the sudo provided by guestexec doesn't allow for -S
+	p.guestCommands, err = guestexec.NewGuestCommands(p.config.GuestOSType, false)
 	if err != nil {
 		return fmt.Errorf("Invalid guest_os_type: \"%s\"", p.config.GuestOSType)
 	}
@@ -561,7 +563,7 @@ func (p *Provisioner) moveFile(ui packersdk.Ui, comm packersdk.Communicator, dst
 func (p *Provisioner) createDir(ui packersdk.Ui, comm packersdk.Communicator, dir string) error {
 	ui.Message(fmt.Sprintf("Creating directory: %s", dir))
 	cmd := &packersdk.RemoteCmd{
-		Command: p.guestCommands.CreateDir(dir),
+		Command: p.sudo(p.guestCommands.CreateDir(dir)),
 	}
 	ctx := context.TODO()
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
@@ -577,7 +579,7 @@ func (p *Provisioner) statPath(ui packersdk.Ui, comm packersdk.Communicator, pat
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Verifying Path: %s", path))
 	cmd := &packersdk.RemoteCmd{
-		Command: p.guestCommands.StatPath(path),
+		Command: p.sudo(p.guestCommands.StatPath(path)),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
@@ -592,7 +594,7 @@ func (p *Provisioner) removeDir(ui packersdk.Ui, comm packersdk.Communicator, di
 	ctx := context.TODO()
 	ui.Message(fmt.Sprintf("Removing directory: %s", dir))
 	cmd := &packersdk.RemoteCmd{
-		Command: p.guestCommands.RemoveDir(dir),
+		Command: p.sudo(p.guestCommands.RemoveDir(dir)),
 	}
 	if err := cmd.RunWithUi(ctx, comm, ui); err != nil {
 		return err
