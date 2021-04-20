@@ -779,23 +779,6 @@
         ]
       },
       {
-        "title": "Parallels",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/parallels"
-          },
-          {
-            "title": "ISO",
-            "path": "builders/parallels/iso"
-          },
-          {
-            "title": "PVM",
-            "path": "builders/parallels/pvm"
-          }
-        ]
-      },
-      {
         "title": "ProfitBricks",
         "path": "builders/profitbricks"
       },

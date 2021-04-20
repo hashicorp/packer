@@ -67,5 +67,11 @@
     "repo": "hashicorp/packer-plugin-outscale",
     "version": "latest",
     "pluginTier": "community"
+  },
+  {
+    "title": "Parallels",
+    "path": "parallels",
+    "repo": "hashicorp/packer-plugin-parallels",
+    "version": "latest"
   }
 ]

@@ -9,7 +9,6 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0
-	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
@@ -48,6 +47,7 @@ require (
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
+	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0

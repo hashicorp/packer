@@ -33,8 +33,6 @@ import (
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
-	parallelsisobuilder "github.com/hashicorp/packer/builder/parallels/iso"
-	parallelspvmbuilder "github.com/hashicorp/packer/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	scalewaybuilder "github.com/hashicorp/packer/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
@@ -97,8 +95,6 @@ var Builders = map[string]packersdk.Builder{
 	"openstack":        new(openstackbuilder.Builder),
 	"oracle-classic":   new(oracleclassicbuilder.Builder),
 	"oracle-oci":       new(oracleocibuilder.Builder),
-	"parallels-iso":    new(parallelsisobuilder.Builder),
-	"parallels-pvm":    new(parallelspvmbuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
