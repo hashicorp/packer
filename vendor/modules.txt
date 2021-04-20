@@ -522,14 +522,14 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
-# github.com/hashicorp/packer-plugin-qemu v0.0.1
-## explicit
-github.com/hashicorp/packer-plugin-qemu/builder/qemu
 # github.com/hashicorp/packer-plugin-proxmox v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
+# github.com/hashicorp/packer-plugin-qemu v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-qemu/builder/qemu
 # github.com/hashicorp/packer-plugin-sdk v0.2.0
 ## explicit
 github.com/hashicorp/packer-plugin-sdk/acctest
