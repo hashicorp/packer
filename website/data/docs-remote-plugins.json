@@ -38,6 +38,13 @@
     "version": "latest"
   },
   {
+    "title": "Scaleway",
+    "path": "scaleway",
+    "repo": "hashicorp/packer-plugin-scaleway",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
