@@ -539,7 +539,7 @@ github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu
-# github.com/hashicorp/packer-plugin-scaleway v0.0.1-pre
+# github.com/hashicorp/packer-plugin-scaleway v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-scaleway/builder/scaleway
 github.com/hashicorp/packer-plugin-scaleway/builder/scaleway/version
@@ -760,7 +760,6 @@ github.com/ryanuber/go-glob
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7
-## explicit
 github.com/scaleway/scaleway-sdk-go/api/instance/v1
 github.com/scaleway/scaleway-sdk-go/api/marketplace/v1
 github.com/scaleway/scaleway-sdk-go/internal/async
