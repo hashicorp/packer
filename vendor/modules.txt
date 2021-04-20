@@ -70,6 +70,12 @@ github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
 github.com/ChrisTrenkamp/goxpath/xconst
+# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vpc
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/vserver
 # github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 github.com/StackExchange/wmi
 # github.com/Telmate/proxmox-api-go v0.0.0-20210331182840-ff89a0cebcfa
@@ -516,6 +522,9 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
+# github.com/hashicorp/packer-plugin-ncloud v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-ncloud/builder/ncloud
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu
@@ -699,6 +708,8 @@ github.com/modern-go/concurrent
 github.com/modern-go/reflect2
 # github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 github.com/nu7hatch/gouuid
+# github.com/olekukonko/tablewriter v0.0.5
+github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk/v36 v36.2.0
 ## explicit
 github.com/oracle/oci-go-sdk/v36/common

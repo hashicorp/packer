@@ -24,6 +24,12 @@
     "version": "latest"
   },
   {
+    "title": "Naver Cloud",
+    "path": "ncloud",
+    "repo": "hashicorp/packer-plugin-ncloud",
+    "version": "v0.0.1"
+  },
+  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
