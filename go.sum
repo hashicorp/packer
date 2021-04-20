@@ -482,6 +482,8 @@ github.com/hashicorp/packer-plugin-hyperone v0.0.1 h1:Owp1B5cI0VgFgR3pCyeeQdyKPT
 github.com/hashicorp/packer-plugin-hyperone v0.0.1/go.mod h1:9DglrxEBIig85Hr8r11YE+uMn3G0u+pt0AZHVP+wnAY=
 github.com/hashicorp/packer-plugin-hyperv v0.0.1 h1:ZdsJw4X+4zSgRYPzVQbJrx8Az73AkneSWLnmfpojl0k=
 github.com/hashicorp/packer-plugin-hyperv v0.0.1/go.mod h1:sB9mEZCfaXVjTD6pS+Tt0xMtUD1Ocnl5mZ3i/PG6eB0=
+github.com/hashicorp/packer-plugin-jdcloud v0.0.1 h1:MLvAroDOHWimBf6cBa0trlHJpB8nKtO9FPyg2l6Iafw=
+github.com/hashicorp/packer-plugin-jdcloud v0.0.1/go.mod h1:bVGtjp3v98rpguEYxJAXQbg8CjllInh5WFqO9a0T4lc=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VRcRxTuLoLX1ssUag=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-openstack v0.0.2 h1:wGNE8es3Bn9auuIoX+gqT9chXzYY9GlM55eSpM4uwtU=

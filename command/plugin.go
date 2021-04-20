@@ -19,8 +19,6 @@ import (
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
-	jdcloudbuilder "github.com/hashicorp/packer/builder/jdcloud"
-	linodebuilder "github.com/hashicorp/packer/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
@@ -69,8 +67,6 @@ var Builders = map[string]packersdk.Builder{
 	"digitalocean":     new(digitaloceanbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"hcloud":           new(hcloudbuilder.Builder),
-	"jdcloud":          new(jdcloudbuilder.Builder),
-	"linode":           new(linodebuilder.Builder),
 	"lxc":              new(lxcbuilder.Builder),
 	"lxd":              new(lxdbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
