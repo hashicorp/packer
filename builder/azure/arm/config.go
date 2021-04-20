@@ -402,7 +402,7 @@ type Config struct {
 	// temporary name assigned to the OSDisk. If this
 	// value is not set, a random value will be assigned. Being able to assign a custom
 	// osDiskName could ease deployment if naming conventions are used..
-	OsDiskName string `mapstructure:"os_disk_name" required:"false"`
+	TempOSDiskName string `mapstructure:"temp_os_disk_name" required:"false"`
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
