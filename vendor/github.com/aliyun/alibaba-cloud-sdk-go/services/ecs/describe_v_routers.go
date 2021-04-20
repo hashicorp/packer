@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeVRouters invokes the ecs.DescribeVRouters API synchronously
-// api document: https://help.aliyun.com/api/ecs/describevrouters.html
 func (client *Client) DescribeVRouters(request *DescribeVRoutersRequest) (response *DescribeVRoutersResponse, err error) {
 	response = CreateDescribeVRoutersResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeVRouters(request *DescribeVRoutersRequest) (respon
 }
 
 // DescribeVRoutersWithChan invokes the ecs.DescribeVRouters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevrouters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVRoutersWithChan(request *DescribeVRoutersRequest) (<-chan *DescribeVRoutersResponse, <-chan error) {
 	responseChan := make(chan *DescribeVRoutersResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeVRoutersWithChan(request *DescribeVRoutersRequest)
 }
 
 // DescribeVRoutersWithCallback invokes the ecs.DescribeVRouters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevrouters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVRoutersWithCallback(request *DescribeVRoutersRequest, callback func(response *DescribeVRoutersResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,11 +73,11 @@ type DescribeVRoutersRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	VRouterId            string           `position:"Query" name:"VRouterId"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 }
 
 // DescribeVRoutersResponse is the response struct for api DescribeVRouters
@@ -101,6 +96,7 @@ func CreateDescribeVRoutersRequest() (request *DescribeVRoutersRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeVRouters", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

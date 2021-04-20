@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteLaunchTemplateVersion invokes the ecs.DeleteLaunchTemplateVersion API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletelaunchtemplateversion.html
 func (client *Client) DeleteLaunchTemplateVersion(request *DeleteLaunchTemplateVersionRequest) (response *DeleteLaunchTemplateVersionResponse, err error) {
 	response = CreateDeleteLaunchTemplateVersionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteLaunchTemplateVersion(request *DeleteLaunchTemplateV
 }
 
 // DeleteLaunchTemplateVersionWithChan invokes the ecs.DeleteLaunchTemplateVersion API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletelaunchtemplateversion.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteLaunchTemplateVersionWithChan(request *DeleteLaunchTemplateVersionRequest) (<-chan *DeleteLaunchTemplateVersionResponse, <-chan error) {
 	responseChan := make(chan *DeleteLaunchTemplateVersionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteLaunchTemplateVersionWithChan(request *DeleteLaunchT
 }
 
 // DeleteLaunchTemplateVersionWithCallback invokes the ecs.DeleteLaunchTemplateVersion API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletelaunchtemplateversion.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteLaunchTemplateVersionWithCallback(request *DeleteLaunchTemplateVersionRequest, callback func(response *DeleteLaunchTemplateVersionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -97,6 +92,7 @@ func CreateDeleteLaunchTemplateVersionRequest() (request *DeleteLaunchTemplateVe
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteLaunchTemplateVersion", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

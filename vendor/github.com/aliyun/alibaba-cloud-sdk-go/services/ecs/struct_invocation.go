@@ -17,16 +17,31 @@ package ecs
 
 // Invocation is a nested struct in ecs response
 type Invocation struct {
-	CommandId         string            `json:"CommandId" xml:"CommandId"`
-	PageNumber        int               `json:"PageNumber" xml:"PageNumber"`
-	CommandName       string            `json:"CommandName" xml:"CommandName"`
-	TotalCount        int               `json:"TotalCount" xml:"TotalCount"`
-	PageSize          int               `json:"PageSize" xml:"PageSize"`
-	InvokeId          string            `json:"InvokeId" xml:"InvokeId"`
-	InvokeStatus      string            `json:"InvokeStatus" xml:"InvokeStatus"`
-	Timed             bool              `json:"Timed" xml:"Timed"`
-	Frequency         string            `json:"Frequency" xml:"Frequency"`
-	CommandType       string            `json:"CommandType" xml:"CommandType"`
-	InvocationResults InvocationResults `json:"InvocationResults" xml:"InvocationResults"`
-	InvokeInstances   InvokeInstances   `json:"InvokeInstances" xml:"InvokeInstances"`
+	Name              string                               `json:"Name" xml:"Name"`
+	PageSize          int64                                `json:"PageSize" xml:"PageSize"`
+	Timed             bool                                 `json:"Timed" xml:"Timed"`
+	Frequency         string                               `json:"Frequency" xml:"Frequency"`
+	Content           string                               `json:"Content" xml:"Content"`
+	CommandContent    string                               `json:"CommandContent" xml:"CommandContent"`
+	InvocationStatus  string                               `json:"InvocationStatus" xml:"InvocationStatus"`
+	FileGroup         string                               `json:"FileGroup" xml:"FileGroup"`
+	Description       string                               `json:"Description" xml:"Description"`
+	Overwrite         string                               `json:"Overwrite" xml:"Overwrite"`
+	PageNumber        int64                                `json:"PageNumber" xml:"PageNumber"`
+	CommandId         string                               `json:"CommandId" xml:"CommandId"`
+	TargetDir         string                               `json:"TargetDir" xml:"TargetDir"`
+	FileMode          string                               `json:"FileMode" xml:"FileMode"`
+	TotalCount        int64                                `json:"TotalCount" xml:"TotalCount"`
+	Username          string                               `json:"Username" xml:"Username"`
+	ContentType       string                               `json:"ContentType" xml:"ContentType"`
+	CreationTime      string                               `json:"CreationTime" xml:"CreationTime"`
+	CommandName       string                               `json:"CommandName" xml:"CommandName"`
+	Parameters        string                               `json:"Parameters" xml:"Parameters"`
+	VmCount           int                                  `json:"VmCount" xml:"VmCount"`
+	InvokeId          string                               `json:"InvokeId" xml:"InvokeId"`
+	InvokeStatus      string                               `json:"InvokeStatus" xml:"InvokeStatus"`
+	FileOwner         string                               `json:"FileOwner" xml:"FileOwner"`
+	CommandType       string                               `json:"CommandType" xml:"CommandType"`
+	InvokeInstances   InvokeInstancesInDescribeInvocations `json:"InvokeInstances" xml:"InvokeInstances"`
+	InvocationResults InvocationResults                    `json:"InvocationResults" xml:"InvocationResults"`
 }

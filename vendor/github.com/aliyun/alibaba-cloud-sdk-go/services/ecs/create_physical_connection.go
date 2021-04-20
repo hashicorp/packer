@@ -21,7 +21,6 @@ import (
 )
 
 // CreatePhysicalConnection invokes the ecs.CreatePhysicalConnection API synchronously
-// api document: https://help.aliyun.com/api/ecs/createphysicalconnection.html
 func (client *Client) CreatePhysicalConnection(request *CreatePhysicalConnectionRequest) (response *CreatePhysicalConnectionResponse, err error) {
 	response = CreateCreatePhysicalConnectionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreatePhysicalConnection(request *CreatePhysicalConnection
 }
 
 // CreatePhysicalConnectionWithChan invokes the ecs.CreatePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createphysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreatePhysicalConnectionWithChan(request *CreatePhysicalConnectionRequest) (<-chan *CreatePhysicalConnectionResponse, <-chan error) {
 	responseChan := make(chan *CreatePhysicalConnectionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreatePhysicalConnectionWithChan(request *CreatePhysicalCo
 }
 
 // CreatePhysicalConnectionWithCallback invokes the ecs.CreatePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createphysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreatePhysicalConnectionWithCallback(request *CreatePhysicalConnectionRequest, callback func(response *CreatePhysicalConnectionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,21 +72,21 @@ func (client *Client) CreatePhysicalConnectionWithCallback(request *CreatePhysic
 type CreatePhysicalConnectionRequest struct {
 	*requests.RpcRequest
 	AccessPointId                 string           `position:"Query" name:"AccessPointId"`
-	RedundantPhysicalConnectionId string           `position:"Query" name:"RedundantPhysicalConnectionId"`
-	PeerLocation                  string           `position:"Query" name:"PeerLocation"`
 	ResourceOwnerId               requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	PortType                      string           `position:"Query" name:"PortType"`
 	CircuitCode                   string           `position:"Query" name:"CircuitCode"`
-	Bandwidth                     requests.Integer `position:"Query" name:"bandwidth"`
 	ClientToken                   string           `position:"Query" name:"ClientToken"`
-	ResourceOwnerAccount          string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount                  string           `position:"Query" name:"OwnerAccount"`
 	Description                   string           `position:"Query" name:"Description"`
 	Type                          string           `position:"Query" name:"Type"`
+	UserCidr                      string           `position:"Query" name:"UserCidr"`
+	RedundantPhysicalConnectionId string           `position:"Query" name:"RedundantPhysicalConnectionId"`
+	PeerLocation                  string           `position:"Query" name:"PeerLocation"`
+	Bandwidth                     requests.Integer `position:"Query" name:"bandwidth"`
+	ResourceOwnerAccount          string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                  string           `position:"Query" name:"OwnerAccount"`
 	OwnerId                       requests.Integer `position:"Query" name:"OwnerId"`
 	LineOperator                  string           `position:"Query" name:"LineOperator"`
 	Name                          string           `position:"Query" name:"Name"`
-	UserCidr                      string           `position:"Query" name:"UserCidr"`
 }
 
 // CreatePhysicalConnectionResponse is the response struct for api CreatePhysicalConnection
@@ -107,6 +102,7 @@ func CreateCreatePhysicalConnectionRequest() (request *CreatePhysicalConnectionR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreatePhysicalConnection", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // GetInstanceScreenshot invokes the ecs.GetInstanceScreenshot API synchronously
-// api document: https://help.aliyun.com/api/ecs/getinstancescreenshot.html
 func (client *Client) GetInstanceScreenshot(request *GetInstanceScreenshotRequest) (response *GetInstanceScreenshotResponse, err error) {
 	response = CreateGetInstanceScreenshotResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) GetInstanceScreenshot(request *GetInstanceScreenshotReques
 }
 
 // GetInstanceScreenshotWithChan invokes the ecs.GetInstanceScreenshot API asynchronously
-// api document: https://help.aliyun.com/api/ecs/getinstancescreenshot.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) GetInstanceScreenshotWithChan(request *GetInstanceScreenshotRequest) (<-chan *GetInstanceScreenshotResponse, <-chan error) {
 	responseChan := make(chan *GetInstanceScreenshotResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) GetInstanceScreenshotWithChan(request *GetInstanceScreensh
 }
 
 // GetInstanceScreenshotWithCallback invokes the ecs.GetInstanceScreenshot API asynchronously
-// api document: https://help.aliyun.com/api/ecs/getinstancescreenshot.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) GetInstanceScreenshotWithCallback(request *GetInstanceScreenshotRequest, callback func(response *GetInstanceScreenshotResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -98,6 +93,7 @@ func CreateGetInstanceScreenshotRequest() (request *GetInstanceScreenshotRequest
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "GetInstanceScreenshot", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

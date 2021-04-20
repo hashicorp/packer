@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteBandwidthPackage invokes the ecs.DeleteBandwidthPackage API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletebandwidthpackage.html
 func (client *Client) DeleteBandwidthPackage(request *DeleteBandwidthPackageRequest) (response *DeleteBandwidthPackageResponse, err error) {
 	response = CreateDeleteBandwidthPackageResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteBandwidthPackage(request *DeleteBandwidthPackageRequ
 }
 
 // DeleteBandwidthPackageWithChan invokes the ecs.DeleteBandwidthPackage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletebandwidthpackage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteBandwidthPackageWithChan(request *DeleteBandwidthPackageRequest) (<-chan *DeleteBandwidthPackageResponse, <-chan error) {
 	responseChan := make(chan *DeleteBandwidthPackageResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteBandwidthPackageWithChan(request *DeleteBandwidthPac
 }
 
 // DeleteBandwidthPackageWithCallback invokes the ecs.DeleteBandwidthPackage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletebandwidthpackage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteBandwidthPackageWithCallback(request *DeleteBandwidthPackageRequest, callback func(response *DeleteBandwidthPackageResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateDeleteBandwidthPackageRequest() (request *DeleteBandwidthPackageReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteBandwidthPackage", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteDisk invokes the ecs.DeleteDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletedisk.html
 func (client *Client) DeleteDisk(request *DeleteDiskRequest) (response *DeleteDiskResponse, err error) {
 	response = CreateDeleteDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteDisk(request *DeleteDiskRequest) (response *DeleteDi
 }
 
 // DeleteDiskWithChan invokes the ecs.DeleteDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletedisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteDiskWithChan(request *DeleteDiskRequest) (<-chan *DeleteDiskResponse, <-chan error) {
 	responseChan := make(chan *DeleteDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteDiskWithChan(request *DeleteDiskRequest) (<-chan *De
 }
 
 // DeleteDiskWithCallback invokes the ecs.DeleteDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletedisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteDiskWithCallback(request *DeleteDiskRequest, callback func(response *DeleteDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) DeleteDiskWithCallback(request *DeleteDiskRequest, callbac
 type DeleteDiskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	DiskId               string           `position:"Query" name:"DiskId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DiskId               string           `position:"Query" name:"DiskId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -95,6 +90,7 @@ func CreateDeleteDiskRequest() (request *DeleteDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

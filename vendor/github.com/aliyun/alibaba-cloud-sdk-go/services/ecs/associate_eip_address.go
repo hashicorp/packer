@@ -21,7 +21,6 @@ import (
 )
 
 // AssociateEipAddress invokes the ecs.AssociateEipAddress API synchronously
-// api document: https://help.aliyun.com/api/ecs/associateeipaddress.html
 func (client *Client) AssociateEipAddress(request *AssociateEipAddressRequest) (response *AssociateEipAddressResponse, err error) {
 	response = CreateAssociateEipAddressResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AssociateEipAddress(request *AssociateEipAddressRequest) (
 }
 
 // AssociateEipAddressWithChan invokes the ecs.AssociateEipAddress API asynchronously
-// api document: https://help.aliyun.com/api/ecs/associateeipaddress.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AssociateEipAddressWithChan(request *AssociateEipAddressRequest) (<-chan *AssociateEipAddressResponse, <-chan error) {
 	responseChan := make(chan *AssociateEipAddressResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AssociateEipAddressWithChan(request *AssociateEipAddressRe
 }
 
 // AssociateEipAddressWithCallback invokes the ecs.AssociateEipAddress API asynchronously
-// api document: https://help.aliyun.com/api/ecs/associateeipaddress.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AssociateEipAddressWithCallback(request *AssociateEipAddressRequest, callback func(response *AssociateEipAddressResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) AssociateEipAddressWithCallback(request *AssociateEipAddre
 type AssociateEipAddressRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	AllocationId         string           `position:"Query" name:"AllocationId"`
+	InstanceType         string           `position:"Query" name:"InstanceType"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	InstanceType         string           `position:"Query" name:"InstanceType"`
-	AllocationId         string           `position:"Query" name:"AllocationId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // AssociateEipAddressResponse is the response struct for api AssociateEipAddress
@@ -97,6 +92,7 @@ func CreateAssociateEipAddressRequest() (request *AssociateEipAddressRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AssociateEipAddress", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

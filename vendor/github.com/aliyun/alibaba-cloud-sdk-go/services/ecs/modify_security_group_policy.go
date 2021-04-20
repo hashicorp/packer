@@ -21,7 +21,6 @@ import (
 )
 
 // ModifySecurityGroupPolicy invokes the ecs.ModifySecurityGroupPolicy API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygrouppolicy.html
 func (client *Client) ModifySecurityGroupPolicy(request *ModifySecurityGroupPolicyRequest) (response *ModifySecurityGroupPolicyResponse, err error) {
 	response = CreateModifySecurityGroupPolicyResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifySecurityGroupPolicy(request *ModifySecurityGroupPoli
 }
 
 // ModifySecurityGroupPolicyWithChan invokes the ecs.ModifySecurityGroupPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygrouppolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifySecurityGroupPolicyWithChan(request *ModifySecurityGroupPolicyRequest) (<-chan *ModifySecurityGroupPolicyResponse, <-chan error) {
 	responseChan := make(chan *ModifySecurityGroupPolicyResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifySecurityGroupPolicyWithChan(request *ModifySecurityG
 }
 
 // ModifySecurityGroupPolicyWithCallback invokes the ecs.ModifySecurityGroupPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygrouppolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifySecurityGroupPolicyWithCallback(request *ModifySecurityGroupPolicyRequest, callback func(response *ModifySecurityGroupPolicyResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,11 +73,11 @@ type ModifySecurityGroupPolicyRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
+	SecurityGroupId      string           `position:"Query" name:"SecurityGroupId"`
+	InnerAccessPolicy    string           `position:"Query" name:"InnerAccessPolicy"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	SecurityGroupId      string           `position:"Query" name:"SecurityGroupId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InnerAccessPolicy    string           `position:"Query" name:"InnerAccessPolicy"`
 }
 
 // ModifySecurityGroupPolicyResponse is the response struct for api ModifySecurityGroupPolicy
@@ -97,6 +92,7 @@ func CreateModifySecurityGroupPolicyRequest() (request *ModifySecurityGroupPolic
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifySecurityGroupPolicy", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

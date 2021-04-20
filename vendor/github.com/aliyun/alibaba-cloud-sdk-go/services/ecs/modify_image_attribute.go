@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyImageAttribute invokes the ecs.ModifyImageAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimageattribute.html
 func (client *Client) ModifyImageAttribute(request *ModifyImageAttributeRequest) (response *ModifyImageAttributeResponse, err error) {
 	response = CreateModifyImageAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyImageAttribute(request *ModifyImageAttributeRequest)
 }
 
 // ModifyImageAttributeWithChan invokes the ecs.ModifyImageAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimageattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyImageAttributeWithChan(request *ModifyImageAttributeRequest) (<-chan *ModifyImageAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyImageAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyImageAttributeWithChan(request *ModifyImageAttribute
 }
 
 // ModifyImageAttributeWithCallback invokes the ecs.ModifyImageAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyimageattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyImageAttributeWithCallback(request *ModifyImageAttributeRequest, callback func(response *ModifyImageAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,11 +73,15 @@ type ModifyImageAttributeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ImageId              string           `position:"Query" name:"ImageId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ImageName            string           `position:"Query" name:"ImageName"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	Description          string           `position:"Query" name:"Description"`
+	BootMode             string           `position:"Query" name:"BootMode"`
+	ImageName            string           `position:"Query" name:"ImageName"`
+	LicenseType          string           `position:"Query" name:"LicenseType"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	ImageFamily          string           `position:"Query" name:"ImageFamily"`
+	Status               string           `position:"Query" name:"Status"`
 }
 
 // ModifyImageAttributeResponse is the response struct for api ModifyImageAttribute
@@ -97,6 +96,7 @@ func CreateModifyImageAttributeRequest() (request *ModifyImageAttributeRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyImageAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

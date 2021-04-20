@@ -21,7 +21,6 @@ import (
 )
 
 // CreateVpc invokes the ecs.CreateVpc API synchronously
-// api document: https://help.aliyun.com/api/ecs/createvpc.html
 func (client *Client) CreateVpc(request *CreateVpcRequest) (response *CreateVpcResponse, err error) {
 	response = CreateCreateVpcResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateVpc(request *CreateVpcRequest) (response *CreateVpcR
 }
 
 // CreateVpcWithChan invokes the ecs.CreateVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateVpcWithChan(request *CreateVpcRequest) (<-chan *CreateVpcResponse, <-chan error) {
 	responseChan := make(chan *CreateVpcResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateVpcWithChan(request *CreateVpcRequest) (<-chan *Crea
 }
 
 // CreateVpcWithCallback invokes the ecs.CreateVpc API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createvpc.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateVpcWithCallback(request *CreateVpcRequest, callback func(response *CreateVpcResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,15 +71,15 @@ func (client *Client) CreateVpcWithCallback(request *CreateVpcRequest, callback 
 // CreateVpcRequest is the request struct for api CreateVpc
 type CreateVpcRequest struct {
 	*requests.RpcRequest
-	VpcName              string           `position:"Query" name:"VpcName"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	CidrBlock            string           `position:"Query" name:"CidrBlock"`
 	Description          string           `position:"Query" name:"Description"`
+	VpcName              string           `position:"Query" name:"VpcName"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	CidrBlock            string           `position:"Query" name:"CidrBlock"`
 }
 
 // CreateVpcResponse is the response struct for api CreateVpc
@@ -102,6 +97,7 @@ func CreateCreateVpcRequest() (request *CreateVpcRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateVpc", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

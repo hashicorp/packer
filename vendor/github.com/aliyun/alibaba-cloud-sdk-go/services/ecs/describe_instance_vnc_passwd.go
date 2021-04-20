@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceVncPasswd invokes the ecs.DescribeInstanceVncPasswd API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncpasswd.html
 func (client *Client) DescribeInstanceVncPasswd(request *DescribeInstanceVncPasswdRequest) (response *DescribeInstanceVncPasswdResponse, err error) {
 	response = CreateDescribeInstanceVncPasswdResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceVncPasswd(request *DescribeInstanceVncPass
 }
 
 // DescribeInstanceVncPasswdWithChan invokes the ecs.DescribeInstanceVncPasswd API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncpasswd.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceVncPasswdWithChan(request *DescribeInstanceVncPasswdRequest) (<-chan *DescribeInstanceVncPasswdResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceVncPasswdResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceVncPasswdWithChan(request *DescribeInstanc
 }
 
 // DescribeInstanceVncPasswdWithCallback invokes the ecs.DescribeInstanceVncPasswd API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncpasswd.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceVncPasswdWithCallback(request *DescribeInstanceVncPasswdRequest, callback func(response *DescribeInstanceVncPasswdResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DescribeInstanceVncPasswdWithCallback(request *DescribeIns
 type DescribeInstanceVncPasswdRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DescribeInstanceVncPasswdResponse is the response struct for api DescribeInstanceVncPasswd
@@ -96,6 +91,7 @@ func CreateDescribeInstanceVncPasswdRequest() (request *DescribeInstanceVncPassw
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceVncPasswd", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

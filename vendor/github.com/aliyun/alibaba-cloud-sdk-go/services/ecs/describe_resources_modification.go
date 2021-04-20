@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeResourcesModification invokes the ecs.DescribeResourcesModification API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcesmodification.html
 func (client *Client) DescribeResourcesModification(request *DescribeResourcesModificationRequest) (response *DescribeResourcesModificationResponse, err error) {
 	response = CreateDescribeResourcesModificationResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeResourcesModification(request *DescribeResourcesMo
 }
 
 // DescribeResourcesModificationWithChan invokes the ecs.DescribeResourcesModification API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcesmodification.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeResourcesModificationWithChan(request *DescribeResourcesModificationRequest) (<-chan *DescribeResourcesModificationResponse, <-chan error) {
 	responseChan := make(chan *DescribeResourcesModificationResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeResourcesModificationWithChan(request *DescribeRes
 }
 
 // DescribeResourcesModificationWithCallback invokes the ecs.DescribeResourcesModification API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcesmodification.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeResourcesModificationWithCallback(request *DescribeResourcesModificationRequest, callback func(response *DescribeResourcesModificationResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -102,6 +97,7 @@ func CreateDescribeResourcesModificationRequest() (request *DescribeResourcesMod
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeResourcesModification", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

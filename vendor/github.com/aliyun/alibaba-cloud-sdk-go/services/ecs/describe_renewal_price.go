@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeRenewalPrice invokes the ecs.DescribeRenewalPrice API synchronously
-// api document: https://help.aliyun.com/api/ecs/describerenewalprice.html
 func (client *Client) DescribeRenewalPrice(request *DescribeRenewalPriceRequest) (response *DescribeRenewalPriceResponse, err error) {
 	response = CreateDescribeRenewalPriceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeRenewalPrice(request *DescribeRenewalPriceRequest)
 }
 
 // DescribeRenewalPriceWithChan invokes the ecs.DescribeRenewalPrice API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describerenewalprice.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRenewalPriceWithChan(request *DescribeRenewalPriceRequest) (<-chan *DescribeRenewalPriceResponse, <-chan error) {
 	responseChan := make(chan *DescribeRenewalPriceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeRenewalPriceWithChan(request *DescribeRenewalPrice
 }
 
 // DescribeRenewalPriceWithCallback invokes the ecs.DescribeRenewalPrice API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describerenewalprice.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeRenewalPriceWithCallback(request *DescribeRenewalPriceRequest, callback func(response *DescribeRenewalPriceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,12 @@ func (client *Client) DescribeRenewalPriceWithCallback(request *DescribeRenewalP
 type DescribeRenewalPriceRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	PriceUnit            string           `position:"Query" name:"PriceUnit"`
 	ResourceId           string           `position:"Query" name:"ResourceId"`
 	Period               requests.Integer `position:"Query" name:"Period"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	PriceUnit            string           `position:"Query" name:"PriceUnit"`
+	ExpectedRenewDay     requests.Integer `position:"Query" name:"ExpectedRenewDay"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	ResourceType         string           `position:"Query" name:"ResourceType"`
 }
@@ -99,6 +95,7 @@ func CreateDescribeRenewalPriceRequest() (request *DescribeRenewalPriceRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeRenewalPrice", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDeploymentSetAttribute invokes the ecs.ModifyDeploymentSetAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifydeploymentsetattribute.html
 func (client *Client) ModifyDeploymentSetAttribute(request *ModifyDeploymentSetAttributeRequest) (response *ModifyDeploymentSetAttributeResponse, err error) {
 	response = CreateModifyDeploymentSetAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDeploymentSetAttribute(request *ModifyDeploymentSetA
 }
 
 // ModifyDeploymentSetAttributeWithChan invokes the ecs.ModifyDeploymentSetAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydeploymentsetattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDeploymentSetAttributeWithChan(request *ModifyDeploymentSetAttributeRequest) (<-chan *ModifyDeploymentSetAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyDeploymentSetAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDeploymentSetAttributeWithChan(request *ModifyDeploy
 }
 
 // ModifyDeploymentSetAttributeWithCallback invokes the ecs.ModifyDeploymentSetAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydeploymentsetattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDeploymentSetAttributeWithCallback(request *ModifyDeploymentSetAttributeRequest, callback func(response *ModifyDeploymentSetAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,11 +71,11 @@ func (client *Client) ModifyDeploymentSetAttributeWithCallback(request *ModifyDe
 // ModifyDeploymentSetAttributeRequest is the request struct for api ModifyDeploymentSetAttribute
 type ModifyDeploymentSetAttributeRequest struct {
 	*requests.RpcRequest
-	DeploymentSetId      string           `position:"Query" name:"DeploymentSetId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Description          string           `position:"Query" name:"Description"`
+	DeploymentSetId      string           `position:"Query" name:"DeploymentSetId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Description          string           `position:"Query" name:"Description"`
 	DeploymentSetName    string           `position:"Query" name:"DeploymentSetName"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
@@ -97,6 +92,7 @@ func CreateModifyDeploymentSetAttributeRequest() (request *ModifyDeploymentSetAt
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyDeploymentSetAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -19,25 +19,33 @@ package ecs
 type InstanceType struct {
 	MemorySize                  float64 `json:"MemorySize" xml:"MemorySize"`
 	EniPrivateIpAddressQuantity int     `json:"EniPrivateIpAddressQuantity" xml:"EniPrivateIpAddressQuantity"`
-	InstancePpsRx               int     `json:"InstancePpsRx" xml:"InstancePpsRx"`
+	InstancePpsRx               int64   `json:"InstancePpsRx" xml:"InstancePpsRx"`
 	CpuCoreCount                int     `json:"CpuCoreCount" xml:"CpuCoreCount"`
+	EniTotalQuantity            int     `json:"EniTotalQuantity" xml:"EniTotalQuantity"`
 	Cores                       int     `json:"Cores" xml:"Cores"`
-	Memory                      int     `json:"Memory" xml:"Memory"`
 	InstanceTypeId              string  `json:"InstanceTypeId" xml:"InstanceTypeId"`
 	InstanceBandwidthRx         int     `json:"InstanceBandwidthRx" xml:"InstanceBandwidthRx"`
 	InstanceType                string  `json:"InstanceType" xml:"InstanceType"`
-	BaselineCredit              int     `json:"BaselineCredit" xml:"BaselineCredit"`
 	EniQuantity                 int     `json:"EniQuantity" xml:"EniQuantity"`
 	Generation                  string  `json:"Generation" xml:"Generation"`
-	GPUAmount                   int     `json:"GPUAmount" xml:"GPUAmount"`
 	SupportIoOptimized          string  `json:"SupportIoOptimized" xml:"SupportIoOptimized"`
 	InstanceTypeFamily          string  `json:"InstanceTypeFamily" xml:"InstanceTypeFamily"`
 	InitialCredit               int     `json:"InitialCredit" xml:"InitialCredit"`
-	InstancePpsTx               int     `json:"InstancePpsTx" xml:"InstancePpsTx"`
+	InstancePpsTx               int64   `json:"InstancePpsTx" xml:"InstancePpsTx"`
 	LocalStorageAmount          int     `json:"LocalStorageAmount" xml:"LocalStorageAmount"`
 	InstanceFamilyLevel         string  `json:"InstanceFamilyLevel" xml:"InstanceFamilyLevel"`
-	LocalStorageCapacity        int     `json:"LocalStorageCapacity" xml:"LocalStorageCapacity"`
+	TotalEniQueueQuantity       int     `json:"TotalEniQueueQuantity" xml:"TotalEniQueueQuantity"`
 	GPUSpec                     string  `json:"GPUSpec" xml:"GPUSpec"`
-	LocalStorageCategory        string  `json:"LocalStorageCategory" xml:"LocalStorageCategory"`
+	SecondaryEniQueueNumber     int     `json:"SecondaryEniQueueNumber" xml:"SecondaryEniQueueNumber"`
 	InstanceBandwidthTx         int     `json:"InstanceBandwidthTx" xml:"InstanceBandwidthTx"`
+	MaximumQueueNumberPerEni    int     `json:"MaximumQueueNumberPerEni" xml:"MaximumQueueNumberPerEni"`
+	DiskQuantity                int     `json:"DiskQuantity" xml:"DiskQuantity"`
+	PrimaryEniQueueNumber       int     `json:"PrimaryEniQueueNumber" xml:"PrimaryEniQueueNumber"`
+	Memory                      int     `json:"Memory" xml:"Memory"`
+	BaselineCredit              int     `json:"BaselineCredit" xml:"BaselineCredit"`
+	EniTrunkSupported           bool    `json:"EniTrunkSupported" xml:"EniTrunkSupported"`
+	GPUAmount                   int     `json:"GPUAmount" xml:"GPUAmount"`
+	EniIpv6AddressQuantity      int     `json:"EniIpv6AddressQuantity" xml:"EniIpv6AddressQuantity"`
+	LocalStorageCapacity        int64   `json:"LocalStorageCapacity" xml:"LocalStorageCapacity"`
+	LocalStorageCategory        string  `json:"LocalStorageCategory" xml:"LocalStorageCategory"`
 }

@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyVirtualBorderRouterAttribute invokes the ecs.ModifyVirtualBorderRouterAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvirtualborderrouterattribute.html
 func (client *Client) ModifyVirtualBorderRouterAttribute(request *ModifyVirtualBorderRouterAttributeRequest) (response *ModifyVirtualBorderRouterAttributeResponse, err error) {
 	response = CreateModifyVirtualBorderRouterAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyVirtualBorderRouterAttribute(request *ModifyVirtualB
 }
 
 // ModifyVirtualBorderRouterAttributeWithChan invokes the ecs.ModifyVirtualBorderRouterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvirtualborderrouterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVirtualBorderRouterAttributeWithChan(request *ModifyVirtualBorderRouterAttributeRequest) (<-chan *ModifyVirtualBorderRouterAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyVirtualBorderRouterAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyVirtualBorderRouterAttributeWithChan(request *Modify
 }
 
 // ModifyVirtualBorderRouterAttributeWithCallback invokes the ecs.ModifyVirtualBorderRouterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvirtualborderrouterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVirtualBorderRouterAttributeWithCallback(request *ModifyVirtualBorderRouterAttributeRequest, callback func(response *ModifyVirtualBorderRouterAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -79,17 +74,17 @@ type ModifyVirtualBorderRouterAttributeRequest struct {
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	CircuitCode          string           `position:"Query" name:"CircuitCode"`
 	VlanId               requests.Integer `position:"Query" name:"VlanId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	Description          string           `position:"Query" name:"Description"`
 	VbrId                string           `position:"Query" name:"VbrId"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PeerGatewayIp        string           `position:"Query" name:"PeerGatewayIp"`
 	PeeringSubnetMask    string           `position:"Query" name:"PeeringSubnetMask"`
-	Name                 string           `position:"Query" name:"Name"`
 	LocalGatewayIp       string           `position:"Query" name:"LocalGatewayIp"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	Name                 string           `position:"Query" name:"Name"`
 }
 
 // ModifyVirtualBorderRouterAttributeResponse is the response struct for api ModifyVirtualBorderRouterAttribute
@@ -104,6 +99,7 @@ func CreateModifyVirtualBorderRouterAttributeRequest() (request *ModifyVirtualBo
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyVirtualBorderRouterAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // AllocateDedicatedHosts invokes the ecs.AllocateDedicatedHosts API synchronously
-// api document: https://help.aliyun.com/api/ecs/allocatededicatedhosts.html
 func (client *Client) AllocateDedicatedHosts(request *AllocateDedicatedHostsRequest) (response *AllocateDedicatedHostsResponse, err error) {
 	response = CreateAllocateDedicatedHostsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AllocateDedicatedHosts(request *AllocateDedicatedHostsRequ
 }
 
 // AllocateDedicatedHostsWithChan invokes the ecs.AllocateDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/allocatededicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AllocateDedicatedHostsWithChan(request *AllocateDedicatedHostsRequest) (<-chan *AllocateDedicatedHostsResponse, <-chan error) {
 	responseChan := make(chan *AllocateDedicatedHostsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AllocateDedicatedHostsWithChan(request *AllocateDedicatedH
 }
 
 // AllocateDedicatedHostsWithCallback invokes the ecs.AllocateDedicatedHosts API asynchronously
-// api document: https://help.aliyun.com/api/ecs/allocatededicatedhosts.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AllocateDedicatedHostsWithCallback(request *AllocateDedicatedHostsRequest, callback func(response *AllocateDedicatedHostsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -79,8 +74,11 @@ type AllocateDedicatedHostsRequest struct {
 	ResourceOwnerId                requests.Integer             `position:"Query" name:"ResourceOwnerId"`
 	ClientToken                    string                       `position:"Query" name:"ClientToken"`
 	Description                    string                       `position:"Query" name:"Description"`
+	CpuOverCommitRatio             requests.Float               `position:"Query" name:"CpuOverCommitRatio"`
 	ResourceGroupId                string                       `position:"Query" name:"ResourceGroupId"`
+	MinQuantity                    requests.Integer             `position:"Query" name:"MinQuantity"`
 	ActionOnMaintenance            string                       `position:"Query" name:"ActionOnMaintenance"`
+	DedicatedHostClusterId         string                       `position:"Query" name:"DedicatedHostClusterId"`
 	Tag                            *[]AllocateDedicatedHostsTag `position:"Query" name:"Tag"  type:"Repeated"`
 	DedicatedHostType              string                       `position:"Query" name:"DedicatedHostType"`
 	AutoRenewPeriod                requests.Integer             `position:"Query" name:"AutoRenewPeriod"`
@@ -95,6 +93,7 @@ type AllocateDedicatedHostsRequest struct {
 	AutoRenew                      requests.Boolean             `position:"Query" name:"AutoRenew"`
 	NetworkAttributesSlbUdpTimeout requests.Integer             `position:"Query" name:"NetworkAttributes.SlbUdpTimeout"`
 	ZoneId                         string                       `position:"Query" name:"ZoneId"`
+	AutoPlacement                  string                       `position:"Query" name:"AutoPlacement"`
 	ChargeType                     string                       `position:"Query" name:"ChargeType"`
 	NetworkAttributesUdpTimeout    requests.Integer             `position:"Query" name:"NetworkAttributes.UdpTimeout"`
 }
@@ -118,6 +117,7 @@ func CreateAllocateDedicatedHostsRequest() (request *AllocateDedicatedHostsReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AllocateDedicatedHosts", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

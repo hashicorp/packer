@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyHaVipAttribute invokes the ecs.ModifyHaVipAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhavipattribute.html
 func (client *Client) ModifyHaVipAttribute(request *ModifyHaVipAttributeRequest) (response *ModifyHaVipAttributeResponse, err error) {
 	response = CreateModifyHaVipAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyHaVipAttribute(request *ModifyHaVipAttributeRequest)
 }
 
 // ModifyHaVipAttributeWithChan invokes the ecs.ModifyHaVipAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhavipattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyHaVipAttributeWithChan(request *ModifyHaVipAttributeRequest) (<-chan *ModifyHaVipAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyHaVipAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyHaVipAttributeWithChan(request *ModifyHaVipAttribute
 }
 
 // ModifyHaVipAttributeWithCallback invokes the ecs.ModifyHaVipAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhavipattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyHaVipAttributeWithCallback(request *ModifyHaVipAttributeRequest, callback func(response *ModifyHaVipAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,12 @@ func (client *Client) ModifyHaVipAttributeWithCallback(request *ModifyHaVipAttri
 // ModifyHaVipAttributeRequest is the request struct for api ModifyHaVipAttribute
 type ModifyHaVipAttributeRequest struct {
 	*requests.RpcRequest
-	HaVipId              string           `position:"Query" name:"HaVipId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	Description          string           `position:"Query" name:"Description"`
+	HaVipId              string           `position:"Query" name:"HaVipId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -97,6 +92,7 @@ func CreateModifyHaVipAttributeRequest() (request *ModifyHaVipAttributeRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyHaVipAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

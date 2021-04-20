@@ -21,7 +21,6 @@ import (
 )
 
 // ModifySecurityGroupAttribute invokes the ecs.ModifySecurityGroupAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygroupattribute.html
 func (client *Client) ModifySecurityGroupAttribute(request *ModifySecurityGroupAttributeRequest) (response *ModifySecurityGroupAttributeResponse, err error) {
 	response = CreateModifySecurityGroupAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifySecurityGroupAttribute(request *ModifySecurityGroupA
 }
 
 // ModifySecurityGroupAttributeWithChan invokes the ecs.ModifySecurityGroupAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygroupattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifySecurityGroupAttributeWithChan(request *ModifySecurityGroupAttributeRequest) (<-chan *ModifySecurityGroupAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifySecurityGroupAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifySecurityGroupAttributeWithChan(request *ModifySecuri
 }
 
 // ModifySecurityGroupAttributeWithCallback invokes the ecs.ModifySecurityGroupAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifysecuritygroupattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifySecurityGroupAttributeWithCallback(request *ModifySecurityGroupAttributeRequest, callback func(response *ModifySecurityGroupAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) ModifySecurityGroupAttributeWithCallback(request *ModifySe
 type ModifySecurityGroupAttributeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	SecurityGroupId      string           `position:"Query" name:"SecurityGroupId"`
 	Description          string           `position:"Query" name:"Description"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	SecurityGroupName    string           `position:"Query" name:"SecurityGroupName"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
 // ModifySecurityGroupAttributeResponse is the response struct for api ModifySecurityGroupAttribute
@@ -97,6 +92,7 @@ func CreateModifySecurityGroupAttributeRequest() (request *ModifySecurityGroupAt
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifySecurityGroupAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

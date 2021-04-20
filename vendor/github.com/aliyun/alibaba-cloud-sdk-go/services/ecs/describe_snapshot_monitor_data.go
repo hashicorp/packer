@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeSnapshotMonitorData invokes the ecs.DescribeSnapshotMonitorData API synchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotmonitordata.html
 func (client *Client) DescribeSnapshotMonitorData(request *DescribeSnapshotMonitorDataRequest) (response *DescribeSnapshotMonitorDataResponse, err error) {
 	response = CreateDescribeSnapshotMonitorDataResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeSnapshotMonitorData(request *DescribeSnapshotMonit
 }
 
 // DescribeSnapshotMonitorDataWithChan invokes the ecs.DescribeSnapshotMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSnapshotMonitorDataWithChan(request *DescribeSnapshotMonitorDataRequest) (<-chan *DescribeSnapshotMonitorDataResponse, <-chan error) {
 	responseChan := make(chan *DescribeSnapshotMonitorDataResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeSnapshotMonitorDataWithChan(request *DescribeSnaps
 }
 
 // DescribeSnapshotMonitorDataWithCallback invokes the ecs.DescribeSnapshotMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSnapshotMonitorDataWithCallback(request *DescribeSnapshotMonitorDataRequest, callback func(response *DescribeSnapshotMonitorDataResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,13 @@ func (client *Client) DescribeSnapshotMonitorDataWithCallback(request *DescribeS
 type DescribeSnapshotMonitorDataRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	StartTime            string           `position:"Query" name:"StartTime"`
 	Period               requests.Integer `position:"Query" name:"Period"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	EndTime              string           `position:"Query" name:"EndTime"`
-	StartTime            string           `position:"Query" name:"StartTime"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	Category             string           `position:"Query" name:"Category"`
 }
 
 // DescribeSnapshotMonitorDataResponse is the response struct for api DescribeSnapshotMonitorData
@@ -98,6 +94,7 @@ func CreateDescribeSnapshotMonitorDataRequest() (request *DescribeSnapshotMonito
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeSnapshotMonitorData", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceDeployment invokes the ecs.ModifyInstanceDeployment API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancedeployment.html
 func (client *Client) ModifyInstanceDeployment(request *ModifyInstanceDeploymentRequest) (response *ModifyInstanceDeploymentResponse, err error) {
 	response = CreateModifyInstanceDeploymentResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceDeployment(request *ModifyInstanceDeployment
 }
 
 // ModifyInstanceDeploymentWithChan invokes the ecs.ModifyInstanceDeployment API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancedeployment.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceDeploymentWithChan(request *ModifyInstanceDeploymentRequest) (<-chan *ModifyInstanceDeploymentResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceDeploymentResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceDeploymentWithChan(request *ModifyInstanceDe
 }
 
 // ModifyInstanceDeploymentWithCallback invokes the ecs.ModifyInstanceDeployment API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancedeployment.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceDeploymentWithCallback(request *ModifyInstanceDeploymentRequest, callback func(response *ModifyInstanceDeploymentResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,14 +71,20 @@ func (client *Client) ModifyInstanceDeploymentWithCallback(request *ModifyInstan
 // ModifyInstanceDeploymentRequest is the request struct for api ModifyInstanceDeployment
 type ModifyInstanceDeploymentRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	DeploymentSetId      string           `position:"Query" name:"DeploymentSetId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DedicatedHostId      string           `position:"Query" name:"DedicatedHostId"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	Force                requests.Boolean `position:"Query" name:"Force"`
+	ResourceOwnerId        requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	DeploymentSetGroupNo   requests.Integer `position:"Query" name:"DeploymentSetGroupNo"`
+	DedicatedHostClusterId string           `position:"Query" name:"DedicatedHostClusterId"`
+	InstanceType           string           `position:"Query" name:"InstanceType"`
+	DeploymentSetId        string           `position:"Query" name:"DeploymentSetId"`
+	ResourceOwnerAccount   string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount           string           `position:"Query" name:"OwnerAccount"`
+	Tenancy                string           `position:"Query" name:"Tenancy"`
+	DedicatedHostId        string           `position:"Query" name:"DedicatedHostId"`
+	OwnerId                requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId             string           `position:"Query" name:"InstanceId"`
+	Force                  requests.Boolean `position:"Query" name:"Force"`
+	MigrationType          string           `position:"Query" name:"MigrationType"`
+	Affinity               string           `position:"Query" name:"Affinity"`
 }
 
 // ModifyInstanceDeploymentResponse is the response struct for api ModifyInstanceDeployment
@@ -98,6 +99,7 @@ func CreateModifyInstanceDeploymentRequest() (request *ModifyInstanceDeploymentR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceDeployment", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

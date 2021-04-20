@@ -13,7 +13,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
-	alicloudecsbuilder "github.com/hashicorp/packer/builder/alicloud/ecs"
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
 	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
@@ -39,7 +38,6 @@ import (
 	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
-	alicloudimportpostprocessor "github.com/hashicorp/packer/post-processor/alicloud-import"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -74,7 +72,6 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packersdk.Builder{
-	"alicloud-ecs":     new(alicloudecsbuilder.Builder),
 	"azure-arm":        new(azurearmbuilder.Builder),
 	"azure-chroot":     new(azurechrootbuilder.Builder),
 	"azure-dtl":        new(azuredtlbuilder.Builder),
@@ -122,7 +119,6 @@ var Provisioners = map[string]packersdk.Provisioner{
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{
-	"alicloud-import":     new(alicloudimportpostprocessor.PostProcessor),
 	"artifice":            new(artificepostprocessor.PostProcessor),
 	"checksum":            new(checksumpostprocessor.PostProcessor),
 	"compress":            new(compresspostprocessor.PostProcessor),

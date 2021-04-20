@@ -21,7 +21,6 @@ import (
 )
 
 // CreateHpcCluster invokes the ecs.CreateHpcCluster API synchronously
-// api document: https://help.aliyun.com/api/ecs/createhpccluster.html
 func (client *Client) CreateHpcCluster(request *CreateHpcClusterRequest) (response *CreateHpcClusterResponse, err error) {
 	response = CreateCreateHpcClusterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateHpcCluster(request *CreateHpcClusterRequest) (respon
 }
 
 // CreateHpcClusterWithChan invokes the ecs.CreateHpcCluster API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createhpccluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateHpcClusterWithChan(request *CreateHpcClusterRequest) (<-chan *CreateHpcClusterResponse, <-chan error) {
 	responseChan := make(chan *CreateHpcClusterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateHpcClusterWithChan(request *CreateHpcClusterRequest)
 }
 
 // CreateHpcClusterWithCallback invokes the ecs.CreateHpcCluster API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createhpccluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateHpcClusterWithCallback(request *CreateHpcClusterRequest, callback func(response *CreateHpcClusterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -98,6 +93,7 @@ func CreateCreateHpcClusterRequest() (request *CreateHpcClusterRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateHpcCluster", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

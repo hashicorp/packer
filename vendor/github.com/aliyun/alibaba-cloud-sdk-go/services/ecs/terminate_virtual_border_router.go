@@ -21,7 +21,6 @@ import (
 )
 
 // TerminateVirtualBorderRouter invokes the ecs.TerminateVirtualBorderRouter API synchronously
-// api document: https://help.aliyun.com/api/ecs/terminatevirtualborderrouter.html
 func (client *Client) TerminateVirtualBorderRouter(request *TerminateVirtualBorderRouterRequest) (response *TerminateVirtualBorderRouterResponse, err error) {
 	response = CreateTerminateVirtualBorderRouterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) TerminateVirtualBorderRouter(request *TerminateVirtualBord
 }
 
 // TerminateVirtualBorderRouterWithChan invokes the ecs.TerminateVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/terminatevirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) TerminateVirtualBorderRouterWithChan(request *TerminateVirtualBorderRouterRequest) (<-chan *TerminateVirtualBorderRouterResponse, <-chan error) {
 	responseChan := make(chan *TerminateVirtualBorderRouterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) TerminateVirtualBorderRouterWithChan(request *TerminateVir
 }
 
 // TerminateVirtualBorderRouterWithCallback invokes the ecs.TerminateVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/terminatevirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) TerminateVirtualBorderRouterWithCallback(request *TerminateVirtualBorderRouterRequest, callback func(response *TerminateVirtualBorderRouterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,11 @@ func (client *Client) TerminateVirtualBorderRouterWithCallback(request *Terminat
 type TerminateVirtualBorderRouterRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	UserCidr             string           `position:"Query" name:"UserCidr"`
 	VbrId                string           `position:"Query" name:"VbrId"`
+	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -97,6 +92,7 @@ func CreateTerminateVirtualBorderRouterRequest() (request *TerminateVirtualBorde
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "TerminateVirtualBorderRouter", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

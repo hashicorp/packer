@@ -21,7 +21,6 @@ import (
 )
 
 // EnablePhysicalConnection invokes the ecs.EnablePhysicalConnection API synchronously
-// api document: https://help.aliyun.com/api/ecs/enablephysicalconnection.html
 func (client *Client) EnablePhysicalConnection(request *EnablePhysicalConnectionRequest) (response *EnablePhysicalConnectionResponse, err error) {
 	response = CreateEnablePhysicalConnectionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) EnablePhysicalConnection(request *EnablePhysicalConnection
 }
 
 // EnablePhysicalConnectionWithChan invokes the ecs.EnablePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/enablephysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) EnablePhysicalConnectionWithChan(request *EnablePhysicalConnectionRequest) (<-chan *EnablePhysicalConnectionResponse, <-chan error) {
 	responseChan := make(chan *EnablePhysicalConnectionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) EnablePhysicalConnectionWithChan(request *EnablePhysicalCo
 }
 
 // EnablePhysicalConnectionWithCallback invokes the ecs.EnablePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/enablephysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) EnablePhysicalConnectionWithCallback(request *EnablePhysicalConnectionRequest, callback func(response *EnablePhysicalConnectionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) EnablePhysicalConnectionWithCallback(request *EnablePhysic
 type EnablePhysicalConnectionRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
 }
 
 // EnablePhysicalConnectionResponse is the response struct for api EnablePhysicalConnection
@@ -97,6 +92,7 @@ func CreateEnablePhysicalConnectionRequest() (request *EnablePhysicalConnectionR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "EnablePhysicalConnection", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

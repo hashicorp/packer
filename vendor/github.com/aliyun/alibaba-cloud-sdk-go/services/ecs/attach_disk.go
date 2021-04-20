@@ -21,7 +21,6 @@ import (
 )
 
 // AttachDisk invokes the ecs.AttachDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/attachdisk.html
 func (client *Client) AttachDisk(request *AttachDiskRequest) (response *AttachDiskResponse, err error) {
 	response = CreateAttachDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AttachDisk(request *AttachDiskRequest) (response *AttachDi
 }
 
 // AttachDiskWithChan invokes the ecs.AttachDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachDiskWithChan(request *AttachDiskRequest) (<-chan *AttachDiskResponse, <-chan error) {
 	responseChan := make(chan *AttachDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AttachDiskWithChan(request *AttachDiskRequest) (<-chan *At
 }
 
 // AttachDiskWithCallback invokes the ecs.AttachDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachDiskWithCallback(request *AttachDiskRequest, callback func(response *AttachDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,16 @@ func (client *Client) AttachDiskWithCallback(request *AttachDiskRequest, callbac
 type AttachDiskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	KeyPairName          string           `position:"Query" name:"KeyPairName"`
+	Bootable             requests.Boolean `position:"Query" name:"Bootable"`
+	Password             string           `position:"Query" name:"Password"`
+	DiskId               string           `position:"Query" name:"DiskId"`
+	DeleteWithInstance   requests.Boolean `position:"Query" name:"DeleteWithInstance"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DiskId               string           `position:"Query" name:"DiskId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 	Device               string           `position:"Query" name:"Device"`
-	DeleteWithInstance   requests.Boolean `position:"Query" name:"DeleteWithInstance"`
 }
 
 // AttachDiskResponse is the response struct for api AttachDisk
@@ -98,6 +96,7 @@ func CreateAttachDiskRequest() (request *AttachDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AttachDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

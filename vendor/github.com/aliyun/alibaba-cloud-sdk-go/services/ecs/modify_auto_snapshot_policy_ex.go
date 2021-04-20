@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyAutoSnapshotPolicyEx invokes the ecs.ModifyAutoSnapshotPolicyEx API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicyex.html
 func (client *Client) ModifyAutoSnapshotPolicyEx(request *ModifyAutoSnapshotPolicyExRequest) (response *ModifyAutoSnapshotPolicyExResponse, err error) {
 	response = CreateModifyAutoSnapshotPolicyExResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyAutoSnapshotPolicyEx(request *ModifyAutoSnapshotPoli
 }
 
 // ModifyAutoSnapshotPolicyExWithChan invokes the ecs.ModifyAutoSnapshotPolicyEx API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicyex.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyAutoSnapshotPolicyExWithChan(request *ModifyAutoSnapshotPolicyExRequest) (<-chan *ModifyAutoSnapshotPolicyExResponse, <-chan error) {
 	responseChan := make(chan *ModifyAutoSnapshotPolicyExResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyAutoSnapshotPolicyExWithChan(request *ModifyAutoSnap
 }
 
 // ModifyAutoSnapshotPolicyExWithCallback invokes the ecs.ModifyAutoSnapshotPolicyEx API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicyex.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyAutoSnapshotPolicyExWithCallback(request *ModifyAutoSnapshotPolicyExRequest, callback func(response *ModifyAutoSnapshotPolicyExResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,14 +71,17 @@ func (client *Client) ModifyAutoSnapshotPolicyExWithCallback(request *ModifyAuto
 // ModifyAutoSnapshotPolicyExRequest is the request struct for api ModifyAutoSnapshotPolicyEx
 type ModifyAutoSnapshotPolicyExRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId        requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount   string           `position:"Query" name:"ResourceOwnerAccount"`
-	AutoSnapshotPolicyId   string           `position:"Query" name:"autoSnapshotPolicyId"`
-	TimePoints             string           `position:"Query" name:"timePoints"`
-	RetentionDays          requests.Integer `position:"Query" name:"retentionDays"`
-	OwnerId                requests.Integer `position:"Query" name:"OwnerId"`
-	RepeatWeekdays         string           `position:"Query" name:"repeatWeekdays"`
-	AutoSnapshotPolicyName string           `position:"Query" name:"autoSnapshotPolicyName"`
+	ResourceOwnerId              requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	AutoSnapshotPolicyId         string           `position:"Query" name:"autoSnapshotPolicyId"`
+	CopiedSnapshotsRetentionDays requests.Integer `position:"Query" name:"CopiedSnapshotsRetentionDays"`
+	TimePoints                   string           `position:"Query" name:"timePoints"`
+	RepeatWeekdays               string           `position:"Query" name:"repeatWeekdays"`
+	EnableCrossRegionCopy        requests.Boolean `position:"Query" name:"EnableCrossRegionCopy"`
+	ResourceOwnerAccount         string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId                      requests.Integer `position:"Query" name:"OwnerId"`
+	AutoSnapshotPolicyName       string           `position:"Query" name:"autoSnapshotPolicyName"`
+	RetentionDays                requests.Integer `position:"Query" name:"retentionDays"`
+	TargetCopyRegions            string           `position:"Query" name:"TargetCopyRegions"`
 }
 
 // ModifyAutoSnapshotPolicyExResponse is the response struct for api ModifyAutoSnapshotPolicyEx
@@ -98,6 +96,7 @@ func CreateModifyAutoSnapshotPolicyExRequest() (request *ModifyAutoSnapshotPolic
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyAutoSnapshotPolicyEx", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteNetworkInterfacePermission invokes the ecs.DeleteNetworkInterfacePermission API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterfacepermission.html
 func (client *Client) DeleteNetworkInterfacePermission(request *DeleteNetworkInterfacePermissionRequest) (response *DeleteNetworkInterfacePermissionResponse, err error) {
 	response = CreateDeleteNetworkInterfacePermissionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteNetworkInterfacePermission(request *DeleteNetworkInt
 }
 
 // DeleteNetworkInterfacePermissionWithChan invokes the ecs.DeleteNetworkInterfacePermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterfacepermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteNetworkInterfacePermissionWithChan(request *DeleteNetworkInterfacePermissionRequest) (<-chan *DeleteNetworkInterfacePermissionResponse, <-chan error) {
 	responseChan := make(chan *DeleteNetworkInterfacePermissionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteNetworkInterfacePermissionWithChan(request *DeleteNe
 }
 
 // DeleteNetworkInterfacePermissionWithCallback invokes the ecs.DeleteNetworkInterfacePermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletenetworkinterfacepermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteNetworkInterfacePermissionWithCallback(request *DeleteNetworkInterfacePermissionRequest, callback func(response *DeleteNetworkInterfacePermissionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateDeleteNetworkInterfacePermissionRequest() (request *DeleteNetworkInte
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteNetworkInterfacePermission", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

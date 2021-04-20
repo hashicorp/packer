@@ -21,7 +21,6 @@ import (
 )
 
 // RemoveBandwidthPackageIps invokes the ecs.RemoveBandwidthPackageIps API synchronously
-// api document: https://help.aliyun.com/api/ecs/removebandwidthpackageips.html
 func (client *Client) RemoveBandwidthPackageIps(request *RemoveBandwidthPackageIpsRequest) (response *RemoveBandwidthPackageIpsResponse, err error) {
 	response = CreateRemoveBandwidthPackageIpsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) RemoveBandwidthPackageIps(request *RemoveBandwidthPackageI
 }
 
 // RemoveBandwidthPackageIpsWithChan invokes the ecs.RemoveBandwidthPackageIps API asynchronously
-// api document: https://help.aliyun.com/api/ecs/removebandwidthpackageips.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RemoveBandwidthPackageIpsWithChan(request *RemoveBandwidthPackageIpsRequest) (<-chan *RemoveBandwidthPackageIpsResponse, <-chan error) {
 	responseChan := make(chan *RemoveBandwidthPackageIpsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) RemoveBandwidthPackageIpsWithChan(request *RemoveBandwidth
 }
 
 // RemoveBandwidthPackageIpsWithCallback invokes the ecs.RemoveBandwidthPackageIps API asynchronously
-// api document: https://help.aliyun.com/api/ecs/removebandwidthpackageips.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RemoveBandwidthPackageIpsWithCallback(request *RemoveBandwidthPackageIpsRequest, callback func(response *RemoveBandwidthPackageIpsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,11 +71,11 @@ func (client *Client) RemoveBandwidthPackageIpsWithCallback(request *RemoveBandw
 // RemoveBandwidthPackageIpsRequest is the request struct for api RemoveBandwidthPackageIps
 type RemoveBandwidthPackageIpsRequest struct {
 	*requests.RpcRequest
-	RemovedIpAddresses   *[]string        `position:"Query" name:"RemovedIpAddresses"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	ClientToken          string           `position:"Query" name:"ClientToken"`
+	RemovedIpAddresses   *[]string        `position:"Query" name:"RemovedIpAddresses"  type:"Repeated"`
 	BandwidthPackageId   string           `position:"Query" name:"BandwidthPackageId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
@@ -97,6 +92,7 @@ func CreateRemoveBandwidthPackageIpsRequest() (request *RemoveBandwidthPackageIp
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "RemoveBandwidthPackageIps", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

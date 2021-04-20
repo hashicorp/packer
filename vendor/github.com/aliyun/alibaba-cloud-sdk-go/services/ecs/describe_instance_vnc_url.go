@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceVncUrl invokes the ecs.DescribeInstanceVncUrl API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncurl.html
 func (client *Client) DescribeInstanceVncUrl(request *DescribeInstanceVncUrlRequest) (response *DescribeInstanceVncUrlResponse, err error) {
 	response = CreateDescribeInstanceVncUrlResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceVncUrl(request *DescribeInstanceVncUrlRequ
 }
 
 // DescribeInstanceVncUrlWithChan invokes the ecs.DescribeInstanceVncUrl API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncurl.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceVncUrlWithChan(request *DescribeInstanceVncUrlRequest) (<-chan *DescribeInstanceVncUrlResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceVncUrlResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceVncUrlWithChan(request *DescribeInstanceVn
 }
 
 // DescribeInstanceVncUrlWithCallback invokes the ecs.DescribeInstanceVncUrl API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancevncurl.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceVncUrlWithCallback(request *DescribeInstanceVncUrlRequest, callback func(response *DescribeInstanceVncUrlResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DescribeInstanceVncUrlWithCallback(request *DescribeInstan
 type DescribeInstanceVncUrlRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DescribeInstanceVncUrlResponse is the response struct for api DescribeInstanceVncUrl
@@ -96,6 +91,7 @@ func CreateDescribeInstanceVncUrlRequest() (request *DescribeInstanceVncUrlReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceVncUrl", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // ImportKeyPair invokes the ecs.ImportKeyPair API synchronously
-// api document: https://help.aliyun.com/api/ecs/importkeypair.html
 func (client *Client) ImportKeyPair(request *ImportKeyPairRequest) (response *ImportKeyPairResponse, err error) {
 	response = CreateImportKeyPairResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ImportKeyPair(request *ImportKeyPairRequest) (response *Im
 }
 
 // ImportKeyPairWithChan invokes the ecs.ImportKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/importkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ImportKeyPairWithChan(request *ImportKeyPairRequest) (<-chan *ImportKeyPairResponse, <-chan error) {
 	responseChan := make(chan *ImportKeyPairResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ImportKeyPairWithChan(request *ImportKeyPairRequest) (<-ch
 }
 
 // ImportKeyPairWithCallback invokes the ecs.ImportKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/importkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ImportKeyPairWithCallback(request *ImportKeyPairRequest, callback func(response *ImportKeyPairResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,11 +71,19 @@ func (client *Client) ImportKeyPairWithCallback(request *ImportKeyPairRequest, c
 // ImportKeyPairRequest is the request struct for api ImportKeyPair
 type ImportKeyPairRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	PublicKeyBody        string           `position:"Query" name:"PublicKeyBody"`
-	KeyPairName          string           `position:"Query" name:"KeyPairName"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	ResourceOwnerId      requests.Integer    `position:"Query" name:"ResourceOwnerId"`
+	KeyPairName          string              `position:"Query" name:"KeyPairName"`
+	ResourceGroupId      string              `position:"Query" name:"ResourceGroupId"`
+	Tag                  *[]ImportKeyPairTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string              `position:"Query" name:"ResourceOwnerAccount"`
+	PublicKeyBody        string              `position:"Query" name:"PublicKeyBody"`
+	OwnerId              requests.Integer    `position:"Query" name:"OwnerId"`
+}
+
+// ImportKeyPairTag is a repeated param struct in ImportKeyPairRequest
+type ImportKeyPairTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // ImportKeyPairResponse is the response struct for api ImportKeyPair
@@ -97,6 +100,7 @@ func CreateImportKeyPairRequest() (request *ImportKeyPairRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ImportKeyPair", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

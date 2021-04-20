@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyAutoSnapshotPolicy invokes the ecs.ModifyAutoSnapshotPolicy API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicy.html
 func (client *Client) ModifyAutoSnapshotPolicy(request *ModifyAutoSnapshotPolicyRequest) (response *ModifyAutoSnapshotPolicyResponse, err error) {
 	response = CreateModifyAutoSnapshotPolicyResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyAutoSnapshotPolicy(request *ModifyAutoSnapshotPolicy
 }
 
 // ModifyAutoSnapshotPolicyWithChan invokes the ecs.ModifyAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyAutoSnapshotPolicyWithChan(request *ModifyAutoSnapshotPolicyRequest) (<-chan *ModifyAutoSnapshotPolicyResponse, <-chan error) {
 	responseChan := make(chan *ModifyAutoSnapshotPolicyResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyAutoSnapshotPolicyWithChan(request *ModifyAutoSnapsh
 }
 
 // ModifyAutoSnapshotPolicyWithCallback invokes the ecs.ModifyAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyAutoSnapshotPolicyWithCallback(request *ModifyAutoSnapshotPolicyRequest, callback func(response *ModifyAutoSnapshotPolicyResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -79,14 +74,14 @@ type ModifyAutoSnapshotPolicyRequest struct {
 	DataDiskPolicyEnabled             requests.Boolean `position:"Query" name:"DataDiskPolicyEnabled"`
 	ResourceOwnerId                   requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	DataDiskPolicyRetentionDays       requests.Integer `position:"Query" name:"DataDiskPolicyRetentionDays"`
-	ResourceOwnerAccount              string           `position:"Query" name:"ResourceOwnerAccount"`
 	SystemDiskPolicyRetentionLastWeek requests.Boolean `position:"Query" name:"SystemDiskPolicyRetentionLastWeek"`
+	SystemDiskPolicyRetentionDays     requests.Integer `position:"Query" name:"SystemDiskPolicyRetentionDays"`
+	DataDiskPolicyTimePeriod          requests.Integer `position:"Query" name:"DataDiskPolicyTimePeriod"`
+	ResourceOwnerAccount              string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount                      string           `position:"Query" name:"OwnerAccount"`
 	SystemDiskPolicyTimePeriod        requests.Integer `position:"Query" name:"SystemDiskPolicyTimePeriod"`
 	OwnerId                           requests.Integer `position:"Query" name:"OwnerId"`
 	DataDiskPolicyRetentionLastWeek   requests.Boolean `position:"Query" name:"DataDiskPolicyRetentionLastWeek"`
-	SystemDiskPolicyRetentionDays     requests.Integer `position:"Query" name:"SystemDiskPolicyRetentionDays"`
-	DataDiskPolicyTimePeriod          requests.Integer `position:"Query" name:"DataDiskPolicyTimePeriod"`
 	SystemDiskPolicyEnabled           requests.Boolean `position:"Query" name:"SystemDiskPolicyEnabled"`
 }
 
@@ -102,6 +97,7 @@ func CreateModifyAutoSnapshotPolicyRequest() (request *ModifyAutoSnapshotPolicyR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyAutoSnapshotPolicy", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

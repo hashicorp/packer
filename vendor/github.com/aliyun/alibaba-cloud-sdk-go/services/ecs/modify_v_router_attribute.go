@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyVRouterAttribute invokes the ecs.ModifyVRouterAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvrouterattribute.html
 func (client *Client) ModifyVRouterAttribute(request *ModifyVRouterAttributeRequest) (response *ModifyVRouterAttributeResponse, err error) {
 	response = CreateModifyVRouterAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyVRouterAttribute(request *ModifyVRouterAttributeRequ
 }
 
 // ModifyVRouterAttributeWithChan invokes the ecs.ModifyVRouterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvrouterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVRouterAttributeWithChan(request *ModifyVRouterAttributeRequest) (<-chan *ModifyVRouterAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyVRouterAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyVRouterAttributeWithChan(request *ModifyVRouterAttri
 }
 
 // ModifyVRouterAttributeWithCallback invokes the ecs.ModifyVRouterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvrouterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVRouterAttributeWithCallback(request *ModifyVRouterAttributeRequest, callback func(response *ModifyVRouterAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,12 @@ func (client *Client) ModifyVRouterAttributeWithCallback(request *ModifyVRouterA
 // ModifyVRouterAttributeRequest is the request struct for api ModifyVRouterAttribute
 type ModifyVRouterAttributeRequest struct {
 	*requests.RpcRequest
-	VRouterName          string           `position:"Query" name:"VRouterName"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	VRouterId            string           `position:"Query" name:"VRouterId"`
+	Description          string           `position:"Query" name:"Description"`
+	VRouterName          string           `position:"Query" name:"VRouterName"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Description          string           `position:"Query" name:"Description"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -97,6 +92,7 @@ func CreateModifyVRouterAttributeRequest() (request *ModifyVRouterAttributeReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyVRouterAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

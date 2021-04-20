@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyPrepayInstanceSpec invokes the ecs.ModifyPrepayInstanceSpec API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyprepayinstancespec.html
 func (client *Client) ModifyPrepayInstanceSpec(request *ModifyPrepayInstanceSpecRequest) (response *ModifyPrepayInstanceSpecResponse, err error) {
 	response = CreateModifyPrepayInstanceSpecResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyPrepayInstanceSpec(request *ModifyPrepayInstanceSpec
 }
 
 // ModifyPrepayInstanceSpecWithChan invokes the ecs.ModifyPrepayInstanceSpec API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyprepayinstancespec.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyPrepayInstanceSpecWithChan(request *ModifyPrepayInstanceSpecRequest) (<-chan *ModifyPrepayInstanceSpecResponse, <-chan error) {
 	responseChan := make(chan *ModifyPrepayInstanceSpecResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyPrepayInstanceSpecWithChan(request *ModifyPrepayInst
 }
 
 // ModifyPrepayInstanceSpecWithCallback invokes the ecs.ModifyPrepayInstanceSpec API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyprepayinstancespec.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyPrepayInstanceSpecWithCallback(request *ModifyPrepayInstanceSpecRequest, callback func(response *ModifyPrepayInstanceSpecResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,16 +72,19 @@ func (client *Client) ModifyPrepayInstanceSpecWithCallback(request *ModifyPrepay
 type ModifyPrepayInstanceSpecRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	OperatorType         string           `position:"Query" name:"OperatorType"`
 	SystemDiskCategory   string           `position:"Query" name:"SystemDisk.Category"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	RebootTime           string           `position:"Query" name:"RebootTime"`
 	MigrateAcrossZone    requests.Boolean `position:"Query" name:"MigrateAcrossZone"`
 	InstanceType         string           `position:"Query" name:"InstanceType"`
+	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
+	RebootWhenFinished   requests.Boolean `position:"Query" name:"RebootWhenFinished"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	EndTime              string           `position:"Query" name:"EndTime"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // ModifyPrepayInstanceSpecResponse is the response struct for api ModifyPrepayInstanceSpec
@@ -102,6 +100,7 @@ func CreateModifyPrepayInstanceSpecRequest() (request *ModifyPrepayInstanceSpecR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyPrepayInstanceSpec", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

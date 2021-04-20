@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceChargeType invokes the ecs.ModifyInstanceChargeType API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancechargetype.html
 func (client *Client) ModifyInstanceChargeType(request *ModifyInstanceChargeTypeRequest) (response *ModifyInstanceChargeTypeResponse, err error) {
 	response = CreateModifyInstanceChargeTypeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceChargeType(request *ModifyInstanceChargeType
 }
 
 // ModifyInstanceChargeTypeWithChan invokes the ecs.ModifyInstanceChargeType API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancechargetype.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceChargeTypeWithChan(request *ModifyInstanceChargeTypeRequest) (<-chan *ModifyInstanceChargeTypeResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceChargeTypeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceChargeTypeWithChan(request *ModifyInstanceCh
 }
 
 // ModifyInstanceChargeTypeWithCallback invokes the ecs.ModifyInstanceChargeType API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancechargetype.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceChargeTypeWithCallback(request *ModifyInstanceChargeTypeRequest, callback func(response *ModifyInstanceChargeTypeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,24 +72,26 @@ func (client *Client) ModifyInstanceChargeTypeWithCallback(request *ModifyInstan
 type ModifyInstanceChargeTypeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	ClientToken          string           `position:"Query" name:"ClientToken"`
+	IsDetailFee          requests.Boolean `position:"Query" name:"IsDetailFee"`
+	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 	Period               requests.Integer `position:"Query" name:"Period"`
 	DryRun               requests.Boolean `position:"Query" name:"DryRun"`
 	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
 	IncludeDataDisks     requests.Boolean `position:"Query" name:"IncludeDataDisks"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
 	InstanceIds          string           `position:"Query" name:"InstanceIds"`
-	InstanceChargeType   string           `position:"Query" name:"InstanceChargeType"`
 }
 
 // ModifyInstanceChargeTypeResponse is the response struct for api ModifyInstanceChargeType
 type ModifyInstanceChargeTypeResponse struct {
 	*responses.BaseResponse
-	RequestId string `json:"RequestId" xml:"RequestId"`
-	OrderId   string `json:"OrderId" xml:"OrderId"`
+	RequestId      string                                   `json:"RequestId" xml:"RequestId"`
+	OrderId        string                                   `json:"OrderId" xml:"OrderId"`
+	FeeOfInstances FeeOfInstancesInModifyInstanceChargeType `json:"FeeOfInstances" xml:"FeeOfInstances"`
 }
 
 // CreateModifyInstanceChargeTypeRequest creates a request to invoke ModifyInstanceChargeType API
@@ -103,6 +100,7 @@ func CreateModifyInstanceChargeTypeRequest() (request *ModifyInstanceChargeTypeR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceChargeType", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

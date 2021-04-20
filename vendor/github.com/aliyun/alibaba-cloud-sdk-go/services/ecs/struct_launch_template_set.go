@@ -21,8 +21,8 @@ type LaunchTemplateSet struct {
 	ModifiedTime         string                        `json:"ModifiedTime" xml:"ModifiedTime"`
 	LaunchTemplateId     string                        `json:"LaunchTemplateId" xml:"LaunchTemplateId"`
 	LaunchTemplateName   string                        `json:"LaunchTemplateName" xml:"LaunchTemplateName"`
-	DefaultVersionNumber int                           `json:"DefaultVersionNumber" xml:"DefaultVersionNumber"`
-	LatestVersionNumber  int                           `json:"LatestVersionNumber" xml:"LatestVersionNumber"`
+	DefaultVersionNumber int64                         `json:"DefaultVersionNumber" xml:"DefaultVersionNumber"`
+	LatestVersionNumber  int64                         `json:"LatestVersionNumber" xml:"LatestVersionNumber"`
 	CreatedBy            string                        `json:"CreatedBy" xml:"CreatedBy"`
 	ResourceGroupId      string                        `json:"ResourceGroupId" xml:"ResourceGroupId"`
 	Tags                 TagsInDescribeLaunchTemplates `json:"Tags" xml:"Tags"`

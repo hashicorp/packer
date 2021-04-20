@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyHpcClusterAttribute invokes the ecs.ModifyHpcClusterAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhpcclusterattribute.html
 func (client *Client) ModifyHpcClusterAttribute(request *ModifyHpcClusterAttributeRequest) (response *ModifyHpcClusterAttributeResponse, err error) {
 	response = CreateModifyHpcClusterAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyHpcClusterAttribute(request *ModifyHpcClusterAttribu
 }
 
 // ModifyHpcClusterAttributeWithChan invokes the ecs.ModifyHpcClusterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhpcclusterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyHpcClusterAttributeWithChan(request *ModifyHpcClusterAttributeRequest) (<-chan *ModifyHpcClusterAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyHpcClusterAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyHpcClusterAttributeWithChan(request *ModifyHpcCluste
 }
 
 // ModifyHpcClusterAttributeWithCallback invokes the ecs.ModifyHpcClusterAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyhpcclusterattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyHpcClusterAttributeWithCallback(request *ModifyHpcClusterAttributeRequest, callback func(response *ModifyHpcClusterAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -98,6 +93,7 @@ func CreateModifyHpcClusterAttributeRequest() (request *ModifyHpcClusterAttribut
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyHpcClusterAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

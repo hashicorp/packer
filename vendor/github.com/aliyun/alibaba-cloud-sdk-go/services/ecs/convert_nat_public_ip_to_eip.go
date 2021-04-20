@@ -21,7 +21,6 @@ import (
 )
 
 // ConvertNatPublicIpToEip invokes the ecs.ConvertNatPublicIpToEip API synchronously
-// api document: https://help.aliyun.com/api/ecs/convertnatpubliciptoeip.html
 func (client *Client) ConvertNatPublicIpToEip(request *ConvertNatPublicIpToEipRequest) (response *ConvertNatPublicIpToEipResponse, err error) {
 	response = CreateConvertNatPublicIpToEipResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ConvertNatPublicIpToEip(request *ConvertNatPublicIpToEipRe
 }
 
 // ConvertNatPublicIpToEipWithChan invokes the ecs.ConvertNatPublicIpToEip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/convertnatpubliciptoeip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ConvertNatPublicIpToEipWithChan(request *ConvertNatPublicIpToEipRequest) (<-chan *ConvertNatPublicIpToEipResponse, <-chan error) {
 	responseChan := make(chan *ConvertNatPublicIpToEipResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ConvertNatPublicIpToEipWithChan(request *ConvertNatPublicI
 }
 
 // ConvertNatPublicIpToEipWithCallback invokes the ecs.ConvertNatPublicIpToEip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/convertnatpubliciptoeip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ConvertNatPublicIpToEipWithCallback(request *ConvertNatPublicIpToEipRequest, callback func(response *ConvertNatPublicIpToEipResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -94,6 +89,7 @@ func CreateConvertNatPublicIpToEipRequest() (request *ConvertNatPublicIpToEipReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ConvertNatPublicIpToEip", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

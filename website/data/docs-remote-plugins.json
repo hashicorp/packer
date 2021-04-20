@@ -1,5 +1,12 @@
 [
   {
+    "title": "Alicloud",
+    "path": "alicloud",
+    "repo": "hashicorp/packer-plugin-alicloud",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Ansible",
     "path": "ansible",
     "repo": "hashicorp/packer-plugin-ansible",

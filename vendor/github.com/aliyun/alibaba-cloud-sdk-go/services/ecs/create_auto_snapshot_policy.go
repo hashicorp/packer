@@ -21,7 +21,6 @@ import (
 )
 
 // CreateAutoSnapshotPolicy invokes the ecs.CreateAutoSnapshotPolicy API synchronously
-// api document: https://help.aliyun.com/api/ecs/createautosnapshotpolicy.html
 func (client *Client) CreateAutoSnapshotPolicy(request *CreateAutoSnapshotPolicyRequest) (response *CreateAutoSnapshotPolicyResponse, err error) {
 	response = CreateCreateAutoSnapshotPolicyResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateAutoSnapshotPolicy(request *CreateAutoSnapshotPolicy
 }
 
 // CreateAutoSnapshotPolicyWithChan invokes the ecs.CreateAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateAutoSnapshotPolicyWithChan(request *CreateAutoSnapshotPolicyRequest) (<-chan *CreateAutoSnapshotPolicyResponse, <-chan error) {
 	responseChan := make(chan *CreateAutoSnapshotPolicyResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateAutoSnapshotPolicyWithChan(request *CreateAutoSnapsh
 }
 
 // CreateAutoSnapshotPolicyWithCallback invokes the ecs.CreateAutoSnapshotPolicy API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createautosnapshotpolicy.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateAutoSnapshotPolicyWithCallback(request *CreateAutoSnapshotPolicyRequest, callback func(response *CreateAutoSnapshotPolicyResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,13 +71,23 @@ func (client *Client) CreateAutoSnapshotPolicyWithCallback(request *CreateAutoSn
 // CreateAutoSnapshotPolicyRequest is the request struct for api CreateAutoSnapshotPolicy
 type CreateAutoSnapshotPolicyRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId        requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount   string           `position:"Query" name:"ResourceOwnerAccount"`
-	TimePoints             string           `position:"Query" name:"timePoints"`
-	RetentionDays          requests.Integer `position:"Query" name:"retentionDays"`
-	OwnerId                requests.Integer `position:"Query" name:"OwnerId"`
-	RepeatWeekdays         string           `position:"Query" name:"repeatWeekdays"`
-	AutoSnapshotPolicyName string           `position:"Query" name:"autoSnapshotPolicyName"`
+	ResourceOwnerId              requests.Integer               `position:"Query" name:"ResourceOwnerId"`
+	CopiedSnapshotsRetentionDays requests.Integer               `position:"Query" name:"CopiedSnapshotsRetentionDays"`
+	TimePoints                   string                         `position:"Query" name:"timePoints"`
+	RepeatWeekdays               string                         `position:"Query" name:"repeatWeekdays"`
+	Tag                          *[]CreateAutoSnapshotPolicyTag `position:"Query" name:"Tag"  type:"Repeated"`
+	EnableCrossRegionCopy        requests.Boolean               `position:"Query" name:"EnableCrossRegionCopy"`
+	ResourceOwnerAccount         string                         `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId                      requests.Integer               `position:"Query" name:"OwnerId"`
+	AutoSnapshotPolicyName       string                         `position:"Query" name:"autoSnapshotPolicyName"`
+	RetentionDays                requests.Integer               `position:"Query" name:"retentionDays"`
+	TargetCopyRegions            string                         `position:"Query" name:"TargetCopyRegions"`
+}
+
+// CreateAutoSnapshotPolicyTag is a repeated param struct in CreateAutoSnapshotPolicyRequest
+type CreateAutoSnapshotPolicyTag struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }
 
 // CreateAutoSnapshotPolicyResponse is the response struct for api CreateAutoSnapshotPolicy
@@ -98,6 +103,7 @@ func CreateCreateAutoSnapshotPolicyRequest() (request *CreateAutoSnapshotPolicyR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateAutoSnapshotPolicy", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // EipNotifyPaid invokes the ecs.EipNotifyPaid API synchronously
-// api document: https://help.aliyun.com/api/ecs/eipnotifypaid.html
 func (client *Client) EipNotifyPaid(request *EipNotifyPaidRequest) (response *EipNotifyPaidResponse, err error) {
 	response = CreateEipNotifyPaidResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) EipNotifyPaid(request *EipNotifyPaidRequest) (response *Ei
 }
 
 // EipNotifyPaidWithChan invokes the ecs.EipNotifyPaid API asynchronously
-// api document: https://help.aliyun.com/api/ecs/eipnotifypaid.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) EipNotifyPaidWithChan(request *EipNotifyPaidRequest) (<-chan *EipNotifyPaidResponse, <-chan error) {
 	responseChan := make(chan *EipNotifyPaidResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) EipNotifyPaidWithChan(request *EipNotifyPaidRequest) (<-ch
 }
 
 // EipNotifyPaidWithCallback invokes the ecs.EipNotifyPaid API asynchronously
-// api document: https://help.aliyun.com/api/ecs/eipnotifypaid.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) EipNotifyPaidWithCallback(request *EipNotifyPaidRequest, callback func(response *EipNotifyPaidResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,10 +73,10 @@ type EipNotifyPaidRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	Data                 string           `position:"Query" name:"data"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -101,6 +96,7 @@ func CreateEipNotifyPaidRequest() (request *EipNotifyPaidRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "EipNotifyPaid", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

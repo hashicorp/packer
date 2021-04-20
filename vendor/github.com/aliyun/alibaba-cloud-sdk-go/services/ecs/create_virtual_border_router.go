@@ -21,7 +21,6 @@ import (
 )
 
 // CreateVirtualBorderRouter invokes the ecs.CreateVirtualBorderRouter API synchronously
-// api document: https://help.aliyun.com/api/ecs/createvirtualborderrouter.html
 func (client *Client) CreateVirtualBorderRouter(request *CreateVirtualBorderRouterRequest) (response *CreateVirtualBorderRouterResponse, err error) {
 	response = CreateCreateVirtualBorderRouterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateVirtualBorderRouter(request *CreateVirtualBorderRout
 }
 
 // CreateVirtualBorderRouterWithChan invokes the ecs.CreateVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createvirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateVirtualBorderRouterWithChan(request *CreateVirtualBorderRouterRequest) (<-chan *CreateVirtualBorderRouterResponse, <-chan error) {
 	responseChan := make(chan *CreateVirtualBorderRouterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateVirtualBorderRouterWithChan(request *CreateVirtualBo
 }
 
 // CreateVirtualBorderRouterWithCallback invokes the ecs.CreateVirtualBorderRouter API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createvirtualborderrouter.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateVirtualBorderRouterWithCallback(request *CreateVirtualBorderRouterRequest, callback func(response *CreateVirtualBorderRouterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -80,16 +75,16 @@ type CreateVirtualBorderRouterRequest struct {
 	CircuitCode          string           `position:"Query" name:"CircuitCode"`
 	VlanId               requests.Integer `position:"Query" name:"VlanId"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	Description          string           `position:"Query" name:"Description"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PeerGatewayIp        string           `position:"Query" name:"PeerGatewayIp"`
 	PeeringSubnetMask    string           `position:"Query" name:"PeeringSubnetMask"`
-	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
-	Name                 string           `position:"Query" name:"Name"`
 	LocalGatewayIp       string           `position:"Query" name:"LocalGatewayIp"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
+	Name                 string           `position:"Query" name:"Name"`
 	VbrOwnerId           requests.Integer `position:"Query" name:"VbrOwnerId"`
 }
 
@@ -106,6 +101,7 @@ func CreateCreateVirtualBorderRouterRequest() (request *CreateVirtualBorderRoute
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateVirtualBorderRouter", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

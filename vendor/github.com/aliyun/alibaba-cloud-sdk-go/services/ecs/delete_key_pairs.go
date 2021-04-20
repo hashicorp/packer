@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteKeyPairs invokes the ecs.DeleteKeyPairs API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletekeypairs.html
 func (client *Client) DeleteKeyPairs(request *DeleteKeyPairsRequest) (response *DeleteKeyPairsResponse, err error) {
 	response = CreateDeleteKeyPairsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteKeyPairs(request *DeleteKeyPairsRequest) (response *
 }
 
 // DeleteKeyPairsWithChan invokes the ecs.DeleteKeyPairs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletekeypairs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteKeyPairsWithChan(request *DeleteKeyPairsRequest) (<-chan *DeleteKeyPairsResponse, <-chan error) {
 	responseChan := make(chan *DeleteKeyPairsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteKeyPairsWithChan(request *DeleteKeyPairsRequest) (<-
 }
 
 // DeleteKeyPairsWithCallback invokes the ecs.DeleteKeyPairs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletekeypairs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteKeyPairsWithCallback(request *DeleteKeyPairsRequest, callback func(response *DeleteKeyPairsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,8 +72,8 @@ func (client *Client) DeleteKeyPairsWithCallback(request *DeleteKeyPairsRequest,
 type DeleteKeyPairsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	KeyPairNames         string           `position:"Query" name:"KeyPairNames"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -94,6 +89,7 @@ func CreateDeleteKeyPairsRequest() (request *DeleteKeyPairsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteKeyPairs", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeSnapshotsUsage invokes the ecs.DescribeSnapshotsUsage API synchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotsusage.html
 func (client *Client) DescribeSnapshotsUsage(request *DescribeSnapshotsUsageRequest) (response *DescribeSnapshotsUsageResponse, err error) {
 	response = CreateDescribeSnapshotsUsageResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeSnapshotsUsage(request *DescribeSnapshotsUsageRequ
 }
 
 // DescribeSnapshotsUsageWithChan invokes the ecs.DescribeSnapshotsUsage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotsusage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSnapshotsUsageWithChan(request *DescribeSnapshotsUsageRequest) (<-chan *DescribeSnapshotsUsageResponse, <-chan error) {
 	responseChan := make(chan *DescribeSnapshotsUsageResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeSnapshotsUsageWithChan(request *DescribeSnapshotsU
 }
 
 // DescribeSnapshotsUsageWithCallback invokes the ecs.DescribeSnapshotsUsage API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describesnapshotsusage.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeSnapshotsUsageWithCallback(request *DescribeSnapshotsUsageRequest, callback func(response *DescribeSnapshotsUsageResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -87,7 +82,7 @@ type DescribeSnapshotsUsageResponse struct {
 	*responses.BaseResponse
 	RequestId     string `json:"RequestId" xml:"RequestId"`
 	SnapshotCount int    `json:"SnapshotCount" xml:"SnapshotCount"`
-	SnapshotSize  int    `json:"SnapshotSize" xml:"SnapshotSize"`
+	SnapshotSize  int64  `json:"SnapshotSize" xml:"SnapshotSize"`
 }
 
 // CreateDescribeSnapshotsUsageRequest creates a request to invoke DescribeSnapshotsUsage API
@@ -96,6 +91,7 @@ func CreateDescribeSnapshotsUsageRequest() (request *DescribeSnapshotsUsageReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeSnapshotsUsage", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

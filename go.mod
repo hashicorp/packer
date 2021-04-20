@@ -9,8 +9,6 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
 	github.com/Azure/go-autorest/autorest/date v0.2.0
 	github.com/Azure/go-autorest/autorest/to v0.3.0
-	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
-	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/aws/aws-sdk-go v1.38.22
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
@@ -41,6 +39,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.9.1
+	github.com/hashicorp/packer-plugin-alicloud v0.0.2
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-ansible v0.0.2
 	github.com/hashicorp/packer-plugin-docker v0.0.7

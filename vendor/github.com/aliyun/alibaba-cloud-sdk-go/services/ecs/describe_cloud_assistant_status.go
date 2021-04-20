@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeCloudAssistantStatus invokes the ecs.DescribeCloudAssistantStatus API synchronously
-// api document: https://help.aliyun.com/api/ecs/describecloudassistantstatus.html
 func (client *Client) DescribeCloudAssistantStatus(request *DescribeCloudAssistantStatusRequest) (response *DescribeCloudAssistantStatusResponse, err error) {
 	response = CreateDescribeCloudAssistantStatusResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeCloudAssistantStatus(request *DescribeCloudAssista
 }
 
 // DescribeCloudAssistantStatusWithChan invokes the ecs.DescribeCloudAssistantStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describecloudassistantstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeCloudAssistantStatusWithChan(request *DescribeCloudAssistantStatusRequest) (<-chan *DescribeCloudAssistantStatusResponse, <-chan error) {
 	responseChan := make(chan *DescribeCloudAssistantStatusResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeCloudAssistantStatusWithChan(request *DescribeClou
 }
 
 // DescribeCloudAssistantStatusWithCallback invokes the ecs.DescribeCloudAssistantStatus API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describecloudassistantstatus.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeCloudAssistantStatusWithCallback(request *DescribeCloudAssistantStatusRequest, callback func(response *DescribeCloudAssistantStatusResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,8 +72,11 @@ func (client *Client) DescribeCloudAssistantStatusWithCallback(request *Describe
 type DescribeCloudAssistantStatusRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OSType               string           `position:"Query" name:"OSType"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	InstanceId           *[]string        `position:"Query" name:"InstanceId"  type:"Repeated"`
 }
@@ -87,6 +85,9 @@ type DescribeCloudAssistantStatusRequest struct {
 type DescribeCloudAssistantStatusResponse struct {
 	*responses.BaseResponse
 	RequestId                       string                          `json:"RequestId" xml:"RequestId"`
+	TotalCount                      int64                           `json:"TotalCount" xml:"TotalCount"`
+	PageNumber                      int64                           `json:"PageNumber" xml:"PageNumber"`
+	PageSize                        int64                           `json:"PageSize" xml:"PageSize"`
 	InstanceCloudAssistantStatusSet InstanceCloudAssistantStatusSet `json:"InstanceCloudAssistantStatusSet" xml:"InstanceCloudAssistantStatusSet"`
 }
 
@@ -96,6 +97,7 @@ func CreateDescribeCloudAssistantStatusRequest() (request *DescribeCloudAssistan
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeCloudAssistantStatus", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

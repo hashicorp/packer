@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDiskChargeType invokes the ecs.ModifyDiskChargeType API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskchargetype.html
 func (client *Client) ModifyDiskChargeType(request *ModifyDiskChargeTypeRequest) (response *ModifyDiskChargeTypeResponse, err error) {
 	response = CreateModifyDiskChargeTypeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDiskChargeType(request *ModifyDiskChargeTypeRequest)
 }
 
 // ModifyDiskChargeTypeWithChan invokes the ecs.ModifyDiskChargeType API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskchargetype.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDiskChargeTypeWithChan(request *ModifyDiskChargeTypeRequest) (<-chan *ModifyDiskChargeTypeResponse, <-chan error) {
 	responseChan := make(chan *ModifyDiskChargeTypeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDiskChargeTypeWithChan(request *ModifyDiskChargeType
 }
 
 // ModifyDiskChargeTypeWithCallback invokes the ecs.ModifyDiskChargeType API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskchargetype.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDiskChargeTypeWithCallback(request *ModifyDiskChargeTypeRequest, callback func(response *ModifyDiskChargeTypeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,14 +72,14 @@ func (client *Client) ModifyDiskChargeTypeWithCallback(request *ModifyDiskCharge
 type ModifyDiskChargeTypeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	ClientToken          string           `position:"Query" name:"ClientToken"`
 	DiskChargeType       string           `position:"Query" name:"DiskChargeType"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	DiskIds              string           `position:"Query" name:"DiskIds"`
 	AutoPay              requests.Boolean `position:"Query" name:"AutoPay"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DiskIds              string           `position:"Query" name:"DiskIds"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // ModifyDiskChargeTypeResponse is the response struct for api ModifyDiskChargeType
@@ -100,6 +95,7 @@ func CreateModifyDiskChargeTypeRequest() (request *ModifyDiskChargeTypeRequest) 
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyDiskChargeType", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

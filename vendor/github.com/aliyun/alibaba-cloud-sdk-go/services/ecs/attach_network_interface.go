@@ -21,7 +21,6 @@ import (
 )
 
 // AttachNetworkInterface invokes the ecs.AttachNetworkInterface API synchronously
-// api document: https://help.aliyun.com/api/ecs/attachnetworkinterface.html
 func (client *Client) AttachNetworkInterface(request *AttachNetworkInterfaceRequest) (response *AttachNetworkInterfaceResponse, err error) {
 	response = CreateAttachNetworkInterfaceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AttachNetworkInterface(request *AttachNetworkInterfaceRequ
 }
 
 // AttachNetworkInterfaceWithChan invokes the ecs.AttachNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachnetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachNetworkInterfaceWithChan(request *AttachNetworkInterfaceRequest) (<-chan *AttachNetworkInterfaceResponse, <-chan error) {
 	responseChan := make(chan *AttachNetworkInterfaceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AttachNetworkInterfaceWithChan(request *AttachNetworkInter
 }
 
 // AttachNetworkInterfaceWithCallback invokes the ecs.AttachNetworkInterface API asynchronously
-// api document: https://help.aliyun.com/api/ecs/attachnetworkinterface.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AttachNetworkInterfaceWithCallback(request *AttachNetworkInterfaceRequest, callback func(response *AttachNetworkInterfaceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,14 @@ func (client *Client) AttachNetworkInterfaceWithCallback(request *AttachNetworkI
 // AttachNetworkInterfaceRequest is the request struct for api AttachNetworkInterface
 type AttachNetworkInterfaceRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	NetworkInterfaceId   string           `position:"Query" name:"NetworkInterfaceId"`
+	ResourceOwnerId                  requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	TrunkNetworkInstanceId           string           `position:"Query" name:"TrunkNetworkInstanceId"`
+	ResourceOwnerAccount             string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                     string           `position:"Query" name:"OwnerAccount"`
+	WaitForNetworkConfigurationReady requests.Boolean `position:"Query" name:"WaitForNetworkConfigurationReady"`
+	OwnerId                          requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId                       string           `position:"Query" name:"InstanceId"`
+	NetworkInterfaceId               string           `position:"Query" name:"NetworkInterfaceId"`
 }
 
 // AttachNetworkInterfaceResponse is the response struct for api AttachNetworkInterface
@@ -96,6 +93,7 @@ func CreateAttachNetworkInterfaceRequest() (request *AttachNetworkInterfaceReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AttachNetworkInterface", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

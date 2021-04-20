@@ -21,7 +21,6 @@ import (
 )
 
 // GetInstanceConsoleOutput invokes the ecs.GetInstanceConsoleOutput API synchronously
-// api document: https://help.aliyun.com/api/ecs/getinstanceconsoleoutput.html
 func (client *Client) GetInstanceConsoleOutput(request *GetInstanceConsoleOutputRequest) (response *GetInstanceConsoleOutputResponse, err error) {
 	response = CreateGetInstanceConsoleOutputResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) GetInstanceConsoleOutput(request *GetInstanceConsoleOutput
 }
 
 // GetInstanceConsoleOutputWithChan invokes the ecs.GetInstanceConsoleOutput API asynchronously
-// api document: https://help.aliyun.com/api/ecs/getinstanceconsoleoutput.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) GetInstanceConsoleOutputWithChan(request *GetInstanceConsoleOutputRequest) (<-chan *GetInstanceConsoleOutputResponse, <-chan error) {
 	responseChan := make(chan *GetInstanceConsoleOutputResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) GetInstanceConsoleOutputWithChan(request *GetInstanceConso
 }
 
 // GetInstanceConsoleOutputWithCallback invokes the ecs.GetInstanceConsoleOutput API asynchronously
-// api document: https://help.aliyun.com/api/ecs/getinstanceconsoleoutput.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) GetInstanceConsoleOutputWithCallback(request *GetInstanceConsoleOutputRequest, callback func(response *GetInstanceConsoleOutputResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,6 +72,7 @@ func (client *Client) GetInstanceConsoleOutputWithCallback(request *GetInstanceC
 type GetInstanceConsoleOutputRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	RemoveSymbols        requests.Boolean `position:"Query" name:"RemoveSymbols"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
@@ -98,6 +94,7 @@ func CreateGetInstanceConsoleOutputRequest() (request *GetInstanceConsoleOutputR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "GetInstanceConsoleOutput", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

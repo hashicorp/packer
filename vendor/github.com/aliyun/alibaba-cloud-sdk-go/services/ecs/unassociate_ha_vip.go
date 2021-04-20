@@ -21,7 +21,6 @@ import (
 )
 
 // UnassociateHaVip invokes the ecs.UnassociateHaVip API synchronously
-// api document: https://help.aliyun.com/api/ecs/unassociatehavip.html
 func (client *Client) UnassociateHaVip(request *UnassociateHaVipRequest) (response *UnassociateHaVipResponse, err error) {
 	response = CreateUnassociateHaVipResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) UnassociateHaVip(request *UnassociateHaVipRequest) (respon
 }
 
 // UnassociateHaVipWithChan invokes the ecs.UnassociateHaVip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/unassociatehavip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) UnassociateHaVipWithChan(request *UnassociateHaVipRequest) (<-chan *UnassociateHaVipResponse, <-chan error) {
 	responseChan := make(chan *UnassociateHaVipResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) UnassociateHaVipWithChan(request *UnassociateHaVipRequest)
 }
 
 // UnassociateHaVipWithCallback invokes the ecs.UnassociateHaVip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/unassociatehavip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) UnassociateHaVipWithCallback(request *UnassociateHaVipRequest, callback func(response *UnassociateHaVipResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,14 +71,14 @@ func (client *Client) UnassociateHaVipWithCallback(request *UnassociateHaVipRequ
 // UnassociateHaVipRequest is the request struct for api UnassociateHaVip
 type UnassociateHaVipRequest struct {
 	*requests.RpcRequest
-	HaVipId              string           `position:"Query" name:"HaVipId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
+	HaVipId              string           `position:"Query" name:"HaVipId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Force                string           `position:"Query" name:"Force"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
+	Force                string           `position:"Query" name:"Force"`
 }
 
 // UnassociateHaVipResponse is the response struct for api UnassociateHaVip
@@ -98,6 +93,7 @@ func CreateUnassociateHaVipRequest() (request *UnassociateHaVipRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "UnassociateHaVip", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

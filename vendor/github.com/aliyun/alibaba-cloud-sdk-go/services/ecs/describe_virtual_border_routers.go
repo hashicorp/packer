@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeVirtualBorderRouters invokes the ecs.DescribeVirtualBorderRouters API synchronously
-// api document: https://help.aliyun.com/api/ecs/describevirtualborderrouters.html
 func (client *Client) DescribeVirtualBorderRouters(request *DescribeVirtualBorderRoutersRequest) (response *DescribeVirtualBorderRoutersResponse, err error) {
 	response = CreateDescribeVirtualBorderRoutersResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeVirtualBorderRouters(request *DescribeVirtualBorde
 }
 
 // DescribeVirtualBorderRoutersWithChan invokes the ecs.DescribeVirtualBorderRouters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevirtualborderrouters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVirtualBorderRoutersWithChan(request *DescribeVirtualBorderRoutersRequest) (<-chan *DescribeVirtualBorderRoutersResponse, <-chan error) {
 	responseChan := make(chan *DescribeVirtualBorderRoutersResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeVirtualBorderRoutersWithChan(request *DescribeVirt
 }
 
 // DescribeVirtualBorderRoutersWithCallback invokes the ecs.DescribeVirtualBorderRouters API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describevirtualborderrouters.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeVirtualBorderRoutersWithCallback(request *DescribeVirtualBorderRoutersRequest, callback func(response *DescribeVirtualBorderRoutersResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,12 +71,12 @@ func (client *Client) DescribeVirtualBorderRoutersWithCallback(request *Describe
 // DescribeVirtualBorderRoutersRequest is the request struct for api DescribeVirtualBorderRouters
 type DescribeVirtualBorderRoutersRequest struct {
 	*requests.RpcRequest
-	Filter               *[]DescribeVirtualBorderRoutersFilter `position:"Query" name:"Filter"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer                      `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                                `position:"Query" name:"ResourceOwnerAccount"`
-	PageSize             requests.Integer                      `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer                      `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer                      `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer                      `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string                                `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId              requests.Integer                      `position:"Query" name:"OwnerId"`
+	Filter               *[]DescribeVirtualBorderRoutersFilter `position:"Query" name:"Filter"  type:"Repeated"`
 }
 
 // DescribeVirtualBorderRoutersFilter is a repeated param struct in DescribeVirtualBorderRoutersRequest
@@ -106,6 +101,7 @@ func CreateDescribeVirtualBorderRoutersRequest() (request *DescribeVirtualBorder
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeVirtualBorderRouters", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

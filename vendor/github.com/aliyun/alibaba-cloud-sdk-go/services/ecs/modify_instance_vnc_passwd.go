@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceVncPasswd invokes the ecs.ModifyInstanceVncPasswd API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancevncpasswd.html
 func (client *Client) ModifyInstanceVncPasswd(request *ModifyInstanceVncPasswdRequest) (response *ModifyInstanceVncPasswdResponse, err error) {
 	response = CreateModifyInstanceVncPasswdResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceVncPasswd(request *ModifyInstanceVncPasswdRe
 }
 
 // ModifyInstanceVncPasswdWithChan invokes the ecs.ModifyInstanceVncPasswd API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancevncpasswd.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceVncPasswdWithChan(request *ModifyInstanceVncPasswdRequest) (<-chan *ModifyInstanceVncPasswdResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceVncPasswdResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceVncPasswdWithChan(request *ModifyInstanceVnc
 }
 
 // ModifyInstanceVncPasswdWithCallback invokes the ecs.ModifyInstanceVncPasswd API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancevncpasswd.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceVncPasswdWithCallback(request *ModifyInstanceVncPasswdRequest, callback func(response *ModifyInstanceVncPasswdResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) ModifyInstanceVncPasswdWithCallback(request *ModifyInstanc
 type ModifyInstanceVncPasswdRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 	VncPassword          string           `position:"Query" name:"VncPassword"`
 }
 
@@ -96,6 +91,7 @@ func CreateModifyInstanceVncPasswdRequest() (request *ModifyInstanceVncPasswdReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceVncPasswd", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

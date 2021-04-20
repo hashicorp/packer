@@ -17,11 +17,15 @@ package ecs
 
 // NetworkInterface is a nested struct in ecs response
 type NetworkInterface struct {
-	SecurityGroupId      string `json:"SecurityGroupId" xml:"SecurityGroupId"`
-	VSwitchId            string `json:"VSwitchId" xml:"VSwitchId"`
-	NetworkInterfaceId   string `json:"NetworkInterfaceId" xml:"NetworkInterfaceId"`
-	PrimaryIpAddress     string `json:"PrimaryIpAddress" xml:"PrimaryIpAddress"`
-	MacAddress           string `json:"MacAddress" xml:"MacAddress"`
-	Description          string `json:"Description" xml:"Description"`
-	NetworkInterfaceName string `json:"NetworkInterfaceName" xml:"NetworkInterfaceName"`
+	SecurityGroupId      string                                           `json:"SecurityGroupId" xml:"SecurityGroupId"`
+	VSwitchId            string                                           `json:"VSwitchId" xml:"VSwitchId"`
+	NetworkInterfaceId   string                                           `json:"NetworkInterfaceId" xml:"NetworkInterfaceId"`
+	PrimaryIpAddress     string                                           `json:"PrimaryIpAddress" xml:"PrimaryIpAddress"`
+	MacAddress           string                                           `json:"MacAddress" xml:"MacAddress"`
+	Description          string                                           `json:"Description" xml:"Description"`
+	Type                 string                                           `json:"Type" xml:"Type"`
+	NetworkInterfaceName string                                           `json:"NetworkInterfaceName" xml:"NetworkInterfaceName"`
+	SecurityGroupIds     SecurityGroupIdsInDescribeLaunchTemplateVersions `json:"SecurityGroupIds" xml:"SecurityGroupIds"`
+	PrivateIpSets        PrivateIpSetsInDescribeInstances                 `json:"PrivateIpSets" xml:"PrivateIpSets"`
+	Ipv6Sets             Ipv6SetsInDescribeInstances                      `json:"Ipv6Sets" xml:"Ipv6Sets"`
 }

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeEipMonitorData invokes the ecs.DescribeEipMonitorData API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeeipmonitordata.html
 func (client *Client) DescribeEipMonitorData(request *DescribeEipMonitorDataRequest) (response *DescribeEipMonitorDataResponse, err error) {
 	response = CreateDescribeEipMonitorDataResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeEipMonitorData(request *DescribeEipMonitorDataRequ
 }
 
 // DescribeEipMonitorDataWithChan invokes the ecs.DescribeEipMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeeipmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeEipMonitorDataWithChan(request *DescribeEipMonitorDataRequest) (<-chan *DescribeEipMonitorDataResponse, <-chan error) {
 	responseChan := make(chan *DescribeEipMonitorDataResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeEipMonitorDataWithChan(request *DescribeEipMonitor
 }
 
 // DescribeEipMonitorDataWithCallback invokes the ecs.DescribeEipMonitorData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeeipmonitordata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeEipMonitorDataWithCallback(request *DescribeEipMonitorDataRequest, callback func(response *DescribeEipMonitorDataResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) DescribeEipMonitorDataWithCallback(request *DescribeEipMon
 type DescribeEipMonitorDataRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	AllocationId         string           `position:"Query" name:"AllocationId"`
+	StartTime            string           `position:"Query" name:"StartTime"`
 	Period               requests.Integer `position:"Query" name:"Period"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	EndTime              string           `position:"Query" name:"EndTime"`
-	AllocationId         string           `position:"Query" name:"AllocationId"`
-	StartTime            string           `position:"Query" name:"StartTime"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
 
@@ -99,6 +94,7 @@ func CreateDescribeEipMonitorDataRequest() (request *DescribeEipMonitorDataReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeEipMonitorData", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

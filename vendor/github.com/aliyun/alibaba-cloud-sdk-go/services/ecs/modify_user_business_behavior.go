@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyUserBusinessBehavior invokes the ecs.ModifyUserBusinessBehavior API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyuserbusinessbehavior.html
 func (client *Client) ModifyUserBusinessBehavior(request *ModifyUserBusinessBehaviorRequest) (response *ModifyUserBusinessBehaviorResponse, err error) {
 	response = CreateModifyUserBusinessBehaviorResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyUserBusinessBehavior(request *ModifyUserBusinessBeha
 }
 
 // ModifyUserBusinessBehaviorWithChan invokes the ecs.ModifyUserBusinessBehavior API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyuserbusinessbehavior.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyUserBusinessBehaviorWithChan(request *ModifyUserBusinessBehaviorRequest) (<-chan *ModifyUserBusinessBehaviorResponse, <-chan error) {
 	responseChan := make(chan *ModifyUserBusinessBehaviorResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyUserBusinessBehaviorWithChan(request *ModifyUserBusi
 }
 
 // ModifyUserBusinessBehaviorWithCallback invokes the ecs.ModifyUserBusinessBehavior API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyuserbusinessbehavior.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyUserBusinessBehaviorWithCallback(request *ModifyUserBusinessBehaviorRequest, callback func(response *ModifyUserBusinessBehaviorResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateModifyUserBusinessBehaviorRequest() (request *ModifyUserBusinessBehav
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyUserBusinessBehavior", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

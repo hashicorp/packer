@@ -19,6 +19,6 @@ package ecs
 type SnapshotPackage struct {
 	StartTime    string `json:"StartTime" xml:"StartTime"`
 	EndTime      string `json:"EndTime" xml:"EndTime"`
-	InitCapacity int    `json:"InitCapacity" xml:"InitCapacity"`
+	InitCapacity int64  `json:"InitCapacity" xml:"InitCapacity"`
 	DisplayName  string `json:"DisplayName" xml:"DisplayName"`
 }

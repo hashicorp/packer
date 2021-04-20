@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeImageSharePermission invokes the ecs.DescribeImageSharePermission API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeimagesharepermission.html
 func (client *Client) DescribeImageSharePermission(request *DescribeImageSharePermissionRequest) (response *DescribeImageSharePermissionResponse, err error) {
 	response = CreateDescribeImageSharePermissionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeImageSharePermission(request *DescribeImageSharePe
 }
 
 // DescribeImageSharePermissionWithChan invokes the ecs.DescribeImageSharePermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeimagesharepermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeImageSharePermissionWithChan(request *DescribeImageSharePermissionRequest) (<-chan *DescribeImageSharePermissionResponse, <-chan error) {
 	responseChan := make(chan *DescribeImageSharePermissionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeImageSharePermissionWithChan(request *DescribeImag
 }
 
 // DescribeImageSharePermissionWithCallback invokes the ecs.DescribeImageSharePermission API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeimagesharepermission.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeImageSharePermissionWithCallback(request *DescribeImageSharePermissionRequest, callback func(response *DescribeImageSharePermissionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -78,11 +73,11 @@ type DescribeImageSharePermissionRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	ImageId              string           `position:"Query" name:"ImageId"`
+	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	PageSize             requests.Integer `position:"Query" name:"PageSize"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer `position:"Query" name:"PageNumber"`
 }
 
 // DescribeImageSharePermissionResponse is the response struct for api DescribeImageSharePermission
@@ -104,6 +99,7 @@ func CreateDescribeImageSharePermissionRequest() (request *DescribeImageSharePer
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeImageSharePermission", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

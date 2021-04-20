@@ -21,7 +21,6 @@ import (
 )
 
 // DetachKeyPair invokes the ecs.DetachKeyPair API synchronously
-// api document: https://help.aliyun.com/api/ecs/detachkeypair.html
 func (client *Client) DetachKeyPair(request *DetachKeyPairRequest) (response *DetachKeyPairResponse, err error) {
 	response = CreateDetachKeyPairResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DetachKeyPair(request *DetachKeyPairRequest) (response *De
 }
 
 // DetachKeyPairWithChan invokes the ecs.DetachKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachKeyPairWithChan(request *DetachKeyPairRequest) (<-chan *DetachKeyPairResponse, <-chan error) {
 	responseChan := make(chan *DetachKeyPairResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DetachKeyPairWithChan(request *DetachKeyPairRequest) (<-ch
 }
 
 // DetachKeyPairWithCallback invokes the ecs.DetachKeyPair API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachkeypair.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachKeyPairWithCallback(request *DetachKeyPairRequest, callback func(response *DetachKeyPairResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) DetachKeyPairWithCallback(request *DetachKeyPairRequest, c
 type DetachKeyPairRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	InstanceIds          string           `position:"Query" name:"InstanceIds"`
 	KeyPairName          string           `position:"Query" name:"KeyPairName"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceIds          string           `position:"Query" name:"InstanceIds"`
 }
 
 // DetachKeyPairResponse is the response struct for api DetachKeyPair
@@ -99,6 +94,7 @@ func CreateDetachKeyPairRequest() (request *DetachKeyPairRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DetachKeyPair", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

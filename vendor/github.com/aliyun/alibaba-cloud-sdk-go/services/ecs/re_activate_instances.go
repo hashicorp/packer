@@ -21,7 +21,6 @@ import (
 )
 
 // ReActivateInstances invokes the ecs.ReActivateInstances API synchronously
-// api document: https://help.aliyun.com/api/ecs/reactivateinstances.html
 func (client *Client) ReActivateInstances(request *ReActivateInstancesRequest) (response *ReActivateInstancesResponse, err error) {
 	response = CreateReActivateInstancesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ReActivateInstances(request *ReActivateInstancesRequest) (
 }
 
 // ReActivateInstancesWithChan invokes the ecs.ReActivateInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/reactivateinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReActivateInstancesWithChan(request *ReActivateInstancesRequest) (<-chan *ReActivateInstancesResponse, <-chan error) {
 	responseChan := make(chan *ReActivateInstancesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ReActivateInstancesWithChan(request *ReActivateInstancesRe
 }
 
 // ReActivateInstancesWithCallback invokes the ecs.ReActivateInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/reactivateinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ReActivateInstancesWithCallback(request *ReActivateInstancesRequest, callback func(response *ReActivateInstancesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,10 +72,10 @@ func (client *Client) ReActivateInstancesWithCallback(request *ReActivateInstanc
 type ReActivateInstancesRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // ReActivateInstancesResponse is the response struct for api ReActivateInstances
@@ -95,6 +90,7 @@ func CreateReActivateInstancesRequest() (request *ReActivateInstancesRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ReActivateInstances", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

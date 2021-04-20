@@ -19,6 +19,7 @@ package ecs
 type KeyPair struct {
 	KeyPairName        string                 `json:"KeyPairName" xml:"KeyPairName"`
 	KeyPairFingerPrint string                 `json:"KeyPairFingerPrint" xml:"KeyPairFingerPrint"`
+	CreationTime       string                 `json:"CreationTime" xml:"CreationTime"`
 	ResourceGroupId    string                 `json:"ResourceGroupId" xml:"ResourceGroupId"`
 	Tags               TagsInDescribeKeyPairs `json:"Tags" xml:"Tags"`
 }

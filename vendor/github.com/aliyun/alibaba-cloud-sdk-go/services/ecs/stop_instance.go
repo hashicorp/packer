@@ -21,7 +21,6 @@ import (
 )
 
 // StopInstance invokes the ecs.StopInstance API synchronously
-// api document: https://help.aliyun.com/api/ecs/stopinstance.html
 func (client *Client) StopInstance(request *StopInstanceRequest) (response *StopInstanceResponse, err error) {
 	response = CreateStopInstanceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) StopInstance(request *StopInstanceRequest) (response *Stop
 }
 
 // StopInstanceWithChan invokes the ecs.StopInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/stopinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) StopInstanceWithChan(request *StopInstanceRequest) (<-chan *StopInstanceResponse, <-chan error) {
 	responseChan := make(chan *StopInstanceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) StopInstanceWithChan(request *StopInstanceRequest) (<-chan
 }
 
 // StopInstanceWithCallback invokes the ecs.StopInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/stopinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) StopInstanceWithCallback(request *StopInstanceRequest, callback func(response *StopInstanceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,15 +72,15 @@ func (client *Client) StopInstanceWithCallback(request *StopInstanceRequest, cal
 type StopInstanceRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	DryRun               requests.Boolean `position:"Query" name:"DryRun"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ConfirmStop          requests.Boolean `position:"Query" name:"ConfirmStop"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	StoppedMode          string           `position:"Query" name:"StoppedMode"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	Hibernate            requests.Boolean `position:"Query" name:"Hibernate"`
 	ForceStop            requests.Boolean `position:"Query" name:"ForceStop"`
+	ConfirmStop          requests.Boolean `position:"Query" name:"ConfirmStop"`
+	DryRun               requests.Boolean `position:"Query" name:"DryRun"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // StopInstanceResponse is the response struct for api StopInstance
@@ -100,6 +95,7 @@ func CreateStopInstanceRequest() (request *StopInstanceRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "StopInstance", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

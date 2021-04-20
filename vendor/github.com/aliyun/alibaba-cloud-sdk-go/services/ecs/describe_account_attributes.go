@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeAccountAttributes invokes the ecs.DescribeAccountAttributes API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccountattributes.html
 func (client *Client) DescribeAccountAttributes(request *DescribeAccountAttributesRequest) (response *DescribeAccountAttributesResponse, err error) {
 	response = CreateDescribeAccountAttributesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeAccountAttributes(request *DescribeAccountAttribut
 }
 
 // DescribeAccountAttributesWithChan invokes the ecs.DescribeAccountAttributes API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccountattributes.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAccountAttributesWithChan(request *DescribeAccountAttributesRequest) (<-chan *DescribeAccountAttributesResponse, <-chan error) {
 	responseChan := make(chan *DescribeAccountAttributesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeAccountAttributesWithChan(request *DescribeAccount
 }
 
 // DescribeAccountAttributesWithCallback invokes the ecs.DescribeAccountAttributes API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeaccountattributes.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeAccountAttributesWithCallback(request *DescribeAccountAttributesRequest, callback func(response *DescribeAccountAttributesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateDescribeAccountAttributesRequest() (request *DescribeAccountAttribute
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeAccountAttributes", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

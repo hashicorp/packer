@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeClassicLinkInstances invokes the ecs.DescribeClassicLinkInstances API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeclassiclinkinstances.html
 func (client *Client) DescribeClassicLinkInstances(request *DescribeClassicLinkInstancesRequest) (response *DescribeClassicLinkInstancesResponse, err error) {
 	response = CreateDescribeClassicLinkInstancesResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeClassicLinkInstances(request *DescribeClassicLinkI
 }
 
 // DescribeClassicLinkInstancesWithChan invokes the ecs.DescribeClassicLinkInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeclassiclinkinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeClassicLinkInstancesWithChan(request *DescribeClassicLinkInstancesRequest) (<-chan *DescribeClassicLinkInstancesResponse, <-chan error) {
 	responseChan := make(chan *DescribeClassicLinkInstancesResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeClassicLinkInstancesWithChan(request *DescribeClas
 }
 
 // DescribeClassicLinkInstancesWithCallback invokes the ecs.DescribeClassicLinkInstances API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeclassiclinkinstances.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeClassicLinkInstancesWithCallback(request *DescribeClassicLinkInstancesRequest, callback func(response *DescribeClassicLinkInstancesResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) DescribeClassicLinkInstancesWithCallback(request *Describe
 type DescribeClassicLinkInstancesRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
-	PageSize             string           `position:"Query" name:"PageSize"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	PageNumber           string           `position:"Query" name:"PageNumber"`
+	PageSize             string           `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
 }
 
 // DescribeClassicLinkInstancesResponse is the response struct for api DescribeClassicLinkInstances
@@ -101,6 +96,7 @@ func CreateDescribeClassicLinkInstancesRequest() (request *DescribeClassicLinkIn
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeClassicLinkInstances", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

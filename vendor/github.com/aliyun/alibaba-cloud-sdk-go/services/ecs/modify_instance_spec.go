@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceSpec invokes the ecs.ModifyInstanceSpec API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancespec.html
 func (client *Client) ModifyInstanceSpec(request *ModifyInstanceSpecRequest) (response *ModifyInstanceSpecResponse, err error) {
 	response = CreateModifyInstanceSpecResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceSpec(request *ModifyInstanceSpecRequest) (re
 }
 
 // ModifyInstanceSpecWithChan invokes the ecs.ModifyInstanceSpec API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancespec.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceSpecWithChan(request *ModifyInstanceSpecRequest) (<-chan *ModifyInstanceSpecResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceSpecResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceSpecWithChan(request *ModifyInstanceSpecRequ
 }
 
 // ModifyInstanceSpecWithCallback invokes the ecs.ModifyInstanceSpec API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstancespec.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceSpecWithCallback(request *ModifyInstanceSpecRequest, callback func(response *ModifyInstanceSpecResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,19 +72,19 @@ func (client *Client) ModifyInstanceSpecWithCallback(request *ModifyInstanceSpec
 type ModifyInstanceSpecRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId                  requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount             string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken                      string           `position:"Query" name:"ClientToken"`
 	AllowMigrateAcrossZone           requests.Boolean `position:"Query" name:"AllowMigrateAcrossZone"`
-	OwnerAccount                     string           `position:"Query" name:"OwnerAccount"`
 	InternetMaxBandwidthOut          requests.Integer `position:"Query" name:"InternetMaxBandwidthOut"`
+	SystemDiskCategory               string           `position:"Query" name:"SystemDisk.Category"`
+	InstanceType                     string           `position:"Query" name:"InstanceType"`
+	TemporaryEndTime                 string           `position:"Query" name:"Temporary.EndTime"`
+	ResourceOwnerAccount             string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                     string           `position:"Query" name:"OwnerAccount"`
 	OwnerId                          requests.Integer `position:"Query" name:"OwnerId"`
 	TemporaryInternetMaxBandwidthOut requests.Integer `position:"Query" name:"Temporary.InternetMaxBandwidthOut"`
-	SystemDiskCategory               string           `position:"Query" name:"SystemDisk.Category"`
 	TemporaryStartTime               string           `position:"Query" name:"Temporary.StartTime"`
 	Async                            requests.Boolean `position:"Query" name:"Async"`
 	InstanceId                       string           `position:"Query" name:"InstanceId"`
-	InstanceType                     string           `position:"Query" name:"InstanceType"`
-	TemporaryEndTime                 string           `position:"Query" name:"Temporary.EndTime"`
 	InternetMaxBandwidthIn           requests.Integer `position:"Query" name:"InternetMaxBandwidthIn"`
 }
 
@@ -105,6 +100,7 @@ func CreateModifyInstanceSpecRequest() (request *ModifyInstanceSpecRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceSpec", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

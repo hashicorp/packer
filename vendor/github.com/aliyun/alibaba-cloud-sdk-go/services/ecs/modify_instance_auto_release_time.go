@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceAutoReleaseTime invokes the ecs.ModifyInstanceAutoReleaseTime API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceautoreleasetime.html
 func (client *Client) ModifyInstanceAutoReleaseTime(request *ModifyInstanceAutoReleaseTimeRequest) (response *ModifyInstanceAutoReleaseTimeResponse, err error) {
 	response = CreateModifyInstanceAutoReleaseTimeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceAutoReleaseTime(request *ModifyInstanceAutoR
 }
 
 // ModifyInstanceAutoReleaseTimeWithChan invokes the ecs.ModifyInstanceAutoReleaseTime API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceautoreleasetime.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceAutoReleaseTimeWithChan(request *ModifyInstanceAutoReleaseTimeRequest) (<-chan *ModifyInstanceAutoReleaseTimeResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceAutoReleaseTimeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceAutoReleaseTimeWithChan(request *ModifyInsta
 }
 
 // ModifyInstanceAutoReleaseTimeWithCallback invokes the ecs.ModifyInstanceAutoReleaseTime API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceautoreleasetime.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceAutoReleaseTimeWithCallback(request *ModifyInstanceAutoReleaseTimeRequest, callback func(response *ModifyInstanceAutoReleaseTimeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,11 @@ func (client *Client) ModifyInstanceAutoReleaseTimeWithCallback(request *ModifyI
 type ModifyInstanceAutoReleaseTimeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	AutoReleaseTime      string           `position:"Query" name:"AutoReleaseTime"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // ModifyInstanceAutoReleaseTimeResponse is the response struct for api ModifyInstanceAutoReleaseTime
@@ -96,6 +91,7 @@ func CreateModifyInstanceAutoReleaseTimeRequest() (request *ModifyInstanceAutoRe
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceAutoReleaseTime", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

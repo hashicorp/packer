@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceHistoryEvents invokes the ecs.DescribeInstanceHistoryEvents API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancehistoryevents.html
 func (client *Client) DescribeInstanceHistoryEvents(request *DescribeInstanceHistoryEventsRequest) (response *DescribeInstanceHistoryEventsResponse, err error) {
 	response = CreateDescribeInstanceHistoryEventsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceHistoryEvents(request *DescribeInstanceHis
 }
 
 // DescribeInstanceHistoryEventsWithChan invokes the ecs.DescribeInstanceHistoryEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancehistoryevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceHistoryEventsWithChan(request *DescribeInstanceHistoryEventsRequest) (<-chan *DescribeInstanceHistoryEventsResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceHistoryEventsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceHistoryEventsWithChan(request *DescribeIns
 }
 
 // DescribeInstanceHistoryEventsWithCallback invokes the ecs.DescribeInstanceHistoryEvents API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstancehistoryevents.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceHistoryEventsWithCallback(request *DescribeInstanceHistoryEventsRequest, callback func(response *DescribeInstanceHistoryEventsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -80,6 +75,7 @@ type DescribeInstanceHistoryEventsRequest struct {
 	ResourceOwnerId          requests.Integer `position:"Query" name:"ResourceOwnerId"`
 	EventCycleStatus         string           `position:"Query" name:"EventCycleStatus"`
 	PageNumber               requests.Integer `position:"Query" name:"PageNumber"`
+	ImpactLevel              string           `position:"Query" name:"ImpactLevel"`
 	PageSize                 requests.Integer `position:"Query" name:"PageSize"`
 	InstanceEventCycleStatus *[]string        `position:"Query" name:"InstanceEventCycleStatus"  type:"Repeated"`
 	EventPublishTimeEnd      string           `position:"Query" name:"EventPublishTime.End"`
@@ -110,6 +106,7 @@ func CreateDescribeInstanceHistoryEventsRequest() (request *DescribeInstanceHist
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceHistoryEvents", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

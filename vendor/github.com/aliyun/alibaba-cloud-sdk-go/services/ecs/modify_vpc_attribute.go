@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyVpcAttribute invokes the ecs.ModifyVpcAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvpcattribute.html
 func (client *Client) ModifyVpcAttribute(request *ModifyVpcAttributeRequest) (response *ModifyVpcAttributeResponse, err error) {
 	response = CreateModifyVpcAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyVpcAttribute(request *ModifyVpcAttributeRequest) (re
 }
 
 // ModifyVpcAttributeWithChan invokes the ecs.ModifyVpcAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvpcattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVpcAttributeWithChan(request *ModifyVpcAttributeRequest) (<-chan *ModifyVpcAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyVpcAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyVpcAttributeWithChan(request *ModifyVpcAttributeRequ
 }
 
 // ModifyVpcAttributeWithCallback invokes the ecs.ModifyVpcAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvpcattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVpcAttributeWithCallback(request *ModifyVpcAttributeRequest, callback func(response *ModifyVpcAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,15 +71,15 @@ func (client *Client) ModifyVpcAttributeWithCallback(request *ModifyVpcAttribute
 // ModifyVpcAttributeRequest is the request struct for api ModifyVpcAttribute
 type ModifyVpcAttributeRequest struct {
 	*requests.RpcRequest
-	VpcName              string           `position:"Query" name:"VpcName"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VpcId                string           `position:"Query" name:"VpcId"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	CidrBlock            string           `position:"Query" name:"CidrBlock"`
 	Description          string           `position:"Query" name:"Description"`
+	VpcName              string           `position:"Query" name:"VpcName"`
 	UserCidr             string           `position:"Query" name:"UserCidr"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	VpcId                string           `position:"Query" name:"VpcId"`
+	CidrBlock            string           `position:"Query" name:"CidrBlock"`
 }
 
 // ModifyVpcAttributeResponse is the response struct for api ModifyVpcAttribute
@@ -99,6 +94,7 @@ func CreateModifyVpcAttributeRequest() (request *ModifyVpcAttributeRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyVpcAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

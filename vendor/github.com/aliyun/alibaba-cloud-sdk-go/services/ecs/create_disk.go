@@ -21,7 +21,6 @@ import (
 )
 
 // CreateDisk invokes the ecs.CreateDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/createdisk.html
 func (client *Client) CreateDisk(request *CreateDiskRequest) (response *CreateDiskResponse, err error) {
 	response = CreateCreateDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateDisk(request *CreateDiskRequest) (response *CreateDi
 }
 
 // CreateDiskWithChan invokes the ecs.CreateDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDiskWithChan(request *CreateDiskRequest) (<-chan *CreateDiskResponse, <-chan error) {
 	responseChan := make(chan *CreateDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateDiskWithChan(request *CreateDiskRequest) (<-chan *Cr
 }
 
 // CreateDiskWithCallback invokes the ecs.CreateDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateDiskWithCallback(request *CreateDiskRequest, callback func(response *CreateDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,23 +71,28 @@ func (client *Client) CreateDiskWithCallback(request *CreateDiskRequest, callbac
 // CreateDiskRequest is the request struct for api CreateDisk
 type CreateDiskRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	SnapshotId           string           `position:"Query" name:"SnapshotId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	ClientToken          string           `position:"Query" name:"ClientToken"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Description          string           `position:"Query" name:"Description"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	DiskName             string           `position:"Query" name:"DiskName"`
-	ResourceGroupId      string           `position:"Query" name:"ResourceGroupId"`
-	Size                 requests.Integer `position:"Query" name:"Size"`
-	Encrypted            requests.Boolean `position:"Query" name:"Encrypted"`
-	DiskCategory         string           `position:"Query" name:"DiskCategory"`
-	ZoneId               string           `position:"Query" name:"ZoneId"`
-	Tag                  *[]CreateDiskTag `position:"Query" name:"Tag"  type:"Repeated"`
-	Arn                  *[]CreateDiskArn `position:"Query" name:"Arn"  type:"Repeated"`
-	KMSKeyId             string           `position:"Query" name:"KMSKeyId"`
-	AdvancedFeatures     string           `position:"Query" name:"AdvancedFeatures"`
+	ResourceOwnerId           requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	SnapshotId                string           `position:"Query" name:"SnapshotId"`
+	ClientToken               string           `position:"Query" name:"ClientToken"`
+	EncryptAlgorithm          string           `position:"Query" name:"EncryptAlgorithm"`
+	Description               string           `position:"Query" name:"Description"`
+	DiskName                  string           `position:"Query" name:"DiskName"`
+	ResourceGroupId           string           `position:"Query" name:"ResourceGroupId"`
+	DiskCategory              string           `position:"Query" name:"DiskCategory"`
+	StorageSetPartitionNumber requests.Integer `position:"Query" name:"StorageSetPartitionNumber"`
+	Tag                       *[]CreateDiskTag `position:"Query" name:"Tag"  type:"Repeated"`
+	Arn                       *[]CreateDiskArn `position:"Query" name:"Arn"  type:"Repeated"`
+	AdvancedFeatures          string           `position:"Query" name:"AdvancedFeatures"`
+	ResourceOwnerAccount      string           `position:"Query" name:"ResourceOwnerAccount"`
+	PerformanceLevel          string           `position:"Query" name:"PerformanceLevel"`
+	OwnerAccount              string           `position:"Query" name:"OwnerAccount"`
+	OwnerId                   requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId                string           `position:"Query" name:"InstanceId"`
+	StorageSetId              string           `position:"Query" name:"StorageSetId"`
+	Size                      requests.Integer `position:"Query" name:"Size"`
+	Encrypted                 requests.Boolean `position:"Query" name:"Encrypted"`
+	ZoneId                    string           `position:"Query" name:"ZoneId"`
+	KMSKeyId                  string           `position:"Query" name:"KMSKeyId"`
 }
 
 // CreateDiskTag is a repeated param struct in CreateDiskRequest
@@ -113,6 +113,7 @@ type CreateDiskResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
 	DiskId    string `json:"DiskId" xml:"DiskId"`
+	OrderId   string `json:"OrderId" xml:"OrderId"`
 }
 
 // CreateCreateDiskRequest creates a request to invoke CreateDisk API
@@ -121,6 +122,7 @@ func CreateCreateDiskRequest() (request *CreateDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

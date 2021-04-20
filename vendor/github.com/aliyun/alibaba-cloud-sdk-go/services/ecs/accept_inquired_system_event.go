@@ -21,7 +21,6 @@ import (
 )
 
 // AcceptInquiredSystemEvent invokes the ecs.AcceptInquiredSystemEvent API synchronously
-// api document: https://help.aliyun.com/api/ecs/acceptinquiredsystemevent.html
 func (client *Client) AcceptInquiredSystemEvent(request *AcceptInquiredSystemEventRequest) (response *AcceptInquiredSystemEventResponse, err error) {
 	response = CreateAcceptInquiredSystemEventResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AcceptInquiredSystemEvent(request *AcceptInquiredSystemEve
 }
 
 // AcceptInquiredSystemEventWithChan invokes the ecs.AcceptInquiredSystemEvent API asynchronously
-// api document: https://help.aliyun.com/api/ecs/acceptinquiredsystemevent.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AcceptInquiredSystemEventWithChan(request *AcceptInquiredSystemEventRequest) (<-chan *AcceptInquiredSystemEventResponse, <-chan error) {
 	responseChan := make(chan *AcceptInquiredSystemEventResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AcceptInquiredSystemEventWithChan(request *AcceptInquiredS
 }
 
 // AcceptInquiredSystemEventWithCallback invokes the ecs.AcceptInquiredSystemEvent API asynchronously
-// api document: https://help.aliyun.com/api/ecs/acceptinquiredsystemevent.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AcceptInquiredSystemEventWithCallback(request *AcceptInquiredSystemEventRequest, callback func(response *AcceptInquiredSystemEventResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateAcceptInquiredSystemEventRequest() (request *AcceptInquiredSystemEven
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AcceptInquiredSystemEvent", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DetachDisk invokes the ecs.DetachDisk API synchronously
-// api document: https://help.aliyun.com/api/ecs/detachdisk.html
 func (client *Client) DetachDisk(request *DetachDiskRequest) (response *DetachDiskResponse, err error) {
 	response = CreateDetachDiskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DetachDisk(request *DetachDiskRequest) (response *DetachDi
 }
 
 // DetachDiskWithChan invokes the ecs.DetachDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachDiskWithChan(request *DetachDiskRequest) (<-chan *DetachDiskResponse, <-chan error) {
 	responseChan := make(chan *DetachDiskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DetachDiskWithChan(request *DetachDiskRequest) (<-chan *De
 }
 
 // DetachDiskWithCallback invokes the ecs.DetachDisk API asynchronously
-// api document: https://help.aliyun.com/api/ecs/detachdisk.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DetachDiskWithCallback(request *DetachDiskRequest, callback func(response *DetachDiskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,12 @@ func (client *Client) DetachDiskWithCallback(request *DetachDiskRequest, callbac
 type DetachDiskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
+	DiskId               string           `position:"Query" name:"DiskId"`
+	DeleteWithInstance   requests.Boolean `position:"Query" name:"DeleteWithInstance"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	DiskId               string           `position:"Query" name:"DiskId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DetachDiskResponse is the response struct for api DetachDisk
@@ -96,6 +92,7 @@ func CreateDetachDiskRequest() (request *DetachDiskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DetachDisk", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

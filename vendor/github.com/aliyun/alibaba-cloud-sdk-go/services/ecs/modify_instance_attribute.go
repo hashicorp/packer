@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyInstanceAttribute invokes the ecs.ModifyInstanceAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceattribute.html
 func (client *Client) ModifyInstanceAttribute(request *ModifyInstanceAttributeRequest) (response *ModifyInstanceAttributeResponse, err error) {
 	response = CreateModifyInstanceAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyInstanceAttribute(request *ModifyInstanceAttributeRe
 }
 
 // ModifyInstanceAttributeWithChan invokes the ecs.ModifyInstanceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceAttributeWithChan(request *ModifyInstanceAttributeRequest) (<-chan *ModifyInstanceAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyInstanceAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyInstanceAttributeWithChan(request *ModifyInstanceAtt
 }
 
 // ModifyInstanceAttributeWithCallback invokes the ecs.ModifyInstanceAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyinstanceattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyInstanceAttributeWithCallback(request *ModifyInstanceAttributeRequest, callback func(response *ModifyInstanceAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,19 +71,21 @@ func (client *Client) ModifyInstanceAttributeWithCallback(request *ModifyInstanc
 // ModifyInstanceAttributeRequest is the request struct for api ModifyInstanceAttribute
 type ModifyInstanceAttributeRequest struct {
 	*requests.RpcRequest
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	Recyclable           requests.Boolean `position:"Query" name:"Recyclable"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Description          string           `position:"Query" name:"Description"`
-	CreditSpecification  string           `position:"Query" name:"CreditSpecification"`
-	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	DeletionProtection   requests.Boolean `position:"Query" name:"DeletionProtection"`
-	UserData             string           `position:"Query" name:"UserData"`
-	Password             string           `position:"Query" name:"Password"`
-	HostName             string           `position:"Query" name:"HostName"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	InstanceName         string           `position:"Query" name:"InstanceName"`
+	ResourceOwnerId             requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Recyclable                  requests.Boolean `position:"Query" name:"Recyclable"`
+	NetworkInterfaceQueueNumber requests.Integer `position:"Query" name:"NetworkInterfaceQueueNumber"`
+	Description                 string           `position:"Query" name:"Description"`
+	DeletionProtection          requests.Boolean `position:"Query" name:"DeletionProtection"`
+	UserData                    string           `position:"Query" name:"UserData"`
+	Password                    string           `position:"Query" name:"Password"`
+	HostName                    string           `position:"Query" name:"HostName"`
+	ResourceOwnerAccount        string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount                string           `position:"Query" name:"OwnerAccount"`
+	CreditSpecification         string           `position:"Query" name:"CreditSpecification"`
+	OwnerId                     requests.Integer `position:"Query" name:"OwnerId"`
+	SecurityGroupIds            *[]string        `position:"Query" name:"SecurityGroupIds"  type:"Repeated"`
+	InstanceId                  string           `position:"Query" name:"InstanceId"`
+	InstanceName                string           `position:"Query" name:"InstanceName"`
 }
 
 // ModifyInstanceAttributeResponse is the response struct for api ModifyInstanceAttribute
@@ -103,6 +100,7 @@ func CreateModifyInstanceAttributeRequest() (request *ModifyInstanceAttributeReq
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyInstanceAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

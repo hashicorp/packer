@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeKeyPairs invokes the ecs.DescribeKeyPairs API synchronously
-// api document: https://help.aliyun.com/api/ecs/describekeypairs.html
 func (client *Client) DescribeKeyPairs(request *DescribeKeyPairsRequest) (response *DescribeKeyPairsResponse, err error) {
 	response = CreateDescribeKeyPairsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeKeyPairs(request *DescribeKeyPairsRequest) (respon
 }
 
 // DescribeKeyPairsWithChan invokes the ecs.DescribeKeyPairs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describekeypairs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeKeyPairsWithChan(request *DescribeKeyPairsRequest) (<-chan *DescribeKeyPairsResponse, <-chan error) {
 	responseChan := make(chan *DescribeKeyPairsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeKeyPairsWithChan(request *DescribeKeyPairsRequest)
 }
 
 // DescribeKeyPairsWithCallback invokes the ecs.DescribeKeyPairs API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describekeypairs.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeKeyPairsWithCallback(request *DescribeKeyPairsRequest, callback func(response *DescribeKeyPairsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,15 +71,15 @@ func (client *Client) DescribeKeyPairsWithCallback(request *DescribeKeyPairsRequ
 // DescribeKeyPairsRequest is the request struct for api DescribeKeyPairs
 type DescribeKeyPairsRequest struct {
 	*requests.RpcRequest
-	ResourceGroupId      string                 `position:"Query" name:"ResourceGroupId"`
 	ResourceOwnerId      requests.Integer       `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                 `position:"Query" name:"ResourceOwnerAccount"`
 	KeyPairFingerPrint   string                 `position:"Query" name:"KeyPairFingerPrint"`
-	PageSize             requests.Integer       `position:"Query" name:"PageSize"`
 	KeyPairName          string                 `position:"Query" name:"KeyPairName"`
-	Tag                  *[]DescribeKeyPairsTag `position:"Query" name:"Tag"  type:"Repeated"`
-	OwnerId              requests.Integer       `position:"Query" name:"OwnerId"`
 	PageNumber           requests.Integer       `position:"Query" name:"PageNumber"`
+	ResourceGroupId      string                 `position:"Query" name:"ResourceGroupId"`
+	PageSize             requests.Integer       `position:"Query" name:"PageSize"`
+	Tag                  *[]DescribeKeyPairsTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string                 `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerId              requests.Integer       `position:"Query" name:"OwnerId"`
 }
 
 // DescribeKeyPairsTag is a repeated param struct in DescribeKeyPairsRequest
@@ -109,6 +104,7 @@ func CreateDescribeKeyPairsRequest() (request *DescribeKeyPairsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeKeyPairs", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

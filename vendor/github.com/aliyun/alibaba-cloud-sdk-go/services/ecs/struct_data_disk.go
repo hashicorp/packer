@@ -25,4 +25,5 @@ type DataDisk struct {
 	Description        string `json:"Description" xml:"Description"`
 	DeleteWithInstance bool   `json:"DeleteWithInstance" xml:"DeleteWithInstance"`
 	Device             string `json:"Device" xml:"Device"`
+	PerformanceLevel   string `json:"PerformanceLevel" xml:"PerformanceLevel"`
 }

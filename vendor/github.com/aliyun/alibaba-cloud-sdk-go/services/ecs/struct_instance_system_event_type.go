@@ -22,6 +22,8 @@ type InstanceSystemEventType struct {
 	EventPublishTime  string            `json:"EventPublishTime" xml:"EventPublishTime"`
 	NotBefore         string            `json:"NotBefore" xml:"NotBefore"`
 	EventFinishTime   string            `json:"EventFinishTime" xml:"EventFinishTime"`
+	Reason            string            `json:"Reason" xml:"Reason"`
+	ImpactLevel       string            `json:"ImpactLevel" xml:"ImpactLevel"`
 	EventType         EventType         `json:"EventType" xml:"EventType"`
 	EventCycleStatus  EventCycleStatus  `json:"EventCycleStatus" xml:"EventCycleStatus"`
 	ExtendedAttribute ExtendedAttribute `json:"ExtendedAttribute" xml:"ExtendedAttribute"`

@@ -21,7 +21,6 @@ import (
 )
 
 // CancelTask invokes the ecs.CancelTask API synchronously
-// api document: https://help.aliyun.com/api/ecs/canceltask.html
 func (client *Client) CancelTask(request *CancelTaskRequest) (response *CancelTaskResponse, err error) {
 	response = CreateCancelTaskResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CancelTask(request *CancelTaskRequest) (response *CancelTa
 }
 
 // CancelTaskWithChan invokes the ecs.CancelTask API asynchronously
-// api document: https://help.aliyun.com/api/ecs/canceltask.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelTaskWithChan(request *CancelTaskRequest) (<-chan *CancelTaskResponse, <-chan error) {
 	responseChan := make(chan *CancelTaskResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CancelTaskWithChan(request *CancelTaskRequest) (<-chan *Ca
 }
 
 // CancelTaskWithCallback invokes the ecs.CancelTask API asynchronously
-// api document: https://help.aliyun.com/api/ecs/canceltask.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CancelTaskWithCallback(request *CancelTaskRequest, callback func(response *CancelTaskResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) CancelTaskWithCallback(request *CancelTaskRequest, callbac
 type CancelTaskRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	TaskId               string           `position:"Query" name:"TaskId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	TaskId               string           `position:"Query" name:"TaskId"`
 }
 
 // CancelTaskResponse is the response struct for api CancelTask
@@ -94,6 +89,7 @@ func CreateCancelTaskRequest() (request *CancelTaskRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CancelTask", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

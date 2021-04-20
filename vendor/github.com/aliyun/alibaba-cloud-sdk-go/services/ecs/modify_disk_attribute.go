@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyDiskAttribute invokes the ecs.ModifyDiskAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskattribute.html
 func (client *Client) ModifyDiskAttribute(request *ModifyDiskAttributeRequest) (response *ModifyDiskAttributeResponse, err error) {
 	response = CreateModifyDiskAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyDiskAttribute(request *ModifyDiskAttributeRequest) (
 }
 
 // ModifyDiskAttributeWithChan invokes the ecs.ModifyDiskAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDiskAttributeWithChan(request *ModifyDiskAttributeRequest) (<-chan *ModifyDiskAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyDiskAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyDiskAttributeWithChan(request *ModifyDiskAttributeRe
 }
 
 // ModifyDiskAttributeWithCallback invokes the ecs.ModifyDiskAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifydiskattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyDiskAttributeWithCallback(request *ModifyDiskAttributeRequest, callback func(response *ModifyDiskAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,16 +71,17 @@ func (client *Client) ModifyDiskAttributeWithCallback(request *ModifyDiskAttribu
 // ModifyDiskAttributeRequest is the request struct for api ModifyDiskAttribute
 type ModifyDiskAttributeRequest struct {
 	*requests.RpcRequest
+	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Description          string           `position:"Query" name:"Description"`
 	DiskName             string           `position:"Query" name:"DiskName"`
 	DeleteAutoSnapshot   requests.Boolean `position:"Query" name:"DeleteAutoSnapshot"`
-	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	DiskIds              *[]string        `position:"Query" name:"DiskIds"  type:"Repeated"`
+	DiskId               string           `position:"Query" name:"DiskId"`
+	DeleteWithInstance   requests.Boolean `position:"Query" name:"DeleteWithInstance"`
 	EnableAutoSnapshot   requests.Boolean `position:"Query" name:"EnableAutoSnapshot"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
-	Description          string           `position:"Query" name:"Description"`
-	DiskId               string           `position:"Query" name:"DiskId"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	DeleteWithInstance   requests.Boolean `position:"Query" name:"DeleteWithInstance"`
 }
 
 // ModifyDiskAttributeResponse is the response struct for api ModifyDiskAttribute
@@ -100,6 +96,7 @@ func CreateModifyDiskAttributeRequest() (request *ModifyDiskAttributeRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyDiskAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

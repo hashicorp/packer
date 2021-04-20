@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeUserData invokes the ecs.DescribeUserData API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeuserdata.html
 func (client *Client) DescribeUserData(request *DescribeUserDataRequest) (response *DescribeUserDataResponse, err error) {
 	response = CreateDescribeUserDataResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeUserData(request *DescribeUserDataRequest) (respon
 }
 
 // DescribeUserDataWithChan invokes the ecs.DescribeUserData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeuserdata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeUserDataWithChan(request *DescribeUserDataRequest) (<-chan *DescribeUserDataResponse, <-chan error) {
 	responseChan := make(chan *DescribeUserDataResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeUserDataWithChan(request *DescribeUserDataRequest)
 }
 
 // DescribeUserDataWithCallback invokes the ecs.DescribeUserData API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeuserdata.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeUserDataWithCallback(request *DescribeUserDataRequest, callback func(response *DescribeUserDataResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) DescribeUserDataWithCallback(request *DescribeUserDataRequ
 type DescribeUserDataRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DescribeUserDataResponse is the response struct for api DescribeUserData
@@ -97,6 +92,7 @@ func CreateDescribeUserDataRequest() (request *DescribeUserDataRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeUserData", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

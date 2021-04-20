@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteHpcCluster invokes the ecs.DeleteHpcCluster API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletehpccluster.html
 func (client *Client) DeleteHpcCluster(request *DeleteHpcClusterRequest) (response *DeleteHpcClusterResponse, err error) {
 	response = CreateDeleteHpcClusterResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteHpcCluster(request *DeleteHpcClusterRequest) (respon
 }
 
 // DeleteHpcClusterWithChan invokes the ecs.DeleteHpcCluster API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletehpccluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteHpcClusterWithChan(request *DeleteHpcClusterRequest) (<-chan *DeleteHpcClusterResponse, <-chan error) {
 	responseChan := make(chan *DeleteHpcClusterResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteHpcClusterWithChan(request *DeleteHpcClusterRequest)
 }
 
 // DeleteHpcClusterWithCallback invokes the ecs.DeleteHpcCluster API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletehpccluster.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteHpcClusterWithCallback(request *DeleteHpcClusterRequest, callback func(response *DeleteHpcClusterResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -96,6 +91,7 @@ func CreateDeleteHpcClusterRequest() (request *DeleteHpcClusterRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteHpcCluster", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

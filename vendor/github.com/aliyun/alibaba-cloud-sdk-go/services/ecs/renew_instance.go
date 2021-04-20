@@ -21,7 +21,6 @@ import (
 )
 
 // RenewInstance invokes the ecs.RenewInstance API synchronously
-// api document: https://help.aliyun.com/api/ecs/renewinstance.html
 func (client *Client) RenewInstance(request *RenewInstanceRequest) (response *RenewInstanceResponse, err error) {
 	response = CreateRenewInstanceResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) RenewInstance(request *RenewInstanceRequest) (response *Re
 }
 
 // RenewInstanceWithChan invokes the ecs.RenewInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/renewinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RenewInstanceWithChan(request *RenewInstanceRequest) (<-chan *RenewInstanceResponse, <-chan error) {
 	responseChan := make(chan *RenewInstanceResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) RenewInstanceWithChan(request *RenewInstanceRequest) (<-ch
 }
 
 // RenewInstanceWithCallback invokes the ecs.RenewInstance API asynchronously
-// api document: https://help.aliyun.com/api/ecs/renewinstance.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RenewInstanceWithCallback(request *RenewInstanceRequest, callback func(response *RenewInstanceResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,19 +72,21 @@ func (client *Client) RenewInstanceWithCallback(request *RenewInstanceRequest, c
 type RenewInstanceRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	Period               requests.Integer `position:"Query" name:"Period"`
-	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
+	Period               requests.Integer `position:"Query" name:"Period"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	ExpectedRenewDay     requests.Integer `position:"Query" name:"ExpectedRenewDay"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PeriodUnit           string           `position:"Query" name:"PeriodUnit"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // RenewInstanceResponse is the response struct for api RenewInstance
 type RenewInstanceResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	OrderId   string `json:"OrderId" xml:"OrderId"`
 }
 
 // CreateRenewInstanceRequest creates a request to invoke RenewInstance API
@@ -98,6 +95,7 @@ func CreateRenewInstanceRequest() (request *RenewInstanceRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "RenewInstance", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

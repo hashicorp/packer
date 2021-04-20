@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteHaVip invokes the ecs.DeleteHaVip API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletehavip.html
 func (client *Client) DeleteHaVip(request *DeleteHaVipRequest) (response *DeleteHaVipResponse, err error) {
 	response = CreateDeleteHaVipResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteHaVip(request *DeleteHaVipRequest) (response *Delete
 }
 
 // DeleteHaVipWithChan invokes the ecs.DeleteHaVip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletehavip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteHaVipWithChan(request *DeleteHaVipRequest) (<-chan *DeleteHaVipResponse, <-chan error) {
 	responseChan := make(chan *DeleteHaVipResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteHaVipWithChan(request *DeleteHaVipRequest) (<-chan *
 }
 
 // DeleteHaVipWithCallback invokes the ecs.DeleteHaVip API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletehavip.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteHaVipWithCallback(request *DeleteHaVipRequest, callback func(response *DeleteHaVipResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,10 +71,10 @@ func (client *Client) DeleteHaVipWithCallback(request *DeleteHaVipRequest, callb
 // DeleteHaVipRequest is the request struct for api DeleteHaVip
 type DeleteHaVipRequest struct {
 	*requests.RpcRequest
-	HaVipId              string           `position:"Query" name:"HaVipId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
+	HaVipId              string           `position:"Query" name:"HaVipId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 }
@@ -96,6 +91,7 @@ func CreateDeleteHaVipRequest() (request *DeleteHaVipRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteHaVip", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeInstanceAutoRenewAttribute invokes the ecs.DescribeInstanceAutoRenewAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceautorenewattribute.html
 func (client *Client) DescribeInstanceAutoRenewAttribute(request *DescribeInstanceAutoRenewAttributeRequest) (response *DescribeInstanceAutoRenewAttributeResponse, err error) {
 	response = CreateDescribeInstanceAutoRenewAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeInstanceAutoRenewAttribute(request *DescribeInstan
 }
 
 // DescribeInstanceAutoRenewAttributeWithChan invokes the ecs.DescribeInstanceAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceAutoRenewAttributeWithChan(request *DescribeInstanceAutoRenewAttributeRequest) (<-chan *DescribeInstanceAutoRenewAttributeResponse, <-chan error) {
 	responseChan := make(chan *DescribeInstanceAutoRenewAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeInstanceAutoRenewAttributeWithChan(request *Descri
 }
 
 // DescribeInstanceAutoRenewAttributeWithCallback invokes the ecs.DescribeInstanceAutoRenewAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeinstanceautorenewattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeInstanceAutoRenewAttributeWithCallback(request *DescribeInstanceAutoRenewAttributeRequest, callback func(response *DescribeInstanceAutoRenewAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,13 +72,13 @@ func (client *Client) DescribeInstanceAutoRenewAttributeWithCallback(request *De
 type DescribeInstanceAutoRenewAttributeRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	InstanceId           string           `position:"Query" name:"InstanceId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
+	PageNumber           string           `position:"Query" name:"PageNumber"`
 	RenewalStatus        string           `position:"Query" name:"RenewalStatus"`
 	PageSize             string           `position:"Query" name:"PageSize"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
-	PageNumber           string           `position:"Query" name:"PageNumber"`
+	InstanceId           string           `position:"Query" name:"InstanceId"`
 }
 
 // DescribeInstanceAutoRenewAttributeResponse is the response struct for api DescribeInstanceAutoRenewAttribute
@@ -102,6 +97,7 @@ func CreateDescribeInstanceAutoRenewAttributeRequest() (request *DescribeInstanc
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeInstanceAutoRenewAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

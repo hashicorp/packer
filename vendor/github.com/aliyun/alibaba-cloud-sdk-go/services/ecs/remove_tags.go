@@ -21,7 +21,6 @@ import (
 )
 
 // RemoveTags invokes the ecs.RemoveTags API synchronously
-// api document: https://help.aliyun.com/api/ecs/removetags.html
 func (client *Client) RemoveTags(request *RemoveTagsRequest) (response *RemoveTagsResponse, err error) {
 	response = CreateRemoveTagsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) RemoveTags(request *RemoveTagsRequest) (response *RemoveTa
 }
 
 // RemoveTagsWithChan invokes the ecs.RemoveTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/removetags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RemoveTagsWithChan(request *RemoveTagsRequest) (<-chan *RemoveTagsResponse, <-chan error) {
 	responseChan := make(chan *RemoveTagsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) RemoveTagsWithChan(request *RemoveTagsRequest) (<-chan *Re
 }
 
 // RemoveTagsWithCallback invokes the ecs.RemoveTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/removetags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) RemoveTagsWithCallback(request *RemoveTagsRequest, callback func(response *RemoveTagsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) RemoveTagsWithCallback(request *RemoveTagsRequest, callbac
 type RemoveTagsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Tag                  *[]RemoveTagsTag `position:"Query" name:"Tag"  type:"Repeated"`
 	ResourceId           string           `position:"Query" name:"ResourceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	Tag                  *[]RemoveTagsTag `position:"Query" name:"Tag"  type:"Repeated"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	ResourceType         string           `position:"Query" name:"ResourceType"`
 }
@@ -102,6 +97,7 @@ func CreateRemoveTagsRequest() (request *RemoveTagsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "RemoveTags", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

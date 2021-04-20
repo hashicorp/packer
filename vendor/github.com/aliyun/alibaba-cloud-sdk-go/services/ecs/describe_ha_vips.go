@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeHaVips invokes the ecs.DescribeHaVips API synchronously
-// api document: https://help.aliyun.com/api/ecs/describehavips.html
 func (client *Client) DescribeHaVips(request *DescribeHaVipsRequest) (response *DescribeHaVipsResponse, err error) {
 	response = CreateDescribeHaVipsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeHaVips(request *DescribeHaVipsRequest) (response *
 }
 
 // DescribeHaVipsWithChan invokes the ecs.DescribeHaVips API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describehavips.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeHaVipsWithChan(request *DescribeHaVipsRequest) (<-chan *DescribeHaVipsResponse, <-chan error) {
 	responseChan := make(chan *DescribeHaVipsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeHaVipsWithChan(request *DescribeHaVipsRequest) (<-
 }
 
 // DescribeHaVipsWithCallback invokes the ecs.DescribeHaVips API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describehavips.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeHaVipsWithCallback(request *DescribeHaVipsRequest, callback func(response *DescribeHaVipsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,13 +71,13 @@ func (client *Client) DescribeHaVipsWithCallback(request *DescribeHaVipsRequest,
 // DescribeHaVipsRequest is the request struct for api DescribeHaVips
 type DescribeHaVipsRequest struct {
 	*requests.RpcRequest
-	Filter               *[]DescribeHaVipsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 	ResourceOwnerId      requests.Integer        `position:"Query" name:"ResourceOwnerId"`
+	PageNumber           requests.Integer        `position:"Query" name:"PageNumber"`
+	PageSize             requests.Integer        `position:"Query" name:"PageSize"`
 	ResourceOwnerAccount string                  `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string                  `position:"Query" name:"OwnerAccount"`
-	PageSize             requests.Integer        `position:"Query" name:"PageSize"`
 	OwnerId              requests.Integer        `position:"Query" name:"OwnerId"`
-	PageNumber           requests.Integer        `position:"Query" name:"PageNumber"`
+	Filter               *[]DescribeHaVipsFilter `position:"Query" name:"Filter"  type:"Repeated"`
 }
 
 // DescribeHaVipsFilter is a repeated param struct in DescribeHaVipsRequest
@@ -107,6 +102,7 @@ func CreateDescribeHaVipsRequest() (request *DescribeHaVipsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeHaVips", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

@@ -21,7 +21,6 @@ import (
 )
 
 // DeletePhysicalConnection invokes the ecs.DeletePhysicalConnection API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletephysicalconnection.html
 func (client *Client) DeletePhysicalConnection(request *DeletePhysicalConnectionRequest) (response *DeletePhysicalConnectionResponse, err error) {
 	response = CreateDeletePhysicalConnectionResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeletePhysicalConnection(request *DeletePhysicalConnection
 }
 
 // DeletePhysicalConnectionWithChan invokes the ecs.DeletePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletephysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeletePhysicalConnectionWithChan(request *DeletePhysicalConnectionRequest) (<-chan *DeletePhysicalConnectionResponse, <-chan error) {
 	responseChan := make(chan *DeletePhysicalConnectionResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeletePhysicalConnectionWithChan(request *DeletePhysicalCo
 }
 
 // DeletePhysicalConnectionWithCallback invokes the ecs.DeletePhysicalConnection API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletephysicalconnection.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeletePhysicalConnectionWithCallback(request *DeletePhysicalConnectionRequest, callback func(response *DeletePhysicalConnectionResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,11 +72,11 @@ func (client *Client) DeletePhysicalConnectionWithCallback(request *DeletePhysic
 type DeletePhysicalConnectionRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string           `position:"Query" name:"ClientToken"`
-	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	PhysicalConnectionId string           `position:"Query" name:"PhysicalConnectionId"`
 }
 
 // DeletePhysicalConnectionResponse is the response struct for api DeletePhysicalConnection
@@ -96,6 +91,7 @@ func CreateDeletePhysicalConnectionRequest() (request *DeletePhysicalConnectionR
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeletePhysicalConnection", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

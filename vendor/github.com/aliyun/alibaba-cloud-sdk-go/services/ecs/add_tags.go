@@ -21,7 +21,6 @@ import (
 )
 
 // AddTags invokes the ecs.AddTags API synchronously
-// api document: https://help.aliyun.com/api/ecs/addtags.html
 func (client *Client) AddTags(request *AddTagsRequest) (response *AddTagsResponse, err error) {
 	response = CreateAddTagsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) AddTags(request *AddTagsRequest) (response *AddTagsRespons
 }
 
 // AddTagsWithChan invokes the ecs.AddTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/addtags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AddTagsWithChan(request *AddTagsRequest) (<-chan *AddTagsResponse, <-chan error) {
 	responseChan := make(chan *AddTagsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) AddTagsWithChan(request *AddTagsRequest) (<-chan *AddTagsR
 }
 
 // AddTagsWithCallback invokes the ecs.AddTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/addtags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) AddTagsWithCallback(request *AddTagsRequest, callback func(response *AddTagsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,9 +72,9 @@ func (client *Client) AddTagsWithCallback(request *AddTagsRequest, callback func
 type AddTagsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
+	Tag                  *[]AddTagsTag    `position:"Query" name:"Tag"  type:"Repeated"`
 	ResourceId           string           `position:"Query" name:"ResourceId"`
 	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	Tag                  *[]AddTagsTag    `position:"Query" name:"Tag"  type:"Repeated"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
 	ResourceType         string           `position:"Query" name:"ResourceType"`
 }
@@ -102,6 +97,7 @@ func CreateAddTagsRequest() (request *AddTagsRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "AddTags", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

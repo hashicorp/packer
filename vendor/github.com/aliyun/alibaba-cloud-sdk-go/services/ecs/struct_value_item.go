@@ -23,4 +23,5 @@ type ValueItem struct {
 	InstanceChargeType string `json:"InstanceChargeType" xml:"InstanceChargeType"`
 	InstanceType       string `json:"InstanceType" xml:"InstanceType"`
 	Count              int    `json:"Count" xml:"Count"`
+	DiskCategory       string `json:"DiskCategory" xml:"DiskCategory"`
 }

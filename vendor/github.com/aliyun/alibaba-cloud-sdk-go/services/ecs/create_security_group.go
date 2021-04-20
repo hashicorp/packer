@@ -21,7 +21,6 @@ import (
 )
 
 // CreateSecurityGroup invokes the ecs.CreateSecurityGroup API synchronously
-// api document: https://help.aliyun.com/api/ecs/createsecuritygroup.html
 func (client *Client) CreateSecurityGroup(request *CreateSecurityGroupRequest) (response *CreateSecurityGroupResponse, err error) {
 	response = CreateCreateSecurityGroupResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) CreateSecurityGroup(request *CreateSecurityGroupRequest) (
 }
 
 // CreateSecurityGroupWithChan invokes the ecs.CreateSecurityGroup API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createsecuritygroup.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateSecurityGroupWithChan(request *CreateSecurityGroupRequest) (<-chan *CreateSecurityGroupResponse, <-chan error) {
 	responseChan := make(chan *CreateSecurityGroupResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) CreateSecurityGroupWithChan(request *CreateSecurityGroupRe
 }
 
 // CreateSecurityGroupWithCallback invokes the ecs.CreateSecurityGroup API asynchronously
-// api document: https://help.aliyun.com/api/ecs/createsecuritygroup.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) CreateSecurityGroupWithCallback(request *CreateSecurityGroupRequest, callback func(response *CreateSecurityGroupResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,15 +72,17 @@ func (client *Client) CreateSecurityGroupWithCallback(request *CreateSecurityGro
 type CreateSecurityGroupRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer          `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                    `position:"Query" name:"ResourceOwnerAccount"`
 	ClientToken          string                    `position:"Query" name:"ClientToken"`
-	OwnerAccount         string                    `position:"Query" name:"OwnerAccount"`
+	ServiceManaged       requests.Boolean          `position:"Query" name:"ServiceManaged"`
 	Description          string                    `position:"Query" name:"Description"`
-	OwnerId              requests.Integer          `position:"Query" name:"OwnerId"`
 	SecurityGroupName    string                    `position:"Query" name:"SecurityGroupName"`
 	ResourceGroupId      string                    `position:"Query" name:"ResourceGroupId"`
-	VpcId                string                    `position:"Query" name:"VpcId"`
 	Tag                  *[]CreateSecurityGroupTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string                    `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string                    `position:"Query" name:"OwnerAccount"`
+	OwnerId              requests.Integer          `position:"Query" name:"OwnerId"`
+	SecurityGroupType    string                    `position:"Query" name:"SecurityGroupType"`
+	VpcId                string                    `position:"Query" name:"VpcId"`
 }
 
 // CreateSecurityGroupTag is a repeated param struct in CreateSecurityGroupRequest
@@ -107,6 +104,7 @@ func CreateCreateSecurityGroupRequest() (request *CreateSecurityGroupRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "CreateSecurityGroup", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

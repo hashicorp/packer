@@ -21,7 +21,6 @@ import (
 )
 
 // ModifyVSwitchAttribute invokes the ecs.ModifyVSwitchAttribute API synchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvswitchattribute.html
 func (client *Client) ModifyVSwitchAttribute(request *ModifyVSwitchAttributeRequest) (response *ModifyVSwitchAttributeResponse, err error) {
 	response = CreateModifyVSwitchAttributeResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) ModifyVSwitchAttribute(request *ModifyVSwitchAttributeRequ
 }
 
 // ModifyVSwitchAttributeWithChan invokes the ecs.ModifyVSwitchAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvswitchattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVSwitchAttributeWithChan(request *ModifyVSwitchAttributeRequest) (<-chan *ModifyVSwitchAttributeResponse, <-chan error) {
 	responseChan := make(chan *ModifyVSwitchAttributeResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) ModifyVSwitchAttributeWithChan(request *ModifyVSwitchAttri
 }
 
 // ModifyVSwitchAttributeWithCallback invokes the ecs.ModifyVSwitchAttribute API asynchronously
-// api document: https://help.aliyun.com/api/ecs/modifyvswitchattribute.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) ModifyVSwitchAttributeWithCallback(request *ModifyVSwitchAttributeRequest, callback func(response *ModifyVSwitchAttributeResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -76,13 +71,13 @@ func (client *Client) ModifyVSwitchAttributeWithCallback(request *ModifyVSwitchA
 // ModifyVSwitchAttributeRequest is the request struct for api ModifyVSwitchAttribute
 type ModifyVSwitchAttributeRequest struct {
 	*requests.RpcRequest
-	VSwitchId            string           `position:"Query" name:"VSwitchId"`
 	ResourceOwnerId      requests.Integer `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
-	VSwitchName          string           `position:"Query" name:"VSwitchName"`
-	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	Description          string           `position:"Query" name:"Description"`
+	ResourceOwnerAccount string           `position:"Query" name:"ResourceOwnerAccount"`
+	OwnerAccount         string           `position:"Query" name:"OwnerAccount"`
 	OwnerId              requests.Integer `position:"Query" name:"OwnerId"`
+	VSwitchId            string           `position:"Query" name:"VSwitchId"`
+	VSwitchName          string           `position:"Query" name:"VSwitchName"`
 }
 
 // ModifyVSwitchAttributeResponse is the response struct for api ModifyVSwitchAttribute
@@ -97,6 +92,7 @@ func CreateModifyVSwitchAttributeRequest() (request *ModifyVSwitchAttributeReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "ModifyVSwitchAttribute", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

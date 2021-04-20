@@ -21,7 +21,6 @@ import (
 )
 
 // DeleteCommand invokes the ecs.DeleteCommand API synchronously
-// api document: https://help.aliyun.com/api/ecs/deletecommand.html
 func (client *Client) DeleteCommand(request *DeleteCommandRequest) (response *DeleteCommandResponse, err error) {
 	response = CreateDeleteCommandResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DeleteCommand(request *DeleteCommandRequest) (response *De
 }
 
 // DeleteCommandWithChan invokes the ecs.DeleteCommand API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletecommand.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteCommandWithChan(request *DeleteCommandRequest) (<-chan *DeleteCommandResponse, <-chan error) {
 	responseChan := make(chan *DeleteCommandResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DeleteCommandWithChan(request *DeleteCommandRequest) (<-ch
 }
 
 // DeleteCommandWithCallback invokes the ecs.DeleteCommand API asynchronously
-// api document: https://help.aliyun.com/api/ecs/deletecommand.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DeleteCommandWithCallback(request *DeleteCommandRequest, callback func(response *DeleteCommandResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -95,6 +90,7 @@ func CreateDeleteCommandRequest() (request *DeleteCommandRequest) {
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DeleteCommand", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 

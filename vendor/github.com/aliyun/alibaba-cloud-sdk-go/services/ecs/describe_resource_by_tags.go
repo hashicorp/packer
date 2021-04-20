@@ -21,7 +21,6 @@ import (
 )
 
 // DescribeResourceByTags invokes the ecs.DescribeResourceByTags API synchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcebytags.html
 func (client *Client) DescribeResourceByTags(request *DescribeResourceByTagsRequest) (response *DescribeResourceByTagsResponse, err error) {
 	response = CreateDescribeResourceByTagsResponse()
 	err = client.DoAction(request, response)
@@ -29,8 +28,6 @@ func (client *Client) DescribeResourceByTags(request *DescribeResourceByTagsRequ
 }
 
 // DescribeResourceByTagsWithChan invokes the ecs.DescribeResourceByTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcebytags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeResourceByTagsWithChan(request *DescribeResourceByTagsRequest) (<-chan *DescribeResourceByTagsResponse, <-chan error) {
 	responseChan := make(chan *DescribeResourceByTagsResponse, 1)
 	errChan := make(chan error, 1)
@@ -53,8 +50,6 @@ func (client *Client) DescribeResourceByTagsWithChan(request *DescribeResourceBy
 }
 
 // DescribeResourceByTagsWithCallback invokes the ecs.DescribeResourceByTags API asynchronously
-// api document: https://help.aliyun.com/api/ecs/describeresourcebytags.html
-// asynchronous document: https://help.aliyun.com/document_detail/66220.html
 func (client *Client) DescribeResourceByTagsWithCallback(request *DescribeResourceByTagsRequest, callback func(response *DescribeResourceByTagsResponse, err error)) <-chan int {
 	result := make(chan int, 1)
 	err := client.AddAsyncTask(func() {
@@ -77,12 +72,12 @@ func (client *Client) DescribeResourceByTagsWithCallback(request *DescribeResour
 type DescribeResourceByTagsRequest struct {
 	*requests.RpcRequest
 	ResourceOwnerId      requests.Integer             `position:"Query" name:"ResourceOwnerId"`
-	ResourceOwnerAccount string                       `position:"Query" name:"ResourceOwnerAccount"`
+	PageNumber           requests.Integer             `position:"Query" name:"PageNumber"`
 	PageSize             requests.Integer             `position:"Query" name:"PageSize"`
 	Tag                  *[]DescribeResourceByTagsTag `position:"Query" name:"Tag"  type:"Repeated"`
+	ResourceOwnerAccount string                       `position:"Query" name:"ResourceOwnerAccount"`
 	OwnerId              requests.Integer             `position:"Query" name:"OwnerId"`
 	ResourceType         string                       `position:"Query" name:"ResourceType"`
-	PageNumber           requests.Integer             `position:"Query" name:"PageNumber"`
 }
 
 // DescribeResourceByTagsTag is a repeated param struct in DescribeResourceByTagsRequest
@@ -107,6 +102,7 @@ func CreateDescribeResourceByTagsRequest() (request *DescribeResourceByTagsReque
 		RpcRequest: &requests.RpcRequest{},
 	}
 	request.InitWithApiInfo("Ecs", "2014-05-26", "DescribeResourceByTags", "ecs", "openAPI")
+	request.Method = requests.POST
 	return
 }
 
