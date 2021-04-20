@@ -29,7 +29,6 @@ import (
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
-	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
 	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -88,7 +87,6 @@ var Builders = map[string]packersdk.Builder{
 	"lxd":              new(lxdbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
-	"openstack":        new(openstackbuilder.Builder),
 	"oracle-classic":   new(oracleclassicbuilder.Builder),
 	"oracle-oci":       new(oracleocibuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),

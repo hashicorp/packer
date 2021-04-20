@@ -366,7 +366,6 @@ github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
 # github.com/gophercloud/gophercloud v0.12.0
-## explicit
 github.com/gophercloud/gophercloud
 github.com/gophercloud/gophercloud/internal
 github.com/gophercloud/gophercloud/openstack
@@ -395,7 +394,6 @@ github.com/gophercloud/gophercloud/openstack/networking/v2/subnets
 github.com/gophercloud/gophercloud/openstack/utils
 github.com/gophercloud/gophercloud/pagination
 # github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c
-## explicit
 github.com/gophercloud/utils/env
 github.com/gophercloud/utils/openstack/clientconfig
 github.com/gophercloud/utils/openstack/compute/v2/flavors
