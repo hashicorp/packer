@@ -754,10 +754,6 @@
         "path": "builders/oneandone"
       },
       {
-        "title": "OpenStack",
-        "path": "builders/openstack"
-      },
-      {
         "title": "Oracle",
         "routes": [
           {

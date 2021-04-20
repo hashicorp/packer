@@ -525,6 +525,9 @@ github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-im
 # github.com/hashicorp/packer-plugin-ncloud v0.0.2
 ## explicit
 github.com/hashicorp/packer-plugin-ncloud/builder/ncloud
+# github.com/hashicorp/packer-plugin-openstack v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-openstack/builder/openstack
 # github.com/hashicorp/packer-plugin-outscale v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu
@@ -1210,7 +1213,7 @@ gopkg.in/square/go-jose.v2
 gopkg.in/square/go-jose.v2/cipher
 gopkg.in/square/go-jose.v2/json
 gopkg.in/square/go-jose.v2/jwt
-# gopkg.in/yaml.v2 v2.3.0
+# gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 gopkg.in/yaml.v3
