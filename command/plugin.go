@@ -100,7 +100,6 @@ var Builders = map[string]packersdk.Builder{
 	"parallels-iso":    new(parallelsisobuilder.Builder),
 	"parallels-pvm":    new(parallelspvmbuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
-	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
