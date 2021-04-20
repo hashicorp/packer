@@ -100,7 +100,6 @@ github.com/aliyun/alibaba-cloud-sdk-go/services/ram
 ## explicit
 github.com/aliyun/aliyun-oss-go-sdk/oss
 # github.com/antihax/optional v1.0.0
-## explicit
 github.com/antihax/optional
 # github.com/apparentlymart/go-cidr v1.0.1
 github.com/apparentlymart/go-cidr/cidr
@@ -115,7 +114,7 @@ github.com/approvals/go-approval-tests/utils
 github.com/armon/go-metrics
 # github.com/armon/go-radix v1.0.0
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.38.0
+# github.com/aws/aws-sdk-go v1.38.22
 ## explicit
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/arn
@@ -524,7 +523,15 @@ github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-im
 # github.com/hashicorp/packer-plugin-ncloud v0.0.2
 ## explicit
 github.com/hashicorp/packer-plugin-ncloud/builder/ncloud
-# github.com/hashicorp/packer-plugin-proxmox v0.0.1
+# github.com/hashicorp/packer-plugin-outscale v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume
+github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot
+github.com/hashicorp/packer-plugin-outscale/builder/osc/common
+github.com/hashicorp/packer-plugin-outscale/builder/osc/common/retry
+# github.com/hashicorp/packer-plugin-proxmox v0.0.2
 ## explicit
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common
@@ -719,8 +726,7 @@ github.com/olekukonko/tablewriter
 github.com/oracle/oci-go-sdk/v36/common
 github.com/oracle/oci-go-sdk/v36/common/auth
 github.com/oracle/oci-go-sdk/v36/core
-# github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
-## explicit
+# github.com/outscale/osc-sdk-go/osc v0.0.0-20210317154930-f27e09c295b2
 github.com/outscale/osc-sdk-go/osc
 # github.com/packer-community/winrmcp v0.0.0-20180921204643-0fd363d6159a
 github.com/packer-community/winrmcp/winrmcp
@@ -1013,8 +1019,7 @@ golang.org/x/oauth2/jwt
 ## explicit
 golang.org/x/sync/errgroup
 golang.org/x/sync/semaphore
-# golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44
-## explicit
+# golang.org/x/sys v0.0.0-20210420072515-93ed5bcd2bfe
 golang.org/x/sys/cpu
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader

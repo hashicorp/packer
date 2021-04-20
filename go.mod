@@ -12,9 +12,8 @@ require (
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022
 	github.com/aliyun/alibaba-cloud-sdk-go v0.0.0-20190418113227-25233c783f4e
 	github.com/aliyun/aliyun-oss-go-sdk v0.0.0-20170113022742-e6dbea820a9f
-	github.com/antihax/optional v1.0.0
 	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
-	github.com/aws/aws-sdk-go v1.38.0
+	github.com/aws/aws-sdk-go v1.38.22
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/c2h5oh/datasize v0.0.0-20200112174442-28bbd4740fee
 	github.com/cheggaaa/pb v1.0.27
@@ -48,7 +47,8 @@ require (
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
-	github.com/hashicorp/packer-plugin-proxmox v0.0.1
+	github.com/hashicorp/packer-plugin-outscale v0.0.1
+	github.com/hashicorp/packer-plugin-proxmox v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
@@ -69,7 +69,6 @@ require (
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/oracle/oci-go-sdk/v36 v36.2.0
-	github.com/outscale/osc-sdk-go/osc v0.0.0-20200722135656-d654809d0699
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3
@@ -91,7 +90,6 @@ require (
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44
 	golang.org/x/tools v0.1.0
 	google.golang.org/grpc v1.36.1
 )

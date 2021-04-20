@@ -7248,6 +7248,10 @@ func (c *SSM) GetCommandInvocationRequest(input *GetCommandInvocationInput) (req
 // Returns detailed information about command execution for an invocation or
 // plugin.
 //
+// GetCommandInvocation only gives the execution status of a plugin in a document.
+// To get the command execution status on a specific instance, use ListCommandInvocations.
+// To get the command execution status across instances, use ListCommands.
+//
 // Returns awserr.Error for service API and SDK errors. Use runtime type assertions
 // with awserr.Error's Code and Message methods to get detailed information about
 // the error.
@@ -9524,8 +9528,8 @@ func (c *SSM) LabelParameterVersionRequest(input *LabelParameterVersionInput) (r
 //    * You can't create a label when you create a new parameter. You must attach
 //    a label to a specific version of a parameter.
 //
-//    * You can't delete a parameter label. If you no longer want to use a parameter
-//    label, then you must move it to a different version of a parameter.
+//    * If you no longer want to use a parameter label, then you can either
+//    delete it or move it to a different version of a parameter.
 //
 //    * A label can have a maximum of 100 characters.
 //
@@ -13627,6 +13631,96 @@ func (c *SSM) TerminateSessionWithContext(ctx aws.Context, input *TerminateSessi
 	return out, req.Send()
 }
 
+const opUnlabelParameterVersion = "UnlabelParameterVersion"
+
+// UnlabelParameterVersionRequest generates a "aws/request.Request" representing the
+// client's request for the UnlabelParameterVersion operation. The "output" return
+// value will be populated with the request's response once the request completes
+// successfully.
+//
+// Use "Send" method on the returned Request to send the API call to the service.
+// the "output" return value is not valid until after Send returns without error.
+//
+// See UnlabelParameterVersion for more information on using the UnlabelParameterVersion
+// API call, and error handling.
+//
+// This method is useful when you want to inject custom logic or configuration
+// into the SDK's request lifecycle. Such as custom headers, or retry logic.
+//
+//
+//    // Example sending a request using the UnlabelParameterVersionRequest method.
+//    req, resp := client.UnlabelParameterVersionRequest(params)
+//
+//    err := req.Send()
+//    if err == nil { // resp is now filled
+//        fmt.Println(resp)
+//    }
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/UnlabelParameterVersion
+func (c *SSM) UnlabelParameterVersionRequest(input *UnlabelParameterVersionInput) (req *request.Request, output *UnlabelParameterVersionOutput) {
+	op := &request.Operation{
+		Name:       opUnlabelParameterVersion,
+		HTTPMethod: "POST",
+		HTTPPath:   "/",
+	}
+
+	if input == nil {
+		input = &UnlabelParameterVersionInput{}
+	}
+
+	output = &UnlabelParameterVersionOutput{}
+	req = c.newRequest(op, input, output)
+	return
+}
+
+// UnlabelParameterVersion API operation for Amazon Simple Systems Manager (SSM).
+//
+// Remove a label or labels from a parameter.
+//
+// Returns awserr.Error for service API and SDK errors. Use runtime type assertions
+// with awserr.Error's Code and Message methods to get detailed information about
+// the error.
+//
+// See the AWS API reference guide for Amazon Simple Systems Manager (SSM)'s
+// API operation UnlabelParameterVersion for usage and error information.
+//
+// Returned Error Types:
+//   * InternalServerError
+//   An error occurred on the server side.
+//
+//   * TooManyUpdates
+//   There are concurrent updates for a resource that supports one update at a
+//   time.
+//
+//   * ParameterNotFound
+//   The parameter could not be found. Verify the name and try again.
+//
+//   * ParameterVersionNotFound
+//   The specified parameter version was not found. Verify the parameter name
+//   and version, and try again.
+//
+// See also, https://docs.aws.amazon.com/goto/WebAPI/ssm-2014-11-06/UnlabelParameterVersion
+func (c *SSM) UnlabelParameterVersion(input *UnlabelParameterVersionInput) (*UnlabelParameterVersionOutput, error) {
+	req, out := c.UnlabelParameterVersionRequest(input)
+	return out, req.Send()
+}
+
+// UnlabelParameterVersionWithContext is the same as UnlabelParameterVersion with the addition of
+// the ability to pass a context and additional request options.
+//
+// See UnlabelParameterVersion for details on how to use this API operation.
+//
+// The context must be non-nil and will be used for request cancellation. If
+// the context is nil a panic will occur. In the future the SDK may create
+// sub-contexts for http.Requests. See https://golang.org/pkg/context/
+// for more information on using Contexts.
+func (c *SSM) UnlabelParameterVersionWithContext(ctx aws.Context, input *UnlabelParameterVersionInput, opts ...request.Option) (*UnlabelParameterVersionOutput, error) {
+	req, out := c.UnlabelParameterVersionRequest(input)
+	req.SetContext(ctx)
+	req.ApplyOptions(opts...)
+	return out, req.Send()
+}
+
 const opUpdateAssociation = "UpdateAssociation"
 
 // UpdateAssociationRequest generates a "aws/request.Request" representing the
@@ -15233,9 +15327,7 @@ type AddTagsToResourceInput struct {
 	// ResourceType is a required field
 	ResourceType *string `type:"string" required:"true" enum:"ResourceTypeForTagging"`
 
-	// One or more tags. The value parameter is required, but if you don't want
-	// the tag to have a value, specify the parameter with no value, and we set
-	// the value to an empty string.
+	// One or more tags. The value parameter is required.
 	//
 	// Do not enter personally identifiable information in this field.
 	//
@@ -15457,7 +15549,8 @@ type Association struct {
 	// Information about the association.
 	Overview *AssociationOverview `type:"structure"`
 
-	// A cron expression that specifies a schedule when the association runs.
+	// A cron expression that specifies a schedule when the association runs. The
+	// schedule runs in Coordinated Universal Time (UTC).
 	ScheduleExpression *string `min:"1" type:"string"`
 
 	// The instances targeted by the request to create an association.
@@ -19465,8 +19558,10 @@ type CreateActivationInput struct {
 	// Do not enter personally identifiable information in this field.
 	Description *string `type:"string"`
 
-	// The date by which this activation request should expire. The default value
-	// is 24 hours.
+	// The date by which this activation request should expire, in timestamp format,
+	// such as "2021-07-07T00:00:00". You can specify a date up to 30 days in advance.
+	// If you don't provide an expiration date, the activation code expires in 24
+	// hours.
 	ExpirationDate *time.Time `type:"timestamp"`
 
 	// The Amazon Identity and Access Management (IAM) role that you want to assign
@@ -23124,7 +23219,7 @@ type DescribeAutomationStepExecutionsInput struct {
 	NextToken *string `type:"string"`
 
 	// A boolean that indicates whether to list step executions in reverse order
-	// by start time. The default value is false.
+	// by start time. The default value is 'false'.
 	ReverseOrder *bool `type:"boolean"`
 }
 
@@ -25756,6 +25851,13 @@ type DescribePatchGroupStateOutput struct {
 	// The number of instances in the patch group.
 	Instances *int64 `type:"integer"`
 
+	// The number of instances where patches that are specified as "Critical" for
+	// compliance reporting in the patch baseline are not installed. These patches
+	// might be missing, have failed installation, were rejected, or were installed
+	// but awaiting a required instance reboot. The status of these instances is
+	// NON_COMPLIANT.
+	InstancesWithCriticalNonCompliantPatches *int64 `type:"integer"`
+
 	// The number of instances with patches from the patch baseline that failed
 	// to install.
 	InstancesWithFailedPatches *int64 `type:"integer"`
@@ -25786,6 +25888,17 @@ type DescribePatchGroupStateOutput struct {
 	// The number of instances with patches that aren't applicable.
 	InstancesWithNotApplicablePatches *int64 `type:"integer"`
 
+	// The number of instances with patches installed that are specified as other
+	// than "Critical" or "Security" but are not compliant with the patch baseline.
+	// The status of these instances is NON_COMPLIANT.
+	InstancesWithOtherNonCompliantPatches *int64 `type:"integer"`
+
+	// The number of instances where patches that are specified as "Security" in
+	// a patch advisory are not installed. These patches might be missing, have
+	// failed installation, were rejected, or were installed but awaiting a required
+	// instance reboot. The status of these instances is NON_COMPLIANT.
+	InstancesWithSecurityNonCompliantPatches *int64 `type:"integer"`
+
 	// The number of instances with NotApplicable patches beyond the supported limit,
 	// which are not reported by name to Systems Manager Inventory.
 	InstancesWithUnreportedNotApplicablePatches *int64 `type:"integer"`
@@ -25804,6 +25917,12 @@ func (s DescribePatchGroupStateOutput) GoString() string {
 // SetInstances sets the Instances field's value.
 func (s *DescribePatchGroupStateOutput) SetInstances(v int64) *DescribePatchGroupStateOutput {
 	s.Instances = &v
+	return s
+}
+
+// SetInstancesWithCriticalNonCompliantPatches sets the InstancesWithCriticalNonCompliantPatches field's value.
+func (s *DescribePatchGroupStateOutput) SetInstancesWithCriticalNonCompliantPatches(v int64) *DescribePatchGroupStateOutput {
+	s.InstancesWithCriticalNonCompliantPatches = &v
 	return s
 }
 
@@ -25846,6 +25965,18 @@ func (s *DescribePatchGroupStateOutput) SetInstancesWithMissingPatches(v int64) 
 // SetInstancesWithNotApplicablePatches sets the InstancesWithNotApplicablePatches field's value.
 func (s *DescribePatchGroupStateOutput) SetInstancesWithNotApplicablePatches(v int64) *DescribePatchGroupStateOutput {
 	s.InstancesWithNotApplicablePatches = &v
+	return s
+}
+
+// SetInstancesWithOtherNonCompliantPatches sets the InstancesWithOtherNonCompliantPatches field's value.
+func (s *DescribePatchGroupStateOutput) SetInstancesWithOtherNonCompliantPatches(v int64) *DescribePatchGroupStateOutput {
+	s.InstancesWithOtherNonCompliantPatches = &v
+	return s
+}
+
+// SetInstancesWithSecurityNonCompliantPatches sets the InstancesWithSecurityNonCompliantPatches field's value.
+func (s *DescribePatchGroupStateOutput) SetInstancesWithSecurityNonCompliantPatches(v int64) *DescribePatchGroupStateOutput {
+	s.InstancesWithSecurityNonCompliantPatches = &v
 	return s
 }
 
@@ -28042,19 +28173,25 @@ type GetCommandInvocationInput struct {
 	CommandId *string `min:"36" type:"string" required:"true"`
 
 	// (Required) The ID of the managed instance targeted by the command. A managed
-	// instance can be an EC2 instance or an instance in your hybrid environment
-	// that is configured for Systems Manager.
+	// instance can be an Amazon Elastic Compute Cloud (Amazon EC2) instance or
+	// an instance in your hybrid environment that is configured for AWS Systems
+	// Manager.
 	//
 	// InstanceId is a required field
 	InstanceId *string `type:"string" required:"true"`
 
 	// The name of the plugin for which you want detailed results. If the document
-	// contains only one plugin, you can omit the name and details for that plugin
-	// are returned. If the document contains more than one plugin, you must specify
-	// the name of the plugin for which you want to view details.
+	// contains only one plugin, you can omit the name and details for that plugin.
+	// If the document contains more than one plugin, you must specify the name
+	// of the plugin for which you want to view details.
 	//
 	// Plugin names are also referred to as step names in Systems Manager documents.
 	// For example, aws:RunShellScript is a plugin.
+	//
+	// To find the PluginName, check the document content and find the name of the
+	// plugin. Alternatively, use ListCommandInvocations with the CommandId and
+	// Details parameters. The PluginName is the Name attribute of the CommandPlugin
+	// object in the CommandPlugins list.
 	PluginName *string `min:"4" type:"string"`
 }
 
@@ -28129,7 +28266,7 @@ type GetCommandInvocationOutput struct {
 	// Duration since ExecutionStartDateTime.
 	ExecutionElapsedTime *string `type:"string"`
 
-	// The date and time the plugin was finished running. Date and time are written
+	// The date and time the plugin finished running. Date and time are written
 	// in ISO 8601 format. For example, June 7, 2017 is represented as 2017-06-7.
 	// The following sample AWS CLI command uses the InvokedAfter filter.
 	//
@@ -28174,8 +28311,9 @@ type GetCommandInvocationOutput struct {
 	// then this string is empty.
 	StandardOutputContent *string `type:"string"`
 
-	// The URL for the complete text written by the plugin to stdout in Amazon S3.
-	// If an S3 bucket was not specified, then this string is empty.
+	// The URL for the complete text written by the plugin to stdout in Amazon Simple
+	// Storage Service (Amazon S3). If an S3 bucket was not specified, then this
+	// string is empty.
 	StandardOutputUrl *string `type:"string"`
 
 	// The status of this invocation plugin. This status can be different than StatusDetails.
@@ -31944,6 +32082,13 @@ type InstancePatchState struct {
 	// BaselineId is a required field
 	BaselineId *string `min:"20" type:"string" required:"true"`
 
+	// The number of instances where patches that are specified as "Critical" for
+	// compliance reporting in the patch baseline are not installed. These patches
+	// might be missing, have failed installation, were rejected, or were installed
+	// but awaiting a required instance reboot. The status of these instances is
+	// NON_COMPLIANT.
+	CriticalNonCompliantCount *int64 `type:"integer"`
+
 	// The number of patches from the patch baseline that were attempted to be installed
 	// during the last patching operation, but failed to install.
 	FailedCount *int64 `type:"integer"`
@@ -32013,6 +32158,11 @@ type InstancePatchState struct {
 	// OperationStartTime is a required field
 	OperationStartTime *time.Time `type:"timestamp" required:"true"`
 
+	// The number of instances with patches installed that are specified as other
+	// than "Critical" or "Security" but are not compliant with the patch baseline.
+	// The status of these instances is NON_COMPLIANT.
+	OtherNonCompliantCount *int64 `type:"integer"`
+
 	// Placeholder information. This field will always be empty in the current release
 	// of the service.
 	OwnerInformation *string `min:"1" type:"string" sensitive:"true"`
@@ -32036,6 +32186,12 @@ type InstancePatchState struct {
 	//    until a reboot is performed.
 	RebootOption *string `type:"string" enum:"RebootOption"`
 
+	// The number of instances where patches that are specified as "Security" in
+	// a patch advisory are not installed. These patches might be missing, have
+	// failed installation, were rejected, or were installed but awaiting a required
+	// instance reboot. The status of these instances is NON_COMPLIANT.
+	SecurityNonCompliantCount *int64 `type:"integer"`
+
 	// The ID of the patch baseline snapshot used during the patching operation
 	// when this compliance data was collected.
 	SnapshotId *string `min:"36" type:"string"`
@@ -32058,6 +32214,12 @@ func (s InstancePatchState) GoString() string {
 // SetBaselineId sets the BaselineId field's value.
 func (s *InstancePatchState) SetBaselineId(v string) *InstancePatchState {
 	s.BaselineId = &v
+	return s
+}
+
+// SetCriticalNonCompliantCount sets the CriticalNonCompliantCount field's value.
+func (s *InstancePatchState) SetCriticalNonCompliantCount(v int64) *InstancePatchState {
+	s.CriticalNonCompliantCount = &v
 	return s
 }
 
@@ -32139,6 +32301,12 @@ func (s *InstancePatchState) SetOperationStartTime(v time.Time) *InstancePatchSt
 	return s
 }
 
+// SetOtherNonCompliantCount sets the OtherNonCompliantCount field's value.
+func (s *InstancePatchState) SetOtherNonCompliantCount(v int64) *InstancePatchState {
+	s.OtherNonCompliantCount = &v
+	return s
+}
+
 // SetOwnerInformation sets the OwnerInformation field's value.
 func (s *InstancePatchState) SetOwnerInformation(v string) *InstancePatchState {
 	s.OwnerInformation = &v
@@ -32154,6 +32322,12 @@ func (s *InstancePatchState) SetPatchGroup(v string) *InstancePatchState {
 // SetRebootOption sets the RebootOption field's value.
 func (s *InstancePatchState) SetRebootOption(v string) *InstancePatchState {
 	s.RebootOption = &v
+	return s
+}
+
+// SetSecurityNonCompliantCount sets the SecurityNonCompliantCount field's value.
+func (s *InstancePatchState) SetSecurityNonCompliantCount(v int64) *InstancePatchState {
+	s.SecurityNonCompliantCount = &v
 	return s
 }
 
@@ -36170,7 +36344,7 @@ type ListCommandInvocationsInput struct {
 	CommandId *string `min:"36" type:"string"`
 
 	// (Optional) If set this returns the response of the command executions and
-	// any command output. By default this is set to False.
+	// any command output. The default value is 'false'.
 	Details *bool `type:"boolean"`
 
 	// (Optional) One or more filters. Use a filter to return a more specific list
@@ -43263,7 +43437,7 @@ type PutParameterInput struct {
 	// Name is a required field
 	Name *string `min:"1" type:"string" required:"true"`
 
-	// Overwrite an existing parameter. If not specified, will default to "false".
+	// Overwrite an existing parameter. The default value is 'false'.
 	Overwrite *bool `type:"boolean"`
 
 	// One or more policies to apply to a parameter. This action takes a JSON array.
@@ -45158,6 +45332,14 @@ type ResourceDataSyncSource struct {
 	// sync source of this type can synchronize data from AWS Organizations.
 	AwsOrganizationsSource *ResourceDataSyncAwsOrganizationsSource `type:"structure"`
 
+	// When you create a resource data sync, if you choose one of the AWS Organizations
+	// options, then Systems Manager automatically enables all OpsData sources in
+	// the selected AWS Regions for all AWS accounts in your organization (or in
+	// the selected organization units). For more information, see About multiple
+	// account and Region resource data syncs (https://docs.aws.amazon.com/systems-manager/latest/userguide/Explorer-resouce-data-sync-multiple-accounts-and-regions.html)
+	// in the AWS Systems Manager User Guide.
+	EnableAllOpsDataSources *bool `type:"boolean"`
+
 	// Whether to automatically synchronize and aggregate data from new AWS Regions
 	// when those Regions come online.
 	IncludeFutureRegions *bool `type:"boolean"`
@@ -45215,6 +45397,12 @@ func (s *ResourceDataSyncSource) SetAwsOrganizationsSource(v *ResourceDataSyncAw
 	return s
 }
 
+// SetEnableAllOpsDataSources sets the EnableAllOpsDataSources field's value.
+func (s *ResourceDataSyncSource) SetEnableAllOpsDataSources(v bool) *ResourceDataSyncSource {
+	s.EnableAllOpsDataSources = &v
+	return s
+}
+
 // SetIncludeFutureRegions sets the IncludeFutureRegions field's value.
 func (s *ResourceDataSyncSource) SetIncludeFutureRegions(v bool) *ResourceDataSyncSource {
 	s.IncludeFutureRegions = &v
@@ -45252,6 +45440,14 @@ type ResourceDataSyncSourceWithState struct {
 	// The field name in SyncSource for the ResourceDataSyncAwsOrganizationsSource
 	// type.
 	AwsOrganizationsSource *ResourceDataSyncAwsOrganizationsSource `type:"structure"`
+
+	// When you create a resource data sync, if you choose one of the AWS Organizations
+	// options, then Systems Manager automatically enables all OpsData sources in
+	// the selected AWS Regions for all AWS accounts in your organization (or in
+	// the selected organization units). For more information, see About multiple
+	// account and Region resource data syncs (https://docs.aws.amazon.com/systems-manager/latest/userguide/Explorer-resouce-data-sync-multiple-accounts-and-regions.html)
+	// in the AWS Systems Manager User Guide.
+	EnableAllOpsDataSources *bool `type:"boolean"`
 
 	// Whether to automatically synchronize and aggregate data from new AWS Regions
 	// when those Regions come online.
@@ -45294,6 +45490,12 @@ func (s ResourceDataSyncSourceWithState) GoString() string {
 // SetAwsOrganizationsSource sets the AwsOrganizationsSource field's value.
 func (s *ResourceDataSyncSourceWithState) SetAwsOrganizationsSource(v *ResourceDataSyncAwsOrganizationsSource) *ResourceDataSyncSourceWithState {
 	s.AwsOrganizationsSource = v
+	return s
+}
+
+// SetEnableAllOpsDataSources sets the EnableAllOpsDataSources field's value.
+func (s *ResourceDataSyncSourceWithState) SetEnableAllOpsDataSources(v bool) *ResourceDataSyncSourceWithState {
+	s.EnableAllOpsDataSources = &v
 	return s
 }
 
@@ -47026,6 +47228,11 @@ func (s *StartAutomationExecutionOutput) SetAutomationExecutionId(v string) *Sta
 type StartChangeRequestExecutionInput struct {
 	_ struct{} `type:"structure"`
 
+	// User-provided details about the change. If no details are provided, content
+	// specified in the Template information section of the associated change template
+	// is added.
+	ChangeDetails *string `min:"1" type:"string"`
+
 	// The name of the change request associated with the runbook workflow to be
 	// run.
 	ChangeRequestName *string `min:"1" type:"string"`
@@ -47054,6 +47261,11 @@ type StartChangeRequestExecutionInput struct {
 	//
 	// Runbooks is a required field
 	Runbooks []*Runbook `min:"1" type:"list" required:"true"`
+
+	// The time that the requester expects the runbook workflow related to the change
+	// request to complete. The time is an estimate only that the requester provides
+	// for reviewers.
+	ScheduledEndTime *time.Time `type:"timestamp"`
 
 	// The date and time specified in the change request to run the Automation runbooks.
 	//
@@ -47086,6 +47298,9 @@ func (s StartChangeRequestExecutionInput) GoString() string {
 // Validate inspects the fields of the type to determine if they are valid.
 func (s *StartChangeRequestExecutionInput) Validate() error {
 	invalidParams := request.ErrInvalidParams{Context: "StartChangeRequestExecutionInput"}
+	if s.ChangeDetails != nil && len(*s.ChangeDetails) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("ChangeDetails", 1))
+	}
 	if s.ChangeRequestName != nil && len(*s.ChangeRequestName) < 1 {
 		invalidParams.Add(request.NewErrParamMinLen("ChangeRequestName", 1))
 	}
@@ -47131,6 +47346,12 @@ func (s *StartChangeRequestExecutionInput) Validate() error {
 	return nil
 }
 
+// SetChangeDetails sets the ChangeDetails field's value.
+func (s *StartChangeRequestExecutionInput) SetChangeDetails(v string) *StartChangeRequestExecutionInput {
+	s.ChangeDetails = &v
+	return s
+}
+
 // SetChangeRequestName sets the ChangeRequestName field's value.
 func (s *StartChangeRequestExecutionInput) SetChangeRequestName(v string) *StartChangeRequestExecutionInput {
 	s.ChangeRequestName = &v
@@ -47164,6 +47385,12 @@ func (s *StartChangeRequestExecutionInput) SetParameters(v map[string][]*string)
 // SetRunbooks sets the Runbooks field's value.
 func (s *StartChangeRequestExecutionInput) SetRunbooks(v []*Runbook) *StartChangeRequestExecutionInput {
 	s.Runbooks = v
+	return s
+}
+
+// SetScheduledEndTime sets the ScheduledEndTime field's value.
+func (s *StartChangeRequestExecutionInput) SetScheduledEndTime(v time.Time) *StartChangeRequestExecutionInput {
+	s.ScheduledEndTime = &v
 	return s
 }
 
@@ -47898,6 +48125,9 @@ type Target struct {
 	// User-defined criteria that maps to Key. For example, if you specified tag:ServerRole,
 	// you could specify value:WebServer to run a command on instances that include
 	// EC2 tags of ServerRole,WebServer.
+	//
+	// Depending on the type of Target, the maximum number of values for a Key might
+	// be lower than the global maximum of 50.
 	Values []*string `type:"list"`
 }
 
@@ -48375,6 +48605,111 @@ func (s *TotalSizeLimitExceededException) StatusCode() int {
 // RequestID returns the service's response RequestID for request.
 func (s *TotalSizeLimitExceededException) RequestID() string {
 	return s.RespMetadata.RequestID
+}
+
+type UnlabelParameterVersionInput struct {
+	_ struct{} `type:"structure"`
+
+	// One or more labels to delete from the specified parameter version.
+	//
+	// Labels is a required field
+	Labels []*string `min:"1" type:"list" required:"true"`
+
+	// The parameter name of which you want to delete one or more labels.
+	//
+	// Name is a required field
+	Name *string `min:"1" type:"string" required:"true"`
+
+	// The specific version of the parameter which you want to delete one or more
+	// labels from. If it is not present, the call will fail.
+	//
+	// ParameterVersion is a required field
+	ParameterVersion *int64 `type:"long" required:"true"`
+}
+
+// String returns the string representation
+func (s UnlabelParameterVersionInput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s UnlabelParameterVersionInput) GoString() string {
+	return s.String()
+}
+
+// Validate inspects the fields of the type to determine if they are valid.
+func (s *UnlabelParameterVersionInput) Validate() error {
+	invalidParams := request.ErrInvalidParams{Context: "UnlabelParameterVersionInput"}
+	if s.Labels == nil {
+		invalidParams.Add(request.NewErrParamRequired("Labels"))
+	}
+	if s.Labels != nil && len(s.Labels) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Labels", 1))
+	}
+	if s.Name == nil {
+		invalidParams.Add(request.NewErrParamRequired("Name"))
+	}
+	if s.Name != nil && len(*s.Name) < 1 {
+		invalidParams.Add(request.NewErrParamMinLen("Name", 1))
+	}
+	if s.ParameterVersion == nil {
+		invalidParams.Add(request.NewErrParamRequired("ParameterVersion"))
+	}
+
+	if invalidParams.Len() > 0 {
+		return invalidParams
+	}
+	return nil
+}
+
+// SetLabels sets the Labels field's value.
+func (s *UnlabelParameterVersionInput) SetLabels(v []*string) *UnlabelParameterVersionInput {
+	s.Labels = v
+	return s
+}
+
+// SetName sets the Name field's value.
+func (s *UnlabelParameterVersionInput) SetName(v string) *UnlabelParameterVersionInput {
+	s.Name = &v
+	return s
+}
+
+// SetParameterVersion sets the ParameterVersion field's value.
+func (s *UnlabelParameterVersionInput) SetParameterVersion(v int64) *UnlabelParameterVersionInput {
+	s.ParameterVersion = &v
+	return s
+}
+
+type UnlabelParameterVersionOutput struct {
+	_ struct{} `type:"structure"`
+
+	// The labels that are not attached to the given parameter version.
+	InvalidLabels []*string `min:"1" type:"list"`
+
+	// A list of all labels deleted from the parameter.
+	RemovedLabels []*string `min:"1" type:"list"`
+}
+
+// String returns the string representation
+func (s UnlabelParameterVersionOutput) String() string {
+	return awsutil.Prettify(s)
+}
+
+// GoString returns the string representation
+func (s UnlabelParameterVersionOutput) GoString() string {
+	return s.String()
+}
+
+// SetInvalidLabels sets the InvalidLabels field's value.
+func (s *UnlabelParameterVersionOutput) SetInvalidLabels(v []*string) *UnlabelParameterVersionOutput {
+	s.InvalidLabels = v
+	return s
+}
+
+// SetRemovedLabels sets the RemovedLabels field's value.
+func (s *UnlabelParameterVersionOutput) SetRemovedLabels(v []*string) *UnlabelParameterVersionOutput {
+	s.RemovedLabels = v
+	return s
 }
 
 // The calendar entry contained in the specified Systems Manager document is
@@ -49267,9 +49602,9 @@ type UpdateDocumentInput struct {
 	// supports JSON and YAML documents. JSON is the default format.
 	DocumentFormat *string `type:"string" enum:"DocumentFormat"`
 
-	// (Required) The latest version of the document that you want to update. The
-	// latest document version can be specified using the $LATEST variable or by
-	// the version number. Updating a previous version of a document is not supported.
+	// The version of the document that you want to update. Currently, Systems Manager
+	// supports updating only the latest version of the document. You can specify
+	// the version number of the latest version or use the $LATEST variable.
 	DocumentVersion *string `type:"string"`
 
 	// The name of the document that you want to update.
