@@ -72,6 +72,13 @@
     "version": "latest"
   },
   {
+    "title": "Puppet",
+    "path": "puppet",
+    "repo": "hashicorp/packer-plugin-puppet",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "hashicorp/packer-plugin-scaleway",
@@ -101,25 +108,5 @@
     "path": "qemu",
     "repo": "hashicorp/packer-plugin-qemu",
     "version": "latest"
-  },
-  {
-    "title": "Outscale",
-    "path": "outscale",
-    "repo": "hashicorp/packer-plugin-outscale",
-    "version": "latest",
-    "pluginTier": "community"
-  },
-  {
-    "title": "Parallels",
-    "path": "parallels",
-    "repo": "hashicorp/packer-plugin-parallels",
-    "version": "latest"
-  },
-  {
-    "title": "Puppet",
-    "path": "puppet",
-    "repo": "hashicorp/packer-plugin-puppet",
-    "version": "latest",
-    "pluginTier": "community"
   }
 ]
