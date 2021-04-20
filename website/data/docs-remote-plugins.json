@@ -3,6 +3,7 @@
     "title": "Alicloud",
     "path": "alicloud",
     "repo": "hashicorp/packer-plugin-alicloud",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
