@@ -527,6 +527,9 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
+# github.com/hashicorp/packer-plugin-jdcloud v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud
 # github.com/hashicorp/packer-plugin-ncloud v0.0.2
 ## explicit
 github.com/hashicorp/packer-plugin-ncloud/builder/ncloud
@@ -647,7 +650,6 @@ github.com/hyperonecom/h1-client-go
 github.com/jarcoal/httpmock
 github.com/jarcoal/httpmock/internal
 # github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
-## explicit
 github.com/jdcloud-api/jdcloud-sdk-go/core
 github.com/jdcloud-api/jdcloud-sdk-go/services/charge/models
 github.com/jdcloud-api/jdcloud-sdk-go/services/common/models

@@ -44,6 +44,7 @@ require (
 	github.com/hashicorp/packer-plugin-cloudstack v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
+	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-openstack v0.0.1
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
@@ -58,7 +59,6 @@ require (
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
 	github.com/hetznercloud/hcloud-go v1.15.1
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4
-	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961
 	github.com/joyent/triton-go v0.0.0-20180628001255-830d2b111e62
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/linode/linodego v0.14.0
