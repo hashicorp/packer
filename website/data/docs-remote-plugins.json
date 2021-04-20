@@ -60,6 +60,13 @@
     "pluginTier": "community"
   },
   {
+    "title": "JD Cloud",
+    "path": "jdcloud",
+    "repo": "hashicorp/packer-plugin-jdcloud",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",

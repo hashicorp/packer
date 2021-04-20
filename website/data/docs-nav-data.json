@@ -754,10 +754,6 @@
         "path": "builders/tencentcloud-cvm"
       },
       {
-        "title": "JDCloud",
-        "path": "builders/jdcloud"
-      },
-      {
         "title": "Triton",
         "path": "builders/triton"
       },
