@@ -28,7 +28,6 @@ import (
 	linodebuilder "github.com/hashicorp/packer/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
-	ncloudbuilder "github.com/hashicorp/packer/builder/ncloud"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer/builder/openstack"
@@ -100,7 +99,6 @@ var Builders = map[string]packersdk.Builder{
 	"linode":           new(linodebuilder.Builder),
 	"lxc":              new(lxcbuilder.Builder),
 	"lxd":              new(lxdbuilder.Builder),
-	"ncloud":           new(ncloudbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
 	"openstack":        new(openstackbuilder.Builder),
