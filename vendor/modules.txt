@@ -70,8 +70,7 @@ github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlbuilder
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlele
 github.com/ChrisTrenkamp/goxpath/tree/xmltree/xmlnode
 github.com/ChrisTrenkamp/goxpath/xconst
-# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7
-## explicit
+# github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/hmac
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/ncloud
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2/services/server
@@ -522,6 +521,9 @@ github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute
 github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute/version
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export
 github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import
+# github.com/hashicorp/packer-plugin-ncloud v0.0.2
+## explicit
+github.com/hashicorp/packer-plugin-ncloud/builder/ncloud
 # github.com/hashicorp/packer-plugin-proxmox v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
@@ -710,8 +712,7 @@ github.com/modern-go/concurrent
 github.com/modern-go/reflect2
 # github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 github.com/nu7hatch/gouuid
-# github.com/olekukonko/tablewriter v0.0.0-20180105111133-96aac992fc8b
-## explicit
+# github.com/olekukonko/tablewriter v0.0.5
 github.com/olekukonko/tablewriter
 # github.com/oracle/oci-go-sdk/v36 v36.2.0
 ## explicit

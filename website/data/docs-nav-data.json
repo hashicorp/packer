@@ -750,10 +750,6 @@
         "path": "builders/lxd"
       },
       {
-        "title": "NAVER Cloud",
-        "path": "builders/ncloud"
-      },
-      {
         "title": "Null",
         "path": "builders/null"
       },

@@ -25,6 +25,7 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
+	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
@@ -56,6 +57,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
+	"ncloud":              new(ncloudbuilder.Builder),
 	"proxmox":             new(proxmoxiso.Builder),
 	"proxmox-iso":         new(proxmoxiso.Builder),
 	"proxmox-clone":       new(proxmoxclone.Builder),
