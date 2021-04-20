@@ -37,13 +37,19 @@
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
-
     "version": "latest"
   },
   {
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
+    "version": "latest"
+  },
+  {
+    "title": "JD Cloud",
+    "path": "jdcloud",
+    "repo": "hashicorp/packer-plugin-jdcloud",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
