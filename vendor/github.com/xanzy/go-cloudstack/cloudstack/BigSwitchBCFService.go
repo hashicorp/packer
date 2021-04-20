@@ -139,11 +139,10 @@ func (s *BigSwitchBCFService) AddBigSwitchBcfDevice(p *AddBigSwitchBcfDevicePara
 }
 
 type AddBigSwitchBcfDeviceResponse struct {
+	JobID               string `json:"jobid"`
 	Bcfdeviceid         string `json:"bcfdeviceid"`
 	Bigswitchdevicename string `json:"bigswitchdevicename"`
 	Hostname            string `json:"hostname"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Nat                 bool   `json:"nat"`
 	Password            string `json:"password"`
 	Physicalnetworkid   string `json:"physicalnetworkid"`
@@ -214,9 +213,8 @@ func (s *BigSwitchBCFService) DeleteBigSwitchBcfDevice(p *DeleteBigSwitchBcfDevi
 }
 
 type DeleteBigSwitchBcfDeviceResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -321,8 +319,6 @@ type BigSwitchBcfDevice struct {
 	Bcfdeviceid         string `json:"bcfdeviceid"`
 	Bigswitchdevicename string `json:"bigswitchdevicename"`
 	Hostname            string `json:"hostname"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Nat                 bool   `json:"nat"`
 	Password            string `json:"password"`
 	Physicalnetworkid   string `json:"physicalnetworkid"`

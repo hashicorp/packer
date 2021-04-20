@@ -95,11 +95,9 @@ func (s *LDAPService) AddLdapConfiguration(p *AddLdapConfigurationParams) (*AddL
 }
 
 type AddLdapConfigurationResponse struct {
-	Domainid  string `json:"domainid"`
-	Hostname  string `json:"hostname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Port      int    `json:"port"`
+	Domainid string `json:"domainid"`
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port"`
 }
 
 type DeleteLdapConfigurationParams struct {
@@ -173,11 +171,9 @@ func (s *LDAPService) DeleteLdapConfiguration(p *DeleteLdapConfigurationParams) 
 }
 
 type DeleteLdapConfigurationResponse struct {
-	Domainid  string `json:"domainid"`
-	Hostname  string `json:"hostname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Port      int    `json:"port"`
+	Domainid string `json:"domainid"`
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port"`
 }
 
 type ImportLdapUsersParams struct {
@@ -337,8 +333,6 @@ type ImportLdapUsersResponse struct {
 	Domain    string `json:"domain"`
 	Email     string `json:"email"`
 	Firstname string `json:"firstname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Lastname  string `json:"lastname"`
 	Principal string `json:"principal"`
 	Username  string `json:"username"`
@@ -496,8 +490,6 @@ type LdapConfigResponse struct {
 	Binddn      string `json:"binddn"`
 	Bindpass    string `json:"bindpass"`
 	Hostname    string `json:"hostname"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Port        string `json:"port"`
 	Queryfilter string `json:"queryfilter"`
 	Searchbase  string `json:"searchbase"`
@@ -672,8 +664,6 @@ type LdapCreateAccountResponse struct {
 	Iptotal                   int64                           `json:"iptotal"`
 	Iscleanuprequired         bool                            `json:"iscleanuprequired"`
 	Isdefault                 bool                            `json:"isdefault"`
-	JobID                     string                          `json:"jobid"`
-	Jobstatus                 int                             `json:"jobstatus"`
 	Memoryavailable           string                          `json:"memoryavailable"`
 	Memorylimit               string                          `json:"memorylimit"`
 	Memorytotal               int64                           `json:"memorytotal"`
@@ -780,8 +770,6 @@ type LdapRemoveResponse struct {
 	Binddn      string `json:"binddn"`
 	Bindpass    string `json:"bindpass"`
 	Hostname    string `json:"hostname"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Port        string `json:"port"`
 	Queryfilter string `json:"queryfilter"`
 	Searchbase  string `json:"searchbase"`
@@ -897,8 +885,6 @@ type LinkDomainToLdapResponse struct {
 	Accountid   string `json:"accountid"`
 	Accounttype int    `json:"accounttype"`
 	Domainid    string `json:"domainid"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Ldapdomain  string `json:"ldapdomain"`
 	Name        string `json:"name"`
 	Type        string `json:"type"`
@@ -1014,11 +1000,9 @@ type ListLdapConfigurationsResponse struct {
 }
 
 type LdapConfiguration struct {
-	Domainid  string `json:"domainid"`
-	Hostname  string `json:"hostname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Port      int    `json:"port"`
+	Domainid string `json:"domainid"`
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port"`
 }
 
 type ListLdapUsersParams struct {
@@ -1111,8 +1095,6 @@ type LdapUser struct {
 	Domain    string `json:"domain"`
 	Email     string `json:"email"`
 	Firstname string `json:"firstname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Lastname  string `json:"lastname"`
 	Principal string `json:"principal"`
 	Username  string `json:"username"`
@@ -1204,8 +1186,6 @@ type SearchLdapResponse struct {
 	Domain    string `json:"domain"`
 	Email     string `json:"email"`
 	Firstname string `json:"firstname"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Lastname  string `json:"lastname"`
 	Principal string `json:"principal"`
 	Username  string `json:"username"`

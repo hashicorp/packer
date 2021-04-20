@@ -92,6 +92,7 @@ func (s *ProjectService) ActivateProject(p *ActivateProjectParams) (*ActivatePro
 }
 
 type ActivateProjectResponse struct {
+	JobID                     string  `json:"jobid"`
 	Account                   string  `json:"account"`
 	Cpuavailable              string  `json:"cpuavailable"`
 	Cpulimit                  string  `json:"cpulimit"`
@@ -103,8 +104,6 @@ type ActivateProjectResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -242,6 +241,7 @@ func (s *ProjectService) CreateProject(p *CreateProjectParams) (*CreateProjectRe
 }
 
 type CreateProjectResponse struct {
+	JobID                     string  `json:"jobid"`
 	Account                   string  `json:"account"`
 	Cpuavailable              string  `json:"cpuavailable"`
 	Cpulimit                  string  `json:"cpulimit"`
@@ -253,8 +253,6 @@ type CreateProjectResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -353,9 +351,8 @@ func (s *ProjectService) DeleteProject(p *DeleteProjectParams) (*DeleteProjectRe
 }
 
 type DeleteProjectResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -422,9 +419,8 @@ func (s *ProjectService) DeleteProjectInvitation(p *DeleteProjectInvitationParam
 }
 
 type DeleteProjectInvitationResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -633,8 +629,6 @@ type ProjectInvitation struct {
 	Domainid  string `json:"domainid"`
 	Email     string `json:"email"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
 	State     string `json:"state"`
@@ -916,8 +910,6 @@ type Project struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -1021,6 +1013,7 @@ func (s *ProjectService) SuspendProject(p *SuspendProjectParams) (*SuspendProjec
 }
 
 type SuspendProjectResponse struct {
+	JobID                     string  `json:"jobid"`
 	Account                   string  `json:"account"`
 	Cpuavailable              string  `json:"cpuavailable"`
 	Cpulimit                  string  `json:"cpulimit"`
@@ -1032,8 +1025,6 @@ type SuspendProjectResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -1159,6 +1150,7 @@ func (s *ProjectService) UpdateProject(p *UpdateProjectParams) (*UpdateProjectRe
 }
 
 type UpdateProjectResponse struct {
+	JobID                     string  `json:"jobid"`
 	Account                   string  `json:"account"`
 	Cpuavailable              string  `json:"cpuavailable"`
 	Cpulimit                  string  `json:"cpulimit"`
@@ -1170,8 +1162,6 @@ type UpdateProjectResponse struct {
 	Ipavailable               string  `json:"ipavailable"`
 	Iplimit                   string  `json:"iplimit"`
 	Iptotal                   int64   `json:"iptotal"`
-	JobID                     string  `json:"jobid"`
-	Jobstatus                 int     `json:"jobstatus"`
 	Memoryavailable           string  `json:"memoryavailable"`
 	Memorylimit               string  `json:"memorylimit"`
 	Memorytotal               int64   `json:"memorytotal"`
@@ -1304,8 +1294,7 @@ func (s *ProjectService) UpdateProjectInvitation(p *UpdateProjectInvitationParam
 }
 
 type UpdateProjectInvitationResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }

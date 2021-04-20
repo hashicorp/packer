@@ -72,8 +72,6 @@ type Capability struct {
 	Customdiskofferingmaxsize int64  `json:"customdiskofferingmaxsize"`
 	Customdiskofferingminsize int64  `json:"customdiskofferingminsize"`
 	Dynamicrolesenabled       bool   `json:"dynamicrolesenabled"`
-	JobID                     string `json:"jobid"`
-	Jobstatus                 int    `json:"jobstatus"`
 	Kvmsnapshotenabled        bool   `json:"kvmsnapshotenabled"`
 	Projectinviterequired     bool   `json:"projectinviterequired"`
 	Regionsecondaryenabled    bool   `json:"regionsecondaryenabled"`
@@ -249,8 +247,6 @@ type Configuration struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 	Id          int64  `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Scope       string `json:"scope"`
 	Value       string `json:"value"`
@@ -332,9 +328,7 @@ type ListDeploymentPlannersResponse struct {
 }
 
 type DeploymentPlanner struct {
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
-	Name      string `json:"name"`
+	Name string `json:"name"`
 }
 
 type UpdateConfigurationParams struct {
@@ -465,8 +459,6 @@ type UpdateConfigurationResponse struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 	Id          int64  `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Scope       string `json:"scope"`
 	Value       string `json:"value"`

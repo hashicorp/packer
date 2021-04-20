@@ -181,8 +181,6 @@ type CreateUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -243,8 +241,6 @@ func (s *UserService) DeleteUser(p *DeleteUserParams) (*DeleteUserResponse, erro
 
 type DeleteUserResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -257,14 +253,6 @@ func (r *DeleteUserResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -343,6 +331,7 @@ func (s *UserService) DisableUser(p *DisableUserParams) (*DisableUserResponse, e
 }
 
 type DisableUserResponse struct {
+	JobID               string `json:"jobid"`
 	Account             string `json:"account"`
 	Accountid           string `json:"accountid"`
 	Accounttype         int    `json:"accounttype"`
@@ -355,8 +344,6 @@ type DisableUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -428,8 +415,6 @@ type EnableUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -501,8 +486,6 @@ type GetUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -562,8 +545,6 @@ func (s *UserService) GetVirtualMachineUserData(p *GetVirtualMachineUserDataPara
 }
 
 type GetVirtualMachineUserDataResponse struct {
-	JobID            string `json:"jobid"`
-	Jobstatus        int    `json:"jobstatus"`
 	Userdata         string `json:"userdata"`
 	Virtualmachineid string `json:"virtualmachineid"`
 }
@@ -780,8 +761,6 @@ type User struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -853,8 +832,6 @@ type LockUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`
@@ -919,8 +896,6 @@ func (s *UserService) RegisterUserKeys(p *RegisterUserKeysParams) (*RegisterUser
 
 type RegisterUserKeysResponse struct {
 	Apikey    string `json:"apikey"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Secretkey string `json:"secretkey"`
 }
 
@@ -932,9 +907,6 @@ func (p *UpdateUserParams) toURLValues() url.Values {
 	u := url.Values{}
 	if p.p == nil {
 		return u
-	}
-	if v, found := p.p["currentpassword"]; found {
-		u.Set("currentpassword", v.(string))
 	}
 	if v, found := p.p["email"]; found {
 		u.Set("email", v.(string))
@@ -964,14 +936,6 @@ func (p *UpdateUserParams) toURLValues() url.Values {
 		u.Set("usersecretkey", v.(string))
 	}
 	return u
-}
-
-func (p *UpdateUserParams) SetCurrentpassword(v string) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["currentpassword"] = v
-	return
 }
 
 func (p *UpdateUserParams) SetEmail(v string) {
@@ -1083,8 +1047,6 @@ type UpdateUserResponse struct {
 	Id                  string `json:"id"`
 	Iscallerchilddomain bool   `json:"iscallerchilddomain"`
 	Isdefault           bool   `json:"isdefault"`
-	JobID               string `json:"jobid"`
-	Jobstatus           int    `json:"jobstatus"`
 	Lastname            string `json:"lastname"`
 	Roleid              string `json:"roleid"`
 	Rolename            string `json:"rolename"`

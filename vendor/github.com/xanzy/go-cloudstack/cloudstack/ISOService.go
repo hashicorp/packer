@@ -104,6 +104,7 @@ func (s *ISOService) AttachIso(p *AttachIsoParams) (*AttachIsoResponse, error) {
 }
 
 type AttachIsoResponse struct {
+	JobID                 string                           `json:"jobid"`
 	Account               string                           `json:"account"`
 	Affinitygroup         []AttachIsoResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                              `json:"cpunumber"`
@@ -135,8 +136,6 @@ type AttachIsoResponse struct {
 	Isodisplaytext        string                           `json:"isodisplaytext"`
 	Isoid                 string                           `json:"isoid"`
 	Isoname               string                           `json:"isoname"`
-	JobID                 string                           `json:"jobid"`
-	Jobstatus             int                              `json:"jobstatus"`
 	Keypair               string                           `json:"keypair"`
 	Memory                int                              `json:"memory"`
 	Memoryintfreekbs      int64                            `json:"memoryintfreekbs"`
@@ -146,7 +145,7 @@ type AttachIsoResponse struct {
 	Networkkbsread        int64                            `json:"networkkbsread"`
 	Networkkbswrite       int64                            `json:"networkkbswrite"`
 	Nic                   []Nic                            `json:"nic"`
-	Ostypeid              string                           `json:"ostypeid"`
+	Ostypeid              int64                            `json:"ostypeid"`
 	Password              string                           `json:"password"`
 	Passwordenabled       bool                             `json:"passwordenabled"`
 	Project               string                           `json:"project"`
@@ -160,7 +159,6 @@ type AttachIsoResponse struct {
 	Serviceofferingname   string                           `json:"serviceofferingname"`
 	Servicestate          string                           `json:"servicestate"`
 	State                 string                           `json:"state"`
-	Tags                  []Tags                           `json:"tags"`
 	Templatedisplaytext   string                           `json:"templatedisplaytext"`
 	Templateid            string                           `json:"templateid"`
 	Templatename          string                           `json:"templatename"`
@@ -211,33 +209,6 @@ type AttachIsoResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
-}
-
-func (r *AttachIsoResponse) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias AttachIsoResponse
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type CopyIsoParams struct {
@@ -342,6 +313,7 @@ func (s *ISOService) CopyIso(p *CopyIsoParams) (*CopyIsoResponse, error) {
 }
 
 type CopyIsoResponse struct {
+	JobID                 string            `json:"jobid"`
 	Account               string            `json:"account"`
 	Accountid             string            `json:"accountid"`
 	Bits                  int               `json:"bits"`
@@ -365,8 +337,6 @@ type CopyIsoResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
-	JobID                 string            `json:"jobid"`
-	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -376,43 +346,14 @@ type CopyIsoResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
-	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
-	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
-}
-
-func (r *CopyIsoResponse) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias CopyIsoResponse
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type DeleteIsoParams struct {
@@ -489,9 +430,8 @@ func (s *ISOService) DeleteIso(p *DeleteIsoParams) (*DeleteIsoResponse, error) {
 }
 
 type DeleteIsoResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -563,6 +503,7 @@ func (s *ISOService) DetachIso(p *DetachIsoParams) (*DetachIsoResponse, error) {
 }
 
 type DetachIsoResponse struct {
+	JobID                 string                           `json:"jobid"`
 	Account               string                           `json:"account"`
 	Affinitygroup         []DetachIsoResponseAffinitygroup `json:"affinitygroup"`
 	Cpunumber             int                              `json:"cpunumber"`
@@ -594,8 +535,6 @@ type DetachIsoResponse struct {
 	Isodisplaytext        string                           `json:"isodisplaytext"`
 	Isoid                 string                           `json:"isoid"`
 	Isoname               string                           `json:"isoname"`
-	JobID                 string                           `json:"jobid"`
-	Jobstatus             int                              `json:"jobstatus"`
 	Keypair               string                           `json:"keypair"`
 	Memory                int                              `json:"memory"`
 	Memoryintfreekbs      int64                            `json:"memoryintfreekbs"`
@@ -605,7 +544,7 @@ type DetachIsoResponse struct {
 	Networkkbsread        int64                            `json:"networkkbsread"`
 	Networkkbswrite       int64                            `json:"networkkbswrite"`
 	Nic                   []Nic                            `json:"nic"`
-	Ostypeid              string                           `json:"ostypeid"`
+	Ostypeid              int64                            `json:"ostypeid"`
 	Password              string                           `json:"password"`
 	Passwordenabled       bool                             `json:"passwordenabled"`
 	Project               string                           `json:"project"`
@@ -619,7 +558,6 @@ type DetachIsoResponse struct {
 	Serviceofferingname   string                           `json:"serviceofferingname"`
 	Servicestate          string                           `json:"servicestate"`
 	State                 string                           `json:"state"`
-	Tags                  []Tags                           `json:"tags"`
 	Templatedisplaytext   string                           `json:"templatedisplaytext"`
 	Templateid            string                           `json:"templateid"`
 	Templatename          string                           `json:"templatename"`
@@ -670,33 +608,6 @@ type DetachIsoResponseAffinitygroup struct {
 	Projectid         string   `json:"projectid"`
 	Type              string   `json:"type"`
 	VirtualmachineIds []string `json:"virtualmachineIds"`
-}
-
-func (r *DetachIsoResponse) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias DetachIsoResponse
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type ExtractIsoParams struct {
@@ -801,13 +712,12 @@ func (s *ISOService) ExtractIso(p *ExtractIsoParams) (*ExtractIsoResponse, error
 }
 
 type ExtractIsoResponse struct {
+	JobID            string `json:"jobid"`
 	Accountid        string `json:"accountid"`
 	Created          string `json:"created"`
 	ExtractId        string `json:"extractId"`
 	ExtractMode      string `json:"extractMode"`
 	Id               string `json:"id"`
-	JobID            string `json:"jobid"`
-	Jobstatus        int    `json:"jobstatus"`
 	Name             string `json:"name"`
 	Resultstring     string `json:"resultstring"`
 	State            string `json:"state"`
@@ -909,8 +819,6 @@ type IsoPermission struct {
 	Domainid   string   `json:"domainid"`
 	Id         string   `json:"id"`
 	Ispublic   bool     `json:"ispublic"`
-	JobID      string   `json:"jobid"`
-	Jobstatus  int      `json:"jobstatus"`
 	Projectids []string `json:"projectids"`
 }
 
@@ -1274,8 +1182,6 @@ type Iso struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
-	JobID                 string            `json:"jobid"`
-	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1285,43 +1191,14 @@ type Iso struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
-	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
-	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
-}
-
-func (r *Iso) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias Iso
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type RegisterIsoParams struct {
@@ -1377,10 +1254,6 @@ func (p *RegisterIsoParams) toURLValues() url.Values {
 	}
 	if v, found := p.p["ostypeid"]; found {
 		u.Set("ostypeid", v.(string))
-	}
-	if v, found := p.p["passwordenabled"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("passwordenabled", vv)
 	}
 	if v, found := p.p["projectid"]; found {
 		u.Set("projectid", v.(string))
@@ -1498,14 +1371,6 @@ func (p *RegisterIsoParams) SetOstypeid(v string) {
 	return
 }
 
-func (p *RegisterIsoParams) SetPasswordenabled(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["passwordenabled"] = v
-	return
-}
-
 func (p *RegisterIsoParams) SetProjectid(v string) {
 	if p.p == nil {
 		p.p = make(map[string]interface{})
@@ -1581,8 +1446,6 @@ type RegisterIsoResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
-	JobID                 string            `json:"jobid"`
-	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1592,43 +1455,14 @@ type RegisterIsoResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
-	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
-	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
-}
-
-func (r *RegisterIsoResponse) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias RegisterIsoResponse
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type UpdateIsoParams struct {
@@ -1689,10 +1523,6 @@ func (p *UpdateIsoParams) toURLValues() url.Values {
 	if v, found := p.p["sortkey"]; found {
 		vv := strconv.Itoa(v.(int))
 		u.Set("sortkey", vv)
-	}
-	if v, found := p.p["sshkeyenabled"]; found {
-		vv := strconv.FormatBool(v.(bool))
-		u.Set("sshkeyenabled", vv)
 	}
 	return u
 }
@@ -1801,14 +1631,6 @@ func (p *UpdateIsoParams) SetSortkey(v int) {
 	return
 }
 
-func (p *UpdateIsoParams) SetSshkeyenabled(v bool) {
-	if p.p == nil {
-		p.p = make(map[string]interface{})
-	}
-	p.p["sshkeyenabled"] = v
-	return
-}
-
 // You should always use this function to get a new UpdateIsoParams instance,
 // as then you are sure you have configured all required params
 func (s *ISOService) NewUpdateIsoParams(id string) *UpdateIsoParams {
@@ -1857,8 +1679,6 @@ type UpdateIsoResponse struct {
 	Isfeatured            bool              `json:"isfeatured"`
 	Ispublic              bool              `json:"ispublic"`
 	Isready               bool              `json:"isready"`
-	JobID                 string            `json:"jobid"`
-	Jobstatus             int               `json:"jobstatus"`
 	Name                  string            `json:"name"`
 	Ostypeid              string            `json:"ostypeid"`
 	Ostypename            string            `json:"ostypename"`
@@ -1868,43 +1688,14 @@ type UpdateIsoResponse struct {
 	Project               string            `json:"project"`
 	Projectid             string            `json:"projectid"`
 	Removed               string            `json:"removed"`
-	Requireshvm           bool              `json:"requireshvm"`
 	Size                  int64             `json:"size"`
 	Sourcetemplateid      string            `json:"sourcetemplateid"`
 	Sshkeyenabled         bool              `json:"sshkeyenabled"`
 	Status                string            `json:"status"`
-	Tags                  []Tags            `json:"tags"`
 	Templatetag           string            `json:"templatetag"`
 	Templatetype          string            `json:"templatetype"`
 	Zoneid                string            `json:"zoneid"`
 	Zonename              string            `json:"zonename"`
-}
-
-func (r *UpdateIsoResponse) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	err := json.Unmarshal(b, &m)
-	if err != nil {
-		return err
-	}
-
-	if success, ok := m["success"].(string); ok {
-		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	type alias UpdateIsoResponse
-	return json.Unmarshal(b, (*alias)(r))
 }
 
 type UpdateIsoPermissionsParams struct {
@@ -2027,8 +1818,6 @@ func (s *ISOService) UpdateIsoPermissions(p *UpdateIsoPermissionsParams) (*Updat
 
 type UpdateIsoPermissionsResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -2041,14 +1830,6 @@ func (r *UpdateIsoPermissionsResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err

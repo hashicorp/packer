@@ -105,8 +105,6 @@ func (s *SwiftService) AddSwift(p *AddSwiftParams) (*AddSwiftResponse, error) {
 
 type AddSwiftResponse struct {
 	Id           string `json:"id"`
-	JobID        string `json:"jobid"`
-	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`
@@ -241,8 +239,6 @@ type ListSwiftsResponse struct {
 
 type Swift struct {
 	Id           string `json:"id"`
-	JobID        string `json:"jobid"`
-	Jobstatus    int    `json:"jobstatus"`
 	Name         string `json:"name"`
 	Protocol     string `json:"protocol"`
 	Providername string `json:"providername"`

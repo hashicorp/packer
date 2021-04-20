@@ -146,7 +146,7 @@ func (s *AddressService) NewAssociateIpAddressParams() *AssociateIpAddressParams
 	return p
 }
 
-// Acquires and associates a public IP to an account. Either of the parameters are required, i.e. either zoneId, or networkId, or vpcId
+// Acquires and associates a public IP to an account.
 func (s *AddressService) AssociateIpAddress(p *AssociateIpAddressParams) (*AssociateIpAddressResponse, error) {
 	resp, err := s.cs.newRequest("associateIpAddress", p.toURLValues())
 	if err != nil {
@@ -182,6 +182,7 @@ func (s *AddressService) AssociateIpAddress(p *AssociateIpAddressParams) (*Assoc
 }
 
 type AssociateIpAddressResponse struct {
+	JobID                     string `json:"jobid"`
 	Account                   string `json:"account"`
 	Allocated                 string `json:"allocated"`
 	Associatednetworkid       string `json:"associatednetworkid"`
@@ -196,8 +197,6 @@ type AssociateIpAddressResponse struct {
 	Issourcenat               bool   `json:"issourcenat"`
 	Isstaticnat               bool   `json:"isstaticnat"`
 	Issystem                  bool   `json:"issystem"`
-	JobID                     string `json:"jobid"`
-	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Physicalnetworkid         string `json:"physicalnetworkid"`
 	Project                   string `json:"project"`
@@ -279,9 +278,8 @@ func (s *AddressService) DisassociateIpAddress(p *DisassociateIpAddressParams) (
 }
 
 type DisassociateIpAddressResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -641,8 +639,6 @@ type PublicIpAddress struct {
 	Issourcenat               bool   `json:"issourcenat"`
 	Isstaticnat               bool   `json:"isstaticnat"`
 	Issystem                  bool   `json:"issystem"`
-	JobID                     string `json:"jobid"`
-	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Physicalnetworkid         string `json:"physicalnetworkid"`
 	Project                   string `json:"project"`
@@ -752,6 +748,7 @@ func (s *AddressService) UpdateIpAddress(p *UpdateIpAddressParams) (*UpdateIpAdd
 }
 
 type UpdateIpAddressResponse struct {
+	JobID                     string `json:"jobid"`
 	Account                   string `json:"account"`
 	Allocated                 string `json:"allocated"`
 	Associatednetworkid       string `json:"associatednetworkid"`
@@ -766,8 +763,6 @@ type UpdateIpAddressResponse struct {
 	Issourcenat               bool   `json:"issourcenat"`
 	Isstaticnat               bool   `json:"isstaticnat"`
 	Issystem                  bool   `json:"issystem"`
-	JobID                     string `json:"jobid"`
-	Jobstatus                 int    `json:"jobstatus"`
 	Networkid                 string `json:"networkid"`
 	Physicalnetworkid         string `json:"physicalnetworkid"`
 	Project                   string `json:"project"`

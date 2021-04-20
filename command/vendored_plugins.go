@@ -21,6 +21,7 @@ import (
 	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
 	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
+	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -70,6 +71,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
 	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
+	"cloudstack":          new(cloudstackbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),

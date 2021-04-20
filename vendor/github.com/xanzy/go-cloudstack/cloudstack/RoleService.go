@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 )
 
@@ -97,8 +96,6 @@ func (s *RoleService) CreateRole(p *CreateRoleParams) (*CreateRoleResponse, erro
 type CreateRoleResponse struct {
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 }
@@ -188,8 +185,6 @@ func (s *RoleService) CreateRolePermission(p *CreateRolePermissionParams) (*Crea
 type CreateRolePermissionResponse struct {
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Permission  string `json:"permission"`
 	Roleid      string `json:"roleid"`
 	Rolename    string `json:"rolename"`
@@ -245,8 +240,6 @@ func (s *RoleService) DeleteRole(p *DeleteRoleParams) (*DeleteRoleResponse, erro
 
 type DeleteRoleResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -259,14 +252,6 @@ func (r *DeleteRoleResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -326,8 +311,6 @@ func (s *RoleService) DeleteRolePermission(p *DeleteRolePermissionParams) (*Dele
 
 type DeleteRolePermissionResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -340,14 +323,6 @@ func (r *DeleteRolePermissionResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -412,8 +387,6 @@ type ListRolePermissionsResponse struct {
 type RolePermission struct {
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Permission  string `json:"permission"`
 	Roleid      string `json:"roleid"`
 	Rolename    string `json:"rolename"`
@@ -579,8 +552,6 @@ type ListRolesResponse struct {
 type Role struct {
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 }
@@ -668,8 +639,6 @@ func (s *RoleService) UpdateRole(p *UpdateRoleParams) (*UpdateRoleResponse, erro
 type UpdateRoleResponse struct {
 	Description string `json:"description"`
 	Id          string `json:"id"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 }
@@ -757,8 +726,6 @@ func (s *RoleService) UpdateRolePermission(p *UpdateRolePermissionParams) (*Upda
 
 type UpdateRolePermissionResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -771,14 +738,6 @@ func (r *UpdateRolePermissionResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err

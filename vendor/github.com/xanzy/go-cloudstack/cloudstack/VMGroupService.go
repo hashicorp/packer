@@ -110,8 +110,6 @@ type CreateInstanceGroupResponse struct {
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Name      string `json:"name"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -166,8 +164,6 @@ func (s *VMGroupService) DeleteInstanceGroup(p *DeleteInstanceGroupParams) (*Del
 
 type DeleteInstanceGroupResponse struct {
 	Displaytext string `json:"displaytext"`
-	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
 	Success     bool   `json:"success"`
 }
 
@@ -180,14 +176,6 @@ func (r *DeleteInstanceGroupResponse) UnmarshalJSON(b []byte) error {
 
 	if success, ok := m["success"].(string); ok {
 		m["success"] = success == "true"
-		b, err = json.Marshal(m)
-		if err != nil {
-			return err
-		}
-	}
-
-	if ostypeid, ok := m["ostypeid"].(float64); ok {
-		m["ostypeid"] = strconv.Itoa(int(ostypeid))
 		b, err = json.Marshal(m)
 		if err != nil {
 			return err
@@ -441,8 +429,6 @@ type InstanceGroup struct {
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Name      string `json:"name"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`
@@ -512,8 +498,6 @@ type UpdateInstanceGroupResponse struct {
 	Domain    string `json:"domain"`
 	Domainid  string `json:"domainid"`
 	Id        string `json:"id"`
-	JobID     string `json:"jobid"`
-	Jobstatus int    `json:"jobstatus"`
 	Name      string `json:"name"`
 	Project   string `json:"project"`
 	Projectid string `json:"projectid"`

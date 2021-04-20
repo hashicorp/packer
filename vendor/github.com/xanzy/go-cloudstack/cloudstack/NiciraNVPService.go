@@ -160,9 +160,8 @@ func (s *NiciraNVPService) AddNiciraNvpDevice(p *AddNiciraNvpDeviceParams) (*Add
 }
 
 type AddNiciraNvpDeviceResponse struct {
-	Hostname             string `json:"hostname"`
 	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
+	Hostname             string `json:"hostname"`
 	L2gatewayserviceuuid string `json:"l2gatewayserviceuuid"`
 	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid"`
 	Niciradevicename     string `json:"niciradevicename"`
@@ -235,9 +234,8 @@ func (s *NiciraNVPService) DeleteNiciraNvpDevice(p *DeleteNiciraNvpDeviceParams)
 }
 
 type DeleteNiciraNvpDeviceResponse struct {
-	Displaytext string `json:"displaytext"`
 	JobID       string `json:"jobid"`
-	Jobstatus   int    `json:"jobstatus"`
+	Displaytext string `json:"displaytext"`
 	Success     bool   `json:"success"`
 }
 
@@ -340,8 +338,6 @@ type ListNiciraNvpDevicesResponse struct {
 
 type NiciraNvpDevice struct {
 	Hostname             string `json:"hostname"`
-	JobID                string `json:"jobid"`
-	Jobstatus            int    `json:"jobstatus"`
 	L2gatewayserviceuuid string `json:"l2gatewayserviceuuid"`
 	L3gatewayserviceuuid string `json:"l3gatewayserviceuuid"`
 	Niciradevicename     string `json:"niciradevicename"`
