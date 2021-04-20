@@ -536,6 +536,14 @@ github.com/hashicorp/packer-plugin-outscale/builder/osc/common/retry
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/common
 github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso
+# github.com/hashicorp/packer-plugin-outscale v0.0.1
+## explicit
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate
+github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume
+github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot
+github.com/hashicorp/packer-plugin-outscale/builder/osc/common
+github.com/hashicorp/packer-plugin-outscale/builder/osc/common/retry
 # github.com/hashicorp/packer-plugin-qemu v0.0.1
 ## explicit
 github.com/hashicorp/packer-plugin-qemu/builder/qemu
