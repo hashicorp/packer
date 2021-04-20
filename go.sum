@@ -463,12 +463,10 @@ github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjM
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1/go.mod h1:MfV898IrEMpKH6wVnvOI5Tkhxm2snf3QxwVqV4k3bNI=
-github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364 h1:9vTNg4xYdp+PzBFSi+G2Nfc8qw7X1ebrBFKt4wmvARk=
-github.com/hashicorp/packer-plugin-qemu v0.0.0-20210419131938-9ec808d0c364/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
-github.com/hashicorp/packer-plugin-qemu v0.0.1 h1:yGnmWf4Z+ZmOJXJF6w23V2KChtTCiPHsFnfg7+LRu74=
-github.com/hashicorp/packer-plugin-qemu v0.0.1/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
 github.com/hashicorp/packer-plugin-proxmox v0.0.1 h1:nwfQtfcfV4Gx4aiX1OQD/FoZvWCt2L4qaRYY7zTJ8L0=
 github.com/hashicorp/packer-plugin-proxmox v0.0.1/go.mod h1:3URutEWX1yy10qcHNJncS4OMpZknA1FyvlrfL+5usYk=
+github.com/hashicorp/packer-plugin-qemu v0.0.1 h1:yGnmWf4Z+ZmOJXJF6w23V2KChtTCiPHsFnfg7+LRu74=
+github.com/hashicorp/packer-plugin-qemu v0.0.1/go.mod h1:8Q/LCjO7oplLcLe1KLdEt7rq94h42Di6Lab2DTLNwVg=
 github.com/hashicorp/packer-plugin-sdk v0.0.6/go.mod h1:Nvh28f+Jmpp2rcaN79bULTouNkGNDRfHckhHKTAXtyU=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210111224258-fd30ebb797f0/go.mod h1:YdWTt5w6cYfaQG7IOi5iorL+3SXnz8hI0gJCi8Db/LI=
 github.com/hashicorp/packer-plugin-sdk v0.0.7-0.20210120105339-f6fd68d2570a/go.mod h1:exN0C+Pe+3zu18l4nxueNjX5cfmslxUX/m/xk4IVmZQ=
