@@ -27,12 +27,14 @@
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
     "title": "Proxmox",
     "path": "proxmox",
     "repo": "hashicorp/packer-plugin-proxmox",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
