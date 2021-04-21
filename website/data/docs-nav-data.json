@@ -725,23 +725,6 @@
         "path": "builders/oneandone"
       },
       {
-        "title": "Oracle",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/oracle"
-          },
-          {
-            "title": "Oracle Classic",
-            "path": "builders/oracle/classic"
-          },
-          {
-            "title": "Oracle OCI",
-            "path": "builders/oracle/oci"
-          }
-        ]
-      },
-      {
         "title": "ProfitBricks",
         "path": "builders/profitbricks"
       },

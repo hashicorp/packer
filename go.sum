@@ -261,6 +261,7 @@ github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-ini/ini v1.25.4 h1:Mujh4R/dH6YL8bxuISne3xX2+qcQ9p0IxKAP6ExWoUo=
 github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
+github.com/go-ini/ini v1.62.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-ldap/ldap v3.0.2+incompatible/go.mod h1:qfd9rJvER9Q0/D/Sqn1DfHRoBp40uXYvFoEVrNEPqRc=
 github.com/go-logr/logr v0.1.0/go.mod h1:ixOQHD9gLJUVQQ2ZOR7zLEifBX6tGkNJF4QyIY7sIas=
 github.com/go-ole/go-ole v1.2.4/go.mod h1:XCwSNxSkXRo4vlyPy93sltvi/qJq0jqQhjqQNIwKuxM=
@@ -438,6 +439,8 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79 h1:RKu7yAXZTaQsxj1K9GDsh+QVw0+Wu1SWHxtbFN0n+hE=
 github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79/go.mod h1:09jT3Y/OIsjTjQ2+3bkVNPDKqWcGIYYvjB2BEKVUdvc=
+github.com/hashicorp/go-oracle-terraform v0.17.0 h1:gFiaeKf9MXLobhv7uqzPuDFULL6ymJpw1NJCXwSOgJ4=
+github.com/hashicorp/go-oracle-terraform v0.17.0/go.mod h1:09jT3Y/OIsjTjQ2+3bkVNPDKqWcGIYYvjB2BEKVUdvc=
 github.com/hashicorp/go-plugin v1.0.1/go.mod h1:++UyYGoz3o5w9ZzAdZxtQKrWWP+iqPBn3cQptSMzBuY=
 github.com/hashicorp/go-retryablehttp v0.5.3/go.mod h1:9B5zBasrRhHXnJnui7y6sL7es7NDiJgTc6Er0maI1Xs=
 github.com/hashicorp/go-retryablehttp v0.5.4 h1:1BZvpawXoJCWX6pNtow9+rpEj+3itIlutiqnntI6jOE=
@@ -517,6 +520,8 @@ github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VR
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-openstack v0.0.2 h1:wGNE8es3Bn9auuIoX+gqT9chXzYY9GlM55eSpM4uwtU=
 github.com/hashicorp/packer-plugin-openstack v0.0.2/go.mod h1:rHAdd4+JmI+1z98Zx+lVOehgzLZT1Rjo2YgtS0NNvwM=
+github.com/hashicorp/packer-plugin-oracle v0.0.3 h1:yQEAfCD+TQqEWjrHLJTfdJis7axhwknzCKB07gnTZDA=
+github.com/hashicorp/packer-plugin-oracle v0.0.3/go.mod h1:EfUBTOzh5WtQu6PbcBcylKXiZSyyNw5XbzJ2/CUxay8=
 github.com/hashicorp/packer-plugin-outscale v0.0.1 h1:BrL8hKypNYrvP3NR+d+xX03SZKB08yTgXPRnH9piUI8=
 github.com/hashicorp/packer-plugin-outscale v0.0.1/go.mod h1:6jEWfJO7TgAbaL3e+St1bN5PoIC/MmDIsYqNUzAHF1w=
 github.com/hashicorp/packer-plugin-parallels v0.0.1 h1:fcaaiGWdU1+X4IGadXdUhJ2si1ZA3apXS9tMNJXln2A=

@@ -94,6 +94,13 @@
     "version": "latest"
   },
   {
+    "title": "Oracle",
+    "path": "oracle",
+    "repo": "hashicorp/packer-plugin-oracle",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "Outscale",
     "path": "outscale",
     "repo": "hashicorp/packer-plugin-outscale",
