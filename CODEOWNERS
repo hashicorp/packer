@@ -17,8 +17,8 @@
 /builder/jdcloud/                      @XiaohanLiang @remrain
 /website/pages/docs/builders/jdcloud* @XiaohanLiang @remrain
 
-/builder/linode/                      @displague @ctreatma @stvnjacobs @charliekenney23 @phillc
-/website/pages/docs/builders/linode* @displague @ctreatma @stvnjacobs @charliekenney23 @phillc
+/builder/linode/                      @stvnjacobs @charliekenney23 @phillc
+/website/pages/docs/builders/linode* @stvnjacobs @charliekenney23 @phillc
 
 /builder/lxc/                      @ChrisLundquist
 /website/pages/docs/builders/lxc*  @ChrisLundquist
