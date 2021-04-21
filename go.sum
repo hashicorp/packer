@@ -545,6 +545,8 @@ github.com/hashicorp/packer-plugin-sdk v0.2.0 h1:A4Dq7p4y1vscY4gMzp7GQaXyDJYYhP4
 github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
 github.com/hashicorp/packer-plugin-ucloud v0.0.1 h1:SC2F1BuXb6dKhY6fRdmAqTkuc17jlBIu/Ut0URJy8TU=
 github.com/hashicorp/packer-plugin-ucloud v0.0.1/go.mod h1:xyMMmi/UPqFV3GT4eeX7wIqdoncNyrNuvdylnEQl1RU=
+github.com/hashicorp/packer-plugin-vagrant v0.0.3 h1:BT8l8PM6TBawBRuhpvyuA4QSW9/FvE7rhGgVaiRpXz8=
+github.com/hashicorp/packer-plugin-vagrant v0.0.3/go.mod h1:eEXMqtPg8V3aaDO3ZhZ+NB7Yii6eairrEvTFLJaEV4k=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1 h1:vTfy7a10RUVMdNnDLo0EQrCVbAG4rGWkaDTMC7MVBi4=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
 github.com/hashicorp/packer-plugin-vmware v0.0.1 h1:jRQAdjHwg3zeCBb52KoZsuxugrHcQhjgQln72o9eGgM=
@@ -603,8 +605,9 @@ github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+o
 github.com/klauspost/compress v0.0.0-20160131094358-f86d2e6d8a77/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
 github.com/klauspost/compress v1.11.6/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
-github.com/klauspost/compress v1.11.7 h1:0hzRabrMN4tSTvMfnL3SCv1ZGeAP23ynzodBgaHeMeg=
 github.com/klauspost/compress v1.11.7/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
+github.com/klauspost/compress v1.11.13 h1:eSvu8Tmq6j2psUJqJrLcWH6K3w5Dwc+qipbaA6eVEN4=
+github.com/klauspost/compress v1.11.13/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
 github.com/klauspost/cpuid v0.0.0-20160106104451-349c67577817/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/crc32 v0.0.0-20160114101742-999f3125931f/go.mod h1:+ZoRqAPRLkC4NPOvfYeR5KNOrY6TD+/sAC3HXPZgDYg=

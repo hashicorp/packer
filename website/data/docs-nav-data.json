@@ -754,10 +754,6 @@
         "path": "builders/triton"
       },
       {
-        "title": "Vagrant",
-        "path": "builders/vagrant"
-      },
-      {
         "title": "Yandex.Cloud",
         "path": "builders/yandex"
       },
@@ -867,14 +863,6 @@
       {
         "title": "Shell (Local)",
         "path": "post-processors/shell-local"
-      },
-      {
-        "title": "Vagrant",
-        "path": "post-processors/vagrant"
-      },
-      {
-        "title": "Vagrant Cloud",
-        "path": "post-processors/vagrant-cloud"
       },
       {
         "title": "Yandex.Cloud Compute Export",

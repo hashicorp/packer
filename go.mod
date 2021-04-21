@@ -58,6 +58,7 @@ require (
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
 	github.com/hashicorp/packer-plugin-ucloud v0.0.1
+	github.com/hashicorp/packer-plugin-vagrant v0.0.3
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
