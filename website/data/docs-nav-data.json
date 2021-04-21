@@ -788,10 +788,6 @@
         "path": "provisioners/breakpoint"
       },
       {
-        "title": "Converge",
-        "path": "provisioners/converge"
-      },
-      {
         "title": "File",
         "path": "provisioners/file"
       },

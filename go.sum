@@ -499,6 +499,8 @@ github.com/hashicorp/packer-plugin-chef v0.0.1 h1:1zQwnnvftwg9PJyWjMfHfDyzfWDdb0
 github.com/hashicorp/packer-plugin-chef v0.0.1/go.mod h1:4iSyWfvrb4QwUDZqJ3iCb+kIsnDwOTL1yTEDXBtk3Ew=
 github.com/hashicorp/packer-plugin-cloudstack v0.0.1 h1:BF9nXRlA0xQV5W/+CoLjWn0aLO60gTbsxnLi/o37ktc=
 github.com/hashicorp/packer-plugin-cloudstack v0.0.1/go.mod h1:fx13TY2szz6cm2e99xzU3gQzKdGVwysxY2TyKr0r8MQ=
+github.com/hashicorp/packer-plugin-converge v0.0.1 h1:cjrNt2Q/BuSH2o2bpNV91DhWYSTN7vb4LwxwFXULcok=
+github.com/hashicorp/packer-plugin-converge v0.0.1/go.mod h1:3Rm0fAiVwFriSRrwt3dsuKInYYzuOa6tqPFGMOW7noI=
 github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjMNgxayo2DPLz9y+c=
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=

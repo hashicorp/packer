@@ -39,7 +39,6 @@ import (
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
-	convergeprovisioner "github.com/hashicorp/packer/provisioner/converge"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
@@ -77,7 +76,6 @@ var Builders = map[string]packersdk.Builder{
 var Provisioners = map[string]packersdk.Provisioner{
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"breakpoint":        new(breakpointprovisioner.Provisioner),
-	"converge":          new(convergeprovisioner.Provisioner),
 	"file":              new(fileprovisioner.Provisioner),
 	"inspec":            new(inspecprovisioner.Provisioner),
 	"powershell":        new(powershellprovisioner.Provisioner),
