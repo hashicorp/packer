@@ -709,23 +709,6 @@
         "path": "builders/hetzner-cloud"
       },
       {
-        "title": "Hyper-V",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/hyperv"
-          },
-          {
-            "title": "ISO",
-            "path": "builders/hyperv/iso"
-          },
-          {
-            "title": "VMCX",
-            "path": "builders/hyperv/vmcx"
-          }
-        ]
-      },
-      {
         "title": "Linode",
         "path": "builders/linode"
       },
