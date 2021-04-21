@@ -146,20 +146,13 @@ testacc: # install-build-deps generate ## Run acceptance tests
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
 testrace: mode-check vet ## Test with race detection enabled
-	@GO111MODULE=off go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
+	@go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 # Runs code coverage and open a html page with report
 cover:
 	go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m -coverprofile=coverage.out
 	go tool cover -html=coverage.out
 	rm coverage.out
-
-check-vendor-vs-mod: ## Check that go modules and vendored code are on par
-	@GO111MODULE=on go mod vendor
-	@git diff --exit-code --ignore-space-change --ignore-space-at-eol -- vendor ; if [ $$? -eq 1 ]; then \
-		echo "ERROR: vendor dir is not on par with go modules definition." && \
-		exit 1; \
-	fi
 
 vet: ## Vet Go code
 	@go vet $(VET)  ; if [ $$? -eq 1 ]; then \
