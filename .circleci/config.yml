@@ -1,6 +1,5 @@
 orbs:
   win: circleci/windows@1.0.0
-  codecov: codecov/codecov@1.0.5
 
 version: 2.1
 
@@ -64,8 +63,6 @@ jobs:
     steps:
       - checkout
       - run: TESTARGS="-coverprofile=coverage.txt  -covermode=atomic" make ci
-      - codecov/upload:
-          file: coverage.txt
   test-darwin:
     executor: darwin
     working_directory: ~/go/github.com/hashicorp/packer
@@ -73,8 +70,6 @@ jobs:
       - install-go-run-tests-unix:
           GOOS: darwin
           GOVERSION: "1.16"
-      - codecov/upload:
-          file: coverage.txt
   test-windows:
     executor:
       name: win/vs2019
@@ -82,8 +77,6 @@ jobs:
     steps:
       - install-go-run-tests-windows:
           GOVERSION: "1.16"
-      - codecov/upload:
-          file: coverage.txt
   check-lint:
     executor: golang
     resource_class: xlarge
