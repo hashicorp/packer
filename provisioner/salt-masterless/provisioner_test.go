@@ -187,7 +187,7 @@ func TestProvisionerExecuteCommand(t *testing.T) {
 	}
 
 	withoutOverride := p.sudo("echo hello")
-	if withoutOverride != "sudo echo hello" {
+	if withoutOverride != "sudo -S echo hello" {
 		t.Fatalf("execute command not generated correctly")
 	}
 
