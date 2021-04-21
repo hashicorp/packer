@@ -1,6 +1,7 @@
 package command
 
 import (
+	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 
 	// Previously core-bundled components, split into their own plugins but
@@ -116,6 +117,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
+	"converge":          new(convergeprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
 	"puppet-server":     new(puppetserverprovisioner.Provisioner),
 }

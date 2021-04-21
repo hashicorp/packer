@@ -22,7 +22,6 @@
     "title": "Chef",
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
-    "version": "latest",
     "pluginTier": "community",
     "version": "latest"
   },
@@ -30,6 +29,13 @@
     "title": "Cloudstack",
     "path": "cloudstack",
     "repo": "hashicorp/packer-plugin-cloudstack",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
+    "title": "Converge",
+    "path": "converge",
+    "repo": "hashicorp/packer-plugin-converge",
     "pluginTier": "community",
     "version": "latest"
   },
