@@ -135,6 +135,13 @@
     "pluginTier": "community"
   },
   {
+    "title": "Vagrant",
+    "path": "vagrant",
+    "repo": "hashicorp/packer-plugin-vagrant",
+    "pluginTier": "official",
+    "version": "latest"
+  },
+  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
