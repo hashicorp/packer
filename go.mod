@@ -24,7 +24,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.5
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/errwrap v1.0.0
@@ -36,7 +36,7 @@ require (
 	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
-	github.com/hashicorp/hcl/v2 v2.9.1
+	github.com/hashicorp/hcl/v2 v2.10.0
 	github.com/hashicorp/packer-plugin-alicloud v0.0.2
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
 	github.com/hashicorp/packer-plugin-ansible v0.0.2
@@ -45,8 +45,9 @@ require (
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-hyperone v0.0.1
+	github.com/hashicorp/packer-plugin-hyperv v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
-	github.com/hashicorp/packer-plugin-openstack v0.0.1
+	github.com/hashicorp/packer-plugin-openstack v0.0.2
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
@@ -83,7 +84,7 @@ require (
 	github.com/ulikunitz/xz v0.5.6
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
-	github.com/zclconf/go-cty v1.8.1
+	github.com/zclconf/go-cty v1.8.2
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
 	golang.org/x/mod v0.4.1

@@ -13,9 +13,6 @@
 /builder/digitalocean/                     @andrewsomething
 /website/pages/docs/builders/digitalocean* @andrewsomething
 
-/builder/hyperv/                      @taliesins
-/website/pages/docs/builders/hyperv* @taliesins
-
 /examples/jdcloud/                     @XiaohanLiang @remrain
 /builder/jdcloud/                      @XiaohanLiang @remrain
 /website/pages/docs/builders/jdcloud* @XiaohanLiang @remrain
