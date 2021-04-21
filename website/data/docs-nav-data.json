@@ -709,10 +709,6 @@
         "path": "builders/hetzner-cloud"
       },
       {
-        "title": "HyperOne",
-        "path": "builders/hyperone"
-      },
-      {
         "title": "Hyper-V",
         "routes": [
           {

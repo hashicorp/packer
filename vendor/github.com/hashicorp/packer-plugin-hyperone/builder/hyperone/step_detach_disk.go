@@ -10,7 +10,6 @@ import (
 )
 
 type stepDetachDisk struct {
-	vmID string
 }
 
 func (s *stepDetachDisk) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {

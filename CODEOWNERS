@@ -52,12 +52,6 @@
 /builder/hcloud/                      @LKaemmerling
 /website/pages/docs/builders/hcloud* @LKaemmerling
 
-/examples/hyperone/                    @m110 @gregorybrzeski @ad-m
-/builder/hyperone/                     @m110 @gregorybrzeski @ad-m
-/website/pages/docs/builders/hyperone* @m110 @gregorybrzeski @ad-m
-/test/builder_hyperone*                @m110 @gregorybrzeski @ad-m
-/test/fixtures/builder-hyperone/       @m110 @gregorybrzeski @ad-m
-
 /examples/ucloud/                     @shawnmssu
 /builder/ucloud/                      @shawnmssu
 /website/pages/docs/builders/ucloud* @shawnmssu

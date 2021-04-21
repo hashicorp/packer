@@ -19,7 +19,6 @@ import (
 	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
-	hyperonebuilder "github.com/hashicorp/packer/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer/builder/hyperv/vmcx"
 	jdcloudbuilder "github.com/hashicorp/packer/builder/jdcloud"
@@ -72,7 +71,6 @@ var Builders = map[string]packersdk.Builder{
 	"digitalocean":     new(digitaloceanbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"hcloud":           new(hcloudbuilder.Builder),
-	"hyperone":         new(hyperonebuilder.Builder),
 	"hyperv-iso":       new(hypervisobuilder.Builder),
 	"hyperv-vmcx":      new(hypervvmcxbuilder.Builder),
 	"jdcloud":          new(jdcloudbuilder.Builder),

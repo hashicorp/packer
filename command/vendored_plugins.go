@@ -30,6 +30,7 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
+	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
@@ -94,6 +95,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
 	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
 	"osc-chroot":          new(oscchrootbuilder.Builder),
+	"hyperone":            new(hyperonebuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the
