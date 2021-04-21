@@ -4,14 +4,13 @@
 [![Discuss](https://img.shields.io/badge/discuss-packer-3d89ff?style=flat)](https://discuss.hashicorp.com/c/packer)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
 [![GoReportCard][report-badge]][report]
-[![codecov](https://codecov.io/gh/hashicorp/packer/branch/master/graph/badge.svg)](https://codecov.io/gh/hashicorp/packer)
 
 [circleci-badge]: https://circleci.com/gh/hashicorp/packer.svg?style=svg
 [circleci]: https://app.circleci.com/pipelines/github/hashicorp/packer
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
 [godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
-[godoc]: https://godoc.org/github.com/hashicorp/packer	
-[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer	
+[godoc]: https://godoc.org/github.com/hashicorp/packer
+[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer
 [report]: https://goreportcard.com/report/github.com/hashicorp/packer
 
 <p align="center" style="text-align:center;">
@@ -48,7 +47,7 @@ yourself](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.m
 
 After Packer is installed, create your first template, which tells Packer
 what platforms to build images for and how you want to build them. In our
-case, we'll create a simple AMI that has Redis pre-installed. 
+case, we'll create a simple AMI that has Redis pre-installed.
 
 Save this file as `quick-start.pkr.hcl`. Export your AWS credentials as the
 `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
