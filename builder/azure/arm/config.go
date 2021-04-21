@@ -304,7 +304,7 @@ type Config struct {
 	TempComputeName string `mapstructure:"temp_compute_name" required:"false"`
 	// temporary name assigned to the Nic. If this
 	// value is not set, a random value will be assigned. Being able to assign a custom
-	// nicname could ease deployment if naming conventions are used..
+	// nicname could ease deployment if naming conventions are used.
 	TempNicName string `mapstructure:"temp_nic_name" required:"false"`
 	// name assigned to the temporary resource group created during the build.
 	// If this value is not set, a random value will be assigned. This resource
@@ -401,7 +401,7 @@ type Config struct {
 	OSType string `mapstructure:"os_type" required:"false"`
 	// temporary name assigned to the OSDisk. If this
 	// value is not set, a random value will be assigned. Being able to assign a custom
-	// osDiskName could ease deployment if naming conventions are used..
+	// osDiskName could ease deployment if naming conventions are used.
 	TempOSDiskName string `mapstructure:"temp_os_disk_name" required:"false"`
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.

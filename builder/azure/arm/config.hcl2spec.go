@@ -58,6 +58,7 @@ type FlatConfig struct {
 	ResourceGroupName                          *string                            `mapstructure:"resource_group_name" cty:"resource_group_name" hcl:"resource_group_name"`
 	StorageAccount                             *string                            `mapstructure:"storage_account" cty:"storage_account" hcl:"storage_account"`
 	TempComputeName                            *string                            `mapstructure:"temp_compute_name" required:"false" cty:"temp_compute_name" hcl:"temp_compute_name"`
+	TempNicName                                *string                            `mapstructure:"temp_nic_name" required:"false" cty:"temp_nic_name" hcl:"temp_nic_name"`
 	TempResourceGroupName                      *string                            `mapstructure:"temp_resource_group_name" cty:"temp_resource_group_name" hcl:"temp_resource_group_name"`
 	BuildResourceGroupName                     *string                            `mapstructure:"build_resource_group_name" cty:"build_resource_group_name" hcl:"build_resource_group_name"`
 	BuildKeyVaultName                          *string                            `mapstructure:"build_key_vault_name" cty:"build_key_vault_name" hcl:"build_key_vault_name"`
@@ -70,6 +71,7 @@ type FlatConfig struct {
 	PlanInfo                                   *FlatPlanInformation               `mapstructure:"plan_info" required:"false" cty:"plan_info" hcl:"plan_info"`
 	PollingDurationTimeout                     *string                            `mapstructure:"polling_duration_timeout" required:"false" cty:"polling_duration_timeout" hcl:"polling_duration_timeout"`
 	OSType                                     *string                            `mapstructure:"os_type" required:"false" cty:"os_type" hcl:"os_type"`
+	TempOSDiskName                             *string                            `mapstructure:"temp_os_disk_name" required:"false" cty:"temp_os_disk_name" hcl:"temp_os_disk_name"`
 	OSDiskSizeGB                               *int32                             `mapstructure:"os_disk_size_gb" required:"false" cty:"os_disk_size_gb" hcl:"os_disk_size_gb"`
 	AdditionalDiskSize                         []int32                            `mapstructure:"disk_additional_size" required:"false" cty:"disk_additional_size" hcl:"disk_additional_size"`
 	DiskCachingType                            *string                            `mapstructure:"disk_caching_type" required:"false" cty:"disk_caching_type" hcl:"disk_caching_type"`
@@ -187,6 +189,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"resource_group_name":                              &hcldec.AttrSpec{Name: "resource_group_name", Type: cty.String, Required: false},
 		"storage_account":                                  &hcldec.AttrSpec{Name: "storage_account", Type: cty.String, Required: false},
 		"temp_compute_name":                                &hcldec.AttrSpec{Name: "temp_compute_name", Type: cty.String, Required: false},
+		"temp_nic_name":                                    &hcldec.AttrSpec{Name: "temp_nic_name", Type: cty.String, Required: false},
 		"temp_resource_group_name":                         &hcldec.AttrSpec{Name: "temp_resource_group_name", Type: cty.String, Required: false},
 		"build_resource_group_name":                        &hcldec.AttrSpec{Name: "build_resource_group_name", Type: cty.String, Required: false},
 		"build_key_vault_name":                             &hcldec.AttrSpec{Name: "build_key_vault_name", Type: cty.String, Required: false},
@@ -199,6 +202,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"plan_info":                                        &hcldec.BlockSpec{TypeName: "plan_info", Nested: hcldec.ObjectSpec((*FlatPlanInformation)(nil).HCL2Spec())},
 		"polling_duration_timeout":                         &hcldec.AttrSpec{Name: "polling_duration_timeout", Type: cty.String, Required: false},
 		"os_type":                                          &hcldec.AttrSpec{Name: "os_type", Type: cty.String, Required: false},
+		"temp_os_disk_name":                                &hcldec.AttrSpec{Name: "temp_os_disk_name", Type: cty.String, Required: false},
 		"os_disk_size_gb":                                  &hcldec.AttrSpec{Name: "os_disk_size_gb", Type: cty.Number, Required: false},
 		"disk_additional_size":                             &hcldec.AttrSpec{Name: "disk_additional_size", Type: cty.List(cty.Number), Required: false},
 		"disk_caching_type":                                &hcldec.AttrSpec{Name: "disk_caching_type", Type: cty.String, Required: false},
