@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // InstanceIPAddressResponse contains the IPv4 and IPv6 details for an Instance
@@ -65,7 +67,7 @@ func (c *Client) GetInstanceIPAddresses(ctx context.Context, linodeID int) (*Ins
 		return nil, err
 	}
 
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&InstanceIPAddressResponse{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&InstanceIPAddressResponse{}).Get(e))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +81,7 @@ func (c *Client) GetInstanceIPAddress(ctx context.Context, linodeID int, ipaddre
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%s", e, ipaddress)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&InstanceIP{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&InstanceIP{}).Get(e))
 
 	if err != nil {
 		return nil, err
@@ -106,10 +108,10 @@ func (c *Client) AddInstanceIPAddress(ctx context.Context, linodeID int, public 
 	if bodyData, err := json.Marshal(instanceipRequest); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetHeader("Content-Type", "application/json").
 		SetBody(body).
 		Post(e))
@@ -136,10 +138,10 @@ func (c *Client) UpdateInstanceIPAddress(ctx context.Context, linodeID int, ipAd
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 

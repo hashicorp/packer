@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // LKELinodeStatus constants start with LKELinode and include
@@ -18,8 +20,9 @@ const (
 
 // LKEClusterPoolLinode represents a LKEClusterPoolLinode object
 type LKEClusterPoolLinode struct {
-	ID     string          `json:"id"`
-	Status LKELinodeStatus `json:"status"`
+	ID         string          `json:"id"`
+	InstanceID int             `json:"instance_id"`
+	Status     LKELinodeStatus `json:"status"`
 }
 
 // LKEClusterPool represents a LKEClusterPool object
@@ -92,7 +95,7 @@ func (c *Client) GetLKEClusterPool(ctx context.Context, clusterID, id int) (*LKE
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&LKEClusterPool{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&LKEClusterPool{}).Get(e))
 	if err != nil {
 		return nil, err
 	}
@@ -112,10 +115,10 @@ func (c *Client) CreateLKEClusterPool(ctx context.Context, clusterID int, create
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -139,10 +142,10 @@ func (c *Client) UpdateLKEClusterPool(ctx context.Context, clusterID, id int, up
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -161,6 +164,6 @@ func (c *Client) DeleteLKEClusterPool(ctx context.Context,
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

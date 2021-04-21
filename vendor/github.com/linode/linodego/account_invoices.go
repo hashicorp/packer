@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // Invoice structs reflect an invoice for billable activity on the account.
@@ -111,7 +112,7 @@ func (c *Client) GetInvoice(ctx context.Context, id int) (*Invoice, error) {
 	}
 
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&Invoice{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&Invoice{}).Get(e))
 
 	if err != nil {
 		return nil, err

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // NodeBalancer represents a NodeBalancer object
@@ -137,7 +138,7 @@ func (c *Client) GetNodeBalancer(ctx context.Context, id int) (*NodeBalancer, er
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).
+	r, err := errors.CoupleAPIErrors(c.R(ctx).
 		SetResult(&NodeBalancer{}).
 		Get(e))
 	if err != nil {
@@ -159,10 +160,10 @@ func (c *Client) CreateNodeBalancer(ctx context.Context, nodebalancer NodeBalanc
 	if bodyData, err := json.Marshal(nodebalancer); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetHeader("Content-Type", "application/json").
 		SetBody(body).
 		Post(e))
@@ -187,10 +188,10 @@ func (c *Client) UpdateNodeBalancer(ctx context.Context, id int, updateOpts Node
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -208,7 +209,7 @@ func (c *Client) DeleteNodeBalancer(ctx context.Context, id int) error {
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 
 	return err
 }

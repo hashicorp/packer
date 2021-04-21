@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 /*
@@ -218,7 +219,7 @@ func (c *Client) GetInstance(ctx context.Context, linodeID int) (*Instance, erro
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, linodeID)
-	r, err := coupleAPIErrors(c.R(ctx).
+	r, err := errors.CoupleAPIErrors(c.R(ctx).
 		SetResult(Instance{}).
 		Get(e))
 	if err != nil {
@@ -234,7 +235,7 @@ func (c *Client) GetInstanceTransfer(ctx context.Context, linodeID int) (*Instan
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d/transfer", e, linodeID)
-	r, err := coupleAPIErrors(c.R(ctx).
+	r, err := errors.CoupleAPIErrors(c.R(ctx).
 		SetResult(InstanceTransfer{}).
 		Get(e))
 	if err != nil {
@@ -256,10 +257,10 @@ func (c *Client) CreateInstance(ctx context.Context, instance InstanceCreateOpti
 	if bodyData, err := json.Marshal(instance); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -283,10 +284,10 @@ func (c *Client) UpdateInstance(ctx context.Context, id int, instance InstanceUp
 	if bodyData, err := json.Marshal(instance); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -309,7 +310,7 @@ func (c *Client) DeleteInstance(ctx context.Context, id int) error {
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }
 
@@ -322,7 +323,7 @@ func (c *Client) BootInstance(ctx context.Context, id int, configID int) error {
 		bodyMap := map[string]int{"config_id": configID}
 		bodyJSON, err := json.Marshal(bodyMap)
 		if err != nil {
-			return NewError(err)
+			return errors.New(err)
 		}
 		bodyStr = string(bodyJSON)
 	}
@@ -333,7 +334,7 @@ func (c *Client) BootInstance(ctx context.Context, id int, configID int) error {
 	}
 
 	e = fmt.Sprintf("%s/%d/boot", e, id)
-	_, err = coupleAPIErrors(c.R(ctx).
+	_, err = errors.CoupleAPIErrors(c.R(ctx).
 		SetBody(bodyStr).
 		Post(e))
 
@@ -354,10 +355,10 @@ func (c *Client) CloneInstance(ctx context.Context, id int, options InstanceClon
 	if bodyData, err := json.Marshal(options); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -377,7 +378,7 @@ func (c *Client) RebootInstance(ctx context.Context, id int, configID int) error
 		bodyMap := map[string]int{"config_id": configID}
 		bodyJSON, err := json.Marshal(bodyMap)
 		if err != nil {
-			return NewError(err)
+			return errors.New(err)
 		}
 		bodyStr = string(bodyJSON)
 	}
@@ -389,7 +390,7 @@ func (c *Client) RebootInstance(ctx context.Context, id int, configID int) error
 
 	e = fmt.Sprintf("%s/%d/reboot", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).
+	_, err = errors.CoupleAPIErrors(c.R(ctx).
 		SetBody(bodyStr).
 		Post(e))
 
@@ -412,7 +413,7 @@ type InstanceRebuildOptions struct {
 func (c *Client) RebuildInstance(ctx context.Context, id int, opts InstanceRebuildOptions) (*Instance, error) {
 	o, err := json.Marshal(opts)
 	if err != nil {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 	b := string(o)
 	e, err := c.Instances.Endpoint()
@@ -420,7 +421,7 @@ func (c *Client) RebuildInstance(ctx context.Context, id int, opts InstanceRebui
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d/rebuild", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).
+	r, err := errors.CoupleAPIErrors(c.R(ctx).
 		SetBody(b).
 		SetResult(&Instance{}).
 		Post(e))
@@ -442,7 +443,7 @@ type InstanceRescueOptions struct {
 func (c *Client) RescueInstance(ctx context.Context, id int, opts InstanceRescueOptions) error {
 	o, err := json.Marshal(opts)
 	if err != nil {
-		return NewError(err)
+		return errors.New(err)
 	}
 	b := string(o)
 	e, err := c.Instances.Endpoint()
@@ -451,7 +452,7 @@ func (c *Client) RescueInstance(ctx context.Context, id int, opts InstanceRescue
 	}
 	e = fmt.Sprintf("%s/%d/rescue", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).
+	_, err = errors.CoupleAPIErrors(c.R(ctx).
 		SetBody(b).
 		Post(e))
 
@@ -462,7 +463,7 @@ func (c *Client) RescueInstance(ctx context.Context, id int, opts InstanceRescue
 func (c *Client) ResizeInstance(ctx context.Context, id int, opts InstanceResizeOptions) error {
 	o, err := json.Marshal(opts)
 	if err != nil {
-		return NewError(err)
+		return errors.New(err)
 	}
 	body := string(o)
 	e, err := c.Instances.Endpoint()
@@ -471,7 +472,7 @@ func (c *Client) ResizeInstance(ctx context.Context, id int, opts InstanceResize
 	}
 	e = fmt.Sprintf("%s/%d/resize", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).
+	_, err = errors.CoupleAPIErrors(c.R(ctx).
 		SetBody(body).
 		Post(e))
 
@@ -501,6 +502,6 @@ func (c *Client) simpleInstanceAction(ctx context.Context, action string, id int
 		return err
 	}
 	e = fmt.Sprintf("%s/%d/%s", e, id, action)
-	_, err = coupleAPIErrors(c.R(ctx).Post(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Post(e))
 	return err
 }

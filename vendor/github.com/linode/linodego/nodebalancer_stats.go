@@ -2,6 +2,8 @@ package linodego
 
 import (
 	"context"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // NodeBalancerStats represents a nodebalancer stats object
@@ -28,7 +30,7 @@ func (c *Client) GetNodeBalancerStats(ctx context.Context, linodeID int) (*NodeB
 	if err != nil {
 		return nil, err
 	}
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&NodeBalancerStats{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&NodeBalancerStats{}).Get(e))
 	if err != nil {
 		return nil, err
 	}

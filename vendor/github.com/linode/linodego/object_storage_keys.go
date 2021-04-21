@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // ObjectStorageKey represents a linode object storage key object
@@ -67,10 +69,10 @@ func (c *Client) CreateObjectStorageKey(ctx context.Context, createOpts ObjectSt
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -87,7 +89,7 @@ func (c *Client) GetObjectStorageKey(ctx context.Context, id int) (*ObjectStorag
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&ObjectStorageKey{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&ObjectStorageKey{}).Get(e))
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +110,10 @@ func (c *Client) UpdateObjectStorageKey(ctx context.Context, id int, updateOpts 
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -129,6 +131,6 @@ func (c *Client) DeleteObjectStorageKey(ctx context.Context, id int) error {
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

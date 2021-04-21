@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // User represents a User object
@@ -88,7 +90,7 @@ func (c *Client) GetUser(ctx context.Context, id string) (*User, error) {
 	}
 
 	e = fmt.Sprintf("%s/%s", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&User{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&User{}).Get(e))
 
 	if err != nil {
 		return nil, err
@@ -113,10 +115,10 @@ func (c *Client) CreateUser(ctx context.Context, createOpts UserCreateOptions) (
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -144,10 +146,10 @@ func (c *Client) UpdateUser(ctx context.Context, id string, updateOpts UserUpdat
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -167,7 +169,7 @@ func (c *Client) DeleteUser(ctx context.Context, id string) error {
 
 	e = fmt.Sprintf("%s/%s", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 
 	return err
 }

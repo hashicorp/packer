@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // SSHKey represents a SSHKey object
@@ -99,7 +100,7 @@ func (c *Client) GetSSHKey(ctx context.Context, id int) (*SSHKey, error) {
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&SSHKey{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&SSHKey{}).Get(e))
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +120,10 @@ func (c *Client) CreateSSHKey(ctx context.Context, createOpts SSHKeyCreateOption
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -146,10 +147,10 @@ func (c *Client) UpdateSSHKey(ctx context.Context, id int, updateOpts SSHKeyUpda
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -167,6 +168,6 @@ func (c *Client) DeleteSSHKey(ctx context.Context, id int) error {
 	}
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

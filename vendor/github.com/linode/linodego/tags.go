@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	lerrors "github.com/linode/linodego/pkg/errors"
 )
 
 // Tag represents a Tag object
@@ -211,10 +213,10 @@ func (c *Client) CreateTag(ctx context.Context, createOpts TagCreateOptions) (*T
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, lerrors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := lerrors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -232,6 +234,6 @@ func (c *Client) DeleteTag(ctx context.Context, label string) error {
 	}
 	e = fmt.Sprintf("%s/%s", e, label)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = lerrors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

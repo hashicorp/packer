@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // Image represents a deployable Image object for use with Linode Instances
@@ -103,7 +104,7 @@ func (c *Client) GetImage(ctx context.Context, id string) (*Image, error) {
 	}
 
 	e = fmt.Sprintf("%s/%s", e, id)
-	r, err := coupleAPIErrors(c.Images.R(ctx).Get(e))
+	r, err := errors.CoupleAPIErrors(c.Images.R(ctx).Get(e))
 
 	if err != nil {
 		return nil, err
@@ -126,10 +127,10 @@ func (c *Client) CreateImage(ctx context.Context, createOpts ImageCreateOptions)
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -155,10 +156,10 @@ func (c *Client) UpdateImage(ctx context.Context, id string, updateOpts ImageUpd
 	if bodyData, err := json.Marshal(updateOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -177,6 +178,6 @@ func (c *Client) DeleteImage(ctx context.Context, id string) error {
 
 	e = fmt.Sprintf("%s/%s", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

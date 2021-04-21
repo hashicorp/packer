@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // DomainRecord represents a DomainRecord object
@@ -122,7 +124,7 @@ func (c *Client) GetDomainRecord(ctx context.Context, domainID int, id int) (*Do
 	}
 
 	e = fmt.Sprintf("%s/%d", e, id)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&DomainRecord{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&DomainRecord{}).Get(e))
 
 	if err != nil {
 		return nil, err
@@ -145,12 +147,12 @@ func (c *Client) CreateDomainRecord(ctx context.Context, domainID int, domainrec
 
 	bodyData, err := json.Marshal(domainrecord)
 	if err != nil {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
 	body = string(bodyData)
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -178,10 +180,10 @@ func (c *Client) UpdateDomainRecord(ctx context.Context, domainID int, id int, d
 	if bodyData, err := json.Marshal(domainrecord); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -201,7 +203,7 @@ func (c *Client) DeleteDomainRecord(ctx context.Context, domainID int, id int) e
 
 	e = fmt.Sprintf("%s/%d", e, id)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 
 	return err
 }

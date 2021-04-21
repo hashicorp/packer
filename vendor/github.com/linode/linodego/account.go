@@ -1,6 +1,10 @@
 package linodego
 
-import "context"
+import (
+	"context"
+
+	"github.com/linode/linodego/pkg/errors"
+)
 
 // Account associated with the token in use
 type Account struct {
@@ -34,7 +38,7 @@ func (c *Client) GetAccount(ctx context.Context) (*Account, error) {
 		return nil, err
 	}
 
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&Account{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&Account{}).Get(e))
 
 	if err != nil {
 		return nil, err

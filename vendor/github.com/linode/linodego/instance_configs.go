@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // InstanceConfig represents all of the settings that control the boot and run configuration of a Linode Instance
@@ -179,7 +180,7 @@ func (c *Client) GetInstanceConfig(ctx context.Context, linodeID int, configID i
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%d", e, configID)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&InstanceConfig{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&InstanceConfig{}).Get(e))
 
 	if err != nil {
 		return nil, err
@@ -204,7 +205,7 @@ func (c *Client) CreateInstanceConfig(ctx context.Context, linodeID int, createO
 		return nil, err
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -232,7 +233,7 @@ func (c *Client) UpdateInstanceConfig(ctx context.Context, linodeID int, configI
 		return nil, err
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Put(e))
 
@@ -256,6 +257,6 @@ func (c *Client) DeleteInstanceConfig(ctx context.Context, linodeID int, configI
 	}
 	e = fmt.Sprintf("%s/%d", e, configID)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

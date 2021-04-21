@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/linode/linodego/internal/parseabletime"
+	"github.com/linode/linodego/pkg/errors"
 )
 
 // ObjectStorageBucket represents a ObjectStorage object
@@ -82,7 +83,7 @@ func (c *Client) GetObjectStorageBucket(ctx context.Context, clusterID, label st
 		return nil, err
 	}
 	e = fmt.Sprintf("%s/%s/%s", e, clusterID, label)
-	r, err := coupleAPIErrors(c.R(ctx).SetResult(&ObjectStorageBucket{}).Get(e))
+	r, err := errors.CoupleAPIErrors(c.R(ctx).SetResult(&ObjectStorageBucket{}).Get(e))
 	if err != nil {
 		return nil, err
 	}
@@ -102,10 +103,10 @@ func (c *Client) CreateObjectStorageBucket(ctx context.Context, createOpts Objec
 	if bodyData, err := json.Marshal(createOpts); err == nil {
 		body = string(bodyData)
 	} else {
-		return nil, NewError(err)
+		return nil, errors.New(err)
 	}
 
-	r, err := coupleAPIErrors(req.
+	r, err := errors.CoupleAPIErrors(req.
 		SetBody(body).
 		Post(e))
 
@@ -123,6 +124,6 @@ func (c *Client) DeleteObjectStorageBucket(ctx context.Context, clusterID, label
 	}
 	e = fmt.Sprintf("%s/%s/%s", e, clusterID, label)
 
-	_, err = coupleAPIErrors(c.R(ctx).Delete(e))
+	_, err = errors.CoupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }
