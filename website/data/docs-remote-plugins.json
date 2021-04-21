@@ -114,6 +114,13 @@
     "version": "latest"
   },
   {
+    "title": "UCloud",
+    "path": "ucloud",
+    "repo": "hashicorp/packer-plugin-ucloud",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",

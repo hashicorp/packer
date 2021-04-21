@@ -49,10 +49,6 @@
 /builder/hcloud/                      @LKaemmerling
 /website/pages/docs/builders/hcloud* @LKaemmerling
 
-/examples/ucloud/                     @shawnmssu
-/builder/ucloud/                      @shawnmssu
-/website/pages/docs/builders/ucloud* @shawnmssu
-
 /builder/yandex/                      @GennadySpb @alexanderKhaustov @seukyaso
 /website/pages/docs/builders/yandex* @GennadySpb @alexanderKhaustov @seukyaso
 
@@ -74,4 +70,3 @@
 /post-processor/yandex-export/          @GennadySpb
 /post-processor/yandex-import/          @GennadySpb
 /post-processor/vsphere-template/       nelson@bennu.cl
-/post-processor/ucloud-import/          @shawnmssu

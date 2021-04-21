@@ -30,7 +30,6 @@ import (
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
-	uclouduhostbuilder "github.com/hashicorp/packer/builder/ucloud/uhost"
 	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
@@ -39,7 +38,6 @@ import (
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
-	ucloudimportpostprocessor "github.com/hashicorp/packer/post-processor/ucloud-import"
 	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
@@ -80,7 +78,6 @@ var Builders = map[string]packersdk.Builder{
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
-	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
 	"vagrant":          new(vagrantbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
@@ -107,7 +104,6 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
 	"manifest":            new(manifestpostprocessor.PostProcessor),
 	"shell-local":         new(shelllocalpostprocessor.PostProcessor),
-	"ucloud-import":       new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":             new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":       new(vagrantcloudpostprocessor.PostProcessor),
 	"yandex-export":       new(yandexexportpostprocessor.PostProcessor),

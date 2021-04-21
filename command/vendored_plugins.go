@@ -47,6 +47,8 @@ import (
 	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	scalewaybuilder "github.com/hashicorp/packer-plugin-scaleway/builder/scaleway"
+	uclouduhostbuilder "github.com/hashicorp/packer-plugin-ucloud/builder/ucloud/uhost"
+	ucloudimportpostprocessor "github.com/hashicorp/packer-plugin-ucloud/post-processor/ucloud-import"
 	virtualboxisobuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/iso"
 	virtualboxovfbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/ovf"
 	virtualboxvmbuilder "github.com/hashicorp/packer-plugin-virtualbox/builder/virtualbox/vm"
@@ -89,6 +91,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"scaleway":            new(scalewaybuilder.Builder),
+	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
 	"virtualbox-iso":      new(virtualboxisobuilder.Builder),
@@ -125,6 +128,7 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
+	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
 }
