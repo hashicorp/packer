@@ -37,7 +37,6 @@
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
-
     "version": "latest"
   },
   {
@@ -45,6 +44,13 @@
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
     "version": "latest"
+  },
+  {
+    "title": "HyperOne",
+    "path": "hyperone",
+    "repo": "hashicorp/packer-plugin-hyperone",
+    "version": "latest",
+    "pluginTier": "community"
   },
   {
     "title": "Naver Cloud",
@@ -88,6 +94,12 @@
     "pluginTier": "community"
   },
   {
+    "title": "QEMU",
+    "path": "qemu",
+    "repo": "hashicorp/packer-plugin-qemu",
+    "version": "latest"
+  },
+  {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "hashicorp/packer-plugin-scaleway",
@@ -110,12 +122,6 @@
     "title": "VMware",
     "path": "vmware",
     "repo": "hashicorp/packer-plugin-vmware",
-    "version": "latest"
-  },
-  {
-    "title": "QEMU",
-    "path": "qemu",
-    "repo": "hashicorp/packer-plugin-qemu",
     "version": "latest"
   }
 ]

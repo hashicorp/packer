@@ -476,6 +476,8 @@ github.com/hashicorp/packer-plugin-docker v0.0.7 h1:hMTrH7vrkFIjphtbbtpuzffTzSjM
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1 h1:Shjio88MraB+ocj0VI5+M65r4UBKbYI4eCqLNyPXKEo=
 github.com/hashicorp/packer-plugin-googlecompute v0.0.1/go.mod h1:MfV898IrEMpKH6wVnvOI5Tkhxm2snf3QxwVqV4k3bNI=
+github.com/hashicorp/packer-plugin-hyperone v0.0.1 h1:Owp1B5cI0VgFgR3pCyeeQdyKPTWls36mVedv+WxZMOM=
+github.com/hashicorp/packer-plugin-hyperone v0.0.1/go.mod h1:9DglrxEBIig85Hr8r11YE+uMn3G0u+pt0AZHVP+wnAY=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VRcRxTuLoLX1ssUag=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-openstack v0.0.1 h1:FUaNjKguAipPZZXQ4UiJK6c5+2nS89CRxJHjAsfVyIQ=
@@ -647,8 +649,9 @@ github.com/mitchellh/iochan v1.0.0/go.mod h1:JwYml1nuB7xOzsp52dPpHFffvOCDupsG0Qu
 github.com/mitchellh/mapstructure v0.0.0-20160808181253-ca63d7c062ee/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
 github.com/mitchellh/mapstructure v1.2.3/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
-github.com/mitchellh/mapstructure v1.4.0 h1:7ks8ZkOP5/ujthUsT07rNv+nkLXCQWKNHuwzOAesEks=
 github.com/mitchellh/mapstructure v1.4.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
+github.com/mitchellh/mapstructure v1.4.1 h1:CpVNEelQCZBooIPDn+AR3NpivK/TIKU8bDxdASFVQag=
+github.com/mitchellh/mapstructure v1.4.1/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/panicwrap v1.0.0 h1:67zIyVakCIvcs69A0FGfZjBdPleaonSgGlXRSRlb6fE=
 github.com/mitchellh/panicwrap v1.0.0/go.mod h1:pKvZHwWrZowLUzftuFq7coarnxbBXU4aQh3N0BJOeeA=
 github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784 h1:+DAetXqxv/mSyCkE9KBIYOZs9b68y7SUaDCxQMRjA68=
