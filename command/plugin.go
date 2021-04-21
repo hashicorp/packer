@@ -16,7 +16,6 @@ import (
 	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
 	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
-	digitaloceanbuilder "github.com/hashicorp/packer/builder/digitalocean"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
 	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
@@ -32,7 +31,6 @@ import (
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
-	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
@@ -58,7 +56,6 @@ var Builders = map[string]packersdk.Builder{
 	"azure-arm":        new(azurearmbuilder.Builder),
 	"azure-chroot":     new(azurechrootbuilder.Builder),
 	"azure-dtl":        new(azuredtlbuilder.Builder),
-	"digitalocean":     new(digitaloceanbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"hcloud":           new(hcloudbuilder.Builder),
 	"lxc":              new(lxcbuilder.Builder),
@@ -88,14 +85,13 @@ var Provisioners = map[string]packersdk.Provisioner{
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{
-	"artifice":            new(artificepostprocessor.PostProcessor),
-	"checksum":            new(checksumpostprocessor.PostProcessor),
-	"compress":            new(compresspostprocessor.PostProcessor),
-	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
-	"manifest":            new(manifestpostprocessor.PostProcessor),
-	"shell-local":         new(shelllocalpostprocessor.PostProcessor),
-	"yandex-export":       new(yandexexportpostprocessor.PostProcessor),
-	"yandex-import":       new(yandeximportpostprocessor.PostProcessor),
+	"artifice":      new(artificepostprocessor.PostProcessor),
+	"checksum":      new(checksumpostprocessor.PostProcessor),
+	"compress":      new(compresspostprocessor.PostProcessor),
+	"manifest":      new(manifestpostprocessor.PostProcessor),
+	"shell-local":   new(shelllocalpostprocessor.PostProcessor),
+	"yandex-export": new(yandexexportpostprocessor.PostProcessor),
+	"yandex-import": new(yandeximportpostprocessor.PostProcessor),
 }
 
 var Datasources = map[string]packersdk.Datasource{}

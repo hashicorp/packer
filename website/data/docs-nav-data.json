@@ -697,10 +697,6 @@
         ]
       },
       {
-        "title": "DigitalOcean",
-        "path": "builders/digitalocean"
-      },
-      {
         "title": "File",
         "path": "builders/file"
       },
@@ -847,10 +843,6 @@
       {
         "title": "Checksum",
         "path": "post-processors/checksum"
-      },
-      {
-        "title": "DigitalOcean Import",
-        "path": "post-processors/digitalocean-import"
       },
       {
         "title": "Manifest",
