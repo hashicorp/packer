@@ -33,6 +33,8 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
+	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
+	linodebuilder "github.com/hashicorp/packer-plugin-linode/builder/linode"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
@@ -80,6 +82,8 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"hyperv-iso":          new(hypervisobuilder.Builder),
 	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
 	"hyperone":            new(hyperonebuilder.Builder),
+	"jdcloud":             new(jdcloudbuilder.Builder),
+	"linode":              new(linodebuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
 	"proxmox":             new(proxmoxiso.Builder),

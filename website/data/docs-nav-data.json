@@ -709,10 +709,6 @@
         "path": "builders/hetzner-cloud"
       },
       {
-        "title": "Linode",
-        "path": "builders/linode"
-      },
-      {
         "title": "LXC",
         "path": "builders/lxc"
       },
@@ -752,10 +748,6 @@
       {
         "title": "Tencent Cloud",
         "path": "builders/tencentcloud-cvm"
-      },
-      {
-        "title": "JDCloud",
-        "path": "builders/jdcloud"
       },
       {
         "title": "Triton",
