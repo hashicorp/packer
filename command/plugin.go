@@ -28,7 +28,6 @@ import (
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
-	vagrantbuilder "github.com/hashicorp/packer/builder/vagrant"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
@@ -36,8 +35,6 @@ import (
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer/post-processor/digitalocean-import"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
-	vagrantpostprocessor "github.com/hashicorp/packer/post-processor/vagrant"
-	vagrantcloudpostprocessor "github.com/hashicorp/packer/post-processor/vagrant-cloud"
 	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
@@ -74,7 +71,6 @@ var Builders = map[string]packersdk.Builder{
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
-	"vagrant":          new(vagrantbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
@@ -100,8 +96,6 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
 	"manifest":            new(manifestpostprocessor.PostProcessor),
 	"shell-local":         new(shelllocalpostprocessor.PostProcessor),
-	"vagrant":             new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud":       new(vagrantcloudpostprocessor.PostProcessor),
 	"yandex-export":       new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":       new(yandeximportpostprocessor.PostProcessor),
 }
