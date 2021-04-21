@@ -30,7 +30,6 @@ type Config struct {
 	SkipBootstrap bool   `mapstructure:"skip_bootstrap"`
 	BootstrapArgs string `mapstructure:"bootstrap_args"`
 
-	DisableSudo    bool   `mapstructure:"disable_sudo"`
 	ExecuteCommand string `mapstructure:"execute_command"`
 
 	// Custom state to run instead of highstate
@@ -153,6 +152,12 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		p.config.TempConfigDir = p.guestOSTypeConfig.tempDir
 	}
 
+	if p.config.ExecuteCommand == "" {
+		if p.config.GuestOSType == guestexec.UnixOSType {
+			p.config.ExecuteCommand = "sudo -S"
+		}
+	}
+
 	var errs *packersdk.MultiError
 
 	// require a salt state tree
@@ -162,7 +167,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.Formulas != nil && len(p.config.Formulas) > 0 {
-
 		validURLs := hasValidFormulaURLs(p.config.Formulas)
 		if !validURLs {
 			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("Invalid formula URL. Please verify the git URLs also contain a '//' subdir"))
@@ -468,16 +472,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 
 // Prepends sudo to supplied command if config says to
 func (p *Provisioner) sudo(cmd string) string {
-	if p.config.DisableSudo || (p.config.GuestOSType == guestexec.WindowsOSType) {
-		return cmd
-	}
-
-	executeCommand := "sudo"
-	if p.config.ExecuteCommand != "" {
-		executeCommand = p.config.ExecuteCommand
-	}
-
-	return fmt.Sprintf("%s %s", executeCommand, cmd)
+	return fmt.Sprintf("%s %s", p.config.ExecuteCommand, cmd)
 }
 
 func validateDirConfig(path string, name string, required bool) error {

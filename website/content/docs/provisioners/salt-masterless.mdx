@@ -61,13 +61,9 @@ Optional:
   has more detailed usage instructions. By default, no arguments are sent to
   the script.
 
-- `disable_sudo` (boolean) - By default, the bootstrap install command is
-  prefixed with `sudo`. When using a Docker builder, you will likely want to
-  pass `true` since `sudo` is often not pre-installed.
-
-- `execute_command` (string) - By default certain commands require sudo on linux
-  based systems, if necessary this allows overriding the default `sudo -S`. When
-  the SSH user is not in the sudoers file with no password, you will have to use this.
+- `execute_command` (string) - The command to use to execute salt-call with. Like the
+  shell executor this is prefixed to the actual salt-call command. The default value
+  for unix is `sudo -S` and the default on windows is empty.
 
 - `remote_pillar_roots` (string) - The path to your remote [pillar
   roots](http://docs.saltproject.io/en/latest/ref/configuration/master.html#pillar-configuration).
