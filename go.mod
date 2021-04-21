@@ -57,6 +57,7 @@ require (
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
+	github.com/hashicorp/packer-plugin-ucloud v0.0.1
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
@@ -79,8 +80,6 @@ require (
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
-	github.com/ucloud/ucloud-sdk-go v0.16.3
-	github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6
 	github.com/ulikunitz/xz v0.5.6
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c

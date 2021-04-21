@@ -754,10 +754,6 @@
         "path": "builders/triton"
       },
       {
-        "title": "UCloud",
-        "path": "builders/ucloud-uhost"
-      },
-      {
         "title": "Vagrant",
         "path": "builders/vagrant"
       },
@@ -871,10 +867,6 @@
       {
         "title": "Shell (Local)",
         "path": "post-processors/shell-local"
-      },
-      {
-        "title": "UCloud Import",
-        "path": "post-processors/ucloud-import"
       },
       {
         "title": "Vagrant",

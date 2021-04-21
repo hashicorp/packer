@@ -543,6 +543,8 @@ github.com/hashicorp/packer-plugin-sdk v0.1.3/go.mod h1:xePpgQgQYv/bamiypx3hH9uk
 github.com/hashicorp/packer-plugin-sdk v0.1.4/go.mod h1:xePpgQgQYv/bamiypx3hH9ukidxDdcN8q0R0wLi8IEQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.0 h1:A4Dq7p4y1vscY4gMzp7GQaXyDJYYhP4ukp4fapPSOY4=
 github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
+github.com/hashicorp/packer-plugin-ucloud v0.0.1 h1:SC2F1BuXb6dKhY6fRdmAqTkuc17jlBIu/Ut0URJy8TU=
+github.com/hashicorp/packer-plugin-ucloud v0.0.1/go.mod h1:xyMMmi/UPqFV3GT4eeX7wIqdoncNyrNuvdylnEQl1RU=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1 h1:vTfy7a10RUVMdNnDLo0EQrCVbAG4rGWkaDTMC7MVBi4=
 github.com/hashicorp/packer-plugin-virtualbox v0.0.1/go.mod h1:OOGNMK8Y8zjsYngesZH5kCbH0Fj8PKvhqPp8w1ejM3Y=
 github.com/hashicorp/packer-plugin-vmware v0.0.1 h1:jRQAdjHwg3zeCBb52KoZsuxugrHcQhjgQln72o9eGgM=
@@ -800,10 +802,12 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible h1:bs+0lcG4RELNbE8PsBC9oaPP0/qExr0DuEGnZyocm84=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
-github.com/ucloud/ucloud-sdk-go v0.16.3 h1:DCh4A5vSxFr3EvtvJL+g0Ehy4hSlEkMpQmEvxEQhYdo=
 github.com/ucloud/ucloud-sdk-go v0.16.3/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
-github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6 h1:FAWNiqocJ04wC4Znj7Ax4PGWstZijayO6ifuHHvb+vI=
+github.com/ucloud/ucloud-sdk-go v0.20.2 h1:ZNB38C7oZ2imCHEC79mVFvVT+ASkbryriOkZ+q2E0XI=
+github.com/ucloud/ucloud-sdk-go v0.20.2/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
 github.com/ufilesdk-dev/ufile-gosdk v0.0.0-20190830075812-b4dbc4ef43a6/go.mod h1:R5FMQxkQ+QK/9Vz+jfnJP4rZIktYrRcWmuAnbOSkROI=
+github.com/ufilesdk-dev/ufile-gosdk v1.0.1 h1:TNtFN3vO8ghuxLKBwQqSELllHYP4rggvXCox8JtVV0Y=
+github.com/ufilesdk-dev/ufile-gosdk v1.0.1/go.mod h1:R5FMQxkQ+QK/9Vz+jfnJP4rZIktYrRcWmuAnbOSkROI=
 github.com/ugorji/go v0.0.0-20151218193438-646ae4a518c1/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
 github.com/ugorji/go v1.2.4 h1:cTciPbZ/VSOzCLKclmssnfQ/jyoVyOcJ3aoJyUV1Urc=
 github.com/ugorji/go v1.2.4/go.mod h1:EuaSCk8iZMdIspsu6HXH7X2UGKw1ezO4wCfGszGmmo4=
