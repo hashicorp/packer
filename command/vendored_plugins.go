@@ -33,6 +33,7 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
+	hcloudbuilder "github.com/hashicorp/packer-plugin-hcloud/builder/hcloud"
 	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
@@ -93,6 +94,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
+	"hcloud":              new(hcloudbuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
 	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
 	"hyperone":            new(hyperonebuilder.Builder),
