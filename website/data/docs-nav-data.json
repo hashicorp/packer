@@ -713,10 +713,6 @@
         "path": "builders/profitbricks"
       },
       {
-        "title": "Tencent Cloud",
-        "path": "builders/tencentcloud-cvm"
-      },
-      {
         "title": "Yandex.Cloud",
         "path": "builders/yandex"
       },

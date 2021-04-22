@@ -20,7 +20,6 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
-	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
@@ -54,7 +53,6 @@ var Builders = map[string]packersdk.Builder{
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
-	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
