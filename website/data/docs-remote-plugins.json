@@ -147,6 +147,13 @@
     "version": "latest"
   },
   {
+    "title": "Triton",
+    "path": "triton",
+    "repo": "hashicorp/packer-plugin-triton",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "UCloud",
     "path": "ucloud",
     "repo": "hashicorp/packer-plugin-ucloud",

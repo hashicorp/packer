@@ -24,7 +24,6 @@ import (
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
-	tritonbuilder "github.com/hashicorp/packer/builder/triton"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
@@ -62,7 +61,6 @@ var Builders = map[string]packersdk.Builder{
 	"oneandone":        new(oneandonebuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
-	"triton":           new(tritonbuilder.Builder),
 	"yandex":           new(yandexbuilder.Builder),
 }
 
