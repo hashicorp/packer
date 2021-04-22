@@ -20,14 +20,11 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
-	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
-	yandexexportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-export"
-	yandeximportpostprocessor "github.com/hashicorp/packer/post-processor/yandex-import"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
@@ -53,7 +50,6 @@ var Builders = map[string]packersdk.Builder{
 	"null":         new(nullbuilder.Builder),
 	"oneandone":    new(oneandonebuilder.Builder),
 	"profitbricks": new(profitbricksbuilder.Builder),
-	"yandex":       new(yandexbuilder.Builder),
 }
 
 var Provisioners = map[string]packersdk.Provisioner{
@@ -71,13 +67,11 @@ var Provisioners = map[string]packersdk.Provisioner{
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{
-	"artifice":      new(artificepostprocessor.PostProcessor),
-	"checksum":      new(checksumpostprocessor.PostProcessor),
-	"compress":      new(compresspostprocessor.PostProcessor),
-	"manifest":      new(manifestpostprocessor.PostProcessor),
-	"shell-local":   new(shelllocalpostprocessor.PostProcessor),
-	"yandex-export": new(yandexexportpostprocessor.PostProcessor),
-	"yandex-import": new(yandeximportpostprocessor.PostProcessor),
+	"artifice":    new(artificepostprocessor.PostProcessor),
+	"checksum":    new(checksumpostprocessor.PostProcessor),
+	"compress":    new(compresspostprocessor.PostProcessor),
+	"manifest":    new(manifestpostprocessor.PostProcessor),
+	"shell-local": new(shelllocalpostprocessor.PostProcessor),
 }
 
 var Datasources = map[string]packersdk.Datasource{}
