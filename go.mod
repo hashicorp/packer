@@ -16,7 +16,7 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/godo v1.11.1
+	github.com/digitalocean/godo v1.60.0
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
 	github.com/go-ini/ini v1.25.4
@@ -43,6 +43,7 @@ require (
 	github.com/hashicorp/packer-plugin-chef v0.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v0.0.1
 	github.com/hashicorp/packer-plugin-converge v0.0.1
+	github.com/hashicorp/packer-plugin-digitalocean v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-hyperone v0.0.1

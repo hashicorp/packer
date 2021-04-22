@@ -23,6 +23,8 @@ import (
 	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
+	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
+	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -83,6 +85,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
+	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"hyperv-iso":          new(hypervisobuilder.Builder),
@@ -131,6 +134,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(anazibimportpostprocessor.PostProcessor),
+	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),

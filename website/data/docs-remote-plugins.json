@@ -40,6 +40,13 @@
     "version": "latest"
   },
   {
+    "title": "DigitalOcean",
+    "path": "digitalocean",
+    "repo": "hashicorp/packer-plugin-digitalocean",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
