@@ -22,8 +22,6 @@ import (
 	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
-	oracleclassicbuilder "github.com/hashicorp/packer/builder/oracle/classic"
-	oracleocibuilder "github.com/hashicorp/packer/builder/oracle/oci"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer/builder/triton"
@@ -62,8 +60,6 @@ var Builders = map[string]packersdk.Builder{
 	"lxd":              new(lxdbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
-	"oracle-classic":   new(oracleclassicbuilder.Builder),
-	"oracle-oci":       new(oracleocibuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),

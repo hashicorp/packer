@@ -19,7 +19,7 @@ require (
 	github.com/digitalocean/godo v1.60.0
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
-	github.com/go-ini/ini v1.25.4
+	github.com/go-ini/ini v1.62.0
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.5
@@ -33,7 +33,7 @@ require (
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79
+	github.com/hashicorp/go-oracle-terraform v0.17.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.10.0
@@ -52,6 +52,7 @@ require (
 	github.com/hashicorp/packer-plugin-linode v0.0.2
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-openstack v0.0.2
+	github.com/hashicorp/packer-plugin-oracle v0.0.3 // indirect
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2

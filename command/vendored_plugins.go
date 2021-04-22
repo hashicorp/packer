@@ -40,6 +40,8 @@ import (
 	linodebuilder "github.com/hashicorp/packer-plugin-linode/builder/linode"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
+	oracleclassicbuilder "github.com/hashicorp/packer-plugin-oracle/builder/classic"
+	oracleocibuilder "github.com/hashicorp/packer-plugin-oracle/builder/oci"
 	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
 	oscbsusurrogatebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate"
 	oscbsuvolumebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume"
@@ -95,6 +97,8 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"linode":              new(linodebuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
+	"oracle-classic":      new(oracleclassicbuilder.Builder),
+	"oracle-oci":          new(oracleocibuilder.Builder),
 	"proxmox":             new(proxmoxiso.Builder),
 	"proxmox-iso":         new(proxmoxiso.Builder),
 	"proxmox-clone":       new(proxmoxclone.Builder),
