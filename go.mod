@@ -41,7 +41,7 @@ require (
 	github.com/hashicorp/packer-plugin-digitalocean v0.0.1
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
-	github.com/hashicorp/packer-plugin-hcloud v0.0.0-20210422120216-b87fe1c1b879
+	github.com/hashicorp/packer-plugin-hcloud v0.0.1
 	github.com/hashicorp/packer-plugin-hyperone v0.0.1
 	github.com/hashicorp/packer-plugin-hyperv v0.0.1
 	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
@@ -64,7 +64,6 @@ require (
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
-	github.com/hetznercloud/hcloud-go v1.25.0
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
