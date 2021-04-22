@@ -16,7 +16,6 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
-	github.com/go-resty/resty/v2 v2.6.0 // indirect
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.5
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
@@ -61,6 +60,7 @@ require (
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
+	github.com/hashicorp/packer-plugin-yandex v0.0.4
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
