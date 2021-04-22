@@ -211,5 +211,11 @@
     "path": "vmware",
     "repo": "hashicorp/packer-plugin-vmware",
     "version": "latest"
+  },
+  {
+    "title": "Yandex",
+    "path": "yandex",
+    "repo": "hashicorp/packer-plugin-yandex",
+    "version": "latest"
   }
 ]
