@@ -45,6 +45,8 @@ require (
 	github.com/hashicorp/packer-plugin-hyperv v0.0.1
 	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
 	github.com/hashicorp/packer-plugin-linode v0.0.2
+	github.com/hashicorp/packer-plugin-lxc v0.0.1
+	github.com/hashicorp/packer-plugin-lxd v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-openstack v0.0.2
 	github.com/hashicorp/packer-plugin-oracle v0.0.3

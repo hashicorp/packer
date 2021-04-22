@@ -544,6 +544,10 @@ github.com/hashicorp/packer-plugin-jdcloud v0.0.1 h1:MLvAroDOHWimBf6cBa0trlHJpB8
 github.com/hashicorp/packer-plugin-jdcloud v0.0.1/go.mod h1:bVGtjp3v98rpguEYxJAXQbg8CjllInh5WFqO9a0T4lc=
 github.com/hashicorp/packer-plugin-linode v0.0.2 h1:obN0kQKlfCQuFmRwVx6ksQApQZ85gPAcSCtjDd0F30c=
 github.com/hashicorp/packer-plugin-linode v0.0.2/go.mod h1:uF8FAE3+PG/lVI1TwjXSaS3AHv4+Wb3/3gsrg0h6IQ0=
+github.com/hashicorp/packer-plugin-lxc v0.0.1 h1:UPcoEYb/MFArZZLKyMdEiNqbvDthw+3PULKhgN98tKM=
+github.com/hashicorp/packer-plugin-lxc v0.0.1/go.mod h1:W5fbCd3CnNUa+ApVGJ6QwAt646QT3eMhNeBWIcM51As=
+github.com/hashicorp/packer-plugin-lxd v0.0.1 h1:CrFbQmQmdgI3n1RHMPmTUDinRPnPa/bIS9IsMtzERp8=
+github.com/hashicorp/packer-plugin-lxd v0.0.1/go.mod h1:h3wqgxQiWy8pIJytTjeqXlAd1PXfNTvhTdODnvzDG3w=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VRcRxTuLoLX1ssUag=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-openstack v0.0.2 h1:wGNE8es3Bn9auuIoX+gqT9chXzYY9GlM55eSpM4uwtU=

@@ -705,14 +705,6 @@
         "path": "builders/hetzner-cloud"
       },
       {
-        "title": "LXC",
-        "path": "builders/lxc"
-      },
-      {
-        "title": "LXD",
-        "path": "builders/lxd"
-      },
-      {
         "title": "Null",
         "path": "builders/null"
       },
