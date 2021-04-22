@@ -713,10 +713,6 @@
         "path": "builders/profitbricks"
       },
       {
-        "title": "Yandex.Cloud",
-        "path": "builders/yandex"
-      },
-      {
         "title": "Custom",
         "path": "builders/custom"
       },
@@ -814,14 +810,6 @@
       {
         "title": "Shell (Local)",
         "path": "post-processors/shell-local"
-      },
-      {
-        "title": "Yandex.Cloud Compute Export",
-        "path": "post-processors/yandex-export"
-      },
-      {
-        "title": "Yandex.Cloud Compute Import",
-        "path": "post-processors/yandex-import"
       },
       {
         "title": "Community-Supported",

@@ -1,7 +1,6 @@
 package command
 
 import (
-	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 
 	// Previously core-bundled components, split into their own plugins but
@@ -23,6 +22,7 @@ import (
 	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
+	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
@@ -73,6 +73,9 @@ import (
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere-template"
+	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
+	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
+	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
@@ -129,6 +132,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
 	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
 	"osc-chroot":          new(oscchrootbuilder.Builder),
+	"yandex":              new(yandexbuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the
@@ -161,6 +165,8 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
+	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
+	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
 
 // Upon init lets load up any plugins that were vendored manually into the default
