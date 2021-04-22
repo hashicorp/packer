@@ -302,6 +302,10 @@ type Config struct {
 	// group and VM name allows one to execute commands to update the VM during a
 	// Packer build, e.g. attach a resource disk to the VM.
 	TempComputeName string `mapstructure:"temp_compute_name" required:"false"`
+	// temporary name assigned to the Nic. If this
+	// value is not set, a random value will be assigned. Being able to assign a custom
+	// nicname could ease deployment if naming conventions are used.
+	TempNicName string `mapstructure:"temp_nic_name" required:"false"`
 	// name assigned to the temporary resource group created during the build.
 	// If this value is not set, a random value will be assigned. This resource
 	// group is deleted at the end of the build.
@@ -395,6 +399,10 @@ type Config struct {
 	// machine. For Linux this configures an SSH authorized key. For Windows
 	// this configures a WinRM certificate.
 	OSType string `mapstructure:"os_type" required:"false"`
+	// temporary name assigned to the OSDisk. If this
+	// value is not set, a random value will be assigned. Being able to assign a custom
+	// osDiskName could ease deployment if naming conventions are used.
+	TempOSDiskName string `mapstructure:"temp_os_disk_name" required:"false"`
 	// Specify the size of the OS disk in GB
 	// (gigabytes). Values of zero or less than zero are ignored.
 	OSDiskSizeGB int32 `mapstructure:"os_disk_size_gb" required:"false"`
@@ -704,9 +712,18 @@ func setRuntimeValues(c *Config) {
 	} else if c.TempResourceGroupName != "" && c.BuildResourceGroupName == "" {
 		c.tmpResourceGroupName = c.TempResourceGroupName
 	}
+	if c.TempNicName == "" {
+		c.tmpNicName = tempName.NicName
+	} else {
+		c.tmpNicName = c.TempNicName
+	}
 	c.tmpNicName = tempName.NicName
 	c.tmpPublicIPAddressName = tempName.PublicIPAddressName
-	c.tmpOSDiskName = tempName.OSDiskName
+	if c.TempOSDiskName == "" {
+		c.tmpOSDiskName = tempName.OSDiskName
+	} else {
+		c.tmpOSDiskName = c.TempOSDiskName
+	}
 	c.tmpDataDiskName = tempName.DataDiskName
 	c.tmpSubnetName = tempName.SubnetName
 	c.tmpVirtualNetworkName = tempName.VirtualNetworkName
