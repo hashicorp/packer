@@ -168,6 +168,12 @@
     "version": "latest"
   },
   {
+    "title": "Tencent Cloud",
+    "path": "tencentcloud",
+    "repo": "hashicorp/packer-plugin-tencentcloud",
+    "version": "latest"
+  },
+  {
     "title": "Triton",
     "path": "triton",
     "repo": "hashicorp/packer-plugin-triton",

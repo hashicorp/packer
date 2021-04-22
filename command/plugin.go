@@ -20,7 +20,6 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
-	tencentcloudcvmbuilder "github.com/hashicorp/packer/builder/tencentcloud/cvm"
 	yandexbuilder "github.com/hashicorp/packer/builder/yandex"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
@@ -47,15 +46,14 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packersdk.Builder{
-	"azure-arm":        new(azurearmbuilder.Builder),
-	"azure-chroot":     new(azurechrootbuilder.Builder),
-	"azure-dtl":        new(azuredtlbuilder.Builder),
-	"file":             new(filebuilder.Builder),
-	"null":             new(nullbuilder.Builder),
-	"oneandone":        new(oneandonebuilder.Builder),
-	"profitbricks":     new(profitbricksbuilder.Builder),
-	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
-	"yandex":           new(yandexbuilder.Builder),
+	"azure-arm":    new(azurearmbuilder.Builder),
+	"azure-chroot": new(azurechrootbuilder.Builder),
+	"azure-dtl":    new(azuredtlbuilder.Builder),
+	"file":         new(filebuilder.Builder),
+	"null":         new(nullbuilder.Builder),
+	"oneandone":    new(oneandonebuilder.Builder),
+	"profitbricks": new(profitbricksbuilder.Builder),
+	"yandex":       new(yandexbuilder.Builder),
 }
 
 var Provisioners = map[string]packersdk.Provisioner{

@@ -58,6 +58,7 @@ require (
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.0
+	github.com/hashicorp/packer-plugin-tencentcloud v0.0.1
 	github.com/hashicorp/packer-plugin-triton v0.0.0-20210421085122-768dd7c764d9
 	github.com/hashicorp/packer-plugin-ucloud v0.0.1
 	github.com/hashicorp/packer-plugin-vagrant v0.0.3
@@ -74,12 +75,10 @@ require (
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/pierrec/lz4 v2.0.5+incompatible
-	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
-	github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible
 	github.com/ulikunitz/xz v0.5.6
 	github.com/yandex-cloud/go-genproto v0.0.0-20200915125933-33de72a328bd
 	github.com/yandex-cloud/go-sdk v0.0.0-20200921111412-ef15ded2014c
