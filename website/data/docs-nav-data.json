@@ -729,10 +729,6 @@
         "path": "builders/tencentcloud-cvm"
       },
       {
-        "title": "Triton",
-        "path": "builders/triton"
-      },
-      {
         "title": "Yandex.Cloud",
         "path": "builders/yandex"
       },
