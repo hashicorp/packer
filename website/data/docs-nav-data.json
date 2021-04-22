@@ -701,10 +701,6 @@
         "path": "builders/file"
       },
       {
-        "title": "Hetzner Cloud",
-        "path": "builders/hetzner-cloud"
-      },
-      {
         "title": "Null",
         "path": "builders/null"
       },

@@ -59,6 +59,13 @@
     "version": "latest"
   },
   {
+    "title": "hcloud",
+    "path": "hetzner-cloud",
+    "repo": "hashicorp/packer-plugin-hcloud",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "HyperOne",
     "path": "hyperone",
     "repo": "hashicorp/packer-plugin-hyperone",
