@@ -16,10 +16,8 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/digitalocean/godo v1.60.0
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
-	github.com/go-ini/ini v1.62.0
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.5
@@ -29,11 +27,9 @@ require (
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
-	github.com/hashicorp/go-cleanhttp v0.5.2
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 	github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hashicorp/go-oracle-terraform v0.17.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.10.0
@@ -50,9 +46,11 @@ require (
 	github.com/hashicorp/packer-plugin-hyperv v0.0.1
 	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
 	github.com/hashicorp/packer-plugin-linode v0.0.2
+	github.com/hashicorp/packer-plugin-lxc v0.0.1
+	github.com/hashicorp/packer-plugin-lxd v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-openstack v0.0.2
-	github.com/hashicorp/packer-plugin-oracle v0.0.3 // indirect
+	github.com/hashicorp/packer-plugin-oracle v0.0.3
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
@@ -76,7 +74,6 @@ require (
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/mitchellh/reflectwalk v1.0.0
-	github.com/oracle/oci-go-sdk/v36 v36.2.0
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3

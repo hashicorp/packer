@@ -18,8 +18,6 @@ import (
 	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	hcloudbuilder "github.com/hashicorp/packer/builder/hcloud"
-	lxcbuilder "github.com/hashicorp/packer/builder/lxc"
-	lxdbuilder "github.com/hashicorp/packer/builder/lxd"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
 	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
@@ -56,8 +54,6 @@ var Builders = map[string]packersdk.Builder{
 	"azure-dtl":        new(azuredtlbuilder.Builder),
 	"file":             new(filebuilder.Builder),
 	"hcloud":           new(hcloudbuilder.Builder),
-	"lxc":              new(lxcbuilder.Builder),
-	"lxd":              new(lxdbuilder.Builder),
 	"null":             new(nullbuilder.Builder),
 	"oneandone":        new(oneandonebuilder.Builder),
 	"profitbricks":     new(profitbricksbuilder.Builder),

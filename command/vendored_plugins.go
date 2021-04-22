@@ -38,6 +38,8 @@ import (
 	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
 	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
 	linodebuilder "github.com/hashicorp/packer-plugin-linode/builder/linode"
+	lxcbuilder "github.com/hashicorp/packer-plugin-lxc/builder/lxc"
+	lxdbuilder "github.com/hashicorp/packer-plugin-lxd/builder/lxd"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer-plugin-oracle/builder/classic"
@@ -95,6 +97,8 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"hyperone":            new(hyperonebuilder.Builder),
 	"jdcloud":             new(jdcloudbuilder.Builder),
 	"linode":              new(linodebuilder.Builder),
+	"lxc":                 new(lxcbuilder.Builder),
+	"lxd":                 new(lxdbuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
 	"oracle-classic":      new(oracleclassicbuilder.Builder),

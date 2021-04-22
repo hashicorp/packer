@@ -260,8 +260,8 @@ github.com/go-chi/chi v4.0.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxm
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/go-ini/ini v1.25.4 h1:Mujh4R/dH6YL8bxuISne3xX2+qcQ9p0IxKAP6ExWoUo=
 github.com/go-ini/ini v1.25.4/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
+github.com/go-ini/ini v1.62.0 h1:7VJT/ZXjzqSrvtraFp4ONq80hTcRQth1c9ZnQ3uNQvU=
 github.com/go-ini/ini v1.62.0/go.mod h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=
 github.com/go-ldap/ldap v3.0.2+incompatible/go.mod h1:qfd9rJvER9Q0/D/Sqn1DfHRoBp40uXYvFoEVrNEPqRc=
 github.com/go-logr/logr v0.1.0/go.mod h1:ixOQHD9gLJUVQQ2ZOR7zLEifBX6tGkNJF4QyIY7sIas=
@@ -438,7 +438,6 @@ github.com/hashicorp/go-multierror v1.0.0/go.mod h1:dHtQlpGsu+cZNNAkkCN/P3hoUDHh
 github.com/hashicorp/go-multierror v1.1.0/go.mod h1:spPvp8C1qA32ftKqdAHm4hHTbPw+vmowP0z+KUhOZdA=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
-github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79 h1:RKu7yAXZTaQsxj1K9GDsh+QVw0+Wu1SWHxtbFN0n+hE=
 github.com/hashicorp/go-oracle-terraform v0.0.0-20181016190316-007121241b79/go.mod h1:09jT3Y/OIsjTjQ2+3bkVNPDKqWcGIYYvjB2BEKVUdvc=
 github.com/hashicorp/go-oracle-terraform v0.17.0 h1:gFiaeKf9MXLobhv7uqzPuDFULL6ymJpw1NJCXwSOgJ4=
 github.com/hashicorp/go-oracle-terraform v0.17.0/go.mod h1:09jT3Y/OIsjTjQ2+3bkVNPDKqWcGIYYvjB2BEKVUdvc=
@@ -519,6 +518,10 @@ github.com/hashicorp/packer-plugin-jdcloud v0.0.1 h1:MLvAroDOHWimBf6cBa0trlHJpB8
 github.com/hashicorp/packer-plugin-jdcloud v0.0.1/go.mod h1:bVGtjp3v98rpguEYxJAXQbg8CjllInh5WFqO9a0T4lc=
 github.com/hashicorp/packer-plugin-linode v0.0.2 h1:obN0kQKlfCQuFmRwVx6ksQApQZ85gPAcSCtjDd0F30c=
 github.com/hashicorp/packer-plugin-linode v0.0.2/go.mod h1:uF8FAE3+PG/lVI1TwjXSaS3AHv4+Wb3/3gsrg0h6IQ0=
+github.com/hashicorp/packer-plugin-lxc v0.0.1 h1:UPcoEYb/MFArZZLKyMdEiNqbvDthw+3PULKhgN98tKM=
+github.com/hashicorp/packer-plugin-lxc v0.0.1/go.mod h1:W5fbCd3CnNUa+ApVGJ6QwAt646QT3eMhNeBWIcM51As=
+github.com/hashicorp/packer-plugin-lxd v0.0.1 h1:CrFbQmQmdgI3n1RHMPmTUDinRPnPa/bIS9IsMtzERp8=
+github.com/hashicorp/packer-plugin-lxd v0.0.1/go.mod h1:h3wqgxQiWy8pIJytTjeqXlAd1PXfNTvhTdODnvzDG3w=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VRcRxTuLoLX1ssUag=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
 github.com/hashicorp/packer-plugin-openstack v0.0.2 h1:wGNE8es3Bn9auuIoX+gqT9chXzYY9GlM55eSpM4uwtU=

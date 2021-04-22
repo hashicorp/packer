@@ -87,6 +87,20 @@
     "version": "latest"
   },
   {
+    "title": "LXC",
+    "path": "lxc",
+    "repo": "hashicorp/packer-plugin-lxc",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
+    "title": "LXD",
+    "path": "lxd",
+    "repo": "hashicorp/packer-plugin-lxd",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
