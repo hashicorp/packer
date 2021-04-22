@@ -125,6 +125,7 @@
     "title": "Oracle",
     "path": "oracle",
     "repo": "hashicorp/packer-plugin-oracle",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
@@ -171,6 +172,7 @@
     "title": "Tencent Cloud",
     "path": "tencentcloud",
     "repo": "hashicorp/packer-plugin-tencentcloud",
+    "pluginTier": "community",
     "version": "latest"
   },
   {
