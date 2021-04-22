@@ -216,6 +216,7 @@
     "title": "Yandex",
     "path": "yandex",
     "repo": "hashicorp/packer-plugin-yandex",
-    "version": "latest"
+    "version": "latest",
+    "pluginTier": "community"
   }
 ]
