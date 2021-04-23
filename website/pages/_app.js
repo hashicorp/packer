@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }) {
         description="Packer is a free and open source tool for creating golden images for multiple
         platforms from a single source configuration."
         image="https://www.packer.io/img/og-image.png"
-        icon={[{ href: '/favicon.ico' }]}
+        icon={[{ href: '/_favicon.ico' }]}
       />
       <HashiStackMenu />
       <ProductSubnav />
