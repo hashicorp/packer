@@ -1955,6 +1955,29 @@ func TestConfigShouldAllowSharedImageGalleryOptions(t *testing.T) {
 
 }
 
+func TestConfigShouldRejectSharedImageGalleryInvalidStorageAccountType(t *testing.T) {
+	config := map[string]interface{}{
+		"location":        "ignore",
+		"subscription_id": "ignore",
+		"os_type":         "linux",
+		"shared_image_gallery": map[string]string{
+			"subscription":         "ignore",
+			"resource_group":       "ignore",
+			"gallery_name":         "ignore",
+			"image_name":           "ignore",
+			"image_version":        "ignore",
+			"storage_account_type": "--invalid--",
+		},
+	}
+
+	var c Config
+	_, err := c.Prepare(config, getPackerConfiguration())
+	if err != nil {
+		t.Log("config Shared Image Gallery with unsupported storage account type failed which is expected", err)
+	}
+
+}
+
 func TestConfigShouldRejectSharedImageGalleryWithVhdTarget(t *testing.T) {
 	config := map[string]interface{}{
 		"location":        "ignore",

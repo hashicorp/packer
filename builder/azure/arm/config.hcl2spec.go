@@ -334,6 +334,7 @@ type FlatSharedImageGalleryDestination struct {
 	SigDestinationImageName          *string  `mapstructure:"image_name" cty:"image_name" hcl:"image_name"`
 	SigDestinationImageVersion       *string  `mapstructure:"image_version" cty:"image_version" hcl:"image_version"`
 	SigDestinationReplicationRegions []string `mapstructure:"replication_regions" cty:"replication_regions" hcl:"replication_regions"`
+	SigDestinationStorageAccountType *string  `mapstructure:"storage_account_type" cty:"storage_account_type" hcl:"storage_account_type"`
 }
 
 // FlatMapstructure returns a new FlatSharedImageGalleryDestination.
@@ -348,12 +349,13 @@ func (*SharedImageGalleryDestination) FlatMapstructure() interface{ HCL2Spec() m
 // The decoded values from this spec will then be applied to a FlatSharedImageGalleryDestination.
 func (*FlatSharedImageGalleryDestination) HCL2Spec() map[string]hcldec.Spec {
 	s := map[string]hcldec.Spec{
-		"subscription":        &hcldec.AttrSpec{Name: "subscription", Type: cty.String, Required: false},
-		"resource_group":      &hcldec.AttrSpec{Name: "resource_group", Type: cty.String, Required: false},
-		"gallery_name":        &hcldec.AttrSpec{Name: "gallery_name", Type: cty.String, Required: false},
-		"image_name":          &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
-		"image_version":       &hcldec.AttrSpec{Name: "image_version", Type: cty.String, Required: false},
-		"replication_regions": &hcldec.AttrSpec{Name: "replication_regions", Type: cty.List(cty.String), Required: false},
+		"subscription":         &hcldec.AttrSpec{Name: "subscription", Type: cty.String, Required: false},
+		"resource_group":       &hcldec.AttrSpec{Name: "resource_group", Type: cty.String, Required: false},
+		"gallery_name":         &hcldec.AttrSpec{Name: "gallery_name", Type: cty.String, Required: false},
+		"image_name":           &hcldec.AttrSpec{Name: "image_name", Type: cty.String, Required: false},
+		"image_version":        &hcldec.AttrSpec{Name: "image_version", Type: cty.String, Required: false},
+		"replication_regions":  &hcldec.AttrSpec{Name: "replication_regions", Type: cty.List(cty.String), Required: false},
+		"storage_account_type": &hcldec.AttrSpec{Name: "storage_account_type", Type: cty.String, Required: false},
 	}
 	return s
 }

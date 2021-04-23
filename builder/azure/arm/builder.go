@@ -449,6 +449,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 		stateBag.Put(constants.ArmManagedImageSharedGalleryName, b.config.SharedGalleryDestination.SigDestinationGalleryName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageName, b.config.SharedGalleryDestination.SigDestinationImageName)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersion, b.config.SharedGalleryDestination.SigDestinationImageVersion)
+		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionStorageAccountType, b.config.SharedGalleryDestination.SigDestinationStorageAccountType)
 		stateBag.Put(constants.ArmManagedImageSubscription, b.config.ClientConfig.SubscriptionID)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionEndOfLifeDate, b.config.SharedGalleryImageVersionEndOfLifeDate)
 		stateBag.Put(constants.ArmManagedImageSharedGalleryImageVersionReplicaCount, b.config.SharedGalleryImageVersionReplicaCount)
