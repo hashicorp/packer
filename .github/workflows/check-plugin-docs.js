@@ -50,6 +50,14 @@ async function checkPluginDocs() {
           );
         }
       }
+      // Validate that local zip files are not used in production
+      if (typeof pluginEntry.zipFile !== "undefined") {
+        throw new Error(
+            `Local ZIP file being used for "${
+                title || pluginEntry.path || repo
+            }". The zipFile option should only be used for local development. Please omit the zipFile attribute and ensure the plugin entry points to a remote repository.`
+        );
+      }
       // Attempt to fetch plugin docs files
       const docsMdxFiles = await fetchPluginDocs({ repo, tag: version });
       const mdxFilesByComponent = docsMdxFiles.reduce((acc, mdxFile) => {
