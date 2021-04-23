@@ -278,6 +278,33 @@ If a plugin maintainer wishes to only include a specific version of released doc
 
 The `"sourceBranch"` key in the above configuration ensures potential contributors can link back to source files in the plugin repository from the Packer docs site. If a `"sourceBranch"` value is not present, it will default to `"main"`.
 
+#### Testing Plugin Documentation
+
+Before publishing the `docs.zip` file, you might want to preview your documentation changes.
+We provide a mechanism that allows to preview how the docs will look like within
+the Packer documentation.
+
+Follow the next steps to get the Packer website running and preview the documentation changes:
+
+- Get the [Packer source code](https://github.com/hashicorp/packer). Our website code is under the [website folder](https://github.com/hashicorp/packer/tree/master/website).
+- Generate the `docs.zip` file. You can find above the steps to do so.
+- Add the `zipFile` attribute to the plugin entry in `docs-remote-plugins.json`. The value should be the full path of the `docs.zip` generated. For example:
+
+```json
+{
+  "title": "Scaffolding",
+  "path": "scaffolding",
+  "repo": "hashicorp/packer-plugin-scaffolding",
+  "version": "latest",
+  "sourceBranch": "main",
+  "zipFile": "/Users/myuser/Packer/plugins/packer-plugin-scaffolding/docs.zip"
+}
+```
+
+- Go to the [website folder](https://github.com/hashicorp/packer/tree/master/website).
+  In the website README, follow the steps to [run the website with node](https://github.com/hashicorp/packer/tree/master/website#with-node).
+- Once the website is up and running, the plugin documentation should be available in `http://localhost:3000/docs`.
+
 ### Plugin Development Tips and FAQs
 
 #### Working Examples
