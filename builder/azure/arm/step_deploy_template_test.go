@@ -117,6 +117,7 @@ func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInExistingResourceGr
 	stateBag.Put(constants.ArmIsManagedImage, true)
 	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
 	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put(constants.ArmKeepOSDisk, false)
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)
@@ -133,6 +134,7 @@ func TestStepDeployTemplateCleanupShouldDeleteManagedOSImageInTemporaryResourceG
 	stateBag.Put(constants.ArmIsManagedImage, true)
 	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
 	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put(constants.ArmKeepOSDisk, false)
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)
@@ -149,6 +151,7 @@ func TestStepDeployTemplateCleanupShouldDeleteVHDOSImageInExistingResourceGroup(
 	stateBag.Put(constants.ArmIsManagedImage, false)
 	stateBag.Put(constants.ArmIsExistingResourceGroup, true)
 	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put(constants.ArmKeepOSDisk, false)
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)
@@ -165,6 +168,7 @@ func TestStepDeployTemplateCleanupShouldVHDOSImageInTemporaryResourceGroup(t *te
 	stateBag.Put(constants.ArmIsManagedImage, false)
 	stateBag.Put(constants.ArmIsExistingResourceGroup, false)
 	stateBag.Put(constants.ArmIsResourceGroupCreated, true)
+	stateBag.Put(constants.ArmKeepOSDisk, false)
 	stateBag.Put("ui", packersdk.TestUi(t))
 
 	testSubject.Cleanup(stateBag)

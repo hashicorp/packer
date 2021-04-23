@@ -332,6 +332,17 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 				template.(*CaptureTemplate),
 				getSasUrlFunc)
 		}
+		return NewManagedImageArtifact(b.config.OSType,
+			b.config.ManagedImageResourceGroupName,
+			b.config.ManagedImageName,
+			b.config.Location,
+			managedImageID,
+			b.config.ManagedImageOSDiskSnapshotName,
+			b.config.ManagedImageDataDiskSnapshotPrefix,
+			generatedData,
+			b.stateBag.Get(constants.ArmKeepOSDisk).(bool),
+			nil,
+			getSasUrlFunc)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),

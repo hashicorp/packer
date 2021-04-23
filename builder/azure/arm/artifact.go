@@ -3,6 +3,7 @@ package arm
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/url"
 	"path"
 	"strings"
@@ -60,16 +61,19 @@ func NewManagedImageArtifact(osType, resourceGroup, name, location, id, osDiskSn
 
 	if keepOSDisk {
 		if template == nil {
-			return nil, fmt.Errorf("nil capture template")
+			log.Printf("artifact error: nil capture template")
+			return &res, nil
 		}
 
 		if len(template.Resources) != 1 {
-			return nil, fmt.Errorf("malformed capture template, expected one resource")
+			log.Printf("artifact error: malformed capture template, expected one resource")
+			return &res, nil
 		}
 
 		vhdUri, err := url.Parse(template.Resources[0].Properties.StorageProfile.OSDisk.Image.Uri)
 		if err != nil {
-			return nil, err
+			log.Printf("artifact error: Error parsing osdisk url: %s", err)
+			return &res, nil
 		}
 
 		res.OSDiskUri = vhdUri.String()
