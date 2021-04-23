@@ -54,4 +54,5 @@ const (
 	ArmAsyncResourceGroupDelete                               string = "arm.AsyncResourceGroupDelete"
 	ArmManagedImageOSDiskSnapshotName                         string = "arm.ManagedImageOSDiskSnapshotName"
 	ArmManagedImageDataDiskSnapshotPrefix                     string = "arm.ManagedImageDataDiskSnapshotPrefix"
+	ArmKeepOSDisk                                             string = "arm.KeepOSDisk"
 )

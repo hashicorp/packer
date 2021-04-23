@@ -296,6 +296,15 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		return nil, errors.New("Build was halted.")
 	}
 
+	getSasUrlFunc := func(name string) string {
+		blob := azureClient.BlobStorageClient.GetContainerReference(DefaultSasBlobContainer).GetBlobReference(name)
+		options := storage.BlobSASOptions{}
+		options.BlobServiceSASPermissions.Read = true
+		options.Expiry = time.Now().AddDate(0, 1, 0).UTC() // one month
+		sasUrl, _ := blob.GetSASURI(options)
+		return sasUrl
+	}
+
 	generatedData := map[string]interface{}{"generated_data": b.stateBag.Get("generated_data")}
 	if b.config.isManagedImage() {
 		managedImageID := fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Compute/images/%s",
@@ -310,6 +319,18 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 				b.config.ManagedImageDataDiskSnapshotPrefix,
 				b.stateBag.Get(constants.ArmManagedImageSharedGalleryId).(string),
 				generatedData)
+		} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
+			return NewManagedImageArtifact(b.config.OSType,
+				b.config.ManagedImageResourceGroupName,
+				b.config.ManagedImageName,
+				b.config.Location,
+				managedImageID,
+				b.config.ManagedImageOSDiskSnapshotName,
+				b.config.ManagedImageDataDiskSnapshotPrefix,
+				generatedData,
+				b.stateBag.Get(constants.ArmKeepOSDisk).(bool),
+				template.(*CaptureTemplate),
+				getSasUrlFunc)
 		}
 		return NewManagedImageArtifact(b.config.OSType,
 			b.config.ManagedImageResourceGroupName,
@@ -318,18 +339,14 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			managedImageID,
 			b.config.ManagedImageOSDiskSnapshotName,
 			b.config.ManagedImageDataDiskSnapshotPrefix,
-			generatedData)
+			generatedData,
+			b.stateBag.Get(constants.ArmKeepOSDisk).(bool),
+			nil,
+			getSasUrlFunc)
 	} else if template, ok := b.stateBag.GetOk(constants.ArmCaptureTemplate); ok {
 		return NewArtifact(
 			template.(*CaptureTemplate),
-			func(name string) string {
-				blob := azureClient.BlobStorageClient.GetContainerReference(DefaultSasBlobContainer).GetBlobReference(name)
-				options := storage.BlobSASOptions{}
-				options.BlobServiceSASPermissions.Read = true
-				options.Expiry = time.Now().AddDate(0, 1, 0).UTC() // one month
-				sasUrl, _ := blob.GetSASURI(options)
-				return sasUrl
-			},
+			getSasUrlFunc,
 			b.config.OSType,
 			generatedData)
 	}
@@ -425,6 +442,7 @@ func (b *Builder) configureStateBag(stateBag multistep.StateBag) {
 	stateBag.Put(constants.ArmManagedImageOSDiskSnapshotName, b.config.ManagedImageOSDiskSnapshotName)
 	stateBag.Put(constants.ArmManagedImageDataDiskSnapshotPrefix, b.config.ManagedImageDataDiskSnapshotPrefix)
 	stateBag.Put(constants.ArmAsyncResourceGroupDelete, b.config.AsyncResourceGroupDelete)
+	stateBag.Put(constants.ArmKeepOSDisk, b.config.KeepOSDisk)
 
 	if b.config.isManagedImage() && b.config.SharedGalleryDestination.SigDestinationGalleryName != "" {
 		stateBag.Put(constants.ArmManagedImageSigPublishResourceGroup, b.config.SharedGalleryDestination.SigDestinationResourceGroup)
