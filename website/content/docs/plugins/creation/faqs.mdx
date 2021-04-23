@@ -1,0 +1,41 @@
+---
+description: |
+  Frequently asked questions for Packer Plugins.
+page_title: Extending Packer Plugin FAQs
+---
+
+# Extending Packer Plugin FAQs
+
+1. **What are the responsibilities in maintaining a community plugin?**
+Community plugins are made available by the community, for the community to be used with Packer. By maintaining a plugin, you will be responsible for the development, release, and ongoing support of the plugin.
+The responsibilities of development include:
+        1. Assisting with the migration of the plugin code base, and git history, into a GitHub repository under your respective organization (e.g github.com/<orgname>/packer-plugin-<name>).
+        1. Updating the code base to work with new versions of Packer.
+        1. Reviewing issues and pull-requests opened against the plugin repository in a timely manner.
+        1. Releasing new versions of the plugin binary that are compatible with Packer - See [Creating a Release](https://www.packer.io/docs/plugins/creation#creating-a-github-release) for more details.
+
+2. **What happens to an active plugin that is no longer being maintained?**
+
+Plugins that are not actively maintained will be marked as unmaintained on their respective documentation pages, and scheduled for archival. We will try to find a new owner. If no owner can be found then HashiCorp will follow the process for archiving a plugin that has no owner.
+
+3. **What does it mean for a plugin to be archived?**
+
+A plugin that does not have an owner will be broken out into its own repository under the HashiCorp GitHub organization. The new repository will then be [archived](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/archiving-a-github-repository) to let users know that the plugin is no longer being maintained. Upon the initial breakout, a final compatible release of the plugin will be made, but it will not be actively maintained or monitored for new issues. Critical security-related issues will be reviewed and addressed where possible.
+
+4. **I've upgraded my plugin to use the latest Packer plugin SDK will it work versions of Packer prior to v1.7.0**?
+In Packer v1.7.0, a new Packer Plugin SDK was made available to assist maintainers in the creation of Packer plugins. In this new SDK a number of breaking changes were introduced so the plugin API version was bumped from version 4 to version 5.0. Thus making any plugin using the latest SDK incompatible with versions of Packer before v1.7.0.
+
+The latest API version supports both a major and a minor version to allow for minor improvements to the Packer Plugin SDK API without causing backwards incompatibilities for plugins on the same major API version.
+
+5. **Will existing plugins not using the new Packer Plugin SDK continue to work with Packer v1.7.0+**?
+Packer plugins built against version 4 of the Packer plugin API, those plugins not using github.com/hashicorp/packer-plugin-sdk, will continue to work with the latest versions of Packer but they must be installed manually. Support for plugin installation via the `packer init` command is only supported for plugins using the latest Packer Plugin SDK.
+
+6. **I have an existing plugin (e.g packer-provisioner-comment) that I've upgraded to the latest SDK will it work with Packer v1.7.0+**?
+Any plugin that has been upgraded to the latest version of the packer plugin sdk will work with any version of packer after, and including, v1.7.0. Plugins following the old naming convention of `packer-[builder|provisioner|post-processor]-${name}` will not be supported by the `packer-init` command for installation, and instead must be installed manually.
+
+In order for an updated plugin to with the new `packer init` installation process it must be converted to a multi-component plugin for Packer - see [upgrade plugins to use multi-component RPC server](https://www.packer.io/guides/1.7-plugin-upgrade#upgrade-plugins-to-use-the-new-multi-component-rpc-server) for instructions on how to upgrade.
+
+7. **There is a community plugin currently under the HashiCorp GitHub org that I would like to become the maintainer of, how do I get started**?
+Before v1.7.0 of Packer the majority of Packer plugins were being maintained under the [hashicorp/packer](https://github.com/hashicorp/packer) repository. With the new `packer init` command the Packer team has moved out all non-core plugins into there separate repositories to separate the scope of responsibility for Packer core, and its individual plugins.
+
+If you are insterested in solely making changes to the plugins under the HashiCorp GitHub org. you can do so using the GitHub pull-request process and following the [Packer Contributing Guide](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md). If you are interested in take full ownership of the plugin and transferring the code base into your respective GitHub org. please reach out to [Packer-integration-dev@hashicorp.com](mailto:Packer-integration-dev@hashicorp.com).

@@ -653,7 +653,13 @@
     ]
   },
   {
-    "divider": true
+    "title": "Plugins",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "plugins"
+      }
+    ]
   },
   {
     "title": "Communicators",
@@ -832,36 +838,31 @@
     "divider": true
   },
   {
-    "title": "Packer Plugins",
+    "title": "Extending Packer",
     "routes": [
       {
         "title": "Overview",
-        "path": "plugins"
+        "path": "plugins/creation"
       },
       {
-        "title": "Extending Packer",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "plugins/creation"
-          },
-          {
-            "title": "Custom Builders",
-            "path": "plugins/creation/custom-builders"
-          },
-          {
-            "title": "Custom Post-Processors",
-            "path": "plugins/creation/custom-post-processors"
-          },
-          {
-            "title": "Custom Provisioners",
-            "path": "plugins/creation/custom-provisioners"
-          },
-          {
-            "title": "Custom Data Sources",
-            "path": "plugins/creation/custom-datasources"
-          }
-        ]
+        "title": "Extending Packer FAQs",
+        "path": "plugins/creation/faqs"
+      },
+      {
+        "title": "Custom Builders",
+        "path": "plugins/creation/custom-builders"
+      },
+      {
+        "title": "Custom Post-Processors",
+        "path": "plugins/creation/custom-post-processors"
+      },
+      {
+        "title": "Custom Provisioners",
+        "path": "plugins/creation/custom-provisioners"
+      },
+      {
+        "title": "Custom Data Sources",
+        "path": "plugins/creation/custom-datasources"
       }
     ]
   },
