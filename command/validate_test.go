@@ -22,6 +22,8 @@ func TestValidateCommand(t *testing.T) {
 		{path: filepath.Join(testFixture("validate"), "null_var.json"), exitCode: 1},
 		{path: filepath.Join(testFixture("validate"), "var_foo_with_no_default.pkr.hcl"), exitCode: 1},
 
+		{path: testFixture("hcl", "validation", "wrong_pause_before.pkr.hcl"), exitCode: 1},
+
 		// wrong version fails
 		{path: filepath.Join(testFixture("version_req", "base_failure")), exitCode: 1},
 		{path: filepath.Join(testFixture("version_req", "base_success")), exitCode: 0},
