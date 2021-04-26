@@ -119,8 +119,9 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 		pauseBefore, err := time.ParseDuration(b.PauseBefore)
 		if err != nil {
 			return nil, append(diags, &hcl.Diagnostic{
-				Summary: "Failed to parse pause_before duration",
-				Detail:  err.Error(),
+				Summary:  "Failed to parse pause_before duration",
+				Severity: hcl.DiagError,
+				Detail:   err.Error(),
 			})
 		}
 		provisioner.PauseBefore = pauseBefore
