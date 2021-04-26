@@ -66,6 +66,14 @@
     "pluginTier": "community"
   },
   {
+    "title": "HuaweiCloud",
+    "path": "huaweicloud",
+    "repo": "huaweicloud/packer-plugin-huaweicloud",
+    "version": "latest",
+    "pluginTier": "community",
+    "sourceBranch": "master"
+  },
+  {
     "title": "HyperOne",
     "path": "hyperone",
     "repo": "hashicorp/packer-plugin-hyperone",
