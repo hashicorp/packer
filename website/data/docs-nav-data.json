@@ -680,23 +680,6 @@
         "path": "builders"
       },
       {
-        "title": "Azure",
-        "routes": [
-          {
-            "title": "Overview",
-            "path": "builders/azure"
-          },
-          {
-            "title": "ARM",
-            "path": "builders/azure/arm"
-          },
-          {
-            "title": "chroot",
-            "path": "builders/azure/chroot"
-          }
-        ]
-      },
-      {
         "title": "File",
         "path": "builders/file"
       },

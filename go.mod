@@ -2,18 +2,9 @@ module github.com/hashicorp/packer
 
 require (
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
-	github.com/Azure/azure-sdk-for-go v40.5.0+incompatible
-	github.com/Azure/go-autorest/autorest v0.10.0
-	github.com/Azure/go-autorest/autorest/adal v0.8.2
-	github.com/Azure/go-autorest/autorest/azure/auth v0.4.2
-	github.com/Azure/go-autorest/autorest/azure/cli v0.3.1
-	github.com/Azure/go-autorest/autorest/date v0.2.0
-	github.com/Azure/go-autorest/autorest/to v0.3.0
-	github.com/approvals/go-approval-tests v0.0.0-20160714161514-ad96e53bea43
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
 	github.com/gobwas/glob v0.2.3
@@ -69,7 +60,6 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
-	github.com/mitchellh/reflectwalk v1.0.0
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/posener/complete v1.2.3
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
