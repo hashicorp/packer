@@ -4,43 +4,43 @@
 
 Major refactor: Extracted a majority of HashiCorp-maintained and community plugins from the Packer Core repository. They now live in their own multi-component plugin repositiores. The following repositories have been created, and their components have been deleted from the "github.com/hashicorp/packer" repository.
 
-"github.com/hashicorp/packer-plugin-docker"
-"github.com/hashicorp/packer-plugin-amazon"
-"github.com/hashicorp/packer-plugin-ansible"
-"github.com/hashicorp/packer-plugin-inspec"
-"github.com/hashicorp/packer-plugin-azure"
-"github.com/hashicorp/packer-plugin-googlecompute"
-"github.com/hashicorp/packer-plugin-parallels"
-"github.com/hashicorp/packer-plugin-qemu"
-"github.com/hashicorp/packer-plugin-vagrant"
-"github.com/hashicorp/packer-plugin-virtualbox"
-"github.com/hashicorp/packer-plugin-vmware"
-"github.com/hashicorp/packer-plugin-vsphere"
-"github.com/hashicorp/packer-plugin-alicloud"
-"github.com/hashicorp/packer-plugin-cloudstack"
-"github.com/hashicorp/packer-plugin-digitalocean"
-"github.com/hashicorp/packer-plugin-hcloud"
-"github.com/hashicorp/packer-plugin-hyperone"
-"github.com/hashicorp/packer-plugin-hyperv"
-"github.com/hashicorp/packer-plugin-ionos-cloud"
-"github.com/hashicorp/packer-plugin-jdcloud"
-"github.com/hashicorp/packer-plugin-linode"
-"github.com/hashicorp/packer-plugin-lxc"
-"github.com/hashicorp/packer-plugin-lxd"
-"github.com/hashicorp/packer-plugin-ncloud"
-"github.com/hashicorp/packer-plugin-openstack"
-"github.com/hashicorp/packer-plugin-oracle"
-"github.com/hashicorp/packer-plugin-outscale"
-"github.com/hashicorp/packer-plugin-proxmox"
-"github.com/hashicorp/packer-plugin-scaleway"
-"github.com/hashicorp/packer-plugin-tencentcloud"
-"github.com/hashicorp/packer-plugin-triton"
-"github.com/hashicorp/packer-plugin-ucloud"
-"github.com/hashicorp/packer-plugin-yandex"
-"github.com/hashicorp/packer-plugin-chef"
-"github.com/hashicorp/packer-plugin-converge"
-"github.com/hashicorp/packer-plugin-puppet"
-"github.com/hashicorp/packer-plugin-salt"
+* "github.com/hashicorp/packer-plugin-docker"
+* "github.com/hashicorp/packer-plugin-amazon"
+* "github.com/hashicorp/packer-plugin-ansible"
+* "github.com/hashicorp/packer-plugin-inspec"
+* "github.com/hashicorp/packer-plugin-azure"
+* "github.com/hashicorp/packer-plugin-googlecompute"
+* "github.com/hashicorp/packer-plugin-parallels"
+* "github.com/hashicorp/packer-plugin-qemu"
+* "github.com/hashicorp/packer-plugin-vagrant"
+* "github.com/hashicorp/packer-plugin-virtualbox"
+* "github.com/hashicorp/packer-plugin-vmware"
+* "github.com/hashicorp/packer-plugin-vsphere"
+* "github.com/hashicorp/packer-plugin-alicloud"
+* "github.com/hashicorp/packer-plugin-cloudstack"
+* "github.com/hashicorp/packer-plugin-digitalocean"
+* "github.com/hashicorp/packer-plugin-hcloud"
+* "github.com/hashicorp/packer-plugin-hyperone"
+* "github.com/hashicorp/packer-plugin-hyperv"
+* "github.com/hashicorp/packer-plugin-ionos-cloud"
+* "github.com/hashicorp/packer-plugin-jdcloud"
+* "github.com/hashicorp/packer-plugin-linode"
+* "github.com/hashicorp/packer-plugin-lxc"
+* "github.com/hashicorp/packer-plugin-lxd"
+* "github.com/hashicorp/packer-plugin-ncloud"
+* "github.com/hashicorp/packer-plugin-openstack"
+* "github.com/hashicorp/packer-plugin-oracle"
+* "github.com/hashicorp/packer-plugin-outscale"
+* "github.com/hashicorp/packer-plugin-proxmox"
+* "github.com/hashicorp/packer-plugin-scaleway"
+* "github.com/hashicorp/packer-plugin-tencentcloud"
+* "github.com/hashicorp/packer-plugin-triton"
+* "github.com/hashicorp/packer-plugin-ucloud"
+* "github.com/hashicorp/packer-plugin-yandex"
+* "github.com/hashicorp/packer-plugin-chef"
+* "github.com/hashicorp/packer-plugin-converge"
+* "github.com/hashicorp/packer-plugin-puppet"
+* "github.com/hashicorp/packer-plugin-salt"
 
 _this will not be a backwards-breaking change in v1.7.3_ because the extracted
 components are being vendored back into Packer. However, we encourage users to
@@ -49,23 +49,23 @@ updates to each plugin, and to prepare for Packer v2.0 when we will stop
 vendoring the above plugins into the main Packer binary. The following
 components will not be removed from the main packer binary:
 
-`null` builder
-`file` builder
-`breakpoint` provisioner
+* `null` builder
+* `file` builder
+* `breakpoint` provisioner
 
-`file` provisioner
-`powershell` provisioner
-`shell` provisioner
-`shell-local` provisioner
-`sleep` provisioner
-`windows-restart` provisioner
-`windows-shell` provisioner
+* `file` provisioner
+* `powershell` provisioner
+* `shell` provisioner
+* `shell-local` provisioner
+* `sleep` provisioner
+* `windows-restart` provisioner
+* `windows-shell` provisioner
 
-`artifice` post-processor
-`checksum` post-processor
-`compress` post-processor
-`manifest` post-processor
-`shell-local` post-processor
+* `artifice` post-processor
+* `checksum` post-processor
+* `compress` post-processor
+* `manifest` post-processor
+* `shell-local` post-processor
 
 ### Bug Fixes:
 * core/hcl: Fix Invalid provisioner pause_before panic [GH-10978]
