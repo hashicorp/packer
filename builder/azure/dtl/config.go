@@ -285,9 +285,9 @@ type Config struct {
 	LabSubnetName         string `mapstructure:"lab_subnet_name"`
 	LabResourceGroupName  string `mapstructure:"lab_resource_group_name"`
 
-	DtlArtifacts []DtlArtifact `mapstructure:"dtl_artifacts"`
-	VMName       string        `mapstructure:"vm_name"`
-	DisallowPublicIP        bool `mapstructure:"disallow_public_ip" required:"false"`
+	DtlArtifacts     []DtlArtifact `mapstructure:"dtl_artifacts"`
+	VMName           string        `mapstructure:"vm_name"`
+	DisallowPublicIP bool          `mapstructure:"disallow_public_ip" required:"false"`
 
 	// Runtime Values
 	UserName                string
