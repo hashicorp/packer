@@ -86,10 +86,9 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 		resp, err := s.client.InterfacesClient.Get(ctx, s.config.tmpResourceGroupName, s.config.tmpNicName, "")
 		if err != nil {
 			s.say(s.client.LastError.Error())
-			return  err
+			return err
 		}
-		PrivateIP := *(*resp.IPConfigurations)[0].PrivateIPAddress
-		s.config.tmpFQDN = PrivateIP
+		s.config.tmpFQDN = *(*resp.IPConfigurations)[0].PrivateIPAddress
 	} else {
 		s.config.tmpFQDN = *vm.Fqdn
 	}
