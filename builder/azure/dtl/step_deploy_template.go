@@ -110,7 +110,7 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 		dp := &dtl.ArtifactParameterProperties{}
 		dp.Name = &hostname
 		dp.Value = &s.config.tmpFQDN
-		dparams := []dtl.ArtifactParameterProperties{ *dp }
+		dparams := []dtl.ArtifactParameterProperties{*dp}
 
 		winrmArtifact := &dtl.ArtifactInstallProperties{
 			ArtifactTitle: &winrma,
@@ -118,8 +118,8 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 			Parameters:    &dparams,
 		}
 
-		dtlArtifacts := []dtl.ArtifactInstallProperties{ *winrmArtifact }
-		dtlArtifactsRequest := dtl.ApplyArtifactsRequest{ Artifacts: &dtlArtifacts }
+		dtlArtifacts := []dtl.ArtifactInstallProperties{*winrmArtifact}
+		dtlArtifactsRequest := dtl.ApplyArtifactsRequest{Artifacts: &dtlArtifacts}
 		f, err := s.client.DtlVirtualMachineClient.ApplyArtifacts(ctx, s.config.tmpResourceGroupName, s.config.LabName, s.config.tmpComputeName, dtlArtifactsRequest)
 		if err == nil {
 			err = f.WaitForCompletionRef(ctx, s.client.DtlVirtualMachineClient.Client)
