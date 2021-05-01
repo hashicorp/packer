@@ -60,6 +60,7 @@ type FlatConfig struct {
 	SharedGallery                       *FlatSharedImageGallery            `mapstructure:"shared_image_gallery" cty:"shared_image_gallery" hcl:"shared_image_gallery"`
 	SharedGalleryDestination            *FlatSharedImageGalleryDestination `mapstructure:"shared_image_gallery_destination" cty:"shared_image_gallery_destination" hcl:"shared_image_gallery_destination"`
 	SharedGalleryTimeout                *string                            `mapstructure:"shared_image_gallery_timeout" cty:"shared_image_gallery_timeout" hcl:"shared_image_gallery_timeout"`
+	CustomImageCaptureTimeout           *string                            `mapstructure:"custom_image_capture_timeout" cty:"custom_image_capture_timeout" hcl:"custom_image_capture_timeout"`
 	ImagePublisher                      *string                            `mapstructure:"image_publisher" cty:"image_publisher" hcl:"image_publisher"`
 	ImageOffer                          *string                            `mapstructure:"image_offer" cty:"image_offer" hcl:"image_offer"`
 	ImageSku                            *string                            `mapstructure:"image_sku" cty:"image_sku" hcl:"image_sku"`
@@ -86,6 +87,7 @@ type FlatConfig struct {
 	LabResourceGroupName                *string                            `mapstructure:"lab_resource_group_name" cty:"lab_resource_group_name" hcl:"lab_resource_group_name"`
 	DtlArtifacts                        []FlatDtlArtifact                  `mapstructure:"dtl_artifacts" cty:"dtl_artifacts" hcl:"dtl_artifacts"`
 	VMName                              *string                            `mapstructure:"vm_name" cty:"vm_name" hcl:"vm_name"`
+	DisallowPublicIP                    *bool                              `mapstructure:"disallow_public_ip" required:"false" cty:"disallow_public_ip" hcl:"disallow_public_ip"`
 	UserName                            *string                            `cty:"user_name" hcl:"user_name"`
 	Password                            *string                            `cty:"password" hcl:"password"`
 	VMCreationResourceGroup             *string                            `cty:"vm_creation_resource_group" hcl:"vm_creation_resource_group"`
@@ -175,6 +177,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"shared_image_gallery":                     &hcldec.BlockSpec{TypeName: "shared_image_gallery", Nested: hcldec.ObjectSpec((*FlatSharedImageGallery)(nil).HCL2Spec())},
 		"shared_image_gallery_destination":         &hcldec.BlockSpec{TypeName: "shared_image_gallery_destination", Nested: hcldec.ObjectSpec((*FlatSharedImageGalleryDestination)(nil).HCL2Spec())},
 		"shared_image_gallery_timeout":             &hcldec.AttrSpec{Name: "shared_image_gallery_timeout", Type: cty.String, Required: false},
+		"custom_image_capture_timeout":             &hcldec.AttrSpec{Name: "custom_image_capture_timeout", Type: cty.String, Required: false},
 		"image_publisher":                          &hcldec.AttrSpec{Name: "image_publisher", Type: cty.String, Required: false},
 		"image_offer":                              &hcldec.AttrSpec{Name: "image_offer", Type: cty.String, Required: false},
 		"image_sku":                                &hcldec.AttrSpec{Name: "image_sku", Type: cty.String, Required: false},
@@ -201,6 +204,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"lab_resource_group_name":                  &hcldec.AttrSpec{Name: "lab_resource_group_name", Type: cty.String, Required: false},
 		"dtl_artifacts":                            &hcldec.BlockListSpec{TypeName: "dtl_artifacts", Nested: hcldec.ObjectSpec((*FlatDtlArtifact)(nil).HCL2Spec())},
 		"vm_name":                                  &hcldec.AttrSpec{Name: "vm_name", Type: cty.String, Required: false},
+		"disallow_public_ip":                       &hcldec.AttrSpec{Name: "disallow_public_ip", Type: cty.Bool, Required: false},
 		"user_name":                                &hcldec.AttrSpec{Name: "user_name", Type: cty.String, Required: false},
 		"password":                                 &hcldec.AttrSpec{Name: "password", Type: cty.String, Required: false},
 		"vm_creation_resource_group":               &hcldec.AttrSpec{Name: "vm_creation_resource_group", Type: cty.String, Required: false},

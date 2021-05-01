@@ -45,6 +45,13 @@
   its default of "60m" (valid time units include `s` for seconds, `m` for
   minutes, and `h` for hours.)
 
+- `custom_image_capture_timeout` (duration string | ex: "1h5m2s") - How long to wait for an image to be captured before timing out
+  If your Packer build is failing on the Capture Image step with the
+  error `Original Error: context deadline exceeded`, but the image is
+  present when you check your custom image repository, then you probably
+  need to increase this timeout from its default of 30 minutes.
+  Units: minutes
+
 - `image_publisher` (string) - PublisherName for your base image. See
   [documentation](https://docs.microsoft.com/en-us/cli/azure/vm/image)
   for details.
@@ -165,5 +172,7 @@
 - `dtl_artifacts` ([]DtlArtifact) - Dtl Artifacts
 
 - `vm_name` (string) - VM Name
+
+- `disallow_public_ip` (bool) - Disallow Public IP
 
 <!-- End of code generated from the comments of the Config struct in builder/azure/dtl/config.go; -->
