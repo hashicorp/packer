@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/azure/common/constants"
+	"github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
 )
 
 type StepDeployTemplate struct {
@@ -65,7 +66,6 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 	}
 
 	f, err := s.client.DtlLabsClient.CreateEnvironment(ctx, s.config.tmpResourceGroupName, s.config.LabName, *labMachine)
-
 	if err == nil {
 		err = f.WaitForCompletionRef(ctx, s.client.DtlLabsClient.Client)
 	}
@@ -73,19 +73,66 @@ func (s *StepDeployTemplate) deployTemplate(ctx context.Context, resourceGroupNa
 		s.say(s.client.LastError.Error())
 		return err
 	}
-	expand := "Properties($expand=ComputeVm,Artifacts,NetworkInterface)"
 
+	expand := "Properties($expand=ComputeVm,Artifacts,NetworkInterface)"
 	vm, err := s.client.DtlVirtualMachineClient.Get(ctx, s.config.tmpResourceGroupName, s.config.LabName, s.config.tmpComputeName, expand)
 	if err != nil {
 		s.say(s.client.LastError.Error())
 	}
+
+	// set tmpFQDN to the PrivateIP or to the real FQDN depending on
+	// publicIP being allowed or not
+	if s.config.DisallowPublicIP {
+		resp, err := s.client.InterfacesClient.Get(ctx, s.config.tmpResourceGroupName, s.config.tmpNicName, "")
+		if err != nil {
+			s.say(s.client.LastError.Error())
+			return  err
+		}
+		PrivateIP := *(*resp.IPConfigurations)[0].PrivateIPAddress
+		s.config.tmpFQDN = PrivateIP
+	} else {
+		s.config.tmpFQDN = *vm.Fqdn
+	}
+	s.say(fmt.Sprintf(" -> VM FQDN/IP : '%s'", s.config.tmpFQDN))
+	state.Put(constants.SSHHost, s.config.tmpFQDN)
+
+	// In a windows VM, add the winrm artifact. Doing it after the machine has been
+	// created allows us to use its IP address as FQDN
+	if strings.ToLower(s.config.OSType) == "windows" {
+		// Add mandatory Artifact
+		var winrma = "windows-winrm"
+		var artifactid = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.DevTestLab/labs/%s/artifactSources/public repo/artifacts/%s",
+			s.config.ClientConfig.SubscriptionID,
+			s.config.tmpResourceGroupName,
+			s.config.LabName,
+			winrma)
+
+		var hostname = "hostName"
+		dp := &dtl.ArtifactParameterProperties{}
+		dp.Name = &hostname
+		dp.Value = &s.config.tmpFQDN
+		dparams := []dtl.ArtifactParameterProperties{ *dp }
+
+		winrmArtifact := &dtl.ArtifactInstallProperties{
+			ArtifactTitle: &winrma,
+			ArtifactID:    &artifactid,
+			Parameters:    &dparams,
+		}
+
+		dtlArtifacts := []dtl.ArtifactInstallProperties{ *winrmArtifact }
+		dtlArtifactsRequest := dtl.ApplyArtifactsRequest{ Artifacts: &dtlArtifacts }
+		f, err := s.client.DtlVirtualMachineClient.ApplyArtifacts(ctx, s.config.tmpResourceGroupName, s.config.LabName, s.config.tmpComputeName, dtlArtifactsRequest)
+		if err == nil {
+			err = f.WaitForCompletionRef(ctx, s.client.DtlVirtualMachineClient.Client)
+		}
+		if err != nil {
+			s.say(s.client.LastError.Error())
+			return err
+		}
+	}
+
 	xs := strings.Split(*vm.LabVirtualMachineProperties.ComputeID, "/")
 	s.config.VMCreationResourceGroup = xs[4]
-
-	s.say(fmt.Sprintf(" -> VM FQDN : '%s'", *vm.Fqdn))
-
-	state.Put(constants.SSHHost, *vm.Fqdn)
-	s.config.tmpFQDN = *vm.Fqdn
 
 	// Resuing the Resource group name from common constants as all steps depend on it.
 	state.Put(constants.ArmResourceGroupName, s.config.VMCreationResourceGroup)

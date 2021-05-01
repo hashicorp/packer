@@ -2,7 +2,6 @@ package dtl
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/devtestlabs/mgmt/2018-09-15/dtl"
 )
@@ -78,31 +77,6 @@ func GetVirtualMachineDeployment(config *Config) (*dtl.LabVirtualMachineCreation
 		}
 	}
 
-	if strings.ToLower(config.OSType) == "windows" {
-		// Add mandatory Artifact
-		var winrma = "windows-winrm"
-		var artifactid = fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.DevTestLab/labs/%s/artifactSources/public repo/artifacts/%s",
-			config.ClientConfig.SubscriptionID,
-			config.tmpResourceGroupName,
-			config.LabName,
-			winrma)
-
-		var hostname = "hostName"
-		//var hostNameValue = fmt.Sprintf("%s.%s.cloudapp.azure.com", config.VMName, config.Location)
-		dparams := []dtl.ArtifactParameterProperties{}
-		dp := &dtl.ArtifactParameterProperties{}
-		dp.Name = &hostname
-		dp.Value = &config.tmpFQDN
-		dparams = append(dparams, *dp)
-
-		winrmArtifact := &dtl.ArtifactInstallProperties{
-			ArtifactTitle: &winrma,
-			ArtifactID:    &artifactid,
-			Parameters:    &dparams,
-		}
-		dtlArtifacts = append(dtlArtifacts, *winrmArtifact)
-	}
-
 	labMachineProps := &dtl.LabVirtualMachineCreationParameterProperties{
 		CreatedByUserID:            &config.ClientConfig.ClientID,
 		OwnerObjectID:              &config.ClientConfig.ObjectID,
@@ -114,7 +88,7 @@ func GetVirtualMachineDeployment(config *Config) (*dtl.LabVirtualMachineCreation
 		IsAuthenticationWithSSHKey: newBool(true),
 		LabSubnetName:              &config.LabSubnetName,
 		LabVirtualNetworkID:        &labVirtualNetworkID,
-		DisallowPublicIPAddress:    newBool(false),
+		DisallowPublicIPAddress:    &config.DisallowPublicIP,
 		GalleryImageReference:      &galleryImageRef,
 		CustomImageID:              getCustomImageId(config),
 		PlanID:                     &config.PlanID,

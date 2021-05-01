@@ -75,12 +75,13 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		return nil, err
 	}
 
-	ui.Message("Creating Azure Resource Manager (ARM) client ...")
+	ui.Message("Creating Azure DevTestLab (DTL) client ...")
 	azureClient, err := NewAzureClient(
 		b.config.ClientConfig.SubscriptionID,
 		b.config.LabResourceGroupName,
 		b.config.ClientConfig.CloudEnvironment(),
 		b.config.SharedGalleryTimeout,
+		b.config.CustomImageCaptureTimeout,
 		b.config.PollingDurationTimeout,
 		spnCloud)
 
@@ -168,12 +169,12 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	b.config.Location = *lab.Location
 
 	if b.config.LabVirtualNetworkName == "" || b.config.LabSubnetName == "" {
-		virtualNetowrk, subnet, err := b.getSubnetInformation(ctx, ui, *azureClient)
+		virtualNetwork, subnet, err := b.getSubnetInformation(ctx, ui, *azureClient)
 
 		if err != nil {
 			return nil, err
 		}
-		b.config.LabVirtualNetworkName = *virtualNetowrk
+		b.config.LabVirtualNetworkName = *virtualNetwork
 		b.config.LabSubnetName = *subnet
 
 		ui.Message(fmt.Sprintf("No lab network information provided. Using %s Virtual network and %s subnet for Virtual Machine creation", b.config.LabVirtualNetworkName, b.config.LabSubnetName))

@@ -98,6 +98,8 @@ func (p *Provisioner) Communicator() packersdk.Communicator {
 
 func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
 
+	ui.Say("Running provisioner ...")
+
 	p.communicator = comm
 
 	err := p.config.ClientConfig.SetDefaultValues()
@@ -123,11 +125,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		return err
 	}
 
-	ui.Message("Creating Azure Resource Manager (ARM) client ...")
+	ui.Message("Creating Azure DevTestLab (DTL) client ...")
 	azureClient, err := dtlBuilder.NewAzureClient(
 		p.config.ClientConfig.SubscriptionID,
 		"",
 		p.config.ClientConfig.CloudEnvironment(),
+		p.config.PollingDurationTimeout,
 		p.config.PollingDurationTimeout,
 		p.config.PollingDurationTimeout,
 		spnCloud)

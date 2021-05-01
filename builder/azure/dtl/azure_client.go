@@ -132,7 +132,7 @@ func byConcatDecorators(decorators ...autorest.RespondDecorator) autorest.Respon
 }
 
 func NewAzureClient(subscriptionID, resourceGroupName string,
-	cloud *azure.Environment, SharedGalleryTimeout time.Duration, PollingDuration time.Duration,
+	cloud *azure.Environment, SharedGalleryTimeout time.Duration, CustomImageCaptureTimeout time.Duration, PollingDuration time.Duration,
 	servicePrincipalToken *adal.ServicePrincipalToken) (*AzureClient, error) {
 
 	var azureClient = &AzureClient{}
@@ -166,7 +166,7 @@ func NewAzureClient(subscriptionID, resourceGroupName string,
 	azureClient.DtlCustomImageClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), templateCapture(azureClient), errorCapture(azureClient))
 	azureClient.DtlCustomImageClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.DtlCustomImageClient.UserAgent)
 	azureClient.DtlCustomImageClient.PollingDuration = autorest.DefaultPollingDuration
-	azureClient.DtlCustomImageClient.Client.PollingDuration = PollingDuration
+	azureClient.DtlCustomImageClient.Client.PollingDuration = CustomImageCaptureTimeout
 
 	azureClient.DtlVirtualNetworksClient = dtl.NewVirtualNetworksClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
 	azureClient.DtlVirtualNetworksClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
@@ -188,6 +188,13 @@ func NewAzureClient(subscriptionID, resourceGroupName string,
 	azureClient.GalleryImagesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
 	azureClient.GalleryImagesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.GalleryImagesClient.UserAgent)
 	azureClient.GalleryImagesClient.Client.PollingDuration = PollingDuration
+
+	azureClient.InterfacesClient = network.NewInterfacesClientWithBaseURI(cloud.ResourceManagerEndpoint, subscriptionID)
+	azureClient.InterfacesClient.Authorizer = autorest.NewBearerAuthorizer(servicePrincipalToken)
+	azureClient.InterfacesClient.RequestInspector = withInspection(maxlen)
+	azureClient.InterfacesClient.ResponseInspector = byConcatDecorators(byInspecting(maxlen), errorCapture(azureClient))
+	azureClient.InterfacesClient.UserAgent = fmt.Sprintf("%s %s", useragent.String(version.AzurePluginVersion.FormattedVersion()), azureClient.InterfacesClient.UserAgent)
+	azureClient.InterfacesClient.Client.PollingDuration = PollingDuration
 
 	return azureClient, nil
 }
