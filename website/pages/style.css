@@ -29,11 +29,6 @@
 /* Print Styles */
 @import './print.css';
 
-/* Sticky Footer */
-.content {
-  min-height: calc(100vh - 260px);
-}
-
 /* 404 page styles */
 #p-404 {
   display: flex;
@@ -41,7 +36,7 @@
   justify-content: center;
   margin: 64px auto;
   max-width: 784px;
-  min-height: 50vh;
+  min-height: calc(90vh - 260px);
   padding-inline: 32px;
   text-align: center;
 
