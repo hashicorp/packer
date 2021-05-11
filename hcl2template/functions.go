@@ -63,7 +63,7 @@ func Functions(basedir string) map[string]function.Function {
 		"formatdate":         stdlib.FormatDateFunc,
 		"formatlist":         stdlib.FormatListFunc,
 		"indent":             stdlib.IndentFunc,
-		"index":              stdlib.IndexFunc,
+		"index":              pkrfunction.IndexFunc, // stdlib.IndexFunc is not compatible
 		"join":               stdlib.JoinFunc,
 		"jsondecode":         stdlib.JSONDecodeFunc,
 		"jsonencode":         stdlib.JSONEncodeFunc,
