@@ -15,9 +15,11 @@ container, a common model used by most CI/CD services. However, while it is
 possible to run many builders in containers or nested virtualization, this may
 require advanced configuration; examples include the [QEMU
 builder](/docs/builders/qemu) for
-[KVM](https://www.linux-kvm.org/page/Main_Page) and
-[Xen](https://www.xenproject.org/)), or the [VirtualBox
-builder](/docs/builders/virtualbox) for OVA or OVF virtual machines.
+[KVM](https://www.linux-kvm.org/page/Main_Page) or
+[Xen](https://www.xenproject.org/)), the [VirtualBox
+builder](/docs/builders/virtualbox) for OVA or OVF virtual machines, and the
+[VMware builder](/docs/builders/vmware) for use with VMware products that
+require running on a bare-metal machine or in nested virtualization.
 
 The [Building a VirtualBox Image with Packer in
 TeamCity](/guides/packer-on-cicd/build-virtualbox-image) guide shows
