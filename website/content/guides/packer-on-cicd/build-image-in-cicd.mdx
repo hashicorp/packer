@@ -10,14 +10,16 @@ images with Packer.
 - [How to Build Immutable Infrastructure with Packer and CircleCI Workflows](https://circleci.com/blog/how-to-build-immutable-infrastructure-with-packer-and-circleci-workflows/)
 - [Using Packer and Ansible to Build Immutable Infrastructure in CodeShip](https://blog.codeship.com/packer-ansible/)
 
-The majority of the [Packer Builders](/docs/builders) can run in
-a container or VM, a common model used by most CI/CD services. However, the
-[QEMU builder](/docs/builders/qemu) for
-[KVM](https://www.linux-kvm.org/page/Main_Page) and
-[Xen](https://www.xenproject.org/) virtual machine images, [VirtualBox
-builder](/docs/builders/virtualbox) for OVA or OVF virtual machines and
-[VMware builder](/docs/builders/vmware) for use with VMware products
-require running on a bare-metal machine or nested virtualization.
+The majority of the [Packer Builders](/docs/builders) can run just fine in a
+container, a common model used by most CI/CD services. However, while it is
+possible to run many builders in containers or nested virtualization, this may
+require advanced configuration; examples include the [QEMU
+builder](/docs/builders/qemu) for
+[KVM](https://www.linux-kvm.org/page/Main_Page) or
+[Xen](https://www.xenproject.org/), the [VirtualBox
+builder](/docs/builders/virtualbox) for OVA or OVF virtual machines, and the
+[VMware builder](/docs/builders/vmware) for use with VMware products that are
+all designed to run on a bare-metal machine or within nested virtualization.
 
 The [Building a VirtualBox Image with Packer in
 TeamCity](/guides/packer-on-cicd/build-virtualbox-image) guide shows
