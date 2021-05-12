@@ -469,8 +469,9 @@ github.com/hashicorp/go-getter/gcs/v2 v2.0.0-20200604122502-a6995fa1edad/go.mod 
 github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad h1:hwk5mQRwVvZc/f+So1kHbOhW/f7P2fEcCr2D5pSk9sI=
 github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad/go.mod h1:kcB6Mv+0wzYXbQjTAeD/Pb85145WcFk2EElpe02fuoE=
 github.com/hashicorp/go-getter/v2 v2.0.0-20200511090339-3107ec4af37a/go.mod h1:QJ+LwRM91JBKBLyHoKBrcmi49i9Tu/ItpgTNXWSnpGM=
-github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad h1:BfRfKjQgvwJrXF2apbeqoqeuxzDcxZIeI/eCj6HLkM4=
 github.com/hashicorp/go-getter/v2 v2.0.0-20200604122502-a6995fa1edad/go.mod h1:bM2M11foprILIk1Slmr2wBrJYsdQTym//+QMJqgm3F8=
+github.com/hashicorp/go-getter/v2 v2.0.0 h1:wamdcQazMBZK6VwUo3HAOWLkcOJBWBoXPKfmf7/S17w=
+github.com/hashicorp/go-getter/v2 v2.0.0/go.mod h1:w65fE5glbccYjndAuj1kA5lnVBGZYEaH0e5qA1kpIks=
 github.com/hashicorp/go-hclog v0.0.0-20180709165350-ff2cf002a8dd/go.mod h1:9bjs9uLqI8l75knNv3lV1kA55veR+WUPSiKIWcQHudI=
 github.com/hashicorp/go-hclog v0.8.0/go.mod h1:5CU+agLiy3J7N7QjHK5d05KxGsuXiQLrjA0H7acj2lQ=
 github.com/hashicorp/go-hclog v0.12.0 h1:d4QkX8FRTYaKaCZBoXYY8zJX2BXjWxurN/GA2tkrmZM=
@@ -546,8 +547,8 @@ github.com/hashicorp/packer-plugin-amazon v0.0.1 h1:EuyjNK9bL7WhQeIJzhBJxOx8nyc6
 github.com/hashicorp/packer-plugin-amazon v0.0.1/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
 github.com/hashicorp/packer-plugin-ansible v0.0.2 h1:nvBtCedXhUI5T6Up5+bmhlY7rmk8FjWuFv9A2joK7TU=
 github.com/hashicorp/packer-plugin-ansible v0.0.2/go.mod h1:ocXB4KTU+I+DBRGfMP4XE7dPlURaUnb7NJvyddZ6bh0=
-github.com/hashicorp/packer-plugin-azure v0.0.1 h1:P2eRNQYRiF7LoRmx7k933aJOW2gWuV9kde2n+gpPk/Q=
-github.com/hashicorp/packer-plugin-azure v0.0.1/go.mod h1:D96NupljcRvKiMHxPDljymLkSSmdk25Ej8euuW6rSOA=
+github.com/hashicorp/packer-plugin-azure v0.0.2 h1:hfKvTVNWh4IinbQsIDNXhkBJlJeWNnb2bY/Zm+cqXZ4=
+github.com/hashicorp/packer-plugin-azure v0.0.2/go.mod h1:ySskXX3DJV9Z9Yzt3dyrWsN1XUcjeIOtyL7/ZNHs6zw=
 github.com/hashicorp/packer-plugin-chef v0.0.1 h1:1zQwnnvftwg9PJyWjMfHfDyzfWDdb0eo9IX8fX6kd+Y=
 github.com/hashicorp/packer-plugin-chef v0.0.1/go.mod h1:4iSyWfvrb4QwUDZqJ3iCb+kIsnDwOTL1yTEDXBtk3Ew=
 github.com/hashicorp/packer-plugin-cloudstack v0.0.1 h1:BF9nXRlA0xQV5W/+CoLjWn0aLO60gTbsxnLi/o37ktc=
@@ -606,8 +607,9 @@ github.com/hashicorp/packer-plugin-sdk v0.1.2/go.mod h1:KRjczE1/c9NV5Re+PXt3myJs
 github.com/hashicorp/packer-plugin-sdk v0.1.3-0.20210407232143-c217d82aefb6/go.mod h1:xePpgQgQYv/bamiypx3hH9ukidxDdcN8q0R0wLi8IEQ=
 github.com/hashicorp/packer-plugin-sdk v0.1.3/go.mod h1:xePpgQgQYv/bamiypx3hH9ukidxDdcN8q0R0wLi8IEQ=
 github.com/hashicorp/packer-plugin-sdk v0.1.4/go.mod h1:xePpgQgQYv/bamiypx3hH9ukidxDdcN8q0R0wLi8IEQ=
-github.com/hashicorp/packer-plugin-sdk v0.2.0 h1:A4Dq7p4y1vscY4gMzp7GQaXyDJYYhP4ukp4fapPSOY4=
 github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
+github.com/hashicorp/packer-plugin-sdk v0.2.1 h1:NZJ9h2ddzZb6E3eaYFD7L4mSjqFia3FDoDTxDGQKNMs=
+github.com/hashicorp/packer-plugin-sdk v0.2.1/go.mod h1:4V7lS35FRhukvZrW41IPctTPY7JmHPOkFZcR7XGXZPk=
 github.com/hashicorp/packer-plugin-tencentcloud v0.0.1 h1:DR7GETCzrK/DPFMUPbULIklCxwGhstbbz6pl+2S+UnM=
 github.com/hashicorp/packer-plugin-tencentcloud v0.0.1/go.mod h1:FmdacMLvDKiT6OdMAc2x4LXtqu/soLApH3jF57SWOik=
 github.com/hashicorp/packer-plugin-triton v0.0.0-20210421085122-768dd7c764d9 h1:No5oPI9Wa7FhTKkFJwI3hcfUVvEpgPC8QMcG9l/Vxzo=
@@ -935,8 +937,9 @@ github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljT
 github.com/ugorji/go/codec v1.2.4 h1:C5VurWRRCKjuENsbM6GYVw8W++WVW9rSxoACKIvxzz8=
 github.com/ugorji/go/codec v1.2.4/go.mod h1:bWBu1+kIRWcF8uMklKaJrR6fTWQOwAlrIzX22pHwryA=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
-github.com/ulikunitz/xz v0.5.6 h1:jGHAfXawEGZQ3blwU5wnWKQJvAraT7Ftq9EXjnXYgt8=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
+github.com/ulikunitz/xz v0.5.8 h1:ERv8V6GKqVi23rgu5cj9pVfVzJbOqAY2Ntl88O6c2nQ=
+github.com/ulikunitz/xz v0.5.8/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
 github.com/valyala/fasttemplate v1.1.0/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
@@ -970,8 +973,9 @@ github.com/zclconf/go-cty v1.4.0/go.mod h1:nHzOclRkoj++EU9ZjSrZvRG0BXIWt8c7loYc0
 github.com/zclconf/go-cty v1.7.0/go.mod h1:VDR4+I79ubFBGm1uJac1226K5yANQFHeauxPBoP54+o=
 github.com/zclconf/go-cty v1.8.0/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty v1.8.1/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
-github.com/zclconf/go-cty v1.8.2 h1:u+xZfBKgpycDnTNjPhGiTEYZS5qS/Sb5MqSfm7vzcjg=
 github.com/zclconf/go-cty v1.8.2/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
+github.com/zclconf/go-cty v1.8.3 h1:48gwZXrdSADU2UW9eZKHprxAI7APZGW9XmExpJpSjT0=
+github.com/zclconf/go-cty v1.8.3/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRKQfBXbGkpdV6QMzT3rU1kSTAnfu1dO8dPKjYprgj8=
 github.com/zclconf/go-cty-yaml v1.0.1 h1:up11wlgAaDvlAGENcFDnZgkn0qUJurso7k6EpURKNF8=
 github.com/zclconf/go-cty-yaml v1.0.1/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
