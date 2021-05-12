@@ -133,12 +133,14 @@ module.exports = [
   },
   {
     source: '/intro/getting-started/vagrant',
-    destination: 'https://learn.hashicorp.com/packer/getting-started/vagrant',
+    destination:
+      'https://learn.hashicorp.com/tutorials/packer/aws-get-started-post-processors-vagrant?in=packer/aws-get-started',
     permanent: true,
   },
   {
     source: '/intro/getting-started/next',
-    destination: 'https://learn.hashicorp.com/packer/getting-started/next   ',
+    destination:
+      'https://learn.hashicorp.com/collections/packer/docker-get-started',
     permanent: true,
   },
   {
