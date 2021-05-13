@@ -46,7 +46,7 @@ function, check our
 ### The "OutputSpec" Method
 
 This method returns a [hcldec.ObjectSpec](/guides/hcl/component-object-spec) of the data source output.
-The object spec can be generated using the command [`mapstructure-to-hcl2`](https://github.com/hashicorp/packer/tree/master/cmd/mapstructure-to-hcl2)
+The object spec can be generated using the command [`packer-sdc mapstructure-to-hcl2`](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc)
 just like the configuration spec for the `ConfigSpec` method.
 
 This method is used in `packer validate` command. Packer will use the spec to assign
