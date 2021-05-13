@@ -20,9 +20,9 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.0
 	github.com/hashicorp/packer-plugin-alicloud v0.0.2
 	github.com/hashicorp/packer-plugin-amazon v0.0.1
-	github.com/hashicorp/packer-plugin-ansible v0.0.2
+	github.com/hashicorp/packer-plugin-ansible v0.0.3
 	github.com/hashicorp/packer-plugin-azure v0.0.2
-	github.com/hashicorp/packer-plugin-chef v0.0.1
+	github.com/hashicorp/packer-plugin-chef v0.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v0.0.1
 	github.com/hashicorp/packer-plugin-converge v0.0.1
 	github.com/hashicorp/packer-plugin-digitalocean v0.0.1
@@ -41,7 +41,7 @@ require (
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
-	github.com/hashicorp/packer-plugin-puppet v0.0.1
+	github.com/hashicorp/packer-plugin-puppet v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.1
