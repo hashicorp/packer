@@ -262,7 +262,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 					return fmt.Errorf("Unable to create Salt state directory: %s", err)
 				}
 				req.Dst = path
-				req.Mode = getter.ModeAny
+				req.GetMode = getter.ModeAny
 				if _, err := client.Get(ctx, &req); err != nil {
 					return fmt.Errorf("Unable to download Salt formula from %s: %s", i, err)
 				}

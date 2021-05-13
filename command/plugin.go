@@ -13,9 +13,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 
-	azurearmbuilder "github.com/hashicorp/packer/builder/azure/arm"
-	azurechrootbuilder "github.com/hashicorp/packer/builder/azure/chroot"
-	azuredtlbuilder "github.com/hashicorp/packer/builder/azure/dtl"
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	oneandonebuilder "github.com/hashicorp/packer/builder/oneandone"
@@ -25,7 +22,6 @@ import (
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
-	azuredtlartifactprovisioner "github.com/hashicorp/packer/provisioner/azure-dtlartifact"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
@@ -43,9 +39,6 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packersdk.Builder{
-	"azure-arm":    new(azurearmbuilder.Builder),
-	"azure-chroot": new(azurechrootbuilder.Builder),
-	"azure-dtl":    new(azuredtlbuilder.Builder),
 	"file":         new(filebuilder.Builder),
 	"null":         new(nullbuilder.Builder),
 	"oneandone":    new(oneandonebuilder.Builder),
@@ -53,17 +46,16 @@ var Builders = map[string]packersdk.Builder{
 }
 
 var Provisioners = map[string]packersdk.Provisioner{
-	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
-	"breakpoint":        new(breakpointprovisioner.Provisioner),
-	"file":              new(fileprovisioner.Provisioner),
-	"inspec":            new(inspecprovisioner.Provisioner),
-	"powershell":        new(powershellprovisioner.Provisioner),
-	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
-	"shell":             new(shellprovisioner.Provisioner),
-	"shell-local":       new(shelllocalprovisioner.Provisioner),
-	"sleep":             new(sleepprovisioner.Provisioner),
-	"windows-restart":   new(windowsrestartprovisioner.Provisioner),
-	"windows-shell":     new(windowsshellprovisioner.Provisioner),
+	"breakpoint":      new(breakpointprovisioner.Provisioner),
+	"file":            new(fileprovisioner.Provisioner),
+	"inspec":          new(inspecprovisioner.Provisioner),
+	"powershell":      new(powershellprovisioner.Provisioner),
+	"salt-masterless": new(saltmasterlessprovisioner.Provisioner),
+	"shell":           new(shellprovisioner.Provisioner),
+	"shell-local":     new(shelllocalprovisioner.Provisioner),
+	"sleep":           new(sleepprovisioner.Provisioner),
+	"windows-restart": new(windowsrestartprovisioner.Provisioner),
+	"windows-shell":   new(windowsshellprovisioner.Provisioner),
 }
 
 var PostProcessors = map[string]packersdk.PostProcessor{

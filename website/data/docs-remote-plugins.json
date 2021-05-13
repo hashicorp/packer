@@ -19,6 +19,12 @@
     "version": "latest"
   },
   {
+    "title": "Azure",
+    "path": "azure",
+    "repo": "hashicorp/packer-plugin-azure",
+    "version": "latest"
+  },
+  {
     "title": "Chef",
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",

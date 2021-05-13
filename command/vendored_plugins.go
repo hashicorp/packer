@@ -19,6 +19,10 @@ import (
 	anazibimportpostprocessor "github.com/hashicorp/packer-plugin-amazon/post-processor/import"
 	ansibleprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible"
 	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
+	azurearmbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/arm"
+	azurechrootbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/chroot"
+	azuredtlbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/dtl"
+	azuredtlartifactprovisioner "github.com/hashicorp/packer-plugin-azure/provisioner/azure-dtlartifact"
 	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
@@ -94,6 +98,9 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
 	"amazon-ebsvolume":    new(amazonebsvolumebuilder.Builder),
 	"amazon-instance":     new(amazoninstancebuilder.Builder),
+	"azure-arm":           new(azurearmbuilder.Builder),
+	"azure-chroot":        new(azurechrootbuilder.Builder),
+	"azure-dtl":           new(azuredtlbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
 	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
@@ -138,6 +145,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 // VendoredProvisioners are provisioner components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredProvisioners = map[string]packersdk.Provisioner{
+	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
