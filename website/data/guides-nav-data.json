@@ -15,12 +15,12 @@
         "path": "hcl"
       },
       {
-        "title": "From JSON v1",
-        "path": "hcl/from-json-v1"
-      },
-      {
         "title": "Variables",
         "path": "hcl/variables"
+      },
+      {
+        "title": "Upgrade Packer JSON Template to HCL2",
+        "href": "https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade"
       },
       {
         "title": "Making a plugin HCL2 enabled",

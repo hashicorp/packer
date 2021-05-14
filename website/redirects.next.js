@@ -218,6 +218,11 @@ module.exports = [
     destination: '/docs/post-processors/docker/docker-:path*',
     permanent: true,
   },
+  {
+    source: '/guides/hcl/from-json-v1',
+    destination: 'https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade',
+    permanent: true,
+  },
   // disallow '.html' or '/index.html' in favor of cleaner, simpler paths
   { source: '/:path*/index', destination: '/:path*', permanent: true },
   { source: '/:path*.html', destination: '/:path*', permanent: true },
