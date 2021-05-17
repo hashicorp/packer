@@ -12,6 +12,8 @@ import NProgress from '@hashicorp/nextjs-scripts/lib/nprogress'
 import createConsentManager from '@hashicorp/nextjs-scripts/lib/consent-manager'
 import { ErrorBoundary } from '@hashicorp/nextjs-scripts/lib/bugsnag'
 import useAnchorLinkAnalytics from '@hashicorp/nextjs-scripts/lib/anchor-link-analytics'
+import AlertBanner from '@hashicorp/react-alert-banner'
+import alertBannerData, { ALERT_BANNER_ACTIVE } from 'data/alert-banner'
 
 NProgress({ Router })
 const { ConsentManager, openConsentManager } = createConsentManager({
@@ -32,6 +34,9 @@ export default function App({ Component, pageProps }) {
         image="https://www.packer.io/img/og-image.png"
         icon={[{ href: '/favicon.ico' }]}
       />
+      {ALERT_BANNER_ACTIVE && (
+        <AlertBanner {...alertBannerData} product="packer" />
+      )}
       <HashiStackMenu />
       <ProductSubnav />
       <div className="content">
