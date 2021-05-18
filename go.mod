@@ -44,7 +44,7 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.1
+	github.com/hashicorp/packer-plugin-sdk v0.2.2
 	github.com/hashicorp/packer-plugin-tencentcloud v0.0.1
 	github.com/hashicorp/packer-plugin-triton v0.0.0-20210421085122-768dd7c764d9
 	github.com/hashicorp/packer-plugin-ucloud v0.0.1
@@ -54,7 +54,7 @@ require (
 	github.com/hashicorp/packer-plugin-vsphere v0.0.1
 	github.com/hashicorp/packer-plugin-yandex v0.0.4
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
-	github.com/masterzen/winrm v0.0.0-20201030141608-56ca5c5f2380
+	github.com/masterzen/winrm v0.0.0-20210504160029-28ed956f5227
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.0
 	github.com/mitchellh/go-homedir v1.1.0
