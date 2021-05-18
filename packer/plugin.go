@@ -320,7 +320,11 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 
 	for _, datasourceName := range desc.Datasources {
 		datasourceName := datasourceName // copy to avoid pointer overwrite issue
-		c.DataSources.Set(pluginPrefix+datasourceName, func() (packersdk.Datasource, error) {
+		key := pluginPrefix + datasourceName
+		if datasourceName == pluginsdk.DEFAULT_NAME {
+			key = pluginName
+		}
+		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
 	}
