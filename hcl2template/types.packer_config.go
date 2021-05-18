@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -226,6 +227,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 	var retry, previousL int
 	for len(locals) > 0 {
 		local := locals[0]
+		log.Printf("[DEBUG-10981] Eavluating local: %q", local.Name)
 		moreDiags := c.evaluateLocalVariable(local)
 		if moreDiags.HasErrors() {
 			if len(locals) == 1 {
