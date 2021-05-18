@@ -79,6 +79,74 @@ key with an underscore. Example:
 **Important:** Only _root level_ keys can be underscore prefixed. Keys within
 builders, provisioners, etc. will still result in validation errors.
 
+-> **Note:** Packer supports HCL2 from version 1.6.0. The Hashicorp
+Configuration Language does support comments anywhere in template files.
+If comments are important to you, consider upgrading your
+JSON template to HCL2 using the `packer hcl2_upgrade` command.
+
+One workaround if you are not ready to upgrade to HCL is to use jq to strip
+unsupported comments from a Packer template before you run `packer build`.
+
+For example, here is a file named `commented_template.json`:
+
+```json
+{
+  "_comment": ["this is", "a multi-line", "comment"],
+  "builders": [
+    {
+      "_comment": "this is a comment inside a builder",
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "_comment": "this is a root level comment",
+  "provisioners": [
+    {
+      "_comment": "this is a different comment",
+      "type": "shell",
+      "_comment": "this is yet another comment",
+      "inline": ["echo hellooooo"]
+    }
+  ]
+}
+```
+
+If you use the following jq command:
+
+```shell-session
+$ jq 'walk(if type == "object" then del(._comment) else . end)' commented_template.json > uncommented_template.json
+```
+
+The tool will produce a new file containing:
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo hellooooo"]
+    }
+  ]
+}
+```
+
+Once you've got your uncommented file, you can call `packer build` on it like
+you normally would.
+
+If your install of jq does not have the walk function and you get an error like
+
+```text
+jq: error: walk/1 is not defined at <top-level>,
+```
+
+You can create a file `~/.jq` and add the [walk function](https://github.com/stedolan/jq/blob/ad9fc9f559e78a764aac20f669f23cdd020cd943/src/builtin.jq#L255-L262) to it by hand.
+
 ## Example Template
 
 Below is an example of a basic template that could be invoked with
