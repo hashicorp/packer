@@ -125,14 +125,15 @@ Here is a full list of the available functions for reference.
   `strftime FORMAT` - UTC time, formated using the ISO C standard format
   `FORMAT`. See
   [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
-  of available format specifier.
+  of available format specifiers.
 
   Please note that if you are using a large number of builders,
-  provisioners or post-processors, the isotime may be slightly
-  different for each one because it is from when the plugin is
-  launched not the initial Packer process. In order to avoid this and make
-  the timestamp consistent across all plugins, set it as a user variable
-  and then access the user variable within your plugins.
+  provisioners or post-processors, using the isotime engine directly in the
+  plugin configuration may cause the timestamp to be slightly diffferent for
+  each plugin. This is because the timestamp is generated when each plugin is
+  launched rather than in the initial Packer process. In order to avoid this
+  and make sure the timestamp is consistent across all plugins, set it as a user
+  variable and then access the user variable within your plugins.
 
 - `lower` - Lowercases the string.
 - `packer_version` - Returns Packer version.
