@@ -235,8 +235,10 @@ documentation for more information on user variables.
 
 # isotime Function Format Reference
 
-The way you format isotime in golang is a bit nontraditional compared to how
-you may be used to formatting datetime strings.
+The isotime template engine uses golang to generate timestamps. If you're
+unfamiliar with golang, then the way you format the timestamp is going to
+feel a bit unusual compared to how you may be used to formatting
+datetime strings.
 
 Full docs and examples for the golang time formatting function can be found
 [here](https://golang.org/pkg/time/#example_Time_Format)
@@ -273,14 +275,14 @@ You can try and modify the following examples in a packer template or in
 
 | Input                                      | Output                       |
 | ------------------------------------------ | -----------                  |
-| "packer-{{isotime `2006-01-02`}}"          | "packer-2021-05-17 11:40:16" |
-| "packer-{{isotime `Jan-_2-15:04:05.000`}}" | "packer-May-17-23:40:16.786" |
-| "packer-{{isotime `3:04PM`}}"              | "packer-11:40PM"             |
-| "{{ isotime }}                             | "June 7, 7:22:43pm 2014"     |
-| "{{isotime `2006-01-02`}}"                 | "2014-06-07"                 |
-| "{{isotime `Mon 1504`}}"                   | "Sat 1922"                   |
-| "{{isotime `02-Jan-06 03\_04\_05`}}"       | "07-Jun-2014 07\_22\_43"     |
-| "{{isotime `Hour15Year200603`}}"           | "Hour19Year201407"           |
+| ``"packer-{{isotime `2006-01-02`}}"``          | "packer-2021-05-17 11:40:16" |
+| ``"packer-{{isotime `Jan-_2-15:04:05.000`}}"`` | "packer-May-17-23:40:16.786" |
+| ``"packer-{{isotime `3:04PM`}}"``              | "packer-11:40PM"             |
+| ``"{{ isotime }}"``                            | "June 7, 7:22:43pm 2014"     |
+| ``"{{isotime `2006-01-02`}}"``                 | "2014-06-07"                 |
+| ``"{{isotime `Mon 1504`}}"``                   | "Sat 1922"                   |
+| ``"{{isotime `02-Jan-06 03\_04\_05`}}"``       | "07-Jun-2014 07\_22\_43"     |
+| ``"{{isotime `Hour15Year200603`}}"``           | "Hour19Year201407"           |
 
 
 Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
