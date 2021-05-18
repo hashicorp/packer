@@ -25,11 +25,6 @@ module.exports = [
     permanent: true,
   },
   {
-    source: '/docs/templates/veewee-to-packer',
-    destination: '/guides/veewee-to-packer',
-    permanent: true,
-  },
-  {
     source: '/docs/extend/developing-plugins',
     destination: '/docs/plugins',
     permanent: true,

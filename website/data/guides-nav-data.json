@@ -46,27 +46,6 @@
     ]
   },
   {
-    "title": "Workflow Tips and Tricks",
-    "routes": [
-      {
-        "title": "Overview",
-        "path": "workflow-tips-and-tricks"
-      },
-      {
-        "title": "Isotime Template Function",
-        "path": "workflow-tips-and-tricks/isotime-template-function"
-      },
-      {
-        "title": "Veewee to Packer",
-        "path": "workflow-tips-and-tricks/veewee-to-packer"
-      },
-      {
-        "title": "Use jq to strip comments from a Packer template",
-        "path": "workflow-tips-and-tricks/use-packer-with-comment"
-      }
-    ]
-  },
-  {
     "title": "Build Immutable Infrastructure with Packer in CI/CD",
     "routes": [
       {
