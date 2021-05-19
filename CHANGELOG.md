@@ -2,45 +2,46 @@
 
 ### IMPROVEMENTS:
 
+
 Major refactor: Extracted a majority of HashiCorp-maintained and community plugins from the Packer Core repository. They now live in their own multi-component plugin repositiores. The following repositories have been created, and their components have been deleted from the "github.com/hashicorp/packer" repository.
 
-* "github.com/hashicorp/packer-plugin-docker"
-* "github.com/hashicorp/packer-plugin-amazon"
-* "github.com/hashicorp/packer-plugin-ansible"
+* "github.com/hashicorp/packer-plugin-alicloud" [GH-10932]
+* "github.com/hashicorp/packer-plugin-amazon" [GH-10800]
+* "github.com/hashicorp/packer-plugin-ansible" [GH-10912]
+* "github.com/hashicorp/packer-plugin-azure" [GH-10979]
+* "github.com/hashicorp/packer-plugin-chef" [GH-10921]
+* "github.com/hashicorp/packer-plugin-cloudstack" [GH-10934]
+* "github.com/hashicorp/packer-plugin-converge" [GH-10956]
+* "github.com/hashicorp/packer-plugin-digitalocean" [GH-10961]
+* "github.com/hashicorp/packer-plugin-docker" [GH-10695]
+* "github.com/hashicorp/packer-plugin-googlecompute" [GH-10890]
+* "github.com/hashicorp/packer-plugin-hcloud" [GH-10966]
+* "github.com/hashicorp/packer-plugin-hyperone" [GH-10949]
+* "github.com/hashicorp/packer-plugin-hyperv" [GH-10949]
 * "github.com/hashicorp/packer-plugin-inspec"
-* "github.com/hashicorp/packer-plugin-azure"
-* "github.com/hashicorp/packer-plugin-googlecompute"
-* "github.com/hashicorp/packer-plugin-parallels"
-* "github.com/hashicorp/packer-plugin-qemu"
-* "github.com/hashicorp/packer-plugin-vagrant"
-* "github.com/hashicorp/packer-plugin-virtualbox"
-* "github.com/hashicorp/packer-plugin-vmware"
-* "github.com/hashicorp/packer-plugin-vsphere"
-* "github.com/hashicorp/packer-plugin-alicloud"
-* "github.com/hashicorp/packer-plugin-cloudstack"
-* "github.com/hashicorp/packer-plugin-digitalocean"
-* "github.com/hashicorp/packer-plugin-hcloud"
-* "github.com/hashicorp/packer-plugin-hyperone"
-* "github.com/hashicorp/packer-plugin-hyperv"
 * "github.com/hashicorp/packer-plugin-ionos-cloud"
-* "github.com/hashicorp/packer-plugin-jdcloud"
-* "github.com/hashicorp/packer-plugin-linode"
-* "github.com/hashicorp/packer-plugin-lxc"
-* "github.com/hashicorp/packer-plugin-lxd"
-* "github.com/hashicorp/packer-plugin-ncloud"
-* "github.com/hashicorp/packer-plugin-openstack"
-* "github.com/hashicorp/packer-plugin-oracle"
-* "github.com/hashicorp/packer-plugin-outscale"
-* "github.com/hashicorp/packer-plugin-proxmox"
-* "github.com/hashicorp/packer-plugin-scaleway"
-* "github.com/hashicorp/packer-plugin-tencentcloud"
-* "github.com/hashicorp/packer-plugin-triton"
-* "github.com/hashicorp/packer-plugin-ucloud"
-* "github.com/hashicorp/packer-plugin-yandex"
-* "github.com/hashicorp/packer-plugin-chef"
-* "github.com/hashicorp/packer-plugin-converge"
-* "github.com/hashicorp/packer-plugin-puppet"
+* "github.com/hashicorp/packer-plugin-jdcloud" [GH-10946]
+* "github.com/hashicorp/packer-plugin-linode" [GH-10947]
+* "github.com/hashicorp/packer-plugin-lxc" [GH-10965]
+* "github.com/hashicorp/packer-plugin-lxd" [GH-10965]
+* "github.com/hashicorp/packer-plugin-ncloud" [GH-10937]
+* "github.com/hashicorp/packer-plugin-openstack" [GH-10933]
+* "github.com/hashicorp/packer-plugin-oracle" [GH-10962]
+* "github.com/hashicorp/packer-plugin-outscale" [GH-10941]
+* "github.com/hashicorp/packer-plugin-parallels" [GH-10936]
+* "github.com/hashicorp/packer-plugin-proxmox" [GH-10930]
+* "github.com/hashicorp/packer-plugin-puppet" [GH-10943]
+* "github.com/hashicorp/packer-plugin-qemu" [GH-10929]
 * "github.com/hashicorp/packer-plugin-salt"
+* "github.com/hashicorp/packer-plugin-scaleway" [GH-10939]
+* "github.com/hashicorp/packer-plugin-tencentcloud" [GH-10967]
+* "github.com/hashicorp/packer-plugin-triton" [GH-10963]
+* "github.com/hashicorp/packer-plugin-ucloud" [GH-10953]
+* "github.com/hashicorp/packer-plugin-vagrant" [GH-10960]
+* "github.com/hashicorp/packer-plugin-virtualbox" [GH-10910]
+* "github.com/hashicorp/packer-plugin-vmware" [GH-10920]
+* "github.com/hashicorp/packer-plugin-vsphere" [GH-10896]
+* "github.com/hashicorp/packer-plugin-yandex" [GH-10970]
 
 _this will not be a backwards-breaking change in v1.7.3_ because the extracted
 components are being vendored back into Packer. However, we encourage users to
@@ -68,9 +69,31 @@ components will not be removed from the main packer binary:
 * `shell-local` post-processor
 
 ### Bug Fixes:
-* core/hcl: Fix Invalid provisioner pause_before panic [GH-10978]
-* builder/azure: Add `keep_os_disk` parameter to control OS disk deletion [GH-10045]
+* builder/azure: Add `keep_os_disk` parameter to control OS disk deletion
+    [GH-10045]
+* builder/azure: Stop SIG timout from being overridden by PollingDuration
+    [GH-10816]
 * builder/azure: Support shared image gallery storage account type [GH-10863]
+* builder/proxmox: Proxmox builder use ipv4 address instead of always ipv6.
+    [GH-10858]
+* core/hcl: Fix Invalid provisioner pause_before panic [GH-10978]
+* core: HCL "index" function now actually returns the index of the element
+    [GH-11008]
+* core: Implemented DEFAULT_NAME handling for datasource plugins [GH-11026]
+
+### Enhancements:
+
+* builder/azure:  Added custom nicname and osdiskname [GH-10938]
+* builder/azure: Add support for shared image gallery storage account type
+    [GH-10863]
+* builder/digitalocean: support ecdsa, ed25519, dsa temporary key types.
+    [GH-10856]
+* builder/ncloud: Support ncloud vpc version [GH-10870]
+* post-processor/compress: Add bzip2 support to post-processor [GH-10867]
+* post-processor/googlecompute-import: Add Image Storage Locations field
+    [GH-10864]
+* Removed the golang "vendor" directory in favor of go modules. This should not
+    affect end users. [GH-10916]
 
 ## 1.7.2 (April 05, 2021)
 
