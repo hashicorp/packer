@@ -1,0 +1,33 @@
+.sectionBreakCta {
+  padding: 88px 24px;
+  max-width: 800px;
+  display: grid;
+  grid-gap: 24px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 12px rgba(37, 38, 45, 0.08);
+  margin: 0 16px;
+  background-color: var(--white);
+  align-items: center;
+
+  @media (--medium-up) {
+    margin: 0 auto 104px auto;
+  }
+  & hr {
+    position: absolute;
+    top: 56px;
+    left: calc(50% - 32px);
+    width: 64px;
+    background-color: var(--packer);
+    margin-top: 0;
+    margin-bottom: 24px;
+  }
+}
+
+.heading {
+  composes: g-type-display-4 from global;
+  margin: 0;
+  @media (--medium-up) {
+    padding: 0 88px;
+  }
+}

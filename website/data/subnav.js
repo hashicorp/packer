@@ -1,14 +1,9 @@
 export default [
   { text: 'Overview', url: '/', type: 'inbound' },
   {
-    text: 'Intro',
-    url: '/intro',
-    type: 'inbound',
-  },
-  {
-    text: 'Guides',
-    url: '/guides',
-    type: 'inbound',
+    text: 'Tutorials',
+    url: 'https://learn.hashicorp.com/packer',
+    type: 'outbound',
   },
   {
     text: 'Docs',
