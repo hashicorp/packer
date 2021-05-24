@@ -1,0 +1,20 @@
+.root {
+  & ul {
+    list-style: none;
+    margin-left: 2rem;
+
+    & li {
+      color: #525252;
+
+      &::before {
+        content: '';
+        display: block;
+        width: 18px;
+        margin-left: calc(-1 * 1.6rem);
+        height: 18px;
+        top: 7px;
+        background: url('./check-circle-filled.svg');
+      }
+    }
+  }
+}
