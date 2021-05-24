@@ -845,6 +845,10 @@
             "path": "plugins/creation/custom-datasources"
           }
         ]
+      },
+      {
+        "title": "Packer Integration Program",
+        "path": "plugins/packer-integration-program"
       }
     ]
   },
