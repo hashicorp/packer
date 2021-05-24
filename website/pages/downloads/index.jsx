@@ -7,7 +7,7 @@ import s from './style.module.css'
 export default function DownloadsPage(staticProps) {
   return (
     <ProductDownloadsPage
-      getStartedDescription="Follow step-by-step tutorials on the essentials of Nomad."
+      getStartedDescription="Follow step-by-step tutorials on the essentials of Packer."
       getStartedLinks={[
         {
           label: 'Getting Started',
