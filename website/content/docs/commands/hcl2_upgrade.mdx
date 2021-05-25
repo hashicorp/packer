@@ -98,9 +98,11 @@ working on improving this part of the transformer.
 
 ## Options
 
-- `-output-file` - File where to put the hcl2 generated config. Defaults to
-  JSON_TEMPLATE.pkr.hcl
-- `-with-annotations` - Adds helper annotations with information about the generated HCL2 blocks.
+- `-output-file` - Filename of the hcl2 generated template. Defaults to
+  JSON_TEMPLATE.pkr.hcl; for example, if the file is called
+  "packerparty.json", the default output-file is "packerparty.json.pkr.hcl".
+- `-with-annotations` - Adds helpful comments to the HCL template with
+  information about the generated HCL2 blocks.
 
 ## User variables using other user variables
 
@@ -128,3 +130,10 @@ locals {
   baz = "${var.foo} ${var.bar}"
 }
 ```
+
+## Upgrading templates that use third-party community plugins
+
+If your template references a plugin that is not bundled with the main Packer
+binary, you need to make sure that the [plugin is installed](/docs/plugins#installing-plugins)
+or you will get an `unknown builder type` error. Packer needs to load the plugin
+to transpose the template.
