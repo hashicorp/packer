@@ -86,13 +86,29 @@ source "amazon-ebs" "server" {
 }
 ```
 
-## Description
+## Single `local` block
 
 The `local` block defines exactly one local variable within a folder. The block
 label is the name of the local, and the "expression" is the expression that
 should be evaluated to create the local. Using this block, you can optionally
 supply a "sensitive" boolean to mark the variable as sensitive and filter it
 from logs.
+
+```hcl
+local "mylocal" {
+  expression = "${var.secret_api_key}"
+  sensitive  = true
+}
+```
+
+This block is also very useful for defining complex locals. Packer might take some time to expand and evaluate `locals`
+with complex expressions dependent on other locals. The `locals` block is read as a map.  Maps are not sorted, and therefore
+the evaluation time is not deterministic.
+
+To avoid that, singular `local` blocks should be used instead. These will be
+evaluated in the order they are defined, and the evaluation order and time will always be the same.
+
+## `locals` block
 
 The `locals` block defines one or more local variables within a folder.
 
