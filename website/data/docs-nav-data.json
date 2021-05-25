@@ -688,10 +688,6 @@
         "path": "builders/null"
       },
       {
-        "title": "1&amp;1",
-        "path": "builders/oneandone"
-      },
-      {
         "title": "ProfitBricks",
         "path": "builders/profitbricks"
       },
