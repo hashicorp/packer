@@ -1,5 +1,12 @@
 [
   {
+    "title": "1&1",
+    "path": "oneandone",
+    "repo": "hashicorp/packer-plugin-oneandone",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Alicloud",
     "path": "alicloud",
     "repo": "hashicorp/packer-plugin-alicloud",

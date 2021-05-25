@@ -577,6 +577,8 @@ github.com/hashicorp/packer-plugin-lxd v0.0.1 h1:CrFbQmQmdgI3n1RHMPmTUDinRPnPa/b
 github.com/hashicorp/packer-plugin-lxd v0.0.1/go.mod h1:h3wqgxQiWy8pIJytTjeqXlAd1PXfNTvhTdODnvzDG3w=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2 h1:MGvGkOVfzeosqOSs5dteghLwv9VRcRxTuLoLX1ssUag=
 github.com/hashicorp/packer-plugin-ncloud v0.0.2/go.mod h1:Hud2R1pkky96TQy3TPTTrr9Kej4b/4dqC/v+uEE0VDY=
+github.com/hashicorp/packer-plugin-oneandone v0.0.1 h1:ypaXL9gpQEIE7zAiBU0GrbMxyRhx1izc1uYBewyxYFM=
+github.com/hashicorp/packer-plugin-oneandone v0.0.1/go.mod h1:7zGckJD65NY3KNfnTDQsky+2USjplzVwtaLQOUgM9es=
 github.com/hashicorp/packer-plugin-openstack v0.0.2 h1:wGNE8es3Bn9auuIoX+gqT9chXzYY9GlM55eSpM4uwtU=
 github.com/hashicorp/packer-plugin-openstack v0.0.2/go.mod h1:rHAdd4+JmI+1z98Zx+lVOehgzLZT1Rjo2YgtS0NNvwM=
 github.com/hashicorp/packer-plugin-oracle v0.0.3 h1:yQEAfCD+TQqEWjrHLJTfdJis7axhwknzCKB07gnTZDA=
