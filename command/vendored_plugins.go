@@ -46,6 +46,7 @@ import (
 	lxcbuilder "github.com/hashicorp/packer-plugin-lxc/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer-plugin-lxd/builder/lxd"
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
+	oneandonebuilder "github.com/hashicorp/packer-plugin-oneandone/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer-plugin-oracle/builder/classic"
 	oracleocibuilder "github.com/hashicorp/packer-plugin-oracle/builder/oci"
@@ -114,6 +115,7 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"lxc":                 new(lxcbuilder.Builder),
 	"lxd":                 new(lxdbuilder.Builder),
 	"ncloud":              new(ncloudbuilder.Builder),
+	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
 	"oracle-classic":      new(oracleclassicbuilder.Builder),
 	"oracle-oci":          new(oracleocibuilder.Builder),

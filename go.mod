@@ -1,7 +1,6 @@
 module github.com/hashicorp/packer
 
 require (
-	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
@@ -36,6 +35,7 @@ require (
 	github.com/hashicorp/packer-plugin-lxc v0.0.1
 	github.com/hashicorp/packer-plugin-lxd v0.0.1
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
+	github.com/hashicorp/packer-plugin-oneandone v0.0.1
 	github.com/hashicorp/packer-plugin-openstack v0.0.2
 	github.com/hashicorp/packer-plugin-oracle v0.0.3
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
