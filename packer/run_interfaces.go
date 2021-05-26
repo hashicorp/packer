@@ -12,6 +12,9 @@ type GetBuildsOptions struct {
 	Except, Only []string
 	Debug, Force bool
 	OnError      string
+
+	// count only/except match count; so say something when nothing matched.
+	ExceptMatches, OnlyMatches int
 }
 
 type BuildGetter interface {
