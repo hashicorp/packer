@@ -4,11 +4,6 @@ behavior "regexp_issue_labeler" "panic_label" {
     labels = ["crash", "bug"]
 }
 
-behavior "remove_labels_on_reply" "remove_stale" {
-    labels = ["waiting-reply", "stale"]
-    only_non_maintainers = true
-}
-
 poll "label_issue_migrater" "remote_plugin_migrater" {
   schedule                = "0 20 * * * *"
   new_owner               = "hashicorp"
