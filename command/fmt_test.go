@@ -156,6 +156,7 @@ func Test_fmt_pipe(t *testing.T) {
 		expected string
 	}{
 		{unformattedHCL, []string{"fmt", "-"}, nil, formattedHCL},
+		{formattedHCL, []string{"fmt", "-"}, nil, formattedHCL},
 	}
 
 	for _, tc := range tc {
