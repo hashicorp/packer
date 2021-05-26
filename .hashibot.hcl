@@ -1,9 +1,3 @@
-
-behavior "regexp_issue_labeler" "panic_label" {
-    regexp = "panic:"
-    labels = ["crash", "bug"]
-}
-
 poll "label_issue_migrater" "remote_plugin_migrater" {
   schedule                = "0 20 * * * *"
   new_owner               = "hashicorp"
