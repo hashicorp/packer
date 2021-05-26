@@ -17,9 +17,11 @@ func Test_hcl2_upgrade(t *testing.T) {
 	_ = cwd
 
 	tc := []struct {
-		folder string
-		flags  []string
+		folder   string
+		flags    []string
+		exitCode int
 	}{
+		{folder: "unknown_builder", flags: []string{}, exitCode: 1},
 		{folder: "complete", flags: []string{"-with-annotations"}},
 		{folder: "without-annotations", flags: []string{}},
 		{folder: "minimal", flags: []string{"-with-annotations"}},
@@ -43,15 +45,19 @@ func Test_hcl2_upgrade(t *testing.T) {
 			}
 			args = append(args, inputPath)
 			p := helperCommand(t, args...)
-			bs, err := p.CombinedOutput()
+			err := p.Run()
 			if err != nil {
-				t.Fatalf("%v %s", err, bs)
+				t.Logf("run returned an error: %s", err)
 			}
 			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
 			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
 
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)
+			}
+			actualExitCode := p.ProcessState.ExitCode()
+			if tc.exitCode != actualExitCode {
+				t.Fatalf("unexpected exit code: %d found; expected %d ", actualExitCode, tc.exitCode)
 			}
 			os.Remove(outputPath)
 		})
