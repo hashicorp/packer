@@ -1,0 +1,16 @@
+name: Issue Comment Created Triage
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  issue_comment_triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          labels: |
+            stale
+            waiting-reply
