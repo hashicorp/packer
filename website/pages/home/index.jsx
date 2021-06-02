@@ -1,139 +1,171 @@
-import Button from '@hashicorp/react-button'
-import VERSION from 'data/version'
+import ProductFeaturesList from '@hashicorp/react-product-features-list'
+import AnimatedTerminal from 'components/animated-terminal'
+import BrandedCta from 'components/branded-cta'
+import HomepageHero from 'components/homepage-hero'
+import IntegrationsTextSplit from 'components/integrations-text-split'
+
+import s from './style.module.css'
 
 export default function Homepage() {
   return (
-    <div id="p-home">
+    <div id="p-home" className={s.home}>
       <section id="hero">
-        <img
-          src={require('@hashicorp/mktg-logos/product/packer/primary/attributed_color.svg')}
-          alt="HashiCorp Packer Logo"
+        <HomepageHero
+          heading="Build automated machine images"
+          subheading="Create identical machine images for multiple platforms from a single source configuration."
+          links={[
+            {
+              text: 'Download',
+              url: '/downloads',
+              type: 'inbound',
+            },
+            {
+              text: 'Explore Tutorials',
+              url: 'https://learn.hashicorp.com/packer',
+              type: 'outbound',
+            },
+          ]}
+          heroFeature={
+            <AnimatedTerminal
+              lines={[
+                {
+                  code: '$ packer build template.pkr.hcl',
+                  color: 'gray',
+                },
+                {
+                  code:
+                    '==> virtualbox: virtualbox output will be in this color.',
+                  color: 'white',
+                },
+                { code: '==> vmware: vmware output will be in this color.' },
+                {
+                  code:
+                    '==> vmware: Copying or downloading ISO. Progress will be reported periodically.',
+                },
+                { code: '==> vmware: Creating virtual machine disk' },
+                { code: '==> vmware: Building and writing VMX file' },
+                { code: '==> vmware: Starting HTTP server on port 8964' },
+                { code: '==> vmware: Starting virtual machine...' },
+                {
+                  code:
+                    '==> virtualbox: Downloading VirtualBox guest additions. Progress will be shown periodically',
+                  color: 'white',
+                },
+                {
+                  code:
+                    '==> virtualbox: Copying or downloading ISO. Progress will be reported periodically.',
+                  color: 'white',
+                },
+                {
+                  code: '==> virtualbox: Starting HTTP server on port 8081',
+                  color: 'white',
+                },
+                {
+                  code: '==> virtualbox: Creating virtual machine...',
+                  color: 'white',
+                },
+                {
+                  code: '==> virtualbox: Creating hard drive...',
+                  color: 'white',
+                },
+              ]}
+            />
+          }
         />
-        <h1 className="g-type-display-3">Build Automated Machine Images</h1>
-        <div className="buttons">
-          <Button
-            title="Get Started"
-            theme={{ brand: 'packer' }}
-            url="https://learn.hashicorp.com/packer"
-          />
-          <Button
-            title={`Download ${VERSION}`}
-            theme={{
-              variant: 'secondary',
-              background: 'light',
-            }}
-            url="/downloads"
-          />
-        </div>
       </section>
-      <section id="infrastructure-as-code" className="g-container">
-        <div className="code-block">
-          <div className="circles">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          $ packer build template.pkr.hcl
-          <span className="green">
-            ==&gt; virtualbox: virtualbox output will be in this color.
-          </span>
-          <span className="blue">
-            ==&gt; vmware: vmware output will be in this color.
-          </span>
-          <span className="blue">
-            ==&gt; vmware: Copying or downloading ISO. Progress will be reported
-            periodically.
-          </span>
-          <span className="blue">
-            ==&gt; vmware: Creating virtual machine disk
-          </span>
-          <span className="blue">
-            ==&gt; vmware: Building and writing VMX file
-          </span>
-          <span className="blue">
-            ==&gt; vmware: Starting HTTP server on port 8964
-          </span>
-          <span className="blue">
-            ==&gt; vmware: Starting virtual machine...
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Downloading VirtualBox guest additions. Progress
-            will be shown periodically
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Copying or downloading ISO. Progress will be
-            reported periodically.
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Starting HTTP server on port 8081
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Creating virtual machine...
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Creating hard drive...
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Creating forwarded port mapping for SSH (host
-            port 3213)
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Executing custom VBoxManage commands...
-            virtualbox: Executing: modifyvm packer --memory 480 virtualbox:
-            Executing: modifyvm packer --cpus
-          </span>
-          <span className="green">
-            ==&gt; virtualbox: Starting the virtual machine...
-          </span>
-          <span className="blue">==&gt; vmware: Waiting 10s for boot...</span>
-          <span className="green">
-            ==&gt; virtualbox: Waiting 10s for boot...
-          </span>
-        </div>
-        <div className="text">
-          <div className="tag g-type-label">Infrastructure as Code</div>
-          <h2 className="g-type-display-2">Modern, Automated</h2>
-          <p className="g-type-body">
-            HashiCorp Packer automates the creation of any type of machine
-            image. It embraces modern configuration management by encouraging
-            you to use automated scripts to install and configure the software
-            within your Packer-made images. Packer brings machine images into
-            the modern age, unlocking untapped potential and opening new
-            opportunities.
-          </p>
-        </div>
+      <section id="features">
+        <ProductFeaturesList
+          heading="Why Packer?"
+          features={[
+            {
+              title: 'Rapid Infrastructure Deployment',
+              content:
+                'Use Terraform to launch completely provisioned and configured machine instances with Packer images in seconds.',
+              icon: '/img/product-features-list/deployment.svg',
+            },
+            {
+              title: 'Multi-provider Portability',
+              content:
+                'Identical images allow you to run dev, staging, and production environments across platforms.',
+              icon: '/img/product-features-list/portability.svg',
+            },
+            {
+              title: 'Improved Stability',
+              content:
+                'By provisioning instances from stable images installed and configured by Packer, you can ensure buggy software does not get deployed.',
+              icon: '/img/product-features-list/stability.svg',
+            },
+            {
+              title: 'Increased Dev / Production Parity',
+              content:
+                'Keep dev, staging, and production environments as similar as possible by generating images for multiple platforms at the same time.',
+              icon: '/img/product-features-list/prod-parity.svg',
+            },
+            {
+              title: 'Reliable Continuous Delivery',
+              content:
+                'Generate new machine images for multiple platforms, launch and test, and verify the infrastructure changes work; then, use Terraform to put your images in production.',
+              icon: '/img/product-features-list/continuous-delivery.svg',
+            },
+            {
+              title: 'Appliance Demo Creation',
+              content:
+                'Create software appliances and disposable product demos quickly, even with software that changes continuously.',
+              icon: '/img/product-features-list/demo-creation.svg',
+            },
+          ]}
+        />
       </section>
-      <section id="integrations">
-        <div className="g-container">
-          <div className="logos">
-            <img src="/img/integrations/azure.svg" alt="Microsoft Azure Logo" />
-            <img
-              src="/img/integrations/aws.svg"
-              alt="Amazon Web Services Logo"
-            />
-            <img src="/img/integrations/vmware.svg" alt="VMware Logo" />
-            <img
-              src="/img/integrations/google-cloud.svg"
-              alt="Google Cloud Platform Logo"
-            />
-            <img src="/img/integrations/docker.svg" alt="Docker Logo" />
-            <img
-              src="/img/integrations/digitalocean.svg"
-              alt="DigitalOcean Logo"
-            />
-          </div>
-          <div className="text">
-            <div className="tag g-type-label">Integrations</div>
-            <h2 className="g-type-display-2">Works Out of The Box</h2>
-            <p className="g-type-body">
-              Out of the box Packer comes with support to build images for
-              Amazon EC2, CloudStack, DigitalOcean, Docker, Google Compute
-              Engine, Microsoft Azure, QEMU, VirtualBox, VMware, and more.
-              Support for more platforms is on the way, and anyone can add new
-              platforms via plugins.
-            </p>
-          </div>
-        </div>
+
+      <section>
+        <IntegrationsTextSplit
+          heading="Extending Packer with Plugins"
+          content={
+            <>
+              <p className="g-type-body">
+                Extend Packer’s functionality without modifying Packer core.
+                Plugins are capable of adding these components:
+              </p>
+              <ul className={s.textSplitList}>
+                <li>Builders</li>
+                <li>Provisioners</li>
+                <li>Post-processors</li>
+                <li>Data sources</li>
+              </ul>
+            </>
+          }
+          links={[
+            {
+              text: 'Read the Docs',
+              url: '/docs',
+              type: 'none',
+            },
+            {
+              text: 'Develop a plugin',
+
+              url: '/docs/plugins',
+              type: 'inbound',
+            },
+          ]}
+          image={{
+            url: '/img/integrations-text-split/integrations.png',
+            alt: 'Build images with Packer plugins',
+          }}
+        />
+      </section>
+      <section id="get-started">
+        <BrandedCta
+          heading="Ready to get started?"
+          content="Start by following a tutorial to deploy a simple application with Waypoint or learn about how the project works by exploring the documentation."
+          links={[
+            {
+              text: 'Get Started',
+              url: '/docs/getting-started',
+              type: 'inbound',
+            },
+            { text: 'Explore documentation', url: '/docs' },
+          ]}
+        />
       </section>
     </div>
   )

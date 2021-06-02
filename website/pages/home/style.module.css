@@ -1,0 +1,21 @@
+.home {
+  display: grid;
+  row-gap: 64px;
+  & :global(#get-started) {
+    margin-top: 64px;
+  }
+  & :global(.g-text-split) {
+    padding: 0;
+  }
+}
+
+.sectionGridContainer {
+  composes: g-grid-container from global;
+  width: 100%;
+}
+
+.textSplitList {
+  margin: 0;
+  padding: 16px 0 0 16px;
+  font-size: 17px;
+}
