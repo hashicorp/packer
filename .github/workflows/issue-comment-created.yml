@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions-ecosystem/action-remove-labels@v1
         with:
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
           labels: |
             stale
             waiting-reply
