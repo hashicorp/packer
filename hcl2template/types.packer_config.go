@@ -557,7 +557,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	if len(opts.Only) > opts.OnlyMatches {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
-			Summary:  "an 'only' option was passed, but did not match any build.",
+			Summary:  "an 'only' option was passed, but not all matches were found for the given build.",
 			Detail: fmt.Sprintf("Possible build names: %v.\n"+
 				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
 		})
