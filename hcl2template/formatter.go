@@ -139,6 +139,10 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 	outSrc := hclwrite.Format(inSrc)
 
 	if bytes.Equal(inSrc, outSrc) {
+		if filename == "-" {
+			_, _ = f.Output.Write(outSrc)
+		}
+
 		return nil, nil
 	}
 
