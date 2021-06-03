@@ -422,6 +422,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	res := []packersdk.Build{}
 	var diags hcl.Diagnostics
+	possibleBuildNames := []string{}
 
 	cfg.debug = opts.Debug
 	cfg.force = opts.Force
@@ -447,6 +448,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 
 			// Apply the -only and -except command-line options to exclude matching builds.
 			buildName := pcb.Name()
+			possibleBuildNames = append(possibleBuildNames, buildName)
 			// -only
 			if len(opts.Only) > 0 {
 				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
@@ -464,6 +466,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				if !include {
 					continue
 				}
+				opts.OnlyMatches++
 			}
 
 			// -except
@@ -481,6 +484,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 					}
 				}
 				if exclude {
+					opts.ExceptMatches++
 					continue
 				}
 			}
@@ -549,6 +553,22 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 
 			res = append(res, pcb)
 		}
+	}
+	if len(opts.Only) > opts.OnlyMatches {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "an 'only' option was passed, but not all matches were found for the given build.",
+			Detail: fmt.Sprintf("Possible build names: %v.\n"+
+				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
+		})
+	}
+	if len(opts.Except) > opts.ExceptMatches {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "an 'except' option was passed, but did not match any build.",
+			Detail: fmt.Sprintf("Possible build names: %v.\n"+
+				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
+		})
 	}
 	return res, diags
 }
