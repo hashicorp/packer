@@ -236,6 +236,13 @@
     "version": "latest"
   },
   {
+    "title": "Vultr",
+    "path": "vultr",
+    "repo": "vultr/packer-plugin-vultr",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Yandex",
     "path": "yandex",
     "repo": "hashicorp/packer-plugin-yandex",
