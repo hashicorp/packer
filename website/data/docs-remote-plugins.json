@@ -190,6 +190,13 @@
     "version": "latest"
   },
   {
+    "title": "SSH Key",
+    "path": "sshkey",
+    "repo": "ivoronin/packer-plugin-sshkey",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Tencent Cloud",
     "path": "tencentcloud",
     "repo": "hashicorp/packer-plugin-tencentcloud",
