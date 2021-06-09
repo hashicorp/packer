@@ -31,3 +31,11 @@
     padding: 0 88px;
   }
 }
+
+.description {
+  composes: g-type-body-large from global;
+  margin: 0;
+  @media (--medium-up) {
+    padding: 0 80px;
+  }
+}

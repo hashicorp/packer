@@ -3,6 +3,7 @@ import AnimatedTerminal from 'components/animated-terminal'
 import BrandedCta from 'components/branded-cta'
 import HomepageHero from 'components/homepage-hero'
 import IntegrationsTextSplit from 'components/integrations-text-split'
+import SectionBreakCta from 'components/section-break-cta'
 
 import s from './style.module.css'
 
@@ -11,6 +12,11 @@ export default function Homepage() {
     <div id="p-home" className={s.home}>
       <section id="hero">
         <HomepageHero
+          alert={{
+            url: 'https://www.hashicorp.com/blog/announcing-hcp-packer',
+            tag: 'BLOG POST',
+            text: 'Announcing HCP Packer',
+          }}
           heading="Build automated machine images"
           subheading="Create identical machine images for multiple platforms from a single source configuration."
           links={[
@@ -116,7 +122,16 @@ export default function Homepage() {
           ]}
         />
       </section>
-
+      <section className={s.sectionGridContainer}>
+        <SectionBreakCta
+          heading="Announcing HCP Packer"
+          description="Bridge the gap between image creation and deployment with image management workflows."
+          link={{
+            text: 'Sign up to be a beta tester',
+            url: 'https://go.hashicorp.com/HCP-Packer-Beta',
+          }}
+        />
+      </section>
       <section>
         <IntegrationsTextSplit
           heading="Extending Packer with Plugins"
