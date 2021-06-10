@@ -24,7 +24,7 @@ require (
 	github.com/hashicorp/packer-plugin-chef v0.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v0.0.1
 	github.com/hashicorp/packer-plugin-converge v0.0.1
-	github.com/hashicorp/packer-plugin-digitalocean v0.0.1
+	github.com/hashicorp/packer-plugin-digitalocean v0.0.2
 	github.com/hashicorp/packer-plugin-docker v0.0.7
 	github.com/hashicorp/packer-plugin-googlecompute v0.0.1
 	github.com/hashicorp/packer-plugin-hcloud v0.0.1
@@ -44,9 +44,9 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
 	github.com/hashicorp/packer-plugin-scaleway v0.0.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.2
+	github.com/hashicorp/packer-plugin-sdk v0.2.3
 	github.com/hashicorp/packer-plugin-tencentcloud v0.0.1
-	github.com/hashicorp/packer-plugin-triton v0.0.0-20210421085122-768dd7c764d9
+	github.com/hashicorp/packer-plugin-triton v0.0.1
 	github.com/hashicorp/packer-plugin-ucloud v0.0.1
 	github.com/hashicorp/packer-plugin-vagrant v0.0.3
 	github.com/hashicorp/packer-plugin-virtualbox v0.0.1
