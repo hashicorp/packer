@@ -7,7 +7,7 @@
 ## This script should be run in packer's root.
 
 declare -a plugins=(
-    "alicloud"
+	"alicloud"
 	"amazon"
 	"ansible"
 	"chef"
