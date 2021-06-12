@@ -3,6 +3,7 @@ package packer
 import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -33,8 +34,11 @@ type Evaluator interface {
 
 type InitializeOptions struct {
 	// When set, the execution of datasources will be skipped and the datasource will provide
-	// a output spec that will be used for validation only.
+	// an output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
+	// When set, initialization of a Packer.hander will try to load any Packer Registry Bucket
+	// configuration that may be present within an HCL2 template config.
+	LoadRegistryBucketSettingsFromEnv bool
 }
 
 // The Handler handles all Packer things. This interface reflects the Packer
@@ -46,6 +50,9 @@ type Handler interface {
 	// PluginRequirements returns the list of plugin Requirements from the
 	// config file.
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
+	// RegistryPublisher returns a configured Bucket that can be used to publish build
+	// artifacts to the said image bucket.
+	RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer
