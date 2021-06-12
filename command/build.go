@@ -16,6 +16,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -149,11 +150,27 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
+
+	registryIteration := packer_registry.NewIteration("packer", "fingerprint1")
+	c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
+
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
+
+	client, err := packer_registry.NewClient()
+	if err != nil {
+		c.Ui.Error("Failed to create client connection to registry: w:" + err.Error())
+	}
+
+	err = registryIteration.Initialize(client)
+	if err != nil {
+		c.Ui.Error(fmt.Sprintf("Failed to start new iteration for the Packer Artifact Registry Bucket: %s", registryIteration.BucketPath()))
+	}
+
+	fmt.Printf("We got ourselves an iteration %#v", registryIteration)
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
