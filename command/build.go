@@ -151,26 +151,27 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	registryIteration := packer_registry.NewIteration("packer", "fingerprint1")
+	// Iteration should have opts to tell it to use author fingerprint,...
+	registryIteration := packer_registry.NewIteration("debian", packer_registry.IterationOptions{})
 	c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
-
-	diags := packerStarter.Initialize(packer.InitializeOptions{})
-	ret = writeDiags(c.Ui, nil, diags)
-	if ret != 0 {
-		return ret
-	}
 
 	client, err := packer_registry.NewClient()
 	if err != nil {
 		c.Ui.Error("Failed to create client connection to registry: w:" + err.Error())
 	}
 
-	err = registryIteration.Initialize(client)
+	err = registryIteration.Initialize(buildCtx, client)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed to start new iteration for the Packer Artifact Registry Bucket: %s", registryIteration.BucketPath()))
+		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", registryIteration.BucketPath(), err))
 	}
 
-	fmt.Printf("We got ourselves an iteration %#v", registryIteration)
+	fmt.Printf("We got ourselves an iteration %#v\n", registryIteration)
+
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,

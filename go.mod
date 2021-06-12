@@ -6,6 +6,7 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
+	github.com/go-openapi/runtime v0.19.20
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
@@ -17,6 +18,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.10.0
+	github.com/hashicorp/hcp-sdk-go v0.0.0-00010101000000-000000000000
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
 	github.com/hashicorp/packer-plugin-amazon v1.0.0
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
@@ -75,6 +77,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/tools v0.1.0
+	google.golang.org/grpc v1.36.1
 )
 
 go 1.16
+
+replace github.com/hashicorp/hcp-sdk-go => /Users/wilkenrivera/Development/go/src/github.com/hashicorp/hcp-sdk-go
