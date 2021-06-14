@@ -16,6 +16,12 @@
 			"inline": [
 				"echo {{user \"conf\"}}-{{timestamp}}-{{isotime \"01-02-2006\"}}"
 			]
+		},
+		{
+			"type": "shell-local",
+			"inline": [
+				"echo {{ split \"some-string\" \"-\" 0 }}"
+			]
 		}
 	]
 }

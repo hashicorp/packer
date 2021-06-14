@@ -1289,7 +1289,8 @@ var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
 func fixQuoting(old string) string {
 	// This regex captures golang template functions that use escaped quotes:
 	// {{ env \"myvar\" }}
-	re := regexp.MustCompile(`{{\s*\w*\s*(\\".*\\")\s*}}`)
+	// {{ split `some-string` \"-\" 0 }}
+	re := regexp.MustCompile(`{{\s*\w*(\s*(\\".*\\")\s*)+\w*\s*}}`)
 
 	body := re.ReplaceAllFunc([]byte(old), func(s []byte) []byte {
 		// Get the capture group
