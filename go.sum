@@ -551,8 +551,8 @@ github.com/hashicorp/packer-plugin-docker v1.0.0 h1:t2vySphbgsOquqsCaNJwTjOpNtwq
 github.com/hashicorp/packer-plugin-docker v1.0.0/go.mod h1:72oCfil438H0NUo/r/UYzSPYOtbn3XGlSMb986xoR6I=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.0 h1:m+C2gz5OCllprPld8A7U2JgvAdp2sDDGCzoK6sChTj8=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.0/go.mod h1:xqrqtnN8P530NVeiZdzXehIbCTh5uScwfnolmGyhSY4=
-github.com/hashicorp/packer-plugin-hcloud v0.0.1 h1:KM4fxnIpBBCe0SHoK9FHLFlGDWoW8uvMLUdtcNRzla0=
-github.com/hashicorp/packer-plugin-hcloud v0.0.1/go.mod h1:H+LpMPP8V+VqFqBHBD2qVSYWE5woFWQRVdtB7S6LMT0=
+github.com/hashicorp/packer-plugin-hcloud v1.0.0 h1:bhuqPRXc6RG15pgyeqR1qTaJAY6iifhuBV9sAOa/zQo=
+github.com/hashicorp/packer-plugin-hcloud v1.0.0/go.mod h1:cRPfKodO8JnLKLA47rUQlU8t0Wfc9vpOEhyhBrNFgTY=
 github.com/hashicorp/packer-plugin-hyperone v0.0.1 h1:Owp1B5cI0VgFgR3pCyeeQdyKPTWls36mVedv+WxZMOM=
 github.com/hashicorp/packer-plugin-hyperone v0.0.1/go.mod h1:9DglrxEBIig85Hr8r11YE+uMn3G0u+pt0AZHVP+wnAY=
 github.com/hashicorp/packer-plugin-hyperv v0.0.1 h1:ZdsJw4X+4zSgRYPzVQbJrx8Az73AkneSWLnmfpojl0k=

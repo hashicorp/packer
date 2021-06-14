@@ -27,7 +27,7 @@ require (
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.0
 	github.com/hashicorp/packer-plugin-docker v1.0.0
 	github.com/hashicorp/packer-plugin-googlecompute v1.0.0
-	github.com/hashicorp/packer-plugin-hcloud v0.0.1
+	github.com/hashicorp/packer-plugin-hcloud v1.0.0
 	github.com/hashicorp/packer-plugin-hyperone v0.0.1
 	github.com/hashicorp/packer-plugin-hyperv v0.0.1
 	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
