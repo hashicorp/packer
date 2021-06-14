@@ -28,11 +28,11 @@ require (
 	github.com/hashicorp/packer-plugin-docker v1.0.0
 	github.com/hashicorp/packer-plugin-googlecompute v1.0.0
 	github.com/hashicorp/packer-plugin-hcloud v1.0.0
-	github.com/hashicorp/packer-plugin-hyperone v0.0.1
-	github.com/hashicorp/packer-plugin-hyperv v0.0.1
-	github.com/hashicorp/packer-plugin-jdcloud v0.0.1
+	github.com/hashicorp/packer-plugin-hyperone v1.0.0
+	github.com/hashicorp/packer-plugin-hyperv v1.0.0
+	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
 	github.com/hashicorp/packer-plugin-linode v1.0.0
-	github.com/hashicorp/packer-plugin-lxc v0.0.1
+	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
 	github.com/hashicorp/packer-plugin-ncloud v0.0.2
 	github.com/hashicorp/packer-plugin-oneandone v0.0.1
