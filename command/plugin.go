@@ -15,7 +15,6 @@ import (
 
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
-	profitbricksbuilder "github.com/hashicorp/packer/builder/profitbricks"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -38,9 +37,8 @@ type PluginCommand struct {
 }
 
 var Builders = map[string]packersdk.Builder{
-	"file":         new(filebuilder.Builder),
-	"null":         new(nullbuilder.Builder),
-	"profitbricks": new(profitbricksbuilder.Builder),
+	"file": new(filebuilder.Builder),
+	"null": new(nullbuilder.Builder),
 }
 
 var Provisioners = map[string]packersdk.Provisioner{

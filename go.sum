@@ -587,6 +587,8 @@ github.com/hashicorp/packer-plugin-outscale v0.0.1 h1:BrL8hKypNYrvP3NR+d+xX03SZK
 github.com/hashicorp/packer-plugin-outscale v0.0.1/go.mod h1:6jEWfJO7TgAbaL3e+St1bN5PoIC/MmDIsYqNUzAHF1w=
 github.com/hashicorp/packer-plugin-parallels v0.0.1 h1:fcaaiGWdU1+X4IGadXdUhJ2si1ZA3apXS9tMNJXln2A=
 github.com/hashicorp/packer-plugin-parallels v0.0.1/go.mod h1:FGNtZ7XFBr3IYuj7uvJtSaNnyhAwe457zP464m06+20=
+github.com/hashicorp/packer-plugin-profitbricks v1.0.1 h1:yFLUoDvm/zwzqj3J4a4pe49JpeDDGx08U9B38FXEyNk=
+github.com/hashicorp/packer-plugin-profitbricks v1.0.1/go.mod h1:qtDQ7sbc0hMXWuxt0gweUwsVyVIazRLyNCHPO19CPU0=
 github.com/hashicorp/packer-plugin-proxmox v0.0.2 h1:x6QW7PeKh+IJymPEt3QdpBhSRi5vqXb8qTWv7rMLuns=
 github.com/hashicorp/packer-plugin-proxmox v0.0.2/go.mod h1:3URutEWX1yy10qcHNJncS4OMpZknA1FyvlrfL+5usYk=
 github.com/hashicorp/packer-plugin-puppet v0.0.2 h1:ER0znnTwRAlWqnTg3JLo//Cgj3wy+LjTVzrzcYFbT7k=
