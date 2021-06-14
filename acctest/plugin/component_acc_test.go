@@ -30,9 +30,9 @@ func TestAccInitAndBuildBasicAmazonAmiDatasource(t *testing.T) {
 			return cleanupPluginInstallation(plugin)
 		},
 		Teardown: func() error {
-			helper := amazonacc.AWSHelper{
-				Region:  "us-west-2",
-				AMIName: "packer-amazon-ami-test",
+			helper := amazonacc.AMIHelper{
+				Region: "us-west-2",
+				Name:   "packer-amazon-ami-test",
 			}
 			return helper.CleanUpAmi()
 		},

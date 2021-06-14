@@ -34,9 +34,9 @@ func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 			return cleanupPluginInstallation(plugin)
 		},
 		Teardown: func() error {
-			helper := amazonacc.AWSHelper{
-				Region:  "us-east-1",
-				AMIName: "packer-plugin-amazon-ebs-test",
+			helper := amazonacc.AMIHelper{
+				Region: "us-east-1",
+				Name:   "packer-plugin-amazon-ebs-test",
 			}
 			return helper.CleanUpAmi()
 		},
