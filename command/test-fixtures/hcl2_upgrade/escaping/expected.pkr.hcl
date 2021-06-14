@@ -28,4 +28,14 @@ build {
     inline = ["echo ${var.conf}-${local.timestamp}-${legacy_isotime("01-02-2006")}"]
   }
 
+
+  # 1 error occurred upgrading the following block:
+  # unhandled "split" call:
+  # there is no way to automatically upgrade the "split" call.
+  # Please manually upgrade to `split(separator, string)`
+  # Visit https://www.packer.io/docs/templates/hcl_templates/functions/string/split for more infos.
+  provisioner "shell-local" {
+    inline = ["echo {{ split `some-string` `-` 0 }}"]
+  }
+
 }
