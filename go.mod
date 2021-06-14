@@ -40,6 +40,7 @@ require (
 	github.com/hashicorp/packer-plugin-oracle v0.0.3
 	github.com/hashicorp/packer-plugin-outscale v0.0.1
 	github.com/hashicorp/packer-plugin-parallels v0.0.1
+	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
 	github.com/hashicorp/packer-plugin-proxmox v0.0.2
 	github.com/hashicorp/packer-plugin-puppet v0.0.2
 	github.com/hashicorp/packer-plugin-qemu v0.0.1
@@ -63,7 +64,6 @@ require (
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/pierrec/lz4 v2.0.5+incompatible
 	github.com/posener/complete v1.2.3
-	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.8

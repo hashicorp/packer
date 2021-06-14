@@ -28,6 +28,7 @@ declare -a plugins=(
 	"oracle"
 	"outscale"
 	"parallels"
+	"profitbricks"
 	"proxmox"
 	"puppet"
 	"qemu"

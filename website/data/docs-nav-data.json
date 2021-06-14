@@ -688,10 +688,6 @@
         "path": "builders/null"
       },
       {
-        "title": "ProfitBricks",
-        "path": "builders/profitbricks"
-      },
-      {
         "title": "Custom",
         "path": "builders/custom"
       },

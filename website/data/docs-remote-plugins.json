@@ -163,6 +163,13 @@
     "version": "latest"
   },
   {
+    "title": "Profitbricks",
+    "path": "profitbricks",
+    "repo": "hashicorp/packer-plugin-profitbricks",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Proxmox",
     "path": "proxmox",
     "repo": "hashicorp/packer-plugin-proxmox",
