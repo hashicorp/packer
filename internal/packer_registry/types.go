@@ -96,6 +96,22 @@ func (i *Iteration) Initialize(ctx context.Context, client *Client) error {
 	}
 
 	// Create/find iteration
+	{
+		params := packer_service.NewCreateIterationParamsWithContext(ctx)
+		params.LocationOrganizationID = i.client.Config.OrganizationID
+		params.LocationProjectID = i.client.Config.ProjectID
+		params.Body = &models.HashicorpCloudPackerCreateIterationRequest{
+			BucketSlug: i.Bucket.Slug,
+		}
+		it, err := i.client.Packer.CreateIteration(params, nil, func(*runtime.ClientOperation) {})
+
+		if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
+			return fmt.Errorf("failed to CreateIteration for Bucket %s with error: %w", i.Bucket.Slug, err)
+		}
+
+		i.ID = it.Payload.Iteration.ID
+	}
+
 	return nil
 }
 
