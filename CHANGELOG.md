@@ -29,6 +29,7 @@ Major refactor: Extracted a majority of HashiCorp-maintained and community plugi
 * "github.com/hashicorp/packer-plugin-oracle" [GH-10962]
 * "github.com/hashicorp/packer-plugin-outscale" [GH-10941]
 * "github.com/hashicorp/packer-plugin-parallels" [GH-10936]
+* "github.com/hashicorp/packer-plugin-profitbricks" [GH-11084]
 * "github.com/hashicorp/packer-plugin-proxmox" [GH-10930]
 * "github.com/hashicorp/packer-plugin-puppet" [GH-10943]
 * "github.com/hashicorp/packer-plugin-qemu" [GH-10929]
