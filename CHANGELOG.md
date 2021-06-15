@@ -2,8 +2,10 @@
 
 ### IMPROVEMENTS:
 
+We've extracted a majority of HashiCorp-maintained and community plugins from the Packer Core repository. They now live in their own multi-component plugin repositories. This is not a breaking change as we are enabling backwards compatibility in this release by vendoring components back into Packer.
+However, we encourage users to begin using `packer init` to download and install plugins to get the latest updates to each plugin, and to prepare for Packer v2.0 when we will stop vendoring the above plugins into the main Packer binary.
 
-Major refactor: Extracted a majority of HashiCorp-maintained and community plugins from the Packer Core repository. They now live in their own multi-component plugin repositiores. The following repositories have been created, and their components have been deleted from the "github.com/hashicorp/packer" repository.
+The following repositories have been created, and their components have been deleted from the "github.com/hashicorp/packer" repository.
 
 * "github.com/hashicorp/packer-plugin-alicloud" [GH-10932]
 * "github.com/hashicorp/packer-plugin-amazon" [GH-10800]
@@ -44,12 +46,7 @@ Major refactor: Extracted a majority of HashiCorp-maintained and community plugi
 * "github.com/hashicorp/packer-plugin-vsphere" [GH-10896]
 * "github.com/hashicorp/packer-plugin-yandex" [GH-10970]
 
-_this will not be a backwards-breaking change in v1.7.3_ because the extracted
-components are being vendored back into Packer. However, we encourage users to
-begin using `packer init` to download and install plugins to get the latest
-updates to each plugin, and to prepare for Packer v2.0 when we will stop
-vendoring the above plugins into the main Packer binary. The following
-components will not be removed from the main packer binary:
+The following components will not be removed from the main packer binary:
 
 * `null` builder
 * `file` builder
@@ -77,6 +74,8 @@ components will not be removed from the main packer binary:
 * builder/azure: Support shared image gallery storage account type [GH-10863]
 * builder/proxmox: Proxmox builder use ipv4 address instead of always ipv6.
     [GH-10858]
+* core/hcl2_upgrade: Improve regex to fix escaping on split function.
+    [GH-11083]
 * core/hcl: Fix Invalid provisioner pause_before panic [GH-10978]
 * core: HCL "index" function now actually returns the index of the element
     [GH-11008]
@@ -90,6 +89,11 @@ components will not be removed from the main packer binary:
 * builder/digitalocean: support ecdsa, ed25519, dsa temporary key types.
     [GH-10856]
 * builder/ncloud: Support ncloud vpc version [GH-10870]
+* core/fmt: When reading from stdin `packer fmt` will output the contents of
+    the formatted file even if the input was already formatted. [GH-11047]
+* core/hcl: HCL variables are now supported within the `name`, `only`,
+    `except`, and `keep_input_artifact` fields for post-processor blocks.
+    [GH-11094]
 * post-processor/compress: Add bzip2 support to post-processor [GH-10867]
 * post-processor/googlecompute-import: Add Image Storage Locations field
     [GH-10864]
