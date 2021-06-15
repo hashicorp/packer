@@ -38,6 +38,8 @@ mascarpone
 whipped_egg_white
 dress
 `
+	one = "1\n"
+	two = "2\n"
 )
 
 func TestBuild(t *testing.T) {
@@ -404,8 +406,8 @@ func TestBuild(t *testing.T) {
 			},
 			fileCheck: fileCheck{
 				expectedContent: map[string]string{
-					"example1.1.txt": "1\n",
-					"example2.2.txt": "2\n",
+					"example1.1.txt": one,
+					"example2.2.txt": two,
 				},
 				notExpected: []string{
 					"example1.2.txt",
