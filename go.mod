@@ -51,7 +51,7 @@ require (
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
 	github.com/hashicorp/packer-plugin-vagrant v1.0.0
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.0
-	github.com/hashicorp/packer-plugin-vmware v0.0.1
+	github.com/hashicorp/packer-plugin-vmware v1.0.0
 	github.com/hashicorp/packer-plugin-vsphere v1.0.0
 	github.com/hashicorp/packer-plugin-yandex v1.0.0
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
@@ -69,9 +69,9 @@ require (
 	github.com/ulikunitz/xz v0.5.8
 	github.com/zclconf/go-cty v1.8.3
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc
+	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
 	golang.org/x/mod v0.4.1
-	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/tools v0.1.0
