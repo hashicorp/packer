@@ -23,7 +23,7 @@ func (p *PostProcessorBlock) String() string {
 	return fmt.Sprintf(buildPostProcessorLabel+"-block %q %q", p.PType, p.PName)
 }
 
-func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl.Diagnostics) {
+func (p *Parser) decodePostProcessor(block *hcl.Block, cfg *PackerConfig) (*PostProcessorBlock, hcl.Diagnostics) {
 	var b struct {
 		Name              string   `hcl:"name,optional"`
 		Only              []string `hcl:"only,optional"`
@@ -31,7 +31,7 @@ func (p *Parser) decodePostProcessor(block *hcl.Block) (*PostProcessorBlock, hcl
 		KeepInputArtifact *bool    `hcl:"keep_input_artifact,optional"`
 		Rest              hcl.Body `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	diags := gohcl.DecodeBody(block.Body, cfg.EvalContext(BuildContext, nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
