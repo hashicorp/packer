@@ -46,7 +46,7 @@ require (
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-scaleway v1.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.3
-	github.com/hashicorp/packer-plugin-tencentcloud v0.0.1
+	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
 	github.com/hashicorp/packer-plugin-vagrant v1.0.0

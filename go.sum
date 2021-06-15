@@ -602,12 +602,11 @@ github.com/hashicorp/packer-plugin-sdk v0.0.14/go.mod h1:tNb3XzJPnjMl3QuUdKmF47B
 github.com/hashicorp/packer-plugin-sdk v0.1.0/go.mod h1:CFsC20uZjtER/EnTn/CSMKD0kEdkqOVev8mtOmfnZiI=
 github.com/hashicorp/packer-plugin-sdk v0.1.1/go.mod h1:1d3nqB9LUsXMQaNUiL67Q+WYEtjsVcLNTX8ikVlpBrc=
 github.com/hashicorp/packer-plugin-sdk v0.1.2/go.mod h1:KRjczE1/c9NV5Re+PXt3myJsVTI/FxEHpZjRjOH0Fug=
-github.com/hashicorp/packer-plugin-sdk v0.2.0/go.mod h1:0DiOMEBldmB0HEhp0npFSSygC8bIvW43pphEgWkp2WU=
 github.com/hashicorp/packer-plugin-sdk v0.2.2/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
 github.com/hashicorp/packer-plugin-sdk v0.2.3 h1:Z/GEaZXweNCvjKXuHTlBffLDfah1GYwucZGjIz/eULA=
 github.com/hashicorp/packer-plugin-sdk v0.2.3/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
-github.com/hashicorp/packer-plugin-tencentcloud v0.0.1 h1:DR7GETCzrK/DPFMUPbULIklCxwGhstbbz6pl+2S+UnM=
-github.com/hashicorp/packer-plugin-tencentcloud v0.0.1/go.mod h1:FmdacMLvDKiT6OdMAc2x4LXtqu/soLApH3jF57SWOik=
+github.com/hashicorp/packer-plugin-tencentcloud v1.0.1 h1:gqFHT79OjQT/xAtEL/BEBDPulFlSqoy6Zj74WZbymr0=
+github.com/hashicorp/packer-plugin-tencentcloud v1.0.1/go.mod h1:X3O5Sq7/6TQXaeJXxqqJyTEgrfwQM+gUFU/Sd7J9p9o=
 github.com/hashicorp/packer-plugin-triton v1.0.0 h1:Uvh8fjEKqlii61BzIt1VEgSyJXL+UYfuMHCj44aVpU8=
 github.com/hashicorp/packer-plugin-triton v1.0.0/go.mod h1:6ulMAf4X2vHta8ZmbCmPRxZBmPW1GJJvUDE7xOcWwzk=
 github.com/hashicorp/packer-plugin-ucloud v1.0.0 h1:nKJ3hmXIvoDz6SHu8vwt4hHPweCfR/KoWrVzUFGBjSw=
@@ -901,7 +900,7 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tencentcloud/tencentcloud-sdk-go v1.0.140/go.mod h1:asUz5BPXxgoPGaRgZaVm1iGcUAuHyYUo1nXqKa83cvI=
+github.com/tencentcloud/tencentcloud-sdk-go v1.0.152/go.mod h1:asUz5BPXxgoPGaRgZaVm1iGcUAuHyYUo1nXqKa83cvI=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible h1:bs+0lcG4RELNbE8PsBC9oaPP0/qExr0DuEGnZyocm84=
 github.com/tencentcloud/tencentcloud-sdk-go v3.0.222+incompatible/go.mod h1:0PfYow01SHPMhKY31xa+EFz2RStxIqj6JFAJS+IkCi4=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
@@ -957,7 +956,6 @@ github.com/zclconf/go-cty v1.4.0/go.mod h1:nHzOclRkoj++EU9ZjSrZvRG0BXIWt8c7loYc0
 github.com/zclconf/go-cty v1.7.0/go.mod h1:VDR4+I79ubFBGm1uJac1226K5yANQFHeauxPBoP54+o=
 github.com/zclconf/go-cty v1.8.0/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty v1.8.1/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
-github.com/zclconf/go-cty v1.8.2/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty v1.8.3 h1:48gwZXrdSADU2UW9eZKHprxAI7APZGW9XmExpJpSjT0=
 github.com/zclconf/go-cty v1.8.3/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRKQfBXbGkpdV6QMzT3rU1kSTAnfu1dO8dPKjYprgj8=
