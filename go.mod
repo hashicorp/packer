@@ -34,26 +34,26 @@ require (
 	github.com/hashicorp/packer-plugin-linode v1.0.0
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
-	github.com/hashicorp/packer-plugin-ncloud v0.0.2
+	github.com/hashicorp/packer-plugin-ncloud v1.0.0
 	github.com/hashicorp/packer-plugin-oneandone v0.0.1
-	github.com/hashicorp/packer-plugin-openstack v0.0.2
+	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.0
-	github.com/hashicorp/packer-plugin-outscale v0.0.1
-	github.com/hashicorp/packer-plugin-parallels v0.0.1
+	github.com/hashicorp/packer-plugin-outscale v1.0.0
+	github.com/hashicorp/packer-plugin-parallels v1.0.0
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
-	github.com/hashicorp/packer-plugin-proxmox v0.0.2
+	github.com/hashicorp/packer-plugin-proxmox v1.0.0
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
-	github.com/hashicorp/packer-plugin-qemu v0.0.1
-	github.com/hashicorp/packer-plugin-scaleway v0.0.1
+	github.com/hashicorp/packer-plugin-qemu v1.0.0
+	github.com/hashicorp/packer-plugin-scaleway v1.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.3
 	github.com/hashicorp/packer-plugin-tencentcloud v0.0.1
-	github.com/hashicorp/packer-plugin-triton v0.0.1
-	github.com/hashicorp/packer-plugin-ucloud v0.0.1
-	github.com/hashicorp/packer-plugin-vagrant v0.0.3
+	github.com/hashicorp/packer-plugin-triton v1.0.0
+	github.com/hashicorp/packer-plugin-ucloud v1.0.0
+	github.com/hashicorp/packer-plugin-vagrant v1.0.0
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.0
 	github.com/hashicorp/packer-plugin-vmware v0.0.1
 	github.com/hashicorp/packer-plugin-vsphere v1.0.0
-	github.com/hashicorp/packer-plugin-yandex v0.0.4
+	github.com/hashicorp/packer-plugin-yandex v1.0.0
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/masterzen/winrm v0.0.0-20210504160029-28ed956f5227
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
