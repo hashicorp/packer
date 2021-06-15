@@ -38,6 +38,8 @@ mascarpone
 whipped_egg_white
 dress
 `
+	one = "1\n"
+	two = "2\n"
 )
 
 func TestBuild(t *testing.T) {
@@ -394,6 +396,23 @@ func TestBuild(t *testing.T) {
 					"postgres/13.txt": "layers/base/main/files\nlayers/base/init/files\nlayers/postgres/files",
 				},
 				expected: []string{"dummy-fooo.txt", "dummy-baar.txt", "postgres/13-fooo.txt", "postgres/13-baar.txt"},
+			},
+		},
+
+		{
+			name: "hcl - variables can be used in shared post-processor fields",
+			args: []string{
+				testFixture("hcl", "var-in-pp-name.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"example1.1.txt": one,
+					"example2.2.txt": two,
+				},
+				notExpected: []string{
+					"example1.2.txt",
+					"example2.1.txt",
+				},
 			},
 		},
 	}

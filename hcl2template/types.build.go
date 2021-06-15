@@ -157,7 +157,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			build.ErrorCleanupProvisionerBlock = p
 		case buildPostProcessorLabel:
-			pp, moreDiags := p.decodePostProcessor(block)
+			pp, moreDiags := p.decodePostProcessor(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -174,7 +174,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			errored := false
 			postProcessors := []*PostProcessorBlock{}
 			for _, block := range content.Blocks {
-				pp, moreDiags := p.decodePostProcessor(block)
+				pp, moreDiags := p.decodePostProcessor(block, cfg)
 				diags = append(diags, moreDiags...)
 				if moreDiags.HasErrors() {
 					errored = true
