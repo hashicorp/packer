@@ -1,4 +1,4 @@
-## 1.7.3 (Upcoming)
+## 1.7.3 (June 15, 2021)
 
 ### IMPROVEMENTS:
 
