@@ -20,7 +20,7 @@ require (
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
 	github.com/hashicorp/packer-plugin-amazon v1.0.0
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
-	github.com/hashicorp/packer-plugin-azure v0.0.3
+	github.com/hashicorp/packer-plugin-azure v1.0.0
 	github.com/hashicorp/packer-plugin-chef v1.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.0

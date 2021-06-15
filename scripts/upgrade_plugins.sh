@@ -10,6 +10,7 @@ declare -a plugins=(
 	"alicloud"
 	"amazon"
 	"ansible"
+	"azure"
 	"chef"
 	"cloudstack"
 	"converge"
