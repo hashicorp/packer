@@ -35,7 +35,7 @@ require (
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
 	github.com/hashicorp/packer-plugin-ncloud v1.0.0
-	github.com/hashicorp/packer-plugin-oneandone v0.0.1
+	github.com/hashicorp/packer-plugin-oneandone v1.0.0
 	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.0
 	github.com/hashicorp/packer-plugin-outscale v1.0.0

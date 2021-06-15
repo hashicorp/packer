@@ -28,6 +28,7 @@ declare -a plugins=(
 	"openstack"
 	"oracle"
 	"outscale"
+	"oneandone"
 	"parallels"
 	"profitbricks"
 	"proxmox"
