@@ -74,6 +74,8 @@ The following components will not be removed from the main packer binary:
 * builder/azure: Support shared image gallery storage account type [GH-10863]
 * builder/proxmox: Proxmox builder use ipv4 address instead of always ipv6.
     [GH-10858]
+* core/hcl2_upgrade: Allow hcl2_upgrade continue with unknown builders.
+    [GH-11049]
 * core/hcl2_upgrade: Improve regex to fix escaping on split function.
     [GH-11083]
 * core/hcl: Fix Invalid provisioner pause_before panic [GH-10978]
@@ -94,6 +96,8 @@ The following components will not be removed from the main packer binary:
 * core/hcl: HCL variables are now supported within the `name`, `only`,
     `except`, and `keep_input_artifact` fields for post-processor blocks.
     [GH-11094]
+* core/hcl: Running `packer build` with an `-only` or `-exclude` flag will now
+    inform the user if no match was found. [GH-11050]
 * post-processor/compress: Add bzip2 support to post-processor [GH-10867]
 * post-processor/googlecompute-import: Add Image Storage Locations field
     [GH-10864]
