@@ -152,7 +152,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	// Iteration should have opts to tell it to use author fingerprint,...
-	registryIteration := packer_registry.NewIteration("debian", packer_registry.IterationOptions{})
+	bucketIteration := packer_registry.NewIterationWithBucket("debian", packer_registry.IterationOptions{})
 	c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
 
 	client, err := packer_registry.NewClient()
@@ -160,12 +160,16 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		c.Ui.Error("Failed to create client connection to registry: w:" + err.Error())
 	}
 
-	err = registryIteration.Initialize(buildCtx, client)
+	/* For now it is possible that iteration did not initialize onto PAR, we are tolerating
+	   it so that we can go through the whole build flow creating builds and things.
+	   Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
+	*/
+	err = bucketIteration.Initialize(buildCtx, client)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", registryIteration.BucketPath(), err))
+		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", bucketIteration.BucketPath(), err))
 	}
 
-	fmt.Printf("We got ourselves an iteration %#v\n", registryIteration)
+	fmt.Printf("We got ourselves an iteration %#v\n", bucketIteration)
 
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
@@ -223,7 +227,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 		buildUis[builds[i]] = ui
 	}
-
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)

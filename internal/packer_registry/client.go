@@ -38,9 +38,9 @@ func NewClient() (*Client, error) {
 		return nil, err
 	}
 
-	loc := os.Getenv("HCP_ARTIFACT_REGISTRY")
+	loc := os.Getenv("PACKER_ARTIFACT_REGISTRY")
 	if loc == "" {
-		return nil, fmt.Errorf("error encountered when configuring PAR connection: no HCP_ARTIFACT_REGISTRY defined")
+		return nil, fmt.Errorf("error encountered when configuring PAR connection: no PACKER_ARTIFACT_REGISTRY defined")
 	}
 
 	locParts := strings.Split(loc, "/")
@@ -48,7 +48,6 @@ func NewClient() (*Client, error) {
 		return nil, fmt.Errorf(`error Artifact Registry location %q is not in the expected format "HCP_ORG_ID/HCP_PROJ_ID"`, loc)
 	}
 	orgID, projID := locParts[0], locParts[1]
-
 	// Configure registry bits
 	svc := packerSvc.New(cl, nil)
 	return &Client{
