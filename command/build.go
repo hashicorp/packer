@@ -151,25 +151,34 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	// Iteration should have opts to tell it to use author fingerprint,...
-	bucketIteration := packer_registry.NewIterationWithBucket("debian", packer_registry.IterationOptions{})
-	c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
-
-	client, err := packer_registry.NewClient()
+	parClient, err := packer_registry.NewClient(packer_registry.ClientConfig{})
 	if err != nil {
-		c.Ui.Error("Failed to create client connection to registry: w:" + err.Error())
+		if e, ok := err.(*packer_registry.HCPClientError); ok {
+			if e.Fatal() {
+				c.Ui.Error("Failed to create client connection to registry: " + e.Error())
+				return 1
+			}
+		}
+		log.Printf("[TRACE] this doesn't seem to be a Packer Registry enabled build so skipping: %s", err.Error())
+		parClient = nil
 	}
 
-	/* For now it is possible that iteration did not initialize onto PAR, we are tolerating
-	   it so that we can go through the whole build flow creating builds and things.
-	   Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
-	*/
-	err = bucketIteration.Initialize(buildCtx, client)
-	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", bucketIteration.BucketPath(), err))
-	}
+	if parClient != nil {
+		// Iteration should have opts to tell it to use author fingerprint,...
+		bucketIteration := packer_registry.NewIterationWithBucket("debian", packer_registry.IterationOptions{})
+		c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
 
-	fmt.Printf("We got ourselves an iteration %#v\n", bucketIteration)
+		/* For now it is possible that iteration did not initialize onto PAR, we are tolerating
+		   it so that we can go through the whole build flow creating builds and things.
+		   Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
+		*/
+		err = bucketIteration.Initialize(buildCtx, parClient)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", bucketIteration.BucketPath(), err))
+		}
+
+		fmt.Printf("We got ourselves an iteration %#v\n", bucketIteration)
+	}
 
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
