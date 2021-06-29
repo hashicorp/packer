@@ -151,19 +151,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	parClient, err := packer_registry.NewClient(packer_registry.ClientConfig{})
+	registryClient, err := packer_registry.NewClient(packer_registry.ClientConfig{})
 	if err != nil {
-		if e, ok := err.(*packer_registry.HCPClientError); ok {
-			if e.Fatal() {
-				c.Ui.Error("Failed to create client connection to registry: " + e.Error())
-				return 1
-			}
+		if !packer_registry.IsNonRegistryEnabledError(err) {
+			c.Ui.Error("Failed to create client connection to artifact registry: " + err.Error())
+			return 1
 		}
-		log.Printf("[TRACE] this doesn't seem to be a Packer Registry enabled build so skipping: %s", err.Error())
-		parClient = nil
+		// TODO we probably don't want to log if no PAR settings exists at all so adding a TODO to clean this up.
+		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", err.Error())
 	}
 
-	if parClient != nil {
+	if registryClient != nil {
 		// Iteration should have opts to tell it to use author fingerprint,...
 		bucketIteration := packer_registry.NewIterationWithBucket("debian", packer_registry.IterationOptions{})
 		c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
@@ -172,7 +170,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		   it so that we can go through the whole build flow creating builds and things.
 		   Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
 		*/
-		err = bucketIteration.Initialize(buildCtx, parClient)
+		err = bucketIteration.Initialize(buildCtx, registryClient)
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", bucketIteration.BucketPath(), err))
 		}

@@ -1,6 +1,7 @@
 package packer_registry
 
 import (
+	"errors"
 	"fmt"
 
 	"google.golang.org/grpc/codes"
@@ -8,21 +9,33 @@ import (
 )
 
 const (
-	Unknown = iota
-	UnsetClient
+	_ = iota
+	NonRegistryEnabled
+	InvalidHCPConfig
 )
 
-type HCPClientError struct {
+type ClientError struct {
 	StatusCode uint
 	Err        error
 }
 
-func (c *HCPClientError) Error() string {
+func (c *ClientError) Error() string {
 	return fmt.Sprintf("status %d: err %v", c.StatusCode, c.Err)
 }
 
-func (c *HCPClientError) Fatal() bool {
-	return c.StatusCode != UnsetClient
+func NewNonRegistryEnabledError() error {
+	return &ClientError{
+		StatusCode: NonRegistryEnabled,
+		Err:        errors.New("no Packer registry configuration found"),
+	}
+}
+
+func IsNonRegistryEnabledError(err error) bool {
+	clientErr, ok := err.(*ClientError)
+	if !ok {
+		return false
+	}
+	return clientErr.StatusCode != NonRegistryEnabled
 }
 
 func checkErrorCode(err error, code codes.Code) bool {

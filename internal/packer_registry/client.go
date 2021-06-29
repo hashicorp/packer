@@ -46,34 +46,27 @@ func NewClient(_ ClientConfig) (*Client, error) {
 		TODO when using a build block configuration for PAR, input ClientConfig is configured, this should fail hard.
 	*/
 	if _, ok := os.LookupEnv("PACKER_ARTIFACT_REGISTRY"); !ok {
-		return nil, &HCPClientError{
-			StatusCode: UnsetClient,
-			Err:        errors.New("No Packer Artifact Registry set, but tolerating for now"),
-		}
-	}
-
-	cl, err := httpclient.New(httpclient.Config{})
-	if err != nil {
-		return nil, &HCPClientError{
-			Err: err,
-		}
+		return nil, NewNonRegistryEnabledError()
 	}
 
 	loc := os.Getenv("PACKER_ARTIFACT_REGISTRY")
-	if loc == "" {
-		return nil, &HCPClientError{
-			Err: errors.New("error encountered when configuring PAR connection: no PACKER_ARTIFACT_REGISTRY defined"),
-		}
-	}
-
 	locParts := strings.Split(loc, "/")
 	if len(locParts) != 2 {
-		return nil, &HCPClientError{
-			Err: errors.New(fmt.Sprintf(`error Artifact Registry location %q is not in the expected format "HCP_ORG_ID/HCP_PROJ_ID"`, loc)),
+		return nil, &ClientError{
+			Err: errors.New(fmt.Sprintf(`error PACKER_ARTIFACT_REGISTRY %q is not in the expected format "HCP_ORG_ID/HCP_PROJ_ID"`, loc)),
 		}
 	}
 	orgID, projID := locParts[0], locParts[1]
+
 	// Configure registry bits
+	cl, err := httpclient.New(httpclient.Config{})
+	if err != nil {
+		return nil, &ClientError{
+			StatusCode: InvalidHCPConfig,
+			Err:        err,
+		}
+	}
+
 	svc := packerSvc.New(cl, nil)
 	return &Client{
 		Packer: svc,
