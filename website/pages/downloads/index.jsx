@@ -10,21 +10,6 @@ export default function DownloadsPage(staticProps) {
       getStartedDescription="Follow step-by-step tutorials on the essentials of Packer."
       getStartedLinks={[
         {
-          label: 'Getting Started',
-          href:
-            'https://learn.hashicorp.com/collections/packer/getting-started',
-        },
-        {
-          label: 'Build an Image with Packer',
-          href:
-            'https://learn.hashicorp.com/tutorials/packer/getting-started-build-image',
-        },
-        {
-          label: 'Provisioning',
-          href:
-            'https://learn.hashicorp.com/tutorials/packer/getting-started-provision',
-        },
-        {
           label: 'View all Packer tutorials',
           href: 'https://learn.hashicorp.com/packer',
         },
