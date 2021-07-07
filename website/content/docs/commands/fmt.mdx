@@ -33,6 +33,15 @@ my-template.pkr.hcl
 
 ```
 
+Format a configuration file, reading from stdin and writing to stdout.
+
+```shell-session
+$ packer fmt -
+
+// You can use pipes to combine this feature with other command line options
+$ cat my-template.pkr.hcl | packer fmt -
+```
+
 ## Options
 
 - `-check` - Checks if the input is formatted. Exit status will be 0 if all
@@ -42,3 +51,5 @@ my-template.pkr.hcl
 
 - `-write=false` - Don't write formatting changes to source files
   (always disabled if using -check)
+
+- `-` - read formatting changes from stdin and write them to stdout.
