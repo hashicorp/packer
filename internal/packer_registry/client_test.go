@@ -1,99 +1,113 @@
 package packer_registry
 
 import (
+	"errors"
 	"os"
 	"strings"
 	"testing"
 )
 
 func TestNewClient(t *testing.T) {
-	tt := []struct {
-		name            string
-		envs            []string
-		errorExpected   bool
-		errorStatusCode uint
+	tc := []struct {
+		name          string
+		envs          []string
+		errorExpected bool
+		errCheckFunc  func(err error) bool
 	}{
 		{
-			name:            "NonRegistryEnabledBuild",
-			errorExpected:   true,
-			errorStatusCode: NonRegistryEnabled,
-		},
-		{
-			name:            "HCP variables with no PACKER_ARTIFACT_REGISTRY variable",
-			envs:            []string{"HCP_CLIENT_ID=foo", "HCP_CLIENT_SECRET=bar"},
-			errorExpected:   true,
-			errorStatusCode: NonRegistryEnabled,
-		},
-		{
-			name:          "Malformed PACKER_ARTIFACT_REGISTRY",
-			envs:          []string{"PACKER_ARTIFACT_REGISTRY=home"},
+			name:          "NonRegistryEnabledBuild",
 			errorExpected: true,
+			errCheckFunc:  checkRegistryEnabledError,
 		},
 		{
-			name:            "PACKER_ARTIFACT_REGISTRY variable but no HCP credentials",
-			envs:            []string{"PACKER_ARTIFACT_REGISTRY=myorgid/myprojectid"},
-			errorExpected:   true,
-			errorStatusCode: InvalidHCPConfig,
+			name:          "HCP variables with no HCP_PACKER_REGISTRY variable",
+			envs:          []string{"HCP_CLIENT_ID=foo", "HCP_CLIENT_SECRET=bar"},
+			errorExpected: true,
+			errCheckFunc:  checkRegistryEnabledError,
 		},
 		{
-			name:            "PACKER_ARTIFACT_REGISTRY variable but not all HCP credentials",
-			envs:            []string{"PACKER_ARTIFACT_REGISTRY=myorgid/myprojectid", "HCP_CLIENT_ID=foo"},
-			errorExpected:   true,
-			errorStatusCode: InvalidHCPConfig,
+			name:          "Malformed HCP_PACKER_REGISTRY",
+			envs:          []string{"HCP_PACKER_REGISTRY=home"},
+			errorExpected: true,
+			errCheckFunc: func(err error) bool {
+				return checkErrorStatus(err, InvalidClientConfig)
+			},
+		},
+		{
+			name:          "HCP_PACKER_REGISTRY variable but no HCP credentials",
+			envs:          []string{"HCP_PACKER_REGISTRY=myorgid/myprojectid"},
+			errorExpected: true,
+			errCheckFunc: func(err error) bool {
+				return checkErrorStatus(err, InvalidClientConfig)
+			},
+		},
+		{
+			name:          "HCP_PACKER_REGISTRY variable but not all HCP credentials",
+			envs:          []string{"HCP_PACKER_REGISTRY=myorgid/myprojectid", "HCP_CLIENT_ID=foo"},
+			errorExpected: true,
+			errCheckFunc: func(err error) bool {
+				return checkErrorStatus(err, InvalidClientConfig)
+			},
 		},
 		{
 			name: "All required variables are set",
-			envs: []string{"HCP_CLIENT_ID=foo", "HCP_CLIENT_SECRET=bar", "PACKER_ARTIFACT_REGISTRY=myorgid/myprojectid"},
+			envs: []string{"HCP_CLIENT_ID=foo", "HCP_CLIENT_SECRET=bar", "HCP_PACKER_REGISTRY=myorgid/myprojectid"},
 		},
 	}
 
-	for _, tc := range tt {
+	for _, tt := range tc {
+		t.Run(tt.name, func(t *testing.T) {
+			envKeys := loadEnvVariables(tt.envs)
 
-		envKeys := loadEnvVariables(tc.envs)
-
-		_, err := NewClient(ClientConfig{})
-		if tc.errorExpected && err == nil {
-			t.Errorf("creating a Client using env variables for its config should error when given only the following env. variables: %q", strings.Join(tc.envs, ","))
-		}
-
-		if err != nil {
-			rawErr, ok := err.(*ClientError)
-			if !ok {
-				t.Errorf("expected a ClientError but got a %t instead", err)
+			_, err := NewClient(ClientConfig{})
+			if tt.errorExpected && err == nil {
+				t.Errorf("creating a Client using env variables for its config should error when given only the following env. variables: %q", strings.Join(tt.envs, ","))
 			}
 
-			if rawErr.StatusCode != tc.errorStatusCode {
-				t.Errorf("expected a different error for this client config: %v", rawErr)
+			if err != nil {
+				rawErr, ok := err.(*ClientError)
+				if !ok {
+					t.Errorf("expected a ClientError but got a %t instead", err)
+				}
+
+				if !tt.errCheckFunc(err) {
+					t.Errorf("expected a different error for this client config: %v", rawErr)
+				}
 			}
-		}
 
-		for _, k := range envKeys {
-			os.Unsetenv(k)
-		}
-
+			for _, k := range envKeys {
+				os.Unsetenv(k)
+			}
+		})
 	}
 }
 
 //ClientID     string
 func TestNewClient_ClientConfig(t *testing.T) {
-	tt := []struct {
-		name            string
-		cfg             ClientConfig
-		errorExpected   bool
-		errorStatusCode uint
+	tc := []struct {
+		name          string
+		cfg           ClientConfig
+		errorExpected bool
+		errCheckFunc  func(err error) bool
 	}{
 		{
-			name:            "NonRegistryEnabledBuild",
-			errorExpected:   true,
-			errorStatusCode: NonRegistryEnabled,
+			name:          "NonRegistryEnabledBuild",
+			errorExpected: true,
+			errCheckFunc:  checkRegistryEnabledError,
+		},
+		{
+			name:          "HCP variables with no HCP_PACKER_REGISTRY variable",
+			cfg:           ClientConfig{ClientID: "foo", ClientSecret: "bar"},
+			errorExpected: true,
+			errCheckFunc:  checkRegistryEnabledError,
 		},
 	}
 
-	for _, tc := range tt {
+	for _, tt := range tc {
 
-		_, err := NewClient(tc.cfg)
-		if tc.errorExpected && err == nil {
-			t.Errorf("creating a Client using should error when given only the following client config %v", tc.cfg)
+		_, err := NewClient(tt.cfg)
+		if tt.errorExpected && err == nil {
+			t.Errorf("creating a Client using should error when given only the following client config %v", tt.cfg)
 		}
 
 		if err != nil {
@@ -102,7 +116,7 @@ func TestNewClient_ClientConfig(t *testing.T) {
 				t.Errorf("expected a ClientError but got a %t instead", err)
 			}
 
-			if rawErr.StatusCode != tc.errorStatusCode {
+			if !tt.errCheckFunc(err) {
 				t.Errorf("expected a different error for this client config: %v", rawErr)
 			}
 		}
@@ -119,4 +133,22 @@ func loadEnvVariables(envs []string) []string {
 		envKeys = append(envKeys, r[0])
 	}
 	return envKeys
+}
+
+func checkRegistryEnabledError(err error) bool {
+	var clientError *ClientError
+	if errors.As(err, &clientError) {
+		return IsNonRegistryEnabledError(clientError)
+	}
+
+	return false
+}
+
+func checkErrorStatus(err error, statusCode uint) bool {
+	var clientError *ClientError
+	if errors.As(err, &clientError) {
+		return clientError.StatusCode == statusCode
+	}
+
+	return false
 }

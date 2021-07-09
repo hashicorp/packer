@@ -3,15 +3,15 @@ package packer_registry
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
 	_ = iota
+	InvalidClientConfig
 	NonRegistryEnabled
-	InvalidHCPConfig
 )
 
 type ClientError struct {
@@ -31,22 +31,19 @@ func NewNonRegistryEnabledError() error {
 }
 
 func IsNonRegistryEnabledError(err error) bool {
-	clientErr, ok := err.(*ClientError)
-	if !ok {
-		return false
+	var clientErr *ClientError
+	if errors.As(err, &clientErr) {
+		return clientErr.StatusCode == NonRegistryEnabled
 	}
-	return clientErr.StatusCode != NonRegistryEnabled
+
+	return false
 }
 
 func checkErrorCode(err error, code codes.Code) bool {
 	if err == nil {
 		return false
 	}
-	st, ok := status.FromError(err)
-	if !ok {
-		return false
-	}
 
-	return st.Code() == code
+	return strings.Contains(err.Error(), fmt.Sprintf("Code:%d", code))
 
 }

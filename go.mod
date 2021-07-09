@@ -6,7 +6,7 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
-	github.com/go-openapi/runtime v0.19.20
+	github.com/go-openapi/runtime v0.19.24
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69

@@ -1,24 +1,59 @@
 package packer_registry
 
 import (
-	"context"
-	"errors"
+	"crypto/sha1"
 	"fmt"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
-	"google.golang.org/grpc/codes"
 )
 
+type Builds struct {
+	sync.RWMutex
+	m map[string]*Build
+}
+
+type Build struct {
+	ComponentType string
+	RunUUID       string
+	Metadata      map[string]string
+	PARtifacts    BuildPARtifacts
+	Status        models.HashicorpCloudPackerBuildStatus
+}
+
+func NewBuilds() Builds {
+	return Builds{
+		m: make(map[string]*Build),
+	}
+}
+
+type PARtifact struct {
+	ID                           string
+	ProviderName, ProviderRegion string
+}
+
+type BuildPARtifacts struct {
+	sync.RWMutex
+	m map[string][]PARtifact
+}
+
+func NewBuildPARtifacts() BuildPARtifacts {
+	return BuildPARtifacts{
+		m: make(map[string][]PARtifact),
+	}
+}
+
 type Iteration struct {
-	Bucket
 	ID           string
-	Fingerprint  string
-	AncestorSlug string
 	Author       string
+	AncestorSlug string
+	Fingerprint  string
+	RunUUID      string
 	Labels       map[string]string
-	Builds       []Build
-	client       *Client
+	Builds       Builds
+	sync.RWMutex
 }
 
 type IterationOptions struct {
@@ -26,72 +61,33 @@ type IterationOptions struct {
 }
 
 func NewIteration(opts IterationOptions) *Iteration {
-	i := Iteration{}
+	i := Iteration{
+		Builds: NewBuilds(),
+	}
 
 	if !opts.UseGitBackend {
 		i.Author = os.Getenv("USER")
-		i.Fingerprint = "dd5540f6d9d05614134da27c44062575b66e503d"
+		s := []byte(time.Now().String())
+		i.Fingerprint = fmt.Sprintf("%x", sha1.Sum(s))
 	}
 
 	return &i
 }
 
-func NewIterationWithBucket(bucketSlug string, opts IterationOptions) *Iteration {
-	b := Bucket{
-		Slug:        bucketSlug,
-		Description: "Base debian image to rule all clouds.",
-		Labels: map[string]string{
-			"Team":      "Dev",
-			"ManagedBy": "Packer",
-		},
-	}
-
-	i := Iteration{Bucket: b}
-
-	if !opts.UseGitBackend {
-		i.Author = os.Getenv("USER")
-		i.Fingerprint = "dd5540f6d9d05614134da27c44062575b66e503d"
-	}
-
-	return &i
-}
-
-func (i *Iteration) Initialize(ctx context.Context, client *Client) error {
-	if client == nil {
-		return errors.New("unable to initialize an Iteration without a valid client")
-	}
-	i.client = client
-
-	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
+/*
+func (i *Iteration) UpdateBuild(ctx context.Context, name string) error {
+	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  i.Bucket.Slug,
-		Description: i.Bucket.Description,
-		Labels:      i.Bucket.Labels,
-	}
-
-	err := UpsertBucket(ctx, i.client, bucketInput)
-	if err != nil {
-		return fmt.Errorf("failed to initialize iteration for bucket %q: %w", i.BucketPath(), err)
-	}
-
-	// Create/find iteration
-	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
-		BucketSlug: i.Bucket.Slug,
-		Iteration: &models.HashicorpCloudPackerIteration{
-			BucketSlug:  i.Bucket.Slug,
-			AuthorID:    i.Author,
-			Fingerprint: i.Fingerprint,
+		Fingerprint: i.Fingerprint,
+		Build: &models.HashicorpCloudPackerBuild{
+			ComponentType: name,
+			IterationID:   i.ID,
+			Status:        models.NewHashicorpCloudPackerBuildStatus(models.HashicorpCloudPackerBuildStatusRUNNING),
 		},
 	}
-	iterationID, err := CreateIteration(ctx, i.client, iterationInput)
-	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
-		return fmt.Errorf("failed to CreateIteration for Bucket %s with error: %w", i.Bucket.Slug, err)
-	}
 
-	i.ID = iterationID
+	err := UpsertBuild(ctx, i.client, buildInput)
 
-	return nil
+	return err
 }
-
-func (i *Iteration) BucketPath() string {
-	return i.Bucket.Slug
-}
+*/

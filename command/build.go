@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,10 +14,11 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -151,34 +153,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	registryClient, err := packer_registry.NewClient(packer_registry.ClientConfig{})
-	if err != nil {
-		if !packer_registry.IsNonRegistryEnabledError(err) {
-			c.Ui.Error("Failed to create client connection to artifact registry: " + err.Error())
-			return 1
-		}
-		// TODO we probably don't want to log if no PAR settings exists at all so adding a TODO to clean this up.
-		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", err.Error())
-	}
-
-	if registryClient != nil {
-		// Iteration should have opts to tell it to use author fingerprint,...
-		bucketIteration := packer_registry.NewIterationWithBucket("debian", packer_registry.IterationOptions{})
-		c.Ui.Say("Attempting to validate build iteration for build slug 'packer'")
-
-		/* For now it is possible that iteration did not initialize onto PAR, we are tolerating
-		   it so that we can go through the whole build flow creating builds and things.
-		   Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
-		*/
-		err = bucketIteration.Initialize(buildCtx, registryClient)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q: %s", bucketIteration.BucketPath(), err))
-		}
-
-		fmt.Printf("We got ourselves an iteration %#v\n", bucketIteration)
-	}
-
-	diags := packerStarter.Initialize(packer.InitializeOptions{})
+	diags := packerStarter.Initialize(packer.InitializeOptions{
+		LoadRegistryBucketSettingsFromEnv: env.InPARMode(),
+	})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -198,6 +175,45 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
+	}
+
+	// Iteration should have opts to tell it to use author fingerprint,...
+	registryBucket, diags := packerStarter.RegistryPublisher()
+	if diags.HasErrors() {
+		return writeDiags(c.Ui, nil, diags)
+	}
+	// TODO we probably want to log if no PAR settings exists at all so adding a TODO to clean this up.
+	if diags.Error() != "" {
+		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
+	}
+
+	var err error
+	if registryBucket != nil {
+		err = registryBucket.Connect()
+	}
+	if err != nil {
+		return writeDiags(c.Ui, nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Detail:   err.Error(),
+				Severity: hcl.DiagError,
+			},
+		})
+	}
+
+	if registryBucket != nil {
+		c.Ui.Say("Attempting to validate build iteration for bucket " + registryBucket.Slug)
+
+		///* For now it is possible that iteration did not initialize onto PAR, we are tolerating
+		//it so that we can go through the whole build flow creating builds and things.
+		//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
+		//*/
+		// Convert to diag
+		registryBucket.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
+		err = registryBucket.Initialize(buildCtx)
+		if err != nil {
+			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", registryBucket.Slug, registryBucket.Destination, err))
+			return 1
+		}
 	}
 
 	// Compile all the UIs for the builds
@@ -262,6 +278,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[b]
+		// TODO review how this works
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errors.Lock()
@@ -282,6 +299,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
+			registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -294,6 +312,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
+				registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusFAILED)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if nil != runArtifacts {

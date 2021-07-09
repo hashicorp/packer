@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
@@ -51,6 +52,9 @@ type PackerConfig struct {
 
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+
+	// Represents registry bucket defined in the config files.
+	Bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File

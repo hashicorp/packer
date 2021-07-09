@@ -2,6 +2,7 @@ package packer_registry
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
@@ -30,27 +31,22 @@ func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 // UpsertBucket tries to update a bucket on a Packer Artifact Registry. If the bucket doesn't exist it creates it.
 func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) error {
 
-	/*
-		The contents of this function are not complete. It justs tries to create and continues if the bucket already exists.
-		Ideally it should call the Update bucket endpoint first, then call create if the bucket doesn't exist - checkErrorCode(err, codes.NotFound)
-	*/
-
-	params := packerSvc.NewCreateBucketParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
-	params.Body = input
-	/*
-		params := packer_service.NewGetBucketParamsWithContext(context.Background())
-		params.BucketSlug = i.Slug
-		params.LocationOrganizationID = i.client.Config.OrganizationID
-		params.LocationProjectID = i.client.Config.ProjectID
-	*/
-	_, err := client.Packer.CreateBucket(params, nil, func(*runtime.ClientOperation) {})
+	err := CreateBucket(ctx, client, input)
 	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
 		return err
 	}
 
-	return nil
+	if err == nil {
+		return nil
+	}
+
+	params := packerSvc.NewUpdateBucketParamsWithContext(ctx)
+	params.LocationOrganizationID = client.Config.OrganizationID
+	params.LocationProjectID = client.Config.ProjectID
+	params.BucketSlug = input.BucketSlug
+	_, err = client.Packer.UpdateBucket(params, nil, func(*runtime.ClientOperation) {})
+
+	return err
 }
 
 /* CreateIteration creates an Iteration for some Bucket on a Packer Artifact Registry for the given input
@@ -62,6 +58,7 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	params := packerSvc.NewCreateIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.Config.OrganizationID
 	params.LocationProjectID = client.Config.ProjectID
+	params.BucketSlug = input.BucketSlug
 	params.Body = input
 
 	it, err := client.Packer.CreateIteration(params, nil, func(*runtime.ClientOperation) {})
@@ -70,4 +67,18 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	}
 
 	return it.Payload.Iteration.ID, nil
+}
+
+func UpsertBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) error {
+	params := packerSvc.NewCreateBuildParamsWithContext(ctx)
+	params.LocationOrganizationID = client.Config.OrganizationID
+	params.LocationProjectID = client.Config.ProjectID
+	params.BucketSlug = input.BucketSlug
+	params.BuildIterationID = input.Build.IterationID
+	params.Body = input
+
+	b, err := client.Packer.CreateBuild(params, nil, func(*runtime.ClientOperation) {})
+	fmt.Printf("%#v", b)
+	return err
+
 }
