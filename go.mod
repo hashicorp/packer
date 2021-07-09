@@ -18,7 +18,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.10.0
-	github.com/hashicorp/hcp-sdk-go v0.0.0-00010101000000-000000000000
+	github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210709190444-22372a371cc8
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
 	github.com/hashicorp/packer-plugin-amazon v1.0.0
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
@@ -81,5 +81,3 @@ require (
 )
 
 go 1.16
-
-replace github.com/hashicorp/hcp-sdk-go => /Users/wilkenrivera/Development/go/src/github.com/hashicorp/hcp-sdk-go
