@@ -16,6 +16,7 @@ type Builds struct {
 }
 
 type Build struct {
+	ID            string
 	ComponentType string
 	RunUUID       string
 	Metadata      map[string]string
@@ -53,7 +54,6 @@ type Iteration struct {
 	RunUUID      string
 	Labels       map[string]string
 	Builds       Builds
-	sync.RWMutex
 }
 
 type IterationOptions struct {
@@ -69,25 +69,8 @@ func NewIteration(opts IterationOptions) *Iteration {
 		i.Author = os.Getenv("USER")
 		s := []byte(time.Now().String())
 		i.Fingerprint = fmt.Sprintf("%x", sha1.Sum(s))
+		//i.Fingerprint = "00ee249320213a1e20578a551c11f47bbdd94ea4"
 	}
 
 	return &i
 }
-
-/*
-func (i *Iteration) UpdateBuild(ctx context.Context, name string) error {
-	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
-		BucketSlug:  i.Bucket.Slug,
-		Fingerprint: i.Fingerprint,
-		Build: &models.HashicorpCloudPackerBuild{
-			ComponentType: name,
-			IterationID:   i.ID,
-			Status:        models.NewHashicorpCloudPackerBuildStatus(models.HashicorpCloudPackerBuildStatusRUNNING),
-		},
-	}
-
-	err := UpsertBuild(ctx, i.client, buildInput)
-
-	return err
-}
-*/

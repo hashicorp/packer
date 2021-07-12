@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -71,22 +72,46 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	}
 
 	// Create/find iteration
+
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
 	}
 
-	iterationID, err := CreateIteration(ctx, b.client, iterationInput)
+	id, err := CreateIteration(ctx, b.client, iterationInput)
 	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
 		return fmt.Errorf("failed to CreateIteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	b.Iteration.ID = iterationID
+	b.Iteration.ID = id
 
 	return nil
 }
 
-func (b *Bucket) UpsertBuild(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
+func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
+
+	// Lets check if we have something already for this build
+	existingBuild, ok := b.Iteration.Builds.m[name]
+	if ok && existingBuild.ID != "" {
+		buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
+			BuildID: existingBuild.ID,
+			Updates: &models.HashicorpCloudPackerBuildUpdates{
+				Status: &status,
+			},
+		}
+
+		_, err := UpdateBuild(ctx, b.client, buildInput)
+		if err != nil {
+			return err
+		}
+		log.Printf("WILKEN we have a build update %#v, %#v\n", buildInput, buildInput.Updates.Status)
+		b.Iteration.Builds.Lock()
+		existingBuild.Status = status
+		b.Iteration.Builds.m[name] = existingBuild
+		b.Iteration.Builds.Unlock()
+		return nil
+	}
+
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
@@ -98,20 +123,33 @@ func (b *Bucket) UpsertBuild(ctx context.Context, name string, status models.Has
 		},
 	}
 
-	err := UpsertBuild(ctx, b.client, buildInput)
+	/*
+		switch name {
+		case "debian.null.example2":
+			buildInput.Build.ID = "01FADSXNA9JA4TKX67CQW09JNW"
+		case "debian.null.example":
+			buildInput.Build.ID = "01FADSSYVBP01Y1CXJ4JR3H98V"
+		}
+	*/
+
+	log.Println("WILKEN calling upsert with input", buildInput.Build.ID)
+
+	id, err := CreateBuild(ctx, b.client, buildInput)
 	if err != nil {
 		return err
 	}
 
-	build := Build{
+	build := &Build{
+		ID:            id,
 		ComponentType: name,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
 		PARtifacts:    NewBuildPARtifacts(),
 	}
 
+	log.Printf("WILKEN we have a build %#v, %#v\n", build, build.Status)
 	b.Iteration.Builds.Lock()
-	b.Iteration.Builds.m[name] = &build
+	b.Iteration.Builds.m[name] = build
 	b.Iteration.Builds.Unlock()
 	return nil
 }

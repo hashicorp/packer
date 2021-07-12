@@ -183,7 +183,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return writeDiags(c.Ui, nil, diags)
 	}
 	// TODO we probably want to log if no PAR settings exists at all so adding a TODO to clean this up.
-	if diags.Error() != "" {
+	if len(diags) > 0 {
 		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
 	}
 
@@ -214,6 +214,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", registryBucket.Slug, registryBucket.Destination, err))
 			return 1
 		}
+	}
+	setBuildStatus := func(name string, status models.HashicorpCloudPackerBuildStatus) {
+		if registryBucket == nil {
+			return
+		}
+		registryBucket.UpdateBuild(buildCtx, name, status)
 	}
 
 	// Compile all the UIs for the builds
@@ -299,7 +305,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
-			registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
+			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -312,10 +318,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
-				registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusFAILED)
+				setBuildStatus(name, models.HashicorpCloudPackerBuildStatusFAILED)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
-				if nil != runArtifacts {
+				if runArtifacts != nil {
 					artifacts.Lock()
 					artifacts.m[name] = runArtifacts
 					artifacts.Unlock()
@@ -371,6 +377,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if len(artifacts.m) > 0 {
 		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts.m {
+			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusDONE)
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
