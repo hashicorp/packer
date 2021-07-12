@@ -54,7 +54,7 @@ type PackerConfig struct {
 	Builds Builds
 
 	// Represents registry bucket defined in the config files.
-	Bucket *packerregistry.Bucket
+	bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File
@@ -446,8 +446,9 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			}
 
 			pcb := &packer.CoreBuild{
-				BuildName: build.Name,
-				Type:      srcUsage.String(),
+				BuildName:                 build.Name,
+				Type:                      srcUsage.String(),
+				ArtifactMetadataPublisher: cfg.bucket,
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.

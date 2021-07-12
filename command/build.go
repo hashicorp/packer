@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,11 +13,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -153,13 +150,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags := packerStarter.Initialize(packer.InitializeOptions{
-		LoadRegistryBucketSettingsFromEnv: env.InPARMode(),
-	})
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
+
+	/*
+		Ideal world we want to send all builds for a new iterations.
+		-only flag doesn't work with PAR to start; future only will be allowed to filter only builds not
+		complete in PAR.
+	*/
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
@@ -177,43 +178,27 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
-	// Iteration should have opts to tell it to use author fingerprint,...
-	registryBucket, diags := packerStarter.RegistryPublisher()
+	// TODO find an option that is not managed by a globally shared Publisher.
+	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
+	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
+	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
 	}
 	// TODO we probably want to log if no PAR settings exists at all so adding a TODO to clean this up.
-	if diags.Error() != "" {
+	if len(diags) > 0 {
 		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
 	}
 
-	var err error
-	if registryBucket != nil {
-		err = registryBucket.Connect()
-	}
-	if err != nil {
-		return writeDiags(c.Ui, nil, hcl.Diagnostics{
+	if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+		diags := hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Detail:   err.Error(),
+				Summary:  "HCP Packer Registry initialization failed",
+				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
 				Severity: hcl.DiagError,
 			},
-		})
-	}
-
-	if registryBucket != nil {
-		c.Ui.Say("Attempting to validate build iteration for bucket " + registryBucket.Slug)
-
-		///* For now it is possible that iteration did not initialize onto PAR, we are tolerating
-		//it so that we can go through the whole build flow creating builds and things.
-		//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
-		//*/
-		// Convert to diag
-		registryBucket.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
-		err = registryBucket.Initialize(buildCtx)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", registryBucket.Slug, registryBucket.Destination, err))
-			return 1
 		}
+		return writeDiags(c.Ui, nil, diags)
 	}
 
 	// Compile all the UIs for the builds
@@ -278,7 +263,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[b]
-		// TODO review how this works
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errors.Lock()
@@ -299,7 +283,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
-			registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -312,10 +295,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
-				registryBucket.UpsertBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusFAILED)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
-				if nil != runArtifacts {
+				if runArtifacts != nil {
 					artifacts.Lock()
 					artifacts.m[name] = runArtifacts
 					artifacts.Unlock()
@@ -410,7 +392,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 				ui.Machine("artifact", iStr, "end")
 				c.Ui.Say(message.String())
+
 			}
+
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

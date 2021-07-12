@@ -6,88 +6,38 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 )
 
-type Builds struct {
-	sync.RWMutex
-	m map[string]*Build
-}
-
-type Build struct {
-	ComponentType string
-	RunUUID       string
-	Metadata      map[string]string
-	PARtifacts    BuildPARtifacts
-	Status        models.HashicorpCloudPackerBuildStatus
-}
-
-func NewBuilds() Builds {
-	return Builds{
-		m: make(map[string]*Build),
-	}
-}
-
-type PARtifact struct {
-	ID                           string
-	ProviderName, ProviderRegion string
-}
-
-type BuildPARtifacts struct {
-	sync.RWMutex
-	m map[string][]PARtifact
-}
-
-func NewBuildPARtifacts() BuildPARtifacts {
-	return BuildPARtifacts{
-		m: make(map[string][]PARtifact),
-	}
-}
-
 type Iteration struct {
-	ID           string
-	Author       string
-	AncestorSlug string
-	Fingerprint  string
-	RunUUID      string
-	Labels       map[string]string
-	Builds       Builds
-	sync.RWMutex
+	ID             string
+	AncestorSlug   string
+	Fingerprint    string
+	RunUUID        string
+	Labels         map[string]string
+	builds         sync.Map
+	expectedBuilds []string
 }
 
 type IterationOptions struct {
 	UseGitBackend bool
 }
 
+// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
 func NewIteration(opts IterationOptions) *Iteration {
 	i := Iteration{
-		Builds: NewBuilds(),
+		builds:         sync.Map{},
+		expectedBuilds: make([]string, 0),
 	}
 
-	if !opts.UseGitBackend {
-		i.Author = os.Getenv("USER")
+	// By default we try to load a Fingerprint from the environment variable.
+	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
+	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
+
+	// Simulating a Git SHA
+	if i.Fingerprint == "" {
 		s := []byte(time.Now().String())
 		i.Fingerprint = fmt.Sprintf("%x", sha1.Sum(s))
 	}
 
 	return &i
 }
-
-/*
-func (i *Iteration) UpdateBuild(ctx context.Context, name string) error {
-	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
-		BucketSlug:  i.Bucket.Slug,
-		Fingerprint: i.Fingerprint,
-		Build: &models.HashicorpCloudPackerBuild{
-			ComponentType: name,
-			IterationID:   i.ID,
-			Status:        models.NewHashicorpCloudPackerBuildStatus(models.HashicorpCloudPackerBuildStatusRUNNING),
-		},
-	}
-
-	err := UpsertBuild(ctx, i.client, buildInput)
-
-	return err
-}
-*/
