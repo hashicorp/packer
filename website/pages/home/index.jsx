@@ -171,12 +171,12 @@ export default function Homepage() {
       <section id="get-started">
         <BrandedCta
           heading="Ready to get started?"
-          content="Start by following a tutorial to deploy a simple application with Waypoint or learn about how the project works by exploring the documentation."
+          content="Start by following a tutorial to create a simple vm image with Packer or learn about how the project works by exploring the documentation."
           links={[
             {
               text: 'Get Started',
-              url: '/docs/getting-started',
-              type: 'inbound',
+              url: 'https://learn.hashicorp.com/packer',
+              type: 'outbound',
             },
             { text: 'Explore documentation', url: '/docs' },
           ]}
