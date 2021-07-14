@@ -65,7 +65,16 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	bucket := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+	bucket, err := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+	if err != nil {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+				Detail:   fmt.Sprintf("%s", err),
+				Severity: hcl.DiagError,
+			},
+		}
+	}
 	// JSON templates don't support reading Packer registry data from a config template so we load all config settings from environment variables.
 	bucket.Canonicalize()
 
@@ -74,7 +83,8 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		bucket.AddBuildForSource(name)
 	}
 
-	err := bucket.Validate()
+	err = bucket.Validate()
+
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
