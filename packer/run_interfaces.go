@@ -50,9 +50,9 @@ type Handler interface {
 	// PluginRequirements returns the list of plugin Requirements from the
 	// config file.
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
-	// RegistryPublisher returns a configured Bucket that can be used to publish build
+	// ConfiguredArtifactMetadataPublisher returns a configured Bucket that can be used to publish build
 	// artifacts to the said image bucket.
-	RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
+	ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer

@@ -43,7 +43,7 @@ type Iteration struct {
 	Fingerprint  string
 	RunUUID      string
 	Labels       map[string]string
-	Builds       Builds
+	builds       Builds
 }
 
 type IterationOptions struct {
@@ -53,7 +53,7 @@ type IterationOptions struct {
 
 func NewIteration(opts IterationOptions) *Iteration {
 	i := Iteration{
-		Builds:  NewBuilds(),
+		builds:  NewBuilds(),
 		RunUUID: opts.RunUUID,
 	}
 

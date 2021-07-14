@@ -161,6 +161,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
+	/*
+		Ideal world we want to send all builds for a new iterations.
+		-only flag doesn't work with PAR to start; future only will be allowed to filter only builds not
+		complete in PAR.
+	*/
+
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
@@ -184,7 +190,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
 	//*/
 	// Convert to diag
-	packer.ArtifactMetadataPublisher, diags = packerStarter.RegistryPublisher()
+	packer.ArtifactMetadataPublisher, diags = packerStarter.ConfiguredArtifactMetadataPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
 	}
@@ -194,7 +200,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
-		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err))
+		c.Ui.Error(
+			fmt.Sprintf("Failed to initialize the Packer Artifact Registry Bucket %q at %q: %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err))
 		return 1
 	}
 
@@ -260,7 +267,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[b]
-		// TODO review how this works
 		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errors.Lock()
@@ -281,7 +287,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
-			err := packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
+			packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -368,25 +374,26 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 				// Lets post state
 				if artifact != nil {
-					log.Printf("WILKEN calling state for artifact %#v\n", artifact.State("par"))
-					switch state := artifact.State("par").(type) {
+					switch state := artifact.State("par.artifact.metadata").(type) {
 					case map[interface{}]interface{}:
-						m := make(map[string]string, 0)
+						log.Printf("WILKEN we have state %#v", state)
+						m := make(map[string]string)
 						for k, v := range state {
 							m[k.(string)] = v.(string)
 						}
 						packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
 							ProviderName:   m["ProviderName"],
 							ProviderRegion: m["ProviderRegion"],
-							ID:             m["ID"],
+							ID:             m["ImageID"],
 						})
 					case []interface{}:
+						log.Printf("WILKEN we have state %#v", state)
 						for _, d := range state {
 							d := d.(map[interface{}]interface{})
 							packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
 								ProviderName:   d["ProviderName"].(string),
 								ProviderRegion: d["ProviderRegion"].(string),
-								ID:             d["ID"].(string),
+								ID:             d["ImageID"].(string),
 							})
 						}
 					}

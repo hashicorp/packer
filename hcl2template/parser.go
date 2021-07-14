@@ -322,9 +322,8 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	filterVarsFromLogs(cfg.LocalVariables)
 
 	if opts.LoadRegistryBucketSettingsFromEnv {
-		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
-			//
-		})
+		// TODO This should probably be moved elsewhere when we start supporting hcp_packer_registry block...
+		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
 		cfg.Bucket.Canonicalize()
 	}
 

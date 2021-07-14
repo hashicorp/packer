@@ -27,7 +27,7 @@ func (a *FileArtifact) String() string {
 }
 
 func (a *FileArtifact) State(name string) interface{} {
-	if name == "par" {
+	if name == "par.artifact.metadata" {
 		metadata := make(map[string]string)
 		metadata["ID"] = a.filename
 		metadata["ProviderName"] = a.Id()

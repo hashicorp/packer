@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
@@ -40,7 +39,9 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 	}
 }
 
-func (c *CoreWrapper) RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
+// ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
+// build image artifacts to a configured Packer Registry destination.
+func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
 	if !env.InPARMode() && (env.HasClientID() && env.HasClientSecret()) {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -65,9 +66,13 @@ func (c *CoreWrapper) RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnosti
 	}
 
 	bucket := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
-	log.Println("WILKEN we have a UUID", bucket.Iteration.RunUUID)
 	// JSON templates don't support reading Packer registry data from a config template so we load all config settings from environment variables.
 	bucket.Canonicalize()
+
+	// Get all builds slated within config ignoring any only or exclude flags.
+	for _, name := range c.BuildNames(nil, nil) {
+		bucket.AddBuildForSource(name)
+	}
 
 	err := bucket.Validate()
 	if err != nil {

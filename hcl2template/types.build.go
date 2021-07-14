@@ -117,6 +117,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 		// source with no body
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
+		// TODO This should probably be moved elsewhere when we start supporting hcp_packer_registry block...
+		cfg.Bucket.AddBuildForSource(ref.String())
 	}
 
 	body = b.Config

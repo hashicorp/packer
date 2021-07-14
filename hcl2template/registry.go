@@ -5,7 +5,9 @@ import (
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 )
 
-func (cfg *PackerConfig) RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
+// ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
+// build image artifacts to a configured Packer Registry destination.
+func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
 	if cfg.Bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{

@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
@@ -89,6 +90,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	// Create/find iteration logic to be added
 
+	// Need to use GIT SHA for for fingerprint.
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
@@ -102,7 +104,36 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	b.Iteration.ID = id
 	log.Printf("WILKEN we have iteration ID %q", id)
 
+	var wg sync.WaitGroup
+	for k := range b.Iteration.builds.m {
+		log.Println("[TRACE] initialize running build for ", k)
+		wg.Add(1)
+		go func(name string) {
+			defer wg.Done()
+			b.UpdateBuild(ctx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
+		}(k)
+	}
+	wg.Wait()
 	return nil
+}
+
+func (b *Bucket) AddBuildForSource(sourceName string) {
+	if b == nil {
+		return
+	}
+
+	if _, ok := b.Iteration.builds.m[sourceName]; ok {
+		return
+	}
+
+	build := &Build{
+		ComponentType: sourceName,
+		RunUUID:       b.Iteration.RunUUID,
+		PARtifacts:    make([]PARtifact, 0),
+	}
+	b.Iteration.builds.Lock()
+	b.Iteration.builds.m[sourceName] = build
+	b.Iteration.builds.Unlock()
 }
 
 func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
@@ -111,9 +142,8 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 		return nil
 	}
 
-	log.Println("WILKEN WE IN UPDATE")
 	// Lets check if we have something already for this build
-	existingBuild, ok := b.Iteration.Builds.m[name]
+	existingBuild, ok := b.Iteration.builds.m[name]
 	if ok && existingBuild.ID != "" {
 		buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
 			BuildID: existingBuild.ID,
@@ -121,6 +151,7 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 				Status: &status,
 			},
 		}
+
 		if status == models.HashicorpCloudPackerBuildStatusDONE {
 			images := make([]*models.HashicorpCloudPackerImage, 0, len(existingBuild.PARtifacts))
 			log.Println("WILKEN we setting some image details for now: " + name)
@@ -130,16 +161,17 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 			}
 			buildInput.Updates.Images = images
 		}
+
 		log.Printf("WILKEN calling build update with %#v\n", buildInput)
 
 		_, err := UpdateBuild(ctx, b.client, buildInput)
 		if err != nil {
 			return err
 		}
-		b.Iteration.Builds.Lock()
+		b.Iteration.builds.Lock()
 		existingBuild.Status = status
-		b.Iteration.Builds.m[name] = existingBuild
-		b.Iteration.Builds.Unlock()
+		b.Iteration.builds.m[name] = existingBuild
+		b.Iteration.builds.Unlock()
 		return nil
 	}
 
@@ -177,10 +209,9 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 		PARtifacts:    make([]PARtifact, 0),
 	}
 
-	b.Iteration.Builds.Lock()
-	b.Iteration.Builds.m[name] = build
-	b.Iteration.Builds.Unlock()
-	log.Printf("WILKEN we have a build %#v", build)
+	b.Iteration.builds.Lock()
+	b.Iteration.builds.m[name] = build
+	b.Iteration.builds.Unlock()
 	return nil
 }
 
@@ -189,22 +220,22 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 	if b == nil {
 		return nil
 	}
-	build, ok := b.Iteration.Builds.m[name]
+
+	build, ok := b.Iteration.builds.m[name]
 	if !ok {
 		return errors.New("no associated build found for the name " + name)
 	}
 
 	for _, artifact := range partifacts {
-		log.Printf("WILKEN adding a partifact %q => %v\n", name, artifact)
 		if build.CloudProvider == "" {
 			build.CloudProvider = artifact.ProviderName
 		}
 		build.PARtifacts = append(build.PARtifacts, artifact)
 	}
 
-	b.Iteration.Builds.Lock()
-	b.Iteration.Builds.m[name] = build
-	b.Iteration.Builds.Unlock()
+	b.Iteration.builds.Lock()
+	b.Iteration.builds.m[name] = build
+	b.Iteration.builds.Unlock()
 
 	return nil
 }
