@@ -38,7 +38,7 @@ require (
 	github.com/hashicorp/packer-plugin-oneandone v1.0.0
 	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.0
-	github.com/hashicorp/packer-plugin-outscale v1.0.0
+	github.com/hashicorp/packer-plugin-outscale v1.0.1
 	github.com/hashicorp/packer-plugin-parallels v1.0.0
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
 	github.com/hashicorp/packer-plugin-proxmox v1.0.0
