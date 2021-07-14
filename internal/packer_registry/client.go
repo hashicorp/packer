@@ -23,11 +23,18 @@ type ClientConfig struct {
 
 func (cfg ClientConfig) Validate() error {
 	if cfg.OrganizationID == "" {
-		return errors.New(`no valid HCP Organization ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`)
+		return &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        errors.New(`no valid HCP Organization ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`),
+		}
+
 	}
 
 	if cfg.ProjectID == "" {
-		return errors.New(`no valid HCP Project ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`)
+		return &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        errors.New(`no valid HCP Project ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`),
+		}
 	}
 
 	return nil

@@ -17,10 +17,11 @@ type Builds struct {
 
 type Build struct {
 	ID            string
+	CloudProvider string
 	ComponentType string
 	RunUUID       string
 	Metadata      map[string]string
-	PARtifacts    BuildPARtifacts
+	PARtifacts    []PARtifact
 	Status        models.HashicorpCloudPackerBuildStatus
 }
 
@@ -33,17 +34,6 @@ func NewBuilds() Builds {
 type PARtifact struct {
 	ID                           string
 	ProviderName, ProviderRegion string
-}
-
-type BuildPARtifacts struct {
-	sync.RWMutex
-	m map[string][]PARtifact
-}
-
-func NewBuildPARtifacts() BuildPARtifacts {
-	return BuildPARtifacts{
-		m: make(map[string][]PARtifact),
-	}
 }
 
 type Iteration struct {

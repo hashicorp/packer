@@ -223,6 +223,8 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	log.Printf("Running builder: %s", b.BuilderType)
 	ts := CheckpointReporter.AddSpan(b.BuilderType, "builder", b.BuilderConfig)
 	builderArtifact, err := b.Builder.Run(ctx, builderUi, hook)
+
+	log.Printf("WILKEN BUILDER %#v STATE DATA %#v, %[2]T", b, builderArtifact.State("par"))
 	ts.End(err)
 	if err != nil {
 		return nil, err

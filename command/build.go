@@ -18,6 +18,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
@@ -377,7 +378,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if len(artifacts.m) > 0 {
 		c.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts.m {
-			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusDONE)
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
@@ -390,6 +390,36 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			for i, artifact := range buildArtifacts {
 				var message bytes.Buffer
 				fmt.Fprintf(&message, "--> %s: ", name)
+
+				// Lets post state
+				if artifact != nil {
+					log.Printf("WILKEN calling state for artifact %#v\n", artifact.State("par"))
+					switch state := artifact.State("par").(type) {
+					case map[interface{}]interface{}:
+						m := make(map[string]string, 0)
+						for k, v := range state {
+							m[k.(string)] = v.(string)
+						}
+						registryBucket.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
+							ProviderName:   m["ProviderName"],
+							ProviderRegion: m["ProviderRegion"],
+							ID:             m["ID"],
+						})
+					case []interface{}:
+						for _, d := range state {
+							d := d.(map[interface{}]interface{})
+							registryBucket.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
+								ProviderName:   d["ProviderName"].(string),
+								ProviderRegion: d["ProviderRegion"].(string),
+								ID:             d["ID"].(string),
+							})
+						}
+					}
+
+					if state, ok := artifact.State("par").([]packerregistry.PARtifact); ok {
+						registryBucket.AddBuildArtifact(buildCtx, name, state...)
+					}
+				}
 
 				if artifact != nil {
 					fmt.Fprint(&message, artifact.String())
@@ -417,7 +447,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 				ui.Machine("artifact", iStr, "end")
 				c.Ui.Say(message.String())
+
 			}
+
+			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusDONE)
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

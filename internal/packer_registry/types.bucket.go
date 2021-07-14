@@ -99,12 +99,21 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 				Status: &status,
 			},
 		}
+		if status == models.HashicorpCloudPackerBuildStatusDONE {
+			images := make([]*models.HashicorpCloudPackerImage, 0, len(existingBuild.PARtifacts))
+			log.Println("WILKEN we setting some image details for now: " + name)
+			for _, partifact := range existingBuild.PARtifacts {
+				images = append(images, &models.HashicorpCloudPackerImage{ImageID: partifact.ID, Region: partifact.ProviderRegion})
+				log.Printf("WILKEN adding image details for %#v\n", partifact)
+			}
+			buildInput.Updates.Images = images
+		}
+		log.Printf("WILKEN calling build update with %#v\n", buildInput)
 
 		_, err := UpdateBuild(ctx, b.client, buildInput)
 		if err != nil {
 			return err
 		}
-		log.Printf("WILKEN we have a build update %#v, %#v\n", buildInput, buildInput.Updates.Status)
 		b.Iteration.Builds.Lock()
 		existingBuild.Status = status
 		b.Iteration.Builds.m[name] = existingBuild
@@ -132,8 +141,6 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 		}
 	*/
 
-	log.Println("WILKEN calling upsert with input", buildInput.Build.ID)
-
 	id, err := CreateBuild(ctx, b.client, buildInput)
 	if err != nil {
 		return err
@@ -144,13 +151,33 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 		ComponentType: name,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
-		PARtifacts:    NewBuildPARtifacts(),
+		PARtifacts:    make([]PARtifact, 0),
 	}
 
-	log.Printf("WILKEN we have a build %#v, %#v\n", build, build.Status)
 	b.Iteration.Builds.Lock()
 	b.Iteration.Builds.m[name] = build
 	b.Iteration.Builds.Unlock()
+	return nil
+}
+
+func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts ...PARtifact) error {
+	build, ok := b.Iteration.Builds.m[name]
+	if !ok {
+		return errors.New("no associated build found for the name " + name)
+	}
+
+	for _, artifact := range partifacts {
+		log.Printf("WILKEN adding a partifact %q => %v\n", name, artifact)
+		if build.CloudProvider == "" {
+			build.CloudProvider = artifact.ProviderName
+		}
+		build.PARtifacts = append(build.PARtifacts, artifact)
+	}
+
+	b.Iteration.Builds.Lock()
+	b.Iteration.Builds.m[name] = build
+	b.Iteration.Builds.Unlock()
+
 	return nil
 }
 
