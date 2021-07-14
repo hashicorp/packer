@@ -47,13 +47,17 @@ type Iteration struct {
 }
 
 type IterationOptions struct {
+	RunUUID       string
 	UseGitBackend bool
 }
 
 func NewIteration(opts IterationOptions) *Iteration {
 	i := Iteration{
-		Builds: NewBuilds(),
+		Builds:  NewBuilds(),
+		RunUUID: opts.RunUUID,
 	}
+
+	i.RunUUID = os.Getenv("PACKER_RUN_UUID")
 
 	if !opts.UseGitBackend {
 		i.Author = os.Getenv("USER")

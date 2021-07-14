@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -179,7 +178,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	// Iteration should have opts to tell it to use author fingerprint,...
-	registryBucket, diags := packerStarter.RegistryPublisher()
+
+	///* For now it is possible that iteration did not initialize onto PAR, we are tolerating
+	//it so that we can go through the whole build flow creating builds and things.
+	//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
+	//*/
+	// Convert to diag
+	packer.ArtifactMetadataPublisher, diags = packerStarter.RegistryPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
 	}
@@ -188,39 +193,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
 	}
 
-	var err error
-	if registryBucket != nil {
-		err = registryBucket.Connect()
-	}
-	if err != nil {
-		return writeDiags(c.Ui, nil, hcl.Diagnostics{
-			&hcl.Diagnostic{
-				Detail:   err.Error(),
-				Severity: hcl.DiagError,
-			},
-		})
-	}
-
-	if registryBucket != nil {
-		c.Ui.Say("Attempting to validate build iteration for bucket " + registryBucket.Slug)
-
-		///* For now it is possible that iteration did not initialize onto PAR, we are tolerating
-		//it so that we can go through the whole build flow creating builds and things.
-		//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
-		//*/
-		// Convert to diag
-		registryBucket.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
-		err = registryBucket.Initialize(buildCtx)
-		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", registryBucket.Slug, registryBucket.Destination, err))
-			return 1
-		}
-	}
-	setBuildStatus := func(name string, status models.HashicorpCloudPackerBuildStatus) {
-		if registryBucket == nil {
-			return
-		}
-		registryBucket.UpdateBuild(buildCtx, name, status)
+	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+		c.Ui.Error(fmt.Sprintf("Failed initialize iteration for the Packer Artifact Registry Bucket %q at %q: %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err))
+		return 1
 	}
 
 	// Compile all the UIs for the builds
@@ -306,7 +281,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
-			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusRUNNING)
+			err := packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -319,7 +294,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
-				setBuildStatus(name, models.HashicorpCloudPackerBuildStatusFAILED)
+				packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusFAILED)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {
@@ -400,7 +375,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 						for k, v := range state {
 							m[k.(string)] = v.(string)
 						}
-						registryBucket.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
+						packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
 							ProviderName:   m["ProviderName"],
 							ProviderRegion: m["ProviderRegion"],
 							ID:             m["ID"],
@@ -408,16 +383,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 					case []interface{}:
 						for _, d := range state {
 							d := d.(map[interface{}]interface{})
-							registryBucket.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
+							packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
 								ProviderName:   d["ProviderName"].(string),
 								ProviderRegion: d["ProviderRegion"].(string),
 								ID:             d["ID"].(string),
 							})
 						}
-					}
-
-					if state, ok := artifact.State("par").([]packerregistry.PARtifact); ok {
-						registryBucket.AddBuildArtifact(buildCtx, name, state...)
 					}
 				}
 
@@ -450,7 +421,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			}
 
-			setBuildStatus(name, models.HashicorpCloudPackerBuildStatusDONE)
+			packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusDONE)
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

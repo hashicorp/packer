@@ -6,6 +6,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
@@ -224,7 +225,6 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	ts := CheckpointReporter.AddSpan(b.BuilderType, "builder", b.BuilderConfig)
 	builderArtifact, err := b.Builder.Run(ctx, builderUi, hook)
 
-	log.Printf("WILKEN BUILDER %#v STATE DATA %#v, %[2]T", b, builderArtifact.State("par"))
 	ts.End(err)
 	if err != nil {
 		return nil, err
@@ -241,6 +241,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 
 	select {
 	case <-ctx.Done():
+		ArtifactMetadataPublisher.UpdateBuild(ctx, b.Name(), models.HashicorpCloudPackerBuildStatusCANCELLED)
 		log.Println("Build was cancelled. Skipping post-processors.")
 		return nil, nil
 	default:
@@ -339,6 +340,7 @@ PostProcessorRunSeqLoop:
 
 	if len(errors) > 0 {
 		err = &packersdk.MultiError{Errors: errors}
+		ArtifactMetadataPublisher.UpdateBuild(ctx, b.Name(), models.HashicorpCloudPackerBuildStatusFAILED)
 	}
 
 	return artifacts, err

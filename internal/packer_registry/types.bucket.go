@@ -51,6 +51,11 @@ func (b *Bucket) Validate() error {
 }
 
 func (b *Bucket) Connect() error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
+
 	registryClient, err := NewClient(b.Config)
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
@@ -60,6 +65,17 @@ func (b *Bucket) Connect() error {
 }
 
 func (b *Bucket) Initialize(ctx context.Context) error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
+
+	if b.client == nil {
+		if err := b.Connect(); err != nil {
+			return err
+		}
+	}
+
 	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug:  b.Slug,
 		Description: b.Description,
@@ -71,7 +87,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		return fmt.Errorf("failed to initialize iteration for bucket %q: %w", b.Slug, err)
 	}
 
-	// Create/find iteration
+	// Create/find iteration logic to be added
 
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
@@ -80,16 +96,22 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	id, err := CreateIteration(ctx, b.client, iterationInput)
 	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
-		return fmt.Errorf("failed to CreateIteration for Bucket %s with error: %w", b.Slug, err)
+		return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
 	b.Iteration.ID = id
+	log.Printf("WILKEN we have iteration ID %q", id)
 
 	return nil
 }
 
 func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
 
+	log.Println("WILKEN WE IN UPDATE")
 	// Lets check if we have something already for this build
 	existingBuild, ok := b.Iteration.Builds.m[name]
 	if ok && existingBuild.ID != "" {
@@ -131,6 +153,7 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 			Status:        &status,
 		},
 	}
+	log.Printf("WILKEN WE IN UPDATE CALLING CREATE %#v", b.Iteration)
 
 	/*
 		switch name {
@@ -157,10 +180,15 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 	b.Iteration.Builds.Lock()
 	b.Iteration.Builds.m[name] = build
 	b.Iteration.Builds.Unlock()
+	log.Printf("WILKEN we have a build %#v", build)
 	return nil
 }
 
 func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts ...PARtifact) error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
 	build, ok := b.Iteration.Builds.m[name]
 	if !ok {
 		return errors.New("no associated build found for the name " + name)
@@ -183,6 +211,10 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 
 // Load defaults from environment variables
 func (b *Bucket) Canonicalize() {
+	// NOOP
+	if b == nil {
+		return
+	}
 
 	if b.Config.ClientID == "" {
 		b.Config.ClientID = os.Getenv(env.HCPClientID)

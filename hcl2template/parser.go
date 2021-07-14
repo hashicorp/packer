@@ -322,7 +322,9 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	filterVarsFromLogs(cfg.LocalVariables)
 
 	if opts.LoadRegistryBucketSettingsFromEnv {
-		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			//
+		})
 		cfg.Bucket.Canonicalize()
 	}
 

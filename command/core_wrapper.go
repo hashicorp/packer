@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
@@ -64,6 +65,7 @@ func (c *CoreWrapper) RegistryPublisher() (*packerregistry.Bucket, hcl.Diagnosti
 	}
 
 	bucket := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+	log.Println("WILKEN we have a UUID", bucket.Iteration.RunUUID)
 	// JSON templates don't support reading Packer registry data from a config template so we load all config settings from environment variables.
 	bucket.Canonicalize()
 
