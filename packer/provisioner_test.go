@@ -1,9 +1,12 @@
 package packer
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"math"
+	"strings"
 	"testing"
 	"time"
 
@@ -129,12 +132,30 @@ func TestPausedProvisionerProvision(t *testing.T) {
 	}
 }
 
-func TestPausedProvisionerProvision_waits(t *testing.T) {
+func TestPausedProvisionerProvision_cancel(t *testing.T) {
+	pausingCtx, cancel := context.WithTimeout(context.Background(), 25*time.Millisecond)
+	defer cancel()
+
 	startTime := time.Now()
 	waitTime := 50 * time.Millisecond
 
-	prov := &PausedProvisioner{
+	ui := new(packersdk.MockUi)
+	prov := pausedTestProvisionor(startTime, 0, waitTime)
+	err := prov.Provision(pausingCtx, ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+	if err == nil {
+		t.Fatalf("No error occurred")
+	}
+
+	expectedError := "context deadline exceeded"
+	if err.Error() != expectedError {
+		t.Fatalf("Unexpected error, expected: %v, got: %v", expectedError, err)
+	}
+}
+
+func pausedTestProvisionor(startTime time.Time, tickSeconds int, waitTime time.Duration) *PausedProvisioner {
+	return &PausedProvisioner{
 		PauseBefore: waitTime,
+		TickSeconds: tickSeconds,
 		Provisioner: &packersdk.MockProvisioner{
 			ProvFunc: func(context.Context) error {
 				timeSinceStartTime := time.Since(startTime)
@@ -145,11 +166,162 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 			},
 		},
 	}
+}
 
-	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+func TestPausedProvisionerProvision_waits(t *testing.T) {
+
+	startTime := time.Now()
+	waitTime := 50 * time.Millisecond
+
+	ui := new(packersdk.MockUi)
+	prov := pausedTestProvisionor(startTime, 0, waitTime)
+	err := prov.Provision(context.Background(), ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
 
 	if err != nil {
 		t.Fatalf("prov failed: %v", err)
+	}
+
+	expectedMessages := []string{
+		fmt.Sprintf("Pausing %s before the next provisioner...", waitTime),
+	}
+
+	if ui.SayMessages[0].Message != expectedMessages[0] {
+		t.Fatalf("expected: %s, got: %s", expectedMessages[0], ui.SayMessages[0].Message)
+	}
+
+	if len(ui.SayMessages) != len(expectedMessages) {
+		t.Fatalf(
+			"length of expected messages different than messages sent. Expected: %v, got: %v, messages: %v",
+			len(ui.SayMessages),
+			len(expectedMessages),
+			ui.SayMessages)
+	}
+}
+
+func TestPausedProvisionerProvision_waits_MachineReadableUi(t *testing.T) {
+	startTime := time.Now()
+	waitTime := 15 * time.Second
+
+	var buffer bytes.Buffer
+	prov := pausedTestProvisionor(startTime, 0, waitTime)
+	ui := MachineReadableUi{
+		Writer: &buffer,
+	}
+	err := prov.Provision(context.Background(), &ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+
+	if err != nil {
+		t.Fatalf("prov failed: %v", err)
+	}
+
+	bufferString := buffer.String()
+	splitByLine := strings.Split(bufferString, "\n")
+
+	if len(splitByLine) != 2 {
+		t.Fatalf(fmt.Sprintf("Too many lines in buffer: %v, expected: %v,  buffer: %v, ", len(splitByLine), 2, bufferString))
+	}
+
+	// First message should be the default message
+	splitByComma := strings.Split(splitByLine[0], ",")
+	// because of the messages coming in via ui.Say function, the message is the 4th entry per line in buffer
+	message := splitByComma[4]
+	firstMessage := "Pausing 15s before the next provisioner..."
+	if message != firstMessage {
+		t.Fatalf(fmt.Sprintf("First message does not match what is expected. Expected: %v, got: %v", firstMessage, message))
+	}
+
+	if splitByLine[1] != "" {
+		t.Fatalf(fmt.Sprintf("Second message in buffer is not empty:  %v", splitByLine[1]))
+	}
+}
+
+func TestPausedProvisionerProvision_waits_with_updates(t *testing.T) {
+	tt := []struct {
+		name             string
+		waitTime         time.Duration
+		tickSeconds      int
+		expectedMessages []string
+	}{
+		{
+			name:        "30 seconds wait and 10 second tick",
+			waitTime:    30 * time.Second,
+			tickSeconds: 10,
+			expectedMessages: []string{
+				"Pausing 30s before the next provisioner...",
+				"20 seconds left until the next provisioner",
+				"10 seconds left until the next provisioner",
+			},
+		},
+		{
+			name:        "30 seconds wait and 5 second tick",
+			waitTime:    30 * time.Second,
+			tickSeconds: 5,
+			expectedMessages: []string{
+				"Pausing 30s before the next provisioner...",
+				"25 seconds left until the next provisioner",
+				"20 seconds left until the next provisioner",
+				"15 seconds left until the next provisioner",
+				"10 seconds left until the next provisioner",
+				"5 seconds left until the next provisioner",
+			},
+		},
+		{
+			name:        "No pause when tickSeconds above waitTime",
+			waitTime:    3 * time.Second,
+			tickSeconds: 4,
+			expectedMessages: []string{
+				"Pausing 3s before the next provisioner...",
+			},
+		},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+		startTime := time.Now()
+
+		prov := pausedTestProvisionor(startTime, tc.tickSeconds, tc.waitTime)
+		ui := new(packersdk.MockUi)
+		currentTime := time.Now()
+		err := prov.Provision(context.Background(), ui, new(packersdk.MockCommunicator), make(map[string]interface{}))
+
+		if err != nil {
+			t.Fatalf(" Test Case: %s, prov failed: %v", tc.name, err)
+		}
+
+		if len(ui.SayMessages) != len(tc.expectedMessages) {
+			t.Fatalf(
+				"Test case: %s, length of expected messages different than messages sent. Expected: %v, got: %v, messages: %v",
+				tc.name,
+				len(ui.SayMessages),
+				len(tc.expectedMessages),
+				ui.SayMessages)
+		}
+
+		lastTime := currentTime
+		for index, message := range tc.expectedMessages {
+			if ui.SayMessages[index].Message != message {
+				t.Fatalf(
+					"Test Case: %s, expected: %s, got: %s",
+					tc.name,
+					message,
+					ui.SayMessages[index].Message)
+			}
+
+			// Skipping first message as this this has not time beforehand
+			if index == 0 {
+				continue
+			}
+
+			waitTimeBetweenMessages := math.Round(ui.SayMessages[index].SayTime.Sub(lastTime).Seconds())
+			if waitTimeBetweenMessages != float64(tc.tickSeconds) {
+				t.Fatalf(
+					"Test Case: %s, Did not wait the appropriate amount of time message: %v",
+					tc.name,
+					ui.SayMessages[index].Message)
+			}
+
+			// setting last time to current SayTime
+			lastTime = ui.SayMessages[index].SayTime
+		}
 	}
 }
 

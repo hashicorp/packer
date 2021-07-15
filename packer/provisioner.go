@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hako/durafmt"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
@@ -135,6 +136,7 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, c
 type PausedProvisioner struct {
 	PauseBefore time.Duration
 	Provisioner packersdk.Provisioner
+	TickSeconds int
 }
 
 func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -145,15 +147,75 @@ func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
 
 func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
 
-	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
-	select {
-	case <-time.After(p.PauseBefore):
-	case <-ctx.Done():
-		return ctx.Err()
+	err := p.pause(ctx, ui)
+	if err != nil {
+		return err
 	}
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
+}
+
+func (p *PausedProvisioner) ableToPauseWithUpdate() bool {
+	return p.TickSeconds > 0 && p.PauseBefore.Seconds() > float64(p.TickSeconds)
+}
+
+func (p *PausedProvisioner) pause(ctx context.Context, ui packersdk.Ui) error {
+	if p.PauseBefore == time.Duration(0) {
+		return nil
+	}
+
+	var C <-chan time.Time
+
+	// If ui is MachineReadableUi, then we don't make ticker that prints updates
+	switch ui.(type) {
+	case *MachineReadableUi:
+	default:
+		// only if pause time is greater than ticker interval, then we create ticker
+		if p.ableToPauseWithUpdate() {
+			ticker := time.NewTicker(time.Duration(p.TickSeconds) * time.Second)
+			defer ticker.Stop()
+			C = ticker.C
+		}
+	}
+
+	totalTime := p.PauseBefore.Seconds()
+	pausingCtx, cancel := context.WithTimeout(ctx, p.PauseBefore)
+	defer cancel()
+
+	deadlineTime, _ := pausingCtx.Deadline()
+
+	// Have to add a second so that time left messages displays properly
+	deadlineTimeAddSecond := deadlineTime.Add(time.Second)
+
+	for {
+		select {
+		case <-pausingCtx.Done():
+			currentTime := time.Now()
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			if currentTime.After(deadlineTime) {
+				return nil
+			} else {
+				return pausingCtx.Err()
+			}
+
+		case <-C:
+			totalTime -= float64(p.TickSeconds)
+
+			if isTimeRemaining(totalTime) {
+				timeLeft := time.Until(deadlineTimeAddSecond)
+				fmtBuildCommandDuration := durafmt.Parse(timeLeft).LimitFirstN(1)
+				ui.Say(fmt.Sprintf("%v left until the next provisioner", fmtBuildCommandDuration))
+			}
+		}
+	}
+}
+
+func isTimeRemaining(totalTime float64) bool {
+	result := totalTime > 0
+	return result
 }
 
 // RetriedProvisioner is a Provisioner implementation that retries
