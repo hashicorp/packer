@@ -54,7 +54,7 @@ type PackerConfig struct {
 	Builds Builds
 
 	// Represents registry bucket defined in the config files.
-	Bucket *packerregistry.Bucket
+	bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File

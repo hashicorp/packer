@@ -21,7 +21,9 @@ import (
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 )
 
-// ArtifactMetadataPublisher
+// ArtifactMetadataPublisher represents a Bucket that can be used for publishing images artifacts to
+// a configured Packer Artifact Registry. By default it points to an unconfigured Bucket so that Packer
+// can safely make noop calls to the Publisher.
 var ArtifactMetadataPublisher *packerregistry.Bucket
 
 // Core is the main executor of Packer. If Packer is being used as a

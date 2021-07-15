@@ -13,11 +13,9 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
@@ -183,13 +181,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
-	// Iteration should have opts to tell it to use author fingerprint,...
-
-	///* For now it is possible that iteration did not initialize onto PAR, we are tolerating
-	//it so that we can go through the whole build flow creating builds and things.
-	//Once this becomes a real thing we need to make sure Packer can properly skip all registry bits if no in PAR-enabled mode.
-	//*/
-	// Convert to diag
+	// TODO find an option that is not managed by a globally shared Publisher.
+	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
+	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
 	packer.ArtifactMetadataPublisher, diags = packerStarter.ConfiguredArtifactMetadataPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
@@ -200,9 +194,14 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
-		c.Ui.Error(
-			fmt.Sprintf("Failed to initialize the Packer Artifact Registry Bucket %q at %q: %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err))
-		return 1
+		diags := hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "Packer Artifact Registry initialization failed",
+				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err),
+				Severity: hcl.DiagError,
+			},
+		}
+		return writeDiags(c.Ui, nil, diags)
 	}
 
 	// Compile all the UIs for the builds
@@ -287,7 +286,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			log.Printf("Starting build run: %s", name)
-			packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
 			// Get the duration of the build and parse it
@@ -300,7 +298,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Lock()
 				errors.m[name] = err
 				errors.Unlock()
-				packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusFAILED)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {
@@ -372,33 +369,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				var message bytes.Buffer
 				fmt.Fprintf(&message, "--> %s: ", name)
 
-				// Lets post state
-				if artifact != nil {
-					switch state := artifact.State("par.artifact.metadata").(type) {
-					case map[interface{}]interface{}:
-						log.Printf("WILKEN we have state %#v", state)
-						m := make(map[string]string)
-						for k, v := range state {
-							m[k.(string)] = v.(string)
-						}
-						packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
-							ProviderName:   m["ProviderName"],
-							ProviderRegion: m["ProviderRegion"],
-							ID:             m["ImageID"],
-						})
-					case []interface{}:
-						log.Printf("WILKEN we have state %#v", state)
-						for _, d := range state {
-							d := d.(map[interface{}]interface{})
-							packer.ArtifactMetadataPublisher.AddBuildArtifact(buildCtx, name, packerregistry.PARtifact{
-								ProviderName:   d["ProviderName"].(string),
-								ProviderRegion: d["ProviderRegion"].(string),
-								ID:             d["ImageID"].(string),
-							})
-						}
-					}
-				}
-
 				if artifact != nil {
 					fmt.Fprint(&message, artifact.String())
 				} else {
@@ -428,7 +398,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			}
 
-			packer.ArtifactMetadataPublisher.UpdateBuild(buildCtx, name, models.HashicorpCloudPackerBuildStatusDONE)
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

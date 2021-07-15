@@ -81,3 +81,5 @@ require (
 )
 
 go 1.16
+
+replace github.com/hashicorp/hcp-sdk-go => /Users/wilkenrivera/Development/go/src/github.com/hashicorp/hcp-sdk-go

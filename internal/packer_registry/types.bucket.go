@@ -24,11 +24,11 @@ type Bucket struct {
 	client *Client
 }
 
+// NewBucketWithIteration initializes a simple Bucket that can be used for tracking Packer
+// related build bits.
 func NewBucketWithIteration(opts IterationOptions) *Bucket {
 	b := Bucket{
-		Description: "Base alpine to rule all clouds.",
 		Labels: map[string]string{
-			"Team":      "Dev",
 			"ManagedBy": "Packer",
 		},
 	}
@@ -51,20 +51,12 @@ func (b *Bucket) Validate() error {
 	return nil
 }
 
-func (b *Bucket) Connect() error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
-	registryClient, err := NewClient(b.Config)
-	if err != nil {
-		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
-	}
-	b.client = registryClient
-	return nil
-}
-
+// Initialize registers the Bucket b with the configured Packer Artifact Registry.
+// Upon initialization a Bucket will be upserted to, a new iteration will be created for the build if the configured
+// fingerprint has not associated builds. Lastly, the initialization process with registered the builds that need to be
+// completed before an iteration can be marked as DONE.
+//
+// b.Initialize() must be called before any data can be published to the configured Packer Artifact Registry.
 func (b *Bucket) Initialize(ctx context.Context) error {
 	// NOOP
 	if b == nil {
@@ -72,7 +64,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	}
 
 	if b.client == nil {
-		if err := b.Connect(); err != nil {
+		if err := b.connect(); err != nil {
 			return err
 		}
 	}
@@ -90,7 +82,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	// Create/find iteration logic to be added
 
-	// Need to use GIT SHA for for fingerprint.
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
@@ -102,18 +93,33 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	}
 
 	b.Iteration.ID = id
-	log.Printf("WILKEN we have iteration ID %q", id)
 
 	var wg sync.WaitGroup
 	for k := range b.Iteration.builds.m {
-		log.Println("[TRACE] initialize running build for ", k)
+		log.Printf("[TRACE] initialize running build for %q", k)
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
-			b.UpdateBuild(ctx, name, models.HashicorpCloudPackerBuildStatusRUNNING)
+			b.PublishBuildStatus(ctx, name, models.HashicorpCloudPackerBuildStatusUNSET)
 		}(k)
 	}
 	wg.Wait()
+	return nil
+}
+
+// connect initializes a client connection to a remote Packer Artifact Registry service on HCP.
+// Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
+func (b *Bucket) connect() error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
+
+	registryClient, err := NewClient(b.Config)
+	if err != nil {
+		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
+	}
+	b.client = registryClient
 	return nil
 }
 
@@ -136,7 +142,7 @@ func (b *Bucket) AddBuildForSource(sourceName string) {
 	b.Iteration.builds.Unlock()
 }
 
-func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
+func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
 	// NOOP
 	if b == nil {
 		return nil
@@ -148,21 +154,20 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 		buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
 			BuildID: existingBuild.ID,
 			Updates: &models.HashicorpCloudPackerBuildUpdates{
-				Status: &status,
+				PackerRunUUID: existingBuild.RunUUID,
+				Status:        &status,
 			},
 		}
 
+		// Possible bug of being able to set DONE with no RunUUID being set.
 		if status == models.HashicorpCloudPackerBuildStatusDONE {
 			images := make([]*models.HashicorpCloudPackerImage, 0, len(existingBuild.PARtifacts))
-			log.Println("WILKEN we setting some image details for now: " + name)
 			for _, partifact := range existingBuild.PARtifacts {
 				images = append(images, &models.HashicorpCloudPackerImage{ImageID: partifact.ID, Region: partifact.ProviderRegion})
-				log.Printf("WILKEN adding image details for %#v\n", partifact)
 			}
+			//TODO pass along cloud provider
 			buildInput.Updates.Images = images
 		}
-
-		log.Printf("WILKEN calling build update with %#v\n", buildInput)
 
 		_, err := UpdateBuild(ctx, b.client, buildInput)
 		if err != nil {
@@ -185,16 +190,6 @@ func (b *Bucket) UpdateBuild(ctx context.Context, name string, status models.Has
 			Status:        &status,
 		},
 	}
-	log.Printf("WILKEN WE IN UPDATE CALLING CREATE %#v", b.Iteration)
-
-	/*
-		switch name {
-		case "debian.null.example2":
-			buildInput.Build.ID = "01FADSXNA9JA4TKX67CQW09JNW"
-		case "debian.null.example":
-			buildInput.Build.ID = "01FADSSYVBP01Y1CXJ4JR3H98V"
-		}
-	*/
 
 	id, err := CreateBuild(ctx, b.client, buildInput)
 	if err != nil {
@@ -278,6 +273,12 @@ func (b *Bucket) Canonicalize() {
 
 	if b.Config.ProjectID == "" {
 		b.Config.ProjectID = projID
+	}
+
+	// Set some iteration values. For Packer RunUUID should always be set.
+	// Creating a bucket differently? Let's not overwrite a UUID that might be set.
+	if b.Iteration.RunUUID == "" {
+		b.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
 	}
 
 }

@@ -4,41 +4,11 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"os"
-	"sync"
 	"time"
-
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 )
-
-type Builds struct {
-	sync.RWMutex
-	m map[string]*Build
-}
-
-type Build struct {
-	ID            string
-	CloudProvider string
-	ComponentType string
-	RunUUID       string
-	Metadata      map[string]string
-	PARtifacts    []PARtifact
-	Status        models.HashicorpCloudPackerBuildStatus
-}
-
-func NewBuilds() Builds {
-	return Builds{
-		m: make(map[string]*Build),
-	}
-}
-
-type PARtifact struct {
-	ID                           string
-	ProviderName, ProviderRegion string
-}
 
 type Iteration struct {
 	ID           string
-	Author       string
 	AncestorSlug string
 	Fingerprint  string
 	RunUUID      string
@@ -47,23 +17,23 @@ type Iteration struct {
 }
 
 type IterationOptions struct {
-	RunUUID       string
 	UseGitBackend bool
 }
 
+// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
 func NewIteration(opts IterationOptions) *Iteration {
 	i := Iteration{
-		builds:  NewBuilds(),
-		RunUUID: opts.RunUUID,
+		builds: NewBuilds(),
 	}
 
-	i.RunUUID = os.Getenv("PACKER_RUN_UUID")
+	// By default we try to load a Fingerprint from the environment variable.
+	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
+	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
 
-	if !opts.UseGitBackend {
-		i.Author = os.Getenv("USER")
+	// Simulating a Git SHA
+	if i.Fingerprint == "" {
 		s := []byte(time.Now().String())
 		i.Fingerprint = fmt.Sprintf("%x", sha1.Sum(s))
-		//i.Fingerprint = "00ee249320213a1e20578a551c11f47bbdd94ea4"
 	}
 
 	return &i

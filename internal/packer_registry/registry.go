@@ -3,7 +3,6 @@ package packer_registry
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
@@ -27,7 +26,8 @@ func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	return resp.Payload.Bucket.ID, nil
 }
 
-// UpsertBucket tries to update a bucket on a Packer Artifact Registry. If the bucket doesn't exist it creates it.
+// UpsertBucket tries to create a bucket on a Packer Artifact Registry. If the bucket exists it will handle the error
+// and update the bucket with the provided details.
 func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) error {
 
 	// Create bucket if exist we continue as is, eventually we want to treat this like an upsert
@@ -93,8 +93,6 @@ func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	params.LocationOrganizationID = client.Config.OrganizationID
 	params.LocationProjectID = client.Config.ProjectID
 	params.Body = input
-
-	log.Printf("WILKEN Calling update build with %#v\n", params)
 
 	resp, err := client.Packer.UpdateBuild(params, nil, func(*runtime.ClientOperation) {})
 	if err != nil {
