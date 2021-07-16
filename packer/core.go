@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	ttmp "text/template"
 
@@ -21,11 +22,6 @@ import (
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 )
 
-// ArtifactMetadataPublisher represents a Bucket that can be used for publishing images artifacts to
-// a configured HCP Packer Registry. By default it points to an unconfigured Bucket so that Packer
-// can safely make noop calls to the Publisher.
-var ArtifactMetadataPublisher *packerregistry.Bucket
-
 // Core is the main executor of Packer. If Packer is being used as a
 // library, this is the struct you'll want to instantiate to get anything done.
 type Core struct {
@@ -36,6 +32,8 @@ type Core struct {
 	builds     map[string]*template.Builder
 	version    string
 	secrets    []string
+	Bucket     *packerregistry.Bucket
+	once       sync.Once
 
 	except []string
 	only   []string
@@ -143,6 +141,11 @@ func (core *Core) Initialize() error {
 	for _, secret := range core.secrets {
 		packersdk.LogSecretFilter.Set(secret)
 	}
+	configBucket := func() {
+		core.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		core.Bucket.Canonicalize()
+	}
+	core.once.Do(configBucket)
 
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
@@ -156,6 +159,8 @@ func (core *Core) Initialize() error {
 		}
 
 		core.builds[v] = b
+		// Get all builds slated within config ignoring any only or exclude flags.
+		core.Bucket.AddBuildForSource(b.Name)
 	}
 	return nil
 }
@@ -401,15 +406,16 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
 	return &CoreBuild{
-		Type:               n,
-		Builder:            builder,
-		BuilderConfig:      configBuilder.Config,
-		BuilderType:        configBuilder.Type,
-		PostProcessors:     postProcessors,
-		Provisioners:       provisioners,
-		CleanupProvisioner: cleanupProvisioner,
-		TemplatePath:       c.Template.Path,
-		Variables:          c.variables,
+		Type:                      n,
+		Builder:                   builder,
+		BuilderConfig:             configBuilder.Config,
+		BuilderType:               configBuilder.Type,
+		PostProcessors:            postProcessors,
+		Provisioners:              provisioners,
+		CleanupProvisioner:        cleanupProvisioner,
+		TemplatePath:              c.Template.Path,
+		Variables:                 c.variables,
+		ArtifactMetadataPublisher: c.Bucket,
 	}, nil
 }
 

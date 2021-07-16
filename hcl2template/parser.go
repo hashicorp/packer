@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -321,15 +320,6 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
 
-	// loaddefaults from ENV
-	// if config has values => override the env.
-
-	if opts.LoadRegistryBucketSettingsFromEnv {
-		// TODO This should probably be moved elsewhere when we start supporting hcp_packer_registry block...
-		cfg.bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
-		cfg.bucket.Canonicalize()
-	}
-
 	// parse the actual content // rest
 	for _, file := range cfg.files {
 		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
@@ -387,7 +377,8 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 
 			// If we are in PAR mode check that only one build block has been parsed.
 			// If so fail because PAR does not support more than one build block.
-			if cfg.bucket != nil && len(cfg.Builds) > 0 {
+			// bucket is created upon the call to decodeBuildConfig.
+			if cfg.Bucket != nil && len(cfg.Builds) > 0 {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Multiple " + buildLabel + " blocks",
@@ -397,11 +388,6 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 						"clear any HCP_PACKER_* environment variables."),
 					Subject: block.DefRange.Ptr(),
 				})
-			}
-
-			// This can probably moved in the decodeBuildConfig
-			if cfg.bucket != nil && build.Name != "" {
-				cfg.bucket.Slug = build.Name
 			}
 
 			cfg.Builds = append(cfg.Builds, build)

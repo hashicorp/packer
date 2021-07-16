@@ -2,10 +2,13 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 )
 
 const (
@@ -98,6 +101,22 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Description = b.Description
 
 	// TODO if packer_registry defined create bucket using bucket.
+	// loaddefaults from ENV
+	// if config has values => override the env.
+	cfg.once.Do(func() {
+		// Right now we only support loading from env but once we have the config block InPARMode() can be false
+		// so we need to account for proper bucket creation later on.
+		if !env.InPARMode() {
+			return
+		}
+		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		cfg.Bucket.Canonicalize()
+		if build.Name != "" {
+			cfg.Bucket.Slug = build.Name
+		}
+	})
+	log.Printf("[TRACE] assigned our publisher %#v", *cfg.Bucket)
+
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)
 
@@ -110,16 +129,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				Detail: "A " + sourceLabel + " type is made of three parts that are" +
 					"split by a dot `.`; each part must start with a letter and " +
 					"may contain only letters, digits, underscores, and dashes." +
-					"A valid source reference looks like: `source.type.name`",
-				Subject: block.DefRange.Ptr(),
+					"A valid source reference looks like: `source.type.name`", Subject: block.DefRange.Ptr(),
 			})
 			continue
 		}
 
 		// source with no body
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
-		// TODO This should probably be moved elsewhere when we start supporting hcp_packer_registry block...
-		cfg.bucket.AddBuildForSource(ref.String())
+		cfg.Bucket.AddBuildForSource(ref.String())
 	}
 
 	body = b.Config

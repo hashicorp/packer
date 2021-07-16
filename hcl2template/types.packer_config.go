@@ -2,8 +2,10 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
@@ -53,8 +55,9 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	// Represents registry bucket defined in the config files.
-	bucket *packerregistry.Bucket
+	// Represents registry Bucket defined in the config files.
+	Bucket *packerregistry.Bucket
+	once   sync.Once
 
 	parser *Parser
 	files  []*hcl.File
@@ -446,9 +449,11 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			}
 
 			pcb := &packer.CoreBuild{
-				BuildName: build.Name,
-				Type:      srcUsage.String(),
+				BuildName:                 build.Name,
+				Type:                      srcUsage.String(),
+				ArtifactMetadataPublisher: cfg.Bucket,
 			}
+			log.Printf("[TRACE] assigned our publisher still parser %#v", *pcb.ArtifactMetadataPublisher)
 
 			// Apply the -only and -except command-line options to exclude matching builds.
 			buildName := pcb.Name()

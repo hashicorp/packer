@@ -19,17 +19,18 @@ import (
 // multiple files, of course, but it should be for only a single provider (such
 // as VirtualBox, EC2, etc.).
 type CoreBuild struct {
-	BuildName          string
-	Type               string
-	Builder            packersdk.Builder
-	BuilderConfig      interface{}
-	BuilderType        string
-	hooks              map[string][]packersdk.Hook
-	Provisioners       []CoreBuildProvisioner
-	PostProcessors     [][]CoreBuildPostProcessor
-	CleanupProvisioner CoreBuildProvisioner
-	TemplatePath       string
-	Variables          map[string]string
+	BuildName                 string
+	Type                      string
+	Builder                   packersdk.Builder
+	BuilderConfig             interface{}
+	BuilderType               string
+	hooks                     map[string][]packersdk.Hook
+	Provisioners              []CoreBuildProvisioner
+	PostProcessors            [][]CoreBuildPostProcessor
+	CleanupProvisioner        CoreBuildProvisioner
+	TemplatePath              string
+	Variables                 map[string]string
+	ArtifactMetadataPublisher *packerregistry.Bucket
 
 	// Indicates whether the build is already initialized before calling Prepare(..)
 	Prepared bool
@@ -223,7 +224,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	}
 
 	log.Printf("Running builder: %s", b.Type)
-	if err := ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusRUNNING); err != nil {
+	if err := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusRUNNING); err != nil {
 		log.Printf("[TRACE] failed to update Packer registry status for %q: %s", b.Type, err)
 	}
 
@@ -232,7 +233,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 
 	ts.End(err)
 	if err != nil {
-		if parErr := ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusFAILED); parErr != nil {
+		if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusFAILED); parErr != nil {
 			log.Printf("[TRACE] failed to update Packer registry status for %q: %s", b.Type, parErr)
 		}
 		return nil, err
@@ -241,7 +242,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	// If there was no result, don't worry about running post-processors
 	// because there is nothing they can do, just return.
 	if builderArtifact == nil {
-		if parErr := ArtifactMetadataPublisher.PublishBuildStatus(context.Background(), b.Type, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
+		if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
 			log.Printf("[TRACE] failed to update Packer registry status for %q: %s", b.Type, parErr)
 		}
 		return nil, nil
@@ -253,7 +254,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	select {
 	case <-ctx.Done():
 		log.Println("Build was cancelled. Skipping post-processors.")
-		if parErr := ArtifactMetadataPublisher.PublishBuildStatus(context.Background(), b.Type, models.HashicorpCloudPackerBuildStatusCANCELLED); parErr != nil {
+		if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(context.Background(), b.Type, models.HashicorpCloudPackerBuildStatusCANCELLED); parErr != nil {
 			log.Printf("[TRACE] failed to update Packer registry status for %q: %s", b.Type, parErr)
 		}
 		return nil, nil
@@ -354,7 +355,7 @@ PostProcessorRunSeqLoop:
 
 	if len(errors) > 0 {
 		err = &packersdk.MultiError{Errors: errors}
-		if parErr := ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusFAILED); parErr != nil {
+		if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusFAILED); parErr != nil {
 			log.Printf("[TRACE] failed to update Packer registry status for %q: %s", b.Type, parErr)
 		}
 		return artifacts, err
@@ -371,7 +372,7 @@ PostProcessorRunSeqLoop:
 				for k, v := range state {
 					m[k.(string)] = v.(string)
 				}
-				ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
+				b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
 					ProviderName:   m["ProviderName"],
 					ProviderRegion: m["ProviderRegion"],
 					ID:             m["ImageID"],
@@ -379,7 +380,7 @@ PostProcessorRunSeqLoop:
 			case []interface{}:
 				for _, d := range state {
 					d := d.(map[interface{}]interface{})
-					ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
+					b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
 						ProviderName:   d["ProviderName"].(string),
 						ProviderRegion: d["ProviderRegion"].(string),
 						ID:             d["ImageID"].(string),
@@ -389,7 +390,7 @@ PostProcessorRunSeqLoop:
 		}
 	}
 
-	if parErr := ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
+	if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Type, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
 		log.Printf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", b.Type, parErr)
 	}
 	return artifacts, nil

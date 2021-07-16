@@ -65,16 +65,7 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	bucket := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
-	// JSON templates don't support reading Packer registry data from a config template so we load all config settings from environment variables.
-	bucket.Canonicalize()
-
-	// Get all builds slated within config ignoring any only or exclude flags.
-	for _, name := range c.BuildNames(nil, nil) {
-		bucket.AddBuildForSource(name)
-	}
-
-	err := bucket.Validate()
+	err := c.Core.Bucket.Validate()
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -85,5 +76,5 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	return bucket, nil
+	return c.Core.Bucket, nil
 }

@@ -63,6 +63,11 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		return nil
 	}
 
+	// Bucket already initialized
+	if b.client != nil {
+		return nil
+	}
+
 	if b.client == nil {
 		if err := b.connect(); err != nil {
 			return err

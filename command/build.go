@@ -184,7 +184,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// TODO find an option that is not managed by a globally shared Publisher.
 	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
 	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
-	packer.ArtifactMetadataPublisher, diags = packerStarter.ConfiguredArtifactMetadataPublisher()
+	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
 	}
@@ -193,16 +193,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
 	}
 
-	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+	if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
 		diags := hcl.Diagnostics{
 			&hcl.Diagnostic{
 				Summary:  "HCP Packer Registry initialization failed",
-				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err),
+				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
 				Severity: hcl.DiagError,
 			},
 		}
 		return writeDiags(c.Ui, nil, diags)
 	}
+	log.Printf("WILKEN %#v", *ArtifactMetadataPublisher)
 
 	// Compile all the UIs for the builds
 	colors := [5]packer.UiColor{
