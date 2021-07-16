@@ -1,0 +1,9 @@
+.root {
+  composes: g-grid-container from global;
+  padding-top: 72px;
+  padding-bottom: 72px;
+}
+
+.sectionHeader {
+  margin-bottom: 100px;
+}
