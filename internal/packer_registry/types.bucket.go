@@ -26,17 +26,20 @@ type Bucket struct {
 
 // NewBucketWithIteration initializes a simple Bucket that can be used for tracking Packer
 // related build bits.
-func NewBucketWithIteration(opts IterationOptions) *Bucket {
+func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
 	b := Bucket{
 		Labels: map[string]string{
 			"ManagedBy": "Packer",
 		},
 	}
 
-	i := NewIteration(opts)
+	i, err := NewIteration(opts)
+	if err != nil {
+		return nil, err
+	}
 	b.Iteration = i
 
-	return &b
+	return &b, nil
 }
 
 func (b *Bucket) Validate() error {

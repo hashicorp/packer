@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -142,7 +143,13 @@ func (core *Core) Initialize() error {
 	}
 
 	if env.InPARMode() {
-		core.bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		var err error
+		core.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			TemplateBaseDir: filepath.Dir(core.Template.Path),
+		})
+		if err != nil {
+			return err
+		}
 		core.bucket.Canonicalize()
 	}
 
