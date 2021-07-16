@@ -11,7 +11,7 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 	if cfg.bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary: "Publishing build artifacts to Packer Artifact Registry not enabled",
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
 				Detail: "No Packer Registry configuration detected; skipping all publishing steps " +
 					"See publishing to a Packer registry for Packer configuration details",
 				Severity: hcl.DiagWarning,
@@ -23,7 +23,7 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "Invalid Packer Artifact Registry configuration",
+				Summary:  "Invalid HCP Packer Registry configuration",
 				Detail:   err.Error(),
 				Severity: hcl.DiagError,
 			},

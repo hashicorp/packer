@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// CreateBucket creates a bucket on a Packer Artifact Registry.
+// CreateBucket creates a bucket on a HCP Packer Registry.
 func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) (string, error) {
 
 	params := packerSvc.NewCreateBucketParamsWithContext(ctx)
@@ -26,7 +26,7 @@ func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	return resp.Payload.Bucket.ID, nil
 }
 
-// UpsertBucket tries to create a bucket on a Packer Artifact Registry. If the bucket exists it will handle the error
+// UpsertBucket tries to create a bucket on a HCP Packer Registry. If the bucket exists it will handle the error
 // and update the bucket with the provided details.
 func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) error {
 
@@ -49,7 +49,7 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	return err
 }
 
-/* CreateIteration creates an Iteration for some Bucket on a Packer Artifact Registry for the given input
+/* CreateIteration creates an Iteration for some Bucket on a HCP Packer Registry for the given input
 and returns the ID associated with the persisted Bucket iteration.
 input: *models.HashicorpCloudPackerCreateIterationRequest{BucketSlug: "bucket name"
 */

@@ -51,12 +51,12 @@ func (b *Bucket) Validate() error {
 	return nil
 }
 
-// Initialize registers the Bucket b with the configured Packer Artifact Registry.
+// Initialize registers the Bucket b with the configured HCP Packer Registry.
 // Upon initialization a Bucket will be upserted to, a new iteration will be created for the build if the configured
 // fingerprint has not associated builds. Lastly, the initialization process with registered the builds that need to be
 // completed before an iteration can be marked as DONE.
 //
-// b.Initialize() must be called before any data can be published to the configured Packer Artifact Registry.
+// b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
 func (b *Bucket) Initialize(ctx context.Context) error {
 	// NOOP
 	if b == nil {
@@ -107,7 +107,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	return nil
 }
 
-// connect initializes a client connection to a remote Packer Artifact Registry service on HCP.
+// connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
 	// NOOP

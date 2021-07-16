@@ -45,7 +45,7 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 	if !env.InPARMode() && (env.HasClientID() && env.HasClientSecret()) {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary: "Publishing build artifacts to Packer Artifact Registry not enabled",
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
 				Detail: fmt.Sprintf("Packer has detected HCP client environment variables but one or more of the "+
 					"required registry variables are missing. Please check that for the following environment variables "+
 					"%q %q", env.HCPPackerRegistry, env.HCPPackerBucket),
@@ -57,7 +57,7 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 	if !env.InPARMode() {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary: "Publishing build artifacts to Packer Artifact Registry not enabled",
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
 				Detail: "No Packer Registry configuration detected; skipping all publishing steps " +
 					"See publishing to a Packer registry for Packer configuration details",
 				Severity: hcl.DiagWarning,
@@ -78,7 +78,7 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "Invalid Packer Artifact Registry configuration",
+				Summary:  "Invalid HCP Packer Registry configuration",
 				Detail:   err.Error(),
 				Severity: hcl.DiagError,
 			},

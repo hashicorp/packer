@@ -14,10 +14,10 @@ type ClientConfig struct {
 	ClientID     string
 	ClientSecret string
 
-	// OrganizationID  is the organization unique identifier to launch resources in.
+	// OrganizationID  is the organization unique identifier on HCP.
 	OrganizationID string
 
-	// ProjectID  is the project unique identifier to launch resources in.
+	// ProjectID  is the project unique identifier on HCP.
 	ProjectID string
 }
 
@@ -49,7 +49,7 @@ type Client struct {
 	Packer       packerSvc.ClientService
 }
 
-// NewClient returns an authenticated client to a HCP Packer Artifact Registry.
+// NewClient returns an authenticated client to a HCP Packer Registry.
 // Client authentication requires the following environment variables be set HCP_CLIENT_ID, HCP_CLIENT_SECRET, and HCP_PACKER_REGISTRY.
 // if not explicitly provided via a valid ClientConfig cfg.
 // Upon error a HCPClientError will be returned.

@@ -196,7 +196,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
 		diags := hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "Packer Artifact Registry initialization failed",
+				Summary:  "HCP Packer Registry initialization failed",
 				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err),
 				Severity: hcl.DiagError,
 			},
