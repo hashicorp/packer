@@ -8,6 +8,8 @@ module.exports = withHashicorp({
     'is-absolute-url',
     '@hashicorp/react-.*',
     '@hashicorp/versioned-docs',
+    '@hashicorp/platform-product-meta',
+    '@hashicorp/platform-util',
   ],
   mdx: { resolveIncludes: path.join(__dirname, 'pages/partials') },
 })({

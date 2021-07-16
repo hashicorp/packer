@@ -1,0 +1,7 @@
+.root {
+  composes: g-grid-container from global;
+
+  & :global(.g-section-header) {
+    margin-bottom: 100px;
+  }
+}
