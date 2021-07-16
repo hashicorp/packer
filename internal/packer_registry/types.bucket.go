@@ -57,14 +57,10 @@ func (b *Bucket) Validate() error {
 // completed before an iteration can be marked as DONE.
 //
 // b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
+// TODO ensure initialize can only be called once
 func (b *Bucket) Initialize(ctx context.Context) error {
 	// NOOP
 	if b == nil {
-		return nil
-	}
-
-	// Bucket already initialized
-	if b.client != nil {
 		return nil
 	}
 
@@ -87,6 +83,8 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	// Create/find iteration logic to be added
 
+	// TODO Implement logic to find existing iteration and use that as opposed to creating an
+	// iteration.
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
@@ -100,13 +98,16 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	b.Iteration.ID = id
 
 	var wg sync.WaitGroup
-	for k := range b.Iteration.builds.m {
-		log.Printf("[TRACE] initialize running build for %q", k)
+	for _, buildName := range b.Iteration.expectedBuilds {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
-			b.PublishBuildStatus(ctx, name, models.HashicorpCloudPackerBuildStatusUNSET)
-		}(k)
+			log.Printf("[TRACE] registering build for %q for the iteration.", name)
+			// Need a way to handle skipping builds that were already created.
+			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
+			// we also need to bubble up the errors here.
+			b.CreateInitialBuildForIteration(ctx, name)
+		}(buildName)
 	}
 	wg.Wait()
 	return nil
@@ -128,23 +129,15 @@ func (b *Bucket) connect() error {
 	return nil
 }
 
-func (b *Bucket) AddBuildForSource(sourceName string) {
+func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 	if b == nil {
 		return
 	}
 
-	if _, ok := b.Iteration.builds.m[sourceName]; ok {
+	if _, ok := b.Iteration.builds.Load(sourceName); ok {
 		return
 	}
-
-	build := &Build{
-		ComponentType: sourceName,
-		RunUUID:       b.Iteration.RunUUID,
-		PARtifacts:    make([]PARtifact, 0),
-	}
-	b.Iteration.builds.Lock()
-	b.Iteration.builds.m[sourceName] = build
-	b.Iteration.builds.Unlock()
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, sourceName)
 }
 
 func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
@@ -154,37 +147,50 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 	}
 
 	// Lets check if we have something already for this build
-	existingBuild, ok := b.Iteration.builds.m[name]
-	if ok && existingBuild.ID != "" {
-		buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
-			BuildID: existingBuild.ID,
-			Updates: &models.HashicorpCloudPackerBuildUpdates{
-				PackerRunUUID: existingBuild.RunUUID,
-				Status:        &status,
-			},
-		}
-
-		// Possible bug of being able to set DONE with no RunUUID being set.
-		if status == models.HashicorpCloudPackerBuildStatusDONE {
-			images := make([]*models.HashicorpCloudPackerImage, 0, len(existingBuild.PARtifacts))
-			for _, partifact := range existingBuild.PARtifacts {
-				images = append(images, &models.HashicorpCloudPackerImage{ImageID: partifact.ID, Region: partifact.ProviderRegion})
-			}
-			//TODO pass along cloud provider
-			buildInput.Updates.Images = images
-		}
-
-		_, err := UpdateBuild(ctx, b.client, buildInput)
-		if err != nil {
-			return err
-		}
-		b.Iteration.builds.Lock()
-		existingBuild.Status = status
-		b.Iteration.builds.m[name] = existingBuild
-		b.Iteration.builds.Unlock()
-		return nil
+	build, ok := b.Iteration.builds.Load(name)
+	if !ok {
+		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
 	}
 
+	buildToUpdate, ok := build.(Build)
+	if !ok {
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	}
+
+	if buildToUpdate.ID == "" {
+		return fmt.Errorf("the build for the component %q does not have a valid id", name)
+	}
+
+	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
+		BuildID: buildToUpdate.ID,
+		Updates: &models.HashicorpCloudPackerBuildUpdates{
+			PackerRunUUID: buildToUpdate.RunUUID,
+			Status:        &status,
+		},
+	}
+
+	// Possible bug of being able to set DONE with no RunUUID being set.
+	if status == models.HashicorpCloudPackerBuildStatusDONE {
+		images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.PARtifacts))
+		for _, partifact := range buildToUpdate.PARtifacts {
+			images = append(images, &models.HashicorpCloudPackerImage{ImageID: partifact.ID, Region: partifact.ProviderRegion})
+		}
+		//TODO pass along cloud provider
+		buildInput.Updates.Images = images
+	}
+
+	_, err := UpdateBuild(ctx, b.client, buildInput)
+	if err != nil {
+		return err
+	}
+	buildToUpdate.Status = status
+	b.Iteration.builds.Store(name, buildToUpdate)
+	return nil
+}
+
+func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string) error {
+
+	status := models.HashicorpCloudPackerBuildStatusUNSET
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
@@ -209,9 +215,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		PARtifacts:    make([]PARtifact, 0),
 	}
 
-	b.Iteration.builds.Lock()
-	b.Iteration.builds.m[name] = build
-	b.Iteration.builds.Unlock()
+	b.Iteration.builds.Store(name, build)
 	return nil
 }
 
@@ -221,9 +225,14 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 		return nil
 	}
 
-	build, ok := b.Iteration.builds.m[name]
+	existingBuild, ok := b.Iteration.builds.Load(name)
 	if !ok {
 		return errors.New("no associated build found for the name " + name)
+	}
+
+	build, ok := existingBuild.(Build)
+	if !ok {
+		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
 	}
 
 	for _, artifact := range partifacts {
@@ -233,9 +242,7 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 		build.PARtifacts = append(build.PARtifacts, artifact)
 	}
 
-	b.Iteration.builds.Lock()
-	b.Iteration.builds.m[name] = build
-	b.Iteration.builds.Unlock()
+	b.Iteration.builds.Store(name, build)
 
 	return nil
 }

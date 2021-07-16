@@ -53,8 +53,8 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
-	// Represents registry Bucket defined in the config files.
-	Bucket *packerregistry.Bucket
+	// Represents registry bucket defined in the config files.
+	bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File
@@ -448,7 +448,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			pcb := &packer.CoreBuild{
 				BuildName:                 build.Name,
 				Type:                      srcUsage.String(),
-				ArtifactMetadataPublisher: cfg.Bucket,
+				ArtifactMetadataPublisher: cfg.bucket,
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.

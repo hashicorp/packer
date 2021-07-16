@@ -1,8 +1,6 @@
 package command
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
@@ -42,18 +40,8 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 // ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
 // build image artifacts to a configured Packer Registry destination.
 func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
-	if !env.InPARMode() && (env.HasClientID() && env.HasClientSecret()) {
-		return nil, hcl.Diagnostics{
-			&hcl.Diagnostic{
-				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
-				Detail: fmt.Sprintf("Packer has detected HCP client environment variables but one or more of the "+
-					"required registry variables are missing. Please check that for the following environment variables "+
-					"%q %q", env.HCPPackerRegistry, env.HCPPackerBucket),
-				Severity: hcl.DiagWarning,
-			},
-		}
-	}
-
+	// JSON can only have configure its Bucket through Env. variables so if not in PAR mode
+	// we don't really care if bucket is nil or set to a bunch of zero values.
 	if !env.InPARMode() {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -65,7 +53,8 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	err := c.Core.Bucket.Validate()
+	bucket := c.Core.GetRegistryBucket()
+	err := bucket.Validate()
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -76,5 +65,5 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	return c.Core.Bucket, nil
+	return bucket, nil
 }

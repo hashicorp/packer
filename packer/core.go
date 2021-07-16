@@ -32,7 +32,7 @@ type Core struct {
 	builds     map[string]*template.Builder
 	version    string
 	secrets    []string
-	Bucket     *packerregistry.Bucket
+	bucket     *packerregistry.Bucket
 
 	except []string
 	only   []string
@@ -142,8 +142,8 @@ func (core *Core) Initialize() error {
 	}
 
 	if env.InPARMode() {
-		core.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
-		core.Bucket.Canonicalize()
+		core.bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		core.bucket.Canonicalize()
 	}
 
 	// Go through and interpolate all the build names. We should be able
@@ -159,7 +159,7 @@ func (core *Core) Initialize() error {
 
 		core.builds[v] = b
 		// Get all builds slated within config ignoring any only or exclude flags.
-		core.Bucket.AddBuildForSource(b.Name)
+		core.bucket.RegisterBuildForComponent(b.Name)
 	}
 	return nil
 }
@@ -414,7 +414,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		CleanupProvisioner:        cleanupProvisioner,
 		TemplatePath:              c.Template.Path,
 		Variables:                 c.variables,
-		ArtifactMetadataPublisher: c.Bucket,
+		ArtifactMetadataPublisher: c.bucket,
 	}, nil
 }
 
@@ -873,4 +873,10 @@ func (c *Core) init() error {
 	}
 
 	return nil
+}
+
+/// GetRegistryBucket returns a configured bucket that can be used for
+// publishing build image artifacts to some HCP Packer Registry.
+func (c *Core) GetRegistryBucket() *packerregistry.Bucket {
+	return c.bucket
 }

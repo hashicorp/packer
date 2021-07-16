@@ -8,7 +8,9 @@ import (
 // ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
 // build image artifacts to a configured Packer Registry destination.
 func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
-	if cfg.Bucket == nil {
+	// If this was a PAR build either env.InPARMode() is true, or if the is an hcp_packer_registry block
+	// defined we would have a non-nil bucket. So if nil assume we are not in a some sort of PAR mode.
+	if cfg.bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
 				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
@@ -19,7 +21,7 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 		}
 	}
 
-	err := cfg.Bucket.Validate()
+	err := cfg.bucket.Validate()
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -30,5 +32,5 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 		}
 	}
 
-	return cfg.Bucket, nil
+	return cfg.bucket, nil
 }

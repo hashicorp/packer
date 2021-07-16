@@ -70,7 +70,6 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 }
 
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
-
 	params := packerSvc.NewCreateBuildParamsWithContext(ctx)
 	params.LocationOrganizationID = client.Config.OrganizationID
 	params.LocationProjectID = client.Config.ProjectID

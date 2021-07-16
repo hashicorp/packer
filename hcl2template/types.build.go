@@ -103,10 +103,10 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	// load defaults from ENV
 	// if config has values => override the env.
 	if env.InPARMode() {
-		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
-		cfg.Bucket.Canonicalize()
+		cfg.bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		cfg.bucket.Canonicalize()
 		if build.Name != "" {
-			cfg.Bucket.Slug = build.Name
+			cfg.bucket.Slug = build.Name
 		}
 	}
 
@@ -129,7 +129,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 		// source with no body
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
-		cfg.Bucket.AddBuildForSource(ref.String())
+		cfg.bucket.RegisterBuildForComponent(ref.String())
 	}
 
 	body = b.Config
