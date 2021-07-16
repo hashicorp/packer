@@ -9,11 +9,13 @@ export default function CommunityPage() {
       <Head>
         <title key="title">Community | Packer by HashiCorp</title>
       </Head>
-      <SectionHeader
-        headline="Community"
-        description="Packer is an open source project with a growing community. There are active, dedicated users willing to help you through various mediums."
-        use_h1={true}
-      />
+      <div className={s.sectionHeader}>
+        <SectionHeader
+          headline="Community"
+          description="Packer is an open source project with a growing community. There are active, dedicated users willing to help you through various mediums."
+          use_h1={true}
+        />
+      </div>
       <VerticalTextBlockList
         product="packer"
         data={[
