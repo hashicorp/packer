@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -320,6 +321,26 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
 
+	// loaddefaults from ENV
+	// if config has values => override the env.
+
+	if opts.LoadRegistryBucketSettingsFromEnv {
+
+		// TODO This should probably be moved elsewhere when we start supporting hcp_packer_registry block...
+		var err error
+		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			TemplateBaseDir: cfg.Basedir,
+		})
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+				Detail:   fmt.Sprintf("%s", err),
+				Severity: hcl.DiagError,
+			})
+		}
+		cfg.bucket.Canonicalize()
+	}
+
 	// parse the actual content // rest
 	for _, file := range cfg.files {
 		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
@@ -374,8 +395,27 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 			if moreDiags.HasErrors() {
 				continue
 			}
-			cfg.Builds = append(cfg.Builds, build)
 
+			// If we are in PAR mode check that only one build block has been parsed.
+			// If so fail because PAR does not support more than one build block.
+			if cfg.bucket != nil && len(cfg.Builds) > 0 {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Multiple " + buildLabel + " blocks",
+					Detail: fmt.Sprintf("For Packer Registry Enabled builds only one " + buildLabel +
+						" block can be defined. Please remove any additional " + buildLabel +
+						" block(s). If this build is not meant for the Packer registry please " +
+						"clear any HCP_PACKER_* environment variables."),
+					Subject: block.DefRange.Ptr(),
+				})
+			}
+
+			// This can probably moved in the decodeBuildConfig
+			if cfg.bucket != nil && build.Name != "" {
+				cfg.bucket.Slug = build.Name
+			}
+
+			cfg.Builds = append(cfg.Builds, build)
 		}
 	}
 

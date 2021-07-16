@@ -16,6 +16,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -149,11 +150,20 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
-	diags := packerStarter.Initialize(packer.InitializeOptions{})
+
+	diags := packerStarter.Initialize(packer.InitializeOptions{
+		LoadRegistryBucketSettingsFromEnv: env.InPARMode(),
+	})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
+
+	/*
+		Ideal world we want to send all builds for a new iterations.
+		-only flag doesn't work with PAR to start; future only will be allowed to filter only builds not
+		complete in PAR.
+	*/
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
@@ -169,6 +179,29 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
+	}
+
+	// TODO find an option that is not managed by a globally shared Publisher.
+	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
+	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
+	packer.ArtifactMetadataPublisher, diags = packerStarter.ConfiguredArtifactMetadataPublisher()
+	if diags.HasErrors() {
+		return writeDiags(c.Ui, nil, diags)
+	}
+	// TODO we probably want to log if no PAR settings exists at all so adding a TODO to clean this up.
+	if len(diags) > 0 {
+		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
+	}
+
+	if err := packer.ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+		diags := hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "HCP Packer Registry initialization failed",
+				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", packer.ArtifactMetadataPublisher.Slug, packer.ArtifactMetadataPublisher.Destination, err),
+				Severity: hcl.DiagError,
+			},
+		}
+		return writeDiags(c.Ui, nil, diags)
 	}
 
 	// Compile all the UIs for the builds
@@ -205,7 +238,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 		buildUis[builds[i]] = ui
 	}
-
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
@@ -268,7 +300,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
-				if nil != runArtifacts {
+				if runArtifacts != nil {
 					artifacts.Lock()
 					artifacts.m[name] = runArtifacts
 					artifacts.Unlock()
@@ -363,7 +395,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 				ui.Machine("artifact", iStr, "end")
 				c.Ui.Say(message.String())
+
 			}
+
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

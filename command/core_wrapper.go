@@ -1,7 +1,12 @@
 package command
 
 import (
+	"fmt"
+	"path/filepath"
+
 	"github.com/hashicorp/hcl/v2"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -33,4 +38,65 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 			Severity: hcl.DiagError,
 		},
 	}
+}
+
+// ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
+// build image artifacts to a configured Packer Registry destination.
+func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
+	if !env.InPARMode() && (env.HasClientID() && env.HasClientSecret()) {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
+				Detail: fmt.Sprintf("Packer has detected HCP client environment variables but one or more of the "+
+					"required registry variables are missing. Please check that for the following environment variables "+
+					"%q %q", env.HCPPackerRegistry, env.HCPPackerBucket),
+				Severity: hcl.DiagWarning,
+			},
+		}
+	}
+
+	if !env.InPARMode() {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
+				Detail: "No Packer Registry configuration detected; skipping all publishing steps " +
+					"See publishing to a Packer registry for Packer configuration details",
+				Severity: hcl.DiagWarning,
+			},
+		}
+	}
+
+	bucket, err := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+		TemplateBaseDir: filepath.Dir(c.Core.Template.Path),
+	})
+	if err != nil {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+				Detail:   fmt.Sprintf("%s", err),
+				Severity: hcl.DiagError,
+			},
+		}
+	}
+	// JSON templates don't support reading Packer registry data from a config template so we load all config settings from environment variables.
+	bucket.Canonicalize()
+
+	// Get all builds slated within config ignoring any only or exclude flags.
+	for _, name := range c.BuildNames(nil, nil) {
+		bucket.AddBuildForSource(name)
+	}
+
+	err = bucket.Validate()
+
+	if err != nil {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "Invalid HCP Packer Registry configuration",
+				Detail:   err.Error(),
+				Severity: hcl.DiagError,
+			},
+		}
+	}
+
+	return bucket, nil
 }

@@ -18,7 +18,13 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 )
+
+// ArtifactMetadataPublisher represents a Bucket that can be used for publishing images artifacts to
+// a configured HCP Packer Registry. By default it points to an unconfigured Bucket so that Packer
+// can safely make noop calls to the Publisher.
+var ArtifactMetadataPublisher *packerregistry.Bucket
 
 // Core is the main executor of Packer. If Packer is being used as a
 // library, this is the struct you'll want to instantiate to get anything done.
