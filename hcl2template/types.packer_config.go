@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
@@ -56,7 +55,6 @@ type PackerConfig struct {
 
 	// Represents registry Bucket defined in the config files.
 	Bucket *packerregistry.Bucket
-	once   sync.Once
 
 	parser *Parser
 	files  []*hcl.File

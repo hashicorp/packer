@@ -99,21 +99,16 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Name = b.Name
 	build.Description = b.Description
 
-	// TODO if packer_registry defined create bucket using bucket.
-	// loaddefaults from ENV
+	// TODO if packer_registry defined create bucket use bucket otherwise
+	// load defaults from ENV
 	// if config has values => override the env.
-	cfg.once.Do(func() {
-		// Right now we only support loading from env but once we have the config block InPARMode() can be false
-		// so we need to account for proper bucket creation later on.
-		if !env.InPARMode() {
-			return
-		}
+	if env.InPARMode() {
 		cfg.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
 		cfg.Bucket.Canonicalize()
 		if build.Name != "" {
 			cfg.Bucket.Slug = build.Name
 		}
-	})
+	}
 
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)

@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	ttmp "text/template"
 
@@ -20,6 +19,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -33,7 +33,6 @@ type Core struct {
 	version    string
 	secrets    []string
 	Bucket     *packerregistry.Bucket
-	once       sync.Once
 
 	except []string
 	only   []string
@@ -141,11 +140,11 @@ func (core *Core) Initialize() error {
 	for _, secret := range core.secrets {
 		packersdk.LogSecretFilter.Set(secret)
 	}
-	configBucket := func() {
+
+	if env.InPARMode() {
 		core.Bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
 		core.Bucket.Canonicalize()
 	}
-	core.once.Do(configBucket)
 
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.

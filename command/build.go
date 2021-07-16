@@ -16,7 +16,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
@@ -151,9 +150,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags := packerStarter.Initialize(packer.InitializeOptions{
-		LoadRegistryBucketSettingsFromEnv: env.InPARMode(),
-	})
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
