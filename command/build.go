@@ -203,7 +203,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		}
 		return writeDiags(c.Ui, nil, diags)
 	}
-	log.Printf("WILKEN %#v", *ArtifactMetadataPublisher)
 
 	// Compile all the UIs for the builds
 	colors := [5]packer.UiColor{
