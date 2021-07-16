@@ -2,6 +2,8 @@ package command
 
 import (
 	"github.com/hashicorp/hcl/v2"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -33,4 +35,35 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 			Severity: hcl.DiagError,
 		},
 	}
+}
+
+// ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
+// build image artifacts to a configured Packer Registry destination.
+func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
+	// JSON can only have configure its Bucket through Env. variables so if not in PAR mode
+	// we don't really care if bucket is nil or set to a bunch of zero values.
+	if !env.InPARMode() {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
+				Detail: "No Packer Registry configuration detected; skipping all publishing steps " +
+					"See publishing to a Packer registry for Packer configuration details",
+				Severity: hcl.DiagWarning,
+			},
+		}
+	}
+
+	bucket := c.Core.GetRegistryBucket()
+	err := bucket.Validate()
+	if err != nil {
+		return nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "Invalid HCP Packer Registry configuration",
+				Detail:   err.Error(),
+				Severity: hcl.DiagError,
+			},
+		}
+	}
+
+	return bucket, nil
 }

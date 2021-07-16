@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -18,6 +19,8 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -30,6 +33,7 @@ type Core struct {
 	builds     map[string]*template.Builder
 	version    string
 	secrets    []string
+	bucket     *packerregistry.Bucket
 
 	except []string
 	only   []string
@@ -138,6 +142,17 @@ func (core *Core) Initialize() error {
 		packersdk.LogSecretFilter.Set(secret)
 	}
 
+	if env.InPARMode() {
+		var err error
+		core.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			TemplateBaseDir: filepath.Dir(core.Template.Path),
+		})
+		if err != nil {
+			return err
+		}
+		core.bucket.Canonicalize()
+	}
+
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
 	core.builds = make(map[string]*template.Builder)
@@ -150,6 +165,8 @@ func (core *Core) Initialize() error {
 		}
 
 		core.builds[v] = b
+		// Get all builds slated within config ignoring any only or exclude flags.
+		core.bucket.RegisterBuildForComponent(b.Name)
 	}
 	return nil
 }
@@ -395,15 +412,16 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
 	return &CoreBuild{
-		Type:               n,
-		Builder:            builder,
-		BuilderConfig:      configBuilder.Config,
-		BuilderType:        configBuilder.Type,
-		PostProcessors:     postProcessors,
-		Provisioners:       provisioners,
-		CleanupProvisioner: cleanupProvisioner,
-		TemplatePath:       c.Template.Path,
-		Variables:          c.variables,
+		Type:                      n,
+		Builder:                   builder,
+		BuilderConfig:             configBuilder.Config,
+		BuilderType:               configBuilder.Type,
+		PostProcessors:            postProcessors,
+		Provisioners:              provisioners,
+		CleanupProvisioner:        cleanupProvisioner,
+		TemplatePath:              c.Template.Path,
+		Variables:                 c.variables,
+		ArtifactMetadataPublisher: c.bucket,
 	}, nil
 }
 
@@ -862,4 +880,10 @@ func (c *Core) init() error {
 	}
 
 	return nil
+}
+
+/// GetRegistryBucket returns a configured bucket that can be used for
+// publishing build image artifacts to some HCP Packer Registry.
+func (c *Core) GetRegistryBucket() *packerregistry.Bucket {
+	return c.bucket
 }
