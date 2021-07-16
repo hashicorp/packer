@@ -1,10 +1,8 @@
 package packer_registry
 
 import (
-	"crypto/sha1"
 	"fmt"
 	"os"
-	"time"
 
 	git "github.com/go-git/go-git/v5"
 	// "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
@@ -20,15 +18,18 @@ type Iteration struct {
 }
 
 type IterationOptions struct {
-	UseGitBackend bool
+	TemplateBaseDir string
 }
 
-func GetGitFingerprint() (string, error) {
-	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{
+func GetGitFingerprint(opts IterationOptions) (string, error) {
+	r, err := git.PlainOpenWithOptions(opts.TemplateBaseDir, &git.PlainOpenOptions{
 		DetectDotGit: true,
 	})
 	if err != nil {
-		return "", fmt.Errorf("Error loading git sha", err)
+		return "", fmt.Errorf("Packer was unable to load a git sha. "+
+			"If your Packer template is not in a git repo, please add a unique "+
+			"template fingerprint using the env var HCP_PACKER_BUILD_FINGERPRINT. "+
+			"Error: %s", err)
 	}
 	// The config can be used to retrieve user identity. for example,
 	// c.User.Email. Leaving in but commented because I'm not sure we care
@@ -53,15 +54,9 @@ func NewIteration(opts IterationOptions) (*Iteration, error) {
 	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
 	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
 
-	// Simulating a Git SHA
+	// Get a git sha.
 	if i.Fingerprint == "" {
-		s := []byte(time.Now().String())
-		// TODO allow user to set fingerprint through Packer block or
-		// environment variable?
-		i.Fingerprint = fmt.Sprintf("%x", sha1.Sum(s))
-		//i.Fingerprint = "00ee249320213a1e20578a551c11f47bbdd94ea4"
-	} else {
-		fp, err := GetGitFingerprint()
+		fp, err := GetGitFingerprint(opts)
 		if err != nil {
 			return nil, err
 		}

@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
@@ -65,7 +66,9 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	bucket, err := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+	bucket, err := packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+		TemplateBaseDir: filepath.Dir(c.Core.Template.Path),
+	})
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
