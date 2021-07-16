@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"google.golang.org/grpc/codes"
@@ -94,26 +95,37 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	}
 
 	id, err := CreateIteration(ctx, b.client, iterationInput)
-	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
-		return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+	if err != nil {
+		if !checkErrorCode(err, codes.AlreadyExists) {
+			return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+		} else {
+			// TODO load iteration using Get request
+			return fmt.Errorf("We haven't implemented loading iterations yet.")
+		}
 	}
 
 	b.Iteration.ID = id
+	log.Println("[TRACE] a valid iteration for build was created with the Id", b.Iteration.ID)
 
+	var errs *multierror.Error
 	var wg sync.WaitGroup
 	for _, buildName := range b.Iteration.expectedBuilds {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
-			log.Printf("[TRACE] registering build for %q for the iteration.", name)
+			log.Printf("[TRACE] registering build with iteration for %q.", name)
 			// Need a way to handle skipping builds that were already created.
 			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
 			// we also need to bubble up the errors here.
-			b.CreateInitialBuildForIteration(ctx, name)
+			err := b.CreateInitialBuildForIteration(ctx, name)
+			if err != nil {
+				errs = multierror.Append(errs, err)
+			}
 		}(buildName)
 	}
 	wg.Wait()
-	return nil
+
+	return errs.ErrorOrNil()
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
@@ -155,7 +167,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
 	}
 
-	buildToUpdate, ok := build.(Build)
+	buildToUpdate, ok := build.(*Build)
 	if !ok {
 		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
 	}
@@ -191,6 +203,8 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 	return nil
 }
 
+// CreateInitialBuildForIteration will create a build record on the Packer registry for named component.
+// This initial creation is needed so that Packer can properly track when an iteration is complete.
 func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string) error {
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
@@ -218,7 +232,9 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 		PARtifacts:    make([]PARtifact, 0),
 	}
 
+	log.Println("[TRACE] creating initial build for component", name)
 	b.Iteration.builds.Store(name, build)
+
 	return nil
 }
 
@@ -233,9 +249,9 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 		return errors.New("no associated build found for the name " + name)
 	}
 
-	build, ok := existingBuild.(Build)
+	build, ok := existingBuild.(*Build)
 	if !ok {
-		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
 	}
 
 	for _, artifact := range partifacts {

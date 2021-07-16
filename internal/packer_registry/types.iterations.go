@@ -48,7 +48,6 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 // NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
 func NewIteration(opts IterationOptions) (*Iteration, error) {
 	i := Iteration{
-		builds:         sync.Map{},
 		expectedBuilds: make([]string, 0),
 	}
 
