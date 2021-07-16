@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 	"sync"
@@ -453,7 +452,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				Type:                      srcUsage.String(),
 				ArtifactMetadataPublisher: cfg.Bucket,
 			}
-			log.Printf("[TRACE] assigned our publisher still parser %#v", *pcb.ArtifactMetadataPublisher)
 
 			// Apply the -only and -except command-line options to exclude matching builds.
 			buildName := pcb.Name()

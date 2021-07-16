@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -115,7 +114,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			cfg.Bucket.Slug = build.Name
 		}
 	})
-	log.Printf("[TRACE] assigned our publisher %#v", *cfg.Bucket)
 
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)
