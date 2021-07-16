@@ -103,10 +103,20 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	// load defaults from ENV
 	// if config has values => override the env.
 	if env.InPARMode() {
-		cfg.bucket = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{})
+		var err error
+		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			TemplateBaseDir: cfg.Basedir,
+		})
 		cfg.bucket.Canonicalize()
 		if build.Name != "" {
 			cfg.bucket.Slug = build.Name
+		}
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+				Detail:   fmt.Sprintf("%s", err),
+				Severity: hcl.DiagError,
+			})
 		}
 	}
 
