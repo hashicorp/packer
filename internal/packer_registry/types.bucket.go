@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"google.golang.org/grpc/codes"
@@ -94,12 +95,19 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	}
 
 	id, err := CreateIteration(ctx, b.client, iterationInput)
-	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
-		return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+	if err != nil {
+		if !checkErrorCode(err, codes.AlreadyExists) {
+			return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+		} else {
+			// TODO load iteration using Get request
+			return fmt.Errorf("We haven't implemented loading iterations yet.")
+		}
 	}
 
 	b.Iteration.ID = id
+	log.Printf("Megan iteration id is %#v", b.Iteration.ID)
 
+	var errs *multierror.Error
 	var wg sync.WaitGroup
 	for _, buildName := range b.Iteration.expectedBuilds {
 		wg.Add(1)
@@ -109,11 +117,14 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 			// Need a way to handle skipping builds that were already created.
 			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
 			// we also need to bubble up the errors here.
-			b.CreateInitialBuildForIteration(ctx, name)
+			err := b.CreateInitialBuildForIteration(ctx, name)
+			if err != nil {
+				errs = multierror.Append(errs, err)
+			}
 		}(buildName)
 	}
 	wg.Wait()
-	return nil
+	return errs
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
@@ -164,6 +175,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
+	log.Printf("Megan status is %#v", status)
 	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
 		BuildID: buildToUpdate.ID,
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
@@ -182,6 +194,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		buildInput.Updates.Images = images
 	}
 
+	log.Printf("1 Megan updating build with input status %#v", buildInput.Updates.Status)
 	_, err := UpdateBuild(ctx, b.client, buildInput)
 	if err != nil {
 		return err
@@ -207,6 +220,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 
 	id, err := CreateBuild(ctx, b.client, buildInput)
 	if err != nil {
+		log.Printf("Error creating initial build: %s", err)
 		return err
 	}
 
@@ -218,7 +232,10 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 		PARtifacts:    make([]PARtifact, 0),
 	}
 
+	log.Printf("Megan creating initial build")
 	b.Iteration.builds.Store(name, build)
+	log.Printf("Megan created initial build")
+	log.Printf("Megan initial build is %#v", b.Iteration.builds)
 	return nil
 }
 
