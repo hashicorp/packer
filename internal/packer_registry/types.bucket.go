@@ -187,10 +187,14 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 	// Possible bug of being able to set DONE with no RunUUID being set.
 	if status == models.HashicorpCloudPackerBuildStatusDONE {
 		images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.PARtifacts))
+		var providerName string
 		for _, partifact := range buildToUpdate.PARtifacts {
+			if providerName == "" {
+				providerName = partifact.ProviderName
+			}
 			images = append(images, &models.HashicorpCloudPackerImage{ImageID: partifact.ID, Region: partifact.ProviderRegion})
 		}
-		//TODO pass along cloud provider
+		buildInput.Updates.CloudProvider = providerName
 		buildInput.Updates.Images = images
 	}
 
