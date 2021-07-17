@@ -80,7 +80,6 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	params.BuildIterationID = input.Build.IterationID
 	params.Body = input
 
-	log.Printf("Megan iterationID is %s", params.BuildIterationID)
 	resp, err := client.Packer.CreateBuild(params, nil, func(*runtime.ClientOperation) {})
 	if err != nil {
 		return "", err
