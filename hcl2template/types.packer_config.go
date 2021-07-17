@@ -446,9 +446,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			}
 
 			pcb := &packer.CoreBuild{
-				BuildName:                 build.Name,
-				Type:                      srcUsage.String(),
-				ArtifactMetadataPublisher: cfg.bucket,
+				BuildName: build.Name,
+				Type:      srcUsage.String(),
 			}
 
 			// Apply the -only and -except command-line options to exclude matching builds.
@@ -535,6 +534,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 						continue
 					}
 					pcb.CleanupProvisioner = errorCleanupProv
+				}
+			}
+
+			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+				builder = &packer.RegistryBuilder{
+					Name:                      srcUsage.String(),
+					Builder:                   builder,
+					ArtifactMetadataPublisher: cfg.bucket,
 				}
 			}
 

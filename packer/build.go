@@ -372,19 +372,26 @@ PostProcessorRunSeqLoop:
 				for k, v := range state {
 					m[k.(string)] = v.(string)
 				}
-				b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
+				// TODO handle these error better
+				err := b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
 					ProviderName:   m["ProviderName"],
 					ProviderRegion: m["ProviderRegion"],
 					ID:             m["ImageID"],
 				})
+				if err != nil {
+					log.Printf("[TRACE] failed to add image artifact for %q: %s", b.Type, err)
+				}
 			case []interface{}:
 				for _, d := range state {
 					d := d.(map[interface{}]interface{})
-					b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
+					err := b.ArtifactMetadataPublisher.AddBuildArtifact(ctx, b.Type, packerregistry.PARtifact{
 						ProviderName:   d["ProviderName"].(string),
 						ProviderRegion: d["ProviderRegion"].(string),
 						ID:             d["ImageID"].(string),
 					})
+					if err != nil {
+						log.Printf("[TRACE] failed to add image artifact for %q: %s", b.Type, err)
+					}
 				}
 			}
 		}
