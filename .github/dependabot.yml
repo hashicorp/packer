@@ -1,0 +1,14 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: /
+  schedule:
+    interval: daily
+  allow:
+    - dependency-name: "github.com/hashicorp/packer-plugin-sdk"
+    - dependency-name: "github.com/hashicorp/hcl/v2"
+    - dependency-name: "github.com/zclconf/go-cty"
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: daily
