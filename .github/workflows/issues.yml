@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add track-internal
-        uses: andymckay/labeler@1.0.2
+        uses: andymckay/labeler@1.0.3
         if: github.event.issue.pull_request == null
         with:
           repo-token: ${{ secrets.Github_Token }}
