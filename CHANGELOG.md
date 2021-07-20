@@ -1,5 +1,10 @@
 ## 1.7.4 (Upcoming)
 
+### BUG FIXES:
+
+* builder/outscale: Update Outscale multi-component plugin to fix `go build`
+    failures due to missing Go module dependencies. [GH-11147]
+
 ## 1.7.3 (June 15, 2021)
 
 ### IMPROVEMENTS:
