@@ -1,4 +1,4 @@
-## 1.7.4 (Upcoming)
+## 1.7.4 (July 20, 2021)
 
 ### BUG FIXES:
 
