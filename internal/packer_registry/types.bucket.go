@@ -180,6 +180,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		BuildID: buildToUpdate.ID,
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			PackerRunUUID: buildToUpdate.RunUUID,
+			Labels:        buildToUpdate.Metadata,
 			Status:        &status,
 		},
 	}
@@ -233,6 +234,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 		ComponentType: name,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
+		Metadata:      make(map[string]string),
 		PARtifacts:    make([]PARtifact, 0),
 	}
 

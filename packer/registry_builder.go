@@ -3,6 +3,7 @@ package packer
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -58,13 +59,20 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 	for _, artifact := range artifacts {
 		// Lets post state
 		if artifact != nil {
+			metadata := make(map[string]string)
+			metadata[artifact.BuilderId()] = artifact.String()
+			metadata[artifact.BuilderId()+".files"] = strings.Join(artifact.Files(), ", ")
+			err := b.ArtifactMetadataPublisher.AddBuildMetadata(b.Name, metadata)
+			if err != nil {
+				log.Printf("[TRACE] failed to add build labels for %q: %s", b.Name, err)
+			}
+
 			switch state := artifact.State("par.artifact.metadata").(type) {
 			case map[interface{}]interface{}:
 				m := make(map[string]string)
 				for k, v := range state {
 					m[k.(string)] = v.(string)
 				}
-
 				// TODO handle these error better
 				err := b.ArtifactMetadataPublisher.AddBuildArtifact(b.Name, packerregistry.PARtifact{
 					ProviderName:   m["ProviderName"],
