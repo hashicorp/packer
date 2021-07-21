@@ -118,16 +118,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				Severity: hcl.DiagError,
 			})
 		}
-
-		if err := cfg.bucket.Validate(); err != nil {
-			return nil, hcl.Diagnostics{
-				&hcl.Diagnostic{
-					Summary:  "Invalid HCP Packer Registry configuration",
-					Detail:   err.Error(),
-					Severity: hcl.DiagError,
-				},
-			}
-		}
 	}
 
 	for _, buildFrom := range b.FromSources {

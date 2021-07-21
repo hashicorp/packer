@@ -151,10 +151,6 @@ func (core *Core) Initialize() error {
 			return err
 		}
 		core.bucket.Canonicalize()
-
-		if err := core.bucket.Validate(); err != nil {
-			return err
-		}
 	}
 
 	// Go through and interpolate all the build names. We should be able
@@ -424,16 +420,15 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
 	return &CoreBuild{
-		Type:                      n,
-		Builder:                   builder,
-		BuilderConfig:             configBuilder.Config,
-		BuilderType:               configBuilder.Type,
-		PostProcessors:            postProcessors,
-		Provisioners:              provisioners,
-		CleanupProvisioner:        cleanupProvisioner,
-		TemplatePath:              c.Template.Path,
-		Variables:                 c.variables,
-		ArtifactMetadataPublisher: c.bucket,
+		Type:               n,
+		Builder:            builder,
+		BuilderConfig:      configBuilder.Config,
+		BuilderType:        configBuilder.Type,
+		PostProcessors:     postProcessors,
+		Provisioners:       provisioners,
+		CleanupProvisioner: cleanupProvisioner,
+		TemplatePath:       c.Template.Path,
+		Variables:          c.variables,
 	}, nil
 }
 

@@ -3,7 +3,6 @@ package packer_registry
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
@@ -89,7 +88,6 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 }
 
 func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {
-	log.Printf("Megan updating build with input status %#v", input.Updates.Status)
 	params := packerSvc.NewUpdateBuildParamsWithContext(ctx)
 	params.BuildID = input.BuildID
 	params.LocationOrganizationID = client.Config.OrganizationID
