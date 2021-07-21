@@ -180,6 +180,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		BuildID: buildToUpdate.ID,
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			PackerRunUUID: buildToUpdate.RunUUID,
+			Labels:        buildToUpdate.Metadata,
 			Status:        &status,
 		},
 	}
@@ -233,6 +234,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 		ComponentType: name,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
+		Metadata:      make(map[string]string),
 		PARtifacts:    make([]PARtifact, 0),
 	}
 
@@ -242,7 +244,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 	return nil
 }
 
-func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts ...PARtifact) error {
+func (b *Bucket) AddBuildArtifact(name string, partifacts ...PARtifact) error {
 	// NOOP
 	if b == nil {
 		return nil
@@ -263,6 +265,34 @@ func (b *Bucket) AddBuildArtifact(ctx context.Context, name string, partifacts .
 			build.CloudProvider = artifact.ProviderName
 		}
 		build.PARtifacts = append(build.PARtifacts, artifact)
+	}
+
+	b.Iteration.builds.Store(name, build)
+
+	return nil
+}
+
+func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
+	// NOOP
+	if b == nil {
+		return nil
+	}
+
+	existingBuild, ok := b.Iteration.builds.Load(name)
+	if !ok {
+		return errors.New("no associated build found for the name " + name)
+	}
+
+	build, ok := existingBuild.(*Build)
+	if !ok {
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	}
+
+	for k, v := range data {
+		if _, ok := build.Metadata[k]; ok {
+			continue
+		}
+		build.Metadata[k] = v
 	}
 
 	b.Iteration.builds.Store(name, build)
