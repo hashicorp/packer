@@ -40,7 +40,7 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 // ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
 // build image artifacts to a configured Packer Registry destination.
 func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
-	// JSON can only have configure its Bucket through Env. variables so if not in PAR mode
+	// JSON can only configure its Bucket through Env. variables so if not in PAR mode
 	// we don't really care if bucket is nil or set to a bunch of zero values.
 	if !env.InPARMode() {
 		return nil, hcl.Diagnostics{

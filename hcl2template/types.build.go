@@ -99,7 +99,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Name = b.Name
 	build.Description = b.Description
 
-	// TODO if packer_registry defined create bucket use bucket otherwise
+	// TODO if hcp_packer_registry block defined create bucket using the config specified otherwise
 	// load defaults from ENV
 	// if config has values => override the env.
 	if env.InPARMode() {

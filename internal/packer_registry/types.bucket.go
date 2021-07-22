@@ -30,7 +30,7 @@ type Bucket struct {
 func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
 	b := Bucket{
 		Labels: map[string]string{
-			"ManagedBy": "Packer",
+			"CreatedBy": "Packer",
 		},
 	}
 
