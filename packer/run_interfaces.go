@@ -36,9 +36,6 @@ type InitializeOptions struct {
 	// When set, the execution of datasources will be skipped and the datasource will provide
 	// an output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
-	// When set, initialization of a Packer.hander will try to load any Packer Registry Bucket
-	// configuration that may be present within an HCL2 template config.
-	LoadRegistryBucketSettingsFromEnv bool
 }
 
 // The Handler handles all Packer things. This interface reflects the Packer

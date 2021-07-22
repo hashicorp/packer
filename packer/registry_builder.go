@@ -98,9 +98,9 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 		}
 	}
 
-	if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Name, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
-		log.Printf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", b.Name, parErr)
-	}
+	//if parErr := b.ArtifactMetadataPublisher.PublishBuildStatus(ctx, b.Name, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
+	//log.Printf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", b.Name, parErr)
+	//}
 
 	return artifact, err
 }
