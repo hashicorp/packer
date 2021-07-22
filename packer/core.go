@@ -150,7 +150,7 @@ func (core *Core) Initialize() error {
 		if err != nil {
 			return err
 		}
-		core.bucket.Canonicalize()
+		core.bucket.LoadDefaultSettingsFromEnv()
 	}
 
 	// Go through and interpolate all the build names. We should be able

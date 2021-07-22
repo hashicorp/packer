@@ -186,15 +186,17 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return writeDiags(c.Ui, nil, diags)
 	}
 
-	if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
-		diags := hcl.Diagnostics{
-			&hcl.Diagnostic{
-				Summary:  "HCP Packer Registry initialization failed",
-				Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
-				Severity: hcl.DiagError,
-			},
+	if ArtifactMetadataPublisher != nil {
+		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+			diags := hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Summary:  "HCP Packer Registry initialization failed",
+					Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
+					Severity: hcl.DiagError,
+				},
+			}
+			return writeDiags(c.Ui, nil, diags)
 		}
-		return writeDiags(c.Ui, nil, diags)
 	}
 
 	// Compile all the UIs for the builds

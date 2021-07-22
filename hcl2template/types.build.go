@@ -107,7 +107,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
 			TemplateBaseDir: cfg.Basedir,
 		})
-		cfg.bucket.Canonicalize()
+		cfg.bucket.LoadDefaultSettingsFromEnv()
 		if build.Name != "" {
 			cfg.bucket.Slug = build.Name
 		}

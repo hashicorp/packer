@@ -71,6 +71,24 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	return it.Payload.Iteration.ID, nil
 }
 
+func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (string, error) {
+	// Create/find iteration
+	params := packerSvc.NewGetIterationParamsWithContext(ctx)
+	params.LocationOrganizationID = client.Config.OrganizationID
+	params.LocationProjectID = client.Config.ProjectID
+	params.BucketSlug = bucketslug
+	// identifier can be either fingerprint, iterationid, or incremental version
+	// for now, we only care about fingerprint so we're hardcoding it.
+	params.Fingerprint = &fingerprint
+
+	it, err := client.Packer.GetIteration(params, nil, func(*runtime.ClientOperation) {})
+	if err != nil {
+		return "", err
+	}
+
+	return it.Payload.Iteration.ID, nil
+}
+
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
 	params := packerSvc.NewCreateBuildParamsWithContext(ctx)
 	params.LocationOrganizationID = client.Config.OrganizationID
@@ -85,6 +103,21 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	}
 
 	return resp.Payload.Build.ID, nil
+}
+
+func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iterationID string) ([]*models.HashicorpCloudPackerBuild, error) {
+	params := packerSvc.NewListBuildsParamsWithContext(ctx)
+	params.LocationOrganizationID = client.Config.OrganizationID
+	params.LocationProjectID = client.Config.ProjectID
+	params.BucketSlug = bucketSlug
+	params.IterationID = iterationID
+
+	resp, err := client.Packer.ListBuilds(params, nil, func(*runtime.ClientOperation) {})
+	if err != nil {
+		return []*models.HashicorpCloudPackerBuild{}, err
+	}
+
+	return resp.Payload.Builds, nil
 }
 
 func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {

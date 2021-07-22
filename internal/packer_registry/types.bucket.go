@@ -63,11 +63,6 @@ func (b *Bucket) Validate() error {
 // b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
 // TODO ensure initialize can only be called once
 func (b *Bucket) Initialize(ctx context.Context) error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
 	if b.client == nil {
 		if err := b.connect(); err != nil {
 			return err
@@ -85,31 +80,80 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		return fmt.Errorf("failed to initialize iteration for bucket %q: %w", b.Slug, err)
 	}
 
-	// Create/find iteration logic to be added
-
-	// TODO Implement logic to find existing iteration and use that as opposed to creating an
-	// iteration.
+	// Create/find iteration
 	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
 	}
 
+	var existingBuilds []*models.HashicorpCloudPackerBuild
+
 	id, err := CreateIteration(ctx, b.client, iterationInput)
 	if err != nil {
 		if !checkErrorCode(err, codes.AlreadyExists) {
 			return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
-		} else {
-			// TODO load iteration using Get request
-			return fmt.Errorf("We haven't implemented loading iterations yet.")
 		}
+		// load existing iteration using fingerprint.
+		id, err = GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
+		if err != nil {
+			return fmt.Errorf("Error loading the existing iteration for fingerprint %s", b.Iteration.Fingerprint)
+		}
+		log.Println("[TRACE] a valid iteration was retrieved with the id", id)
+		// list all this iteration's builds so we can figure out which ones
+		// we want to run against. TODO: pagination?
+		existingBuilds, err = ListBuilds(ctx, b.client, b.Slug, id)
+		if err != nil {
+			return fmt.Errorf("Error listing builds for this existing iteration: %s", err)
+		}
+
+	} else {
+		log.Println("[TRACE] a valid iteration for build was created with the Id", id)
 	}
 
 	b.Iteration.ID = id
-	log.Println("[TRACE] a valid iteration for build was created with the Id", b.Iteration.ID)
 
 	var errs *multierror.Error
 	var wg sync.WaitGroup
-	for _, buildName := range b.Iteration.expectedBuilds {
+
+	//[]string{a,b}
+	// remove the iteration's expected builds that already exist.
+	var toCreate []string
+	for _, expected := range b.Iteration.expectedBuilds {
+		var found bool
+		for _, existing := range existingBuilds {
+			if existing.ComponentType == expected {
+				found = true
+				log.Printf("build of component type %s already exists; skipping the create call", expected)
+
+				if *existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
+					// We also need to remove the builds that are _complete_ from the
+					// Iteration's expectedBuilds so we don't overwrite them.
+					//b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds[:i], b.Iteration.expectedBuilds[i+1:]...)
+					//log.Printf("build of component type %s is already marked DONE; removing the build from the HCP Packer Registry expected builds.", expected)
+					break
+				}
+
+				// Lets create a build entry for any existing builds we want to update in this run
+				b.Iteration.builds.Store(existing.ComponentType, &Build{
+					ID:            existing.ID,
+					ComponentType: existing.ComponentType,
+					RunUUID:       b.Iteration.RunUUID,
+					Status:        models.HashicorpCloudPackerBuildStatusUNSET,
+					Metadata:      make(map[string]string),
+					PARtifacts:    make([]PARtifact, 0),
+				})
+				break
+			}
+		}
+		if !found {
+			missingbuild := expected
+			toCreate = append(toCreate, missingbuild)
+		}
+	}
+
+	log.Println("WILKEN", b.Iteration.expectedBuilds)
+	log.Println("WILKEN", toCreate)
+	for _, buildName := range toCreate {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
@@ -118,9 +162,13 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
 			// we also need to bubble up the errors here.
 			err := b.CreateInitialBuildForIteration(ctx, name)
-			if err != nil {
-				errs = multierror.Append(errs, err)
+			if checkErrorCode(err, codes.AlreadyExists) {
+				// Check whether build is complete, and if so, skip it.
+				log.Printf("[TRACE] build %s already exists in PAR, continuing...", name)
+				return
 			}
+
+			errs = multierror.Append(errs, err)
 		}(buildName)
 	}
 	wg.Wait()
@@ -131,11 +179,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
 	registryClient, err := NewClient(b.Config)
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
@@ -156,11 +199,6 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 }
 
 func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
 	// Lets check if we have something already for this build
 	build, ok := b.Iteration.builds.Load(name)
 	if !ok {
@@ -245,11 +283,6 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 }
 
 func (b *Bucket) AddBuildArtifact(name string, partifacts ...PARtifact) error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
 	existingBuild, ok := b.Iteration.builds.Load(name)
 	if !ok {
 		return errors.New("no associated build found for the name " + name)
@@ -273,11 +306,6 @@ func (b *Bucket) AddBuildArtifact(name string, partifacts ...PARtifact) error {
 }
 
 func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
-	// NOOP
-	if b == nil {
-		return nil
-	}
-
 	existingBuild, ok := b.Iteration.builds.Load(name)
 	if !ok {
 		return errors.New("no associated build found for the name " + name)
@@ -301,12 +329,7 @@ func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
 }
 
 // Load defaults from environment variables
-func (b *Bucket) Canonicalize() {
-	// NOOP
-	if b == nil {
-		return
-	}
-
+func (b *Bucket) LoadDefaultSettingsFromEnv() {
 	if b.Config.ClientID == "" {
 		b.Config.ClientID = os.Getenv(env.HCPClientID)
 	}
