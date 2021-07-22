@@ -185,10 +185,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
 	}
-	// TODO we probably want to log if no PAR settings exists at all so adding a TODO to clean this up.
-	if len(diags) > 0 {
-		log.Printf("[TRACE] This doesn't seem to be a Packer Registry enabled build so skipping: %s", diags.Error())
-	}
 
 	if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
 		diags := hcl.Diagnostics{

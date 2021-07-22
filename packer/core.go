@@ -390,6 +390,14 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
+			if env.InPARMode() && c.bucket != nil {
+				postProcessor = &RegistryPostProcessor{
+					BuilderType:               n,
+					ArtifactMetadataPublisher: c.bucket,
+					PostProcessor:             postProcessor,
+				}
+			}
+
 			current = append(current, CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PType:             rawP.Type,
@@ -405,6 +413,16 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		}
 
 		postProcessors = append(postProcessors, current)
+	}
+	if env.InPARMode() && c.bucket != nil {
+		postProcessors = append(postProcessors, []CoreBuildPostProcessor{
+			{
+				PostProcessor: &RegistryPostProcessor{
+					BuilderType:               n,
+					ArtifactMetadataPublisher: c.bucket,
+				},
+			},
+		})
 	}
 
 	// TODO hooks one day

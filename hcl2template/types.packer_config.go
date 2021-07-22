@@ -405,6 +405,15 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			if moreDiags.HasErrors() {
 				continue
 			}
+
+			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+				postProcessor = &packer.RegistryPostProcessor{
+					ArtifactMetadataPublisher: cfg.bucket,
+					BuilderType:               source.String(),
+					PostProcessor:             postProcessor,
+				}
+			}
+
 			pps = append(pps, packer.CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PName:             ppb.PName,
@@ -524,6 +533,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
+			}
+
+			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+				pps = append(pps, []packer.CoreBuildPostProcessor{
+					{
+						PostProcessor: &packer.RegistryPostProcessor{
+							BuilderType:               srcUsage.String(),
+							ArtifactMetadataPublisher: cfg.bucket,
+						},
+					},
+				})
 			}
 
 			if build.ErrorCleanupProvisionerBlock != nil {
