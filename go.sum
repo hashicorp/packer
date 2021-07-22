@@ -42,8 +42,9 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1 h1:RMTyvS5bjvSWiUcfqfr/E2pxHEMrALvU+E12n6biymg=
 github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1/go.mod h1:61apmbkVJH4kg+38ftT+/l0XxdUCVnHggqcOTqZRSEE=
 github.com/Azure/azure-sdk-for-go v40.5.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
-github.com/Azure/azure-sdk-for-go v51.2.0+incompatible h1:qQNk//OOHK0GZcgMMgdJ4tZuuh0zcOeUkpTxjvKFpSQ=
 github.com/Azure/azure-sdk-for-go v51.2.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
+github.com/Azure/azure-sdk-for-go v53.0.0+incompatible h1:DHeVnEdW3l7C/vXSdig9IJzoEpxgukIpYDfKBq6zNSI=
+github.com/Azure/azure-sdk-for-go v53.0.0+incompatible/go.mod h1:9XXNKU+eRnpl9moKnB4QOLf1HestfXbmab5FXxiDBjc=
 github.com/Azure/go-autorest v14.2.0+incompatible h1:V5VMDjClD3GiElqLWO7mz2MxNAK/vTfRHdAubSIPRgs=
 github.com/Azure/go-autorest v14.2.0+incompatible/go.mod h1:r+4oMnoxhatjLLJ6zxSWATqVooLgysK6ZNox3g/xq24=
 github.com/Azure/go-autorest/autorest v0.9.0/go.mod h1:xyHB1BMZT0cuDHU7I0+g046+BFDTQ8rEZB0s4Yfa6bI=
@@ -540,8 +541,8 @@ github.com/hashicorp/packer-plugin-amazon v1.0.0 h1:oztP0TYxE34X+P0r7KLVJwbYM1Ei
 github.com/hashicorp/packer-plugin-amazon v1.0.0/go.mod h1:A4cjwkca0op3y/IWV3z9vTCHeJY2nLwBnwRxRFlFw6Y=
 github.com/hashicorp/packer-plugin-ansible v1.0.0 h1:YU+k3JgwojL4Aw/yq6F9+b56B2wrhRfhQQgVCRRAZck=
 github.com/hashicorp/packer-plugin-ansible v1.0.0/go.mod h1:wbOfX8U2pcZdsChjwvvK62HF4C1hM4qcn1x5gjp87v0=
-github.com/hashicorp/packer-plugin-azure v1.0.0 h1:IXfxtxN+KQ2RbbUaEp9HzdJPfTUcayiboDrPoyvdVio=
-github.com/hashicorp/packer-plugin-azure v1.0.0/go.mod h1:zBhmvyDu5SxpGa97JKGtSmw5GObhW/BGZVHIt2YmlKo=
+github.com/hashicorp/packer-plugin-azure v1.0.1 h1:Vup22Vfcwmhm2nNQLQiVuZY47gnW6XlF1CTimdFJVac=
+github.com/hashicorp/packer-plugin-azure v1.0.1/go.mod h1:uFZJBJu9HDnHcG/laZNTmIUuqpSTvs+WtBwpLSH/Vkc=
 github.com/hashicorp/packer-plugin-chef v1.0.1 h1:sMTPzIAOaTlp4E05VZG6QILYUqR6IeBuszfHq3cdbUU=
 github.com/hashicorp/packer-plugin-chef v1.0.1/go.mod h1:CdOq9cMzJHbLwm3R+oEexQFbMiMNf0j1jgnvsx85l0M=
 github.com/hashicorp/packer-plugin-cloudstack v1.0.0 h1:TB2XbgaFZ88fJIoldNbCvKjGgaCa3uT2NqrpNrgaCTw=
@@ -956,8 +957,9 @@ github.com/zclconf/go-cty v1.4.0/go.mod h1:nHzOclRkoj++EU9ZjSrZvRG0BXIWt8c7loYc0
 github.com/zclconf/go-cty v1.7.0/go.mod h1:VDR4+I79ubFBGm1uJac1226K5yANQFHeauxPBoP54+o=
 github.com/zclconf/go-cty v1.8.0/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty v1.8.1/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
-github.com/zclconf/go-cty v1.8.3 h1:48gwZXrdSADU2UW9eZKHprxAI7APZGW9XmExpJpSjT0=
 github.com/zclconf/go-cty v1.8.3/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
+github.com/zclconf/go-cty v1.9.0 h1:IgJxw5b4LPXCPeqFjjhLaNEA8NKXMyaEUdAd399acts=
+github.com/zclconf/go-cty v1.9.0/go.mod h1:vVKLxnk3puL4qRAv72AO+W99LUD4da90g3uUAzyuvAk=
 github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRKQfBXbGkpdV6QMzT3rU1kSTAnfu1dO8dPKjYprgj8=
 github.com/zclconf/go-cty-yaml v1.0.1 h1:up11wlgAaDvlAGENcFDnZgkn0qUJurso7k6EpURKNF8=
 github.com/zclconf/go-cty-yaml v1.0.1/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
