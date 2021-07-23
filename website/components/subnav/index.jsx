@@ -18,6 +18,7 @@ export default function PackerSubnav() {
       menuItemsAlign="right"
       menuItems={subnavItems}
       constrainWidth
+      matchOnBasePath
     />
   )
 }
