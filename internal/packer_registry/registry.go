@@ -44,6 +44,10 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	params.LocationOrganizationID = client.Config.OrganizationID
 	params.LocationProjectID = client.Config.ProjectID
 	params.BucketSlug = input.BucketSlug
+	params.Body = &models.HashicorpCloudPackerUpdateBucketRequest{
+		Description: input.Description,
+		Labels:      input.Labels,
+	}
 	_, err = client.Packer.UpdateBucket(params, nil, func(*runtime.ClientOperation) {})
 
 	return err

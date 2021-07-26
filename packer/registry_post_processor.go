@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strings"
 
@@ -34,11 +35,20 @@ func (p *RegistryPostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
+	// This is a bit of a hack for now to denote that this pp should just update the state of a build in PAR.
+	// TODO create an actual post-processor that we can embed here that will do the updating and printing.
 	if p.PostProcessor == nil {
 		if parErr := p.ArtifactMetadataPublisher.PublishBuildStatus(ctx, p.BuilderType, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
-			log.Printf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", p.BuilderType, parErr)
+			return nil, true, false, fmt.Errorf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", p.BuilderType, parErr)
 		}
-		return nil, true, false, nil
+
+		r := &RegistryArtifact{
+			BuildName:   p.BuilderType,
+			BucketSlug:  p.ArtifactMetadataPublisher.Slug,
+			IterationID: p.ArtifactMetadataPublisher.Iteration.ID,
+		}
+
+		return r, true, false, nil
 	}
 
 	source, keep, override, err := p.PostProcessor.PostProcess(ctx, ui, source)

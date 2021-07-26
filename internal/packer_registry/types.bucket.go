@@ -151,8 +151,9 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		}
 	}
 
-	log.Println("WILKEN", b.Iteration.expectedBuilds)
-	log.Println("WILKEN", toCreate)
+	//TODO handle the case were an iteration is completed. Packer should exit an inform the user
+	// that artifacts already exists for the fingerprint associated with the iteration.
+
 	for _, buildName := range toCreate {
 		wg.Add(1)
 		go func(name string) {
