@@ -114,6 +114,13 @@
     "version": "latest"
   },
   {
+    "title": "Kamatera",
+    "path": "kamatera",
+    "repo": "kamatera/packer-plugin-kamatera",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Linode",
     "path": "linode",
     "repo": "hashicorp/packer-plugin-linode",
