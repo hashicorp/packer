@@ -42,7 +42,7 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
 	// JSON can only configure its Bucket through Env. variables so if not in PAR mode
 	// we don't really care if bucket is nil or set to a bunch of zero values.
-	if !env.HasHCPCredentials() {
+	if !env.IsPAREnabled() {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
 				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",

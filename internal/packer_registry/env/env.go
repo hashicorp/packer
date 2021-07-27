@@ -31,3 +31,8 @@ func HasHCPCredentials() bool {
 
 	return true
 }
+
+func IsPAREnabled() bool {
+	_, ok := os.LookupEnv(HCPPackerRegistry)
+	return ok
+}

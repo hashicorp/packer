@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
 )
 
 const (
@@ -180,7 +179,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 	}
 
-	if build.HCPPackerRegistry != nil && env.HasHCPCredentials() {
+	if build.HCPPackerRegistry != nil {
 		var err error
 		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
 			TemplateBaseDir: cfg.Basedir,
@@ -193,7 +192,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			})
 		}
 		cfg.bucket.LoadDefaultSettingsFromEnv()
-		if build.Name != "" {
+		if cfg.bucket.Slug == "" && build.Name != "" {
 			cfg.bucket.Slug = build.Name
 		}
 		build.HCPPackerRegistry.WriteBucketConfig(cfg.bucket)

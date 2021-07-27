@@ -142,7 +142,7 @@ func (core *Core) Initialize() error {
 		packersdk.LogSecretFilter.Set(secret)
 	}
 
-	if env.HasHCPCredentials() {
+	if env.IsPAREnabled() {
 		var err error
 		core.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
 			TemplateBaseDir: filepath.Dir(core.Template.Path),
@@ -390,7 +390,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
-			if env.HasHCPCredentials() && c.bucket != nil {
+			if env.IsPAREnabled() && c.bucket != nil {
 				postProcessor = &RegistryPostProcessor{
 					BuilderType:               n,
 					ArtifactMetadataPublisher: c.bucket,
@@ -414,7 +414,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 		postProcessors = append(postProcessors, current)
 	}
-	if env.HasHCPCredentials() && c.bucket != nil {
+	if env.IsPAREnabled() && c.bucket != nil {
 		postProcessors = append(postProcessors, []CoreBuildPostProcessor{
 			{
 				PostProcessor: &RegistryPostProcessor{
@@ -427,7 +427,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// TODO hooks one day
 
-	if env.HasHCPCredentials() && c.bucket != nil {
+	if env.IsPAREnabled() && c.bucket != nil {
 		builder = &RegistryBuilder{
 			Name:                      n,
 			ArtifactMetadataPublisher: c.bucket,
