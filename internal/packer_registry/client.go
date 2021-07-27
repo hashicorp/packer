@@ -8,6 +8,7 @@ import (
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
+	"github.com/hashicorp/packer/internal/packer_registry/env"
 )
 
 // Client is an HCP client capable of making requests on behalf of a service principal
@@ -27,6 +28,13 @@ type Client struct {
 // Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
 // Upon error a HCPClientError will be returned.
 func NewClient() (*Client, error) {
+	if !env.HasHCPCredentials() {
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        fmt.Errorf("the client authentication requires both HCP_CLIENT_ID and HCP_CLIENT_SECRET environment variables to be set"),
+		}
+	}
+
 	cl, err := httpclient.New(httpclient.Config{})
 	if err != nil {
 		return nil, &ClientError{
