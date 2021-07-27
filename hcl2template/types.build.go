@@ -196,7 +196,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		if build.Name != "" {
 			cfg.bucket.Slug = build.Name
 		}
-		build.HCPPackerRegistry.WriteBucket(cfg.bucket)
+		build.HCPPackerRegistry.WriteBucketConfig(cfg.bucket)
 	}
 
 	for _, buildFrom := range b.FromSources {

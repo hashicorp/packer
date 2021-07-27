@@ -8,15 +8,17 @@ import (
 
 type HCPPackerRegistryBlock struct {
 	Description string
+	Labels      map[string]string
 
 	HCL2Ref HCL2Ref
 }
 
-func (b *HCPPackerRegistryBlock) WriteBucket(bucket *packerregistry.Bucket) {
+func (b *HCPPackerRegistryBlock) WriteBucketConfig(bucket *packerregistry.Bucket) {
 	if b == nil {
 		return
 	}
 	bucket.Description = b.Description
+	bucket.Labels = b.Labels
 }
 
 func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
@@ -24,8 +26,9 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	body := block.Body
 
 	var b struct {
-		Description string   `hcl:"description,optional"`
-		Config      hcl.Body `hcl:",remain"`
+		Description string            `hcl:"description,optional"`
+		Labels      map[string]string `hcl:"labels,optional"`
+		Config      hcl.Body          `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(body, nil, &b)
 	if diags.HasErrors() {
@@ -33,6 +36,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	}
 
 	par.Description = b.Description
+	par.Labels = b.Labels
 
 	return par, diags
 }
