@@ -10,19 +10,11 @@ import (
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 )
 
-// ClientConfig specifies configuration for the client that interacts with HCP
-type ClientConfig struct {
-	ClientID     string
-	ClientSecret string
-}
-
 // Client is an HCP client capable of making requests on behalf of a service principal
 type Client struct {
-	Config ClientConfig
-
+	Packer       packerSvc.ClientService
 	Organization organizationSvc.ClientService
 	Project      projectSvc.ClientService
-	Packer       packerSvc.ClientService
 
 	// OrganizationID  is the organization unique identifier on HCP.
 	OrganizationID string
@@ -32,10 +24,9 @@ type Client struct {
 }
 
 // NewClient returns an authenticated client to a HCP Packer Registry.
-// Client authentication requires the following environment variables be set HCP_CLIENT_ID, HCP_CLIENT_SECRET, and HCP_PACKER_REGISTRY.
-// if not explicitly provided via a valid ClientConfig cfg.
+// Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
 // Upon error a HCPClientError will be returned.
-func NewClient(cfg ClientConfig) (*Client, error) {
+func NewClient() (*Client, error) {
 	cl, err := httpclient.New(httpclient.Config{})
 	if err != nil {
 		return nil, &ClientError{
@@ -48,14 +39,19 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 		Packer:       packerSvc.New(cl, nil),
 		Organization: organizationSvc.New(cl, nil),
 		Project:      projectSvc.New(cl, nil),
-		Config:       cfg,
 	}
 
 	if err := client.loadOrganizationID(); err != nil {
-		return nil, err
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        err,
+		}
 	}
 	if err := client.loadProjectID(); err != nil {
-		return nil, err
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        err,
+		}
 	}
 
 	return client, nil

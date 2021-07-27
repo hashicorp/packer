@@ -19,7 +19,6 @@ type Bucket struct {
 	Description string
 	Destination string
 	Labels      map[string]string
-	Config      ClientConfig
 	*Iteration
 	client *Client
 }
@@ -46,7 +45,6 @@ func (b *Bucket) Validate() error {
 	if b.Slug == "" {
 		return fmt.Errorf("no Packer bucket name defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerBucket)
 	}
-
 	return nil
 }
 
@@ -177,7 +175,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
-	registryClient, err := NewClient(b.Config)
+	registryClient, err := NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
 	}
@@ -328,14 +326,6 @@ func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
 
 // Load defaults from environment variables
 func (b *Bucket) LoadDefaultSettingsFromEnv() {
-	if b.Config.ClientID == "" {
-		b.Config.ClientID = os.Getenv(env.HCPClientID)
-	}
-
-	if b.Config.ClientSecret == "" {
-		b.Config.ClientSecret = os.Getenv(env.HCPClientSecret)
-	}
-
 	// Configure HCP registry destination
 	if b.Slug == "" {
 		b.Slug = os.Getenv(env.HCPPackerBucket)
