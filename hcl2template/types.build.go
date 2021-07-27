@@ -22,6 +22,8 @@ const (
 	buildPostProcessorLabel = "post-processor"
 
 	buildPostProcessorsLabel = "post-processors"
+
+	buildHCPPackerRegistryLabel = "hcp_packer_registry"
 )
 
 var buildSchema = &hcl.BodySchema{
@@ -32,6 +34,7 @@ var buildSchema = &hcl.BodySchema{
 		{Type: buildErrorCleanupProvisionerLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorsLabel, LabelNames: []string{}},
+		{Type: buildHCPPackerRegistryLabel},
 	},
 }
 
@@ -57,6 +60,8 @@ type BuildBlock struct {
 	// A description of what this build does, it could be used in a inspect
 	// call for example.
 	Description string
+
+	HCPPackerRegistry *HCPPackerRegistryBlock
 
 	// Sources is the list of sources that we want to start in this build block.
 	Sources []SourceUseBlock
@@ -99,49 +104,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Name = b.Name
 	build.Description = b.Description
 
-	// TODO if hcp_packer_registry block defined create bucket using the config specified otherwise
-	// load defaults from ENV
-	// if config has values => override the env.
-	if env.InPARMode() {
-		var err error
-		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
-			TemplateBaseDir: cfg.Basedir,
-		})
-		cfg.bucket.LoadDefaultSettingsFromEnv()
-		if build.Name != "" {
-			cfg.bucket.Slug = build.Name
-		}
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
-				Detail:   fmt.Sprintf("%s", err),
-				Severity: hcl.DiagError,
-			})
-		}
-	}
-
-	for _, buildFrom := range b.FromSources {
-		ref := sourceRefFromString(buildFrom)
-
-		if ref == NoSource ||
-			!hclsyntax.ValidIdentifier(ref.Type) ||
-			!hclsyntax.ValidIdentifier(ref.Name) {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Invalid " + sourceLabel + " reference",
-				Detail: "A " + sourceLabel + " type is made of three parts that are" +
-					"split by a dot `.`; each part must start with a letter and " +
-					"may contain only letters, digits, underscores, and dashes." +
-					"A valid source reference looks like: `source.type.name`", Subject: block.DefRange.Ptr(),
-			})
-			continue
-		}
-
-		// source with no body
-		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
-		cfg.bucket.RegisterBuildForComponent(ref.String())
-	}
-
 	body = b.Config
 	content, moreDiags := body.Content(buildSchema)
 	diags = append(diags, moreDiags...)
@@ -150,6 +112,13 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	}
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case buildHCPPackerRegistryLabel:
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			build.HCPPackerRegistry = hcpPackerRegistry
 		case sourceLabel:
 			ref, moreDiags := p.decodeBuildSource(block)
 			diags = append(diags, moreDiags...)
@@ -209,6 +178,47 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				build.PostProcessorsLists = append(build.PostProcessorsLists, postProcessors)
 			}
 		}
+	}
+
+	if build.HCPPackerRegistry != nil || env.InPARMode() {
+		var err error
+		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
+			TemplateBaseDir: cfg.Basedir,
+		})
+		if err != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+				Detail:   fmt.Sprintf("%s", err),
+				Severity: hcl.DiagError,
+			})
+		}
+		cfg.bucket.LoadDefaultSettingsFromEnv()
+		if build.Name != "" {
+			cfg.bucket.Slug = build.Name
+		}
+		build.HCPPackerRegistry.WriteBucket(cfg.bucket)
+	}
+
+	for _, buildFrom := range b.FromSources {
+		ref := sourceRefFromString(buildFrom)
+
+		if ref == NoSource ||
+			!hclsyntax.ValidIdentifier(ref.Type) ||
+			!hclsyntax.ValidIdentifier(ref.Name) {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid " + sourceLabel + " reference",
+				Detail: "A " + sourceLabel + " type is made of three parts that are" +
+					"split by a dot `.`; each part must start with a letter and " +
+					"may contain only letters, digits, underscores, and dashes." +
+					"A valid source reference looks like: `source.type.name`", Subject: block.DefRange.Ptr(),
+			})
+			continue
+		}
+
+		// source with no body
+		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
+		cfg.bucket.RegisterBuildForComponent(ref.String())
 	}
 
 	return build, diags
