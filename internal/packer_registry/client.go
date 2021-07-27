@@ -1,11 +1,9 @@
 package packer_registry
 
 import (
-	"errors"
-
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
+	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
+	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 )
 
@@ -13,6 +11,15 @@ import (
 type ClientConfig struct {
 	ClientID     string
 	ClientSecret string
+}
+
+// Client is an HCP client capable of making requests on behalf of a service principal
+type Client struct {
+	Config ClientConfig
+
+	Organization organizationSvc.ClientService
+	Project      projectSvc.ClientService
+	Packer       packerSvc.ClientService
 
 	// OrganizationID  is the organization unique identifier on HCP.
 	OrganizationID string
@@ -21,46 +28,11 @@ type ClientConfig struct {
 	ProjectID string
 }
 
-func (cfg ClientConfig) Validate() error {
-	if cfg.OrganizationID == "" {
-		return &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        errors.New(`no valid HCP Organization ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`),
-		}
-
-	}
-
-	if cfg.ProjectID == "" {
-		return &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        errors.New(`no valid HCP Project ID found, check that HCP_PACKER_REGISTRY is in the format "HCP_ORG_ID/HCP_PROJ_ID"`),
-		}
-	}
-
-	return nil
-}
-
-// Client is an HCP client capable of making requests on behalf of a service principal
-type Client struct {
-	Config ClientConfig
-
-	Organization organization_service.ClientService
-	Project      project_service.ClientService
-	Packer       packerSvc.ClientService
-}
-
 // NewClient returns an authenticated client to a HCP Packer Registry.
 // Client authentication requires the following environment variables be set HCP_CLIENT_ID, HCP_CLIENT_SECRET, and HCP_PACKER_REGISTRY.
 // if not explicitly provided via a valid ClientConfig cfg.
 // Upon error a HCPClientError will be returned.
 func NewClient(cfg ClientConfig) (*Client, error) {
-	if err := cfg.Validate(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
-		}
-	}
-
 	cl, err := httpclient.New(httpclient.Config{})
 	if err != nil {
 		return nil, &ClientError{
@@ -69,10 +41,11 @@ func NewClient(cfg ClientConfig) (*Client, error) {
 		}
 	}
 
-	svc := packerSvc.New(cl, nil)
 	return &Client{
-		Packer: svc,
-		Config: cfg,
+		Packer:       packerSvc.New(cl, nil),
+		Organization: organizationSvc.New(cl, nil),
+		Project:      projectSvc.New(cl, nil),
+		Config:       cfg,
 	}, nil
-
 }
+

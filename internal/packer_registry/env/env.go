@@ -12,11 +12,6 @@ func HasClientSecret() bool {
 	return ok
 }
 
-func HasPackerRegistryDestionation() bool {
-	_, ok := os.LookupEnv(HCPPackerRegistry)
-	return ok
-}
-
 func HasPackerRegistryBucket() bool {
 	_, ok := os.LookupEnv(HCPPackerBucket)
 	return ok
@@ -26,7 +21,6 @@ func InPARMode() bool {
 	checks := []func() bool{
 		HasClientID,
 		HasClientSecret,
-		HasPackerRegistryDestionation,
 	}
 
 	for _, check := range checks {

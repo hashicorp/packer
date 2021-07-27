@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
+	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"google.golang.org/grpc/codes"
 )
@@ -48,10 +50,6 @@ func (b *Bucket) Validate() error {
 		return fmt.Errorf("no Packer bucket name defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerBucket)
 	}
 
-	if b.Destination == "" {
-		return fmt.Errorf("no Packer registry defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerRegistry)
-	}
-
 	return nil
 }
 
@@ -68,6 +66,15 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 			return err
 		}
 	}
+
+	if err := b.loadOrganizationIDFromCredentials(); err != nil {
+		return err
+	}
+	if err := b.loadProjectIDFromCredentials(); err != nil {
+		return err
+	}
+
+	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
 
 	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug:  b.Slug,
@@ -175,6 +182,38 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	wg.Wait()
 
 	return errs.ErrorOrNil()
+}
+
+func (b *Bucket) loadOrganizationIDFromCredentials() error {
+	// Get the organization ID.
+	listOrgParams := organization_service.NewOrganizationServiceListParams()
+	listOrgResp, err := b.client.Organization.OrganizationServiceList(listOrgParams, nil)
+	if err != nil {
+		return fmt.Errorf("unable to fetch organization list: %v", err)
+	}
+	orgLen := len(listOrgResp.Payload.Organizations)
+	if orgLen != 1 {
+		return fmt.Errorf("unexpected number of organizations: expected 1, actual: %v", orgLen)
+	}
+	b.client.OrganizationID = listOrgResp.Payload.Organizations[0].ID
+	return nil
+}
+
+func (b *Bucket) loadProjectIDFromCredentials() error {
+	// Get the project using the organization ID.
+	listProjParams := project_service.NewProjectServiceListParams()
+	listProjParams.ScopeID = &b.client.OrganizationID
+	scopeType := string(rmmodels.HashicorpCloudResourcemanagerResourceIDResourceTypeORGANIZATION)
+	listProjParams.ScopeType = &scopeType
+	listProjResp, err := b.client.Project.ProjectServiceList(listProjParams, nil)
+	if err != nil {
+		return fmt.Errorf("unable to fetch project id: %v", err)
+	}
+	if len(listProjResp.Payload.Projects) > 1 {
+		return fmt.Errorf("this version of Packer does not support multiple projects, upgrade to a later provider version and set a project ID on the provider/resources")
+	}
+	b.client.ProjectID = listProjResp.Payload.Projects[0].ID
+	return nil
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
@@ -342,26 +381,6 @@ func (b *Bucket) LoadDefaultSettingsFromEnv() {
 	// Configure HCP registry destination
 	if b.Slug == "" {
 		b.Slug = os.Getenv(env.HCPPackerBucket)
-	}
-
-	loc := os.Getenv(env.HCPPackerRegistry)
-	locParts := strings.Split(loc, "/")
-	if len(locParts) != 2 {
-		// we want an error here. Or at least when we try to create the registry client we fail
-		return
-	}
-	orgID, projID := locParts[0], locParts[1]
-
-	if b.Destination == "" {
-		b.Destination = loc
-	}
-
-	if b.Config.OrganizationID == "" {
-		b.Config.OrganizationID = orgID
-	}
-
-	if b.Config.ProjectID == "" {
-		b.Config.ProjectID = projID
 	}
 
 	// Set some iteration values. For Packer RunUUID should always be set.

@@ -14,8 +14,8 @@ import (
 func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) (string, error) {
 
 	params := packerSvc.NewCreateBucketParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
 	resp, err := client.Packer.CreateBucket(params, nil, func(*runtime.ClientOperation) {})
@@ -41,8 +41,8 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	}
 
 	params := packerSvc.NewUpdateBucketParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.Body = &models.HashicorpCloudPackerUpdateBucketRequest{
 		Description: input.Description,
@@ -62,8 +62,8 @@ input: *models.HashicorpCloudPackerCreateIterationRequest{BucketSlug: "bucket na
 func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (string, error) {
 	// Create/find iteration
 	params := packerSvc.NewCreateIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.Body = input
 
@@ -78,8 +78,8 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (string, error) {
 	// Create/find iteration
 	params := packerSvc.NewGetIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketslug
 	// identifier can be either fingerprint, iterationid, or incremental version
 	// for now, we only care about fingerprint so we're hardcoding it.
@@ -95,8 +95,8 @@ func GetIteration(ctx context.Context, client *Client, bucketslug string, finger
 
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
 	params := packerSvc.NewCreateBuildParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.BuildIterationID = input.Build.IterationID
 	params.Body = input
@@ -111,8 +111,8 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 
 func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iterationID string) ([]*models.HashicorpCloudPackerBuild, error) {
 	params := packerSvc.NewListBuildsParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
 	params.IterationID = iterationID
 
@@ -127,8 +127,8 @@ func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iteratio
 func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {
 	params := packerSvc.NewUpdateBuildParamsWithContext(ctx)
 	params.BuildID = input.BuildID
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
 	resp, err := client.Packer.UpdateBuild(params, nil, func(*runtime.ClientOperation) {})
