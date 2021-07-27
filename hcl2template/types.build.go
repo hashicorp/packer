@@ -180,7 +180,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 	}
 
-	if build.HCPPackerRegistry != nil || env.InPARMode() {
+	if build.HCPPackerRegistry != nil && env.HasHCPCredentials() {
 		var err error
 		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
 			TemplateBaseDir: cfg.Basedir,

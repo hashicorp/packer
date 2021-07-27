@@ -17,7 +17,7 @@ func HasPackerRegistryBucket() bool {
 	return ok
 }
 
-func InPARMode() bool {
+func HasHCPCredentials() bool {
 	checks := []func() bool{
 		HasClientID,
 		HasClientSecret,
