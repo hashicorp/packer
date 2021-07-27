@@ -10,9 +10,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
-	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"google.golang.org/grpc/codes"
 )
@@ -65,13 +62,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		if err := b.connect(); err != nil {
 			return err
 		}
-	}
-
-	if err := b.loadOrganizationIDFromCredentials(); err != nil {
-		return err
-	}
-	if err := b.loadProjectIDFromCredentials(); err != nil {
-		return err
 	}
 
 	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
@@ -182,38 +172,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	wg.Wait()
 
 	return errs.ErrorOrNil()
-}
-
-func (b *Bucket) loadOrganizationIDFromCredentials() error {
-	// Get the organization ID.
-	listOrgParams := organization_service.NewOrganizationServiceListParams()
-	listOrgResp, err := b.client.Organization.OrganizationServiceList(listOrgParams, nil)
-	if err != nil {
-		return fmt.Errorf("unable to fetch organization list: %v", err)
-	}
-	orgLen := len(listOrgResp.Payload.Organizations)
-	if orgLen != 1 {
-		return fmt.Errorf("unexpected number of organizations: expected 1, actual: %v", orgLen)
-	}
-	b.client.OrganizationID = listOrgResp.Payload.Organizations[0].ID
-	return nil
-}
-
-func (b *Bucket) loadProjectIDFromCredentials() error {
-	// Get the project using the organization ID.
-	listProjParams := project_service.NewProjectServiceListParams()
-	listProjParams.ScopeID = &b.client.OrganizationID
-	scopeType := string(rmmodels.HashicorpCloudResourcemanagerResourceIDResourceTypeORGANIZATION)
-	listProjParams.ScopeType = &scopeType
-	listProjResp, err := b.client.Project.ProjectServiceList(listProjParams, nil)
-	if err != nil {
-		return fmt.Errorf("unable to fetch project id: %v", err)
-	}
-	if len(listProjResp.Payload.Projects) > 1 {
-		return fmt.Errorf("this version of Packer does not support multiple projects, upgrade to a later provider version and set a project ID on the provider/resources")
-	}
-	b.client.ProjectID = listProjResp.Payload.Projects[0].ID
-	return nil
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
