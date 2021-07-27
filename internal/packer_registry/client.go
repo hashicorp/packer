@@ -91,7 +91,7 @@ func (c *Client) loadProjectID() error {
 		return fmt.Errorf("unable to fetch project id: %v", err)
 	}
 	if len(listProjResp.Payload.Projects) > 1 {
-		return fmt.Errorf("this version of Packer does not support multiple projects, upgrade to a later provider version and set a project ID on the provider/resources")
+		return fmt.Errorf("this version of Packer does not support multiple projects")
 	}
 	c.ProjectID = listProjResp.Payload.Projects[0].ID
 	return nil
