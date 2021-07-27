@@ -421,6 +421,41 @@ func TestParse_build(t *testing.T) {
 			},
 			false,
 		},
+		{"hcp packer registry build",
+			defaultParser,
+			parseTestArgs{"testdata/build/hcp_packer_registry.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						HCPPackerRegistry: &HCPPackerRegistryBlock{
+							Description: "Some description\n",
+							Labels:      map[string]string{"foo": "bar"},
+						},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					Type:           "virtualbox-iso.ubuntu-1204",
+					Prepared:       true,
+					Builder:        emptyMockBuilder,
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
+		},
 	}
 	testParse(t, tests)
 }

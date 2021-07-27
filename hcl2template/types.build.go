@@ -104,6 +104,28 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Name = b.Name
 	build.Description = b.Description
 
+	for _, buildFrom := range b.FromSources {
+		ref := sourceRefFromString(buildFrom)
+
+		if ref == NoSource ||
+			!hclsyntax.ValidIdentifier(ref.Type) ||
+			!hclsyntax.ValidIdentifier(ref.Name) {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid " + sourceLabel + " reference",
+				Detail: "A " + sourceLabel + " type is made of three parts that are" +
+					"split by a dot `.`; each part must start with a letter and " +
+					"may contain only letters, digits, underscores, and dashes." +
+					"A valid source reference looks like: `source.type.name`",
+				Subject: block.DefRange.Ptr(),
+			})
+			continue
+		}
+
+		// source with no body
+		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
+	}
+
 	body = b.Config
 	content, moreDiags := body.Content(buildSchema)
 	diags = append(diags, moreDiags...)
@@ -197,28 +219,10 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			cfg.bucket.Slug = build.Name
 		}
 		build.HCPPackerRegistry.WriteBucketConfig(cfg.bucket)
-	}
 
-	for _, buildFrom := range b.FromSources {
-		ref := sourceRefFromString(buildFrom)
-
-		if ref == NoSource ||
-			!hclsyntax.ValidIdentifier(ref.Type) ||
-			!hclsyntax.ValidIdentifier(ref.Name) {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Invalid " + sourceLabel + " reference",
-				Detail: "A " + sourceLabel + " type is made of three parts that are" +
-					"split by a dot `.`; each part must start with a letter and " +
-					"may contain only letters, digits, underscores, and dashes." +
-					"A valid source reference looks like: `source.type.name`", Subject: block.DefRange.Ptr(),
-			})
-			continue
+		for _, source := range build.Sources {
+			cfg.bucket.RegisterBuildForComponent(source.String())
 		}
-
-		// source with no body
-		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
-		cfg.bucket.RegisterBuildForComponent(ref.String())
 	}
 
 	return build, diags
