@@ -14,6 +14,9 @@ type HCPPackerRegistryBlock struct {
 }
 
 func (b *HCPPackerRegistryBlock) WriteBucketConfig(bucket *packerregistry.Bucket) {
+	if b == nil {
+		return
+	}
 	bucket.Description = b.Description
 	bucket.Labels = b.Labels
 }
