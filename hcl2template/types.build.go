@@ -61,6 +61,7 @@ type BuildBlock struct {
 	// call for example.
 	Description string
 
+	// HCPPackerRegistry contains the configuration for publishing the image to the HCP Packer Registry.
 	HCPPackerRegistry *HCPPackerRegistryBlock
 
 	// Sources is the list of sources that we want to start in this build block.

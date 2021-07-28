@@ -2,16 +2,19 @@ package hcl2template
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 )
 
 type HCPPackerRegistryBlock struct {
+	// Bucket description
 	Description string
-	Labels      map[string]string
+	// Bucket labels
+	Labels map[string]string
 
-	HCL2Ref HCL2Ref
+	HCL2Ref
 }
 
 func (b *HCPPackerRegistryBlock) WriteBucketConfig(bucket *packerregistry.Bucket) {
