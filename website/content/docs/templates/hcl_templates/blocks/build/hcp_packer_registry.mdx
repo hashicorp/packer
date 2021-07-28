@@ -11,7 +11,7 @@ The `hcp_packer_registry` block allows operators the ability to customize the me
 HCP Packer Registry. It configures the details of an image that is created or updated within HCP PAR.
 
 The presence of a `hcp_packer_registry` block will enable HCP PAR mode and all the builds within that build block
-will be pushed to the remote registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`). If no HCP credentials are set Packer will fail the build and exit immediately to avoid any potential artifact drift between the build providers and the Packer registry. 
+will be pushed to the remote registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`). If no HCP credentials are set Packer will fail the build and exit immediately to avoid any potential artifact drift between the build providers and the Packer registry.
 
 ```hcl
 # file: builds.pkr.hcl
@@ -21,9 +21,9 @@ source "file" "basic-example" {
 }
 
 build {
-   name = "example-artifact"
-
    hcp_packer_registry {
+    slug = "sample-artifact"
+
     description = <<EOT
 Some nice description about the image which artifact is being published to HCP Packer Registry. =D
     EOT
@@ -38,9 +38,12 @@ Some nice description about the image which artifact is being published to HCP P
 }
 ```
 
+- `slug` (string) - The image name when published to PAR. Should always be the same, otherwise a new image will be created.
+  Defaults to `build.name` if not set. Will be overwritten if `HCP_PACKER_BUCKET_NAME` is set.
+
 - `description` (string) - The image description. Useful to provide a summary about the image. The description will appear
   at the image's main page and will be updated whenever it is changed and a new build is pushed to HCP PAR. Should contain
-  a maximum of 255 characters.
+  a maximum of 255 characters. Defaults to `build.description` if not set.
 
 - `labels` (map[string]string) - Map of labels. Can provide any information, such as tools versions
   (e.g. go 1.16, python 3.5, etc...). The labels will appear at the image's main page and will be updated
