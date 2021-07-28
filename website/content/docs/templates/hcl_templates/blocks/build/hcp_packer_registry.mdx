@@ -11,7 +11,7 @@ The `hcp_packer_registry` block allows operators the ability to customize the me
 HCP Packer Registry. It configures the details of an image that is created or updated within HCP PAR.
 
 The presence of a `hcp_packer_registry` block will enable HCP PAR mode and all the builds within that build block
-will be pushed to the remote registry as far the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`).
+will be pushed to the remote registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`). If no HCP credentials are set Packer will fail the build and exit immediately to avoid any potential artifact drift between the build providers and the Packer registry. 
 
 ```hcl
 # file: builds.pkr.hcl
