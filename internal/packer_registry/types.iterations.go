@@ -9,19 +9,43 @@ import (
 )
 
 type Iteration struct {
-	ID             string
-	AncestorSlug   string
-	Fingerprint    string
-	RunUUID        string
-	Labels         map[string]string
-	builds         sync.Map
-	expectedBuilds []string
+	ID               string
+	AncestorSlug     string
+	Fingerprint      string
+	RunUUID          string
+	Labels           map[string]string
+	builds           sync.Map
+	registeredBuilds []string
 }
 
 type IterationOptions struct {
 	TemplateBaseDir string
 }
 
+// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
+func NewIteration(opts IterationOptions) (*Iteration, error) {
+	i := Iteration{
+		registeredBuilds: make([]string, 0),
+	}
+
+	// By default we try to load a Fingerprint from the environment variable.
+	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
+	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
+
+	// get a Git SHA
+	if i.Fingerprint == "" {
+		fp, err := GetGitFingerprint(opts)
+		if err != nil {
+			return nil, err
+		}
+		i.Fingerprint = fp
+	}
+
+	return &i, nil
+}
+
+// GetGitFingerprint returns the HEAD commit for some template dir defined in opt.TemplateBaseDir.
+// If the base directory is not under version control an error is returned.
 func GetGitFingerprint(opts IterationOptions) (string, error) {
 	r, err := git.PlainOpenWithOptions(opts.TemplateBaseDir, &git.PlainOpenOptions{
 		DetectDotGit: true,
@@ -43,26 +67,4 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	ref, _ := r.Head()
 	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
 	return ref.Hash().String(), nil
-}
-
-// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by the HCP Packer registry.
-func NewIteration(opts IterationOptions) (*Iteration, error) {
-	i := Iteration{
-		expectedBuilds: make([]string, 0),
-	}
-
-	// By default we try to load a Fingerprint from the environment variable.
-	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
-	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
-
-	// get a Git SHA
-	if i.Fingerprint == "" {
-		fp, err := GetGitFingerprint(opts)
-		if err != nil {
-			return nil, err
-		}
-		i.Fingerprint = fp
-	}
-
-	return &i, nil
 }
