@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"google.golang.org/grpc/codes"
@@ -18,7 +17,7 @@ func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
-	resp, err := client.Packer.CreateBucket(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.CreateBucket(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +47,7 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 		Description: input.Description,
 		Labels:      input.Labels,
 	}
-	_, err = client.Packer.UpdateBucket(params, nil, func(*runtime.ClientOperation) {})
+	_, err = client.Packer.UpdateBucket(params, nil)
 
 	return err
 }
@@ -67,7 +66,7 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	params.BucketSlug = input.BucketSlug
 	params.Body = input
 
-	it, err := client.Packer.CreateIteration(params, nil, func(*runtime.ClientOperation) {})
+	it, err := client.Packer.CreateIteration(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -85,7 +84,7 @@ func GetIteration(ctx context.Context, client *Client, bucketslug string, finger
 	// for now, we only care about fingerprint so we're hardcoding it.
 	params.Fingerprint = &fingerprint
 
-	it, err := client.Packer.GetIteration(params, nil, func(*runtime.ClientOperation) {})
+	it, err := client.Packer.GetIteration(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -101,7 +100,7 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	params.BuildIterationID = input.Build.IterationID
 	params.Body = input
 
-	resp, err := client.Packer.CreateBuild(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.CreateBuild(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -116,7 +115,7 @@ func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iteratio
 	params.BucketSlug = bucketSlug
 	params.IterationID = iterationID
 
-	resp, err := client.Packer.ListBuilds(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.ListBuilds(params, nil)
 	if err != nil {
 		return []*models.HashicorpCloudPackerBuild{}, err
 	}
@@ -131,7 +130,7 @@ func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
-	resp, err := client.Packer.UpdateBuild(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.UpdateBuild(params, nil)
 	if err != nil {
 		return "", err
 	}

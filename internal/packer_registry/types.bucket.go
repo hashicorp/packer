@@ -120,7 +120,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 				found = true
 				log.Printf("build of component type %s already exists; skipping the create call", expected)
 
-				if *existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
+				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
 					// We also need to remove the builds that are _complete_ from the
 					// Iteration's expectedBuilds so we don't overwrite them.
 					//b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds[:i], b.Iteration.expectedBuilds[i+1:]...)
@@ -215,7 +215,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			PackerRunUUID: buildToUpdate.RunUUID,
 			Labels:        buildToUpdate.Metadata,
-			Status:        &status,
+			Status:        status,
 		},
 	}
 
@@ -254,7 +254,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 			ComponentType: name,
 			IterationID:   b.Iteration.ID,
 			PackerRunUUID: b.Iteration.RunUUID,
-			Status:        &status,
+			Status:        status,
 		},
 	}
 
