@@ -113,7 +113,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	//[]string{a,b}
 	// remove the iteration's expected builds that already exist.
 	var toCreate []string
-	for _, expected := range b.Iteration.expectedBuilds {
+	for _, expected := range b.Iteration.registeredBuilds {
 		var found bool
 		for _, existing := range existingBuilds {
 			if existing.ComponentType == expected {
@@ -191,7 +191,7 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 	if _, ok := b.Iteration.builds.Load(sourceName); ok {
 		return
 	}
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, sourceName)
+	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, sourceName)
 }
 
 func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
