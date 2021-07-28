@@ -1,6 +1,9 @@
 package env
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 func HasClientID() bool {
 	_, ok := os.LookupEnv(HCPClientID)
@@ -12,21 +15,15 @@ func HasClientSecret() bool {
 	return ok
 }
 
-func HasPackerRegistryDestionation() bool {
-	_, ok := os.LookupEnv(HCPPackerRegistry)
-	return ok
-}
-
 func HasPackerRegistryBucket() bool {
 	_, ok := os.LookupEnv(HCPPackerBucket)
 	return ok
 }
 
-func InPARMode() bool {
+func HasHCPCredentials() bool {
 	checks := []func() bool{
 		HasClientID,
 		HasClientSecret,
-		HasPackerRegistryDestionation,
 	}
 
 	for _, check := range checks {
@@ -36,4 +33,9 @@ func InPARMode() bool {
 	}
 
 	return true
+}
+
+func IsPAREnabled() bool {
+	val, ok := os.LookupEnv(HCPPackerRegistry)
+	return ok && strings.ToLower(val) != "off" && val != "0"
 }
