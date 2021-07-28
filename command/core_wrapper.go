@@ -41,7 +41,7 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
 	bucket := c.Core.GetRegistryBucket()
 
-	// If at this point the bucket is nil, it means PAR is not enabled
+	// If at this point the bucket is nil, it means the HCP Packer registry is not enabled
 	if bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{

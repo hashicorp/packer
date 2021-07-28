@@ -211,8 +211,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 	}
 
-	// Creates a bucket if either a hcp_packer_registry block is set or PAR is enabled via
-	// environment variable
+	// Creates a bucket if either a hcp_packer_registry block is set or the HCP
+	// Packer registry is enabled via environment variable
 	if build.HCPPackerRegistry != nil || env.IsPAREnabled() {
 		var err error
 		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
