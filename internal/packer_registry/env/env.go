@@ -1,6 +1,9 @@
 package env
 
-import "os"
+import (
+	"os"
+	"strings"
+)
 
 func HasClientID() bool {
 	_, ok := os.LookupEnv(HCPClientID)
@@ -33,6 +36,6 @@ func HasHCPCredentials() bool {
 }
 
 func IsPAREnabled() bool {
-	_, ok := os.LookupEnv(HCPPackerRegistry)
-	return ok
+	val, ok := os.LookupEnv(HCPPackerRegistry)
+	return ok && strings.ToLower(val) != "off" && val != "0"
 }
