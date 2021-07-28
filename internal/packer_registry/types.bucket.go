@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"sync"
 
 	"github.com/hashicorp/go-multierror"
@@ -20,7 +19,6 @@ type Bucket struct {
 	Description string
 	Destination string
 	Labels      map[string]string
-	Config      ClientConfig
 	*Iteration
 	client *Client
 }
@@ -47,11 +45,6 @@ func (b *Bucket) Validate() error {
 	if b.Slug == "" {
 		return fmt.Errorf("no Packer bucket name defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerBucket)
 	}
-
-	if b.Destination == "" {
-		return fmt.Errorf("no Packer registry defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerRegistry)
-	}
-
 	return nil
 }
 
@@ -68,6 +61,8 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 			return err
 		}
 	}
+
+	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
 
 	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug:  b.Slug,
@@ -125,7 +120,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 				found = true
 				log.Printf("build of component type %s already exists; skipping the create call", expected)
 
-				if *existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
+				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
 					// We also need to remove the builds that are _complete_ from the
 					// Iteration's expectedBuilds so we don't overwrite them.
 					//b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds[:i], b.Iteration.expectedBuilds[i+1:]...)
@@ -180,7 +175,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
-	registryClient, err := NewClient(b.Config)
+	registryClient, err := NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
 	}
@@ -220,7 +215,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			PackerRunUUID: buildToUpdate.RunUUID,
 			Labels:        buildToUpdate.Metadata,
-			Status:        &status,
+			Status:        status,
 		},
 	}
 
@@ -259,7 +254,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 			ComponentType: name,
 			IterationID:   b.Iteration.ID,
 			PackerRunUUID: b.Iteration.RunUUID,
-			Status:        &status,
+			Status:        status,
 		},
 	}
 
@@ -331,37 +326,9 @@ func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
 
 // Load defaults from environment variables
 func (b *Bucket) LoadDefaultSettingsFromEnv() {
-	if b.Config.ClientID == "" {
-		b.Config.ClientID = os.Getenv(env.HCPClientID)
-	}
-
-	if b.Config.ClientSecret == "" {
-		b.Config.ClientSecret = os.Getenv(env.HCPClientSecret)
-	}
-
 	// Configure HCP registry destination
 	if b.Slug == "" {
 		b.Slug = os.Getenv(env.HCPPackerBucket)
-	}
-
-	loc := os.Getenv(env.HCPPackerRegistry)
-	locParts := strings.Split(loc, "/")
-	if len(locParts) != 2 {
-		// we want an error here. Or at least when we try to create the registry client we fail
-		return
-	}
-	orgID, projID := locParts[0], locParts[1]
-
-	if b.Destination == "" {
-		b.Destination = loc
-	}
-
-	if b.Config.OrganizationID == "" {
-		b.Config.OrganizationID = orgID
-	}
-
-	if b.Config.ProjectID == "" {
-		b.Config.ProjectID = projID
 	}
 
 	// Set some iteration values. For Packer RunUUID should always be set.

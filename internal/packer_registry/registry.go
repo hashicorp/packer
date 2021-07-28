@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"google.golang.org/grpc/codes"
@@ -14,11 +13,11 @@ import (
 func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) (string, error) {
 
 	params := packerSvc.NewCreateBucketParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
-	resp, err := client.Packer.CreateBucket(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.CreateBucket(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -41,14 +40,14 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 	}
 
 	params := packerSvc.NewUpdateBucketParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.Body = &models.HashicorpCloudPackerUpdateBucketRequest{
 		Description: input.Description,
 		Labels:      input.Labels,
 	}
-	_, err = client.Packer.UpdateBucket(params, nil, func(*runtime.ClientOperation) {})
+	_, err = client.Packer.UpdateBucket(params, nil)
 
 	return err
 }
@@ -62,12 +61,12 @@ input: *models.HashicorpCloudPackerCreateIterationRequest{BucketSlug: "bucket na
 func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (string, error) {
 	// Create/find iteration
 	params := packerSvc.NewCreateIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.Body = input
 
-	it, err := client.Packer.CreateIteration(params, nil, func(*runtime.ClientOperation) {})
+	it, err := client.Packer.CreateIteration(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -78,14 +77,14 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (string, error) {
 	// Create/find iteration
 	params := packerSvc.NewGetIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketslug
 	// identifier can be either fingerprint, iterationid, or incremental version
 	// for now, we only care about fingerprint so we're hardcoding it.
 	params.Fingerprint = &fingerprint
 
-	it, err := client.Packer.GetIteration(params, nil, func(*runtime.ClientOperation) {})
+	it, err := client.Packer.GetIteration(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -95,13 +94,13 @@ func GetIteration(ctx context.Context, client *Client, bucketslug string, finger
 
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
 	params := packerSvc.NewCreateBuildParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
 	params.BuildIterationID = input.Build.IterationID
 	params.Body = input
 
-	resp, err := client.Packer.CreateBuild(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.CreateBuild(params, nil)
 	if err != nil {
 		return "", err
 	}
@@ -111,12 +110,12 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 
 func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iterationID string) ([]*models.HashicorpCloudPackerBuild, error) {
 	params := packerSvc.NewListBuildsParamsWithContext(ctx)
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
 	params.IterationID = iterationID
 
-	resp, err := client.Packer.ListBuilds(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.ListBuilds(params, nil)
 	if err != nil {
 		return []*models.HashicorpCloudPackerBuild{}, err
 	}
@@ -127,11 +126,11 @@ func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iteratio
 func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {
 	params := packerSvc.NewUpdateBuildParamsWithContext(ctx)
 	params.BuildID = input.BuildID
-	params.LocationOrganizationID = client.Config.OrganizationID
-	params.LocationProjectID = client.Config.ProjectID
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
 	params.Body = input
 
-	resp, err := client.Packer.UpdateBuild(params, nil, func(*runtime.ClientOperation) {})
+	resp, err := client.Packer.UpdateBuild(params, nil)
 	if err != nil {
 		return "", err
 	}

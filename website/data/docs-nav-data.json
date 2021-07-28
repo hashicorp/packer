@@ -76,6 +76,10 @@
                     "path": "templates/hcl_templates/blocks/build"
                   },
                   {
+                    "title": "<code>hcp_packer_registry</code>",
+                    "path": "templates/hcl_templates/blocks/build/hcp_packer_registry"
+                  },
+                  {
                     "title": "<code>source</code>",
                     "path": "templates/hcl_templates/blocks/build/source"
                   },
