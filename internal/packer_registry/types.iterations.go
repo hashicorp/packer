@@ -56,6 +56,7 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 			"template fingerprint using the env var HCP_PACKER_BUILD_FINGERPRINT. "+
 			"Error: %s", err)
 	}
+
 	// The config can be used to retrieve user identity. for example,
 	// c.User.Email. Leaving in but commented because I'm not sure we care
 	// about this identity right now. - Megan
@@ -66,5 +67,6 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	// }
 	ref, _ := r.Head()
 	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
+
 	return ref.Hash().String(), nil
 }
