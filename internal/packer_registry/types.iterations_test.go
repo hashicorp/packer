@@ -30,7 +30,7 @@ func TestNewIteration(t *testing.T) {
 			name:        "using git fingerprint",
 			fingerprint: "4ec004e18e977a5b8a3a28f4b24279b6993d7e7c",
 			setupFn: func() func() {
-				//no:lint
+				//nolint:errcheck
 				git.PlainClone(tempdir("4ec004e18e"), false, &git.CloneOptions{
 					// Archived repo
 					URL:   "https://github.com/hashicorp/packer-builder-vsphere",
@@ -38,7 +38,7 @@ func TestNewIteration(t *testing.T) {
 				})
 
 				return func() {
-					//no:lint
+					//nolint:errcheck
 					os.RemoveAll(tempdir("4ec004e18e"))
 				}
 

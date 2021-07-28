@@ -1,8 +1,6 @@
 package packer_registry
 
 import (
-	"sync"
-
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 )
 
@@ -15,12 +13,6 @@ type Build struct {
 	Metadata      map[string]string
 	Images        []Image
 	Status        models.HashicorpCloudPackerBuildStatus
-}
-
-// Builds a concurrent safe collection of Build entries that can be associated to some Iteration.
-type Builds struct {
-	sync.RWMutex
-	m map[string]*Build
 }
 
 // Image represents an artifact on some external provider (e.g AWS, GCP, Azure) that should be tracked
