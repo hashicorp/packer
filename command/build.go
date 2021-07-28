@@ -158,8 +158,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 	/*
 		Ideal world we want to send all builds for a new iterations.
-		-only flag doesn't work with PAR to start; future only will be allowed to filter only builds not
-		complete in PAR.
+		-only flag doesn't work with the HCP Packer registry to start; future only will be allowed to filter only builds not
+		complete in the HCP Packer registry.
 	*/
 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{

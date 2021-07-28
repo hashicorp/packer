@@ -45,7 +45,7 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	return ref.Hash().String(), nil
 }
 
-// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
+// NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by the HCP Packer registry.
 func NewIteration(opts IterationOptions) (*Iteration, error) {
 	i := Iteration{
 		expectedBuilds: make([]string, 0),

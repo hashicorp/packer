@@ -375,7 +375,7 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				continue
 			}
 
-			// If we are in PAR mode check that only one build block has been parsed.
+			// If we are in PAR (HCP Packer registry) mode check that only one build block has been parsed.
 			// If we've already parsed one fail because PAR does not support more than one build block.
 			// bucket is created upon the call to decodeBuildConfig.
 			if cfg.bucket != nil && len(cfg.Builds) > 0 {
