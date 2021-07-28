@@ -1,6 +1,7 @@
 package hcl2template
 
 import (
+	"fmt"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
@@ -32,6 +33,15 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	}
 	diags := gohcl.DecodeBody(body, nil, &b)
 	if diags.HasErrors() {
+		return nil, diags
+	}
+
+	if len(b.Description) > 255 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf(buildHCPPackerRegistryLabel + ".description should have a maximum length of 255 characters"),
+			Subject:  block.DefRange.Ptr(),
+		})
 		return nil, diags
 	}
 

@@ -140,6 +140,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			if moreDiags.HasErrors() {
 				continue
 			}
+			if build.HCPPackerRegistry != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Only one " + buildHCPPackerRegistryLabel + " is allowed"),
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
 			build.HCPPackerRegistry = hcpPackerRegistry
 		case sourceLabel:
 			ref, moreDiags := p.decodeBuildSource(block)
