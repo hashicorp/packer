@@ -117,6 +117,192 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			},
 			false,
 		},
+		{"set slug in hcp_packer_registry block",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/slug.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Name: "bucket-slug",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{
+							Slug:        "real-bucket-slug",
+							Description: "Some description\n",
+							Labels:      map[string]string{"foo": "bar"},
+						},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					BuildName: "bucket-slug",
+					Type:      "virtualbox-iso.ubuntu-1204",
+					Prepared:  true,
+					Builder: &packer.RegistryBuilder{
+						Name:    "virtualbox-iso.ubuntu-1204",
+						Builder: emptyMockBuilder,
+						ArtifactMetadataPublisher: &packer_registry.Bucket{
+							Slug:        "real-bucket-slug",
+							Description: "Some description\n",
+							Labels:      map[string]string{"foo": "bar"},
+							Iteration: &packer_registry.Iteration{
+								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
+							},
+						},
+					},
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PostProcessor: &packer.RegistryPostProcessor{
+									BuilderType: "virtualbox-iso.ubuntu-1204",
+									ArtifactMetadataPublisher: &packer_registry.Bucket{
+										Slug:        "real-bucket-slug",
+										Description: "Some description\n",
+										Labels:      map[string]string{"foo": "bar"},
+										Iteration: &packer_registry.Iteration{
+											Fingerprint: "ignored-fingerprint",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{"use build description",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/build-description.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Description: "Some build description\n",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{
+							Slug: "bucket-slug",
+						},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder: &packer.RegistryBuilder{
+						Name:    "virtualbox-iso.ubuntu-1204",
+						Builder: emptyMockBuilder,
+						ArtifactMetadataPublisher: &packer_registry.Bucket{
+							Slug:        "bucket-slug",
+							Description: "Some build description\n",
+							Iteration: &packer_registry.Iteration{
+								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
+							},
+						},
+					},
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PostProcessor: &packer.RegistryPostProcessor{
+									BuilderType: "virtualbox-iso.ubuntu-1204",
+									ArtifactMetadataPublisher: &packer_registry.Bucket{
+										Slug:        "bucket-slug",
+										Description: "Some build description\n",
+										Iteration: &packer_registry.Iteration{
+											Fingerprint: "ignored-fingerprint",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{"override build description with hcp_packer_registry description",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/override-build-description.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Description: "Some build description\n",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{
+							Slug:        "bucket-slug",
+							Description: "Some override description\n",
+						},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder: &packer.RegistryBuilder{
+						Name:    "virtualbox-iso.ubuntu-1204",
+						Builder: emptyMockBuilder,
+						ArtifactMetadataPublisher: &packer_registry.Bucket{
+							Slug:        "bucket-slug",
+							Description: "Some override description\n",
+							Iteration: &packer_registry.Iteration{
+								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
+							},
+						},
+					},
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PostProcessor: &packer.RegistryPostProcessor{
+									BuilderType: "virtualbox-iso.ubuntu-1204",
+									ArtifactMetadataPublisher: &packer_registry.Bucket{
+										Slug:        "bucket-slug",
+										Description: "Some override description\n",
+										Iteration: &packer_registry.Iteration{
+											Fingerprint: "ignored-fingerprint",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
 		{"duplicate hcp_packer_registry blocks",
 			defaultParser,
 			parseTestArgs{"testdata/hcp_par/duplicate.pkr.hcl", nil, nil},

@@ -136,17 +136,17 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case buildHCPPackerRegistryLabel:
-			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
 			if build.HCPPackerRegistry != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  fmt.Sprintf("Only one " + buildHCPPackerRegistryLabel + " is allowed"),
 					Subject:  block.DefRange.Ptr(),
 				})
+				continue
+			}
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
 				continue
 			}
 			build.HCPPackerRegistry = hcpPackerRegistry
@@ -226,10 +226,18 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			})
 		}
 		cfg.bucket.LoadDefaultSettingsFromEnv()
+		build.HCPPackerRegistry.WriteToBucketConfig(cfg.bucket)
+
+		// If at this point the bucket.Slug is still empty,
+		// last try is to use the build.Name if present
 		if cfg.bucket.Slug == "" && build.Name != "" {
 			cfg.bucket.Slug = build.Name
 		}
-		build.HCPPackerRegistry.WriteBucketConfig(cfg.bucket)
+
+		// If the description is empty, use the one from the build block
+		if cfg.bucket.Description == "" {
+			cfg.bucket.Description = build.Description
+		}
 
 		for _, source := range build.Sources {
 			cfg.bucket.RegisterBuildForComponent(source.String())

@@ -9,6 +9,8 @@ import (
 )
 
 type HCPPackerRegistryBlock struct {
+	// Bucket slug
+	Slug string
 	// Bucket description
 	Description string
 	// Bucket labels
@@ -17,12 +19,17 @@ type HCPPackerRegistryBlock struct {
 	HCL2Ref
 }
 
-func (b *HCPPackerRegistryBlock) WriteBucketConfig(bucket *packerregistry.Bucket) {
+func (b *HCPPackerRegistryBlock) WriteToBucketConfig(bucket *packerregistry.Bucket) {
 	if b == nil {
 		return
 	}
 	bucket.Description = b.Description
 	bucket.Labels = b.Labels
+	// If there's already a Slug this was set from env variable.
+	// In Packer, env variable overrides config values so we keep it that way for consistency.
+	if bucket.Slug == "" && b.Slug != "" {
+		bucket.Slug = b.Slug
+	}
 }
 
 func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
@@ -30,6 +37,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	body := block.Body
 
 	var b struct {
+		Slug        string            `hcl:"slug,optional"`
 		Description string            `hcl:"description,optional"`
 		Labels      map[string]string `hcl:"labels,optional"`
 		Config      hcl.Body          `hcl:",remain"`
@@ -48,6 +56,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 		return nil, diags
 	}
 
+	par.Slug = b.Slug
 	par.Description = b.Description
 	par.Labels = b.Labels
 

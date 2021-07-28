@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
-	"github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -354,14 +354,14 @@ var cmpOpts = []cmp.Option{
 		packer.CoreBuildProvisioner{},
 		packer.CoreBuildPostProcessor{},
 		null.Builder{},
-		packer_registry.Bucket{},
-		packer_registry.Iteration{},
+		packerregistry.Bucket{},
+		packerregistry.Iteration{},
 		packer.RegistryBuilder{},
 	),
 	cmpopts.IgnoreFields(PackerConfig{},
 		"Cwd", // Cwd will change for every os type
 	),
-	cmpopts.IgnoreFields(packer_registry.Iteration{},
+	cmpopts.IgnoreFields(packerregistry.Iteration{},
 		"Fingerprint", // Fingerprint will change everytime
 	),
 	cmpopts.IgnoreFields(VariableAssignment{},
