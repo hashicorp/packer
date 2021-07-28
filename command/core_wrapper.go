@@ -3,7 +3,6 @@ package command
 import (
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -40,9 +39,10 @@ func (c *CoreWrapper) PluginRequirements() (plugingetter.Requirements, hcl.Diagn
 // ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing
 // build image artifacts to a configured Packer Registry destination.
 func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
-	// JSON can only configure its Bucket through Env. variables so if not in PAR mode
-	// we don't really care if bucket is nil or set to a bunch of zero values.
-	if !env.IsPAREnabled() {
+	bucket := c.Core.GetRegistryBucket()
+
+	// If at this point the bucket is nil, it means PAR is not enabled
+	if bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
 				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
@@ -53,7 +53,6 @@ func (c *CoreWrapper) ConfiguredArtifactMetadataPublisher() (*packerregistry.Buc
 		}
 	}
 
-	bucket := c.Core.GetRegistryBucket()
 	err := bucket.Validate()
 	if err != nil {
 		return nil, hcl.Diagnostics{
