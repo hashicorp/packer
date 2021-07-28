@@ -1,0 +1,47 @@
+---
+description: >
+  The hcp_packer_registry allows operators the ability to customize the metadata sent to HCP Packer Registry.
+  It configures the base details of an image that is created or updated within HCP PAR.
+page_title: hcp_packer_registry - build - Blocks
+---
+
+# The `hcp_packer_registry` block
+
+The `hcp_packer_registry` block allows operators the ability to customize the metadata sent to
+HCP Packer Registry. It configures the details of an image that is created or updated within HCP PAR.
+
+The presence of a `hcp_packer_registry` block will enable HCP PAR mode and all the builds within that build block
+will be pushed to the remote registry as far the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`).
+
+```hcl
+# file: builds.pkr.hcl
+source "file" "basic-example" {
+  content = "Lorem ipsum dolor sit amet"
+  target = "sample_artifact"
+}
+
+build {
+   name = "example-artifact"
+
+   hcp_packer_registry {
+    description = <<EOT
+Some nice description about the image which artifact is being published to HCP Packer Registry. =D
+    EOT
+
+    labels = {
+      "foo-version" = "3.4.0",
+      "foo" = "bar",
+    }
+  }
+
+  sources = ["sources.file.basic-example"]
+}
+```
+
+- `description` (string) - The image description. Useful to provide a summary about the image. The description will appear
+  at the image's main page and will be updated whenever it is changed and a new build is pushed to HCP PAR. Should contain
+  a maximum of 255 characters.
+
+- `labels` (map[string]string) - Map of labels. Can provide any information, such as tools versions
+  (e.g. go 1.16, python 3.5, etc...). The labels will appear at the image's main page and will be updated
+  whenever it is changed and a new build is pushed to HCP PAR.
