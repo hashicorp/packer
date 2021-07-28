@@ -74,7 +74,7 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 					m[k.(string)] = v.(string)
 				}
 				// TODO handle these error better
-				err := b.ArtifactMetadataPublisher.AddBuildArtifact(b.Name, packerregistry.PARtifact{
+				err := b.ArtifactMetadataPublisher.AddImageToBuild(b.Name, packerregistry.Image{
 					ProviderName:   m["ProviderName"],
 					ProviderRegion: m["ProviderRegion"],
 					ID:             m["ImageID"],
@@ -85,7 +85,7 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 			case []interface{}:
 				for _, d := range state {
 					d := d.(map[interface{}]interface{})
-					err := b.ArtifactMetadataPublisher.AddBuildArtifact(b.Name, packerregistry.PARtifact{
+					err := b.ArtifactMetadataPublisher.AddImageToBuild(b.Name, packerregistry.Image{
 						ProviderName:   d["ProviderName"].(string),
 						ProviderRegion: d["ProviderRegion"].(string),
 						ID:             d["ImageID"].(string),

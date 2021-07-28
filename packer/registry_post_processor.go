@@ -79,7 +79,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 			}
 
 			// TODO handle these error better
-			err := p.ArtifactMetadataPublisher.AddBuildArtifact(p.BuilderType, packerregistry.PARtifact{
+			err := p.ArtifactMetadataPublisher.AddImageToBuild(p.BuilderType, packerregistry.Image{
 				ProviderName:   m["ProviderName"],
 				ProviderRegion: m["ProviderRegion"],
 				ID:             m["ImageID"],
@@ -90,7 +90,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		case []interface{}:
 			for _, d := range state {
 				d := d.(map[interface{}]interface{})
-				err := p.ArtifactMetadataPublisher.AddBuildArtifact(p.BuilderType, packerregistry.PARtifact{
+				err := p.ArtifactMetadataPublisher.AddImageToBuild(p.BuilderType, packerregistry.Image{
 					ProviderName:   d["ProviderName"].(string),
 					ProviderRegion: d["ProviderRegion"].(string),
 					ID:             d["ImageID"].(string),

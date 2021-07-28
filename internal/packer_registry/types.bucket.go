@@ -56,10 +56,9 @@ func (b *Bucket) Validate() error {
 // b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
 // TODO ensure initialize can only be called once
 func (b *Bucket) Initialize(ctx context.Context) error {
-	if b.client == nil {
-		if err := b.connect(); err != nil {
-			return err
-		}
+
+	if err := b.connect(); err != nil {
+		return err
 	}
 
 	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
@@ -135,7 +134,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 					RunUUID:       b.Iteration.RunUUID,
 					Status:        models.HashicorpCloudPackerBuildStatusUNSET,
 					Metadata:      make(map[string]string),
-					PARtifacts:    make([]PARtifact, 0),
+					Images:        make([]Image, 0),
 				})
 				break
 			}
@@ -175,6 +174,10 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
+	if b.client != nil {
+		return nil
+	}
+
 	registryClient, err := NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
@@ -221,9 +224,9 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 
 	// Possible bug of being able to set DONE with no RunUUID being set.
 	if status == models.HashicorpCloudPackerBuildStatusDONE {
-		images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.PARtifacts))
+		images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.Images))
 		var providerName string
-		for _, partifact := range buildToUpdate.PARtifacts {
+		for _, partifact := range buildToUpdate.Images {
 			if providerName == "" {
 				providerName = partifact.ProviderName
 			}
@@ -242,16 +245,16 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 	return nil
 }
 
-// CreateInitialBuildForIteration will create a build record on the Packer registry for named component.
+// CreateInitialBuildForIteration will create a build record on the HCP Packer Registry for named componentType.
 // This initial creation is needed so that Packer can properly track when an iteration is complete.
-func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string) error {
+func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
 		Build: &models.HashicorpCloudPackerBuild{
-			ComponentType: name,
+			ComponentType: componentType,
 			IterationID:   b.Iteration.ID,
 			PackerRunUUID: b.Iteration.RunUUID,
 			Status:        status,
@@ -265,51 +268,53 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, name string
 
 	build := &Build{
 		ID:            id,
-		ComponentType: name,
+		ComponentType: componentType,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
 		Metadata:      make(map[string]string),
-		PARtifacts:    make([]PARtifact, 0),
+		Images:        make([]Image, 0),
 	}
 
-	log.Println("[TRACE] creating initial build for component", name)
-	b.Iteration.builds.Store(name, build)
+	log.Println("[TRACE] creating initial build for component", componentType)
+	b.Iteration.builds.Store(componentType, build)
 
 	return nil
 }
 
-func (b *Bucket) AddBuildArtifact(name string, partifacts ...PARtifact) error {
-	existingBuild, ok := b.Iteration.builds.Load(name)
+// AddImageToBuild appends one or more images artifacts to the build referred to by componentType.
+func (b *Bucket) AddImageToBuild(componentType string, images ...Image) error {
+	existingBuild, ok := b.Iteration.builds.Load(componentType)
 	if !ok {
-		return errors.New("no associated build found for the name " + name)
+		return errors.New("no associated build found for the name " + componentType)
 	}
 
 	build, ok := existingBuild.(*Build)
 	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", componentType)
 	}
 
-	for _, artifact := range partifacts {
+	for _, artifact := range images {
 		if build.CloudProvider == "" {
 			build.CloudProvider = artifact.ProviderName
 		}
-		build.PARtifacts = append(build.PARtifacts, artifact)
+		build.Images = append(build.Images, artifact)
 	}
 
-	b.Iteration.builds.Store(name, build)
+	b.Iteration.builds.Store(componentType, build)
 
 	return nil
 }
 
-func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
-	existingBuild, ok := b.Iteration.builds.Load(name)
+// AddBuildMetadata merges the contents of data to the labels associated with the build referred to by componentType.
+func (b *Bucket) AddBuildMetadata(componentType string, data map[string]string) error {
+	existingBuild, ok := b.Iteration.builds.Load(componentType)
 	if !ok {
-		return errors.New("no associated build found for the name " + name)
+		return errors.New("no associated build found for the name " + componentType)
 	}
 
 	build, ok := existingBuild.(*Build)
 	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", componentType)
 	}
 
 	for k, v := range data {
@@ -319,20 +324,20 @@ func (b *Bucket) AddBuildMetadata(name string, data map[string]string) error {
 		build.Metadata[k] = v
 	}
 
-	b.Iteration.builds.Store(name, build)
+	b.Iteration.builds.Store(componentType, build)
 
 	return nil
 }
 
 // Load defaults from environment variables
 func (b *Bucket) LoadDefaultSettingsFromEnv() {
-	// Configure HCP registry destination
+	// Configure HCP Packer Registry destination
 	if b.Slug == "" {
 		b.Slug = os.Getenv(env.HCPPackerBucket)
 	}
 
 	// Set some iteration values. For Packer RunUUID should always be set.
-	// Creating a bucket differently? Let's not overwrite a UUID that might be set.
+	// Creating an iteration differently? Let's not overwrite a UUID that might be set.
 	if b.Iteration.RunUUID == "" {
 		b.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
 	}

@@ -17,7 +17,7 @@ func TestNewIteration(t *testing.T) {
 		errorExpected bool
 	}{
 		{
-			name:        "Using Fingerprint Env variable",
+			name:        "using fingerprint env variable",
 			fingerprint: "6825d1ad0d5e",
 			setupFn: func() func() {
 				os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "6825d1ad0d5e")
@@ -27,10 +27,10 @@ func TestNewIteration(t *testing.T) {
 			},
 		},
 		{
-			name:        "Using Git Fingerprint",
+			name:        "using git fingerprint",
 			fingerprint: "4ec004e18e977a5b8a3a28f4b24279b6993d7e7c",
 			setupFn: func() func() {
-				//no:lint
+				//nolint:errcheck
 				git.PlainClone(tempdir("4ec004e18e"), false, &git.CloneOptions{
 					// Archived repo
 					URL:   "https://github.com/hashicorp/packer-builder-vsphere",
@@ -38,7 +38,7 @@ func TestNewIteration(t *testing.T) {
 				})
 
 				return func() {
-					//no:lint
+					//nolint:errcheck
 					os.RemoveAll(tempdir("4ec004e18e"))
 				}
 
@@ -48,7 +48,7 @@ func TestNewIteration(t *testing.T) {
 			},
 		},
 		{
-			name: "Using No Fingerprint",
+			name: "using no fingerprint",
 			opts: IterationOptions{
 				TemplateBaseDir: "/dev/null",
 			},
