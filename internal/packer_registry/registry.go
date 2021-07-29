@@ -74,7 +74,7 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	return it.Payload.Iteration.ID, nil
 }
 
-func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (string, error) {
+func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (*models.HashicorpCloudPackerIteration, error) {
 	// Create/find iteration
 	params := packerSvc.NewGetIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
@@ -86,10 +86,10 @@ func GetIteration(ctx context.Context, client *Client, bucketslug string, finger
 
 	it, err := client.Packer.GetIteration(params, nil)
 	if err != nil {
-		return "", err
+		return &models.HashicorpCloudPackerIteration{}, err
 	}
 
-	return it.Payload.Iteration.ID, nil
+	return it.Payload.Iteration, nil
 }
 
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
