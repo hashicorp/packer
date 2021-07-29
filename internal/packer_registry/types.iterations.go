@@ -33,14 +33,15 @@ func NewIteration(opts IterationOptions) (*Iteration, error) {
 	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
 
 	// get a Git SHA
-	if i.Fingerprint == "" {
-		fp, err := GetGitFingerprint(opts)
-		if err != nil {
-			return nil, err
-		}
-		i.Fingerprint = fp
+	if i.Fingerprint != "" {
+		return &i, nil
 	}
 
+	fp, err := GetGitFingerprint(opts)
+	if err != nil {
+		return nil, err
+	}
+	i.Fingerprint = fp
 	return &i, nil
 }
 
@@ -50,6 +51,7 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	r, err := git.PlainOpenWithOptions(opts.TemplateBaseDir, &git.PlainOpenOptions{
 		DetectDotGit: true,
 	})
+
 	if err != nil {
 		return "", fmt.Errorf("Packer was unable to load a git sha. "+
 			"If your Packer template is not in a git repo, please add a unique "+
@@ -65,7 +67,14 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	// if err != nil {
 	//      return "", fmt.Errorf("Error setting git scope", err)
 	// }
-	ref, _ := r.Head()
+	ref, err := r.Head()
+	if err != nil {
+		return "", fmt.Errorf("Packer encountered an issue reading the git info for the path %q.\n"+
+			"If your Packer template is not in a git repo, please add a unique "+
+			"template fingerprint using the env var HCP_PACKER_BUILD_FINGERPRINT. "+
+			"Error: %s", opts.TemplateBaseDir, err)
+	}
+
 	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
 
 	return ref.Hash().String(), nil
