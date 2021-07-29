@@ -218,13 +218,17 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		cfg.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
 			TemplateBaseDir: cfg.Basedir,
 		})
+
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
 				Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
 				Detail:   fmt.Sprintf("%s", err),
 				Severity: hcl.DiagError,
 			})
+
+			return build, diags
 		}
+
 		cfg.bucket.LoadDefaultSettingsFromEnv()
 		build.HCPPackerRegistry.WriteToBucketConfig(cfg.bucket)
 
