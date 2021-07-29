@@ -18,10 +18,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
-	github.com/hashicorp/hcl/v2 v2.10.0
+	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.0
+	github.com/hashicorp/packer-plugin-amazon v1.0.1-dev
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
 	github.com/hashicorp/packer-plugin-azure v1.0.1
 	github.com/hashicorp/packer-plugin-chef v1.0.1
@@ -65,7 +65,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
-	github.com/pierrec/lz4 v2.0.5+incompatible
+	github.com/pierrec/lz4 v2.5.2+incompatible
 	github.com/posener/complete v1.2.3
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
