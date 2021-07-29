@@ -29,6 +29,9 @@ func TestNewIteration(t *testing.T) {
 		{
 			name:        "using git fingerprint",
 			fingerprint: "4ec004e18e977a5b8a3a28f4b24279b6993d7e7c",
+			opts: IterationOptions{
+				TemplateBaseDir: tempdir("4ec004e18e"),
+			},
 			setupFn: func() func() {
 				//nolint:errcheck
 				git.PlainClone(tempdir("4ec004e18e"), false, &git.CloneOptions{
@@ -41,14 +44,25 @@ func TestNewIteration(t *testing.T) {
 					//nolint:errcheck
 					os.RemoveAll(tempdir("4ec004e18e"))
 				}
-
-			},
-			opts: IterationOptions{
-				TemplateBaseDir: tempdir("4ec004e18e"),
 			},
 		},
 		{
-			name: "using no fingerprint",
+			name: "using empty git directory",
+			opts: IterationOptions{
+				TemplateBaseDir: tempdir("empty-init"),
+			},
+			setupFn: func() func() {
+				//nolint:errcheck
+				git.PlainInit(tempdir("empty-init"), false)
+				return func() {
+					//nolint:errcheck
+					os.RemoveAll(tempdir("empty-init"))
+				}
+			},
+			errorExpected: true,
+		},
+		{
+			name: "using no fingerprint in clean directory",
 			opts: IterationOptions{
 				TemplateBaseDir: "/dev/null",
 			},
@@ -65,13 +79,20 @@ func TestNewIteration(t *testing.T) {
 			}
 
 			i, err := NewIteration(tt.opts)
-			if tt.errorExpected && err != nil {
-				t.Logf("the expected error is %q", err)
+			if tt.errorExpected {
+				t.Logf("%v", err)
+				if err == nil {
+					t.Errorf("expected %q to result in an error, but it return no error", tt.name)
+				}
+
+				if i != nil {
+					t.Errorf("expected %q to result in an error with no iteration, but got %v", tt.name, i)
+				}
 				return
 			}
 
-			if tt.errorExpected && err == nil {
-				t.Errorf("expected %q to fail, but it didn't", tt.name)
+			if err != nil {
+				t.Errorf("expected %q to return with no error, but it %v", tt.name, err)
 			}
 
 			if i.Fingerprint != tt.fingerprint {
