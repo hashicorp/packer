@@ -39,7 +39,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 	// TODO create an actual post-processor that we can embed here that will do the updating and printing.
 	if p.PostProcessor == nil {
 		if parErr := p.ArtifactMetadataPublisher.PublishBuildStatus(ctx, p.BuilderType, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
-			return nil, true, false, fmt.Errorf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", p.BuilderType, parErr)
+			return nil, false, true, fmt.Errorf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", p.BuilderType, parErr)
 		}
 
 		r := &RegistryArtifact{
