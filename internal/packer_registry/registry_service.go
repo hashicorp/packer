@@ -4,10 +4,17 @@ import (
 	"context"
 	"errors"
 
+	"github.com/go-openapi/runtime"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	"google.golang.org/grpc/codes"
 )
+
+type CloudPackerClientService interface {
+	CreateBucket(*packerSvc.CreateBucketParams, runtime.ClientAuthInfoWriter) (*packerSvc.CreateBucketOK, error)
+	UpdateBucket(*packerSvc.UpdateBucketParams, runtime.ClientAuthInfoWriter) (*packerSvc.UpdateBucketOK, error)
+	CreateBuild(*packerSvc.CreateBuildParams, runtime.ClientAuthInfoWriter) (*packerSvc.CreateBuildOK, error)
+}
 
 // CreateBucket creates a bucket on a HCP Packer Registry.
 func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) (string, error) {

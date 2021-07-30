@@ -253,6 +253,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
 	for i := range builds {
+		/* PAR placeholder
+		Here we need to inform PAR that the build for some builder has begun.
+		What information is needed:
+		 - type, builder_uuid, platform, author, PAR related values.
+
+		*/
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
 			break

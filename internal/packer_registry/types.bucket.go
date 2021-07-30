@@ -26,11 +26,7 @@ type Bucket struct {
 // NewBucketWithIteration initializes a simple Bucket that can be used for tracking Packer
 // related build bits.
 func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
-	b := Bucket{
-		Labels: map[string]string{
-			"CreatedBy": "Packer",
-		},
-	}
+	b := Bucket{}
 
 	i, err := NewIteration(opts)
 	if err != nil {
@@ -109,8 +105,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	var errs *multierror.Error
 	var wg sync.WaitGroup
 
-	//[]string{a,b}
-	// remove the iteration's expected builds that already exist.
 	var toCreate []string
 	for _, expected := range b.Iteration.registeredBuilds {
 		var found bool
@@ -120,10 +114,6 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 				log.Printf("build of component type %s already exists; skipping the create call", expected)
 
 				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
-					// We also need to remove the builds that are _complete_ from the
-					// Iteration's expectedBuilds so we don't overwrite them.
-					//b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds[:i], b.Iteration.expectedBuilds[i+1:]...)
-					//log.Printf("build of component type %s is already marked DONE; removing the build from the HCP Packer Registry expected builds.", expected)
 					break
 				}
 
@@ -222,7 +212,6 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		},
 	}
 
-	// Possible bug of being able to set DONE with no RunUUID being set.
 	if status == models.HashicorpCloudPackerBuildStatusDONE {
 		images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.Images))
 		var providerName string
@@ -234,6 +223,10 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		}
 		buildInput.Updates.CloudProvider = providerName
 		buildInput.Updates.Images = images
+
+		if len(images) == 0 {
+			return fmt.Errorf("setting a build to DONE with no published artifacts is not currently support. exiting")
+		}
 	}
 
 	_, err := UpdateBuild(ctx, b.client, buildInput)
