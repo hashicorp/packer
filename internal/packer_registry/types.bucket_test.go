@@ -83,10 +83,6 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	if mockService.CreateBucketCalled {
-		t.Errorf("unexpected call to CreateBucket")
-	}
-
 	if !mockService.UpdateBucketCalled {
 		t.Errorf("expected call to UpdateBucket but it didn't happen")
 	}
@@ -179,7 +175,6 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 }
 
 func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
-	t.Skip("Currently being addressed in 11174")
 	//nolint:errcheck
 	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")

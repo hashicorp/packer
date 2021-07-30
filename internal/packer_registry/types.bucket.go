@@ -19,8 +19,8 @@ type Bucket struct {
 	Description string
 	Destination string
 	Labels      map[string]string
-	*Iteration
-	client *Client
+	Iteration   *Iteration
+	client      *Client
 }
 
 // NewBucketWithIteration initializes a simple Bucket that can be used for tracking Packer
@@ -67,98 +67,10 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	err := UpsertBucket(ctx, b.client, bucketInput)
 	if err != nil {
-		return fmt.Errorf("failed to initialize iteration for bucket %q: %w", b.Slug, err)
+		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
 	}
 
-	// Create/find iteration
-	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
-		BucketSlug:  b.Slug,
-		Fingerprint: b.Iteration.Fingerprint,
-	}
-
-	var existingBuilds []*models.HashicorpCloudPackerBuild
-
-	id, err := CreateIteration(ctx, b.client, iterationInput)
-	if err != nil {
-		if !checkErrorCode(err, codes.AlreadyExists) {
-			return fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
-		}
-		// load existing iteration using fingerprint.
-		id, err = GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
-		if err != nil {
-			return fmt.Errorf("Error loading the existing iteration for fingerprint %s", b.Iteration.Fingerprint)
-		}
-		log.Println("[TRACE] a valid iteration was retrieved with the id", id)
-		// list all this iteration's builds so we can figure out which ones
-		// we want to run against. TODO: pagination?
-		existingBuilds, err = ListBuilds(ctx, b.client, b.Slug, id)
-		if err != nil {
-			return fmt.Errorf("Error listing builds for this existing iteration: %s", err)
-		}
-
-	} else {
-		log.Println("[TRACE] a valid iteration for build was created with the Id", id)
-	}
-
-	b.Iteration.ID = id
-
-	var errs *multierror.Error
-	var wg sync.WaitGroup
-
-	var toCreate []string
-	for _, expected := range b.Iteration.registeredBuilds {
-		var found bool
-		for _, existing := range existingBuilds {
-			if existing.ComponentType == expected {
-				found = true
-				log.Printf("build of component type %s already exists; skipping the create call", expected)
-
-				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
-					break
-				}
-
-				// Lets create a build entry for any existing builds we want to update in this run
-				b.Iteration.builds.Store(existing.ComponentType, &Build{
-					ID:            existing.ID,
-					ComponentType: existing.ComponentType,
-					RunUUID:       b.Iteration.RunUUID,
-					Status:        models.HashicorpCloudPackerBuildStatusUNSET,
-					Metadata:      make(map[string]string),
-					Images:        make([]Image, 0),
-				})
-				break
-			}
-		}
-		if !found {
-			missingbuild := expected
-			toCreate = append(toCreate, missingbuild)
-		}
-	}
-
-	//TODO handle the case were an iteration is completed. Packer should exit an inform the user
-	// that artifacts already exists for the fingerprint associated with the iteration.
-
-	for _, buildName := range toCreate {
-		wg.Add(1)
-		go func(name string) {
-			defer wg.Done()
-			log.Printf("[TRACE] registering build with iteration for %q.", name)
-			// Need a way to handle skipping builds that were already created.
-			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
-			// we also need to bubble up the errors here.
-			err := b.CreateInitialBuildForIteration(ctx, name)
-			if checkErrorCode(err, codes.AlreadyExists) {
-				// Check whether build is complete, and if so, skip it.
-				log.Printf("[TRACE] build %s already exists in PAR, continuing...", name)
-				return
-			}
-
-			errs = multierror.Append(errs, err)
-		}(buildName)
-	}
-	wg.Wait()
-
-	return errs.ErrorOrNil()
+	return b.InitializeIteration(ctx)
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
@@ -335,4 +247,111 @@ func (b *Bucket) LoadDefaultSettingsFromEnv() {
 		b.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
 	}
 
+}
+
+func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error) {
+	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
+		BucketSlug:  b.Slug,
+		Fingerprint: b.Iteration.Fingerprint,
+	}
+
+	iterationResp, err := CreateIteration(context.TODO(), b.client, iterationInput)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+	}
+
+	if iterationResp == nil {
+		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
+	}
+
+	log.Println("[TRACE] a valid iteration for build was created with the Id", iterationResp.ID)
+	return iterationResp, nil
+}
+
+func (b *Bucket) InitializeIteration(ctx context.Context) error {
+
+	// load existing iteration using fingerprint.
+	iterationResp, err := GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
+	if checkErrorCode(err, codes.Aborted) { //probably means Iteration doesn't exist need a way to check the error
+		iterationResp, err = b.createIteration()
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to initialize iteration for fingerprint %s: %s", b.Iteration.Fingerprint, err)
+	}
+	if iterationResp == nil {
+		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
+	}
+
+	log.Println("[TRACE] a valid iteration was retrieved with the id", iterationResp.ID)
+	b.Iteration.ID = iterationResp.ID
+
+	// list all this iteration's builds so we can figure out which ones
+	// we want to run against. TODO: pagination?
+	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, iterationResp.ID)
+	if err != nil {
+		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
+	}
+
+	var toCreate []string
+	for _, expected := range b.Iteration.registeredBuilds {
+		var found bool
+		for _, existing := range existingBuilds {
+			if existing.ComponentType == expected {
+				found = true
+				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
+				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
+					break
+				}
+
+				// Lets create a build entry for any existing builds we want to update in this run
+				b.Iteration.builds.Store(existing.ComponentType, &Build{
+					ID:            existing.ID,
+					ComponentType: existing.ComponentType,
+					RunUUID:       b.Iteration.RunUUID,
+					Status:        models.HashicorpCloudPackerBuildStatusUNSET,
+					Metadata:      make(map[string]string),
+					Images:        make([]Image, 0),
+				})
+				break
+			}
+		}
+
+		if !found {
+			missingbuild := expected
+			toCreate = append(toCreate, missingbuild)
+		}
+	}
+	// If the iteration is completed and there are no new builds to add, Packer
+	// should exit and inform the user that artifacts already exists for the
+	// fingerprint associated with the iteration.
+	if iterationResp.Complete && len(toCreate) == 0 {
+		return fmt.Errorf("This iteration associated to the fingerprint %s is complete "+
+			"and this Packer build adds no new components. Exiting.", b.Iteration.Fingerprint)
+	}
+
+	var errs *multierror.Error
+	var wg sync.WaitGroup
+
+	for _, buildName := range toCreate {
+		wg.Add(1)
+		go func(name string) {
+			defer wg.Done()
+			log.Printf("[TRACE] registering build with iteration for %q.", name)
+			// Need a way to handle skipping builds that were already created.
+			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
+			// we also need to bubble up the errors here.
+			err := b.CreateInitialBuildForIteration(ctx, name)
+			if checkErrorCode(err, codes.AlreadyExists) {
+				// Check whether build is complete, and if so, skip it.
+				log.Printf("[TRACE] build %s already exists in Packer registry, continuing...", name)
+				return
+			}
+
+			errs = multierror.Append(errs, err)
+		}(buildName)
+	}
+	wg.Wait()
+
+	return errs.ErrorOrNil()
 }

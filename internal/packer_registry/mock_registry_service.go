@@ -114,6 +114,9 @@ func (svc *MockPackerClientService) CreateIteration(params *packerSvc.CreateIter
 }
 
 func (svc *MockPackerClientService) GetIteration(params *packerSvc.GetIterationParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.GetIterationOK, error) {
+	if !svc.IterationAlreadyExist {
+		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.Aborted, codes.Aborted.String()))
+	}
 
 	if params.BucketSlug == "" {
 		return nil, errors.New("No valid BucketSlug was passed in")

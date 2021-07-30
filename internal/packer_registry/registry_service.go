@@ -65,7 +65,7 @@ and returns the ID associated with the persisted Bucket iteration.
 
 input: *models.HashicorpCloudPackerCreateIterationRequest{BucketSlug: "bucket name"
 */
-func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (string, error) {
+func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (*models.HashicorpCloudPackerIteration, error) {
 	// Create/find iteration
 	params := packerSvc.NewCreateIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
@@ -75,13 +75,13 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 
 	it, err := client.Packer.CreateIteration(params, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return it.Payload.Iteration.ID, nil
+	return it.Payload.Iteration, nil
 }
 
-func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (string, error) {
+func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (*models.HashicorpCloudPackerIteration, error) {
 	// Create/find iteration
 	params := packerSvc.NewGetIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
@@ -93,10 +93,10 @@ func GetIteration(ctx context.Context, client *Client, bucketslug string, finger
 
 	it, err := client.Packer.GetIteration(params, nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return it.Payload.Iteration.ID, nil
+	return it.Payload.Iteration, nil
 }
 
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
