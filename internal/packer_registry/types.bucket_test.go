@@ -27,7 +27,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
 	if err != nil {
@@ -76,7 +76,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
 	if err != nil {
@@ -126,7 +126,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
@@ -171,7 +171,6 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
 		t.Errorf("expected the existing build to be in the default state")
 	}
-
 }
 
 func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
@@ -197,7 +196,7 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
@@ -220,14 +219,9 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 	if b.Iteration.ID != "iteration-id" {
 		t.Errorf("expected an iteration to returned but it didn't")
 	}
-
-	if _, ok := b.Iteration.builds.Load("happycloud.image"); ok {
-		t.Errorf("there should be no builds as the iteration is complete")
-	}
-
 }
 
-func TestPublishBuildStatus(t *testing.T) {
+func TestUpdateBuildStatus(t *testing.T) {
 	//nolint:errcheck
 	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
@@ -248,7 +242,7 @@ func TestPublishBuildStatus(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
@@ -270,7 +264,7 @@ func TestPublishBuildStatus(t *testing.T) {
 		t.Errorf("expected the existing build to be in the default state")
 	}
 
-	err = b.PublishBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
+	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
 	if err != nil {
 		t.Errorf("unexpected failure for PublishBuildStatus: %v", err)
 	}
@@ -290,7 +284,7 @@ func TestPublishBuildStatus(t *testing.T) {
 	}
 }
 
-func TestPublishBuildStatus_DONENoImages(t *testing.T) {
+func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	//nolint:errcheck
 	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
@@ -311,7 +305,7 @@ func TestPublishBuildStatus_DONENoImages(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.registeredBuilds = append(b.Iteration.registeredBuilds, "happycloud.image")
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
@@ -334,9 +328,9 @@ func TestPublishBuildStatus_DONENoImages(t *testing.T) {
 	}
 
 	//nolint:errcheck
-	b.PublishBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
+	b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
 
-	err = b.PublishBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusDONE)
+	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusDONE)
 	if err == nil {
 		t.Errorf("expected failure for PublishBuildStatus when setting status to DONE with no images")
 	}

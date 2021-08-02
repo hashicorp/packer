@@ -156,12 +156,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	/*
-		Ideal world we want to send all builds for a new iterations.
-		-only flag doesn't work with the HCP Packer registry to start; future only will be allowed to filter only builds not
-		complete in the HCP Packer registry.
-	*/
-
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
@@ -178,9 +172,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
-	// TODO find an option that is not managed by a globally shared Publisher.
 	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
 	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
+	// TODO find an option that is not managed by a globally shared Publisher.
 	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
 	if diags.HasErrors() {
 		return writeDiags(c.Ui, nil, diags)
@@ -191,7 +185,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			diags := hcl.Diagnostics{
 				&hcl.Diagnostic{
 					Summary:  "HCP Packer Registry initialization failed",
-					Detail:   fmt.Sprintf("Unable to open connection to %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
+					Detail:   fmt.Sprintf("Failed to initialize build for %q at %s\n %s", ArtifactMetadataPublisher.Slug, ArtifactMetadataPublisher.Destination, err),
 					Severity: hcl.DiagError,
 				},
 			}
@@ -253,12 +247,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
 	for i := range builds {
-		/* PAR placeholder
-		Here we need to inform PAR that the build for some builder has begun.
-		What information is needed:
-		 - type, builder_uuid, platform, author, PAR related values.
-
-		*/
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
 			break

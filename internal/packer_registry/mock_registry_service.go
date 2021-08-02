@@ -136,6 +136,14 @@ func (svc *MockPackerClientService) GetIteration(params *packerSvc.GetIterationP
 	if svc.IterationCompleted {
 		ok.Payload.Iteration.Complete = true
 		ok.Payload.Iteration.IncrementalVersion = 1
+		ok.Payload.Iteration.Builds = append(ok.Payload.Iteration.Builds, &models.HashicorpCloudPackerBuild{
+			ID:            "build-id",
+			ComponentType: svc.ExistingBuilds[0],
+			Status:        models.HashicorpCloudPackerBuildStatusDONE,
+			Images: []*models.HashicorpCloudPackerImage{
+				{ImageID: "image-id", Region: "somewhere"},
+			},
+		})
 	}
 
 	return ok, nil
@@ -191,8 +199,10 @@ func (svc *MockPackerClientService) UpdateBuild(params *packerSvc.UpdateBuildPar
 func (svc *MockPackerClientService) ListBuilds(params *packerSvc.ListBuildsParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.ListBuildsOK, error) {
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
+	images := make([]*models.HashicorpCloudPackerImage, 0)
 	if svc.BuildAlreadyDone {
 		status = models.HashicorpCloudPackerBuildStatusDONE
+		images = append(images, &models.HashicorpCloudPackerImage{ID: "image-id", Region: "somewhere"})
 	}
 
 	builds := make([]*models.HashicorpCloudPackerBuild, 0, len(svc.ExistingBuilds))
@@ -201,6 +211,7 @@ func (svc *MockPackerClientService) ListBuilds(params *packerSvc.ListBuildsParam
 			ID:            name + "--" + strconv.Itoa(i),
 			ComponentType: name,
 			Status:        status,
+			Images:        images,
 		})
 	}
 

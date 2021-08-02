@@ -10,13 +10,13 @@ import (
 )
 
 type Iteration struct {
-	ID               string
-	AncestorSlug     string
-	Fingerprint      string
-	RunUUID          string
-	Labels           map[string]string
-	builds           sync.Map
-	registeredBuilds []string
+	ID             string
+	AncestorSlug   string
+	Fingerprint    string
+	RunUUID        string
+	Labels         map[string]string
+	builds         sync.Map
+	expectedBuilds []string
 }
 
 type IterationOptions struct {
@@ -26,7 +26,7 @@ type IterationOptions struct {
 // NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
 func NewIteration(opts IterationOptions) (*Iteration, error) {
 	i := Iteration{
-		registeredBuilds: make([]string, 0),
+		expectedBuilds: make([]string, 0),
 	}
 
 	// By default we try to load a Fingerprint from the environment variable.
