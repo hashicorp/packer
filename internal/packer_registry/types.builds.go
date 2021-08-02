@@ -10,8 +10,8 @@ type Build struct {
 	CloudProvider string
 	ComponentType string
 	RunUUID       string
-	Metadata      map[string]string
-	Images        []Image
+	Labels        map[string]string
+	Images        map[string]Image
 	Status        models.HashicorpCloudPackerBuildStatus
 }
 

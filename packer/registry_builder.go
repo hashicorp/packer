@@ -14,7 +14,6 @@ import (
 type RegistryBuilder struct {
 	Name                      string
 	ArtifactMetadataPublisher *packerregistry.Bucket
-
 	packersdk.Builder
 }
 
@@ -60,7 +59,7 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 		metadata := make(map[string]string)
 		metadata[artifact.BuilderId()] = artifact.String()
 		metadata[artifact.BuilderId()+".files"] = strings.Join(artifact.Files(), ", ")
-		err := b.ArtifactMetadataPublisher.AddBuildMetadata(b.Name, metadata)
+		err := b.ArtifactMetadataPublisher.UpdateLabelsForBuild(b.Name, metadata)
 		if err != nil {
 			log.Printf("[TRACE] failed to add build labels for %q: %s", b.Name, err)
 		}
@@ -72,7 +71,7 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 				m[k.(string)] = v.(string)
 			}
 			// TODO handle these error better
-			err := b.ArtifactMetadataPublisher.AddImageToBuild(b.Name, packerregistry.Image{
+			err := b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, packerregistry.Image{
 				ProviderName:   m["ProviderName"],
 				ProviderRegion: m["ProviderRegion"],
 				ID:             m["ImageID"],
@@ -83,7 +82,7 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 		case []interface{}:
 			for _, d := range state {
 				d := d.(map[interface{}]interface{})
-				err := b.ArtifactMetadataPublisher.AddImageToBuild(b.Name, packerregistry.Image{
+				err := b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, packerregistry.Image{
 					ProviderName:   d["ProviderName"].(string),
 					ProviderRegion: d["ProviderRegion"].(string),
 					ID:             d["ImageID"].(string),

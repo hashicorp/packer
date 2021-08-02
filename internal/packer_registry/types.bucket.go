@@ -119,7 +119,7 @@ func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status mod
 		BuildID: buildToUpdate.ID,
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			PackerRunUUID: buildToUpdate.RunUUID,
-			Labels:        buildToUpdate.Metadata,
+			Labels:        buildToUpdate.Labels,
 			Status:        status,
 		},
 	}
@@ -176,8 +176,8 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		ComponentType: componentType,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
-		Metadata:      make(map[string]string),
-		Images:        make([]Image, 0),
+		Labels:        make(map[string]string),
+		Images:        make(map[string]Image),
 	}
 
 	log.Println("[TRACE] creating initial build for component", componentType)
@@ -186,52 +186,14 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 	return nil
 }
 
-// AddImageToBuild appends one or more images artifacts to the build referred to by componentType.
-func (b *Bucket) AddImageToBuild(componentType string, images ...Image) error {
-	existingBuild, ok := b.Iteration.builds.Load(componentType)
-	if !ok {
-		return errors.New("no associated build found for the name " + componentType)
-	}
-
-	build, ok := existingBuild.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", componentType)
-	}
-
-	for _, artifact := range images {
-		if build.CloudProvider == "" {
-			build.CloudProvider = artifact.ProviderName
-		}
-		build.Images = append(build.Images, artifact)
-	}
-
-	b.Iteration.builds.Store(componentType, build)
-
-	return nil
+// UpdateImageForBuild appends one or more images artifacts to the build referred to by componentType.
+func (b *Bucket) UpdateImageForBuild(componentType string, images ...Image) error {
+	return b.Iteration.AddImageToBuild(componentType, images...)
 }
 
-// AddBuildMetadata merges the contents of data to the labels associated with the build referred to by componentType.
-func (b *Bucket) AddBuildMetadata(componentType string, data map[string]string) error {
-	existingBuild, ok := b.Iteration.builds.Load(componentType)
-	if !ok {
-		return errors.New("no associated build found for the name " + componentType)
-	}
-
-	build, ok := existingBuild.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", componentType)
-	}
-
-	for k, v := range data {
-		if _, ok := build.Metadata[k]; ok {
-			continue
-		}
-		build.Metadata[k] = v
-	}
-
-	b.Iteration.builds.Store(componentType, build)
-
-	return nil
+// UpdateLabelsForBuild merges the contents of data to the labels associated with the build referred to by componentType.
+func (b *Bucket) UpdateLabelsForBuild(componentType string, data map[string]string) error {
+	return b.Iteration.AddLabelsToBuild(componentType, data)
 }
 
 // Load defaults from environment variables
@@ -299,20 +261,22 @@ func (b *Bucket) InitializeIteration(ctx context.Context) error {
 		for _, existing := range existingBuilds {
 			if existing.ComponentType == expected {
 				found = true
-				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
-				if existing.Status == models.HashicorpCloudPackerBuildStatusDONE {
-					break
-				}
-
-				// Lets create a build entry for any existing builds we want to update in this run
-				b.Iteration.builds.Store(existing.ComponentType, &Build{
+				build := &Build{
 					ID:            existing.ID,
 					ComponentType: existing.ComponentType,
 					RunUUID:       b.Iteration.RunUUID,
-					Status:        models.HashicorpCloudPackerBuildStatusUNSET,
-					Metadata:      make(map[string]string),
-					Images:        make([]Image, 0),
-				})
+					Status:        existing.Status,
+					Labels:        existing.Labels,
+				}
+				b.Iteration.builds.Store(existing.ComponentType, build)
+
+				for _, image := range existing.Images {
+					b.UpdateImageForBuild(existing.ComponentType, Image{
+						ID:             image.ImageID,
+						ProviderRegion: image.Region,
+					})
+				}
+				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
 				break
 			}
 		}

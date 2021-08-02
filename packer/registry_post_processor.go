@@ -27,6 +27,8 @@ func (p *RegistryPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 }
 
 func (p *RegistryPostProcessor) Configure(raws ...interface{}) error {
+	// If we have all of the Packer registry information here we can safely validate and exit
+	// if the final build is complete or has potential conflicts.
 	if p.PostProcessor == nil {
 		return nil
 	}
@@ -66,7 +68,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		if len(source.Files()) > 0 {
 			metadata[source.BuilderId()+".files"] = strings.Join(source.Files(), ", ")
 		}
-		err := p.ArtifactMetadataPublisher.AddBuildMetadata(p.BuilderType, metadata)
+		err := p.ArtifactMetadataPublisher.UpdateLabelsForBuild(p.BuilderType, metadata)
 		if err != nil {
 			log.Printf("[TRACE] failed to add build labels for %q: %s", p.BuilderType, err)
 		}
@@ -79,7 +81,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 			}
 
 			// TODO handle these error better
-			err := p.ArtifactMetadataPublisher.AddImageToBuild(p.BuilderType, packerregistry.Image{
+			err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
 				ProviderName:   m["ProviderName"],
 				ProviderRegion: m["ProviderRegion"],
 				ID:             m["ImageID"],
@@ -90,7 +92,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		case []interface{}:
 			for _, d := range state {
 				d := d.(map[interface{}]interface{})
-				err := p.ArtifactMetadataPublisher.AddImageToBuild(p.BuilderType, packerregistry.Image{
+				err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
 					ProviderName:   d["ProviderName"].(string),
 					ProviderRegion: d["ProviderRegion"].(string),
 					ID:             d["ImageID"].(string),
