@@ -1,6 +1,7 @@
 package packer_registry
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -9,13 +10,13 @@ import (
 )
 
 type Iteration struct {
-	ID               string
-	AncestorSlug     string
-	Fingerprint      string
-	RunUUID          string
-	Labels           map[string]string
-	builds           sync.Map
-	registeredBuilds []string
+	ID             string
+	AncestorSlug   string
+	Fingerprint    string
+	RunUUID        string
+	Labels         map[string]string
+	builds         sync.Map
+	expectedBuilds []string
 }
 
 type IterationOptions struct {
@@ -25,7 +26,7 @@ type IterationOptions struct {
 // NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
 func NewIteration(opts IterationOptions) (*Iteration, error) {
 	i := Iteration{
-		registeredBuilds: make([]string, 0),
+		expectedBuilds: make([]string, 0),
 	}
 
 	// By default we try to load a Fingerprint from the environment variable.
@@ -78,4 +79,57 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
 
 	return ref.Hash().String(), nil
+}
+
+// AddImageToBuild appends one or more images artifacts to the build referred to by buildName.
+func (i *Iteration) AddImageToBuild(buildName string, images ...Image) error {
+	existingBuild, ok := i.builds.Load(buildName)
+	if !ok {
+		return errors.New("no build found for the name " + buildName)
+	}
+
+	build, ok := existingBuild.(*Build)
+	if !ok {
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
+	}
+
+	if build.Images == nil {
+		build.Images = make(map[string]Image)
+	}
+
+	for _, image := range images {
+		if build.CloudProvider == "" {
+			build.CloudProvider = image.ProviderName
+		}
+
+		k := fmt.Sprintf("%s.region:%s", buildName, image.ProviderRegion)
+		build.Images[k] = image
+	}
+
+	i.builds.Store(buildName, build)
+	return nil
+}
+
+// AddLabelsToBuild merges the contents of data to the labels associated with the build referred to by buildName.
+func (i *Iteration) AddLabelsToBuild(buildName string, data map[string]string) error {
+	existingBuild, ok := i.builds.Load(buildName)
+	if !ok {
+		return errors.New("no associated build found for the name " + buildName)
+	}
+
+	build, ok := existingBuild.(*Build)
+	if !ok {
+		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
+	}
+
+	for k, v := range data {
+		if _, ok := build.Labels[k]; ok {
+			continue
+		}
+		build.Labels[k] = v
+	}
+
+	i.builds.Store(buildName, build)
+
+	return nil
 }
