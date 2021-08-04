@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.3.2
       - name: Install Dependencies
         run: npm i isomorphic-unfetch adm-zip gray-matter
       - name: Fetch and validate plugin docs
