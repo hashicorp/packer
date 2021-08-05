@@ -382,7 +382,7 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Multiple " + buildLabel + " blocks",
-					Detail: fmt.Sprintf("For Packer Registry enabled builds only one " + buildLabel +
+					Detail: fmt.Sprintf("For Packer Registry enabled builds,  only one " + buildLabel +
 						" block can be defined. Please remove any additional " + buildLabel +
 						" block(s). If this build is not meant for the Packer registry please " +
 						"clear any HCP_PACKER_* environment variables."),

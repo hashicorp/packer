@@ -31,7 +31,7 @@ func NewClient() (*Client, error) {
 	if !env.HasHCPCredentials() {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
-			Err:        fmt.Errorf("the client authentication requires both HCP_CLIENT_ID and HCP_CLIENT_SECRET environment variables to be set"),
+			Err:        fmt.Errorf("the client authentication requires both %s and %s environment variables to be set", env.HCPClientID, env.HCPClientSecret),
 		}
 	}
 

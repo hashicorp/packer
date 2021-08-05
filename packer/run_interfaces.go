@@ -47,13 +47,18 @@ type Handler interface {
 	// PluginRequirements returns the list of plugin Requirements from the
 	// config file.
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
-	// ConfiguredArtifactMetadataPublisher returns a configured Bucket that can be used to publish build
-	// artifacts to the said image bucket.
-	ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
 	Evaluator
 	BuildGetter
 	ConfigFixer
 	ConfigInspector
+	HCPHandler
+}
+
+// The HCPHandler handles Packer things needed for communicating with a HCP Packer Registry.
+type HCPHandler interface {
+	// ConfiguredArtifactMetadataPublisher returns a configured Bucket that can be used to publish
+	// build artifacts to the said image bucket.
+	ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
 }
 
 //go:generate enumer -type FixConfigMode

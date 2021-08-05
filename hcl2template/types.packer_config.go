@@ -406,7 +406,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 				continue
 			}
 
-			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+			if cfg.bucket != nil {
 				postProcessor = &packer.RegistryPostProcessor{
 					ArtifactMetadataPublisher: cfg.bucket,
 					BuilderType:               source.String(),
@@ -535,7 +535,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				continue
 			}
 
-			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+			if cfg.bucket != nil {
 				pps = append(pps, []packer.CoreBuildPostProcessor{
 					{
 						PostProcessor: &packer.RegistryPostProcessor{
