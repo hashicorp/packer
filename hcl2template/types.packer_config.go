@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
@@ -51,6 +52,9 @@ type PackerConfig struct {
 
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+
+	// Represents registry bucket defined in the config files.
+	bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File
@@ -401,6 +405,15 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			if moreDiags.HasErrors() {
 				continue
 			}
+
+			if cfg.bucket != nil {
+				postProcessor = &packer.RegistryPostProcessor{
+					ArtifactMetadataPublisher: cfg.bucket,
+					BuilderType:               source.String(),
+					PostProcessor:             postProcessor,
+				}
+			}
+
 			pps = append(pps, packer.CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PName:             ppb.PName,
@@ -522,6 +535,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				continue
 			}
 
+			if cfg.bucket != nil {
+				pps = append(pps, []packer.CoreBuildPostProcessor{
+					{
+						PostProcessor: &packer.RegistryPostProcessor{
+							BuilderType:               srcUsage.String(),
+							ArtifactMetadataPublisher: cfg.bucket,
+						},
+					},
+				})
+			}
+
 			if build.ErrorCleanupProvisionerBlock != nil {
 				if !build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
 					errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
@@ -530,6 +554,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 						continue
 					}
 					pcb.CleanupProvisioner = errorCleanupProv
+				}
+			}
+
+			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+				builder = &packer.RegistryBuilder{
+					Name:                      srcUsage.String(),
+					Builder:                   builder,
+					ArtifactMetadataPublisher: cfg.bucket,
 				}
 			}
 

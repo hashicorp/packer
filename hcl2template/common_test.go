@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -14,6 +13,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -354,9 +354,15 @@ var cmpOpts = []cmp.Option{
 		packer.CoreBuildProvisioner{},
 		packer.CoreBuildPostProcessor{},
 		null.Builder{},
+		packerregistry.Bucket{},
+		packerregistry.Iteration{},
+		packer.RegistryBuilder{},
 	),
 	cmpopts.IgnoreFields(PackerConfig{},
 		"Cwd", // Cwd will change for every os type
+	),
+	cmpopts.IgnoreFields(packerregistry.Iteration{},
+		"Fingerprint", // Fingerprint will change everytime
 	),
 	cmpopts.IgnoreFields(VariableAssignment{},
 		"Expr", // its an interface

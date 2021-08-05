@@ -149,6 +149,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
+
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
@@ -169,6 +170,27 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
+	}
+
+	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
+	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
+	// TODO find an option that is not managed by a globally shared Publisher.
+	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
+	if diags.HasErrors() {
+		return writeDiags(c.Ui, nil, diags)
+	}
+
+	if ArtifactMetadataPublisher != nil {
+		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+			diags := hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Summary:  "HCP Packer Registry initialization failed",
+					Detail:   fmt.Sprintf("Failed to initialize build for %q\n %s", ArtifactMetadataPublisher.Slug, err),
+					Severity: hcl.DiagError,
+				},
+			}
+			return writeDiags(c.Ui, nil, diags)
+		}
 	}
 
 	// Compile all the UIs for the builds
@@ -205,7 +227,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 		buildUis[builds[i]] = ui
 	}
-
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
@@ -268,7 +289,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				errors.Unlock()
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
-				if nil != runArtifacts {
+				if runArtifacts != nil {
 					artifacts.Lock()
 					artifacts.m[name] = runArtifacts
 					artifacts.Unlock()
@@ -363,7 +384,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 				ui.Machine("artifact", iStr, "end")
 				c.Ui.Say(message.String())
+
 			}
+
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")

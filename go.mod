@@ -6,6 +6,8 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dsnet/compress v0.0.1
 	github.com/exoscale/packer-plugin-exoscale v0.1.1
+	github.com/go-git/go-git/v5 v5.4.2
+	github.com/go-openapi/runtime v0.19.24
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
@@ -16,9 +18,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
-	github.com/hashicorp/hcl/v2 v2.10.0
+	github.com/hashicorp/hcl/v2 v2.10.1
+	github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.0
+	github.com/hashicorp/packer-plugin-amazon v1.0.1-dev
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
 	github.com/hashicorp/packer-plugin-azure v1.0.1
 	github.com/hashicorp/packer-plugin-chef v1.0.1
@@ -62,7 +65,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
-	github.com/pierrec/lz4 v2.0.5+incompatible
+	github.com/pierrec/lz4 v2.5.2+incompatible
 	github.com/posener/complete v1.2.3
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
@@ -75,6 +78,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/tools v0.1.0
+	google.golang.org/grpc v1.36.1
 )
 
 go 1.16

@@ -221,7 +221,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	}
 
 	log.Printf("Running builder: %s", b.BuilderType)
-	ts := CheckpointReporter.AddSpan(b.BuilderType, "builder", b.BuilderConfig)
+	ts := CheckpointReporter.AddSpan(b.Type, "builder", b.BuilderConfig)
 	builderArtifact, err := b.Builder.Run(ctx, builderUi, hook)
 	ts.End(err)
 	if err != nil {
@@ -337,9 +337,10 @@ PostProcessorRunSeqLoop:
 
 	if len(errors) > 0 {
 		err = &packersdk.MultiError{Errors: errors}
+		return artifacts, err
 	}
 
-	return artifacts, err
+	return artifacts, nil
 }
 
 func (b *CoreBuild) SetDebug(val bool) {

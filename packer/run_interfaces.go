@@ -3,6 +3,7 @@ package packer
 import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -33,7 +34,7 @@ type Evaluator interface {
 
 type InitializeOptions struct {
 	// When set, the execution of datasources will be skipped and the datasource will provide
-	// a output spec that will be used for validation only.
+	// an output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
 }
 
@@ -50,6 +51,14 @@ type Handler interface {
 	BuildGetter
 	ConfigFixer
 	ConfigInspector
+	HCPHandler
+}
+
+// The HCPHandler handles Packer things needed for communicating with a HCP Packer Registry.
+type HCPHandler interface {
+	// ConfiguredArtifactMetadataPublisher returns a configured Bucket that can be used to publish
+	// build artifacts to the said image bucket.
+	ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics)
 }
 
 //go:generate enumer -type FixConfigMode
