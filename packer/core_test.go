@@ -11,6 +11,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	configHelper "github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/version"
 )
 
 func TestCoreBuildNames(t *testing.T) {
@@ -843,5 +844,32 @@ func TestCoreBuild_provRetry(t *testing.T) {
 	// backwards compatibility
 	if !pInt.ProvRetried {
 		t.Fatal("provisioner should retry for max_retries integer value")
+	}
+}
+
+func TestCoreBuild_packerVersion(t *testing.T) {
+	config := TestCoreConfig(t)
+	testCoreTemplate(t, config, fixtureDir("build-var-packer-version.json"))
+	b := TestBuilder(t, config, "test")
+	core := TestCore(t, config)
+
+	expected := version.FormattedVersion()
+	build, err := core.Build("test")
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+	// Interpolate the config
+	var result map[string]interface{}
+	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
+	if err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	if result["value"] != expected {
+		t.Fatalf("bad: %#v", result)
 	}
 }
