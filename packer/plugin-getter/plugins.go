@@ -273,10 +273,52 @@ func (gp *GetOptions) Version() string {
 
 // A Getter helps get the appropriate files to download a binary.
 type Getter interface {
-	// Get:
-	//  * 'releases'
-	//  * 'sha256'
-	//  * 'binary'
+	// Get allows Packer to know more information about releases of a plugin in
+	// order to decide which version to install. Get behaves similarly to an
+	// HTTP server. Packer will stream responses from get in order to do what's
+	// needed. In order to minimize the amount of requests done, Packer is
+	// strict on filenames and we highly recommend on automating releases.
+	// In the future, Packer will make it possible to ship plugin getters as
+	// binaries this is why Packer streams from the output of get, which will
+	// then be a command.
+	//
+	//  * 'releases', get 'releases' should return the complete list of Releases
+	//    in JSON format following the format of the Release struct. It is also
+	//    possible to read GetOptions to filter for a smaller response. Some
+	//    getters don't. Packer will then decide the highest compatible
+	//    version of the plugin to install by using the sha256 function.
+	//
+	//  * 'sha256', get 'sha256' should return a SHA256SUMS txt file. It will be
+	//    called with the highest possible & user allowed version from get
+	//   'releases'. Packer will check if the release has a binary matching what
+	//    Packer can install and use. If so, get 'binary' will be called;
+	//    otherwise, lower versions will be checked.
+	//    For version 1.0.0 of the 'hashicorp/amazon' builder, the GitHub getter
+	//    will fetch the following URL:
+	//    https://github.com/hashicorp/packer-plugin-amazon/releases/download/v1.0.0/packer-plugin-amazon_v1.0.0_SHA256SUMS
+	//    This URL can be parameterized to the following one:
+	//    https://github.com/{plugin.path}/releases/download/{plugin.version}/packer-plugin-{plugin.name}_{plugin.version}_SHA256SUMS
+	//    If Packer is running on Linux AMD 64, then Packer will check for the
+	//    existence of a packer-plugin-amazon_v1.0.0_x5.0_linux_amd64 checksum in
+	//    that file. This filename can be parameterized to the following one:
+	//    packer-plugin-{plugin.name}_{plugin.version}_x{proto_ver.major}.{proto_ver._minor}_{os}_{arch}
+	//
+	//    See
+	//    https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.goreleaser.yml
+	//    and
+	//    https://www.packer.io/docs/plugins/creation#plugin-development-basics
+	//    to learn how to create and automate your releases and for docs on
+	//    plugin development basics.
+	//
+	//  * get 'zip' is called once we know what version we want and that it is
+	//    compatible with the OS and Packer. Zip expects an io stream of a zip
+	//    file containing a binary. For version 1.0.0 of the 'hashicorp/amazon'
+	//    builder and on darwin_amd64, the GitHub getter will fetch the
+	//    following ZIP:
+	//    https://github.com/hashicorp/packer-plugin-amazon/releases/download/v1.0.0/packer-plugin-amazon_v1.0.0_x5.0_darwin_amd64.zip
+	//    this zip is expected to contain a
+	//    packer-plugin-amazon_v1.0.0_x5.0_linux_amd64 file that will be checksum
+	//    verified then copied to the correct plugin location.
 	Get(what string, opts GetOptions) (io.ReadCloser, error)
 }
 
