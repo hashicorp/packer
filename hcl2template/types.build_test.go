@@ -421,6 +421,57 @@ func TestParse_build(t *testing.T) {
 			},
 			false,
 		},
+		{"provisioner with packer_version interpolation",
+			defaultParser,
+			parseTestArgs{"testdata/build/provisioner_packer_version_interpolation.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PType: "shell",
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					Type:     "virtualbox-iso.ubuntu-1204",
+					Prepared: true,
+					Builder:  emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "shell",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{
+											Tags:        []MockTag{},
+											SliceString: []string{lockedVersion},
+										},
+										NestedSlice: []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
+		},
 	}
 	testParse(t, tests)
 }
