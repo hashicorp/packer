@@ -1,7 +1,7 @@
 import VerticalTextBlockList from '@hashicorp/react-vertical-text-block-list'
 import SectionHeader from '@hashicorp/react-section-header'
 import Head from 'next/head'
-import s from 'style.module.css'
+import s from './style.module.css'
 
 export default function CommunityPage() {
   return (
