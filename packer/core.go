@@ -21,6 +21,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/internal/packer_registry/env"
+	packerversion "github.com/hashicorp/packer/version"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -453,8 +454,9 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 // Context returns an interpolation context.
 func (c *Core) Context() *interpolate.Context {
 	return &interpolate.Context{
-		TemplatePath:  c.Template.Path,
-		UserVariables: c.variables,
+		TemplatePath:            c.Template.Path,
+		UserVariables:           c.variables,
+		CorePackerVersionString: packerversion.FormattedVersion(),
 	}
 }
 

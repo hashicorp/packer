@@ -68,6 +68,7 @@ func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProce
 	}
 
 	builderVars := source.builderVariables()
+	builderVars["packer_core_version"] = cfg.CorePackerVersionString
 	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
 	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
 	builderVars["packer_on_error"] = cfg.onError

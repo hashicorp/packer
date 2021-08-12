@@ -128,6 +128,7 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	// prepare at a later step, to make builds from different template types
 	// easier to reason about.
 	builderVars := source.builderVariables()
+	builderVars["packer_core_version"] = cfg.CorePackerVersionString
 	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
 	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
 	builderVars["packer_on_error"] = cfg.onError
