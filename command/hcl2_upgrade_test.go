@@ -17,9 +17,10 @@ func Test_hcl2_upgrade(t *testing.T) {
 	_ = cwd
 
 	tc := []struct {
-		folder   string
-		flags    []string
-		exitCode int
+		folder    string
+		flags     []string
+		exitCode  int
+		exitEarly bool
 	}{
 		{folder: "unknown_builder", flags: []string{}, exitCode: 1},
 		{folder: "complete", flags: []string{"-with-annotations"}},
@@ -32,6 +33,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "variables-with-variables", flags: []string{}},
 		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "escaping", flags: []string{}},
+		{folder: "inexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 	}
 
 	for _, tc := range tc {
@@ -46,8 +48,16 @@ func Test_hcl2_upgrade(t *testing.T) {
 			args = append(args, inputPath)
 			p := helperCommand(t, args...)
 			err := p.Run()
+			defer os.Remove(outputPath)
 			if err != nil {
 				t.Logf("run returned an error: %s", err)
+			}
+			actualExitCode := p.ProcessState.ExitCode()
+			if tc.exitCode != actualExitCode {
+				t.Fatalf("unexpected exit code: %d found; expected %d ", actualExitCode, tc.exitCode)
+			}
+			if tc.exitEarly {
+				return
 			}
 			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
 			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
@@ -55,11 +65,6 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)
 			}
-			actualExitCode := p.ProcessState.ExitCode()
-			if tc.exitCode != actualExitCode {
-				t.Fatalf("unexpected exit code: %d found; expected %d ", actualExitCode, tc.exitCode)
-			}
-			os.Remove(outputPath)
 		})
 	}
 }
