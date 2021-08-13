@@ -154,6 +154,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	hdl, ret := c.GetConfigFromJSON(&cla.MetaArgs)
 	if ret != 0 {
 		c.Ui.Error(fmt.Sprintf("Failed to get config from JSON"))
+		return 1
 	}
 
 	core := hdl.(*CoreWrapper).Core
