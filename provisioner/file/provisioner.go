@@ -17,10 +17,18 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
+	// This is the content to copy to `destination`. If destination is a file,
+	// content will be written to that file, in case of a directory a file named
+	// `pkr-file-content` is created. It's recommended to use a file as the
+	// destination. A template_file might be referenced in here, or any
+	// interpolation syntax. This attribute cannot be specified with source or
+	// sources.
+	Content string `mapstructure:"content" required:"true"`
 	// The path to a local file or directory to upload to the
 	// machine. The path can be absolute or relative. If it is relative, it is
 	// relative to the working directory when Packer is executed. If this is a
@@ -102,9 +110,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if len(p.config.Sources) < 1 {
+	if len(p.config.Sources) < 1 && p.config.Content == "" {
 		errs = packersdk.MultiErrorAppend(errs,
-			errors.New("Source must be specified."))
+			errors.New("source, sources or content must be specified."))
+	}
+
+	if len(p.config.Sources) > 0 && p.config.Content != "" {
+		errs = packersdk.MultiErrorAppend(errs,
+			errors.New("source(s) conflicts with content."))
 	}
 
 	if p.config.Destination == "" {
@@ -124,6 +137,19 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		generatedData = make(map[string]interface{})
 	}
 	p.config.ctx.Data = generatedData
+
+	if p.config.Content != "" {
+		file, err := tmp.File("pkr-file-content")
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		if _, err := file.WriteString(p.config.Content); err != nil {
+			return err
+		}
+		p.config.Content = ""
+		p.config.Sources = append(p.config.Sources, file.Name())
+	}
 
 	if p.config.Direction == "download" {
 		return p.ProvisionDownload(ui, comm)
