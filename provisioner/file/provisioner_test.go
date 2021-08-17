@@ -151,6 +151,45 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 	}
 }
 
+func TestProvisionerProvision_SendsContent(t *testing.T) {
+	var p Provisioner
+
+	dst := "something.txt"
+	content := "hello"
+	config := map[string]interface{}{
+		"content":     content,
+		"destination": dst,
+	}
+
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	b := bytes.NewBuffer(nil)
+	ui := &packersdk.BasicUi{
+		Writer: b,
+		PB:     &packersdk.NoopProgressTracker{},
+	}
+	comm := &packersdk.MockCommunicator{}
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+
+	if !strings.Contains(b.String(), "something") {
+		t.Fatalf("should print destination filename")
+	}
+
+	if comm.UploadPath != dst {
+		t.Fatalf("should upload to configured destination")
+	}
+
+	if comm.UploadData != content {
+		t.Fatalf("should upload with source file's data")
+	}
+
+}
+
 func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 	var p Provisioner
 	tf1, err := ioutil.TempFile("", "packer")
