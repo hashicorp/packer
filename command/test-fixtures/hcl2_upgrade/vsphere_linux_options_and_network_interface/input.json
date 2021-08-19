@@ -1,0 +1,48 @@
+{
+    "builders": [
+        {
+            "disable_shutdown": true,
+            "type": "vsphere-clone",
+            "vcenter_server": "USER_VALUE",
+            "username": "USER_VALUE",
+            "password": "USER_VALUE",
+            "insecure_connection": "true",
+            "datacenter": "USER_VALUE",
+            "cluster": "USER_VALUE",
+            "network": "USER_VALUE",
+            "datastore": "USER_VALUE",
+            "vm_name": "USER_VALUE",
+            "notes": "Build via Packer",
+            "ssh_username": "root",
+            "ssh_password": "Aa123456",
+            "template": "erez's template",
+            "RAM_reserve_all": false,
+            "convert_to_template": false,
+            "disk_controller_type": [
+                "pvscsi",
+                "pvscsi"
+            ],
+            "storage": [
+                {
+                    "disk_controller_index": 0,
+                    "disk_size": 100000
+                }
+            ],
+            "customize": {
+                "linux_options": {
+                    "host_name": "packer-test",
+                    "domain": "test.internal"
+                },
+                "network_interface": {
+                    "ipv4_address": "172.15.102.202",
+                    "ipv4_netmask": "24"
+                },
+                "ipv4_gateway": "172.15.102.254",
+                "dns_server_list": [
+                    "192.168.254.1",
+                    "192.168.254.2"
+                ]
+            }
+        }
+    ]
+}
