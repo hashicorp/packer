@@ -192,7 +192,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 
 	builders := []*template.Builder{}
 	{
-		// sort builders to avoid map's randomnes
+		// sort builders to avoid map's randomness
 		for _, builder := range tpl.Builders {
 			builders = append(builders, builder)
 		}
