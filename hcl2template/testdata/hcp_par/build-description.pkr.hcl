@@ -3,7 +3,7 @@ build {
 Some build description
     EOT
   hcp_packer_registry {
-    slug = "bucket-slug"
+    bucket_name = "bucket-slug"
   }
   sources = [
     "source.virtualbox-iso.ubuntu-1204",
