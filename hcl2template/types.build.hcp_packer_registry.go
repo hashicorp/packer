@@ -37,7 +37,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	body := block.Body
 
 	var b struct {
-		Slug        string            `hcl:"slug,optional"`
+		Slug        string            `hcl:"bucket_name,optional"`
 		Description string            `hcl:"description,optional"`
 		Labels      map[string]string `hcl:"labels,optional"`
 		Config      hcl.Body          `hcl:",remain"`
