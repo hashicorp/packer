@@ -1,13 +1,6 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go/storage v1.16.1 // indirect
-	github.com/Azure/azure-sdk-for-go v57.0.0+incompatible // indirect
-	github.com/Azure/go-autorest/autorest v0.11.20 // indirect
-	github.com/Azure/go-autorest/autorest/adal v0.9.15 // indirect
-	github.com/Azure/go-autorest/autorest/azure/auth v0.5.8 // indirect
-	github.com/Azure/go-autorest/autorest/azure/cli v0.4.3 // indirect
-	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/Telmate/proxmox-api-go v0.0.0-20210825163308-5e4c0d698a78 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1244 // indirect
@@ -64,9 +57,8 @@ require (
 	github.com/hashicorp/packer-plugin-proxmox v1.0.2
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
-	github.com/hashicorp/packer-plugin-salt v0.0.8
-	github.com/hashicorp/packer-plugin-scaleway v1.0.3
-	github.com/hashicorp/packer-plugin-sdk v0.2.4
+	github.com/hashicorp/packer-plugin-scaleway v1.0.1
+	github.com/hashicorp/packer-plugin-sdk v0.2.4-0.20210824193240-6b55f55dd41b
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
