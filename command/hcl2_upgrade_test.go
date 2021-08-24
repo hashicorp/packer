@@ -10,11 +10,6 @@ import (
 )
 
 func Test_hcl2_upgrade(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Getwd: %v", err)
-	}
-	_ = cwd
 
 	tc := []struct {
 		folder    string
