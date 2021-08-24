@@ -102,8 +102,7 @@ func (i *Iteration) AddImageToBuild(buildName string, images ...Image) error {
 			build.CloudProvider = image.ProviderName
 		}
 
-		k := fmt.Sprintf("%s.region:%s", buildName, image.ProviderRegion)
-		build.Images[k] = image
+		build.Images[image.String()] = image
 	}
 
 	i.builds.Store(buildName, build)

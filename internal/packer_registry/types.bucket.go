@@ -210,7 +210,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	}
 
 	if len(buildToUpdate.Images) == 0 {
-		return fmt.Errorf("setting a build to DONE with no published images is not currently support.")
+		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
 	var providerName string

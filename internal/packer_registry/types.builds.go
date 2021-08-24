@@ -1,6 +1,8 @@
 package packer_registry
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 )
 
@@ -20,4 +22,8 @@ type Build struct {
 type Image struct {
 	ID                           string
 	ProviderName, ProviderRegion string
+}
+
+func (i Image) String() string {
+	return fmt.Sprintf("provider:%s, image:%s, region:%s", i.ProviderName, i.ID, i.ProviderRegion)
 }
