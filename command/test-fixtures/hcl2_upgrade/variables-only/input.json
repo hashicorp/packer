@@ -6,6 +6,7 @@
         "aws_secret_key": "",
         "aws_access_key": "",
         "password": "{{ aws_secretsmanager `sample/app/password` }}",
+        "ami_description": "AMI {{strftime \"%Y-%m\"}}",
         "password_key": "MY_KEY_{{ aws_secretsmanager `sample/app/passwords` `api_key` }}"
     },
     "sensitive-variables": [

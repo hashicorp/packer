@@ -69,6 +69,7 @@ func Functions(basedir string) map[string]function.Function {
 		"jsonencode":         stdlib.JSONEncodeFunc,
 		"keys":               stdlib.KeysFunc,
 		"legacy_isotime":     pkrfunction.LegacyIsotimeFunc,
+		"legacy_strftime":    pkrfunction.LegacyStrftimeFunc,
 		"length":             pkrfunction.LengthFunc,
 		"log":                stdlib.LogFunc,
 		"lookup":             stdlib.LookupFunc,

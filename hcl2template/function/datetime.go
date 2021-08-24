@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jehiah/go-strftime"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 )
@@ -52,6 +53,26 @@ var LegacyIsotimeFunc = function.New(&function.Spec{
 		}
 		format := args[0].AsString()
 		return cty.StringVal(InitTime.Format(format)), nil
+	},
+})
+
+// LegacyStrftimeFunc constructs a function that returns a string representation
+// of the current date and time using golang's strftime datetime formatting.
+var LegacyStrftimeFunc = function.New(&function.Spec{
+	Params: []function.Parameter{},
+	VarParam: &function.Parameter{
+		Name: "format",
+		Type: cty.String,
+	},
+	Type: function.StaticReturnType(cty.String),
+	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
+		if len(args) > 1 {
+			return cty.StringVal(""), fmt.Errorf("too many values, 1 needed: %v", args)
+		} else if len(args) == 0 {
+			return cty.StringVal(InitTime.Format(time.RFC3339)), nil
+		}
+		format := args[0].AsString()
+		return cty.StringVal(strftime.Format(format, InitTime)), nil
 	},
 })
 
