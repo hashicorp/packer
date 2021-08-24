@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer/registryimage"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/mitchellh/mapstructure"
 )
 
 type RegistryPostProcessor struct {
@@ -61,29 +63,27 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 
 	// Lets post state
 	if source != nil {
-		switch state := source.State("par.artifact.metadata").(type) {
+		switch state := source.State(registryimage.ArtifactStateURI).(type) {
 		case map[interface{}]interface{}:
-			m := make(map[string]string)
-			for k, v := range state {
-				m[k.(string)] = v.(string)
-			}
-
-			// TODO handle these error better
+			var image registryimage.Image
+			mapstructure.Decode(state, &image)
 			err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
-				ProviderName:   m["ProviderName"],
-				ProviderRegion: m["ProviderRegion"],
-				ID:             m["ImageID"],
+				ProviderName:   image.ProviderName,
+				ProviderRegion: image.ProviderRegion,
+				ID:             image.ImageID,
 			})
 			if err != nil {
 				log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
 			}
 		case []interface{}:
-			for _, d := range state {
-				d := d.(map[interface{}]interface{})
+			var images []registryimage.Image
+			mapstructure.Decode(state, &images)
+			for _, image := range images {
+				// TODO handle these error better
 				err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
-					ProviderName:   d["ProviderName"].(string),
-					ProviderRegion: d["ProviderRegion"].(string),
-					ID:             d["ImageID"].(string),
+					ProviderName:   image.ProviderName,
+					ProviderRegion: image.ProviderRegion,
+					ID:             image.ImageID,
 				})
 				if err != nil {
 					log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
@@ -91,6 +91,5 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 			}
 		}
 	}
-
 	return source, keep, override, nil
 }

@@ -7,7 +7,9 @@ import (
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer/registryimage"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	"github.com/mitchellh/mapstructure"
 )
 
 type RegistryBuilder struct {
@@ -61,28 +63,28 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 
 	// Lets post state
 	if artifact != nil {
-		switch state := artifact.State("par.artifact.metadata").(type) {
+		switch state := artifact.State(registryimage.ArtifactStateURI).(type) {
 		case map[interface{}]interface{}:
-			m := make(map[string]string)
-			for k, v := range state {
-				m[k.(string)] = v.(string)
-			}
+			var image registryimage.Image
+			mapstructure.Decode(state, &image)
 			// TODO handle these error better
 			err := b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, packerregistry.Image{
-				ProviderName:   m["ProviderName"],
-				ProviderRegion: m["ProviderRegion"],
-				ID:             m["ImageID"],
+				ProviderName:   image.ProviderName,
+				ProviderRegion: image.ProviderRegion,
+				ID:             image.ImageID,
 			})
 			if err != nil {
 				log.Printf("[TRACE] failed to add image artifact for %q: %s", b.Name, err)
 			}
 		case []interface{}:
-			for _, d := range state {
-				d := d.(map[interface{}]interface{})
+			var images []registryimage.Image
+			mapstructure.Decode(state, &images)
+			for _, image := range images {
+				// TODO handle these error better
 				err := b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, packerregistry.Image{
-					ProviderName:   d["ProviderName"].(string),
-					ProviderRegion: d["ProviderRegion"].(string),
-					ID:             d["ImageID"].(string),
+					ProviderName:   image.ProviderName,
+					ProviderRegion: image.ProviderRegion,
+					ID:             image.ImageID,
 				})
 				if err != nil {
 					log.Printf("[TRACE] failed to add image artifact for %q: %s", b.Name, err)
@@ -90,6 +92,5 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 			}
 		}
 	}
-
 	return artifact, err
 }

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
+
+	"github.com/hashicorp/packer-plugin-sdk/packer/registryimage"
 )
 
 type FileArtifact struct {
@@ -27,12 +30,11 @@ func (a *FileArtifact) String() string {
 }
 
 func (a *FileArtifact) State(name string) interface{} {
-	if name == "par.artifact.metadata" {
-		metadata := make(map[string]string)
-		metadata["ImageID"] = a.filename
-		metadata["ProviderName"] = a.Id()
-
-		return metadata
+	if name == registryimage.ArtifactStateURI {
+		return registryimage.FromArtifact(a,
+			registryimage.WithID(path.Base(a.filename)),
+			registryimage.WithRegion(path.Dir(a.filename)),
+		)
 	}
 
 	return nil
