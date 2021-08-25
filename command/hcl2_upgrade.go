@@ -123,6 +123,7 @@ var (
 	localsVariableMap       = map[string]string{}
 	timestamp               = false
 	isotime                 = false
+	strftime                = false
 )
 
 type BlockParser interface {
@@ -192,7 +193,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 
 	builders := []*template.Builder{}
 	{
-		// sort builders to avoid map's randomnes
+		// sort builders to avoid map's randomness
 		for _, builder := range tpl.Builders {
 			builders = append(builders, builder)
 		}
@@ -349,6 +350,14 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return fmt.Sprintf("${legacy_isotime(\"%s\")}", a[0])
 
 		},
+		"strftime": func(a ...string) string {
+			if len(a) == 0 {
+				// returns rfc3339 formatted string.
+				return "${timestamp()}"
+			}
+			strftime = true
+			return fmt.Sprintf("${legacy_strftime(\"%s\")}", a[0])
+		},
 		"user": func(in string) string {
 			if _, ok := localsVariableMap[in]; ok {
 				// variable is now a local
@@ -491,6 +500,7 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		"aws_secretsmanager": setIsLocal,
 		"timestamp":          setIsLocal,
 		"isotime":            setIsLocal,
+		"strftime":           setIsLocal,
 		"user":               setIsLocal,
 		"env": func(in string) string {
 			return fmt.Sprintf("${env(%q)}", in)
@@ -562,6 +572,9 @@ func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 		case map[string]interface{}:
 			var mostComplexElem interface{}
 			for _, randomElem := range value {
+				if k == "linux_options" || k == "network_interface" {
+					break
+				}
 				// HACK: we take the most complex element of that map because
 				// in HCL2, map of objects can be bodies, for example:
 				// map containing object: source_ami_filter {} ( body )
@@ -829,6 +842,9 @@ func (p *LocalsParser) Write(out *bytes.Buffer) {
 	}
 	if isotime {
 		fmt.Fprintln(out, `# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
+	}
+	if strftime {
+		fmt.Fprintln(out, `# The "legacy_strftime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
 	}
 	if len(p.LocalsOut) > 0 {
 		if p.WithAnnotations {

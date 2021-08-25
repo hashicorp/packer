@@ -10,11 +10,6 @@ import (
 )
 
 func Test_hcl2_upgrade(t *testing.T) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("Getwd: %v", err)
-	}
-	_ = cwd
 
 	tc := []struct {
 		folder    string
@@ -33,6 +28,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "variables-with-variables", flags: []string{}},
 		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "escaping", flags: []string{}},
+		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
 		{folder: "inexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 	}
 
