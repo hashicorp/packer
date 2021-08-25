@@ -3,6 +3,7 @@ package packer_registry
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
@@ -139,4 +140,32 @@ func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 	}
 
 	return resp.Payload.Build.ID, nil
+}
+
+// GetChannel loads the iterationId associated with a current channel. If
+// the channel does not exist in HCP Packer, GetChannel returns an error.
+func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug string, channelName string) (*models.HashicorpCloudPackerIteration, error) {
+	params := packerSvc.NewGetChannelParamsWithContext(ctx)
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
+	params.BucketSlug = bucketSlug
+	params.Slug = channelName
+
+	resp, err := client.Packer.GetChannel(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Payload.Channel != nil {
+		if resp.Payload.Channel.Pointer != nil {
+			// The channel payload contains a pointer, which points to the iteration.
+			// Reach into the pointer to get the desired iteration.
+			return resp.Payload.Channel.Pointer.Iteration, nil
+		}
+		return nil, fmt.Errorf("there is no iteration associated with the channel %s",
+			channelName)
+	}
+
+	return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
+		channelName, bucketSlug)
 }
