@@ -105,8 +105,8 @@ github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
 github.com/Microsoft/hcsshim v0.8.9/go.mod h1:5692vkUqntj1idxauYlpoINNKeqCiG6Sg38RRsjT5y8=
 github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.0/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
-github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0 h1:c7GgSBfMt51UGM4SI1F7IFOokOVZO+uxNcJL3Xsmkp4=
-github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7 h1:Kpnbe19WkzVPpLLdAus4LkpNJ+pzLpfAViOUuvPcCqA=
+github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7/go.mod h1:P+3VS0ETiQPyWOx3vB/oeC8J3qd7jnVZLYAFwWgGRt8=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 h1:YoJbenK9C67SkzkDfmQuVln04ygHj3vjZfd9FL+GmQQ=
 github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7/go.mod h1:z4/9nQmJSSwwds7ejkxaJwO37dru3geImFUdJlaLzQo=
@@ -768,8 +768,8 @@ github.com/hashicorp/packer-plugin-lxc v1.0.0 h1:VZ98rBVCLpt5T/Z1DQYc+J/p7Fi6Rf3
 github.com/hashicorp/packer-plugin-lxc v1.0.0/go.mod h1:fHqoE7MMNphPc8dZBs9dJZpfP+JciHQCXIq4bLS/SnE=
 github.com/hashicorp/packer-plugin-lxd v1.0.0 h1:hjSQGBWerBhtIZndw0iG4ubmRyb9Ih5KS8mng1YAu0w=
 github.com/hashicorp/packer-plugin-lxd v1.0.0/go.mod h1:jkBB4GnsoOrXZUFUiA1SOzj5Auk01MhpJiU6yIs5WJ4=
-github.com/hashicorp/packer-plugin-ncloud v1.0.0 h1:VnNhezHVFCIfcC8KP43/GyGaUj58dRJ9PdkEp2NlWa0=
-github.com/hashicorp/packer-plugin-ncloud v1.0.0/go.mod h1:kbCrWMogizFg0k+2x+vV74Nht5nak76g78h+N2sWOMA=
+github.com/hashicorp/packer-plugin-ncloud v1.0.1 h1:0oELREIthQEFSyLmoQxLwLhuf8JBVqsJ+PZnJ+zrsvc=
+github.com/hashicorp/packer-plugin-ncloud v1.0.1/go.mod h1:NH7KStfUBhi+Dky9KsJ8f2VvEefbKNyGBJvdpFC824E=
 github.com/hashicorp/packer-plugin-oneandone v1.0.0 h1:byuTophmj3/0faHfUQXEisxbZETuFWN3XTjmkoLxfKY=
 github.com/hashicorp/packer-plugin-oneandone v1.0.0/go.mod h1:duwkp1xZtgz9uqnvRZdwp+Q4W5Lz/CeDq0ipdR7GZYQ=
 github.com/hashicorp/packer-plugin-openstack v1.0.0 h1:Gbhy2zTFTthdGAytIVfDmfRq+XObY2c9Q1EGx/zAC8E=

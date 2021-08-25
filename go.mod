@@ -37,7 +37,7 @@ require (
 	github.com/hashicorp/packer-plugin-linode v1.0.0
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
-	github.com/hashicorp/packer-plugin-ncloud v1.0.0
+	github.com/hashicorp/packer-plugin-ncloud v1.0.1
 	github.com/hashicorp/packer-plugin-oneandone v1.0.0
 	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.0
@@ -57,7 +57,7 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.0
 	github.com/hashicorp/packer-plugin-vsphere v1.0.0
 	github.com/hashicorp/packer-plugin-yandex v1.0.0
-	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 // indirect
+	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/pgzip v0.0.0-20151221113845-47f36e165cec
 	github.com/masterzen/winrm v0.0.0-20210504160029-28ed956f5227
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
