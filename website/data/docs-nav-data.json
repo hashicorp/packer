@@ -482,6 +482,10 @@
                   {
                     "title": "legacy_isotime",
                     "path": "templates/hcl_templates/functions/datetime/legacy_isotime"
+                  },
+                  {
+                    "title": "legacy_strftime",
+                    "path": "templates/hcl_templates/functions/datetime/legacy_strftime"
                   }
                 ]
               },

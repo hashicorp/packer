@@ -1,0 +1,40 @@
+---
+page_title: legacy_strftime - Functions - Configuration Language
+description: |-
+  The legacy_strftime function returns a string representation of the current date
+  and time.
+---
+
+# `legacy_strftime` — UTC time, formated using the ISO C standard format 
+
+The `legacy_strftime` function returns the current date and time using the given
+format string. The format string follows strftime's datetime formatting.
+
+This function has been provided to create backwards compatibility with Packer's
+legacy JSON templates. However, we recommend that you upgrade your HCL Packer
+template to use
+[`timestamp`](/docs/templates/hcl_templates/functions/datetime/timestamp) and
+[`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate)
+together as soon as is convenient.
+
+-> **Note:** If you are using a large number of builders, provisioners or
+post-processors, the strftime may be slightly different for each one because it
+is from when the plugin is launched not the initial Packer process. In order to
+avoid this and make the timestamp consistent across all plugins, set it as a
+user variable and then access the user variable within your plugins.
+
+## Examples
+
+```shell-session
+> legacy_strftime("%Y-%m")
+2021-08
+```
+
+## Related Functions
+
+- [`format`](/docs/templates/hcl_templates/functions/string/format) is a more general formatting function for arbitrary
+data.
+- [`timestamp`](/docs/templates/hcl_templates/functions/datetime/timestamp) returns the current date and time in a format
+suitable for input to `formatdate`.
+- [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
+  other date and time formats.
