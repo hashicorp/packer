@@ -3,7 +3,7 @@ build {
 Some build description
     EOT
   hcp_packer_registry {
-    slug = "bucket-slug"
+    bucket_name = "bucket-slug"
     description = <<EOT
 Some override description
     EOT
