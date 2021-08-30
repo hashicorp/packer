@@ -203,6 +203,13 @@
     "version": "latest"
   },
   {
+    "title": "Salt",
+    "path": "salt",
+    "repo": "hashicorp/packer-plugin-salt",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "hashicorp/packer-plugin-scaleway",

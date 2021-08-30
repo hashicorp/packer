@@ -24,7 +24,6 @@ import (
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
 	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
-	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
 	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
 	sleepprovisioner "github.com/hashicorp/packer/provisioner/sleep"
@@ -46,7 +45,6 @@ var Provisioners = map[string]packersdk.Provisioner{
 	"file":            new(fileprovisioner.Provisioner),
 	"inspec":          new(inspecprovisioner.Provisioner),
 	"powershell":      new(powershellprovisioner.Provisioner),
-	"salt-masterless": new(saltmasterlessprovisioner.Provisioner),
 	"shell":           new(shellprovisioner.Provisioner),
 	"shell-local":     new(shelllocalprovisioner.Provisioner),
 	"sleep":           new(sleepprovisioner.Provisioner),
