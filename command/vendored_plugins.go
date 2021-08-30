@@ -41,6 +41,7 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
+	inspecprovisioner "github.com/hashicorp/packer-plugin-inspec/provisioner/inspec"
 	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
 	linodebuilder "github.com/hashicorp/packer-plugin-linode/builder/linode"
 	lxcbuilder "github.com/hashicorp/packer-plugin-lxc/builder/lxc"
@@ -155,6 +156,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
 	"converge":          new(convergeprovisioner.Provisioner),
+	"inspec":            new(inspecprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
 	"puppet-server":     new(puppetserverprovisioner.Provisioner),
 }

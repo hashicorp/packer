@@ -33,6 +33,7 @@ require (
 	github.com/hashicorp/packer-plugin-hcloud v1.0.0
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
+	github.com/hashicorp/packer-plugin-inspec v0.0.1
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
 	github.com/hashicorp/packer-plugin-linode v1.0.0
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
@@ -71,9 +72,8 @@ require (
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.8
-	github.com/zclconf/go-cty v1.9.0
+	github.com/zclconf/go-cty v1.9.1
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
 	golang.org/x/mod v0.4.1
 	golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 	golang.org/x/oauth2 v0.0.0-20210313182246-cd4f82c27b84

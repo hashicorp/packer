@@ -22,7 +22,6 @@ import (
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
-	inspecprovisioner "github.com/hashicorp/packer/provisioner/inspec"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	saltmasterlessprovisioner "github.com/hashicorp/packer/provisioner/salt-masterless"
 	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
@@ -44,7 +43,6 @@ var Builders = map[string]packersdk.Builder{
 var Provisioners = map[string]packersdk.Provisioner{
 	"breakpoint":      new(breakpointprovisioner.Provisioner),
 	"file":            new(fileprovisioner.Provisioner),
-	"inspec":          new(inspecprovisioner.Provisioner),
 	"powershell":      new(powershellprovisioner.Provisioner),
 	"salt-masterless": new(saltmasterlessprovisioner.Provisioner),
 	"shell":           new(shellprovisioner.Provisioner),
