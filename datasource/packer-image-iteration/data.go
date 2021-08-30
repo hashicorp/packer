@@ -25,9 +25,9 @@ type Datasource struct {
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	// The name of the bucket your image is in.
-	Bucket string `mapstructure:"bucket_name"`
+	Bucket string `mapstructure:"bucket_name" required:"true"`
 	// The name of the channel to use when retrieving your image
-	Channel string `mapstructure:"channel"`
+	Channel string `mapstructure:"channel" required:"true"`
 	// TODO: Version          string `mapstructure:"version"`
 	// TODO: Label          string `mapstructure:"label"`
 }
