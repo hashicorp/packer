@@ -60,49 +60,69 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 // Copy of []*models.HashicorpCloudPackerBuild. Need to copy so we can generate
 // the HCL spec.
 type ParBuild struct {
-	// aws
+	// The name of the cloud provider that the build exists in. For example,
+	// "aws", "azure", or "gce".
 	CloudProvider string `mapstructure:"cloud_provider"`
-	// builder or post-processor used to build this
+	// The specific Packer builder or post-processor used to create the build.
 	ComponentType string `mapstructure:"component_type"`
-	// created at
-	// Format: date-time
+	// The date and time at which the build was run.
 	CreatedAt string `mapstructure:"created_at"`
-	// ULID
+	// The build id. This is a ULID, which is a unique identifier similar
+	// to a UUID. It is created by the HCP Packer Registry when an build is
+	// first created, and is unique to this build.
 	ID string `mapstructure:"id"`
-	// images
+	// A list of images as stored in the HCP Packer registry. See the ParImage
+	// docs for more information.
 	Images []ParImage `mapstructure:"images"`
-	// ULID of the iteration
+	// The iteration id. This is a ULID, which is a unique identifier similar
+	// to a UUID. It is created by the HCP Packer Registry when an iteration is
+	// first created, and is unique to this iteration.
 	IterationID string `mapstructure:"iteration_id"`
-	// unstructured metadata
+	// Unstructured key:value metadata associated with the build.
 	Labels map[string]string `mapstructure:"labels"`
-	// packer run uuid
+	// The UUID associated with the Packer run that created this build.
 	PackerRunUUID string `mapstructure:"packer_run_uuid"`
-	// complete
+	// Whether the build is considered "complete" (the Packer build ran
+	// successfully and created an artifact), or "incomplete" (the Packer
+	// build did not finish, and there is no uploaded artifact).
 	Status string `mapstructure:"status"`
-	// updated at
-	// Format: date-time
+	// The date and time at which the build was last updated.
 	UpdatedAt string `mapstructure:"updated_at"`
 }
 
 // Copy of []*models.HashicorpCloudPackerImage Need to copy so we can generate
 // the HCL spec.
 type ParImage struct {
-	// Timestamp at which this image was created
-	// Format: date-time
+	// The date and time at which the build was last updated.
 	CreatedAt string `mapstructure:"created_at,omitempty"`
-	// ULID for the image
+	// The iteration id. This is a ULID, which is a unique identifier similar
+	// to a UUID. It is created by the HCP Packer Registry when an iteration is
+	// first created, and is unique to this iteration.
 	ID string `mapstructure:"id,omitempty"`
 	// ID or URL of the remote cloud image as given by a build.
 	ImageID string `mapstructure:"image_id,omitempty"`
-	// region as given by `packer build`. eg. "ap-east-1"
+	// The cloud region as given by `packer build`. eg. "ap-east-1".
+	// For locally managed clouds, this may map instead to a cluster, server
+	// or datastore.
 	Region string `mapstructure:"region,omitempty"`
 }
 
 type DatasourceOutput struct {
-	Id                 string     `mapstructure:"Id"`
-	IncrementalVersion int32      `mapstructure:"incremental_version"`
-	CreatedAt          string     `mapstructure:"created_at"`
-	Builds             []ParBuild `mapstructure:"builds"`
+	// The iteration id. This is a ULID, which is a unique identifier similar
+	// to a UUID. It is created by the HCP Packer Registry when an iteration is
+	// first created, and is unique to this iteration.
+	Id string `mapstructure:"Id"`
+	// The version number assigned to an iteration. This number is an integer,
+	// and is created by the HCP Packer Registry once an iteration is
+	// marked "complete". If a new iteration is marked "complete", the version
+	// that HCP Packer assigns to it will always be the highest previous
+	// iteration version plus one.
+	IncrementalVersion int32 `mapstructure:"incremental_version"`
+	// The date the iteration was created.
+	CreatedAt string `mapstructure:"created_at"`
+	// A list of builds that are stored in the iteration. These builds can be
+	// parsed using HCL to find individual image ids for specific providers.
+	Builds []ParBuild `mapstructure:"builds"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
