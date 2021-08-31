@@ -756,7 +756,6 @@ github.com/hashicorp/packer-plugin-digitalocean v1.0.0/go.mod h1:l80Aie781FwrR+U
 github.com/hashicorp/packer-plugin-docker v0.0.7/go.mod h1:IpeKlwOSy2kdgQcysqd3gCsoqjME9jtmpFoKxn7RRNI=
 github.com/hashicorp/packer-plugin-docker v1.0.1 h1:s4mvIT7+DVf+fucbZ6eGYsCxfprEfCx7mYJKV2wjjqA=
 github.com/hashicorp/packer-plugin-docker v1.0.1/go.mod h1:72oCfil438H0NUo/r/UYzSPYOtbn3XGlSMb986xoR6I=
-github.com/hashicorp/packer-plugin-googlecompute v1.0.0 h1:m+C2gz5OCllprPld8A7U2JgvAdp2sDDGCzoK6sChTj8=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.0/go.mod h1:xqrqtnN8P530NVeiZdzXehIbCTh5uScwfnolmGyhSY4=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.2 h1:fH7EWZ8qL0INWle03NH0VMVNLBweq/s2x+JGZgf6h2k=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.2/go.mod h1:xqrqtnN8P530NVeiZdzXehIbCTh5uScwfnolmGyhSY4=
