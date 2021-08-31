@@ -51,10 +51,10 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatDatasourceOutput is an auto-generated flat version of DatasourceOutput.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatDatasourceOutput struct {
-	Id                 *string        `mapstructure:"Id" cty:"Id" hcl:"Id"`
-	IncrementalVersion *int32         `mapstructure:"incremental_version" cty:"incremental_version" hcl:"incremental_version"`
-	CreatedAt          *string        `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
-	Builds             []FlatParBuild `mapstructure:"builds" cty:"builds" hcl:"builds"`
+	Id                 *string                 `mapstructure:"Id" cty:"Id" hcl:"Id"`
+	IncrementalVersion *int32                  `mapstructure:"incremental_version" cty:"incremental_version" hcl:"incremental_version"`
+	CreatedAt          *string                 `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
+	Builds             map[string]FlatParBuild `mapstructure:"builds" cty:"builds" hcl:"builds"`
 }
 
 // FlatMapstructure returns a new FlatDatasourceOutput.
@@ -72,7 +72,7 @@ func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 		"Id":                  &hcldec.AttrSpec{Name: "Id", Type: cty.String, Required: false},
 		"incremental_version": &hcldec.AttrSpec{Name: "incremental_version", Type: cty.Number, Required: false},
 		"created_at":          &hcldec.AttrSpec{Name: "created_at", Type: cty.String, Required: false},
-		"builds":              &hcldec.BlockListSpec{TypeName: "builds", Nested: hcldec.ObjectSpec((*FlatParBuild)(nil).HCL2Spec())},
+		"builds":              &hcldec.BlockMapSpec{TypeName: "builds", Nested: hcldec.ObjectSpec((*FlatParBuild)(nil).HCL2Spec())},
 	}
 	return s
 }
@@ -80,16 +80,16 @@ func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 // FlatParBuild is an auto-generated flat version of ParBuild.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatParBuild struct {
-	CloudProvider *string           `mapstructure:"cloud_provider" cty:"cloud_provider" hcl:"cloud_provider"`
-	ComponentType *string           `mapstructure:"component_type" cty:"component_type" hcl:"component_type"`
-	CreatedAt     *string           `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
-	ID            *string           `mapstructure:"id" cty:"id" hcl:"id"`
-	Images        []FlatParImage    `mapstructure:"images" cty:"images" hcl:"images"`
-	IterationID   *string           `mapstructure:"iteration_id" cty:"iteration_id" hcl:"iteration_id"`
-	Labels        map[string]string `mapstructure:"labels" cty:"labels" hcl:"labels"`
-	PackerRunUUID *string           `mapstructure:"packer_run_uuid" cty:"packer_run_uuid" hcl:"packer_run_uuid"`
-	Status        *string           `mapstructure:"status" cty:"status" hcl:"status"`
-	UpdatedAt     *string           `mapstructure:"updated_at" cty:"updated_at" hcl:"updated_at"`
+	CloudProvider *string                 `mapstructure:"cloud_provider" cty:"cloud_provider" hcl:"cloud_provider"`
+	ComponentType *string                 `mapstructure:"component_type" cty:"component_type" hcl:"component_type"`
+	CreatedAt     *string                 `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
+	ID            *string                 `mapstructure:"id" cty:"id" hcl:"id"`
+	Images        map[string]FlatParImage `mapstructure:"images" cty:"images" hcl:"images"`
+	IterationID   *string                 `mapstructure:"iteration_id" cty:"iteration_id" hcl:"iteration_id"`
+	Labels        map[string]string       `mapstructure:"labels" cty:"labels" hcl:"labels"`
+	PackerRunUUID *string                 `mapstructure:"packer_run_uuid" cty:"packer_run_uuid" hcl:"packer_run_uuid"`
+	Status        *string                 `mapstructure:"status" cty:"status" hcl:"status"`
+	UpdatedAt     *string                 `mapstructure:"updated_at" cty:"updated_at" hcl:"updated_at"`
 }
 
 // FlatMapstructure returns a new FlatParBuild.
@@ -108,7 +108,7 @@ func (*FlatParBuild) HCL2Spec() map[string]hcldec.Spec {
 		"component_type":  &hcldec.AttrSpec{Name: "component_type", Type: cty.String, Required: false},
 		"created_at":      &hcldec.AttrSpec{Name: "created_at", Type: cty.String, Required: false},
 		"id":              &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},
-		"images":          &hcldec.BlockListSpec{TypeName: "images", Nested: hcldec.ObjectSpec((*FlatParImage)(nil).HCL2Spec())},
+		"images":          &hcldec.BlockMapSpec{TypeName: "images", Nested: hcldec.ObjectSpec((*FlatParImage)(nil).HCL2Spec())},
 		"iteration_id":    &hcldec.AttrSpec{Name: "iteration_id", Type: cty.String, Required: false},
 		"labels":          &hcldec.AttrSpec{Name: "labels", Type: cty.Map(cty.String), Required: false},
 		"packer_run_uuid": &hcldec.AttrSpec{Name: "packer_run_uuid", Type: cty.String, Required: false},

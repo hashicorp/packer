@@ -73,7 +73,7 @@ type ParBuild struct {
 	ID string `mapstructure:"id"`
 	// A list of images as stored in the HCP Packer registry. See the ParImage
 	// docs for more information.
-	Images []ParImage `mapstructure:"images"`
+	Images map[string]ParImage `mapstructure:"images"`
 	// The iteration id. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
@@ -122,7 +122,7 @@ type DatasourceOutput struct {
 	CreatedAt string `mapstructure:"created_at"`
 	// A list of builds that are stored in the iteration. These builds can be
 	// parsed using HCL to find individual image ids for specific providers.
-	Builds []ParBuild `mapstructure:"builds"`
+	Builds map[string]ParBuild `mapstructure:"builds"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
@@ -149,10 +149,12 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		Builds:             convertPackerBuildList(iteration.Builds),
 	}
 
+	log.Printf("Megan this returned value is %#v", output)
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 }
 
-func convertPackerBuildList(builds []*models.HashicorpCloudPackerBuild) (flattened []ParBuild) {
+func convertPackerBuildList(builds []*models.HashicorpCloudPackerBuild) map[string]ParBuild {
+	buildMap := map[string]ParBuild{}
 	for _, build := range builds {
 		out := ParBuild{
 			CloudProvider: build.CloudProvider,
@@ -165,12 +167,13 @@ func convertPackerBuildList(builds []*models.HashicorpCloudPackerBuild) (flatten
 			Status:        string(build.Status),
 			UpdatedAt:     build.UpdatedAt.String(),
 		}
-		flattened = append(flattened, out)
+		buildMap[build.CloudProvider] = out
 	}
-	return
+	return buildMap
 }
 
-func convertPackerBuildImagesList(images []*models.HashicorpCloudPackerImage) (flattened []ParImage) {
+func convertPackerBuildImagesList(images []*models.HashicorpCloudPackerImage) map[string]ParImage {
+	imageMap := map[string]ParImage{}
 	for _, image := range images {
 		out := ParImage{
 			CreatedAt: image.CreatedAt.String(),
@@ -178,7 +181,7 @@ func convertPackerBuildImagesList(images []*models.HashicorpCloudPackerImage) (f
 			ImageID:   image.ImageID,
 			Region:    image.Region,
 		}
-		flattened = append(flattened, out)
+		imageMap[image.Region] = out
 	}
-	return
+	return imageMap
 }

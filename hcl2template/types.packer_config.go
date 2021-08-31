@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -312,6 +313,7 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 			continue
 		}
 		ds.value = realValue
+		log.Printf("Megan value from datasource is %#v", realValue)
 		cfg.Datasources[ref] = ds
 	}
 

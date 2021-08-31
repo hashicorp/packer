@@ -12,7 +12,7 @@
 
 - `created_at` (string) - The date the iteration was created.
 
-- `builds` ([]ParBuild) - A list of builds that are stored in the iteration. These builds can be
+- `builds` (map[string]ParBuild) - A list of builds that are stored in the iteration. These builds can be
   parsed using HCL to find individual image ids for specific providers.
 
 <!-- End of code generated from the comments of the DatasourceOutput struct in datasource/packer-image-iteration/data.go; -->
