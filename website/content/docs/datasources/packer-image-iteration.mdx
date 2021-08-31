@@ -1,0 +1,43 @@
+---
+description: |
+  The Packer Image Iteration Data Source retrieves information about an
+  iteration from the HCP Packer registry. This information can be parsed to
+  provide a source image to various Packer builders.
+page_title: Packer Image Iteration - Data Sources
+---
+
+# Packer Image Iteration Data Source
+
+Type: `packer-image-iteration`
+
+The `Packer Image Iteration` Data Source retrieves information about an
+iteration from the HCP Packer registry. This information can be parsed to
+provide a source image to various Packer builders.
+
+Please note: The HCP Packer registry is in development, and is not yet available
+for public use. For more information about HCP Packer, see https://www.hashicorp.com/blog/announcing-hcp-packer
+
+## Basic Example
+
+Below is a fully functioning example. It stores information about an image
+iteration, which can then be parsed and accessed using HCL tools.
+
+```hcl
+data "packer-image-iteration" "hardened-source" {
+  bucket = "hardened-ubuntu-16-04"
+  channel = "production-stable"
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+### Required:
+
+@include 'datasource/packer-image-iteration/RunConfig-required.mdx'
+
+There are currently no optional fields for this datasource, though we intend
+to add filtering fields in the future.

@@ -15,6 +15,7 @@ import (
 
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
+	packerimageiterationdatasource "github.com/hashicorp/packer/datasource/packer-image-iteration"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -58,7 +59,9 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"shell-local": new(shelllocalpostprocessor.PostProcessor),
 }
 
-var Datasources = map[string]packersdk.Datasource{}
+var Datasources = map[string]packersdk.Datasource{
+	"packer-image-iteration": new(packerimageiterationdatasource.Datasource),
+}
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 

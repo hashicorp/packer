@@ -1,6 +1,7 @@
 module github.com/hashicorp/packer
 
 require (
+	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
