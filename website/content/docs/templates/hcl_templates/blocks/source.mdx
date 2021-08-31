@@ -13,7 +13,7 @@ The top-level `source` block defines reusable builder configuration blocks:
 `@include 'from-1.5/sources/example-block.mdx'`
 
 The first label — `happycloud` here — is the builder type. The second label is
-the name or identifier you want to give to the source. There can be only one
+the unique name or identifier you want to give to the source. There can be only one
 `source.happycloud.foo` top-level source block; but it can be used more than
 once. Builders are usually found in plugins, except for the `file` and the
 `null` builders that will remain in Packer core.
