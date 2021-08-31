@@ -54,7 +54,7 @@ do
    while ! $happy
     do
       echo "upgrading $i"
-      output=$(go get github.com/hashicorp/packer-plugin-$i)
+      output=$(go get -u github.com/hashicorp/packer-plugin-$i)
       happy=true
       if [[ $output == *"443: Connection refused"*  ]]; then
         echo "Try again after 5 seconds"
