@@ -730,10 +730,6 @@
         "path": "provisioners/file"
       },
       {
-        "title": "InSpec",
-        "path": "provisioners/inspec"
-      },
-      {
         "title": "PowerShell",
         "path": "provisioners/powershell"
       },

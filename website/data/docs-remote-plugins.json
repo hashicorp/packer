@@ -107,6 +107,13 @@
     "pluginTier": "community"
   },
   {
+    "title": "InSpec",
+    "path": "inspec",
+    "repo": "hashicorp/packer-plugin-inspec",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "JD Cloud",
     "path": "jdcloud",
     "repo": "hashicorp/packer-plugin-jdcloud",
