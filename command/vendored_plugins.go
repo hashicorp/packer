@@ -62,6 +62,7 @@ import (
 	puppetmasterlessprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
+	saltmasterlessprovisioner "github.com/hashicorp/packer-plugin-salt/provisioner/salt-masterless"
 	scalewaybuilder "github.com/hashicorp/packer-plugin-scaleway/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
@@ -157,6 +158,7 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"converge":          new(convergeprovisioner.Provisioner),
 	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
 	"puppet-server":     new(puppetserverprovisioner.Provisioner),
+	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
 }
 
 // VendoredPostProcessors are post-processor components that were once bundled with the

@@ -738,10 +738,6 @@
         "path": "provisioners/powershell"
       },
       {
-        "title": "Salt Masterless",
-        "path": "provisioners/salt-masterless"
-      },
-      {
         "title": "Shell",
         "path": "provisioners/shell"
       },

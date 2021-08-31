@@ -47,6 +47,7 @@ require (
 	github.com/hashicorp/packer-plugin-proxmox v1.0.0
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
+	github.com/hashicorp/packer-plugin-salt v0.0.2
 	github.com/hashicorp/packer-plugin-scaleway v1.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.3
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
@@ -71,7 +72,7 @@ require (
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.8
-	github.com/zclconf/go-cty v1.9.0
+	github.com/zclconf/go-cty v1.9.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
 	golang.org/x/mod v0.4.1
