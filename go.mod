@@ -1,7 +1,7 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go/storage v1.16.0 // indirect
+	cloud.google.com/go/storage v1.16.1 // indirect
 	github.com/Azure/azure-sdk-for-go v57.0.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.20 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.15 // indirect
@@ -13,7 +13,7 @@ require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1244 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.10+incompatible // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
-	github.com/aws/aws-sdk-go v1.40.33 // indirect
+	github.com/aws/aws-sdk-go v1.40.34 // indirect
 	github.com/biogo/hts v1.4.3
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
-	github.com/hashicorp/consul/api v1.10.0 // indirect
+	github.com/hashicorp/consul/api v1.10.1 // indirect
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
 	github.com/hashicorp/go-getter/v2 v2.0.0
@@ -62,7 +62,7 @@ require (
 	github.com/hashicorp/packer-plugin-hcloud v1.0.0
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
-	github.com/hashicorp/packer-plugin-inspec v0.0.1
+	github.com/hashicorp/packer-plugin-inspec v0.0.7
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
 	github.com/hashicorp/packer-plugin-linode v1.0.0
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
@@ -77,7 +77,7 @@ require (
 	github.com/hashicorp/packer-plugin-proxmox v1.0.2
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
-	github.com/hashicorp/packer-plugin-salt v0.0.2
+	github.com/hashicorp/packer-plugin-salt v0.0.8
 	github.com/hashicorp/packer-plugin-scaleway v1.0.1
 	github.com/hashicorp/packer-plugin-sdk v0.2.4
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
@@ -120,7 +120,7 @@ require (
 	github.com/zclconf/go-cty v1.9.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/mobile v0.0.0-20210831151720-d82874c7e649 // indirect
+	golang.org/x/mobile v0.0.0-20210901025245-1fde1d6c3ca1 // indirect
 	golang.org/x/mod v0.5.0
 	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
@@ -130,14 +130,14 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	golang.org/x/tools v0.1.5
-	google.golang.org/api v0.55.0 // indirect
+	google.golang.org/api v0.56.0 // indirect
 	google.golang.org/genproto v0.0.0-20210831024726-fe130286e0e2 // indirect
 	google.golang.org/grpc v1.40.0
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
 
 require (
-	cloud.google.com/go v0.93.3 // indirect
+	cloud.google.com/go v0.94.0 // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
