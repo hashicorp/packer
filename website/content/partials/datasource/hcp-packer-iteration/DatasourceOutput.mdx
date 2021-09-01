@@ -1,0 +1,30 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-iteration/data.go; DO NOT EDIT MANUALLY -->
+
+- `author_id` (string) - who created the iteration
+
+- `bucket_name` (string) - Name of the bucket that the iteration was retrieved from
+
+- `complete` (bool) - If true, this iteration is considered "ready to use" and will be
+  returned even if the include_incomplete flag is "false" in the
+  list iterations request. Note that if you are retrieving an iteration
+  using a channel, this will always be "true"; channels cannot be assigned
+  to incomplete iterations.
+
+- `created_at` (string) - The date the iteration was created.
+
+- `fingerprint` (string) - The fingerprint of the build; this could be a git sha or other unique
+  identifier as set by the Packer build that created this iteration.
+
+- `id` (string) - The iteration id. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when an iteration is
+  first created, and is unique to this iteration.
+
+- `incremental_version` (int32) - The version number assigned to an iteration. This number is an integer,
+  and is created by the HCP Packer Registry once an iteration is
+  marked "complete". If a new iteration is marked "complete", the version
+  that HCP Packer assigns to it will always be the highest previous
+  iteration version plus one.
+
+- `updated_at` (string) - The date when this iteration was last updated.
+
+<!-- End of code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-iteration/data.go; -->
