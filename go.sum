@@ -854,8 +854,8 @@ github.com/hashicorp/packer-plugin-parallels v1.0.0/go.mod h1:iRJuNflTXPLxdWEXCN
 github.com/hashicorp/packer-plugin-profitbricks v1.0.1 h1:yFLUoDvm/zwzqj3J4a4pe49JpeDDGx08U9B38FXEyNk=
 github.com/hashicorp/packer-plugin-profitbricks v1.0.1/go.mod h1:qtDQ7sbc0hMXWuxt0gweUwsVyVIazRLyNCHPO19CPU0=
 github.com/hashicorp/packer-plugin-proxmox v1.0.0/go.mod h1:wpT6M6zNvb4fNi4BmkKjH2prxTHxVhs/i97ffIpeGM8=
-github.com/hashicorp/packer-plugin-proxmox v1.0.1 h1:ojabXPcU5IjYEBhkpaaWn/9sKapXlPi6WcGxBEaYG08=
-github.com/hashicorp/packer-plugin-proxmox v1.0.1/go.mod h1:wpT6M6zNvb4fNi4BmkKjH2prxTHxVhs/i97ffIpeGM8=
+github.com/hashicorp/packer-plugin-proxmox v1.0.2 h1:lD0pPDHHG3+W8jh4Ez9j3N58tX/gfB/qkoMY1WCCQOQ=
+github.com/hashicorp/packer-plugin-proxmox v1.0.2/go.mod h1:qavY6YzdwMfzYc3T+WobDbwRfk1eMLqn5qaS3yBnp1E=
 github.com/hashicorp/packer-plugin-puppet v1.0.0 h1:KxyUnFBIzF+nXPNtf+I+5p+IwaLsylcuHSxycI7FB7Y=
 github.com/hashicorp/packer-plugin-puppet v1.0.0/go.mod h1:HRS/GxrY3iBINuTBgzOGR6jah+SRfqb37ixftZjZtJw=
 github.com/hashicorp/packer-plugin-qemu v1.0.0 h1:EiWFadbgahXzY15a6G1BJ49wsmqVYQViw/t9GtJibTo=
