@@ -1,0 +1,15 @@
+<!-- Code generated from the comments of the ParImage struct in datasource/packer-image-iteration/data.go; DO NOT EDIT MANUALLY -->
+
+- `created_at` (string) - The date and time at which the build was last updated.
+
+- `id` (string) - The iteration id. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when an iteration is
+  first created, and is unique to this iteration.
+
+- `image_id` (string) - ID or URL of the remote cloud image as given by a build.
+
+- `region` (string) - The cloud region as given by `packer build`. eg. "ap-east-1".
+  For locally managed clouds, this may map instead to a cluster, server
+  or datastore.
+
+<!-- End of code generated from the comments of the ParImage struct in datasource/packer-image-iteration/data.go; -->

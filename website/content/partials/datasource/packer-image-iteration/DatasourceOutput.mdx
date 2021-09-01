@@ -1,0 +1,18 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/packer-image-iteration/data.go; DO NOT EDIT MANUALLY -->
+
+- `Id` (string) - The iteration id. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when an iteration is
+  first created, and is unique to this iteration.
+
+- `incremental_version` (int32) - The version number assigned to an iteration. This number is an integer,
+  and is created by the HCP Packer Registry once an iteration is
+  marked "complete". If a new iteration is marked "complete", the version
+  that HCP Packer assigns to it will always be the highest previous
+  iteration version plus one.
+
+- `created_at` (string) - The date the iteration was created.
+
+- `builds` ([]ParBuild) - A list of builds that are stored in the iteration. These builds can be
+  parsed using HCL to find individual image ids for specific providers.
+
+<!-- End of code generated from the comments of the DatasourceOutput struct in datasource/packer-image-iteration/data.go; -->

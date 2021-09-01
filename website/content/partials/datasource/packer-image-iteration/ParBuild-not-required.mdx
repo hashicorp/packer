@@ -1,0 +1,31 @@
+<!-- Code generated from the comments of the ParBuild struct in datasource/packer-image-iteration/data.go; DO NOT EDIT MANUALLY -->
+
+- `cloud_provider` (string) - The name of the cloud provider that the build exists in. For example,
+  "aws", "azure", or "gce".
+
+- `component_type` (string) - The specific Packer builder or post-processor used to create the build.
+
+- `created_at` (string) - The date and time at which the build was run.
+
+- `id` (string) - The build id. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when an build is
+  first created, and is unique to this build.
+
+- `images` ([]ParImage) - A list of images as stored in the HCP Packer registry. See the ParImage
+  docs for more information.
+
+- `iteration_id` (string) - The iteration id. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when an iteration is
+  first created, and is unique to this iteration.
+
+- `labels` (map[string]string) - Unstructured key:value metadata associated with the build.
+
+- `packer_run_uuid` (string) - The UUID associated with the Packer run that created this build.
+
+- `status` (string) - Whether the build is considered "complete" (the Packer build ran
+  successfully and created an artifact), or "incomplete" (the Packer
+  build did not finish, and there is no uploaded artifact).
+
+- `updated_at` (string) - The date and time at which the build was last updated.
+
+<!-- End of code generated from the comments of the ParBuild struct in datasource/packer-image-iteration/data.go; -->

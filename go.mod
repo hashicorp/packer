@@ -17,6 +17,8 @@ require (
 	github.com/biogo/hts v1.4.3
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/biogo/hts v0.0.0-20160420073057-50da7d4131a3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/digitalocean/go-libvirt v0.0.0-20210723161134-761cfeeb5968 // indirect
