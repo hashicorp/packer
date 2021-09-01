@@ -59,8 +59,8 @@ require (
 	github.com/hashicorp/packer-plugin-converge v1.0.0
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.1
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.2
-	github.com/hashicorp/packer-plugin-hcloud v1.0.0
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.3
+	github.com/hashicorp/packer-plugin-hcloud v1.0.1
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
 	github.com/hashicorp/packer-plugin-inspec v0.0.7
@@ -79,16 +79,16 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-salt v0.0.8
-	github.com/hashicorp/packer-plugin-scaleway v1.0.1
+	github.com/hashicorp/packer-plugin-scaleway v1.0.2
 	github.com/hashicorp/packer-plugin-sdk v0.2.4
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
 	github.com/hashicorp/packer-plugin-vagrant v1.0.0
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.0
-	github.com/hashicorp/packer-plugin-vmware v1.0.1
+	github.com/hashicorp/packer-plugin-vmware v1.0.2
 	github.com/hashicorp/packer-plugin-vsphere v1.0.1
-	github.com/hashicorp/packer-plugin-yandex v1.0.0
+	github.com/hashicorp/packer-plugin-yandex v1.0.1
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493 // indirect
 	github.com/hetznercloud/hcloud-go v1.32.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
