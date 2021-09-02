@@ -22,7 +22,6 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/digitalocean/go-libvirt v0.0.0-20210723161134-761cfeeb5968 // indirect
 	github.com/dsnet/compress v0.0.1
-	github.com/exoscale/packer-plugin-exoscale v0.1.1
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-openapi/runtime v0.19.24
@@ -158,32 +157,18 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
-	github.com/aws/aws-sdk-go-v2 v1.2.1 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.1.2 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.1.2 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.0.3 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.0.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.0.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.0.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.1.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.2.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.1.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.1.2 // indirect
-	github.com/aws/smithy-go v1.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
 	github.com/c2h5oh/datasize v0.0.0-20200825124411-48ed595a09d2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deepmap/oapi-codegen v1.5.1 // indirect
-	github.com/golang-jwt/jwt v3.2.0+incompatible // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001 // indirect
 	github.com/digitalocean/godo v1.65.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
-	github.com/exoscale/egoscale v0.43.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
@@ -223,7 +208,6 @@ require (
 	github.com/hashicorp/vault/sdk v0.2.1 // indirect
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/jarcoal/httpmock v1.0.8 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
@@ -257,7 +241,6 @@ require (
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect
-	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/ucloud/ucloud-sdk-go v0.20.2 // indirect
 	github.com/ufilesdk-dev/ufile-gosdk v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
