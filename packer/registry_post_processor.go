@@ -11,7 +11,6 @@ import (
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
-	"github.com/mitchellh/mapstructure"
 )
 
 type RegistryPostProcessor struct {
@@ -62,21 +61,15 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		return source, false, false, err
 	}
 
-	switch state := source.State(registryimage.ArtifactStateURI).(type) {
-	case map[interface{}]interface{}:
-		var image registryimage.Image
-		config.Decode(&image, &config.DecodeOpts{}, state)
-		err = p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, image)
-	case []interface{}:
-		var images []registryimage.Image
-		mapstructure.Decode(state, &images)
-		config.Decode(&images, &config.DecodeOpts{}, state)
-		err = p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, images...)
-	}
+	state := source.State(registryimage.ArtifactStateURI)
+	var images []registryimage.Image
+	config.Decode(&images, &config.DecodeOpts{}, state)
+	err = p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, images...)
 
 	if err != nil {
 		log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
+		return source, keep, override, err
 	}
 
-	return source, keep, override, err
+	return source, keep, override, nil
 }

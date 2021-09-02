@@ -69,20 +69,14 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 		return nil, nil
 	}
 
-	switch state := artifact.State(registryimage.ArtifactStateURI).(type) {
-	case map[interface{}]interface{}:
-		var image registryimage.Image
-		config.Decode(&image, &config.DecodeOpts{}, state)
-		err = b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, image)
-	case []interface{}:
-		var images []registryimage.Image
-		config.Decode(&images, &config.DecodeOpts{}, state)
-		err = b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, images...)
-	}
-
+	state := artifact.State(registryimage.ArtifactStateURI)
+	var images []registryimage.Image
+	config.Decode(&images, &config.DecodeOpts{}, state)
+	err = b.ArtifactMetadataPublisher.UpdateImageForBuild(b.Name, images...)
 	if err != nil {
 		log.Printf("[TRACE] failed to add image artifact for %q: %s", b.Name, err)
+		return artifact, err
 	}
 
-	return artifact, err
+	return artifact, nil
 }
