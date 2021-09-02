@@ -12,6 +12,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/null"
+	dnull "github.com/hashicorp/packer/datasource/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
 	"github.com/hashicorp/packer/packer"
@@ -41,6 +42,7 @@ func getBasicParser(opts ...getParserOption) *Parser {
 			},
 			DataSources: packer.MapOfDatasource{
 				"amazon-ami": func() (packersdk.Datasource, error) { return &MockDatasource{}, nil },
+				"null":       func() (packersdk.Datasource, error) { return &dnull.Datasource{}, nil },
 			},
 		},
 	}

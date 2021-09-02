@@ -2,6 +2,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -62,7 +63,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	return res, diags
 }
 
-func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
+func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef, secondaryEvaluation bool) (packersdk.Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	block := cfg.Datasources[ref].block
 
@@ -101,19 +102,48 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 			Severity: hcl.DiagError,
 		})
 	}
+
+	// HACK:
+	// This is where we parse the variables being used in the data sources.
+	// By passing in the DatasourceContext variable, we tell the EvalContext
+	// that since this is a datasource being evaluated, we should not allow
+	// other data sources to be decoded into it. When secondaryEvaluation is
+	// true, we know that this data source needs another data source in order
+	// to be evaluated. So we instead retrieve a different EvalContext.
+	// This is a brute force method to enable data sources to depend on each
+	// other, and a more elegant solution will be available once we implement a
+	// true DAG for Packer.
+	var decoded cty.Value
+	var moreDiags hcl.Diagnostics
 	body := block.Body
-	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return nil, diags
+	if secondaryEvaluation {
+		// LocalContext is a lie! See above.
+		decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(LocalContext, nil), datasource)
+	} else {
+		decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
 	}
 
-	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
-	// Unknown types are not recognized by the json marshal during the RPC call and we have to do this here
-	// to avoid json parsing failures when running the validate command.
-	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
-	decoded = hcl2shim.WriteUnknownPlaceholderValues(decoded)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		for _, err = range moreDiags.Errs() {
+			// If the error is just that there's no "data" object in the
+			// context, don't fail. We will track this data source for decoding
+			// again later, once we've evaluated all of the datasources.
+			// return nil, diags
+			if !strings.Contains(err.Error(), `There is no variable named "data"`) {
+				// There's an error that isn't just a recursive data source
+				// interpolation error
+				return nil, diags
+			}
+		}
+	}
 
+	// In case of cty.Unknown values, this will write a equivalent placeholder
+	// of the same type. Unknown types are not recognized by the json marshal
+	// during the RPC call and we have to do this here to avoid json parsing
+	// failures when running the validate command. We don't do this before so
+	// we can validate if variable type matches correctly on decodeHCL2Spec.
+	decoded = hcl2shim.WriteUnknownPlaceholderValues(decoded)
 	if err := datasource.Configure(decoded); err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  err.Error(),
