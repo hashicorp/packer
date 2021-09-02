@@ -6,7 +6,7 @@ version: 2.1
 executors:
   golang:
     docker:
-      - image: docker.mirror.hashicorp.services/circleci/golang:1.16
+      - image: docker.mirror.hashicorp.services/circleci/golang:1.17
     resource_class: medium+
   darwin:
     macos:
@@ -69,14 +69,14 @@ jobs:
     steps:
       - install-go-run-tests-unix:
           GOOS: darwin
-          GOVERSION: "1.16"
+          GOVERSION: "1.17"
   test-windows:
     executor:
       name: win/vs2019
       shell: bash.exe
     steps:
       - install-go-run-tests-windows:
-          GOVERSION: "1.16"
+          GOVERSION: "1.17"
   check-lint:
     executor: golang
     resource_class: xlarge
