@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	git "github.com/go-git/go-git/v5"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 )
 
 type Iteration struct {
@@ -82,7 +83,7 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 }
 
 // AddImageToBuild appends one or more images artifacts to the build referred to by buildName.
-func (i *Iteration) AddImageToBuild(buildName string, images ...Image) error {
+func (i *Iteration) AddImageToBuild(buildName string, images ...registryimage.Image) error {
 	existingBuild, ok := i.builds.Load(buildName)
 	if !ok {
 		return errors.New("no build found for the name " + buildName)
@@ -94,12 +95,23 @@ func (i *Iteration) AddImageToBuild(buildName string, images ...Image) error {
 	}
 
 	if build.Images == nil {
-		build.Images = make(map[string]Image)
+		build.Images = make(map[string]registryimage.Image)
 	}
 
 	for _, image := range images {
+		if err := image.Validate(); err != nil {
+			return fmt.Errorf("failed to add image to build %q: %v", buildName, err)
+		}
+
 		if build.CloudProvider == "" {
 			build.CloudProvider = image.ProviderName
+		}
+
+		for k, v := range image.Labels {
+			if _, ok := build.Labels[k]; ok {
+				continue
+			}
+			build.Labels[k] = v
 		}
 
 		build.Images[image.String()] = image

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/hashicorp/packer-plugin-sdk/packer/registryimage"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 )
 
 type FileArtifact struct {
@@ -31,10 +31,17 @@ func (a *FileArtifact) String() string {
 
 func (a *FileArtifact) State(name string) interface{} {
 	if name == registryimage.ArtifactStateURI {
-		return registryimage.FromArtifact(a,
+		img, err := registryimage.FromArtifact(a,
 			registryimage.WithID(path.Base(a.filename)),
 			registryimage.WithRegion(path.Dir(a.filename)),
 		)
+
+		if err != nil {
+			log.Printf("[DEBUG] error encountered when creating a registry image %v", err)
+			return nil
+		}
+
+		return img
 	}
 
 	return nil

@@ -1,9 +1,8 @@
 package packer_registry
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 )
 
 // Build represents a build of a given component type for some bucket on the HCP Packer Registry.
@@ -13,17 +12,6 @@ type Build struct {
 	ComponentType string
 	RunUUID       string
 	Labels        map[string]string
-	Images        map[string]Image
+	Images        map[string]registryimage.Image
 	Status        models.HashicorpCloudPackerBuildStatus
-}
-
-// Image represents an artifact on some external provider (e.g AWS, GCP, Azure) that should be tracked
-// as the main image artifact for some iteration of a Bucket on the HCP Packer Registry.
-type Image struct {
-	ID                           string
-	ProviderName, ProviderRegion string
-}
-
-func (i Image) String() string {
-	return fmt.Sprintf("provider:%s, image:%s, region:%s", i.ProviderName, i.ID, i.ProviderRegion)
 }

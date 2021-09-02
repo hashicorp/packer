@@ -32,13 +32,13 @@ require (
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
 	github.com/hashicorp/packer-plugin-amazon v1.0.1-dev
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
-	github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210827204949-2db2f8f742f5
+	github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210901194000-92cb558280ea
 	github.com/hashicorp/packer-plugin-chef v1.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.0
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.1
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210827170357-eff61b67a6ce
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210901195800-781d29aa5ab5
 	github.com/hashicorp/packer-plugin-hcloud v1.0.0
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
@@ -58,7 +58,7 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-scaleway v1.0.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.4-0.20210824193240-6b55f55dd41b
+	github.com/hashicorp/packer-plugin-sdk v0.2.5-0.20210902203720-8464b03760f4
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
