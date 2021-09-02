@@ -6,7 +6,7 @@ import (
 	// Previously core-bundled components, split into their own plugins but
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
-	exoscaleimportpostprocessor "github.com/exoscale/packer-plugin-exoscale/post-processor/exoscale-import"
+
 	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
 	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
@@ -173,7 +173,6 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),
 	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
-	"exoscale-import":      new(exoscaleimportpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
