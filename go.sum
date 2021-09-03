@@ -784,6 +784,8 @@ github.com/hashicorp/packer-plugin-ansible v1.0.0 h1:YU+k3JgwojL4Aw/yq6F9+b56B2w
 github.com/hashicorp/packer-plugin-ansible v1.0.0/go.mod h1:wbOfX8U2pcZdsChjwvvK62HF4C1hM4qcn1x5gjp87v0=
 github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210901194000-92cb558280ea h1:AU8BzxMzTPOFJ4QrCzL/2gk4f8+2ETJOWFXruCJUQ9w=
 github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210901194000-92cb558280ea/go.mod h1:7F+L9X05s4kHyOANoaMoAXgoVygQqQqR/NXgZ4TjxHE=
+github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210903201247-40e2012a9e82 h1:H+EZHsWOHvLJ/2dNwhaxe+q/Ub6H3ffSbIK+KprRPLw=
+github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210903201247-40e2012a9e82/go.mod h1:DYHs8Zt4RSbjO1wKnMOAATZOwUKi1lzNZ/AQsWeuVTw=
 github.com/hashicorp/packer-plugin-chef v1.0.1 h1:sMTPzIAOaTlp4E05VZG6QILYUqR6IeBuszfHq3cdbUU=
 github.com/hashicorp/packer-plugin-chef v1.0.1/go.mod h1:CdOq9cMzJHbLwm3R+oEexQFbMiMNf0j1jgnvsx85l0M=
 github.com/hashicorp/packer-plugin-cloudstack v1.0.0 h1:TB2XbgaFZ88fJIoldNbCvKjGgaCa3uT2NqrpNrgaCTw=
@@ -797,6 +799,8 @@ github.com/hashicorp/packer-plugin-docker v1.0.1 h1:s4mvIT7+DVf+fucbZ6eGYsCxfprE
 github.com/hashicorp/packer-plugin-docker v1.0.1/go.mod h1:72oCfil438H0NUo/r/UYzSPYOtbn3XGlSMb986xoR6I=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210901195800-781d29aa5ab5 h1:C8/zqcphScrERyJSIuJErZFy/fz7uT3SndTMcvEGvJo=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210901195800-781d29aa5ab5/go.mod h1:bZBuYb0NjM1M2pei4NyroaNz0ZVCB4EekRoTRGuSBYk=
+github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210903201039-60981eb9b6fb h1:3XKzBE+4dx1lnDg4HRr3QeKV0+d/WFAniB3SPptiKrM=
+github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210903201039-60981eb9b6fb/go.mod h1:vB2Rxi9nUflFdxfFPPVp5kooVucJPCZme/46I4nSFz4=
 github.com/hashicorp/packer-plugin-hcloud v1.0.0 h1:bhuqPRXc6RG15pgyeqR1qTaJAY6iifhuBV9sAOa/zQo=
 github.com/hashicorp/packer-plugin-hcloud v1.0.0/go.mod h1:cRPfKodO8JnLKLA47rUQlU8t0Wfc9vpOEhyhBrNFgTY=
 github.com/hashicorp/packer-plugin-hyperone v1.0.0 h1:4KAu7WTqsZwC6gnL+AGXSJ+DHQ6K73ywl8W1TOZPjZk=
