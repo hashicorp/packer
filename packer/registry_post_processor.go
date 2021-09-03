@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
-	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
+	"github.com/mitchellh/mapstructure"
 )
 
 type RegistryPostProcessor struct {
@@ -61,9 +61,18 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		return source, false, false, err
 	}
 
-	state := source.State(registryimage.ArtifactStateURI)
 	var images []registryimage.Image
-	err = config.Decode(&images, &config.DecodeOpts{}, state)
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:           &images,
+		WeaklyTypedInput: true,
+		ErrorUnused:      true,
+	})
+	if err != nil {
+		return source, false, false, fmt.Errorf("failed to create decoder for HCP Packer registry image: %w", err)
+	}
+
+	state := source.State(registryimage.ArtifactStateURI)
+	err = decoder.Decode(state)
 	if err != nil {
 		return source, false, false, fmt.Errorf("failed to obtain HCP Packer registry image from post-processor artifact: %w", err)
 	}
