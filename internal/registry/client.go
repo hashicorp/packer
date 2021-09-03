@@ -1,4 +1,4 @@
-package packer_registry
+package registry
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
+	"github.com/hashicorp/packer/internal/registry/env"
 )
 
 // Client is an HCP client capable of making requests on behalf of a service principal

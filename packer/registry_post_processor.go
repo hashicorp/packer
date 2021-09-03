@@ -10,7 +10,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
 type RegistryPostProcessor struct {
@@ -63,12 +63,14 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 
 	state := source.State(registryimage.ArtifactStateURI)
 	var images []registryimage.Image
-	config.Decode(&images, &config.DecodeOpts{}, state)
+	err = config.Decode(&images, &config.DecodeOpts{}, state)
+	if err != nil {
+		return source, false, false, fmt.Errorf("failed to obtain HCP Packer registry image from post-processor artifact: %w", err)
+	}
 	err = p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, images...)
 
 	if err != nil {
-		log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
-		return source, keep, override, err
+		return source, keep, override, fmt.Errorf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
 	}
 
 	return source, keep, override, nil

@@ -1,4 +1,4 @@
-package packer_registry
+package registry
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
+	"github.com/hashicorp/packer/internal/registry/env"
 	"google.golang.org/grpc/codes"
 )
 

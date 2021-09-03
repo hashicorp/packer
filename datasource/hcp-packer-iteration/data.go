@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
 type Datasource struct {

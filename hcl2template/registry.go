@@ -2,7 +2,7 @@ package hcl2template
 
 import (
 	"github.com/hashicorp/hcl/v2"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
 // ConfiguredArtifactMetadataPublisher returns a configured image bucket that can be used for publishing

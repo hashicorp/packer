@@ -1,4 +1,4 @@
-package packer_registry
+package registry
 
 import (
 	"errors"

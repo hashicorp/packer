@@ -1,4 +1,4 @@
-package packer_registry
+package registry
 
 import (
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
