@@ -7,23 +7,14 @@
 # This is intended to help debug Vercel build issues, which
 # may or may not be related to docs in plugin repositories.
 
-name: "website: Check plugin docs"
-on:
-  pull_request:
-    paths:
-      - "website/**"
-  schedule:
-    - cron: "45 0 * * *"
-
-jobs:
-  check-plugin-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Node
-        uses: actions/setup-node@v1
-      - name: Install Dependencies
-        run: npm i isomorphic-unfetch adm-zip gray-matter
-      - name: Fetch and validate plugin docs
-        run: node .github/workflows/check-plugin-docs.js
+- name: Packer GitHub Actions
+  # You may pin to the exact commit or the version.
+  # uses: hashicorp/packer-github-actions@2ef5cf325f2beace99a1742903eb52542765c08f
+  uses: hashicorp/packer-github-actions@v0.2.0
+  with:
+    # command to execute
+    command: 
+    # arguments for command
+    arguments: # optional
+    # file(s) to target
+    target: # default is artifacts.pkr.json
