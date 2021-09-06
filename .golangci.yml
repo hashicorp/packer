@@ -27,15 +27,15 @@ issues:
 linters:
   disable-all: true
   enable:
-    - deadcode
-    - errcheck
+    #- deadcode
+    #- errcheck
     - goimports
-    - gosimple
+    #- gosimple
     - govet
-    - ineffassign
+    #- ineffassign
     - staticcheck
     - unconvert
-    - unused
+    #- unused
     - varcheck
   fast: true
 
