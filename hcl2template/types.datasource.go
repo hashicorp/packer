@@ -62,7 +62,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	return res, diags
 }
 
-func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
+func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef, secondaryEvaluation bool) (packersdk.Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	block := cfg.Datasources[ref].block
 
@@ -101,19 +101,23 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 			Severity: hcl.DiagError,
 		})
 	}
+
+	var decoded cty.Value
+	var moreDiags hcl.Diagnostics
 	body := block.Body
-	decoded, moreDiags := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
+	decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
+
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return nil, diags
 	}
 
-	// In case of cty.Unknown values, this will write a equivalent placeholder of the same type
-	// Unknown types are not recognized by the json marshal during the RPC call and we have to do this here
-	// to avoid json parsing failures when running the validate command.
-	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
+	// In case of cty.Unknown values, this will write a equivalent placeholder
+	// of the same type. Unknown types are not recognized by the json marshal
+	// during the RPC call and we have to do this here to avoid json parsing
+	// failures when running the validate command. We don't do this before so
+	// we can validate if variable type matches correctly on decodeHCL2Spec.
 	decoded = hcl2shim.WriteUnknownPlaceholderValues(decoded)
-
 	if err := datasource.Configure(decoded); err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  err.Error(),
