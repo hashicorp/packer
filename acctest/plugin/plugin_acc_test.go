@@ -85,6 +85,17 @@ func cleanupPluginInstallation(plugin addrs.Plugin) error {
 		plugin.Hostname,
 		plugin.Namespace,
 		plugin.Type)
+
+	if _, ok := os.LookupEnv("CIRCLECI"); ok {
+		pluginPath = filepath.Join(home,
+			".config",
+			"packer",
+			"plugins",
+			plugin.Hostname,
+			plugin.Namespace,
+			plugin.Type)
+	}
+
 	testutils.CleanupFiles(pluginPath)
 	return nil
 }
