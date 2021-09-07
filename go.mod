@@ -65,7 +65,7 @@ require (
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-salt v0.0.8
 	github.com/hashicorp/packer-plugin-scaleway v1.0.1
-	github.com/hashicorp/packer-plugin-sdk v0.2.5-0.20210902203720-8464b03760f4
+	github.com/hashicorp/packer-plugin-sdk v0.2.5
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
@@ -199,6 +199,7 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/hashicorp/packer-plugin v0.0.0-20210226150414-64c03a35871c // indirect
 	github.com/hashicorp/serf v0.9.5 // indirect
 	github.com/hashicorp/vault/api v1.1.1 // indirect
 	github.com/hashicorp/vault/sdk v0.2.1 // indirect

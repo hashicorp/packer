@@ -775,6 +775,8 @@ github.com/hashicorp/packer v1.6.7-0.20210217093213-201869d627bf/go.mod h1:+EWPP
 github.com/hashicorp/packer v1.7.0/go.mod h1:3KRJcwOctl2JaAGpQMI1bWQRArfWNWqcYjO6AOsVVGQ=
 github.com/hashicorp/packer v1.7.1/go.mod h1:ApnmMINvuhhnfPyTVqZu6jznDWPVYDJUw7e188DFCmo=
 github.com/hashicorp/packer v1.7.2/go.mod h1:c/QB/DWK5fSdtNWrTb9etWacmbm01UY23ZILpGundCY=
+github.com/hashicorp/packer-plugin v0.0.0-20210226150414-64c03a35871c h1:/71zgjKlFIYRizSfw92mofLUZz6p/lIp94akPkrKQs4=
+github.com/hashicorp/packer-plugin v0.0.0-20210226150414-64c03a35871c/go.mod h1:mQQf7G23sJ3duf7hwf9tuSrJxwUg+cN0mMr1jNx+9TY=
 github.com/hashicorp/packer-plugin-alicloud v1.0.0 h1:f1wyIqgSQQlpYs116Auq/FLYtrW3GbpTzxXxZWmNc1A=
 github.com/hashicorp/packer-plugin-alicloud v1.0.0/go.mod h1:wDWvfgD8JWdrGnAzO6SkcJJiAL+64SCEVY+DWcefNas=
 github.com/hashicorp/packer-plugin-amazon v0.0.1/go.mod h1:12c9msibyHdId+Mk/pCbdRb1KaLIhaNyxeJ6n8bZt30=
@@ -857,6 +859,8 @@ github.com/hashicorp/packer-plugin-sdk v0.2.4/go.mod h1:g24hx1lY+/ancDs4vGNo+o0V
 github.com/hashicorp/packer-plugin-sdk v0.2.5-0.20210901154340-d973e37f8315/go.mod h1:QiU1u6ccm5luIoKR3OS2V1GVAMKjhKTVWpvWHih/hdM=
 github.com/hashicorp/packer-plugin-sdk v0.2.5-0.20210902203720-8464b03760f4 h1:NjCLU8DPN/FS+idX18XQJJ3doowe8VRC1dP6PHLIuG0=
 github.com/hashicorp/packer-plugin-sdk v0.2.5-0.20210902203720-8464b03760f4/go.mod h1:n6IkEEQjbA5gZrTY8CsQ14mRFq+3U93wn0066sreFPs=
+github.com/hashicorp/packer-plugin-sdk v0.2.5 h1:qydxm7rbyUuUvvh2rxTZjur8kG5JQNGtpOifS4Xv1BY=
+github.com/hashicorp/packer-plugin-sdk v0.2.5/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.1 h1:gqFHT79OjQT/xAtEL/BEBDPulFlSqoy6Zj74WZbymr0=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.1/go.mod h1:X3O5Sq7/6TQXaeJXxqqJyTEgrfwQM+gUFU/Sd7J9p9o=
 github.com/hashicorp/packer-plugin-triton v1.0.0 h1:Uvh8fjEKqlii61BzIt1VEgSyJXL+UYfuMHCj44aVpU8=
