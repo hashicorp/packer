@@ -99,12 +99,24 @@ func checkPluginInstallation(initOutput string, plugin addrs.Plugin) error {
 	if err != nil {
 		return err
 	}
+
 	pluginPath := filepath.Join(home,
 		".packer.d",
 		"plugins",
 		plugin.Hostname,
 		plugin.Namespace,
 		plugin.Type)
+
+	if _, ok := os.LookupEnv("CIRCLECI"); ok {
+		pluginPath = filepath.Join(home,
+			".config",
+			"packer",
+			"plugins",
+			plugin.Hostname,
+			plugin.Namespace,
+			plugin.Type)
+	}
+
 	if !testutils.FileExists(pluginPath) {
 		return fmt.Errorf("%s plugin installation not found", plugin.String())
 	}
