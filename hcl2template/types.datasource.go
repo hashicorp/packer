@@ -2,7 +2,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -125,17 +124,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		for _, err = range moreDiags.Errs() {
-			// If the error is just that there's no "data" object in the
-			// context, don't fail. We will track this data source for decoding
-			// again later, once we've evaluated all of the datasources.
-			// return nil, diags
-			if !strings.Contains(err.Error(), `There is no variable named "data"`) {
-				// There's an error that isn't just a recursive data source
-				// interpolation error
-				return nil, diags
-			}
-		}
+		return nil, diags
 	}
 
 	// In case of cty.Unknown values, this will write a equivalent placeholder
