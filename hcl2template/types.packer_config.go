@@ -398,6 +398,10 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 			// we still need to run it. RECURSION TIME!!
 			dependencies, moreDiags, shouldContinue = cfg.recursivelyEvaluateDatasources(dep, dependencies, skipExecution, depth)
 			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				diags = append(diags, moreDiags...)
+				return dependencies, diags, shouldContinue
+			}
 		}
 	}
 	// If we've gotten here, then it means ref doesn't seem to have any further
