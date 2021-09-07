@@ -102,25 +102,10 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 		})
 	}
 
-	// HACK:
-	// This is where we parse the variables being used in the data sources.
-	// By passing in the DatasourceContext variable, we tell the EvalContext
-	// that since this is a datasource being evaluated, we should not allow
-	// other data sources to be decoded into it. When secondaryEvaluation is
-	// true, we know that this data source needs another data source in order
-	// to be evaluated. So we instead retrieve a different EvalContext.
-	// This is a brute force method to enable data sources to depend on each
-	// other, and a more elegant solution will be available once we implement a
-	// true DAG for Packer.
 	var decoded cty.Value
 	var moreDiags hcl.Diagnostics
 	body := block.Body
-	if secondaryEvaluation {
-		// LocalContext is a lie! See above.
-		decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(LocalContext, nil), datasource)
-	} else {
-		decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
-	}
+	decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
 
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {

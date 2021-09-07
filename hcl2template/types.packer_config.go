@@ -118,18 +118,13 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 		},
 	}
 
-	// Currently the places where you can make references to other blocks
-	// from one is very 'procedural', and in this specific case, we could make
-	// the data sources available to other datasources, but this would be
-	// order dependant, meaning that if you define two datasources in two
-	// different blocks, the second one can use the first one, but not the
-	// other way around; which would be totally confusing; so - for now -
-	// datasources can't use other datasources.
 	// In the future we'd like to load and execute HCL blocks using a graph
 	// dependency tree, so that any block can use any block whatever the
 	// order.
+	// For now, don't add DataSources if there's a NilContext, which gets
+	// used with packer console.
 	switch ctx {
-	case LocalContext, BuildContext: // todo: refine
+	case LocalContext, BuildContext, DatasourceContext:
 		datasourceVariables, _ := cfg.Datasources.Values()
 		ectx.Variables[dataAccessor] = cty.ObjectVal(datasourceVariables)
 	}
