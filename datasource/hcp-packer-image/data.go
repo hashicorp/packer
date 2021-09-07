@@ -111,6 +111,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}
+
 	// Load channel.
 	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
@@ -124,20 +125,21 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	output := DatasourceOutput{}
 
 	for _, build := range iteration.Builds {
-		if build.CloudProvider == d.config.CloudProvider {
-			for _, image := range build.Images {
-				if image.Region == d.config.Region {
-					// This is the desired image.
-					output = DatasourceOutput{
-						CloudProvider: build.CloudProvider,
-						ComponentType: build.ComponentType,
-						CreatedAt:     image.CreatedAt.String(),
-						BuildID:       build.ID,
-						IterationID:   build.IterationID,
-						PackerRunUUID: build.PackerRunUUID,
-						ID:            image.ImageID,
-						Region:        image.Region,
-					}
+		if build.CloudProvider != d.config.CloudProvider {
+			continue
+		}
+		for _, image := range build.Images {
+			if image.Region == d.config.Region {
+				// This is the desired image.
+				output = DatasourceOutput{
+					CloudProvider: build.CloudProvider,
+					ComponentType: build.ComponentType,
+					CreatedAt:     image.CreatedAt.String(),
+					BuildID:       build.ID,
+					IterationID:   build.IterationID,
+					PackerRunUUID: build.PackerRunUUID,
+					ID:            image.ImageID,
+					Region:        image.Region,
 				}
 			}
 		}
