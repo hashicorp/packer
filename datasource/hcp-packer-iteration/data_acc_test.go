@@ -3,10 +3,16 @@ package hcp_packer_iteration
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"os/exec"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
+)
+
+const (
+	HCPClientID     string = "HCP_CLIENT_ID"
+	HCPClientSecret string = "HCP_CLIENT_SECRET"
 )
 
 //go:embed test-fixtures/template.pkr.hcl
@@ -25,6 +31,11 @@ var testDatasourceBasic string
 // as defined above.
 
 func TestAccDatasource_HCPPackerIteration(t *testing.T) {
+	if os.Getenv(HCPClientID) == "" && os.Getenv(HCPClientSecret) == "" {
+		t.Skip(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", HCPClientID, HCPClientSecret))
+		return
+	}
+
 	testCase := &acctest.PluginTestCase{
 		Name:     "hcp_packer_iteration_datasource_basic_test",
 		Template: testDatasourceBasic,
