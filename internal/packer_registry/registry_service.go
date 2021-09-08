@@ -169,3 +169,22 @@ func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug str
 	return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
 		channelName, bucketSlug)
 }
+
+// GetIteration queries the HCP Packer registry for an existing bucket iteration.
+func GetIterationFromId(ctx context.Context, client *Client, bucketslug string, iterationId string) (*models.HashicorpCloudPackerIteration, error) {
+	params := packerSvc.NewGetIterationParamsWithContext(ctx)
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
+	params.BucketSlug = bucketslug
+
+	// The identifier can be either fingerprint, iterationid, or incremental version
+	// for now, we only care about fingerprint so we're hardcoding it.
+	params.IterationID = &iterationId
+
+	it, err := client.Packer.GetIteration(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return it.Payload.Iteration, nil
+}

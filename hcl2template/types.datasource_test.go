@@ -31,6 +31,54 @@ func TestParse_datasource(t *testing.T) {
 			[]packersdk.Build{},
 			false,
 		},
+		{"recursive datasources",
+			defaultParser,
+			parseTestArgs{"testdata/datasources/recursive.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
+				Datasources: Datasources{
+					{
+						Type: "null",
+						Name: "foo",
+					}: {
+						Type: "null",
+						Name: "foo",
+					},
+					{
+						Type: "null",
+						Name: "bar",
+					}: {
+						Type: "null",
+						Name: "bar",
+					},
+					{
+						Type: "null",
+						Name: "baz",
+					}: {
+						Type: "null",
+						Name: "baz",
+					},
+					{
+						Type: "null",
+						Name: "bang",
+					}: {
+						Type: "null",
+						Name: "bang",
+					},
+					{
+						Type: "null",
+						Name: "yummy",
+					}: {
+						Type: "null",
+						Name: "yummy",
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{},
+			false,
+		},
 		{"untyped datasource",
 			defaultParser,
 			parseTestArgs{"testdata/datasources/untyped.pkr.hcl", nil, nil},
@@ -48,33 +96,6 @@ func TestParse_datasource(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "datasources"),
-			},
-			true, true,
-			nil,
-			false,
-		},
-		{"not allowed usage of data source within another data source",
-			defaultParser,
-			parseTestArgs{"testdata/datasources/not-allowed.pkr.hcl", nil, nil},
-			&PackerConfig{
-				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "datasources"),
-				Datasources: Datasources{
-					{
-						Type: "amazon-ami",
-						Name: "test_0",
-					}: {
-						Type: "amazon-ami",
-						Name: "test_0",
-					},
-					{
-						Type: "amazon-ami",
-						Name: "test_1",
-					}: {
-						Type: "amazon-ami",
-						Name: "test_1",
-					},
-				},
 			},
 			true, true,
 			nil,
@@ -120,6 +141,34 @@ func TestParse_datasource(t *testing.T) {
 			nil,
 			false,
 		},
+		{"cyclic dependency between data sources",
+			defaultParser,
+			parseTestArgs{"testdata/datasources/dependency_cycle.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "datasources"),
+				Datasources: Datasources{
+					{
+						Type: "null",
+						Name: "gummy",
+					}: {
+						Type: "null",
+						Name: "gummy",
+					},
+					{
+						Type: "null",
+						Name: "bear",
+					}: {
+						Type: "null",
+						Name: "bear",
+					},
+				},
+			},
+			true, true,
+			nil,
+			false,
+		},
 	}
+
 	testParse(t, tests)
 }
