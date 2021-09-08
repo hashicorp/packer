@@ -29,4 +29,4 @@ Thumbs.db
 /packer.exe
 .project
 cache
-# /.vscode/ - commented for customizations
+# .vscode - We intentionally commit .vscode in order to share project-specific settings
