@@ -1,5 +1,19 @@
 ## 1.7.5 (Upcoming)
 
+### BUG FIXES:
+* builder/ncloud: Bump ncloud dependency to fix dependency that got deleted
+    from github [GH-11224]
+* hcl2_upgrade: Fix panic when file does not exist. [GH-11206]
+* hcl2_upgrade: special case: vsphere fix. [GH-11216]
+
+### IMPROVEMENTS:
+* hcl2_upgrade: support strftime function. [GH-11220]
+* provisioner/salt-masterless: Remove salt-masterless provisioner from Packer
+    core to github.com/hashicorp/packer-plugin-salt/provisioner/salt-
+    masterless. [GH-11229]
+* provisioner/file: add option to set content + tests. [GH-11209]
+* provisioner/inspec: Remove inspec provisioner from Packer core. [GH-1130]
+
 ## 1.7.4 (July 20, 2021)
 
 ### BUG FIXES:
