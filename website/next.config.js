@@ -4,11 +4,6 @@ const redirects = require('./redirects.next')
 
 module.exports = withHashicorp({
   defaultLayout: true,
-  transpileModules: [
-    'is-absolute-url',
-    '@hashicorp/react-.*',
-    '@hashicorp/versioned-docs',
-  ],
   mdx: { resolveIncludes: path.join(__dirname, 'pages/partials') },
 })({
   svgo: { plugins: [{ removeViewBox: false }] },
