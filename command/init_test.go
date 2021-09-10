@@ -64,7 +64,7 @@ func TestInitCommand_Run(t *testing.T) {
 			// to always run it.
 			"already-installed-no-op",
 			nil,
-			testMetaFile(t),
+			TestMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -104,7 +104,7 @@ func TestInitCommand_Run(t *testing.T) {
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
-			testMetaFile(t),
+			TestMetaFile(t),
 			map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -176,7 +176,7 @@ func TestInitCommand_Run(t *testing.T) {
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
-			testMetaFile(t),
+			TestMetaFile(t),
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			map[string]string{
@@ -207,7 +207,7 @@ func TestInitCommand_Run(t *testing.T) {
 					Dst: filepath.Join(cfg.dir("4_pkr_config"), defaultConfigDir, "plugins"),
 				}.fn,
 			},
-			testMetaFile(t),
+			TestMetaFile(t),
 			nil,
 			map[string]string{
 				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
@@ -254,7 +254,7 @@ func TestInitCommand_Run(t *testing.T) {
 					Dst: filepath.Join(cfg.dir("5_pkr_config"), defaultConfigDir, "plugins"),
 				}.fn,
 			},
-			testMetaFile(t),
+			TestMetaFile(t),
 			nil,
 			map[string]string{
 				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
@@ -296,7 +296,7 @@ func TestInitCommand_Run(t *testing.T) {
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
-			testMetaFile(t),
+			TestMetaFile(t),
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			map[string]string{

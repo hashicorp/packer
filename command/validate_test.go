@@ -38,7 +38,7 @@ func TestValidateCommand(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.path, func(t *testing.T) {
 			c := &ValidateCommand{
-				Meta: testMetaFile(t),
+				Meta: TestMetaFile(t),
 			}
 			tc := tc
 			args := []string{tc.path}
@@ -51,7 +51,7 @@ func TestValidateCommand(t *testing.T) {
 
 func TestValidateCommand_SkipDatasourceExecution(t *testing.T) {
 	datasourceMock := &packersdk.MockDatasource{}
-	meta := testMetaFile(t)
+	meta := TestMetaFile(t)
 	meta.CoreConfig.Components.PluginConfig.DataSources = packer.MapOfDatasource{
 		"mock": func() (packersdk.Datasource, error) {
 			return datasourceMock, nil
@@ -90,7 +90,7 @@ func TestValidateCommand_SyntaxOnly(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.path, func(t *testing.T) {
 			c := &ValidateCommand{
-				Meta: testMetaFile(t),
+				Meta: TestMetaFile(t),
 			}
 			c.CoreConfig.Version = "102.0.0"
 			tc := tc
@@ -104,7 +104,7 @@ func TestValidateCommand_SyntaxOnly(t *testing.T) {
 
 func TestValidateCommandOKVersion(t *testing.T) {
 	c := &ValidateCommand{
-		Meta: testMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 	args := []string{
 		filepath.Join(testFixture("validate"), "template.json"),
@@ -119,7 +119,7 @@ func TestValidateCommandOKVersion(t *testing.T) {
 
 func TestValidateCommandBadVersion(t *testing.T) {
 	c := &ValidateCommand{
-		Meta: testMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 	args := []string{
 		filepath.Join(testFixture("validate"), "template.json"),
@@ -184,7 +184,7 @@ func TestValidateCommandExcept(t *testing.T) {
 	}
 
 	c := &ValidateCommand{
-		Meta: testMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 	c.CoreConfig.Version = "102.0.0"
 
