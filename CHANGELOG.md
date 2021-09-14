@@ -1,18 +1,34 @@
 ## 1.7.5 (Upcoming)
 
-### BUG FIXES:
-* builder/ncloud: Bump ncloud dependency to fix dependency that got deleted
-    from github [GH-11224]
-* hcl2_upgrade: Fix panic when file does not exist. [GH-11206]
-* hcl2_upgrade: special case: vsphere fix. [GH-11216]
+### NOTES:
+The Exoscale builder and post-processor are no longer vendored with Packer
+    core, users of the Exoscale plugin should use `packer init` to install the
+    latest version of the plugin. See the [Exoscale Plugin
+    Documentation](https://github.com/exoscale/packer-plugin-exoscale#exoscale-packer-plugin) for more information. [GH-11237]
+
+### FEATURES:
+* **Future Scaffolding** This release contains no-op refactors in preparation
+    for connecting Packer to the HCP Packer Registry.
 
 ### IMPROVEMENTS:
 * hcl2_upgrade: support strftime function. [GH-11220]
+* provisioner/file: add option to set content + tests. [GH-11209]
+* provisioner/inspec: Remove inspec provisioner from Packer core. [GH-11230]
 * provisioner/salt-masterless: Remove salt-masterless provisioner from Packer
     core to github.com/hashicorp/packer-plugin-salt/provisioner/salt-
     masterless. [GH-11229]
-* provisioner/file: add option to set content + tests. [GH-11209]
-* provisioner/inspec: Remove inspec provisioner from Packer core. [GH-1130]
+
+### BUG FIXES:
+* builder/azure: Bump plugin to latest version to address a vulnerable
+    dependency in azure-sdk-for-go. [GH-11162]
+* builder/googlecompute: Bump plugin to latest version to fix an issue when
+    building an instance via an IAP tunnel. [GH-11235]
+* builder/ncloud: Bump ncloud dependency to fix dependency that got deleted
+    from github [GH-11224]
+* core: Fix `{{packer_version}}` interpolation regression for HCL and JSON
+    templates. [GH-11200]
+* hcl2_upgrade: Fix panic when file does not exist. [GH-11206]
+* hcl2_upgrade: special case: vsphere fix. [GH-11216]
 
 ## 1.7.4 (July 20, 2021)
 
