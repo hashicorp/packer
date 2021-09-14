@@ -36,16 +36,16 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.1-dev
+	github.com/hashicorp/packer-plugin-amazon v1.0.1
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
-	github.com/hashicorp/packer-plugin-azure v1.0.3-0.20210903201247-40e2012a9e82
+	github.com/hashicorp/packer-plugin-azure v1.0.3
 	github.com/hashicorp/packer-plugin-chef v1.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.0
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.1
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.1-0.20210903201039-60981eb9b6fb
-	github.com/hashicorp/packer-plugin-hcloud v1.0.0
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.5
+	github.com/hashicorp/packer-plugin-hcloud v1.0.1
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
 	github.com/hashicorp/packer-plugin-inspec v0.0.7
@@ -64,7 +64,7 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-salt v0.0.8
-	github.com/hashicorp/packer-plugin-scaleway v1.0.1
+	github.com/hashicorp/packer-plugin-scaleway v1.0.3
 	github.com/hashicorp/packer-plugin-sdk v0.2.5
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
@@ -175,6 +175,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
