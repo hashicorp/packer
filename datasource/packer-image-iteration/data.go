@@ -18,7 +18,10 @@ import (
 	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
-type Datasource struct {
+// Type for Packer datasource has been renamed temporarily to prevent it from being
+// automatically registered as a viable datasource plugin in command/plugin.go.
+// In the future this type will be renamed to allow for the use of the datasource.
+type DeactivatedDatasource struct {
 	config Config
 }
 
@@ -32,11 +35,11 @@ type Config struct {
 	// TODO: Label          string `mapstructure:"label"`
 }
 
-func (d *Datasource) ConfigSpec() hcldec.ObjectSpec {
+func (d *DeactivatedDatasource) ConfigSpec() hcldec.ObjectSpec {
 	return d.config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *Datasource) Configure(raws ...interface{}) error {
+func (d *DeactivatedDatasource) Configure(raws ...interface{}) error {
 	err := config.Decode(&d.config, nil, raws...)
 	if err != nil {
 		return err
@@ -125,11 +128,11 @@ type DatasourceOutput struct {
 	Builds []ParBuild `mapstructure:"builds"`
 }
 
-func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
+func (d *DeactivatedDatasource) OutputSpec() hcldec.ObjectSpec {
 	return (&DatasourceOutput{}).FlatMapstructure().HCL2Spec()
 }
 
-func (d *Datasource) Execute() (cty.Value, error) {
+func (d *DeactivatedDatasource) Execute() (cty.Value, error) {
 	cli, err := packerregistry.NewClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err

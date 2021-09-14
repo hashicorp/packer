@@ -18,7 +18,6 @@ import (
 	hcppackerimagedatasource "github.com/hashicorp/packer/datasource/hcp-packer-image"
 	hcppackeriterationdatasource "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
 	nulldatasource "github.com/hashicorp/packer/datasource/null"
-	packerimageiterationdatasource "github.com/hashicorp/packer/datasource/packer-image-iteration"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -63,10 +62,9 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 }
 
 var Datasources = map[string]packersdk.Datasource{
-	"hcp-packer-image":       new(hcppackerimagedatasource.Datasource),
-	"hcp-packer-iteration":   new(hcppackeriterationdatasource.Datasource),
-	"null":                   new(nulldatasource.Datasource),
-	"packer-image-iteration": new(packerimageiterationdatasource.Datasource),
+	"hcp-packer-image":     new(hcppackerimagedatasource.Datasource),
+	"hcp-packer-iteration": new(hcppackeriterationdatasource.Datasource),
+	"null":                 new(nulldatasource.Datasource),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
