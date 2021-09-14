@@ -1,4 +1,4 @@
-package packer_registry
+package registry
 
 import (
 	"context"
@@ -10,7 +10,8 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
+	"github.com/hashicorp/packer/internal/registry/env"
 	"google.golang.org/grpc/codes"
 )
 
@@ -127,7 +128,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
 		Labels:        make(map[string]string),
-		Images:        make(map[string]Image),
+		Images:        make(map[string]registryimage.Image),
 	}
 
 	log.Println("[TRACE] creating initial build for component", componentType)
@@ -210,7 +211,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	}
 
 	if len(buildToUpdate.Images) == 0 {
-		return fmt.Errorf("setting a build to DONE with no published images is not currently support.")
+		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
 	var providerName string
@@ -219,7 +220,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		if providerName == "" {
 			providerName = image.ProviderName
 		}
-		images = append(images, &models.HashicorpCloudPackerImage{ImageID: image.ID, Region: image.ProviderRegion})
+		images = append(images, &models.HashicorpCloudPackerImage{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
 	buildInput.Updates.CloudProvider = providerName
@@ -236,7 +237,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 }
 
 // UpdateImageForBuild appends one or more images artifacts to the build referred to by componentType.
-func (b *Bucket) UpdateImageForBuild(componentType string, images ...Image) error {
+func (b *Bucket) UpdateImageForBuild(componentType string, images ...registryimage.Image) error {
 	return b.Iteration.AddImageToBuild(componentType, images...)
 }
 
@@ -340,8 +341,8 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 				// potential issue on updating the status of a build that is already DONE. Is this possible?
 				for _, image := range existing.Images {
 
-					err := b.UpdateImageForBuild(existing.ComponentType, Image{
-						ID:             image.ImageID,
+					err := b.UpdateImageForBuild(existing.ComponentType, registryimage.Image{
+						ImageID:        image.ImageID,
 						ProviderRegion: image.Region,
 					})
 

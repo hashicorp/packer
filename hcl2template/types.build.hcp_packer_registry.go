@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
 type HCPPackerRegistryBlock struct {

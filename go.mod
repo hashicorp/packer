@@ -1,13 +1,12 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go/storage v1.16.1 // indirect
-	github.com/Azure/azure-sdk-for-go v57.0.0+incompatible // indirect
+	cloud.google.com/go v0.94.1 // indirect
+	github.com/Azure/azure-sdk-for-go v57.1.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.20 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.15 // indirect
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.8 // indirect
 	github.com/Azure/go-autorest/autorest/azure/cli v0.4.3 // indirect
-	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/Telmate/proxmox-api-go v0.0.0-20210825163308-5e4c0d698a78 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1244 // indirect
@@ -37,15 +36,15 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.1-dev
+	github.com/hashicorp/packer-plugin-amazon v1.0.1
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
-	github.com/hashicorp/packer-plugin-azure v1.0.2
+	github.com/hashicorp/packer-plugin-azure v1.0.3
 	github.com/hashicorp/packer-plugin-chef v1.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.0
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.1
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.4
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.5
 	github.com/hashicorp/packer-plugin-hcloud v1.0.1
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
@@ -66,7 +65,7 @@ require (
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-salt v0.0.8
 	github.com/hashicorp/packer-plugin-scaleway v1.0.3
-	github.com/hashicorp/packer-plugin-sdk v0.2.4
+	github.com/hashicorp/packer-plugin-sdk v0.2.5
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
@@ -82,7 +81,7 @@ require (
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
-	github.com/mitchellh/cli v1.1.0
+	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-fs v0.0.0-20180402235330-b7b9ca407fff // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1
@@ -105,7 +104,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/mobile v0.0.0-20210901025245-1fde1d6c3ca1 // indirect
 	golang.org/x/mod v0.5.0
-	golang.org/x/net v0.0.0-20210825183410-e898025ed96a
+	golang.org/x/net v0.0.0-20210902165921-8d991716f632
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e // indirect
@@ -117,7 +116,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.94.0 // indirect
+	cloud.google.com/go/storage v1.16.1 // indirect
 	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
@@ -125,7 +124,11 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.3.1 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
 	github.com/Azure/go-autorest/tracing v0.6.0 // indirect
+	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20210404020558-97928f7e12b6 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
+	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.2.0 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
@@ -172,6 +175,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
@@ -196,10 +200,12 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/hashicorp/packer-plugin v0.0.0-20210226150414-64c03a35871c // indirect
 	github.com/hashicorp/serf v0.9.5 // indirect
 	github.com/hashicorp/vault/api v1.1.1 // indirect
 	github.com/hashicorp/vault/sdk v0.2.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493 // indirect
+	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
@@ -217,6 +223,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

@@ -6,8 +6,8 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
+	"github.com/hashicorp/packer/internal/registry/env"
 )
 
 const (

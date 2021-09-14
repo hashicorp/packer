@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
+	"github.com/mitchellh/mapstructure"
 )
 
 type RegistryPostProcessor struct {
@@ -59,37 +61,25 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		return source, false, false, err
 	}
 
-	// Lets post state
-	if source != nil {
-		switch state := source.State("par.artifact.metadata").(type) {
-		case map[interface{}]interface{}:
-			m := make(map[string]string)
-			for k, v := range state {
-				m[k.(string)] = v.(string)
-			}
+	var images []registryimage.Image
+	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+		Result:           &images,
+		WeaklyTypedInput: true,
+		ErrorUnused:      true,
+	})
+	if err != nil {
+		return source, false, false, fmt.Errorf("failed to create decoder for HCP Packer registry image: %w", err)
+	}
 
-			// TODO handle these error better
-			err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
-				ProviderName:   m["ProviderName"],
-				ProviderRegion: m["ProviderRegion"],
-				ID:             m["ImageID"],
-			})
-			if err != nil {
-				log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
-			}
-		case []interface{}:
-			for _, d := range state {
-				d := d.(map[interface{}]interface{})
-				err := p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, packerregistry.Image{
-					ProviderName:   d["ProviderName"].(string),
-					ProviderRegion: d["ProviderRegion"].(string),
-					ID:             d["ImageID"].(string),
-				})
-				if err != nil {
-					log.Printf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
-				}
-			}
-		}
+	state := source.State(registryimage.ArtifactStateURI)
+	err = decoder.Decode(state)
+	if err != nil {
+		return source, false, false, fmt.Errorf("failed to obtain HCP Packer registry image from post-processor artifact: %w", err)
+	}
+	err = p.ArtifactMetadataPublisher.UpdateImageForBuild(p.BuilderType, images...)
+
+	if err != nil {
+		return source, keep, override, fmt.Errorf("[TRACE] failed to add image artifact for %q: %s", p.BuilderType, err)
 	}
 
 	return source, keep, override, nil

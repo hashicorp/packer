@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/internal/packer_registry"
+	packer_registry "github.com/hashicorp/packer/internal/registry"
 	"github.com/hashicorp/packer/packer"
 )
 

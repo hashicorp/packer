@@ -2,7 +2,7 @@ package command
 
 import (
 	"github.com/hashicorp/hcl/v2"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )

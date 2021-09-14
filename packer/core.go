@@ -19,8 +19,8 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	packerregistry "github.com/hashicorp/packer/internal/packer_registry"
-	"github.com/hashicorp/packer/internal/packer_registry/env"
+	packerregistry "github.com/hashicorp/packer/internal/registry"
+	"github.com/hashicorp/packer/internal/registry/env"
 	packerversion "github.com/hashicorp/packer/version"
 )
 
