@@ -1,4 +1,4 @@
-## 1.7.5 (Upcoming)
+## 1.7.5 (September 14, 2021)
 
 ### NOTES:
 The Exoscale builder and post-processor are no longer vendored with Packer
