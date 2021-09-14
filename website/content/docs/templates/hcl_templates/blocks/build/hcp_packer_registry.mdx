@@ -22,7 +22,7 @@ source "file" "basic-example" {
 
 build {
    hcp_packer_registry {
-    slug = "sample-artifact"
+    bucket_name = "sample-artifact"
 
     description = <<EOT
 Some nice description about the image which artifact is being published to HCP Packer Registry. =D
@@ -38,7 +38,7 @@ Some nice description about the image which artifact is being published to HCP P
 }
 ```
 
-- `slug` (string) - The image name when published to the HCP Packer registry. Should always be the same, otherwise a new image will be created.
+- `bucket_name` (string) - The image name when published to the HCP Packer registry. Should always be the same, otherwise a new image will be created.
   Defaults to `build.name` if not set. Will be overwritten if `HCP_PACKER_BUCKET_NAME` is set.
 
 - `description` (string) - The image description. Useful to provide a summary about the image. The description will appear
