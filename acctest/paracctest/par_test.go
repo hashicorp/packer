@@ -21,6 +21,7 @@ const (
 )
 
 func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
+	checkEnvVars(t)
 	const tmpBucket = "pkr-acctest-temp-1"
 
 	// allow other tests to go.
@@ -104,6 +105,7 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 }
 
 func TestAcc_PAR_pkr_build(t *testing.T) {
+	checkEnvVars(t)
 	const tmpBucket = "pkr-acctest-temp-2"
 
 	// allow other tests to go.
