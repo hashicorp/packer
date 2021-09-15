@@ -124,11 +124,13 @@ func (d *Datasource) Execute() (cty.Value, error) {
 
 	output := DatasourceOutput{}
 
+	cloudAndRegions := map[string][]string{}
 	for _, build := range iteration.Builds {
 		if build.CloudProvider != d.config.CloudProvider {
 			continue
 		}
 		for _, image := range build.Images {
+			cloudAndRegions[build.CloudProvider] = append(cloudAndRegions[build.CloudProvider], image.Region)
 			if image.Region == d.config.Region {
 				// This is the desired image.
 				output = DatasourceOutput{
@@ -141,9 +143,12 @@ func (d *Datasource) Execute() (cty.Value, error) {
 					ID:            image.ImageID,
 					Region:        image.Region,
 				}
+				return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 			}
 		}
 	}
 
-	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
+	return cty.NullVal(cty.EmptyObject), fmt.Errorf("could not find a build result matching "+
+		"region (%q) and cloud provider (%q). Available: %v ",
+		d.config.Region, d.config.CloudProvider, cloudAndRegions)
 }
