@@ -126,7 +126,6 @@ func (d *Datasource) Execute() (cty.Value, error) {
 
 	cloudAndRegions := map[string][]string{}
 	for _, build := range iteration.Builds {
-		cloudAndRegions[build.CloudProvider] = cloudAndRegions[build.CloudProvider] // force creation
 		if build.CloudProvider != d.config.CloudProvider {
 			continue
 		}
