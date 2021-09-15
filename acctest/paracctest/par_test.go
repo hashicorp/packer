@@ -19,7 +19,7 @@ const (
 	channel   = "acc"
 )
 
-func TestAcc_PAR_service_end_to_end(t *testing.T) {
+func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 
 	// allow other tests to go.
 	t.Parallel()
