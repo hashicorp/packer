@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/packer/acctest"
 	"github.com/hashicorp/packer/command"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -50,7 +51,7 @@ func TestAcc_PAR_service_end_to_end(t *testing.T) {
 			"vmware-iso": {"": {"iso_something_2", "vmvmvm"}},
 		},
 		{
-			"aws":        {"us-west-1": {"ami:something_3", "ami:other_thing"}},
+			"aws":        {"us-west-1": {"ami:something_3"}},
 			"gcp":        {"us-west-1": {"gcp_something_3", "gcpp"}},
 			"azure":      {"us-west-1": {"azure_something_3", "azaz"}},
 			"vmware-iso": {"": {"iso_something_3", "vmvmvm"}},
@@ -88,7 +89,7 @@ func TestAcc_PAR_service_end_to_end(t *testing.T) {
 	code := c.Run([]string{"./test-fixtures/ds.pkr.hcl"})
 	outW := ui.Writer.(*bytes.Buffer)
 	errW := ui.ErrorWriter.(*bytes.Buffer)
-	if code != 1 {
+	if code != 0 {
 		t.Fatalf(
 			"Bad exit code.\n\nStdout:\n\n%s\n\nStderr:\n\n%s",
 			outW.String(),
