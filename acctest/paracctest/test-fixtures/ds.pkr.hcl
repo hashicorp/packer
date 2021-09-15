@@ -1,6 +1,6 @@
 
 variable "bkt" {
-    default = "pkr-acctest-temp"
+    default = "pkr-acctest-temp-1"
 }
 
 data "hcp-packer-iteration" "acc" {
