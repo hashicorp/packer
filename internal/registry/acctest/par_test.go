@@ -1,4 +1,4 @@
-package paracctest
+package acctest
 
 import (
 	"bytes"
