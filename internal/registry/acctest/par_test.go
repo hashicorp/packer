@@ -2,6 +2,7 @@ package acctest
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"regexp"
 	"strconv"
@@ -9,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/packer/acctest"
 	"github.com/hashicorp/packer/command"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -21,20 +21,29 @@ const (
 )
 
 func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
+	runUUID := "11118ff1-a860-44a3-a669-a4f1b4a12688"
+	os.Setenv("PACKER_RUN_UUID", runUUID)
+
 	checkEnvVars(t)
 	const tmpBucket = "pkr-acctest-temp-1"
 
 	// allow other tests to go.
 	t.Parallel()
 
-	cfg, err := NewParConfig(t)
+	cfg, err := NewTestConfig(t)
 	if err != nil {
 		t.Fatalf("NewParConfig: %v", err)
 	}
 
-	defer cfg.DeleteBucket(tmpBucket) // Hopefully everything else is deleted too
+	_, _ = cfg.DeleteBucket(context.Background(), tmpBucket)
+	defer func() {
+		_, err := cfg.DeleteBucket(context.Background(), tmpBucket) // Hopefully everything else is deleted too
+		if err != nil {
+			t.Fatalf("failed to delete bucket: %v", err)
+		}
+	}()
 	// create our bucket, this should fail if the bucket already exists
-	_, err = cfg.CreateBucket(tmpBucket)
+	_, err = cfg.CreateBucket(context.Background(), tmpBucket)
 	if err != nil {
 		t.Fatalf("CreateBucket: %v", err)
 	}
@@ -63,14 +72,22 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 
 	lastIterationID := ""
 	for i, builds := range iterations {
-		iterationsFingerprint := strconv.Itoa(i)
-		iterationID := cfg.UpsertIteration(tmpBucket, iterationsFingerprint)
+		iterationFingerprint := strconv.Itoa(i)
+		iterationID := cfg.UpsertIteration(tmpBucket, iterationFingerprint)
 
 		for cloud, builds := range builds {
 			for region, imageID := range builds {
-				cfg.UpsertBuild(tmpBucket, iterationsFingerprint, iterationID, cloud, region, imageID)
+				cfg.UpsertBuild(
+					tmpBucket,
+					iterationFingerprint,
+					runUUID,
+					iterationID,
+					cloud,
+					region,
+					imageID)
 			}
 		}
+
 		time.Sleep(time.Millisecond)
 		lastIterationID = iterationID
 	}
@@ -105,23 +122,30 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 }
 
 func TestAcc_PAR_pkr_build(t *testing.T) {
+
+	runUUID := "11118ff1-a860-44a3-a669-a4f1b4a12688"
+	os.Setenv("PACKER_RUN_UUID", runUUID)
+
 	checkEnvVars(t)
 	const tmpBucket = "pkr-acctest-temp-2"
 
 	// allow other tests to go.
 	t.Parallel()
 
-	// always setting the same uuid to verify that things work.
-	os.Setenv("PACKER_RUN_UUID", "11118ff1-a860-44a3-a669-a4f1b4a12688")
-
-	cfg, err := NewParConfig(t)
+	cfg, err := NewTestConfig(t)
 	if err != nil {
 		t.Fatalf("NewParConfig: %v", err)
 	}
 
-	defer cfg.DeleteBucket(tmpBucket) // Hopefully everything else is deleted too
+	_, _ = cfg.DeleteBucket(context.Background(), tmpBucket)
+	defer func() {
+		_, err := cfg.DeleteBucket(context.Background(), tmpBucket) // Hopefully everything else is deleted too
+		if err != nil {
+			t.Fatalf("failed to delete bucket: %v", err)
+		}
+	}()
 	// create our bucket, this should fail if the bucket already exists
-	_, err = cfg.CreateBucket(tmpBucket)
+	_, err = cfg.CreateBucket(context.Background(), tmpBucket)
 	if err != nil {
 		t.Fatalf("CreateBucket: %v", err)
 	}

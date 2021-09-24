@@ -1,21 +1,19 @@
 package acctest
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"testing"
 
-	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-
 	structenv "github.com/caarlos0/env/v6"
-	cloud_packer "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	sharedmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-shared/v1/models"
-	"github.com/hashicorp/hcp-sdk-go/httpclient"
 	"github.com/hashicorp/packer/acctest"
+	"github.com/hashicorp/packer/internal/registry"
+	"google.golang.org/grpc/codes"
 )
 
 type hcpConf struct {
@@ -29,29 +27,24 @@ type hcpConf struct {
 }
 
 type Config struct {
-	Client packer_service.ClientService
-	Loc    *sharedmodels.HashicorpCloudLocationLocation
-	T      *testing.T
+	*registry.Client
+	Loc *sharedmodels.HashicorpCloudLocationLocation
+	T   *testing.T
 }
 
-func NewParConfig(t *testing.T) (*Config, error) {
+func NewTestConfig(t *testing.T) (*Config, error) {
 	checkEnvVars(t)
 	cfg := hcpConf{}
 	if err := structenv.Parse(&cfg); err != nil {
 		t.Errorf("%+v\n", err)
 	}
-
-	httpClient, err := httpclient.New(httpclient.Config{
-		ClientID:      cfg.ClientId,
-		ClientSecret:  cfg.ClientSecret,
-		SourceChannel: cfg.UserAgent,
-	})
+	cli, err := registry.NewClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Config{
-		Client: cloud_packer.New(httpClient, nil).PackerService,
+		Client: cli,
 		Loc: &sharedmodels.HashicorpCloudLocationLocation{
 			OrganizationID: cfg.OrgId,
 			ProjectID:      cfg.ProjectId,
@@ -82,27 +75,11 @@ func checkEnvVars(t *testing.T) {
 	}
 }
 
-// UpsertBucket creates a new bucket if it does not already exists.
-func (cfg *Config) CreateBucket(
-	bucketSlug string,
-) (*packer_service.CreateBucketOK, error) {
-	cfg.T.Helper()
-
-	createBktParams := packer_service.NewCreateBucketParams()
-	createBktParams.LocationOrganizationID = cfg.Loc.OrganizationID
-	createBktParams.LocationProjectID = cfg.Loc.ProjectID
-	createBktParams.Body = &models.HashicorpCloudPackerCreateBucketRequest{
-		BucketSlug: bucketSlug,
-		Location:   cfg.Loc,
-	}
-	return cfg.Client.CreateBucket(createBktParams, nil)
-}
-
 func (cfg *Config) UpsertBucket(
 	bucketSlug string,
 ) {
 	cfg.T.Helper()
-	_, err := cfg.CreateBucket(bucketSlug)
+	_, err := cfg.CreateBucket(context.Background(), bucketSlug)
 	if err == nil {
 		return
 	}
@@ -130,7 +107,7 @@ func (cfg *Config) GetIterationByID(
 	getItParams.BucketSlug = bucketSlug
 	getItParams.IterationID = &id
 
-	ok, err := cfg.Client.GetIteration(getItParams, nil)
+	ok, err := cfg.Packer.GetIteration(getItParams, nil)
 	if err != nil {
 		cfg.T.Fatal(err)
 	}
@@ -144,17 +121,7 @@ func (cfg *Config) UpsertIteration(
 ) string {
 	cfg.T.Helper()
 
-	createItParams := packer_service.NewCreateIterationParams()
-	createItParams.LocationOrganizationID = cfg.Loc.OrganizationID
-	createItParams.LocationProjectID = cfg.Loc.ProjectID
-	createItParams.BucketSlug = bucketSlug
-
-	createItParams.Body = &models.HashicorpCloudPackerCreateIterationRequest{
-		BucketSlug:  bucketSlug,
-		Fingerprint: fingerprint,
-		Location:    cfg.Loc,
-	}
-	_, err := cfg.Client.CreateIteration(createItParams, nil)
+	_, err := cfg.CreateIteration(context.Background(), bucketSlug, fingerprint)
 	if err == nil {
 		return cfg.GetIterationIDFromFingerPrint(bucketSlug, fingerprint)
 	}
@@ -171,6 +138,31 @@ func (cfg *Config) UpsertIteration(
 	return ""
 }
 
+// UpsertIteration creates a new iteration if it does not already exists.
+func (cfg *Config) MarkIterationAsDone(
+	bucketSlug,
+	iterID string,
+) {
+	cfg.T.Helper()
+
+	updateItParams := packer_service.NewUpdateIterationParams()
+	updateItParams.Body = &models.HashicorpCloudPackerUpdateIterationRequest{
+		BucketSlug:  bucketSlug,
+		IterationID: iterID,
+		Complete:    true,
+	}
+	updateItParams.IterationID = iterID
+	updateItParams.LocationOrganizationID = cfg.OrganizationID
+	updateItParams.LocationProjectID = cfg.ProjectID
+
+	_, err := cfg.Packer.UpdateIteration(updateItParams, nil)
+	if err == nil {
+		return
+	}
+
+	cfg.T.Errorf("unexpected UpdateIteration error: %v", err)
+}
+
 // GetIterationIDFromFingerPrint returns an iteration ID given its unique
 // fingerprincfg.t.
 func (cfg *Config) GetIterationIDFromFingerPrint(
@@ -185,7 +177,7 @@ func (cfg *Config) GetIterationIDFromFingerPrint(
 	getItParams.BucketSlug = bucketSlug
 	getItParams.Fingerprint = &fingerprint
 
-	ok, err := cfg.Client.GetIteration(getItParams, nil)
+	ok, err := cfg.Packer.GetIteration(getItParams, nil)
 	if err != nil {
 		cfg.T.Fatal(err)
 	}
@@ -196,37 +188,21 @@ func (cfg *Config) GetIterationIDFromFingerPrint(
 func (cfg *Config) UpsertBuild(
 	bucketSlug,
 	iterationFingerprint,
+	runUUID,
 	iterationID,
 	cloudProvider,
 	region string,
 	imageIDs []string,
 ) {
 
-	createBuildParams := packer_service.NewCreateBuildParams()
-	createBuildParams.LocationOrganizationID = cfg.Loc.OrganizationID
-	createBuildParams.LocationProjectID = cfg.Loc.ProjectID
-	createBuildParams.BucketSlug = bucketSlug
-	createBuildParams.BuildIterationID = iterationID
-
-	createBuildParams.Body = &models.HashicorpCloudPackerCreateBuildRequest{
-		Fingerprint: iterationFingerprint,
-		BucketSlug:  bucketSlug,
-		Location:    cfg.Loc,
-	}
-	createBuildParams.Body.Build = &models.HashicorpCloudPackerBuild{
-		PackerRunUUID: uuid.New().String(),
-		CloudProvider: cloudProvider,
-		ComponentType: "acceptance.test",
-		IterationID:   iterationID,
-		Status:        models.HashicorpCloudPackerBuildStatusRUNNING,
-	}
-
-	build, err := cfg.Client.CreateBuild(createBuildParams, nil)
+	build, err := cfg.CreateBuild(context.Background(), bucketSlug, runUUID, iterationID, iterationFingerprint)
 	if err, ok := err.(*packer_service.CreateBuildDefault); ok {
 		switch err.Code() {
 		case int(codes.Aborted), http.StatusConflict:
 			// all good here !
 			return
+		default:
+			cfg.T.Fatalf("couldn't create build: %v", err)
 		}
 	}
 
@@ -253,7 +229,7 @@ func (cfg *Config) UpsertBuild(
 			Region:  region,
 		})
 	}
-	_, err = cfg.Client.UpdateBuild(updateBuildParams, nil)
+	_, err = cfg.Packer.UpdateBuild(updateBuildParams, nil)
 	if err, ok := err.(*packer_service.UpdateBuildDefault); ok {
 		cfg.T.Errorf("unexpected UpdateBuild error, expected nil. Got %v", err)
 	}
@@ -276,7 +252,7 @@ func (cfg *Config) UpsertChannel(
 		IterationID:        iterationID,
 	}
 
-	_, err := cfg.Client.CreateChannel(createChParams, nil)
+	_, err := cfg.Packer.CreateChannel(createChParams, nil)
 	if err == nil {
 		return
 	}
@@ -306,28 +282,11 @@ func (cfg *Config) UpdateChannel(
 		IncrementalVersion: 1,
 	}
 
-	_, err := cfg.Client.UpdateChannel(updateChParams, nil)
+	_, err := cfg.Packer.UpdateChannel(updateChParams, nil)
 	if err == nil {
 		return
 	}
 	cfg.T.Errorf("unexpected UpdateChannel error, expected nil. Got %v", err)
-}
-
-func (cfg *Config) DeleteBucket(
-	bucketSlug string,
-) {
-	cfg.T.Helper()
-
-	deleteBktParams := packer_service.NewDeleteBucketParams()
-	deleteBktParams.LocationOrganizationID = cfg.Loc.OrganizationID
-	deleteBktParams.LocationProjectID = cfg.Loc.ProjectID
-	deleteBktParams.BucketSlug = bucketSlug
-
-	_, err := cfg.Client.DeleteBucket(deleteBktParams, nil)
-	if err == nil {
-		return
-	}
-	cfg.T.Errorf("unexpected DeleteBucket error, expected nil. Got %v", err)
 }
 
 func (cfg *Config) DeleteIteration(
@@ -342,7 +301,7 @@ func (cfg *Config) DeleteIteration(
 	deleteItParams.BucketSlug = &bucketSlug
 	deleteItParams.IterationID = iterationID
 
-	_, err := cfg.Client.DeleteIteration(deleteItParams, nil)
+	_, err := cfg.Packer.DeleteIteration(deleteItParams, nil)
 	if err == nil {
 		return
 	}
@@ -361,7 +320,7 @@ func (cfg *Config) DeleteChannel(
 	deleteChParams.BucketSlug = bucketSlug
 	deleteChParams.Slug = channelSlug
 
-	_, err := cfg.Client.DeleteChannel(deleteChParams, nil)
+	_, err := cfg.Packer.DeleteChannel(deleteChParams, nil)
 	if err == nil {
 		return
 	}
