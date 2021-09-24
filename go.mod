@@ -200,7 +200,6 @@ require (
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/packer-plugin v0.0.0-20210226150414-64c03a35871c // indirect
 	github.com/hashicorp/serf v0.9.5 // indirect
 	github.com/hashicorp/vault/api v1.1.1 // indirect
 	github.com/hashicorp/vault/sdk v0.2.1 // indirect
