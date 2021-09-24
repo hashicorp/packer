@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	bucket  = "pkr-acctest-do-not-delete"
 	channel = "acc"
 )
 

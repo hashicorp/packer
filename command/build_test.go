@@ -931,7 +931,6 @@ func (fc fileCheck) verify(t *testing.T, dir string) {
 	}
 }
 
-
 func cleanup(moreFiles ...string) {
 	os.RemoveAll("chocolate.txt")
 	os.RemoveAll("vanilla.txt")
