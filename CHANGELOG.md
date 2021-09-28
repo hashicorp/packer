@@ -13,6 +13,7 @@ The Exoscale builder and post-processor are no longer vendored with Packer
     for connecting Packer to the HCP Packer Registry.
 
 ### IMPROVEMENTS:
+* core: Upgrade to Go 1.17. [GH-11237]
 * hcl2_upgrade: support strftime function. [GH-11220]
 * provisioner/file: add option to set content + tests. [GH-11209]
 * provisioner/inspec: Remove inspec provisioner from Packer core. [GH-11230]
