@@ -1,4 +1,4 @@
-## 1.7.6 (Upcoming)
+## 1.7.6 (September 28, 2021)
 
 ### BUG FIXES:
 * core: Update Go module dependencies to fix an issue preventing Go 1.16 users
