@@ -1,5 +1,9 @@
 ## 1.7.6 (Upcoming)
 
+### BUG FIXES:
+* core: Update Go module dependencies to fix an issue preventing Go 1.16 users
+    from installing the packer-plugins-check command via go install. [GH-11282]
+
 ## 1.7.5 (September 14, 2021)
 
 ### NOTES:
