@@ -138,7 +138,7 @@ func (cfg *Config) UpsertIteration(
 	return ""
 }
 
-// UpsertIteration creates a new iteration if it does not already exists.
+// MarkIterationAsDone sends an update request to mark an existing iteration as complete.
 func (cfg *Config) MarkIterationAsDone(
 	bucketSlug,
 	iterID string,
