@@ -921,6 +921,8 @@ github.com/masterzen/winrm v0.0.0-20210504160029-28ed956f5227/go.mod h1:a2HXwefe
 github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0 h1:KqYuDbSr8I2X8H65InN8SafDEa0UaLRy6WEmxDqd0F0=
 github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0/go.mod h1:l31LCh9VvG43RJ83A5JLkFPjuz48cZAxBSLQLaIn1p8=
 github.com/matryer/is v1.2.0/go.mod h1:2fLPjFQM9rhQ15aVEtbuwhJinnOqrmgXPNdZsdwlWXA=
+github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
+github.com/matryer/is v1.4.0/go.mod h1:8I/i5uYgLzgsgEloJE1U6xx5HkBQpAZvepWuujKwMRU=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.4/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-colorable v0.1.6/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
