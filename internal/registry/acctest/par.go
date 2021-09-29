@@ -94,7 +94,7 @@ func (cfg *Config) UpsertBucket(
 	cfg.T.Errorf("unexpected CreateBucket error, expected nil or 409. Got %v", err)
 }
 
-// UpsertIteration creates a new iteration if it does not already exists.
+// GetIterationByID is a helper to validate that the id for a given bucketSlug returns a valid Iteration ID.
 func (cfg *Config) GetIterationByID(
 	bucketSlug,
 	id string,
