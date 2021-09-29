@@ -64,7 +64,6 @@ require (
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
 	github.com/hashicorp/packer-plugin-qemu v1.0.0
 	github.com/hashicorp/packer-plugin-salt v0.0.8
-	github.com/hashicorp/packer-plugin-scaleway v1.0.3
 	github.com/hashicorp/packer-plugin-sdk v0.2.5
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
@@ -93,6 +92,7 @@ require (
 	github.com/posener/complete v1.2.3
 	github.com/prometheus/common v0.30.0 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/scaleway/packer-plugin-scaleway v1.0.4
 	github.com/shirou/gopsutil v3.21.1+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.233+incompatible // indirect

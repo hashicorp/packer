@@ -64,7 +64,6 @@ import (
 	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	saltmasterlessprovisioner "github.com/hashicorp/packer-plugin-salt/provisioner/salt-masterless"
-	scalewaybuilder "github.com/hashicorp/packer-plugin-scaleway/builder/scaleway"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
 	uclouduhostbuilder "github.com/hashicorp/packer-plugin-ucloud/builder/ucloud/uhost"
@@ -84,6 +83,7 @@ import (
 	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
 	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
+	scalewaybuilder "github.com/scaleway/packer-plugin-scaleway/builder/scaleway"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
