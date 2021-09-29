@@ -777,8 +777,6 @@ github.com/hashicorp/packer-plugin-qemu v1.0.0 h1:EiWFadbgahXzY15a6G1BJ49wsmqVYQ
 github.com/hashicorp/packer-plugin-qemu v1.0.0/go.mod h1:U+IMWD5NjkCBNQIzttMPOQp+9Xzi4q/atkUJs2Nfv4s=
 github.com/hashicorp/packer-plugin-salt v0.0.8 h1:npF2bukm0qFdUcZ11K4aZPu0zlUXdi24cbmZrHTSvdY=
 github.com/hashicorp/packer-plugin-salt v0.0.8/go.mod h1:KEMBCXLWT4U7CQ0TggCfLww/ci6QyjvZlUSPpadKT6M=
-github.com/hashicorp/packer-plugin-scaleway v1.0.3 h1:o5gx9u5EiwBooVIc4xzLMKkmHQdqvK0JH96IKRONXhQ=
-github.com/hashicorp/packer-plugin-scaleway v1.0.3/go.mod h1:v77ZHeSEXF9WWxQk9fQFBzS6zzrgFne85npwdm+xvME=
 github.com/hashicorp/packer-plugin-sdk v0.2.2/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
 github.com/hashicorp/packer-plugin-sdk v0.2.3/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
 github.com/hashicorp/packer-plugin-sdk v0.2.4/go.mod h1:g24hx1lY+/ancDs4vGNo+o0V4YCzZW4o2jzZ7LEXyII=
@@ -923,9 +921,6 @@ github.com/masterzen/winrm v0.0.0-20210504160029-28ed956f5227/go.mod h1:a2HXwefe
 github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0 h1:KqYuDbSr8I2X8H65InN8SafDEa0UaLRy6WEmxDqd0F0=
 github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0/go.mod h1:l31LCh9VvG43RJ83A5JLkFPjuz48cZAxBSLQLaIn1p8=
 github.com/matryer/is v1.2.0/go.mod h1:2fLPjFQM9rhQ15aVEtbuwhJinnOqrmgXPNdZsdwlWXA=
-github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
-github.com/matryer/is v1.4.0 h1:sosSmIWwkYITGrxZ25ULNDeKiMNzFSr4V/eqBQP0PeE=
-github.com/matryer/is v1.4.0/go.mod h1:8I/i5uYgLzgsgEloJE1U6xx5HkBQpAZvepWuujKwMRU=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.4/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-colorable v0.1.6/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=
@@ -1103,6 +1098,8 @@ github.com/ryanuber/go-glob v1.0.0 h1:iQh3xXAumdQ+4Ufa5b25cRpC5TYKlno6hsv6Cb3pkB
 github.com/ryanuber/go-glob v1.0.0/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=
 github.com/satori/go.uuid v1.2.0 h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=
 github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
+github.com/scaleway/packer-plugin-scaleway v1.0.4 h1:3nVUSsUTA5BjVX0+CTJ7Zr7oerLesb52GKNhpC5ncpo=
+github.com/scaleway/packer-plugin-scaleway v1.0.4/go.mod h1:BQ74nXrd4cJsZ5AiOfmLKfGiJgEuXzhYIVGGbmuCkNg=
 github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 h1:Do8ksLD4Nr3pA0x0hnLOLftZgkiTDvwPDShRTUxtXpE=
 github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7/go.mod h1:CJJ5VAbozOl0yEw7nHB9+7BXTJbIn6h7W+f6Gau5IP8=
 github.com/sean-/conswriter v0.0.0-20180208195008-f5ae3917a627/go.mod h1:7zjs06qF79/FKAJpBvFx3P8Ww4UTIMAe+lpNXDHziac=
