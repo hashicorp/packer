@@ -75,7 +75,7 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 		iterationID := cfg.UpsertIteration(tmpBucket, iterationFingerprint)
 
 		for cloud, builds := range builds {
-			for region, imageID := range builds {
+			for region, imageIDs := range builds {
 				cfg.UpsertBuild(
 					tmpBucket,
 					iterationFingerprint,
@@ -83,7 +83,7 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 					iterationID,
 					cloud,
 					region,
-					imageID)
+					imageIDs)
 			}
 		}
 
