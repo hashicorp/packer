@@ -73,21 +73,20 @@ Remove-Item -Recurse -ErrorAction Ignore -Force "bin\"
 Remove-Item -Recurse -ErrorAction Ignore -Force "pkg\"
 New-Item -Type Directory -Name bin | Out-Null
 
+# Move all the compiled things to the $GOPATH/bin
+$GOPATH=$(go.exe env GOPATH)
+
 # Delete the old dir
 echo "==> Building..."
-gox.exe `
-  -os="${XC_OS}" `
-  -arch="${XC_ARCH}" `
+go build `
   -ldflags "-X github.com/hashicorp/packer/version.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" `
-  -output "pkg/{{.OS}}_{{.Arch}}/packer" `
+  -output "pkg/$(go env GOOS)_$(go env GOARCH)/packer" `
   .
 
 if ($LastExitCode -ne 0) {
     exit 1
 }
 
-# Move all the compiled things to the $GOPATH/bin
-$GOPATH=$(go.exe env GOPATH)
 
 # Copy our OS/Arch to the bin/ directory
 echo "==> Copying binaries for this platform..."

@@ -24,20 +24,20 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) $(LDFLAGS)
 
 export GOLDFLAGS
 
-.PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
+.PHONY: bin checkversion ci ci-lint default install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
 	releasebin test testacc testrace
 
-default: install-build-deps install-gen-deps generate dev
+default: install-gen-deps generate dev
 
 ci: testrace ## Test in continuous integration
 
-release: install-build-deps test releasebin package ## Build a release build
+release: test releasebin package ## Build a release build
 
-bin: install-build-deps ## Build debug/test build
+bin: ## Build debug/test build
 	@echo "WARN: 'make bin' is for debug / test builds only. Use 'make release' for release builds."
 	@GO111MODULE=auto sh -c "$(CURDIR)/scripts/build.sh"
 
-releasebin: install-build-deps
+releasebin:
 	@grep 'const VersionPrerelease = "dev"' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
 		echo "ERROR: You must remove prerelease tags from version/version.go prior to release."; \
 		exit 1; \
@@ -47,9 +47,6 @@ releasebin: install-build-deps
 package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
-
-install-build-deps: ## Install dependencies for bin build
-	@go install github.com/mitchellh/gox@v1.0.1
 
 install-gen-deps: ## Install dependencies for code generation
 	# to avoid having to tidy our go deps, we `go get` our binaries from a temp
@@ -136,11 +133,11 @@ test: mode-check vet ## Run unit tests
 	@go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m
 
 # acctest runs provisioners acceptance tests
-provisioners-acctest: #install-build-deps generate
+provisioners-acctest: #generate
 	ACC_TEST_BUILDERS=$(ACC_TEST_BUILDERS) go test $(TEST) $(TESTARGS) -timeout=1h
 
 # testacc runs acceptance tests
-testacc: # install-build-deps generate ## Run acceptance tests
+testacc: # generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 

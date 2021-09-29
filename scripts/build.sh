@@ -107,13 +107,6 @@ for d in ${GOPATH:-$(go env GOPATH)}; do
 done
 GOPATH="$_GOPATH"
 
-# locate 'gox' and traverse GOPATH if needed
-which "${GOX:=gox}" &>/dev/null || {
-    for d in ${GOPATH}; do
-        GOX="$(convertPathOnCygwin --unix "${d}")/bin/gox"
-        [ -x "${GOX}" ] && break || unset GOX
-    done
-}
 IFS="$OLDIFS"
 
 # Build!
@@ -127,12 +120,9 @@ fi
 
 export CGO_ENABLED=0
 
-${GOX:?command not found} \
-    -os="${XC_OS:-$ALL_XC_OS}" \
-    -arch="${XC_ARCH:-$ALL_XC_ARCH}" \
-    -osarch="${SKIPPED_OSARCH}" \
+go build \
     -ldflags "${GOLDFLAGS}" \
-    -output "pkg/{{.OS}}_{{.Arch}}/packer" \
+    -o "pkg/$(go env GOOS)_$(go env GOARCH)/packer" \
     .
 
 # trim GOPATH to first element
