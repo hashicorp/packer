@@ -1,15 +1,9 @@
 const withHashicorp = require('@hashicorp/platform-nextjs-plugin')
-const path = require('path')
 const redirects = require('./redirects.next')
 
 module.exports = withHashicorp({
   defaultLayout: true,
-  transpileModules: [
-    'is-absolute-url',
-    '@hashicorp/react-.*',
-    '@hashicorp/versioned-docs',
-  ],
-  mdx: { resolveIncludes: path.join(__dirname, 'pages/partials') },
+  nextOptimizedImages: true,
 })({
   svgo: { plugins: [{ removeViewBox: false }] },
   rewrites: () => [
