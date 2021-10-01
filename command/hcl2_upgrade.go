@@ -133,7 +133,7 @@ type BlockParser interface {
 
 func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs) int {
 	var output io.Writer
-	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0755); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
 		return 1
 	}
