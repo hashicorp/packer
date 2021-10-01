@@ -219,7 +219,7 @@
   {
     "title": "Scaleway",
     "path": "scaleway",
-    "repo": "hashicorp/packer-plugin-scaleway",
+    "repo": "scaleway/packer-plugin-scaleway",
     "pluginTier": "community",
     "version": "latest"
   },
