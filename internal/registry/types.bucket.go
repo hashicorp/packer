@@ -104,7 +104,6 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 // CreateInitialBuildForIteration will create a build entry on the HCP Packer Registry for the named componentType.
 // This initial creation is needed so that Packer can properly track when an iteration is complete.
 func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
-
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
@@ -214,16 +213,23 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
-	var providerName string
+	var providerName, sourceID string
 	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
 	for _, image := range buildToUpdate.Images {
+		// These values will always be the same for all images in a single build,
+		// so we can just set it inside the loop without consequence
 		if providerName == "" {
 			providerName = image.ProviderName
 		}
+		if image.SourceImageID != "" {
+			sourceID = image.SourceImageID
+		}
+
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
 	buildInput.Updates.CloudProvider = providerName
+	buildInput.Updates.SourceImageID = sourceID
 	buildInput.Updates.Images = images
 
 	_, err := UpdateBuild(ctx, b.client, buildInput)
