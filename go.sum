@@ -588,7 +588,6 @@ github.com/google/pprof v0.0.0-20210601050228-01bbb1931b22/go.mod h1:kpwsk12EmLe
 github.com/google/pprof v0.0.0-20210609004039-a478d1d731e9/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
 github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
-github.com/google/shlex v0.0.0-20150127133951-6f45313302b9/go.mod h1:RpwtwJQFrIEPstU94h88MWPXP2ektJZ8cZ0YntAmXiE=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
 github.com/google/uuid v0.0.0-20170306145142-6a5e28554805/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
@@ -709,8 +708,6 @@ github.com/hashicorp/hcl v1.0.0/go.mod h1:E5yfLk+7swimpb2L/Alb/PJmXilQ/rhwaUYs4T
 github.com/hashicorp/hcl/v2 v2.10.0/go.mod h1:FwWsfWEjyV/CMj8s/gqAuiviY72rJ1/oayI9WftqcKg=
 github.com/hashicorp/hcl/v2 v2.10.1 h1:h4Xx4fsrRE26ohAk/1iGF/JBqRQbyUqu5Lvj60U54ys=
 github.com/hashicorp/hcl/v2 v2.10.1/go.mod h1:FwWsfWEjyV/CMj8s/gqAuiviY72rJ1/oayI9WftqcKg=
-github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646 h1:4WbtYgGIxeRrGC0hGBtOi6XuJ23024H7r724rCL+eXI=
-github.com/hashicorp/hcp-sdk-go v0.10.1-0.20210727200019-239ce8d80646/go.mod h1:Tm9BAlTkp6jknZ0YNxF/556JBC/meCN1LUmWFN38HsU=
 github.com/hashicorp/logutils v1.0.0/go.mod h1:QIAnNjmIWmVIIkWDTG1z5v++HQmx9WQRO+LraFDTW64=
 github.com/hashicorp/mdns v1.0.0/go.mod h1:tL+uN++7HEJ6SQLQ2/p+z2pH24WQKWjBPkE0mNTz8vQ=
 github.com/hashicorp/mdns v1.0.1/go.mod h1:4gW7WsVCke5TE7EPeYliwHlRUyBtfCwuFwuMg2DmyNY=
@@ -775,11 +772,6 @@ github.com/hashicorp/packer-plugin-qemu v1.0.0 h1:EiWFadbgahXzY15a6G1BJ49wsmqVYQ
 github.com/hashicorp/packer-plugin-qemu v1.0.0/go.mod h1:U+IMWD5NjkCBNQIzttMPOQp+9Xzi4q/atkUJs2Nfv4s=
 github.com/hashicorp/packer-plugin-salt v0.0.8 h1:npF2bukm0qFdUcZ11K4aZPu0zlUXdi24cbmZrHTSvdY=
 github.com/hashicorp/packer-plugin-salt v0.0.8/go.mod h1:KEMBCXLWT4U7CQ0TggCfLww/ci6QyjvZlUSPpadKT6M=
-github.com/hashicorp/packer-plugin-sdk v0.2.2/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
-github.com/hashicorp/packer-plugin-sdk v0.2.3/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
-github.com/hashicorp/packer-plugin-sdk v0.2.4/go.mod h1:g24hx1lY+/ancDs4vGNo+o0V4YCzZW4o2jzZ7LEXyII=
-github.com/hashicorp/packer-plugin-sdk v0.2.5 h1:qydxm7rbyUuUvvh2rxTZjur8kG5JQNGtpOifS4Xv1BY=
-github.com/hashicorp/packer-plugin-sdk v0.2.5/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.1 h1:gqFHT79OjQT/xAtEL/BEBDPulFlSqoy6Zj74WZbymr0=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.1/go.mod h1:X3O5Sq7/6TQXaeJXxqqJyTEgrfwQM+gUFU/Sd7J9p9o=
 github.com/hashicorp/packer-plugin-triton v1.0.0 h1:Uvh8fjEKqlii61BzIt1VEgSyJXL+UYfuMHCj44aVpU8=
@@ -820,6 +812,7 @@ github.com/huandu/xstrings v1.3.2 h1:L18LIDzqlW6xN2rEkpdV8+oL/IXWJ1APd+vsdYy4Wdw
 github.com/huandu/xstrings v1.3.2/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
 github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4 h1:mSmyzhwBeQt2TlHbsXYLona9pwjWAvYGwQJ2Cq/k3VE=
 github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4/go.mod h1:yNUVHSleURKSaYUKq4Wx0i/vjCen2aq7CvPyHd/Vj2Q=
+github.com/iancoleman/strcase v0.1.3/go.mod h1:SK73tn/9oHe+/Y0h39VT4UCxmurVJkR5NA7kMEAOgSE=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/imdario/mergo v0.3.6/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=

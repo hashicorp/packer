@@ -109,9 +109,9 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
-		Build: &models.HashicorpCloudPackerBuild{
+		IterationID: b.Iteration.ID,
+		Build: &models.HashicorpCloudPackerBuildCreateBody{
 			ComponentType: componentType,
-			IterationID:   b.Iteration.ID,
 			PackerRunUUID: b.Iteration.RunUUID,
 			Status:        status,
 		},
@@ -215,12 +215,12 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	}
 
 	var providerName string
-	images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.Images))
+	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
 	for _, image := range buildToUpdate.Images {
 		if providerName == "" {
 			providerName = image.ProviderName
 		}
-		images = append(images, &models.HashicorpCloudPackerImage{ImageID: image.ImageID, Region: image.ProviderRegion})
+		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
 	buildInput.Updates.CloudProvider = providerName

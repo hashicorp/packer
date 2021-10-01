@@ -265,3 +265,7 @@ require (
 )
 
 go 1.17
+
+replace github.com/hashicorp/packer-plugin-sdk => /Users/mmarsh/Projects/packer-plugin-sdk
+
+replace github.com/hashicorp/hcp-sdk-go => /Users/mmarsh/go/src/github.com/hashicorp/hcp-sdk-go
