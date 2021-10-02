@@ -4,7 +4,7 @@
 # Determine the arch/os combos we're building for
 ALL_XC_ARCH="386 amd64 arm arm64 ppc64le mips mips64 mipsle mipsle64 s390x"
 ALL_XC_OS="linux darwin windows freebsd openbsd solaris"
-SKIPPED_OSARCH="!darwin/arm !freebsd/arm !freebsd/arm64"
+SKIPPED_OSARCH="darwin/arm freebsd/arm freebsd/arm64"
 
 # Exit immediately if a command fails
 set -e
@@ -120,10 +120,21 @@ fi
 
 export CGO_ENABLED=0
 
-go build \
-    -ldflags "${GOLDFLAGS}" \
-    -o "pkg/$(go env GOOS)_$(go env GOARCH)/packer" \
-    .
+# build for everything
+for arch in $ALL_XC_ARCH; do
+    for os in $ALL_XC_OS; do
+        OS_ARCH=$os/$arch
+        if echo $SKIPPED_OSARCH | grep -w $OS_ARCH > /dev/null; then
+            continue
+        fi
+        OS_ARCH=$os\_$arch
+        BUILD_OUT=pkg/$OS_ARCH/packer
+        go build \
+            -ldflags "${GOLDFLAGS}" \
+            -o "$BUILD_OUT" \
+            .
+    done
+done
 
 # trim GOPATH to first element
 IFS="${PATHSEP}"
