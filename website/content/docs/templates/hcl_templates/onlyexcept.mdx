@@ -21,7 +21,7 @@ post-processors for a specific source:
 ```hcl
 build {
   name = "my_build"
-  sources [
+  sources = [
     "source.amazon-ebs.first-example",
   ]
   source "source.amazon-ebs.second-example"
@@ -43,7 +43,7 @@ build {
 }
 
 build {
-  sources [
+  sources = [
     "source.amazon-ebs.third-example",
   ]
 }
