@@ -75,6 +75,7 @@ func (svc *MockPackerClientService) CreateBucket(params *packerSvc.PackerService
 
 	svc.CreateBucketCalled = true
 	svc.CreateBucketResp.Bucket.Slug = params.Body.BucketSlug
+	svc.CreateBucketResp.Bucket.ID = "01FGYZEH6VV1HFS14YRNBW78G8"
 
 	ok := &packerSvc.PackerServiceCreateBucketOK{
 		Payload: svc.CreateBucketResp,
