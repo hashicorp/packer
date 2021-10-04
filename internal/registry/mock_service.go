@@ -64,32 +64,36 @@ func NewMockPackerClientService() *MockPackerClientService {
 	return &m
 }
 
-func (svc *MockPackerClientService) CreateBucket(params *packerSvc.CreateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.CreateBucketOK, error) {
+func (svc *MockPackerClientService) PackerServiceCreateBucket(params *packerSvc.PackerServiceCreateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceCreateBucketOK, error) {
 	if svc.BucketAlreadyExist {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()))
 	}
 
+	if params.Body == nil {
+		return nil, errors.New("No body provided.")
+	}
 	if params.Body.BucketSlug == "" {
 		return nil, errors.New("No bucket slug was passed in")
 	}
 
 	svc.CreateBucketCalled = true
+	// This is set in NewMockPackerClientService()
 	svc.CreateBucketResp.Bucket.Slug = params.Body.BucketSlug
 
-	ok := &packerSvc.CreateBucketOK{
+	ok := &packerSvc.PackerServiceCreateBucketOK{
 		Payload: svc.CreateBucketResp,
 	}
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) UpdateBucket(params *packerSvc.UpdateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.UpdateBucketOK, error) {
+func (svc *MockPackerClientService) PackerServiceUpdateBucket(params *packerSvc.PackerServiceUpdateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceUpdateBucketOK, error) {
 	svc.UpdateBucketCalled = true
 
-	return packerSvc.NewUpdateBucketOK(), nil
+	return packerSvc.NewPackerServiceUpdateBucketOK(), nil
 }
 
-func (svc *MockPackerClientService) CreateIteration(params *packerSvc.CreateIterationParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.CreateIterationOK, error) {
+func (svc *MockPackerClientService) PackerServiceCreateIteration(params *packerSvc.PackerServiceCreateIterationParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceCreateIterationOK, error) {
 	if svc.IterationAlreadyExist {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()))
 	}
@@ -106,14 +110,14 @@ func (svc *MockPackerClientService) CreateIteration(params *packerSvc.CreateIter
 	svc.CreateIterationResp.Iteration.BucketSlug = params.Body.BucketSlug
 	svc.CreateIterationResp.Iteration.Fingerprint = params.Body.Fingerprint
 
-	ok := &packerSvc.CreateIterationOK{
+	ok := &packerSvc.PackerServiceCreateIterationOK{
 		Payload: svc.CreateIterationResp,
 	}
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) GetIteration(params *packerSvc.GetIterationParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.GetIterationOK, error) {
+func (svc *MockPackerClientService) PackerServiceGetIteration(params *packerSvc.PackerServiceGetIterationParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceGetIterationOK, error) {
 	if !svc.IterationAlreadyExist {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.Aborted, codes.Aborted.String()))
 	}
@@ -129,7 +133,7 @@ func (svc *MockPackerClientService) GetIteration(params *packerSvc.GetIterationP
 	svc.GetIterationCalled = true
 
 	//
-	ok := &packerSvc.GetIterationOK{
+	ok := &packerSvc.PackerServiceGetIterationOK{
 		Payload: svc.GetIterationResp,
 	}
 
@@ -149,7 +153,7 @@ func (svc *MockPackerClientService) GetIteration(params *packerSvc.GetIterationP
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) CreateBuild(params *packerSvc.CreateBuildParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.CreateBuildOK, error) {
+func (svc *MockPackerClientService) PackerServiceCreateBuild(params *packerSvc.PackerServiceCreateBuildParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceCreateBuildOK, error) {
 	if params.Body.BucketSlug == "" {
 		return nil, errors.New("No valid BucketSlug was passed in")
 	}
@@ -165,15 +169,15 @@ func (svc *MockPackerClientService) CreateBuild(params *packerSvc.CreateBuildPar
 	svc.CreateBuildCalled = true
 
 	svc.CreateBuildResp.Build.ComponentType = params.Body.Build.ComponentType
-	svc.CreateBuildResp.Build.IterationID = params.BuildIterationID
+	svc.CreateBuildResp.Build.IterationID = params.IterationID
 
-	ok := packerSvc.NewCreateBuildOK()
+	ok := packerSvc.NewPackerServiceCreateBuildOK()
 	ok.Payload = svc.CreateBuildResp
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) UpdateBuild(params *packerSvc.UpdateBuildParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.UpdateBuildOK, error) {
+func (svc *MockPackerClientService) PackerServiceUpdateBuild(params *packerSvc.PackerServiceUpdateBuildParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceUpdateBuildOK, error) {
 	if params.Body.BuildID == "" {
 		return nil, errors.New("No valid BuildID was passed in")
 	}
@@ -187,7 +191,7 @@ func (svc *MockPackerClientService) UpdateBuild(params *packerSvc.UpdateBuildPar
 	}
 
 	svc.UpdateBuildCalled = true
-	ok := packerSvc.NewUpdateBuildOK()
+	ok := packerSvc.NewPackerServiceUpdateBuildOK()
 	ok.Payload = &models.HashicorpCloudPackerUpdateBuildResponse{
 		Build: &models.HashicorpCloudPackerBuild{
 			ID: params.Body.BuildID,
@@ -196,7 +200,7 @@ func (svc *MockPackerClientService) UpdateBuild(params *packerSvc.UpdateBuildPar
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) ListBuilds(params *packerSvc.ListBuildsParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.ListBuildsOK, error) {
+func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.PackerServiceListBuildsParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceListBuildsOK, error) {
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	images := make([]*models.HashicorpCloudPackerImage, 0)
@@ -215,7 +219,7 @@ func (svc *MockPackerClientService) ListBuilds(params *packerSvc.ListBuildsParam
 		})
 	}
 
-	ok := packerSvc.NewListBuildsOK()
+	ok := packerSvc.NewPackerServiceListBuildsOK()
 	ok.Payload = &models.HashicorpCloudPackerListBuildsResponse{
 		Builds: builds,
 	}
