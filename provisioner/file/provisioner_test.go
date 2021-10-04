@@ -340,6 +340,14 @@ func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 		"direction":   "download",
 	}
 
+	// Cleaning up destination directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed getting current working directory")
+	}
+	destinationDir := filepath.Join(cwd, "something")
+	defer os.RemoveAll(destinationDir)
+
 	if err := p.Prepare(config); err != nil {
 		t.Fatalf("err: %s", err)
 	}
