@@ -14,6 +14,7 @@ export default function HomepageHero({
       <div className={s.gridContainer}>
         <div className={s.content}>
           {alert ? (
+            // @ts-expect-error -- prop types are incorrect, state is not needed
             <Alert
               url={alert.url}
               tag={alert.tag}

@@ -5,18 +5,6 @@
   --highlight-color: var(--packer-link);
 }
 
-@import '~@hashicorp/react-alert/style.css';
-@import '~@hashicorp/react-alert-banner/style.css';
-@import '~@hashicorp/react-button/styles/index.css';
-@import '~@hashicorp/react-consent-manager/style.css';
-@import '~@hashicorp/react-product-features-list/style.css';
-@import '~@hashicorp/react-search/style.css';
-@import '~@hashicorp/react-subnav/style.css';
-@import '~@hashicorp/react-tabs/style.css';
-@import '~@hashicorp/react-text-split/style.css';
-@import '~@hashicorp/react-toggle/style.css';
-@import '~@hashicorp/react-vertical-text-block-list/style.css';
-
 /* Local Components */
 @import '../components/footer/style.css';
 @import '../components/search-bar/style.css';
@@ -76,43 +64,4 @@
  */
 .g-subnav ~ * :target {
   scroll-margin-top: calc(64px + 0.5em);
-}
-
-/* Layout Styles */
-.g-section-block section {
-  padding-top: 96px;
-  padding-bottom: 96px;
-
-  & > .g-section-header + *,
-  & > .g-grid-container > .g-section-header + * {
-    margin-top: 72px;
-  }
-
-  & > * + *,
-  & > .g-grid-container > * + * {
-    margin-top: 96px;
-  }
-}
-
-.g-section-block .button-container {
-  display: -webkit-box;
-  display: flex;
-  flex-wrap: wrap;
-  -webkit-box-pack: center;
-  justify-content: center;
-  margin: auto -8px -16px;
-}
-
-.g-section-block section > * + .button-container,
-.g-section-block section > .g-grid-container > * + .button-container {
-  margin-top: 40px;
-}
-
-.g-section-block .button-container > * {
-  margin: auto 8px 16px;
-}
-
-.g-section-block.theme-black-background-white-text {
-  background: var(--gray-1);
-  color: white;
 }
