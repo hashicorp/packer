@@ -4,7 +4,7 @@
 # Determine the arch/os combos we're building for
 ALL_XC_ARCH="386 amd64 arm arm64 ppc64le mips mips64 mipsle mipsle64 s390x"
 ALL_XC_OS="linux darwin windows freebsd openbsd solaris"
-SKIPPED_OSARCH="darwin/arm freebsd/arm freebsd/arm64"
+SKIPPED_OSARCH="darwin/arm freebsd/arm freebsd/arm64 darwin/386 solaris/386"
 
 # Exit immediately if a command fails
 set -e
@@ -129,7 +129,7 @@ for arch in $ALL_XC_ARCH; do
         fi
         OS_ARCH=$os\_$arch
         BUILD_OUT=pkg/$OS_ARCH/packer
-        go build \
+        GOOS=$os GOARCH=$arch go build \
             -ldflags "${GOLDFLAGS}" \
             -o "$BUILD_OUT" \
             .
