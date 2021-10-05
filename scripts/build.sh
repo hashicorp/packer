@@ -4,7 +4,46 @@
 # Determine the arch/os combos we're building for
 ALL_XC_ARCH="386 amd64 arm arm64 ppc64le mips mips64 mipsle mipsle64 s390x"
 ALL_XC_OS="linux darwin windows freebsd openbsd solaris"
-SKIPPED_OSARCH="darwin/arm freebsd/arm freebsd/arm64 darwin/386 solaris/386 windows/arm solaris/arm windows/arm64 solaris/arm64 darwin/ppc64le windows/ppc64le freebsd/ppc64le openbsd/ppc64le solaris/ppc64le darwin/mips windows/mips freebsd/mips openbsd/mips solaris/mips darwin/mips64 windows/mips64 freebsd/mips64 solaris/mips64 darwin/mipsle windows/mipsle freebsd/mipsle openbsd/mipsle  openbsd/mipsle solaris/mipsle linux/mipsle64 darwin/mipsle64 windows/mipsle64 freebsd/mipsle64 openbsd/mipsle64 solaris/mipsle64 darwin/s390x windows/s390x freebsd/s390x openbsd/s390x solaris/s390x"
+SKIPPED_OSARCH="darwin/arm
+freebsd/arm
+freebsd/arm64
+darwin/386
+solaris/386
+windows/arm
+solaris/arm
+windows/arm64
+solaris/arm64
+darwin/ppc64le
+windows/ppc64le
+freebsd/ppc64le
+openbsd/ppc64le
+solaris/ppc64le
+darwin/mips
+windows/mips
+freebsd/mips
+openbsd/mips
+solaris/mips
+darwin/mips64
+windows/mips64
+freebsd/mips64
+solaris/mips64
+darwin/mipsle
+windows/mipsle
+freebsd/mipsle
+openbsd/mipsle
+openbsd/mipsle
+solaris/mipsle
+linux/mipsle64
+darwin/mipsle64
+windows/mipsle64
+freebsd/mipsle64
+openbsd/mipsle64
+solaris/mipsle64
+darwin/s390x
+windows/s390x
+freebsd/s390x
+openbsd/s390x
+solaris/s390x"
 
 # Exit immediately if a command fails
 set -e
