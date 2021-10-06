@@ -7,7 +7,8 @@ import Footer from 'components/footer'
 import Error from './_error'
 import Head from 'next/head'
 import HashiHead from '@hashicorp/react-head'
-import Router from 'next/router'
+import { useEffect } from 'react'
+import Router, { useRouter } from 'next/router'
 import NProgress from '@hashicorp/platform-util/nprogress'
 import createConsentManager from '@hashicorp/react-consent-manager/loader'
 import { ErrorBoundary } from '@hashicorp/platform-runtime-error-monitoring'
@@ -21,6 +22,27 @@ const { ConsentManager, openConsentManager } = createConsentManager({
 })
 
 export default function App({ Component, pageProps }) {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Load Fathom analytics
+    Fathom.load('WYIVNEGX', {
+      includedDomains: ['packer.io', 'www.packer.io'],
+    })
+
+    function onRouteChangeComplete() {
+      Fathom.trackPageview()
+    }
+
+    // Record a pageview when route changes
+    router.events.on('routeChangeComplete', onRouteChangeComplete)
+
+    // Unassign event listener
+    return () => {
+      router.events.off('routeChangeComplete', onRouteChangeComplete)
+    }
+  }, [])
+
   useAnchorLinkAnalytics()
 
   return (
