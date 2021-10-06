@@ -1,5 +1,3 @@
-#!/usr/bin/pwsh
-
 <#
     .Synopsis
     Build script for Packer.
