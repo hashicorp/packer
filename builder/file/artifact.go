@@ -10,6 +10,7 @@ import (
 )
 
 type FileArtifact struct {
+	source   string
 	filename string
 }
 
@@ -34,6 +35,7 @@ func (a *FileArtifact) State(name string) interface{} {
 		img, err := registryimage.FromArtifact(a,
 			registryimage.WithID(path.Base(a.filename)),
 			registryimage.WithRegion(path.Dir(a.filename)),
+			registryimage.WithSourceID(a.source),
 		)
 
 		if err != nil {

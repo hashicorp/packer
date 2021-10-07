@@ -68,6 +68,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 			return nil, err
 		}
 		ui.Say(fmt.Sprintf("Copied %d bytes", bytes))
+
+		artifact.source = b.config.Source
 		artifact.filename = target.Name()
 	} else {
 		// We're going to write Contents; if it's empty we'll just create an
@@ -76,6 +78,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		if err != nil {
 			return nil, err
 		}
+		artifact.source = "<no-defined-source-file>"
 		artifact.filename = b.config.Target
 	}
 
