@@ -109,14 +109,22 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 			packerAccessor: cty.ObjectVal(map[string]cty.Value{
-				"version":      cty.StringVal(cfg.CorePackerVersionString),
-				"iteration_id": cty.UnknownVal(cty.String),
+				"version":     cty.StringVal(cfg.CorePackerVersionString),
+				"iterationID": cty.UnknownVal(cty.String),
 			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
 				"root": cty.StringVal(strings.ReplaceAll(cfg.Basedir, `\`, `/`)),
 			}),
 		},
+	}
+
+	// Store the iteration_id, if it exists. Otherwise, it'll be "unknown"
+	if cfg.bucket != nil {
+		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
+			"version":     cty.StringVal(cfg.CorePackerVersionString),
+			"iterationID": cty.StringVal(cfg.bucket.Iteration.ID),
+		})
 	}
 
 	// In the future we'd like to load and execute HCL blocks using a graph

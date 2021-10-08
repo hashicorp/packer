@@ -156,6 +156,29 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
+	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
+	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
+	// TODO find an option that is not managed by a globally shared Publisher.
+	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
+	if diags.HasErrors() {
+		return writeDiags(c.Ui, nil, diags)
+	}
+
+	// We need to create a bucket and an empty iteration before we retrieve builds
+	// so that we can add the iteration ID to the build's eval context
+	if ArtifactMetadataPublisher != nil {
+		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+			diags := hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Summary:  "HCP Packer Registry iteration initialization failed",
+					Detail:   fmt.Sprintf("Failed to initialize iteration for %q\n %s", ArtifactMetadataPublisher.Slug, err),
+					Severity: hcl.DiagError,
+				},
+			}
+			return writeDiags(c.Ui, nil, diags)
+		}
+	}
+
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
@@ -172,19 +195,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
-	// This build currently enforces a 1:1 mapping that one publisher can be assigned to a single packer config file.
-	// It also requires that each config type implements this ConfiguredArtifactMetadataPublisher to return a configured bucket.
-	// TODO find an option that is not managed by a globally shared Publisher.
-	ArtifactMetadataPublisher, diags := packerStarter.ConfiguredArtifactMetadataPublisher()
-	if diags.HasErrors() {
-		return writeDiags(c.Ui, nil, diags)
-	}
-
+	// Now that builds have been retrieved, we can populate the iteration with
+	// the builds we expect to run.
 	if ArtifactMetadataPublisher != nil {
-		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
+		if err := ArtifactMetadataPublisher.PopulateIteration(buildCtx); err != nil {
 			diags := hcl.Diagnostics{
 				&hcl.Diagnostic{
-					Summary:  "HCP Packer Registry initialization failed",
+					Summary:  "HCP Packer Registry build initialization failed",
 					Detail:   fmt.Sprintf("Failed to initialize build for %q\n %s", ArtifactMetadataPublisher.Slug, err),
 					Severity: hcl.DiagError,
 				},
