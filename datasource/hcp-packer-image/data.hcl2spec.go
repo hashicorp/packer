@@ -55,14 +55,15 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatDatasourceOutput is an auto-generated flat version of DatasourceOutput.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatDatasourceOutput struct {
-	CloudProvider *string `mapstructure:"cloud_provider" cty:"cloud_provider" hcl:"cloud_provider"`
-	ComponentType *string `mapstructure:"component_type" cty:"component_type" hcl:"component_type"`
-	CreatedAt     *string `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
-	BuildID       *string `mapstructure:"build_id" cty:"build_id" hcl:"build_id"`
-	IterationID   *string `mapstructure:"iteration_id" cty:"iteration_id" hcl:"iteration_id"`
-	PackerRunUUID *string `mapstructure:"packer_run_uuid" cty:"packer_run_uuid" hcl:"packer_run_uuid"`
-	ID            *string `mapstructure:"id" cty:"id" hcl:"id"`
-	Region        *string `mapstructure:"region" cty:"region" hcl:"region"`
+	CloudProvider *string           `mapstructure:"cloud_provider" cty:"cloud_provider" hcl:"cloud_provider"`
+	ComponentType *string           `mapstructure:"component_type" cty:"component_type" hcl:"component_type"`
+	CreatedAt     *string           `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
+	BuildID       *string           `mapstructure:"build_id" cty:"build_id" hcl:"build_id"`
+	IterationID   *string           `mapstructure:"iteration_id" cty:"iteration_id" hcl:"iteration_id"`
+	PackerRunUUID *string           `mapstructure:"packer_run_uuid" cty:"packer_run_uuid" hcl:"packer_run_uuid"`
+	ID            *string           `mapstructure:"id" cty:"id" hcl:"id"`
+	Region        *string           `mapstructure:"region" cty:"region" hcl:"region"`
+	Labels        map[string]string `mapstructure:"labels" cty:"labels" hcl:"labels"`
 }
 
 // FlatMapstructure returns a new FlatDatasourceOutput.
@@ -85,6 +86,7 @@ func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 		"packer_run_uuid": &hcldec.AttrSpec{Name: "packer_run_uuid", Type: cty.String, Required: false},
 		"id":              &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},
 		"region":          &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"labels":          &hcldec.AttrSpec{Name: "labels", Type: cty.Map(cty.String), Required: false},
 	}
 	return s
 }
