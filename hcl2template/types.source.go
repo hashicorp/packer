@@ -110,6 +110,12 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	}
 
 	body := source.Body
+	// Add known values to source accessor in eval context.
+	ectx.Variables[sourcesAccessor] = cty.ObjectVal(map[string]cty.Value{
+		"type": cty.StringVal(source.Type),
+		"name": cty.StringVal(source.Name),
+	})
+
 	decoded, moreDiags := decodeHCL2Spec(body, ectx, builder)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
