@@ -33,7 +33,7 @@ type Getter struct {
 
 var _ plugingetter.Getter = &Getter{}
 
-func tranformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
+func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 	return func(in io.ReadCloser) (io.ReadCloser, error) {
 		defer in.Close()
 		rd := bufio.NewReader(in)
@@ -202,7 +202,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 			u,
 			nil,
 		)
-		transform = tranformChecksumStream()
+		transform = transformChecksumStream()
 	case "zip":
 		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
 		req, err = g.Client.NewRequest(
