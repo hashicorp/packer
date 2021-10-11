@@ -13,7 +13,7 @@ source "amazon-ebs" "ubuntu-1604" {
 }
 
 source "virtualbox-iso" "ubuntu-1204" {
-    string   = "string"
+    string   = "${source.name}-${source.type}"
     int      = 42
     int64    = 43
     bool     = true
