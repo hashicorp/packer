@@ -415,6 +415,17 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - using build variables in post-processor",
+			args: []string{
+				testFixture("hcl", "build-var-in-pp.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"example.2.txt": two,
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
