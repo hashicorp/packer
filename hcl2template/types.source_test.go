@@ -60,7 +60,7 @@ func TestParse_source(t *testing.T) {
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
-					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+					{Type: "nonexistant", Name: "ubuntu-1204"}: {Type: "nonexistant", Name: "ubuntu-1204"},
 				},
 			},
 			false, false,
@@ -74,13 +74,13 @@ func TestParse_source(t *testing.T) {
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
-					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+					{Type: "nonexistant", Name: "ubuntu-1204"}: {Type: "nonexistant", Name: "ubuntu-1204"},
 				},
 				Builds: Builds{
 					&BuildBlock{
 						Sources: []SourceUseBlock{
 							{
-								SourceRef: SourceRef{Type: "inexistant", Name: "ubuntu-1204"},
+								SourceRef: SourceRef{Type: "nonexistant", Name: "ubuntu-1204"},
 							},
 						},
 					},

@@ -76,7 +76,7 @@ func TestParse_build(t *testing.T) {
 					&BuildBlock{
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
-								PType: "inexistant",
+								PType: "nonexistant",
 							},
 						},
 					},
@@ -138,7 +138,7 @@ func TestParse_build(t *testing.T) {
 						PostProcessorsLists: [][]*PostProcessorBlock{
 							{
 								{
-									PType: "inexistant",
+									PType: "nonexistant",
 								},
 							},
 						},

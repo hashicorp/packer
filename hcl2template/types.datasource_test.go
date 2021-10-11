@@ -109,10 +109,10 @@ func TestParse_datasource(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
-						Type: "inexistant",
+						Type: "nonexistant",
 						Name: "test",
 					}: {
-						Type: "inexistant",
+						Type: "nonexistant",
 						Name: "test",
 					},
 				},
