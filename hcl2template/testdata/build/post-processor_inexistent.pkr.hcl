@@ -1,6 +1,6 @@
 
 build {
-    post-processor "inexistant" {
+    post-processor "nonexistent" {
         foo = "bar"
     }
 }

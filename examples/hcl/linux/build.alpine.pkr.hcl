@@ -4,7 +4,7 @@ build {
   description = <<EOF
 This build creates alpine images for versions :
 * v3.12
-For the following builers :
+For the following builders :
 * virtualbox-iso
 EOF
 
