@@ -1,3 +1,3 @@
-data "nonexistent" "test" {
+data "nonexistant" "test" {
     foo = "bar"
 }
