@@ -77,10 +77,10 @@ source "amazon-ebs" "server" {
 
   tags = "${merge(
     local.common_tags,
-    map(
-      "Name", "awesome-app-server",
-      "Role", "server"
-    )
+    {
+      "Name" = "awesome-app-server",
+      "Role" = "server"
+    }
   )}"
   # ...
 }
