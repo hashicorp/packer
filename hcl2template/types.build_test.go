@@ -66,9 +66,9 @@ func TestParse_build(t *testing.T) {
 			nil,
 			false,
 		},
-		{"nonexistant provisioner",
+		{"nonexistent provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_nonexistant.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/build/provisioner_nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
@@ -76,7 +76,7 @@ func TestParse_build(t *testing.T) {
 					&BuildBlock{
 						ProvisionerBlocks: []*ProvisionerBlock{
 							{
-								PType: "nonexistant",
+								PType: "nonexistent",
 							},
 						},
 					},
@@ -127,9 +127,9 @@ func TestParse_build(t *testing.T) {
 			[]packersdk.Build{&packer.CoreBuild{}},
 			false,
 		},
-		{"nonexistant post-processor",
+		{"nonexistent post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_nonexistant.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/build/post-processor_nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
@@ -138,7 +138,7 @@ func TestParse_build(t *testing.T) {
 						PostProcessorsLists: [][]*PostProcessorBlock{
 							{
 								{
-									PType: "nonexistant",
+									PType: "nonexistent",
 								},
 							},
 						},

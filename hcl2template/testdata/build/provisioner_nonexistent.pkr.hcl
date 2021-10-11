@@ -1,6 +1,6 @@
 
 build {
-    provisioner "nonexistant" {
+    provisioner "nonexistent" {
         foo = "bar"
     }
 }
