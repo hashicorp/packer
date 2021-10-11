@@ -29,7 +29,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "escaping", flags: []string{}},
 		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
-		{folder: "inexistent", flags: []string{}, exitCode: 1, exitEarly: true},
+		{folder: "nonexistant", flags: []string{}, exitCode: 1, exitEarly: true},
 	}
 
 	for _, tc := range tc {

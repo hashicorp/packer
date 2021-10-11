@@ -66,9 +66,9 @@ func TestParse_build(t *testing.T) {
 			nil,
 			false,
 		},
-		{"inexistent provisioner",
+		{"nonexistant provisioner",
 			defaultParser,
-			parseTestArgs{"testdata/build/provisioner_inexistent.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/build/provisioner_nonexistant.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
@@ -127,9 +127,9 @@ func TestParse_build(t *testing.T) {
 			[]packersdk.Build{&packer.CoreBuild{}},
 			false,
 		},
-		{"inexistent post-processor",
+		{"nonexistant post-processor",
 			defaultParser,
-			parseTestArgs{"testdata/build/post-processor_inexistent.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/build/post-processor_nonexistant.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),

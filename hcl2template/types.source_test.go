@@ -55,7 +55,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"unused source with unknown type fails",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/sources/nonexistant.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
@@ -69,7 +69,7 @@ func TestParse_source(t *testing.T) {
 		},
 		{"used source with unknown type fails",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent_used.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/sources/nonexistant_used.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
