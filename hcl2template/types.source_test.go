@@ -55,12 +55,12 @@ func TestParse_source(t *testing.T) {
 		},
 		{"unused source with unknown type fails",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/sources/nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
-					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+					{Type: "nonexistent", Name: "ubuntu-1204"}: {Type: "nonexistent", Name: "ubuntu-1204"},
 				},
 			},
 			false, false,
@@ -69,18 +69,18 @@ func TestParse_source(t *testing.T) {
 		},
 		{"used source with unknown type fails",
 			defaultParser,
-			parseTestArgs{"testdata/sources/inexistent_used.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/sources/nonexistent_used.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
-					{Type: "inexistant", Name: "ubuntu-1204"}: {Type: "inexistant", Name: "ubuntu-1204"},
+					{Type: "nonexistent", Name: "ubuntu-1204"}: {Type: "nonexistent", Name: "ubuntu-1204"},
 				},
 				Builds: Builds{
 					&BuildBlock{
 						Sources: []SourceUseBlock{
 							{
-								SourceRef: SourceRef{Type: "inexistant", Name: "ubuntu-1204"},
+								SourceRef: SourceRef{Type: "nonexistent", Name: "ubuntu-1204"},
 							},
 						},
 					},

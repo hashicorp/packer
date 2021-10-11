@@ -77,7 +77,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "var-args: json - inexistent var file errs",
+			name: "var-args: json - nonexistent var file errs",
 			args: []string{
 				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.json"),
 				filepath.Join(testFixture("var-arg"), "fruit_builder.json"),
@@ -87,7 +87,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "var-args: hcl - inexistent json var file errs",
+			name: "var-args: hcl - nonexistent json var file errs",
 			args: []string{
 				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.json"),
 				testFixture("var-arg"),
@@ -97,7 +97,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "var-args: hcl - inexistent hcl var file errs",
+			name: "var-args: hcl - nonexistent hcl var file errs",
 			args: []string{
 				"-var-file=" + filepath.Join(testFixture("var-arg"), "potato.hcl"),
 				testFixture("var-arg"),
