@@ -289,16 +289,11 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 	return iterationResp, nil
 }
 
-// initializeIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
-// If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
-// that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
-// All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
 func (b *Bucket) initializeIteration(ctx context.Context) error {
-
 	// load existing iteration using fingerprint.
 	iterationResp, err := GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
 	if checkErrorCode(err, codes.Aborted) {
-		//probably means Iteration doesn't exist need a way to check the error
+		// probably means Iteration doesn't exist need a way to check the error
 		iterationResp, err = b.createIteration()
 	}
 
@@ -321,9 +316,17 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 			"If you wish to add a new build to this image a new iteration must be created by changing the build fingerprint.", b.Iteration.Fingerprint)
 	}
 
+	return nil
+}
+
+// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
+// that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
+// All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
+func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
-	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, iterationResp.ID)
+	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, b.Iteration.ID)
 	if err != nil {
 		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
 	}

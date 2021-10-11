@@ -42,12 +42,20 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("expected a call to CreateIteration but it didn't happen")
 	}
 
-	if !mockService.CreateBuildCalled {
-		t.Errorf("expected a call to CreateBuild but it didn't happen")
+	if mockService.CreateBuildCalled {
+		t.Errorf("Didn't expect a call to CreateBuild")
 	}
 
 	if b.Iteration.ID != "iteration-id" {
 		t.Errorf("expected an iteration to created but it didn't")
+	}
+
+	err = b.PopulateIteration(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
+	if !mockService.CreateBuildCalled {
+		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
 	if _, ok := b.Iteration.builds.Load("happycloud.image"); !ok {
@@ -91,12 +99,20 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("expected a call to CreateIteration but it didn't happen")
 	}
 
-	if !mockService.CreateBuildCalled {
-		t.Errorf("expected a call to CreateBuild but it didn't happen")
+	if mockService.CreateBuildCalled {
+		t.Errorf("Didn't expect a call to CreateBuild")
 	}
 
 	if b.Iteration.ID != "iteration-id" {
 		t.Errorf("expected an iteration to created but it didn't")
+	}
+
+	err = b.PopulateIteration(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
+	if !mockService.CreateBuildCalled {
+		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
 	if _, ok := b.Iteration.builds.Load("happycloud.image"); !ok {
@@ -133,6 +149,10 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
+	err = b.PopulateIteration(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
 
 	if mockService.CreateBucketCalled {
 		t.Errorf("unexpected call to CreateBucket")
@@ -158,6 +178,10 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 		t.Errorf("expected an iteration to created but it didn't")
 	}
 
+	err = b.PopulateIteration(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
 	loadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
 	if !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
@@ -201,11 +225,11 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 
 	err = b.Initialize(context.TODO())
 	if err == nil {
-		t.Errorf("Calling initialize on a completed Iteration should fail hard")
+		t.Errorf("unexpected failure: %v", err)
 	}
 
 	if mockService.CreateIterationCalled {
-		t.Errorf("unexpected a call to CreateIteration")
+		t.Errorf("unexpected call to CreateIteration")
 	}
 
 	if !mockService.GetIterationCalled {
@@ -213,11 +237,11 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 	}
 
 	if mockService.CreateBuildCalled {
-		t.Errorf("unexpected a call to CreateBuild")
+		t.Errorf("unexpected call to CreateBuild")
 	}
 
 	if b.Iteration.ID != "iteration-id" {
-		t.Errorf("expected an iteration to returned but it didn't")
+		t.Errorf("expected an iteration to be returned but it wasn't")
 	}
 }
 
@@ -246,6 +270,10 @@ func TestUpdateBuildStatus(t *testing.T) {
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
+	err = b.PopulateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -309,6 +337,10 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
+	err = b.PopulateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}

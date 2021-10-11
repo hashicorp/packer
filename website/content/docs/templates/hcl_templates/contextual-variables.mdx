@@ -129,3 +129,37 @@ null.first-example: output will be in this color.
 Make sure to wrap your variable in single quotes in order to escape the
 string that is returned; if you are running a dev version of packer the
 parenthesis may through off your shell escaping otherwise.
+
+# HCP Packer Iteration ID
+
+If your build is pushing metadata to the HCP Packer reigstry, this variable is
+set to the value of the Iteration ID associated with this run.
+
+```hcl
+source "amazon-ebs" "cannonical-ubuntu-server" {
+  ami_name         = "packer-example"
+  // ...
+  run_volume_tags = {
+    hcp_iteration_id = packer.iterationID
+  }
+}
+```
+
+```shell-session
+==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
+    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
+    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_iteration_id": "01FHGF3M2AK4TS6PCZES4VX5E7"
+```
+
+You can also add this value to post-processors, for example to add to a manifest file:
+
+```hcl
+  post-processor "manifest" {
+    output     = "manifest.json"
+    strip_path = true
+    custom_data = {
+      iteration = "${packer.iterationID}"
+    }
+  }
+
+```
