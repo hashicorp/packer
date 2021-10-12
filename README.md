@@ -59,8 +59,9 @@ variable "access_key" {
 }
 
 variable "secret_key" {
-  type    = string
-  default = "${env("AWS_SECRET_ACCESS_KEY")}"
+  type      = string
+  default   = "${env("AWS_SECRET_ACCESS_KEY")}"
+  sensitive = true
 }
 
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
