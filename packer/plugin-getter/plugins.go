@@ -74,7 +74,7 @@ type RateLimitError struct {
 }
 
 func (rlerr *RateLimitError) Error() string {
-	s := fmt.Sprintf("List version or getting a plugin got rate limited. Try again in %s.\n", time.Until(rlerr.ResetTime))
+	s := fmt.Sprintf("Plugin host rate limited the plugin getter. Try again in %s.\n", time.Until(rlerr.ResetTime))
 	if rlerr.SetableEnvVar != "" {
 		s += fmt.Sprintf("HINT: Set the %s env var with a token to get more requests.\n", rlerr.SetableEnvVar)
 	}
