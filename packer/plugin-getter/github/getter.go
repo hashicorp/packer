@@ -22,7 +22,7 @@ import (
 
 const (
 	ghTokenAccessor  = "PACKER_GITHUB_API_TOKEN"
-	defaultUserAgent = "packer-plugin-getter"
+	defaultUserAgent = "packer-github-plugin-getter"
 	defaultHostname  = "github.com"
 )
 
