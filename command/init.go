@@ -133,6 +133,7 @@ plugin. Unfortunately, this failed :
 					err)
 				c.Ui.Say(msg)
 			} else {
+				c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
 				c.Ui.Error(err.Error())
 				ret = 1
 			}
