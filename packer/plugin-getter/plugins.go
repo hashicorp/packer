@@ -447,6 +447,12 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 				versions = append(versions, v)
 			}
 		}
+		if len(versions) == 0 {
+			err := fmt.Errorf("no matching version found in releases. In %v", releases)
+			errs = multierror.Append(errs, err)
+			log.Printf("[TRACE] %s", err.Error())
+			continue
+		}
 
 		break
 	}
