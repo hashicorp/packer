@@ -22,7 +22,7 @@ import (
 
 const (
 	ghTokenAccessor  = "PACKER_GITHUB_API_TOKEN"
-	defaultUserAgent = "packer-plugin-getter"
+	defaultUserAgent = "packer-github-plugin-getter"
 	defaultHostname  = "github.com"
 )
 
@@ -175,6 +175,8 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 					},
 				},
 			}
+		} else {
+			log.Printf("[WARNING] github-getter: no GitHub token set, if you intend to install plugins often, please set the %s env var", ghTokenAccessor)
 		}
 		g.Client = github.NewClient(tc)
 		g.Client.UserAgent = defaultUserAgent
@@ -220,12 +222,24 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	log.Printf("[DEBUG] github-getter: getting %q", req.URL)
 	resp, err := g.Client.BareDo(ctx, req)
 	if err != nil {
-		// here BareDo will return an err if the request failed or if the
-		// status is not considered a valid http status.
+		// here BareDo will return an err if the request failed or if the status
+		// is not considered a valid http status. So we have to close the body
+		// if it's not nil.
 		if resp != nil {
 			resp.Body.Close()
 		}
-		return nil, err
+		switch err := err.(type) {
+		case *github.RateLimitError:
+			return nil, &plugingetter.RateLimitError{
+				SetableEnvVar: ghTokenAccessor,
+				Err:           err,
+				ResetTime:     err.Rate.Reset.Time,
+			}
+		default:
+			log.Printf("[TRACE] failed requesting: %T. %v", err, err)
+			return nil, err
+		}
+
 	}
 
 	return transform(resp.Body)
