@@ -11,6 +11,7 @@ import Router from 'next/router'
 import NProgress from '@hashicorp/platform-util/nprogress'
 import createConsentManager from '@hashicorp/react-consent-manager/loader'
 import { ErrorBoundary } from '@hashicorp/platform-runtime-error-monitoring'
+import useFathomAnalytics from '@hashicorp/platform-analytics'
 import useAnchorLinkAnalytics from '@hashicorp/platform-util/anchor-link-analytics'
 import AlertBanner from '@hashicorp/react-alert-banner'
 import alertBannerData, { ALERT_BANNER_ACTIVE } from 'data/alert-banner'
@@ -21,6 +22,7 @@ const { ConsentManager, openConsentManager } = createConsentManager({
 })
 
 export default function App({ Component, pageProps }) {
+  useFathomAnalytics()
   useAnchorLinkAnalytics()
 
   return (
