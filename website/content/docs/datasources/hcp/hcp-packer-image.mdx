@@ -1,40 +1,42 @@
 ---
 description: |
-  The HCP Packer Iteration Data Source retrieves information about an
-  iteration from the HCP Packer registry. This information can be used to
-  query HCP for a source image for various Packer builders.
-page_title: HCP Packer Iteration - Data Sources
+  The HCP Packer Image Data Source retrieves information about an
+  image from the HCP Packer registry. This information can be used to
+  provide a source image to various Packer builders.
+page_title: HCP Packer Image - Data Sources
 ---
 
-# HCP Packer Iteration Data Source
+# HCP Packer Image Data Source
 
-Type: `hcp-packer-iteration`
+Type: `hcp-packer-image`
 
-The `HCP Packer Iteration` Data Source retrieves information about an
-iteration from the HCP Packer registry. This information can be used to query
-HCP for a source image for various Packer builders.
+The `HCP Packer Image` Data Source retrieves information about an
+image from the HCP Packer registry. This information can be used to
+provide a source image to various Packer builders.
 
-Please note: The HCP Packer registry is in development, and is not yet available
-for public use. For more information about HCP Packer, see https://www.hashicorp.com/blog/announcing-hcp-packer
+~> **Note:** HCP Packer is under active development, and we are currently offering a [public beta version](https://portal.cloud.hashicorp.com) to collect feedback and continue improving the product.
+To get started, visit the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started) collection on HashiCorp Learn.
 
 ## Basic Example
 
-Below is a fully functioning example. It stores information about an image
-iteration, which can then be accessed as a variable.
+Below is a fully functioning example. It stores information about an image,
+which can then be parsed and accessed as a variable.
 
 ```hcl
-data "hcp-packer-iteration" "hardened-source" {
+data "hcp-packer-image" "example" {
   bucket_name = "hardened-ubuntu-16-04"
-  channel = "packer-test"
+  iteration_id = "${data.hcp-packer-iteration.hardened-source.id}"
+  cloud_provider = "aws"
+  region = "us-east-1"
 }
 ```
 
 ## Full Example
 
-This data source can be used in conjunction with the hcp-packer-image
+This data source can be used in conjunction with the hcp-packer-iteration
 data source to retrieve an image ID using a channel. You provide the channel
-name to the iteration data source, then use the iteration source inside the
-image data source, then use the image data source inside your source block.
+name to the iteration data source, then use the iteration source in the image
+data source, then use the image data source inside your source block.
 
 
 ```hcl
@@ -61,7 +63,7 @@ data "hcp-packer-image" "foo" {
 # a single base image can be customized in multiple secondary layers.
 source "amazon-ebs" "packer-secondary" {
   source_ami       = data.hcp-packer-image.foo.id
-  ...
+  # ...
 }
 ```
 
@@ -73,11 +75,11 @@ described.
 
 ### Required:
 
-@include 'datasource/hcp-packer-iteration/RunConfig-required.mdx'
+@include 'datasource/hcp-packer-image/Config-required.mdx'
 
 There are currently no optional fields for this datasource, though we intend
 to add filtering fields in the future.
 
 ### Output Fields:
 
-@include 'datasource/hcp-packer-iteration/DatasourceOutput.mdx'
+@include 'datasource/hcp-packer-image/DatasourceOutput.mdx'
