@@ -14,6 +14,13 @@
     "version": "latest"
   },
   {
+    "title": "Anka",
+    "path": "anka",
+    "repo": "veertuinc/packer-plugin-veertu-anka",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Ansible",
     "path": "ansible",
     "repo": "hashicorp/packer-plugin-ansible",
