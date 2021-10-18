@@ -76,7 +76,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret == 0 {
-		c.Ui.Say("Packer Configuration Valid.")
+		c.Ui.Say("The configuration is valid.")
 	}
 
 	return ret
