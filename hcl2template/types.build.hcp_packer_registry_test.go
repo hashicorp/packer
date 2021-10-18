@@ -52,9 +52,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 						Name:    "virtualbox-iso.ubuntu-1204",
 						Builder: emptyMockBuilder,
 						ArtifactMetadataPublisher: &packer_registry.Bucket{
-							Slug:        "bucket-slug",
-							Description: "Some description\n",
-							Labels:      map[string]string{"foo": "bar"},
+							Slug:         "bucket-slug",
+							Description:  "Some description\n",
+							BucketLabels: map[string]string{"foo": "bar"},
 							Iteration: &packer_registry.Iteration{
 								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
 							},
@@ -67,9 +67,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 								PostProcessor: &packer.RegistryPostProcessor{
 									BuilderType: "virtualbox-iso.ubuntu-1204",
 									ArtifactMetadataPublisher: &packer_registry.Bucket{
-										Slug:        "bucket-slug",
-										Description: "Some description\n",
-										Labels:      map[string]string{"foo": "bar"},
+										Slug:         "bucket-slug",
+										Description:  "Some description\n",
+										BucketLabels: map[string]string{"foo": "bar"},
 										Iteration: &packer_registry.Iteration{
 											Fingerprint: "ignored-fingerprint",
 										},
@@ -87,9 +87,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 						Name:    "amazon-ebs.aws-ubuntu-16.04",
 						Builder: emptyMockBuilder,
 						ArtifactMetadataPublisher: &packer_registry.Bucket{
-							Slug:        "bucket-slug",
-							Description: "Some description\n",
-							Labels:      map[string]string{"foo": "bar"},
+							Slug:         "bucket-slug",
+							Description:  "Some description\n",
+							BucketLabels: map[string]string{"foo": "bar"},
 							Iteration: &packer_registry.Iteration{
 								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
 							},
@@ -102,9 +102,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 								PostProcessor: &packer.RegistryPostProcessor{
 									BuilderType: "amazon-ebs.aws-ubuntu-16.04",
 									ArtifactMetadataPublisher: &packer_registry.Bucket{
-										Slug:        "bucket-slug",
-										Description: "Some description\n",
-										Labels:      map[string]string{"foo": "bar"},
+										Slug:         "bucket-slug",
+										Description:  "Some description\n",
+										BucketLabels: map[string]string{"foo": "bar"},
 										Iteration: &packer_registry.Iteration{
 											Fingerprint: "ignored-fingerprint",
 										},
@@ -152,9 +152,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 						Name:    "virtualbox-iso.ubuntu-1204",
 						Builder: emptyMockBuilder,
 						ArtifactMetadataPublisher: &packer_registry.Bucket{
-							Slug:        "real-bucket-slug",
-							Description: "Some description\n",
-							Labels:      map[string]string{"foo": "bar"},
+							Slug:         "real-bucket-slug",
+							Description:  "Some description\n",
+							BucketLabels: map[string]string{"foo": "bar"},
 							Iteration: &packer_registry.Iteration{
 								Fingerprint: "ignored-fingerprint", // this will be different everytime so it's ignored
 							},
@@ -167,9 +167,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 								PostProcessor: &packer.RegistryPostProcessor{
 									BuilderType: "virtualbox-iso.ubuntu-1204",
 									ArtifactMetadataPublisher: &packer_registry.Bucket{
-										Slug:        "real-bucket-slug",
-										Description: "Some description\n",
-										Labels:      map[string]string{"foo": "bar"},
+										Slug:         "real-bucket-slug",
+										Description:  "Some description\n",
+										BucketLabels: map[string]string{"foo": "bar"},
 										Iteration: &packer_registry.Iteration{
 											Fingerprint: "ignored-fingerprint",
 										},

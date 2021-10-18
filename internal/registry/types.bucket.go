@@ -17,12 +17,13 @@ import (
 
 // Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
-	Slug        string
-	Description string
-	Destination string
-	Labels      map[string]string
-	Iteration   *Iteration
-	client      *Client
+	Slug         string
+	Description  string
+	Destination  string
+	BucketLabels map[string]string
+	BuildLabels  map[string]string
+	Iteration    *Iteration
+	client       *Client
 }
 
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
@@ -79,7 +80,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug:  b.Slug,
 		Description: b.Description,
-		Labels:      b.Labels,
+		Labels:      b.BucketLabels,
 	}
 
 	err := UpsertBucket(ctx, b.client, bucketInput)
@@ -121,12 +122,16 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		return err
 	}
 
+	if b.BuildLabels == nil {
+		b.BuildLabels = make(map[string]string)
+	}
+
 	build := &Build{
 		ID:            id,
 		ComponentType: componentType,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
-		Labels:        make(map[string]string),
+		Labels:        b.BuildLabels,
 		Images:        make(map[string]registryimage.Image),
 	}
 
