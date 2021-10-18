@@ -14,10 +14,10 @@ For more information about HCP Packer, see [Announcing HCP Packer](https://www.h
 The `hcp_packer_registry` block allows operators the ability to customize the metadata sent to
 HCP Packer Registry. It configures the details of an image that is created or updated within the HCP Packer registry.
 
-The presence of a `hcp_packer_registry` block will enable the HCP Packer mode and all the builds within that build block
+The presence of a `hcp_packer_registry` block will enable HCP Packer mode and all the builds within that build block
 will be pushed to the remote registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`).
 If no HCP credentials are set, Packer will fail the build and exit immediately to avoid any potential artifact drift between
-the build providers and the HCP Packer registry.
+the defined builders (source blocks) and the HCP Packer registry.
 
 ```hcl
 # file: builds.pkr.hcl
