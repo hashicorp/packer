@@ -14,8 +14,8 @@ The `Packer Image Iteration` Data Source retrieves information about an
 iteration from the HCP Packer registry. This information can be parsed to
 provide a source image to various Packer builders.
 
-Please note: The HCP Packer registry is in development, and is not yet available
-for public use. For more information about HCP Packer, see https://www.hashicorp.com/blog/announcing-hcp-packer
+~> **Note:** HCP Packer is currently in public beta. Tutorials can be found at our [HashiCorp Learn](https://learn.hashicorp.com/packer) website.
+For more information about HCP Packer, see [Announcing HCP Packer](https://www.hashicorp.com/blog/announcing-hcp-packer).
 
 ## Basic Example
 
@@ -37,7 +37,7 @@ described.
 
 ### Required:
 
-@include 'datasource/packer-image-iteration/RunConfig-required.mdx'
+@include 'datasource/packer-image-iteration/Config-required.mdx'
 
 There are currently no optional fields for this datasource, though we intend
 to add filtering fields in the future.
