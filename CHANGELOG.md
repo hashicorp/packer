@@ -1,4 +1,4 @@
-## 1.7.7 (Upcoming)
+## 1.7.7 (October 19, 2021)
 
 ### IMPROVEMENTS:
 * Improved support and user experience for HCP Packer registry - [GH-11304](https://github.com/hashicorp/packer/pull/11304) [GH-11315](https://github.com/hashicorp/packer/pull/11315) [GH-11320](https://github.com/hashicorp/packer/pull/11320) [GH-11319](https://github.com/hashicorp/packer/pull/11319)
