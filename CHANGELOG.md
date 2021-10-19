@@ -1,4 +1,4 @@
-## 1.7.7 (Upcoming)
+## 1.8.0 (Upcoming)
 
 ### IMPROVEMENTS:
 * Added and improved support and user experience for HCP Packer - [GH-11304](https://github.com/hashicorp/packer/pull/11304) [GH-11315](https://github.com/hashicorp/packer/pull/11315) [GH-11320](https://github.com/hashicorp/packer/pull/11320) [GH-11319](https://github.com/hashicorp/packer/pull/11319)
@@ -10,7 +10,7 @@
 
 ### Plugin Breakout:
 
-* The code of the Scaleway builder was handed over to the scaleway org [GH-11298](https://github.com/hashicorp/packer/pull/11298)[GH-11296](https://github.com/hashicorp/packer/pull/11296)
+* The code of the Scaleway builder was handed over to the scaleway org [GH-11298](https://github.com/hashicorp/packer/pull/11298) [GH-11296](https://github.com/hashicorp/packer/pull/11296)
 
 ## 1.7.6 (September 28, 2021)
 
