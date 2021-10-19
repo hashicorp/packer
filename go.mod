@@ -36,15 +36,15 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/hashicorp/hcp-sdk-go v0.13.1-0.20211004174420-0f36fadb8a34
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.1
+	github.com/hashicorp/packer-plugin-amazon v1.0.2
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
-	github.com/hashicorp/packer-plugin-azure v1.0.3
+	github.com/hashicorp/packer-plugin-azure v1.0.4
 	github.com/hashicorp/packer-plugin-chef v1.0.1
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.0
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
-	github.com/hashicorp/packer-plugin-docker v1.0.1
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.5
+	github.com/hashicorp/packer-plugin-docker v1.0.2
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.6
 	github.com/hashicorp/packer-plugin-hcloud v1.0.1
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.0
@@ -57,21 +57,21 @@ require (
 	github.com/hashicorp/packer-plugin-oneandone v1.0.0
 	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.1
-	github.com/hashicorp/packer-plugin-outscale v1.0.1
+	github.com/hashicorp/packer-plugin-outscale v1.0.2
 	github.com/hashicorp/packer-plugin-parallels v1.0.0
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
 	github.com/hashicorp/packer-plugin-proxmox v1.0.2
 	github.com/hashicorp/packer-plugin-puppet v1.0.0
-	github.com/hashicorp/packer-plugin-qemu v1.0.0
+	github.com/hashicorp/packer-plugin-qemu v1.0.1
 	github.com/hashicorp/packer-plugin-salt v0.0.8
-	github.com/hashicorp/packer-plugin-sdk v0.2.6
+	github.com/hashicorp/packer-plugin-sdk v0.2.7
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.1
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
 	github.com/hashicorp/packer-plugin-vagrant v1.0.0
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.0
 	github.com/hashicorp/packer-plugin-vmware v1.0.3
-	github.com/hashicorp/packer-plugin-vsphere v1.0.1
+	github.com/hashicorp/packer-plugin-vsphere v1.0.2
 	github.com/hashicorp/packer-plugin-yandex v1.0.2
 	github.com/hetznercloud/hcloud-go v1.32.0 // indirect
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
@@ -142,7 +142,7 @@ require (
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
-	github.com/aws/aws-sdk-go v1.40.34 // indirect
+	github.com/aws/aws-sdk-go v1.40.54 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
