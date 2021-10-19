@@ -76,6 +76,10 @@
                     "path": "templates/hcl_templates/blocks/build"
                   },
                   {
+                    "title": "<code>hcp_packer_registry</code>",
+                    "path": "templates/hcl_templates/blocks/build/hcp_packer_registry"
+                  },
+                  {
                     "title": "<code>source</code>",
                     "path": "templates/hcl_templates/blocks/build/source"
                   },
@@ -707,6 +711,23 @@
       {
         "title": "Overview",
         "path": "datasources"
+      },
+      {
+        "title": "HCP Packer",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "datasources/hcp"
+          },
+          {
+            "title": "Iteration",
+            "path": "datasources/hcp/hcp-packer-iteration"
+          },
+          {
+            "title": "Image",
+            "path": "datasources/hcp/hcp-packer-image"
+          }
+        ]
       }
     ]
   },
@@ -846,5 +867,9 @@
   {
     "title": "Debugging",
     "path": "debugging"
+  },
+  {
+    "title": "HCP Packer",
+    "href": "https://cloud.hashicorp.com/docs/packer"
   }
 ]

@@ -1,15 +1,21 @@
 ---
 description: |
-  Welcome to the Packer documentation! This documentation is more of a reference
-  guide for all available features and options in Packer. If you're just getting
-  started with Packer, please start with the introduction and getting started
-  guide instead.
+  Packer allows you to create identical machine images for multiple platforms from a single source template.
 page_title: Documentation
 ---
 
 # Packer Documentation
 
-Welcome to the Packer documentation! This documentation is more of a reference
-guide for all available features and options in Packer. If you're just getting
-started with Packer, please start with the [introduction and getting started
-guide](/intro) instead.
+[Packer](https://www.packer.io/) is an open source tool that enables you to create identical machine images for multiple platforms from a single source template. A common use case is creating "golden images" that teams across an organization can use in cloud infrastructure.
+
+To install Packer and learn the standard Packer workflow, try the [Get Started tutorials](https://learn.hashicorp.com/packer) on Hashicorp Learn.
+
+## HCP Packer
+
+The HCP Packer registry bridges the gap between image factories and image deployments, allowing development and security teams to work together to create, manage, and consume golden images in a centralized way.
+
+The HCP Packer registry stores metadata about your images, including when they were created, where the image exists in the cloud, and what (if any) git commit is associated with your image build. You can use the registry to track information about the golden images your Packer builds produce, clearly designate which images are appropriate for test and production environments, and query for the right golden images to use in both Packer and Terraform configurations.
+
+HCP Packer is under active development, and we are currently offering a [public beta version](https://portal.cloud.hashicorp.com) to collect feedback and continue improving the product. We encourage you to try HCP Packer and submit your feedback.
+
+To get started, visit the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started) collection on HashiCorp Learn.
