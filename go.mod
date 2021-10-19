@@ -36,7 +36,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/hashicorp/hcp-sdk-go v0.13.1-0.20211004174420-0f36fadb8a34
 	github.com/hashicorp/packer-plugin-alicloud v1.0.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.2
+	github.com/hashicorp/packer-plugin-amazon v1.0.3
 	github.com/hashicorp/packer-plugin-ansible v1.0.0
 	github.com/hashicorp/packer-plugin-azure v1.0.4
 	github.com/hashicorp/packer-plugin-chef v1.0.1
