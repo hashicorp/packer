@@ -49,7 +49,7 @@ get_prs(){
             echo "Skipping PR ${PR_NUM}: labeled as tech debt, docs or website. (waiting a second so we don't get rate-limited...)"
             continue
         fi
-        echo "$(cat pull.json | python -m json.tool | jq '.title') - https://github.com/hashicorp/packer/pull/${PR_NUM}"
+        echo "$(cat pull.json | python -m json.tool | jq -r '.title') - [GH-${PR_NUM}](https://github.com/hashicorp/packer/pull/${PR_NUM})"
     done
 }
 
