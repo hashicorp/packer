@@ -13,22 +13,22 @@ export default function Homepage() {
       <section id="hero">
         <HomepageHero
           alert={{
-            url: 'https://www.hashicorp.com/blog/announcing-hcp-packer',
+            url:
+              'https://www.hashicorp.com/blog/announcing-the-public-beta-of-hcp-packer',
             tag: 'BLOG POST',
-            text: 'Announcing HCP Packer',
+            text: 'Announcing HCP Packer public beta',
           }}
           heading="Build automated machine images"
           subheading="Create identical machine images for multiple platforms from a single source configuration."
           links={[
             {
-              text: 'Download',
-              url: '/downloads',
-              type: 'inbound',
+              text: 'Try HCP Packer',
+              url:
+                'https://cloud.hashicorp.com/products/packer?utm_source=packer_io&utm_content=homepage_hero_packer',
             },
             {
-              text: 'Explore Tutorials',
-              url: 'https://learn.hashicorp.com/packer',
-              type: 'outbound',
+              text: 'Install Packer',
+              url: '/downloads',
             },
           ]}
           heroFeature={
@@ -124,11 +124,19 @@ export default function Homepage() {
       </section>
       <section className={s.sectionGridContainer}>
         <SectionBreakCta
-          heading="Announcing HCP Packer"
-          description="Bridge the gap between image creation and deployment with image management workflows."
+          badge="Beta"
+          heading="Automate build configuration across cloud providers."
+          description="Set up HCP Packer in minutes to start tracking Packer images across your provisioning pipeline."
           link={{
-            text: 'Sign up to be a beta tester',
-            url: 'https://go.hashicorp.com/HCP-Packer-Beta',
+            text: 'Learn more',
+            url:
+              'https://cloud.hashicorp.com/products/packer?utm_source=packer_io&utm_content=homepage_signup_callout',
+          }}
+          media={{
+            src: '/img/hcp-callout.svg',
+            width: 646,
+            height: 441,
+            alt: 'Packer UI',
           }}
         />
       </section>

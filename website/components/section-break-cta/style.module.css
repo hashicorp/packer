@@ -1,41 +1,74 @@
 .sectionBreakCta {
-  padding: 88px 24px;
-  max-width: 800px;
-  display: grid;
-  grid-gap: 24px;
-  text-align: center;
-  position: relative;
-  box-shadow: 0 8px 12px rgba(37, 38, 45, 0.08);
-  margin: 0 16px;
-  background-color: var(--white);
+  display: flex;
   align-items: center;
+  flex-direction: column;
+  padding: 32px 0 32px 24px;
+  background-color: var(--black);
+  background-image: radial-gradient(
+      88.57% 111.76% at 51.65% 103.99%,
+      rgba(99, 208, 255, 0.4) 0%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(0deg, #000, #000);
+  border-radius: 3px;
+  color: var(--white);
+  overflow: hidden;
 
   @media (--medium-up) {
-    margin: 0 auto 104px auto;
+    flex-direction: row;
+    padding: 50px 0 50px 50px;
   }
-  & hr {
-    position: absolute;
-    top: 56px;
-    left: calc(50% - 32px);
-    width: 64px;
-    background-color: var(--packer);
-    margin-top: 0;
-    margin-bottom: 24px;
+
+  @media (--large) {
+    padding: 50px 0 50px 80px;
   }
+}
+
+.content {
+  margin-bottom: 48px;
+  padding-right: 24px;
+
+  @media (--medium-up) {
+    margin-bottom: 0;
+  }
+}
+
+.media {
+  flex-shrink: 0;
+  width: 100%;
+
+  @media (--medium-up) {
+    width: 45%;
+    margin-left: 60px;
+  }
+}
+
+.eyebrow {
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+}
+
+.badge {
+  margin-left: 16px;
+  padding: 2px 10px;
+  background-color: var(--packer-secondary);
+  color: var(--black);
+  composes: g-type-label from global;
+  border-radius: 2px;
 }
 
 .heading {
-  composes: g-type-display-4 from global;
   margin: 0;
-  @media (--medium-up) {
-    padding: 0 88px;
-  }
+  composes: g-type-display-3 from global;
 }
 
 .description {
-  composes: g-type-body-large from global;
-  margin: 0;
-  @media (--medium-up) {
-    padding: 0 80px;
-  }
+  margin: 16px 0 32px;
+  composes: g-type-body from global;
+  color: var(--gray-5);
 }

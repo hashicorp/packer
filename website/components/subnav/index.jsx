@@ -12,8 +12,14 @@ export default function PackerSubnav() {
       }}
       ctaLinks={[
         { text: 'GitHub', url: 'https://www.github.com/hashicorp/packer' },
-        { text: 'Download', url: '/downloads' },
+        { text: 'Install Packer', url: '/downloads' },
+        {
+          text: 'Try HCP Packer',
+          url:
+            'https://cloud.hashicorp.com/products/packer?utm_source=packer_io&utm_content=top_nav_packer',
+        },
       ]}
+      hideGithubStars={true}
       currentPath={router.asPath}
       menuItemsAlign="right"
       menuItems={subnavItems}
