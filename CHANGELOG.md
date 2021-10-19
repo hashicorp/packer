@@ -1,7 +1,7 @@
 ## 1.7.7 (Upcoming)
 
 ### IMPROVEMENTS:
-* Improved support and user experience for HCP Packer - [GH-11304](https://github.com/hashicorp/packer/pull/11304)[GH-11315](https://github.com/hashicorp/packer/pull/11315)[GH-11320](https://github.com/hashicorp/packer/pull/11320)[GH-11319](https://github.com/hashicorp/packer/pull/11319)
+* Added and improved support and user experience for HCP Packer - [GH-11304](https://github.com/hashicorp/packer/pull/11304)[GH-11315](https://github.com/hashicorp/packer/pull/11315)[GH-11320](https://github.com/hashicorp/packer/pull/11320)[GH-11319](https://github.com/hashicorp/packer/pull/11319)
 
 * core: Show successful message upon successful packer validate - [GH-11337](https://github.com/hashicorp/packer/pull/11337)
 * core: Allow use in top level source variables in a build.source block - [GH-11318](https://github.com/hashicorp/packer/pull/11318)
