@@ -1,4 +1,4 @@
-## 1.7.8 (Upcoming)
+## 1.7.8 (October 27, 2021)
 
 ### BUG FIXES
 * builder/amazon: Bump plugin to latest version to address a variable
