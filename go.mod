@@ -233,7 +233,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/oracle/oci-go-sdk/v36 v36.2.0 // indirect
-	github.com/outscale/osc-sdk-go/osc v0.0.0-20210316122053-4dfd64ce707a // indirect
+	github.com/outscale/osc-sdk-go v1.11.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
