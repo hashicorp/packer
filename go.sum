@@ -692,8 +692,8 @@ github.com/hashicorp/memberlist v0.2.2 h1:5+RffWKwqJ71YPu9mWsF7ZOscZmwfasdA8kbdC
 github.com/hashicorp/memberlist v0.2.2/go.mod h1:MS2lj3INKhZjWNqd3N0m3J+Jxf3DAOnAH9VT3Sh9MUE=
 github.com/hashicorp/packer-plugin-alicloud v1.0.0 h1:f1wyIqgSQQlpYs116Auq/FLYtrW3GbpTzxXxZWmNc1A=
 github.com/hashicorp/packer-plugin-alicloud v1.0.0/go.mod h1:wDWvfgD8JWdrGnAzO6SkcJJiAL+64SCEVY+DWcefNas=
-github.com/hashicorp/packer-plugin-amazon v1.0.3 h1:1hXtAjEglg/r/1PKlc/5U8/0UWIvkoQkS37dK9Ne+Mc=
-github.com/hashicorp/packer-plugin-amazon v1.0.3/go.mod h1:+jTH+VY38rN5RH78TU4MbuczRAqs1t4gmaLTUKGfkY8=
+github.com/hashicorp/packer-plugin-amazon v1.0.4 h1:S60aRXa93U2Im/zUtHPzhEyVAx6C3MwffytRQQG7pNc=
+github.com/hashicorp/packer-plugin-amazon v1.0.4/go.mod h1:+jTH+VY38rN5RH78TU4MbuczRAqs1t4gmaLTUKGfkY8=
 github.com/hashicorp/packer-plugin-ansible v1.0.0 h1:YU+k3JgwojL4Aw/yq6F9+b56B2wrhRfhQQgVCRRAZck=
 github.com/hashicorp/packer-plugin-ansible v1.0.0/go.mod h1:wbOfX8U2pcZdsChjwvvK62HF4C1hM4qcn1x5gjp87v0=
 github.com/hashicorp/packer-plugin-azure v1.0.4 h1:T4XawZz5tMFPTNvJtJkLqsP4aeygJlsYQdb94iuRJMg=
