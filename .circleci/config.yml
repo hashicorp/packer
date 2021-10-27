@@ -201,6 +201,7 @@ workflows:
     jobs:
       - check-lint
       - check-fmt
+      - check-mod-tidy
       - check-generate
   build_packer_binaries:
     jobs:
