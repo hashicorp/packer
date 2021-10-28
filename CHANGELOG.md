@@ -1,3 +1,5 @@
+## 1.7.9 (Upcoming)
+
 ## 1.7.8 (October 27, 2021)
 
 ### BUG FIXES
