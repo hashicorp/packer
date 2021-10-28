@@ -4,7 +4,7 @@
 
 ### BUG FIXES
 * builder/amazon: Bump plugin to latest version to address a variable
-    interpolation issue for builder `run_tags`. [GH-11360]
+    interpolation issue for builder `run_tags`. [GH-11360](https://github.com/hashicorp/packer/pull/11360)
 
 ## 1.7.7 (October 19, 2021)
 
