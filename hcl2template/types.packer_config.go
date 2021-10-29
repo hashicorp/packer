@@ -109,8 +109,7 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 			packerAccessor: cty.ObjectVal(map[string]cty.Value{
-				"version":     cty.StringVal(cfg.CorePackerVersionString),
-				"iterationID": cty.UnknownVal(cty.String),
+				"version": cty.StringVal(cfg.CorePackerVersionString),
 			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
