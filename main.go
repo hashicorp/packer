@@ -341,8 +341,8 @@ func loadConfig() (*config, error) {
 			"exoscale": "github.com/exoscale/exoscale",
 			// "googlecompute": "github.com/hashicorp/googlecompute",
 
-			// "parallels-iso": "github.com/hashicorp/parallels",
-			// "parallels-pvm": "github.com/hashicorp/parallels",
+			"parallels-iso": "github.com/hashicorp/parallels",
+			"parallels-pvm": "github.com/hashicorp/parallels",
 
 			// "qemu": "github.com/hashicorp/qemu",
 

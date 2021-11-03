@@ -43,8 +43,6 @@ import (
 	oscbsusurrogatebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate"
 	oscbsuvolumebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume"
 	oscchrootbuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot"
-	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
-	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer-plugin-profitbricks/builder/profitbricks"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
@@ -76,30 +74,29 @@ var VendoredDatasources = map[string]packersdk.Datasource{}
 // VendoredBuilders are builder components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredBuilders = map[string]packersdk.Builder{
-	"alicloud-ecs":     new(alicloudecsbuilder.Builder),
-	"cloudstack":       new(cloudstackbuilder.Builder),
-	"digitalocean":     new(digitaloceanbuilder.Builder),
-	"docker":           new(dockerbuilder.Builder),
-	"googlecompute":    new(googlecomputebuilder.Builder),
-	"hcloud":           new(hcloudbuilder.Builder),
-	"hyperv-iso":       new(hypervisobuilder.Builder),
-	"hyperv-vmcx":      new(hypervvmcxbuilder.Builder),
-	"hyperone":         new(hyperonebuilder.Builder),
-	"jdcloud":          new(jdcloudbuilder.Builder),
-	"linode":           new(linodebuilder.Builder),
-	"lxc":              new(lxcbuilder.Builder),
-	"lxd":              new(lxdbuilder.Builder),
-	"ncloud":           new(ncloudbuilder.Builder),
-	"oneandone":        new(oneandonebuilder.Builder),
-	"openstack":        new(openstackbuilder.Builder),
-	"oracle-classic":   new(oracleclassicbuilder.Builder),
-	"oracle-oci":       new(oracleocibuilder.Builder),
-	"profitbricks":     new(profitbricksbuilder.Builder),
-	"proxmox":          new(proxmoxiso.Builder),
-	"proxmox-iso":      new(proxmoxiso.Builder),
-	"proxmox-clone":    new(proxmoxclone.Builder),
-	"parallels-iso":    new(parallelsisobuilder.Builder),
-	"parallels-pvm":    new(parallelspvmbuilder.Builder),
+	"alicloud-ecs":   new(alicloudecsbuilder.Builder),
+	"cloudstack":     new(cloudstackbuilder.Builder),
+	"digitalocean":   new(digitaloceanbuilder.Builder),
+	"docker":         new(dockerbuilder.Builder),
+	"googlecompute":  new(googlecomputebuilder.Builder),
+	"hcloud":         new(hcloudbuilder.Builder),
+	"hyperv-iso":     new(hypervisobuilder.Builder),
+	"hyperv-vmcx":    new(hypervvmcxbuilder.Builder),
+	"hyperone":       new(hyperonebuilder.Builder),
+	"jdcloud":        new(jdcloudbuilder.Builder),
+	"linode":         new(linodebuilder.Builder),
+	"lxc":            new(lxcbuilder.Builder),
+	"lxd":            new(lxdbuilder.Builder),
+	"ncloud":         new(ncloudbuilder.Builder),
+	"oneandone":      new(oneandonebuilder.Builder),
+	"openstack":      new(openstackbuilder.Builder),
+	"oracle-classic": new(oracleclassicbuilder.Builder),
+	"oracle-oci":     new(oracleocibuilder.Builder),
+	"profitbricks":   new(profitbricksbuilder.Builder),
+	"proxmox":        new(proxmoxiso.Builder),
+	"proxmox-iso":    new(proxmoxiso.Builder),
+	"proxmox-clone":  new(proxmoxclone.Builder),
+
 	"qemu":             new(qemubuilder.Builder),
 	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
