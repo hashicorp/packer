@@ -364,8 +364,8 @@ func loadConfig() (*config, error) {
 			"amazon-secretsmanager": "github.com/hashicorp/amazon",
 		},
 		ProvisionerRedirects: map[string]string{
-			// "ansible":       "github.com/hashicorp/ansible",
-			// "ansible-local": "github.com/hashicorp/ansible",
+			"ansible":       "github.com/hashicorp/ansible",
+			"ansible-local": "github.com/hashicorp/ansible",
 
 			"azure-dtlartifact": "github.com/hashicorp/azure",
 		},

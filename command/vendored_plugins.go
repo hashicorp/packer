@@ -9,8 +9,6 @@ import (
 
 	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
 	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
-	ansibleprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible"
-	ansiblelocalprovisioner "github.com/hashicorp/packer-plugin-ansible/provisioner/ansible-local"
 	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
@@ -93,8 +91,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 // VendoredProvisioners are provisioner components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredProvisioners = map[string]packersdk.Provisioner{
-	"ansible":           new(ansibleprovisioner.Provisioner),
-	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
 	"chef-client":       new(chefclientprovisioner.Provisioner),
 	"chef-solo":         new(chefsoloprovisioner.Provisioner),
 	"converge":          new(convergeprovisioner.Provisioner),
