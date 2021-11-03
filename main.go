@@ -345,7 +345,7 @@ func loadConfig() (*config, error) {
 			"parallels-iso": "github.com/hashicorp/parallels",
 			"parallels-pvm": "github.com/hashicorp/parallels",
 
-			// "qemu": "github.com/hashicorp/qemu",
+			"qemu": "github.com/hashicorp/qemu",
 
 			// "vagrant": "github.com/hashicorp/vagrant",
 

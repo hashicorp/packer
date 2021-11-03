@@ -40,7 +40,6 @@ import (
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	puppetmasterlessprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-masterless"
 	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
-	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	saltmasterlessprovisioner "github.com/hashicorp/packer-plugin-salt/provisioner/salt-masterless"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
@@ -83,7 +82,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"proxmox-iso":    new(proxmoxiso.Builder),
 	"proxmox-clone":  new(proxmoxclone.Builder),
 
-	"qemu":             new(qemubuilder.Builder),
 	"scaleway":         new(scalewaybuilder.Builder),
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
