@@ -338,6 +338,7 @@ func loadConfig() (*config, error) {
 
 			// "docker": "github.com/hashicorp/docker",
 
+			"exoscale": "github.com/exoscale/exoscale",
 			// "googlecompute": "github.com/hashicorp/googlecompute",
 
 			// "parallels-iso": "github.com/hashicorp/parallels",
@@ -377,6 +378,7 @@ func loadConfig() (*config, error) {
 			// "googlecompute-export": "github.com/hashicorp/googlecompute",
 			// "googlecompute-import": "github.com/hashicorp/googlecompute",
 
+			"exoscale-import": "github.com/exoscale/exoscale",
 			// "vagrant":       "github.com/hashicorp/vagrant",
 			// "vagrant-cloud": "github.com/hashicorp/vagrant",
 
