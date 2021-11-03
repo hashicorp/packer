@@ -348,9 +348,9 @@ func loadConfig() (*config, error) {
 
 			// "vagrant": "github.com/hashicorp/vagrant",
 
-			// "virtualbox-iso": "github.com/hashicorp/virtualbox",
-			// "virtualbox-ovf": "github.com/hashicorp/virtualbox",
-			// "virtualbox-vm":  "github.com/hashicorp/virtualbox",
+			"virtualbox-iso": "github.com/hashicorp/virtualbox",
+			"virtualbox-ovf": "github.com/hashicorp/virtualbox",
+			"virtualbox-vm":  "github.com/hashicorp/virtualbox",
 
 			// "vmware-iso": "github.com/hashicorp/vmware",
 			// "vmware-vmx": "github.com/hashicorp/vmware",
