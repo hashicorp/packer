@@ -17,9 +17,6 @@ import (
 	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
-	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
-	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
-	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
 	hcloudbuilder "github.com/hashicorp/packer-plugin-hcloud/builder/hcloud"
 	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
@@ -68,7 +65,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"alicloud-ecs":   new(alicloudecsbuilder.Builder),
 	"cloudstack":     new(cloudstackbuilder.Builder),
 	"digitalocean":   new(digitaloceanbuilder.Builder),
-	"googlecompute":  new(googlecomputebuilder.Builder),
 	"hcloud":         new(hcloudbuilder.Builder),
 	"hyperv-iso":     new(hypervisobuilder.Builder),
 	"hyperv-vmcx":    new(hypervvmcxbuilder.Builder),
@@ -117,15 +113,13 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
-	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
-	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
-	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
-	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
-	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
-	"vagrant":              new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
-	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
-	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
+	"alicloud-import":     new(alicloudimportpostprocessor.PostProcessor),
+	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
+	"ucloud-import":       new(ucloudimportpostprocessor.PostProcessor),
+	"vagrant":             new(vagrantpostprocessor.PostProcessor),
+	"vagrant-cloud":       new(vagrantcloudpostprocessor.PostProcessor),
+	"yandex-export":       new(yandexexportpostprocessor.PostProcessor),
+	"yandex-import":       new(yandeximportpostprocessor.PostProcessor),
 }
 
 // Upon init lets load up any plugins that were vendored manually into the default
