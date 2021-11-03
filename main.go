@@ -326,11 +326,11 @@ func loadConfig() (*config, error) {
 		// BuilderRedirects
 		BuilderRedirects: map[string]string{
 
-			// "amazon-chroot":       "github.com/hashicorp/amazon",
-			// "amazon-ebs":          "github.com/hashicorp/amazon",
-			// "amazon-ebssurrogate": "github.com/hashicorp/amazon",
-			// "amazon-ebsvolume":    "github.com/hashicorp/amazon",
-			// "amazon-instance":     "github.com/hashicorp/amazon",
+			"amazon-chroot":       "github.com/hashicorp/amazon",
+			"amazon-ebs":          "github.com/hashicorp/amazon",
+			"amazon-ebssurrogate": "github.com/hashicorp/amazon",
+			"amazon-ebsvolume":    "github.com/hashicorp/amazon",
+			"amazon-instance":     "github.com/hashicorp/amazon",
 
 			// "azure-arm":    "github.com/hashicorp/azure",
 			// "azure-chroot": "github.com/hashicorp/azure",
@@ -359,7 +359,8 @@ func loadConfig() (*config, error) {
 			// "vsphere-clone": "github.com/hashicorp/vsphere",
 		},
 		DatasourceRedirects: map[string]string{
-			// "amazon-ami": "github.com/hashicorp/amazon",
+			"amazon-ami":            "github.com/hashicorp/amazon",
+			"amazon-secretsmanager": "github.com/hashicorp/amazon",
 		},
 		ProvisionerRedirects: map[string]string{
 			// "ansible":       "github.com/hashicorp/ansible",
@@ -368,7 +369,7 @@ func loadConfig() (*config, error) {
 			// "azure-dtlartifact": "github.com/hashicorp/azure",
 		},
 		PostProcessorRedirects: map[string]string{
-			// "amazon-import": "github.com/hashicorp/amazon",
+			"amazon-import": "github.com/hashicorp/amazon",
 
 			// "docker-import": "github.com/hashicorp/docker",
 			// "docker-push":   "github.com/hashicorp/docker",
