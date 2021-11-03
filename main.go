@@ -332,9 +332,9 @@ func loadConfig() (*config, error) {
 			"amazon-ebsvolume":    "github.com/hashicorp/amazon",
 			"amazon-instance":     "github.com/hashicorp/amazon",
 
-			// "azure-arm":    "github.com/hashicorp/azure",
-			// "azure-chroot": "github.com/hashicorp/azure",
-			// "dtl":          "github.com/hashicorp/azure",
+			"azure-arm":    "github.com/hashicorp/azure",
+			"azure-chroot": "github.com/hashicorp/azure",
+			"azure-dtl":    "github.com/hashicorp/azure",
 
 			// "docker": "github.com/hashicorp/docker",
 
@@ -366,7 +366,7 @@ func loadConfig() (*config, error) {
 			// "ansible":       "github.com/hashicorp/ansible",
 			// "ansible-local": "github.com/hashicorp/ansible",
 
-			// "azure-dtlartifact": "github.com/hashicorp/azure",
+			"azure-dtlartifact": "github.com/hashicorp/azure",
 		},
 		PostProcessorRedirects: map[string]string{
 			"amazon-import": "github.com/hashicorp/amazon",
