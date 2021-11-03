@@ -57,10 +57,6 @@ import (
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
 	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
-	vsphereclonebuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone"
-	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
-	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
-	vspheretemplatepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere-template"
 	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
 	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
@@ -103,8 +99,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
 	"vagrant":          new(vagrantbuilder.Builder),
-	"vsphere-clone":    new(vsphereclonebuilder.Builder),
-	"vsphere-iso":      new(vsphereisobuilder.Builder),
 	"osc-bsu":          new(oscbsubuilder.Builder),
 	"osc-bsusurrogate": new(oscbsusurrogatebuilder.Builder),
 	"osc-bsuvolume":    new(oscbsuvolumebuilder.Builder),
@@ -140,8 +134,6 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
-	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
-	"vsphere":              new(vspherepostprocessor.PostProcessor),
 	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }

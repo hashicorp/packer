@@ -355,8 +355,8 @@ func loadConfig() (*config, error) {
 			"vmware-iso": "github.com/hashicorp/vmware",
 			"vmware-vmx": "github.com/hashicorp/vmware",
 
-			// "vsphere-iso":   "github.com/hashicorp/vsphere",
-			// "vsphere-clone": "github.com/hashicorp/vsphere",
+			"vsphere-iso":   "github.com/hashicorp/vsphere",
+			"vsphere-clone": "github.com/hashicorp/vsphere",
 		},
 		DatasourceRedirects: map[string]string{
 			"amazon-ami":            "github.com/hashicorp/amazon",
@@ -383,8 +383,8 @@ func loadConfig() (*config, error) {
 			// "vagrant":       "github.com/hashicorp/vagrant",
 			// "vagrant-cloud": "github.com/hashicorp/vagrant",
 
-			// "vsphere":          "github.com/hashicorp/vsphere",
-			// "vsphere-template": "github.com/hashicorp/vsphere",
+			"vsphere":          "github.com/hashicorp/vsphere",
+			"vsphere-template": "github.com/hashicorp/vsphere",
 		},
 	}
 	if err := config.Plugins.Discover(); err != nil {
