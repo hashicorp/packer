@@ -347,7 +347,7 @@ func loadConfig() (*config, error) {
 
 			"qemu": "github.com/hashicorp/qemu",
 
-			// "vagrant": "github.com/hashicorp/vagrant",
+			"vagrant": "github.com/hashicorp/vagrant",
 
 			"virtualbox-iso": "github.com/hashicorp/virtualbox",
 			"virtualbox-ovf": "github.com/hashicorp/virtualbox",
@@ -381,8 +381,9 @@ func loadConfig() (*config, error) {
 			"googlecompute-import": "github.com/hashicorp/googlecompute",
 
 			"exoscale-import": "github.com/exoscale/exoscale",
-			// "vagrant":       "github.com/hashicorp/vagrant",
-			// "vagrant-cloud": "github.com/hashicorp/vagrant",
+
+			"vagrant":       "github.com/hashicorp/vagrant",
+			"vagrant-cloud": "github.com/hashicorp/vagrant",
 
 			"vsphere":          "github.com/hashicorp/vsphere",
 			"vsphere-template": "github.com/hashicorp/vsphere",

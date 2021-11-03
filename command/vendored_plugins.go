@@ -45,9 +45,6 @@ import (
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
 	uclouduhostbuilder "github.com/hashicorp/packer-plugin-ucloud/builder/ucloud/uhost"
 	ucloudimportpostprocessor "github.com/hashicorp/packer-plugin-ucloud/post-processor/ucloud-import"
-	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
-	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
-	vagrantcloudpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
 	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
 	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
@@ -86,7 +83,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"tencentcloud-cvm": new(tencentcloudcvmbuilder.Builder),
 	"triton":           new(tritonbuilder.Builder),
 	"ucloud-uhost":     new(uclouduhostbuilder.Builder),
-	"vagrant":          new(vagrantbuilder.Builder),
 	"osc-bsu":          new(oscbsubuilder.Builder),
 	"osc-bsusurrogate": new(oscbsusurrogatebuilder.Builder),
 	"osc-bsuvolume":    new(oscbsuvolumebuilder.Builder),
@@ -114,8 +110,6 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":     new(alicloudimportpostprocessor.PostProcessor),
 	"digitalocean-import": new(digitaloceanimportpostprocessor.PostProcessor),
 	"ucloud-import":       new(ucloudimportpostprocessor.PostProcessor),
-	"vagrant":             new(vagrantpostprocessor.PostProcessor),
-	"vagrant-cloud":       new(vagrantcloudpostprocessor.PostProcessor),
 	"yandex-export":       new(yandexexportpostprocessor.PostProcessor),
 	"yandex-import":       new(yandeximportpostprocessor.PostProcessor),
 }
