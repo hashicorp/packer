@@ -17,11 +17,6 @@ import (
 	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
 	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
-	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
-	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
-	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
-	dockersavepostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-save"
-	dockertagpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-tag"
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
@@ -73,7 +68,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"alicloud-ecs":   new(alicloudecsbuilder.Builder),
 	"cloudstack":     new(cloudstackbuilder.Builder),
 	"digitalocean":   new(digitaloceanbuilder.Builder),
-	"docker":         new(dockerbuilder.Builder),
 	"googlecompute":  new(googlecomputebuilder.Builder),
 	"hcloud":         new(hcloudbuilder.Builder),
 	"hyperv-iso":     new(hypervisobuilder.Builder),
@@ -125,10 +119,6 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
-	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
-	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
-	"docker-save":          new(dockersavepostprocessor.PostProcessor),
-	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
 	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),

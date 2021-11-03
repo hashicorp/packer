@@ -336,7 +336,7 @@ func loadConfig() (*config, error) {
 			"azure-chroot": "github.com/hashicorp/azure",
 			"azure-dtl":    "github.com/hashicorp/azure",
 
-			// "docker": "github.com/hashicorp/docker",
+			"docker": "github.com/hashicorp/docker",
 
 			"exoscale": "github.com/exoscale/exoscale",
 			// "googlecompute": "github.com/hashicorp/googlecompute",
@@ -371,10 +371,10 @@ func loadConfig() (*config, error) {
 		PostProcessorRedirects: map[string]string{
 			"amazon-import": "github.com/hashicorp/amazon",
 
-			// "docker-import": "github.com/hashicorp/docker",
-			// "docker-push":   "github.com/hashicorp/docker",
-			// "docker-save":   "github.com/hashicorp/docker",
-			// "docker-tag":    "github.com/hashicorp/docker",
+			"docker-import": "github.com/hashicorp/docker",
+			"docker-push":   "github.com/hashicorp/docker",
+			"docker-save":   "github.com/hashicorp/docker",
+			"docker-tag":    "github.com/hashicorp/docker",
 
 			// "googlecompute-export": "github.com/hashicorp/googlecompute",
 			// "googlecompute-import": "github.com/hashicorp/googlecompute",
