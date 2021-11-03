@@ -59,8 +59,6 @@ import (
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
 	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
-	vmwareisobuilder "github.com/hashicorp/packer-plugin-vmware/builder/vmware/iso"
-	vmwarevmxbuilder "github.com/hashicorp/packer-plugin-vmware/builder/vmware/vmx"
 	vsphereclonebuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/clone"
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
@@ -110,8 +108,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"vagrant":          new(vagrantbuilder.Builder),
 	"vsphere-clone":    new(vsphereclonebuilder.Builder),
 	"vsphere-iso":      new(vsphereisobuilder.Builder),
-	"vmware-iso":       new(vmwareisobuilder.Builder),
-	"vmware-vmx":       new(vmwarevmxbuilder.Builder),
 	"osc-bsu":          new(oscbsubuilder.Builder),
 	"osc-bsusurrogate": new(oscbsusurrogatebuilder.Builder),
 	"osc-bsuvolume":    new(oscbsuvolumebuilder.Builder),

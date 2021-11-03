@@ -352,8 +352,8 @@ func loadConfig() (*config, error) {
 			"virtualbox-ovf": "github.com/hashicorp/virtualbox",
 			"virtualbox-vm":  "github.com/hashicorp/virtualbox",
 
-			// "vmware-iso": "github.com/hashicorp/vmware",
-			// "vmware-vmx": "github.com/hashicorp/vmware",
+			"vmware-iso": "github.com/hashicorp/vmware",
+			"vmware-vmx": "github.com/hashicorp/vmware",
 
 			// "vsphere-iso":   "github.com/hashicorp/vsphere",
 			// "vsphere-clone": "github.com/hashicorp/vsphere",
