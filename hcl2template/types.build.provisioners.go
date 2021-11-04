@@ -132,9 +132,10 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 		timeout, err := time.ParseDuration(b.Timeout)
 		if err != nil {
 			return nil, append(diags, &hcl.Diagnostic{
-				Summary: "Failed to parse timeout duration",
-				Detail:  err.Error(),
-				Subject: &block.DefRange,
+				Summary:  "Failed to parse timeout duration",
+				Severity: hcl.DiagError,
+				Detail:   err.Error(),
+				Subject:  &block.DefRange,
 			})
 		}
 		provisioner.Timeout = timeout
