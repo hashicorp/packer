@@ -426,6 +426,14 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			name: "hcl - test crash #11381",
+			args: []string{
+				testFixture("hcl", "nil-component-crash.pkr.hcl"),
+			},
+			expectedCode: 1,
+		},
 	}
 
 	for _, tt := range tc {
