@@ -122,6 +122,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 				Summary:  "Failed to parse pause_before duration",
 				Severity: hcl.DiagError,
 				Detail:   err.Error(),
+				Subject:  &block.DefRange,
 			})
 		}
 		provisioner.PauseBefore = pauseBefore
@@ -133,6 +134,7 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, cfg *PackerConfig) (*Provis
 			return nil, append(diags, &hcl.Diagnostic{
 				Summary: "Failed to parse timeout duration",
 				Detail:  err.Error(),
+				Subject: &block.DefRange,
 			})
 		}
 		provisioner.Timeout = timeout
