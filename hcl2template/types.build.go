@@ -146,7 +146,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
 			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() || hcpPackerRegistry == nil {
+			if moreDiags.HasErrors() {
 				continue
 			}
 			build.HCPPackerRegistry = hcpPackerRegistry
@@ -160,7 +160,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		case buildProvisionerLabel:
 			p, moreDiags := p.decodeProvisioner(block, cfg)
 			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() || p == nil {
+			if moreDiags.HasErrors() {
 				continue
 			}
 			build.ProvisionerBlocks = append(build.ProvisionerBlocks, p)
@@ -175,14 +175,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			p, moreDiags := p.decodeProvisioner(block, cfg)
 			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() || p == nil {
+			if moreDiags.HasErrors() {
 				continue
 			}
 			build.ErrorCleanupProvisionerBlock = p
 		case buildPostProcessorLabel:
 			pp, moreDiags := p.decodePostProcessor(block, cfg)
 			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() || pp == nil {
+			if moreDiags.HasErrors() {
 				continue
 			}
 			build.PostProcessorsLists = append(build.PostProcessorsLists, []*PostProcessorBlock{pp})
