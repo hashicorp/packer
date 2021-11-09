@@ -107,17 +107,15 @@ to work on Packer.
 
 ## Unmaintained Plugins
 As contributors' circumstances change, development on a community maintained
-plugin can slow. When this happens, the Packer team may mark a plugin as
-unmaintained, to clearly signal the plugin's status to users.
+plugin can slow. When this happens, HashiCorp may use GitHub's option to archive the 
+plugin’s repository, to clearly signal the plugin's status to users.
 
 What does **unmaintained** mean?
 
 1. The code repository and all commit history will still be available.
 1. Documentation will remain on the Packer website.
 1. Issues and pull requests are monitored as a best effort.
-1. No active development will be performed by the Packer team.
+1. No active development will be performed by HashiCorp.
 
-If anyone from the community is interested in maintaining a community
-supported plugin, please feel free to submit contributions via a pull-
-request for review; reviews are generally prioritized over feature work
-when possible. For a list of open plugin issues and pending feature requests see the [Packer Issue Tracker](https://github.com/hashicorp/packer/issues/).
+If you are interested in maintaining an unmaintained or archived plugin, please reach out to us at packer@hashicorp.com.
+
