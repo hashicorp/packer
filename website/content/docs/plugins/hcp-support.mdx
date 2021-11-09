@@ -27,7 +27,7 @@ We provide the [`FromArtifact`](https://github.com/hashicorp/packer-plugin-sdk/b
 to easily create an Image with the basic information contained in the Artifact. If customization is necessary, the `FromArtifact` accepts
 override functions as the second argument, and that can be used to set different values for the metadata.
 
-The [Image metadata](https://github.com/hashicorp/packer-plugin-sdk/blob/b688c9db722f8e9685310b03ebcc55bfa6b7a674/packer/registry/image/image.go#L22) structure is:
+The [Image metadata](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#Image) structure is:
 ```go
 // Image represents the metadata for some Artifact in the HCP Packer Registry.
 type Image struct {
