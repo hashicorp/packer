@@ -28,8 +28,7 @@ to easily create an Image with the basic information contained in the Artifact. 
 override functions as the second argument, and that can be used to set different values for the metadata.
 
 The [Image metadata](https://github.com/hashicorp/packer-plugin-sdk/blob/b688c9db722f8e9685310b03ebcc55bfa6b7a674/packer/registry/image/image.go#L22) structure is:
-```golang
-
+```go
 // Image represents the metadata for some Artifact in the HCP Packer Registry.
 type Image struct {
 	// ImageID is a unique reference identifier stored on the HCP Packer registry
@@ -58,7 +57,7 @@ Where `ImageID`, `ProviderName`, and `SourceImageID` are mandatory fields.
 Examples using the `FromArtifact` method:
 
 - Simple form:
-```golang
+```go
 func (a *Artifact) State(name string) interface{} {
 	if name == registryimage.ArtifactStateURI {
 		img, err := registryimage.FromArtifact(a)
@@ -73,7 +72,7 @@ func (a *Artifact) State(name string) interface{} {
 ```
 
 - Using overrides:
-```golang
+```go
 func (a *Artifact) State(name string) interface{} {
 	if name == registryimage.ArtifactStateURI {
 		img, err := registryimage.FromArtifact(a,
