@@ -20,7 +20,7 @@ in the artifact.
 ## Builder Artifact
 
 To make the plugin support HCP Packer, changes must be made to the build artifact. The artifact should return the appropriate
-Image metadata in `State(name string) interface{}` when the `name` is the `par.artifact.metadata` specific key.
+Image metadata in `State(name string) interface{}` when the `name` is set to `par.artifact.metadata`. The expected value is provided by the [image.ArtifactStateURI](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants) constant.
 
 The packer-plugin-sdk implements the Image struct to make HCP Packer support easier.
 We provide the [`FromArtifact`](https://github.com/hashicorp/packer-plugin-sdk/blob/efe3f1229c88b517e236b06e927b0dba7dd9394e/packer/registry/image/image.go#L96) function
