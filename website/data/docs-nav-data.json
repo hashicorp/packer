@@ -858,12 +858,12 @@
       {
         "title": "HCP Packer Support",
         "path": "plugins/hcp-support"
-      },
-      {
-        "title": "Packer Integration Program",
-        "path": "plugins/packer-integration-program"
       }
     ]
+  },
+  {
+    "title": "Packer Integration Program",
+    "path": "packer-integration-program"
   },
   {
     "divider": true
