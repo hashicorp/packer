@@ -856,6 +856,10 @@
         ]
       },
       {
+        "title": "HCP Packer Support",
+        "path": "plugins/hcp-support"
+      },
+      {
         "title": "Packer Integration Program",
         "path": "plugins/packer-integration-program"
       }
