@@ -1,0 +1,118 @@
+---
+description: |
+  HCP Packer support allows plugins to manage image metadata that can be stored in a HCP Packer registry.
+page_title: HCP Packer Support
+---
+
+# HCP Packer Support
+
+~> **Note:** HCP Packer is under active development, and we suggest plugin maintainers to keep up with the SDK changes
+for more on HCP Packer support.
+
+~> **Note:** If you're looking to develop a new plugin, please refer first to the [developing
+plugins](/docs/plugins/creation#developing-plugins) page.
+
+HCP Packer support allows for the management of image metadata that can be stored in a HCP Packer registry.
+Before pushing metadata to the HCP Packer registry, Packer will use the [`par.artifact.metadata` key](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants)
+to query a builder artifact for the Image metadata that a particular component would like to have stored in the registry.
+
+For details and usage examples on management of image metadata, see the [Documentation](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image).
+
+## Builder Artifact
+
+To support HCP Packer, changes must be made to the plugin's build artifact. The artifact should keep the appropriate
+Image metadata in state under the key `par.artifact.metadata`. The expected key is provided by the [image.ArtifactStateURI](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants) constant.
+
+To make HCP Packer support easier, we ship an Image package with the [packer-plugin-sdk](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-overview).
+We provide the [`FromArtifact`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#FromArtifact) function
+to easily create an Image with the basic information contained in the Artifact. If customization is necessary, the `FromArtifact` accepts
+override functions as the second argument, and that can be used to set different values for the metadata.
+
+The [Image metadata](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#Image) must contain every
+metadata HCP Packer should store about this component. The structure is:
+```go
+// Image represents the metadata for some Artifact in the HCP Packer Registry.
+type Image struct {
+	// ImageID is a unique reference identifier stored on the HCP Packer registry
+	// that can be used to get back the built artifact of a builder or post-processor.
+	ImageID string
+	// ProviderName represents the name of the top level cloud or service where the built artifact resides.
+	// For example "aws, azure, docker, gcp, and vsphere".
+	ProviderName string
+	// ProviderRegion represents the location of the built artifact.
+	// For cloud providers region usually maps to a cloud region or zone, but for things like the file builder,
+	// S3 bucket or vsphere cluster region can represent a path on the upstream datastore, or cluster.
+	ProviderRegion string
+	// Labels represents additional details about an image that a builder or post-processor may with to provide for a given build.
+	// Any additional metadata will be made available as build labels within a HCP Packer registry iteration.
+	Labels map[string]string
+	// SourceImageID is the cloud image id of the image that was used as the
+	// source for this image. If set, the HCP Packer registry will be able
+	// link the parent and child images for ancestry visualizations and
+	// dependency tracking.
+	SourceImageID string
+}
+```
+
+Where `ImageID`, `ProviderName`, and `SourceImageID` are mandatory fields.
+
+Examples using the `FromArtifact` method:
+
+- Simple form:
+```go
+func (a *Artifact) State(name string) interface{} {
+	if name == registryimage.ArtifactStateURI {
+		img, err := registryimage.FromArtifact(a)
+		if err != nil {
+			log.Printf("[DEBUG] error encountered when creating a registry image %v", err)
+			return nil
+		}
+	  return img
+	}
+	return a.StateData[name]
+}
+```
+
+- Using overrides:
+```go
+func (a *Artifact) State(name string) interface{} {
+	if name == registryimage.ArtifactStateURI {
+		img, err := registryimage.FromArtifact(a,
+                registryimage.WithID(a.Name),
+                registryimage.WithRegion(a.Region.Name()),
+                registryimage.WithProvider("happy-cloud"),
+                registryimage.WithSourceID(a.SourceID),
+                registryimage.SetLabels(a.Labels),
+              )
+		if err != nil {
+			log.Printf("[DEBUG] error encountered when creating a registry image %v", err)
+			return nil
+		}
+	  return img
+	}
+	return a.StateData[name]
+}
+```
+
+See [packer-plugin-sdk/packer/registry/image](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-examples) for additional examples.
+
+### SDK Version
+
+- The HCP Packer support is available from packer-plugin-sdk >= v0.2.7
+
+## Plugins Example
+
+The following plugins currently support HCP Packer and are great references for development:
+
+- [packer-plugin-amazon](https://github.com/hashicorp/packer-plugin-amazon)
+- [packer-plugin-azure](https://github.com/hashicorp/packer-plugin-azure)
+- [packer-plugin-vsphere](https://github.com/hashicorp/packer-plugin-vsphere)
+- [packer-plugin-docker](https://github.com/hashicorp/packer-plugin-docker)
+- [packer-plugin-googlecompute](https://github.com/hashicorp/packer-plugin-googlecompute)
+
+## HCP Packer
+
+To get to know HCP Packer, visit the
+[HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the
+[Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started)
+collection on HashiCorp Learn.
