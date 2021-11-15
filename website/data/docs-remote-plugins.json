@@ -73,6 +73,13 @@
     "version": "latest"
   },
   {
+    "title": "Git",
+    "path": "git",
+    "repo": "ethanmdavidson/packer-plugin-git",
+    "version": "latest",
+    "sourceBranch": "main"
+  },
+  {
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
