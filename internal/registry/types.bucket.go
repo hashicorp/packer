@@ -84,7 +84,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	err := UpsertBucket(ctx, b.client, bucketInput)
 	if err != nil {
-		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
+		return err
 	}
 
 	return b.initializeIteration(ctx)
@@ -298,11 +298,11 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to initialize iteration for fingerprint %s: %s", b.Iteration.Fingerprint, err)
+		return fmt.Errorf("Failed to initialize iteration with fingerprint %s: %s", b.Iteration.Fingerprint, err)
 	}
 
 	if iterationResp == nil {
-		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
+		return fmt.Errorf("Failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
 	}
 
 	log.Println("[TRACE] a valid iteration was retrieved with the id", iterationResp.ID)
@@ -328,7 +328,7 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	// we want to run against. TODO: pagination?
 	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, b.Iteration.ID)
 	if err != nil {
-		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
+		return fmt.Errorf("Failed to list builds for the existing iteration: %s", err)
 	}
 
 	var toCreate []string

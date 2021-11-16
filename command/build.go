@@ -170,8 +170,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
 			diags := hcl.Diagnostics{
 				&hcl.Diagnostic{
-					Summary:  "HCP Packer Registry iteration initialization failed",
-					Detail:   fmt.Sprintf("Failed to initialize iteration for %q\n %s", ArtifactMetadataPublisher.Slug, err),
+					Summary:  "HCP Packer Registry initialization failure",
+					Detail:   err.Error(),
 					Severity: hcl.DiagError,
 				},
 			}

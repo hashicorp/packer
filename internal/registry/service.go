@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
@@ -32,12 +33,26 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 
 	// Create bucket if exist we continue as is, eventually we want to treat this like an upsert
 	_, err := CreateBucket(ctx, client, input)
-	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
-		return err
-	}
 
 	if err == nil {
 		return nil
+	}
+
+	if err, ok := err.(*packerSvc.PackerServiceCreateBucketDefault); ok {
+		switch err.Code() {
+		case int(codes.NotFound), http.StatusNotFound:
+			return fmt.Errorf("The HCP Packer registry for the project %q within the organization %q was not found. "+
+				"Please check within the HCP Portal that the default registry has been created.", client.ProjectID, client.OrganizationID)
+		case int(codes.FailedPrecondition), http.StatusBadRequest:
+			return fmt.Errorf("The HCP Packer registry for the project %q within the organization %q failed with the following error: %s",
+				client.ProjectID,
+				client.OrganizationID,
+				err.Payload.Message)
+		}
+	}
+
+	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
+		return err
 	}
 
 	params := packerSvc.NewPackerServiceUpdateBucketParamsWithContext(ctx)
