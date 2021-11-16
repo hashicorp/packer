@@ -14,7 +14,7 @@ type HCPPackerRegistryBlock struct {
 	// Bucket description
 	Description string
 	// Bucket labels
-	Labels map[string]string
+	BucketLabels map[string]string
 	// Build labels
 	BuildLabels map[string]string
 
@@ -26,7 +26,7 @@ func (b *HCPPackerRegistryBlock) WriteToBucketConfig(bucket *packerregistry.Buck
 		return
 	}
 	bucket.Description = b.Description
-	bucket.BucketLabels = b.Labels
+	bucket.BucketLabels = b.BucketLabels
 	bucket.BuildLabels = b.BuildLabels
 	// If there's already a Slug this was set from env variable.
 	// In Packer, env variable overrides config values so we keep it that way for consistency.
@@ -42,10 +42,11 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	var b struct {
 		Slug        string `hcl:"bucket_name,optional"`
 		Description string `hcl:"description,optional"`
-		//TODO deprecate labels for bucket_labels
-		Labels      map[string]string `hcl:"labels,optional"`
-		BuildLabels map[string]string `hcl:"build_labels,optional"`
-		Config      hcl.Body          `hcl:",remain"`
+		//Deprecated labels for bucket_labels
+		Labels       map[string]string `hcl:"labels,optional"`
+		BucketLabels map[string]string `hcl:"bucket_labels,optional"`
+		BuildLabels  map[string]string `hcl:"build_labels,optional"`
+		Config       hcl.Body          `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(body, nil, &b)
 	if diags.HasErrors() {
@@ -63,7 +64,32 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 
 	par.Slug = b.Slug
 	par.Description = b.Description
-	par.Labels = b.Labels
+
+	if len(b.Labels) > 0 && len(b.BucketLabels) > 0 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("%s.labels and %[1]s.bucket_labels are mutually exclusive; please use the recommended argument %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
+			Subject:  block.DefRange.Ptr(),
+		})
+		return nil, diags
+	}
+
+	if len(b.Labels) > 0 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in a future release; please use %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
+		})
+
+		if b.BucketLabels == nil {
+			b.BucketLabels = make(map[string]string)
+		}
+
+		for k, v := range b.Labels {
+			b.BucketLabels[k] = v
+		}
+	}
+
+	par.BucketLabels = b.BucketLabels
 	par.BuildLabels = b.BuildLabels
 
 	return par, diags

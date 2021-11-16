@@ -5,8 +5,11 @@ build {
         description = <<EOT
 Some description
     EOT
-        labels = {
+        bucket_labels = {
             "foo" = "bar"
+        }
+        build_labels = {
+            "python_version" = "3.0"
         }
     }
 

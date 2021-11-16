@@ -1,12 +1,9 @@
+
 build {
-    name = "bucket-slug"
 
     hcp_packer_registry {
-        bucket_name = "real-bucket-slug"
-        description = <<EOT
-Some description
-    EOT
-        bucket_labels = {
+        bucket_name = "bucket-slug"
+        labels = {
             "foo" = "bar"
         }
     }
@@ -18,3 +15,4 @@ Some description
 
 source "virtualbox-iso" "ubuntu-1204" {
 }
+
