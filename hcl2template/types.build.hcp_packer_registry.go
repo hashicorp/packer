@@ -80,13 +80,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in a future release; please use %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
 		})
 
-		if b.BucketLabels == nil {
-			b.BucketLabels = make(map[string]string)
-		}
-
-		for k, v := range b.Labels {
-			b.BucketLabels[k] = v
-		}
+		b.BucketLabels = b.Labels
 	}
 
 	par.BucketLabels = b.BucketLabels
