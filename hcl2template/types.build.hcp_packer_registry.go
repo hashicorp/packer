@@ -77,7 +77,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 	if len(b.Labels) > 0 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
-			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in a future release; please use %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
+			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in the next minor release; please use %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
 		})
 
 		b.BucketLabels = b.Labels
