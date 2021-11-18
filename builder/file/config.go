@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer-plugin-sdk/pkg/filepath"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
@@ -18,9 +17,9 @@ var ErrContentSourceConflict = fmt.Errorf("Cannot specify source file AND conten
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Source  filepath.List `mapstructure:"source"`
-	Target  string        `mapstructure:"target"`
-	Content string        `mapstructure:"content"`
+	Source  string `mapstructure:"source"`
+	Target  string `mapstructure:"target"`
+	Content string `mapstructure:"content"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
@@ -42,11 +41,11 @@ func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
 		errs = packersdk.MultiErrorAppend(errs, ErrTargetRequired)
 	}
 
-	if c.Content == "" && len(c.Source) == 0 {
+	if c.Content == "" && c.Source == "" {
 		warnings = append(warnings, "Both source file and contents are blank; target will have no content")
 	}
 
-	if c.Content != "" && len(c.Source) != 0 {
+	if c.Content != "" && c.Source != "" {
 		errs = packersdk.MultiErrorAppend(errs, ErrContentSourceConflict)
 	}
 
