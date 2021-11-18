@@ -48,8 +48,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		}
 	}
 
-	if b.config.Source != "" {
-		source, err := os.Open(b.config.Source)
+	if len(b.config.Source) != 0 {
+		source, err := os.Open(b.config.Source.String())
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 		}
 		ui.Say(fmt.Sprintf("Copied %d bytes", bytes))
 
-		artifact.source = b.config.Source
+		artifact.source = b.config.Source.String()
 		artifact.filename = target.Name()
 	} else {
 		// We're going to write Contents; if it's empty we'll just create an
