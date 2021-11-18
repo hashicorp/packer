@@ -434,7 +434,21 @@ func TestBuild(t *testing.T) {
 			},
 			expectedCode: 1,
 		},
+
+		{
+			name: "test",
+			args: []string{
+				testFixture("hcl", "file-builder"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					testFixture("hcl", "file-builder", "here", "there", "world.txt"): "world",
+				},
+			},
+		},
 	}
+
+	tc = tc[len(tc)-1:]
 
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
