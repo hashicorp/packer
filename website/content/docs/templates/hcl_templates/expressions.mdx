@@ -255,9 +255,9 @@ set.
 
 ## `dynamic` blocks
 
-Within top-level block constructs like sources, expressions can usually be used
-only when assigning a value to an argument using the `name = expression` or `key = expression` form. This covers many uses, but some source types include
-repeatable _nested blocks_ in their arguments, which do not accept expressions:
+Within top-level block constructs like [source](/docs/templates/hcl_templates/blocks/source), expressions
+can usually be used only when assigning a value to an argument using the `name = expression` or `key = expression` form.
+This covers many uses, but some source types include repeatable _nested blocks_ in their arguments, which do not accept expressions:
 
 ```hcl
 source "amazon-ebs" "example" {
@@ -270,7 +270,7 @@ source "amazon-ebs" "example" {
 ```
 
 You can dynamically construct repeatable nested blocks like `tag` using a
-special `dynamic` block type, which is supported anywhere, example:
+special `dynamic` block type, which is supported in top-level block constructs, example:
 
 ```hcl
 locals {
@@ -327,8 +327,8 @@ The iterator object (`tag` in the example above) has two attributes:
   `value` and should not be used.
 - `value` is the value of the current element.
 
-A `dynamic` block can only generate arguments that belong to the source type,
-data source or provisioner being configured.
+A `dynamic` block can only generate arguments for nested blocks that belong to
+the source type, data source, or provisioner being configured.
 
 The `for_each` value must be a map or set with one element per desired nested
 block. If you need to declare resource instances based on a nested data
