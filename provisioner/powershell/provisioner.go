@@ -285,9 +285,9 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		if err != nil {
 			return fmt.Errorf("Error stating powershell script: %s", err)
 		}
-		if strings.HasSuffix(p.config.RemotePath, `\`) {
+		if os.IsPathSeparator(p.config.RemotePath[len(p.config.RemotePath)-1]) {
 			// path is a directory
-			p.config.RemotePath += filepath.Base((fi).Name())
+			p.config.RemotePath += filepath.Base(fi.Name())
 		}
 		f, err := os.Open(path)
 		if err != nil {
