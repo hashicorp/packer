@@ -78,9 +78,10 @@ type Config struct {
 
 	remoteCleanUpScriptPath string
 
-	// If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
-	//  in order to make script debugging easier. For instance, setting the
-	//    value to 1 results in adding this to the execute command:
+	// If set, sets PowerShell's [PSDebug mode
+	// on](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
+	// in order to make script debugging easier. For instance, setting the value
+	// to 1 results in adding this to the execute command:
 	//
 	//    ``` powershell
 	//    Set-PSDebug -Trace 1
