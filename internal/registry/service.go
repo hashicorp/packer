@@ -13,35 +13,35 @@ import (
 func (client *Client) CreateBucket(
 	ctx context.Context,
 	bucketSlug string,
-) (*packer_service.CreateBucketOK, error) {
+) (*packer_service.PackerServiceCreateBucketOK, error) {
 
-	createBktParams := packer_service.NewCreateBucketParams()
+	createBktParams := packer_service.NewPackerServiceCreateBucketParams()
 	createBktParams.LocationOrganizationID = client.OrganizationID
 	createBktParams.LocationProjectID = client.ProjectID
 	createBktParams.Body = &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug: bucketSlug,
 	}
 
-	return client.Packer.CreateBucket(createBktParams, nil)
+	return client.Packer.PackerServiceCreateBucket(createBktParams, nil)
 }
 
 func (client *Client) DeleteBucket(
 	ctx context.Context,
 	bucketSlug string,
-) (*packer_service.DeleteBucketOK, error) {
+) (*packer_service.PackerServiceDeleteBucketOK, error) {
 
-	deleteBktParams := packer_service.NewDeleteBucketParamsWithContext(ctx)
+	deleteBktParams := packer_service.NewPackerServiceDeleteBucketParamsWithContext(ctx)
 	deleteBktParams.LocationOrganizationID = client.OrganizationID
 	deleteBktParams.LocationProjectID = client.ProjectID
 	deleteBktParams.BucketSlug = bucketSlug
 
-	return client.Packer.DeleteBucket(deleteBktParams, nil)
+	return client.Packer.PackerServiceDeleteBucket(deleteBktParams, nil)
 }
 
 // CreateBucket creates a bucket on a HCP Packer Registry.
 func CreateBucket(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBucketRequest) (string, error) {
 
-	params := packerSvc.NewPackerServiceCreateBucketParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceCreateBucketParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.Body = input
@@ -68,7 +68,7 @@ func UpsertBucket(ctx context.Context, client *Client, input *models.HashicorpCl
 		return nil
 	}
 
-	params := packerSvc.NewPackerServiceUpdateBucketParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceUpdateBucketParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
@@ -85,9 +85,9 @@ func (client *Client) CreateIteration(
 	ctx context.Context,
 	bucketSlug,
 	fingerprint string,
-) (*packer_service.CreateIterationOK, error) {
+) (*packer_service.PackerServiceCreateIterationOK, error) {
 
-	params := packer_service.NewCreateIterationParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceCreateIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
@@ -95,12 +95,12 @@ func (client *Client) CreateIteration(
 		Fingerprint: fingerprint,
 	}
 
-	return client.Packer.CreateIteration(params, nil)
+	return client.Packer.PackerServiceCreateIteration(params, nil)
 }
 
 // CreateIteration creates an Iteration for some Bucket on a HCP Packer Registry.
 func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (*models.HashicorpCloudPackerIteration, error) {
-	params := packerSvc.NewPackerServiceCreateIterationParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceCreateIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = input.BucketSlug
@@ -118,20 +118,20 @@ func (client *Client) GetIteration(
 	ctx context.Context,
 	bucketSlug,
 	id string,
-) (*packer_service.GetIterationOK, error) {
+) (*packer_service.PackerServiceGetIterationOK, error) {
 
-	getItParams := packer_service.NewGetIterationParams()
+	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = client.OrganizationID
 	getItParams.LocationProjectID = client.ProjectID
 	getItParams.BucketSlug = bucketSlug
 	getItParams.IterationID = &id
 
-	return client.Packer.GetIteration(getItParams, nil)
+	return client.Packer.PackerServiceGetIteration(getItParams, nil)
 }
 
 // GetIteration queries the HCP Packer registry for an existing bucket iteration.
 func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (*models.HashicorpCloudPackerIteration, error) {
-	params := packerSvc.NewPackerServiceGetIterationParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceGetIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketslug
@@ -154,27 +154,28 @@ func (client *Client) CreateBuild(
 	runUUID,
 	iterationID,
 	fingerprint string,
-) (*packer_service.CreateBuildOK, error) {
+) (*packer_service.PackerServiceCreateBuildOK, error) {
 
-	params := packer_service.NewCreateBuildParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceCreateBuildParamsWithContext(ctx)
+
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
-	params.BuildIterationID = iterationID
+	params.IterationID = iterationID
 	params.Body = &models.HashicorpCloudPackerCreateBuildRequest{
 		Fingerprint: fingerprint,
-		Build: &models.HashicorpCloudPackerBuild{
+		Build: &models.HashicorpCloudPackerBuildCreateBody{
 			PackerRunUUID: runUUID,
 			Status:        models.HashicorpCloudPackerBuildStatusRUNNING,
 		},
 	}
 
-	return client.Packer.CreateBuild(params, nil)
+	return client.Packer.PackerServiceCreateBuild(params, nil)
 }
 
 // CreateBuild create a build entry to track for the IterationID and BucketSlug defined within input.
 func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateBuildRequest) (string, error) {
-	params := packerSvc.NewPackerServiceCreateBuildParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceCreateBuildParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.IterationID = input.IterationID
@@ -192,7 +193,7 @@ func CreateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 // ListBuilds queries an Iteration on HCP Packer registry for all of it's associated builds.
 // Currently all builds are returned regardless of status.
 func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iterationID string) ([]*models.HashicorpCloudPackerBuild, error) {
-	params := packerSvc.NewPackerServiceListBuildsParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceListBuildsParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
@@ -208,7 +209,7 @@ func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iteratio
 
 // UpdateBuild updates a single iteration build entry with the incoming input data.
 func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {
-	params := packerSvc.NewPackerServiceUpdateBuildParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceUpdateBuildParamsWithContext(ctx)
 	params.BuildID = input.BuildID
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
@@ -229,7 +230,7 @@ func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpClo
 // GetChannel loads the iterationId associated with a current channel. If
 // the channel does not exist in HCP Packer, GetChannel returns an error.
 func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug string, channelName string) (*models.HashicorpCloudPackerIteration, error) {
-	params := packerSvc.NewPackerServiceGetChannelParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceGetChannelParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
@@ -256,7 +257,7 @@ func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug str
 
 // GetIteration queries the HCP Packer registry for an existing bucket iteration.
 func GetIterationFromId(ctx context.Context, client *Client, bucketslug string, iterationId string) (*models.HashicorpCloudPackerIteration, error) {
-	params := packerSvc.NewPackerServiceGetIterationParamsWithContext(ctx)
+	params := packer_service.NewPackerServiceGetIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketslug

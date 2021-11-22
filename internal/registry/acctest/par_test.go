@@ -41,6 +41,7 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 			t.Fatalf("failed to delete bucket: %v", err)
 		}
 	}()
+
 	// create our bucket, this should fail if the bucket already exists
 	_, err = cfg.CreateBucket(context.Background(), tmpBucket)
 	if err != nil {

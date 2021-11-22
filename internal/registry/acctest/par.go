@@ -120,7 +120,7 @@ func (cfg *Config) MarkIterationAsDone(
 ) {
 	cfg.T.Helper()
 
-	updateItParams := packer_service.PackerServiceNewUpdateIterationParams()
+	updateItParams := packer_service.NewPackerServiceUpdateIterationParams()
 	updateItParams.Body = &models.HashicorpCloudPackerUpdateIterationRequest{
 		BucketSlug:  bucketSlug,
 		IterationID: iterID,
@@ -130,7 +130,7 @@ func (cfg *Config) MarkIterationAsDone(
 	updateItParams.LocationOrganizationID = cfg.OrganizationID
 	updateItParams.LocationProjectID = cfg.ProjectID
 
-	_, err := cfg.Packer.UpdateIteration(updateItParams, nil)
+	_, err := cfg.Packer.PackerServiceUpdateIteration(updateItParams, nil)
 	if err == nil {
 		return
 	}
@@ -146,13 +146,13 @@ func (cfg *Config) GetIterationIDFromFingerPrint(
 ) string {
 	cfg.T.Helper()
 
-	getItParams := packer_service.PackerServiceNewGetIterationParams()
+	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	getItParams.LocationProjectID = cfg.Loc.ProjectID
 	getItParams.BucketSlug = bucketSlug
 	getItParams.Fingerprint = &fingerprint
 
-	ok, err := cfg.Packer.GetIteration(getItParams, nil)
+	ok, err := cfg.Packer.PackerServiceGetIteration(getItParams, nil)
 	if err != nil {
 		cfg.T.Fatal(err)
 	}
@@ -188,7 +188,7 @@ func (cfg *Config) UpsertBuild(
 
 	// Iterations are currently only assigned an incremental version when publishing image metadata on update.
 	// Incremental versions are a requirement for assigning the channel.
-	updateBuildParams := packer_service.PackerServiceNewUpdateBuildParams()
+	updateBuildParams := packer_service.NewPackerServiceUpdateBuildParams()
 	updateBuildParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	updateBuildParams.LocationProjectID = cfg.Loc.ProjectID
 	updateBuildParams.BuildID = build.Payload.Build.ID
@@ -199,12 +199,12 @@ func (cfg *Config) UpsertBuild(
 		},
 	}
 	for _, imageID := range imageIDs {
-		updateBuildParams.Body.Updates.Images = append(updateBuildParams.Body.Updates.Images, &models.HashicorpCloudPackerImage{
+		updateBuildParams.Body.Updates.Images = append(updateBuildParams.Body.Updates.Images, &models.HashicorpCloudPackerImageCreateBody{
 			ImageID: imageID,
 			Region:  region,
 		})
 	}
-	_, err = cfg.Packer.UpdateBuild(updateBuildParams, nil)
+	_, err = cfg.Packer.PackerServiceUpdateBuild(updateBuildParams, nil)
 	if err, ok := err.(*packer_service.PackerServiceUpdateBuildDefault); ok {
 		cfg.T.Errorf("unexpected UpdateBuild error, expected nil. Got %v", err)
 	}
@@ -217,7 +217,7 @@ func (cfg *Config) UpsertChannel(
 ) {
 	cfg.T.Helper()
 
-	createChParams := packer_service.PackerServiceNewCreateChannelParams()
+	createChParams := packer_service.NewPackerServiceCreateChannelParams()
 	createChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	createChParams.LocationProjectID = cfg.Loc.ProjectID
 	createChParams.BucketSlug = bucketSlug
@@ -227,7 +227,7 @@ func (cfg *Config) UpsertChannel(
 		IterationID:        iterationID,
 	}
 
-	_, err := cfg.Packer.CreateChannel(createChParams, nil)
+	_, err := cfg.Packer.PackerServiceCreateChannel(createChParams, nil)
 	if err == nil {
 		return
 	}
@@ -248,7 +248,7 @@ func (cfg *Config) UpdateChannel(
 ) {
 	cfg.T.Helper()
 
-	updateChParams := packer_service.PackerServiceNewUpdateChannelParams()
+	updateChParams := packer_service.NewPackerServiceUpdateChannelParams()
 	updateChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	updateChParams.LocationProjectID = cfg.Loc.ProjectID
 	updateChParams.BucketSlug = bucketSlug
@@ -257,7 +257,7 @@ func (cfg *Config) UpdateChannel(
 		IncrementalVersion: 1,
 	}
 
-	_, err := cfg.Packer.UpdateChannel(updateChParams, nil)
+	_, err := cfg.Packer.PackerServiceUpdateChannel(updateChParams, nil)
 	if err == nil {
 		return
 	}
@@ -270,13 +270,13 @@ func (cfg *Config) DeleteIteration(
 ) {
 	cfg.T.Helper()
 
-	deleteItParams := packer_service.PackerServiceNewDeleteIterationParams()
+	deleteItParams := packer_service.NewPackerServiceDeleteIterationParams()
 	deleteItParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	deleteItParams.LocationProjectID = cfg.Loc.ProjectID
 	deleteItParams.BucketSlug = &bucketSlug
 	deleteItParams.IterationID = iterationID
 
-	_, err := cfg.Packer.DeleteIteration(deleteItParams, nil)
+	_, err := cfg.Packer.PackerServiceDeleteIteration(deleteItParams, nil)
 	if err == nil {
 		return
 	}
@@ -289,13 +289,13 @@ func (cfg *Config) DeleteChannel(
 ) {
 	cfg.T.Helper()
 
-	deleteChParams := packer_service.PackerServiceNewDeleteChannelParams()
+	deleteChParams := packer_service.NewPackerServiceDeleteChannelParams()
 	deleteChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	deleteChParams.LocationProjectID = cfg.Loc.ProjectID
 	deleteChParams.BucketSlug = bucketSlug
 	deleteChParams.Slug = channelSlug
 
-	_, err := cfg.Packer.DeleteChannel(deleteChParams, nil)
+	_, err := cfg.Packer.PackerServiceDeleteChannel(deleteChParams, nil)
 	if err == nil {
 		return
 	}
