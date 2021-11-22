@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	structenv "github.com/caarlos0/env/v6"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
+	packer_service "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
 	sharedmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-shared/v1/models"
 	"github.com/hashicorp/packer/acctest"
@@ -67,31 +67,6 @@ func checkEnvVars(t *testing.T) {
 	if os.Getenv("HCP_CLIENT_SECRET") == "" {
 		t.Fatal("HCP_CLIENT_SECRET must be set for acceptance tests")
 	}
-	if os.Getenv("HCP_ORG_ID") == "" {
-		t.Fatal("HCP_ORG_ID must be set for acceptance tests")
-	}
-	if os.Getenv("HCP_PROJECT_ID") == "" {
-		t.Fatal("HCP_PROJECT_ID must be set for acceptance tests")
-	}
-}
-
-func (cfg *Config) UpsertBucket(
-	bucketSlug string,
-) {
-	cfg.T.Helper()
-	_, err := cfg.CreateBucket(context.Background(), bucketSlug)
-	if err == nil {
-		return
-	}
-	if err, ok := err.(*packer_service.CreateBucketDefault); ok {
-		switch err.Code() {
-		case int(codes.AlreadyExists), http.StatusConflict:
-			// all good here !
-			return
-		}
-	}
-
-	cfg.T.Errorf("unexpected CreateBucket error, expected nil or 409. Got %v", err)
 }
 
 // GetIterationByID is a helper to validate that the id for a given bucketSlug returns a valid Iteration ID.
@@ -101,13 +76,13 @@ func (cfg *Config) GetIterationByID(
 ) string {
 	cfg.T.Helper()
 
-	getItParams := packer_service.NewGetIterationParams()
+	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	getItParams.LocationProjectID = cfg.Loc.ProjectID
 	getItParams.BucketSlug = bucketSlug
 	getItParams.IterationID = &id
 
-	ok, err := cfg.Packer.GetIteration(getItParams, nil)
+	ok, err := cfg.Packer.PackerServiceGetIteration(getItParams, nil)
 	if err != nil {
 		cfg.T.Fatal(err)
 	}
@@ -125,7 +100,7 @@ func (cfg *Config) UpsertIteration(
 	if err == nil {
 		return cfg.GetIterationIDFromFingerPrint(bucketSlug, fingerprint)
 	}
-	if err, ok := err.(*packer_service.CreateIterationDefault); ok {
+	if err, ok := err.(*packer_service.PackerServiceCreateIterationDefault); ok {
 		switch err.Code() {
 		case int(codes.AlreadyExists), http.StatusConflict:
 			// all good here !
@@ -145,7 +120,7 @@ func (cfg *Config) MarkIterationAsDone(
 ) {
 	cfg.T.Helper()
 
-	updateItParams := packer_service.NewUpdateIterationParams()
+	updateItParams := packer_service.PackerServiceNewUpdateIterationParams()
 	updateItParams.Body = &models.HashicorpCloudPackerUpdateIterationRequest{
 		BucketSlug:  bucketSlug,
 		IterationID: iterID,
@@ -171,7 +146,7 @@ func (cfg *Config) GetIterationIDFromFingerPrint(
 ) string {
 	cfg.T.Helper()
 
-	getItParams := packer_service.NewGetIterationParams()
+	getItParams := packer_service.PackerServiceNewGetIterationParams()
 	getItParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	getItParams.LocationProjectID = cfg.Loc.ProjectID
 	getItParams.BucketSlug = bucketSlug
@@ -196,7 +171,7 @@ func (cfg *Config) UpsertBuild(
 ) {
 
 	build, err := cfg.CreateBuild(context.Background(), bucketSlug, runUUID, iterationID, iterationFingerprint)
-	if err, ok := err.(*packer_service.CreateBuildDefault); ok {
+	if err, ok := err.(*packer_service.PackerServiceCreateBuildDefault); ok {
 		switch err.Code() {
 		case int(codes.Aborted), http.StatusConflict:
 			// all good here !
@@ -213,7 +188,7 @@ func (cfg *Config) UpsertBuild(
 
 	// Iterations are currently only assigned an incremental version when publishing image metadata on update.
 	// Incremental versions are a requirement for assigning the channel.
-	updateBuildParams := packer_service.NewUpdateBuildParams()
+	updateBuildParams := packer_service.PackerServiceNewUpdateBuildParams()
 	updateBuildParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	updateBuildParams.LocationProjectID = cfg.Loc.ProjectID
 	updateBuildParams.BuildID = build.Payload.Build.ID
@@ -230,7 +205,7 @@ func (cfg *Config) UpsertBuild(
 		})
 	}
 	_, err = cfg.Packer.UpdateBuild(updateBuildParams, nil)
-	if err, ok := err.(*packer_service.UpdateBuildDefault); ok {
+	if err, ok := err.(*packer_service.PackerServiceUpdateBuildDefault); ok {
 		cfg.T.Errorf("unexpected UpdateBuild error, expected nil. Got %v", err)
 	}
 }
@@ -242,7 +217,7 @@ func (cfg *Config) UpsertChannel(
 ) {
 	cfg.T.Helper()
 
-	createChParams := packer_service.NewCreateChannelParams()
+	createChParams := packer_service.PackerServiceNewCreateChannelParams()
 	createChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	createChParams.LocationProjectID = cfg.Loc.ProjectID
 	createChParams.BucketSlug = bucketSlug
@@ -256,7 +231,7 @@ func (cfg *Config) UpsertChannel(
 	if err == nil {
 		return
 	}
-	if err, ok := err.(*packer_service.CreateChannelDefault); ok {
+	if err, ok := err.(*packer_service.PackerServiceCreateChannelDefault); ok {
 		switch err.Code() {
 		case int(codes.Aborted), http.StatusConflict:
 			// all good here !
@@ -273,7 +248,7 @@ func (cfg *Config) UpdateChannel(
 ) {
 	cfg.T.Helper()
 
-	updateChParams := packer_service.NewUpdateChannelParams()
+	updateChParams := packer_service.PackerServiceNewUpdateChannelParams()
 	updateChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	updateChParams.LocationProjectID = cfg.Loc.ProjectID
 	updateChParams.BucketSlug = bucketSlug
@@ -295,7 +270,7 @@ func (cfg *Config) DeleteIteration(
 ) {
 	cfg.T.Helper()
 
-	deleteItParams := packer_service.NewDeleteIterationParams()
+	deleteItParams := packer_service.PackerServiceNewDeleteIterationParams()
 	deleteItParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	deleteItParams.LocationProjectID = cfg.Loc.ProjectID
 	deleteItParams.BucketSlug = &bucketSlug
@@ -314,7 +289,7 @@ func (cfg *Config) DeleteChannel(
 ) {
 	cfg.T.Helper()
 
-	deleteChParams := packer_service.NewDeleteChannelParams()
+	deleteChParams := packer_service.PackerServiceNewDeleteChannelParams()
 	deleteChParams.LocationOrganizationID = cfg.Loc.OrganizationID
 	deleteChParams.LocationProjectID = cfg.Loc.ProjectID
 	deleteChParams.BucketSlug = bucketSlug

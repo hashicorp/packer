@@ -60,6 +60,8 @@ require (
 	google.golang.org/grpc v1.40.0
 )
 
+require github.com/caarlos0/env/v6 v6.7.2
+
 require (
 	cloud.google.com/go/storage v1.16.1 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
