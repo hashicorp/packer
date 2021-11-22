@@ -235,6 +235,7 @@ func TestArchive(t *testing.T) {
 		},
 	}
 
+	tmpArchiveFile := "temp-archive-package"
 	for format, unzip := range tc {
 		t.Run(format, func(t *testing.T) {
 			config := fmt.Sprintf(`
@@ -242,11 +243,11 @@ func TestArchive(t *testing.T) {
 			"post-processors": [
 				{
 					"type": "compress",
-					"output": "package.%s"
+					"output": "%s.%s"
 				}
 			]
 		}
-		`, format)
+		`, tmpArchiveFile, format)
 
 			artifact := testArchive(t, config)
 			defer func() {
@@ -256,7 +257,7 @@ func TestArchive(t *testing.T) {
 				}
 			}()
 
-			filename := fmt.Sprintf("package.%s", format)
+			filename := fmt.Sprintf("%s.%s", tmpArchiveFile, format)
 			// Verify things look good
 			_, err := os.Stat(filename)
 			if err != nil {
