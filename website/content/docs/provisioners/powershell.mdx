@@ -16,13 +16,6 @@ See the [section
 below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
 for details.
 
-~> This should be the case everywhere in Packer but, when passing path
-variables, make sure you always use a forward slash `/` character to separate
-pathways. Internally the provisioner might do filepath operations, and it will
-do so by treating slashes as the path separator. Some path bugs might occur when
-forward `/` and backward `\` are mixed, so if you use backward slashes, make
-sure full path are used.
-
 ## Basic Example
 
 The example below is fully functional.
