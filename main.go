@@ -326,62 +326,67 @@ func loadConfig() (*config, error) {
 		// BuilderRedirects
 		BuilderRedirects: map[string]string{
 
-			// "amazon-chroot":       "github.com/hashicorp/amazon",
-			// "amazon-ebs":          "github.com/hashicorp/amazon",
-			// "amazon-ebssurrogate": "github.com/hashicorp/amazon",
-			// "amazon-ebsvolume":    "github.com/hashicorp/amazon",
-			// "amazon-instance":     "github.com/hashicorp/amazon",
+			"amazon-chroot":       "github.com/hashicorp/amazon",
+			"amazon-ebs":          "github.com/hashicorp/amazon",
+			"amazon-ebssurrogate": "github.com/hashicorp/amazon",
+			"amazon-ebsvolume":    "github.com/hashicorp/amazon",
+			"amazon-instance":     "github.com/hashicorp/amazon",
 
-			// "azure-arm":    "github.com/hashicorp/azure",
-			// "azure-chroot": "github.com/hashicorp/azure",
-			// "dtl":          "github.com/hashicorp/azure",
+			"azure-arm":    "github.com/hashicorp/azure",
+			"azure-chroot": "github.com/hashicorp/azure",
+			"azure-dtl":    "github.com/hashicorp/azure",
 
-			// "docker": "github.com/hashicorp/docker",
+			"docker": "github.com/hashicorp/docker",
 
-			// "googlecompute": "github.com/hashicorp/googlecompute",
+			"exoscale": "github.com/exoscale/exoscale",
 
-			// "parallels-iso": "github.com/hashicorp/parallels",
-			// "parallels-pvm": "github.com/hashicorp/parallels",
+			"googlecompute": "github.com/hashicorp/googlecompute",
 
-			// "qemu": "github.com/hashicorp/qemu",
+			"parallels-iso": "github.com/hashicorp/parallels",
+			"parallels-pvm": "github.com/hashicorp/parallels",
 
-			// "vagrant": "github.com/hashicorp/vagrant",
+			"qemu": "github.com/hashicorp/qemu",
 
-			// "virtualbox-iso": "github.com/hashicorp/virtualbox",
-			// "virtualbox-ovf": "github.com/hashicorp/virtualbox",
-			// "virtualbox-vm":  "github.com/hashicorp/virtualbox",
+			"vagrant": "github.com/hashicorp/vagrant",
 
-			// "vmware-iso": "github.com/hashicorp/vmware",
-			// "vmware-vmx": "github.com/hashicorp/vmware",
+			"virtualbox-iso": "github.com/hashicorp/virtualbox",
+			"virtualbox-ovf": "github.com/hashicorp/virtualbox",
+			"virtualbox-vm":  "github.com/hashicorp/virtualbox",
 
-			// "vsphere-iso":   "github.com/hashicorp/vsphere",
-			// "vsphere-clone": "github.com/hashicorp/vsphere",
+			"vmware-iso": "github.com/hashicorp/vmware",
+			"vmware-vmx": "github.com/hashicorp/vmware",
+
+			"vsphere-iso":   "github.com/hashicorp/vsphere",
+			"vsphere-clone": "github.com/hashicorp/vsphere",
 		},
 		DatasourceRedirects: map[string]string{
-			// "amazon-ami": "github.com/hashicorp/amazon",
+			"amazon-ami":            "github.com/hashicorp/amazon",
+			"amazon-secretsmanager": "github.com/hashicorp/amazon",
 		},
 		ProvisionerRedirects: map[string]string{
-			// "ansible":       "github.com/hashicorp/ansible",
-			// "ansible-local": "github.com/hashicorp/ansible",
+			"ansible":       "github.com/hashicorp/ansible",
+			"ansible-local": "github.com/hashicorp/ansible",
 
-			// "azure-dtlartifact": "github.com/hashicorp/azure",
+			"azure-dtlartifact": "github.com/hashicorp/azure",
 		},
 		PostProcessorRedirects: map[string]string{
-			// "amazon-import": "github.com/hashicorp/amazon",
+			"amazon-import": "github.com/hashicorp/amazon",
 
-			// "docker-import": "github.com/hashicorp/docker",
-			// "docker-push":   "github.com/hashicorp/docker",
-			// "docker-save":   "github.com/hashicorp/docker",
-			// "docker-tag":    "github.com/hashicorp/docker",
+			"docker-import": "github.com/hashicorp/docker",
+			"docker-push":   "github.com/hashicorp/docker",
+			"docker-save":   "github.com/hashicorp/docker",
+			"docker-tag":    "github.com/hashicorp/docker",
 
-			// "googlecompute-export": "github.com/hashicorp/googlecompute",
-			// "googlecompute-import": "github.com/hashicorp/googlecompute",
+			"googlecompute-export": "github.com/hashicorp/googlecompute",
+			"googlecompute-import": "github.com/hashicorp/googlecompute",
 
-			// "vagrant":       "github.com/hashicorp/vagrant",
-			// "vagrant-cloud": "github.com/hashicorp/vagrant",
+			"exoscale-import": "github.com/exoscale/exoscale",
 
-			// "vsphere":          "github.com/hashicorp/vsphere",
-			// "vsphere-template": "github.com/hashicorp/vsphere",
+			"vagrant":       "github.com/hashicorp/vagrant",
+			"vagrant-cloud": "github.com/hashicorp/vagrant",
+
+			"vsphere":          "github.com/hashicorp/vsphere",
+			"vsphere-template": "github.com/hashicorp/vsphere",
 		},
 	}
 	if err := config.Plugins.Discover(); err != nil {

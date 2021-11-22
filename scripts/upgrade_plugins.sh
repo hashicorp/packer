@@ -7,43 +7,43 @@
 ## This script should be run in packer's root.
 
 declare -a plugins=(
-	"alicloud"
-	"amazon"
-	"ansible"
-	"azure"
-	"chef"
-	"cloudstack"
-	"converge"
-	"digitalocean"
-	"docker"
-	"googlecompute"
-	"hcloud"
-	"hyperone"
-	"hyperv"
-	"jdcloud"
-	"linode"
-	"lxc"
-	"lxd"
-	"ncloud"
-	"openstack"
-	"oracle"
-	"outscale"
-	"oneandone"
-	"parallels"
-	"profitbricks"
-	"proxmox"
-	"puppet"
-	"qemu"
-	"scaleway"
-	"sdk"
-	"tencentcloud"
-	"triton"
-	"ucloud"
-	"vagrant"
-	"virtualbox"
-	"vmware"
-	"vsphere"
-	"yandex"
+	"hashicorp/packer-plugin-alicloud"
+	"hashicorp/packer-plugin-amazon"
+	"hashicorp/packer-plugin-ansible"
+	"hashicorp/packer-plugin-azure"
+	"hashicorp/packer-plugin-chef"
+	"hashicorp/packer-plugin-cloudstack"
+	"hashicorp/packer-plugin-converge"
+	"hashicorp/packer-plugin-digitalocean"
+	"hashicorp/packer-plugin-docker"
+	"hashicorp/packer-plugin-googlecompute"
+	"hashicorp/packer-plugin-hcloud"
+	"hashicorp/packer-plugin-hyperone"
+	"hashicorp/packer-plugin-hyperv"
+	"hashicorp/packer-plugin-jdcloud"
+	"hashicorp/packer-plugin-linode"
+	"hashicorp/packer-plugin-lxc"
+	"hashicorp/packer-plugin-lxd"
+	"hashicorp/packer-plugin-ncloud"
+	"hashicorp/packer-plugin-openstack"
+	"hashicorp/packer-plugin-oracle"
+	"hashicorp/packer-plugin-outscale"
+	"hashicorp/packer-plugin-oneandone"
+	"hashicorp/packer-plugin-parallels"
+	"hashicorp/packer-plugin-profitbricks"
+	"hashicorp/packer-plugin-proxmox"
+	"hashicorp/packer-plugin-puppet"
+	"hashicorp/packer-plugin-qemu"
+	 "scaleway/packer-plugin-scaleway"
+	"hashicorp/packer-plugin-sdk"
+	"hashicorp/packer-plugin-tencentcloud"
+	"hashicorp/packer-plugin-triton"
+	"hashicorp/packer-plugin-ucloud"
+	"hashicorp/packer-plugin-vagrant"
+	"hashicorp/packer-plugin-virtualbox"
+	"hashicorp/packer-plugin-vmware"
+	"hashicorp/packer-plugin-vsphere"
+	"hashicorp/packer-plugin-yandex"
 )
 
 ## now loop through the above plugin array
@@ -54,7 +54,7 @@ do
    while ! $happy
     do
       echo "upgrading $i"
-      output=$(go get -d github.com/hashicorp/packer-plugin-$i)
+      output=$(go get -d github.com/$i)
       happy=true
       if [[ $output == *"443: Connection refused"*  ]]; then
         echo "Try again after 5 seconds"
@@ -65,4 +65,4 @@ do
    sleep 1
 done
 
-go mod tidy
+go mod tidy -compat=1.17

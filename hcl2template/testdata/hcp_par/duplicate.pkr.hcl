@@ -2,7 +2,7 @@ build {
   name = "bucket-slug"
   hcp_packer_registry {
     description = ""
-    labels = {
+    bucket_labels = {
       "foo" = "bar"
     }
   }

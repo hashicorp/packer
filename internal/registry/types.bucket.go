@@ -17,12 +17,13 @@ import (
 
 // Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
-	Slug        string
-	Description string
-	Destination string
-	Labels      map[string]string
-	Iteration   *Iteration
-	client      *Client
+	Slug         string
+	Description  string
+	Destination  string
+	BucketLabels map[string]string
+	BuildLabels  map[string]string
+	Iteration    *Iteration
+	client       *Client
 }
 
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
@@ -79,7 +80,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
 		BucketSlug:  b.Slug,
 		Description: b.Description,
-		Labels:      b.Labels,
+		Labels:      b.BucketLabels,
 	}
 
 	err := UpsertBucket(ctx, b.client, bucketInput)
@@ -104,14 +105,13 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 // CreateInitialBuildForIteration will create a build entry on the HCP Packer Registry for the named componentType.
 // This initial creation is needed so that Packer can properly track when an iteration is complete.
 func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
-
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
 		BucketSlug:  b.Slug,
 		Fingerprint: b.Iteration.Fingerprint,
-		Build: &models.HashicorpCloudPackerBuild{
+		IterationID: b.Iteration.ID,
+		Build: &models.HashicorpCloudPackerBuildCreateBody{
 			ComponentType: componentType,
-			IterationID:   b.Iteration.ID,
 			PackerRunUUID: b.Iteration.RunUUID,
 			Status:        status,
 		},
@@ -122,12 +122,16 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		return err
 	}
 
+	if b.BuildLabels == nil {
+		b.BuildLabels = make(map[string]string)
+	}
+
 	build := &Build{
 		ID:            id,
 		ComponentType: componentType,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
-		Labels:        make(map[string]string),
+		Labels:        b.BuildLabels,
 		Images:        make(map[string]registryimage.Image),
 	}
 
@@ -214,16 +218,23 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
-	var providerName string
-	images := make([]*models.HashicorpCloudPackerImage, 0, len(buildToUpdate.Images))
+	var providerName, sourceID string
+	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
 	for _, image := range buildToUpdate.Images {
+		// These values will always be the same for all images in a single build,
+		// so we can just set it inside the loop without consequence
 		if providerName == "" {
 			providerName = image.ProviderName
 		}
-		images = append(images, &models.HashicorpCloudPackerImage{ImageID: image.ImageID, Region: image.ProviderRegion})
+		if image.SourceImageID != "" {
+			sourceID = image.SourceImageID
+		}
+
+		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
 	buildInput.Updates.CloudProvider = providerName
+	buildInput.Updates.SourceImageID = sourceID
 	buildInput.Updates.Images = images
 
 	_, err := UpdateBuild(ctx, b.client, buildInput)
@@ -283,16 +294,11 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 	return iterationResp, nil
 }
 
-// initializeIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
-// If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
-// that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
-// All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
 func (b *Bucket) initializeIteration(ctx context.Context) error {
-
 	// load existing iteration using fingerprint.
 	iterationResp, err := GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
 	if checkErrorCode(err, codes.Aborted) {
-		//probably means Iteration doesn't exist need a way to check the error
+		// probably means Iteration doesn't exist need a way to check the error
 		iterationResp, err = b.createIteration()
 	}
 
@@ -315,9 +321,17 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 			"If you wish to add a new build to this image a new iteration must be created by changing the build fingerprint.", b.Iteration.Fingerprint)
 	}
 
+	return nil
+}
+
+// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
+// that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
+// All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
+func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
-	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, iterationResp.ID)
+	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, b.Iteration.ID)
 	if err != nil {
 		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
 	}

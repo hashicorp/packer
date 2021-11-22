@@ -77,6 +77,12 @@ jobs:
     steps:
       - install-go-run-tests-windows:
           GOVERSION: "1.17"
+  check-mod-tidy:
+    executor: golang
+    working_directory: /go/src/github.com/hashicorp/packer
+    steps:
+      - checkout
+      - run: go mod tidy -compat=1.17
   check-lint:
     executor: golang
     resource_class: xlarge
@@ -170,7 +176,7 @@ jobs:
             fi
   algolia-index:
     docker:
-      - image: docker.mirror.hashicorp.services/node:12
+      - image: docker.mirror.hashicorp.services/node:14
     steps:
       - checkout
       - run:
@@ -195,6 +201,7 @@ workflows:
     jobs:
       - check-lint
       - check-fmt
+      - check-mod-tidy
       - check-generate
   build_packer_binaries:
     jobs:

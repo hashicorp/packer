@@ -110,11 +110,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
-	if len(p.config.Sources) < 1 && p.config.Content == "" {
-		errs = packersdk.MultiErrorAppend(errs,
-			errors.New("source, sources or content must be specified."))
-	}
-
 	if len(p.config.Sources) > 0 && p.config.Content != "" {
 		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("source(s) conflicts with content."))

@@ -100,6 +100,8 @@ type DatasourceOutput struct {
 	// For locally managed clouds, this may map instead to a cluster, server
 	// or datastore.
 	Region string `mapstructure:"region"`
+	// The key:value metadata labels associated with this build.
+	Labels map[string]string `mapstructure:"labels"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
@@ -142,6 +144,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 					PackerRunUUID: build.PackerRunUUID,
 					ID:            image.ImageID,
 					Region:        image.Region,
+					Labels:        build.Labels,
 				}
 				return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 			}

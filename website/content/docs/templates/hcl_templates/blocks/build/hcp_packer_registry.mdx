@@ -1,50 +1,83 @@
 ---
 description: >
   The hcp_packer_registry allows operators the ability to customize the metadata sent to HCP Packer Registry.
-  It configures the base details of an image that is created or updated within the HCP Packer registry.
+  It configures the base details of an image that is created or updated within HCP Packer.
 page_title: hcp_packer_registry - build - Blocks
 ---
 
 # The `hcp_packer_registry` block
 
-The `hcp_packer_registry` block allows operators the ability to customize the metadata sent to
-HCP Packer Registry. It configures the details of an image that is created or updated within the HCP Packer registry.
+~> **Note:** HCP Packer is under active development, and we are currently
+offering a [public beta version](https://portal.cloud.hashicorp.com) to collect
+feedback and continue improving the product.
+To get started, visit the
+[HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the
+[Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started)
+collection on HashiCorp Learn.
 
-The presence of a `hcp_packer_registry` block will enable the HCP Packer registry mode and all the builds within that build block
-will be pushed to the remote registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`). If no HCP credentials are set Packer will fail the build and exit immediately to avoid any potential artifact drift between the build providers and the HCP Packer registry.
+
+The `hcp_packer_registry` block allows operators the ability to customize the
+metadata sent to HCP Packer Registry. It configures the details of an image
+that is created or updated within the HCP Packer registry.
+
+This block is available from version 1.7.7 of Packer.
+
+The presence of a `hcp_packer_registry` block in a build block will enable HCP
+Packer mode. Packer will push all builds within that build block to the remote
+registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and
+`HCP_CLIENT_SECRET`). If no HCP credentials are set, Packer will fail the build
+and exit immediately to avoid any potential artifact drift between the defined
+builders (source blocks) and the HCP Packer registry.
 
 ```hcl
 # file: builds.pkr.hcl
-source "file" "basic-example" {
-  content = "Lorem ipsum dolor sit amet"
-  target = "sample_artifact"
+source "happycloud" "macos" {
+  os = "macos_amd64"
 }
 
 build {
    hcp_packer_registry {
-    bucket_name = "sample-artifact"
+    bucket_name = "ios-dev"
 
     description = <<EOT
 Some nice description about the image which artifact is being published to HCP Packer Registry. =D
     EOT
 
-    labels = {
-      "foo-version" = "3.4.0",
-      "foo" = "bar",
+    bucket_labels = {
+      "team" = "ios-development",
+      "os"   = "macos"
     }
+
+    build_labels = {
+      "xcode"   = "11.3.0"
+      "version" = "Big Sur"
   }
 
-  sources = ["sources.file.basic-example"]
+  sources = ["source.happycloud.macos"]
 }
 ```
 
-- `bucket_name` (string) - The image name when published to the HCP Packer registry. Should always be the same, otherwise a new image will be created.
-  Defaults to `build.name` if not set. Will be overwritten if `HCP_PACKER_BUCKET_NAME` is set.
+- `bucket_name` (string) - The image name when published to the HCP Packer
+  registry. Should always be the same, otherwise a new image will be created.
+  Defaults to `build.name` if not set. Will be overwritten if
+  `HCP_PACKER_BUCKET_NAME` is set.
 
-- `description` (string) - The image description. Useful to provide a summary about the image. The description will appear
-  at the image's main page and will be updated whenever it is changed and a new build is pushed to the HCP Packer registry. Should contain
-  a maximum of 255 characters. Defaults to `build.description` if not set.
+- `bucket_labels` (map[string]string) - Map of labels. Can provide any information,
+  such as tools versions (e.g. go 1.17, python 3.5, etc...). The bucket labels will
+  appear at the image's main page and will be updated whenever it is changed
+  and a new iteration for the bucket is pushed to the HCP Packer registry.
 
-- `labels` (map[string]string) - Map of labels. Can provide any information, such as tools versions
-  (e.g. go 1.17, python 3.5, etc...). The labels will appear at the image's main page and will be updated
-  whenever it is changed and a new build is pushed to the HCP Packer registry.
+- `build_labels` (map[string]string) - Map of labels. Can provide any information,
+  such as tools versions (e.g. go 1.17, python 3.5, etc...). The build labels will
+  appear in the build section of an iteration. Build labels are specific to an iteration
+  and will be added to a build when is pushed to the HCP Packer registry.
+  Updates to build labels on a completed iteration is not allowed.
+
+- `description` (string) - The image description. Useful to provide a summary
+  about the image. The description will appear at the image's main page and
+  will be updated whenever it is changed and a new build is pushed to the HCP
+  Packer registry. Should contain a maximum of 255 characters. Defaults to
+  `build.description` if not set.
+
+- `labels` (map[string]string) - Deprecated in Packer 1.7.9. See [`bucket_labels`](#bucket_labels) for details.
+

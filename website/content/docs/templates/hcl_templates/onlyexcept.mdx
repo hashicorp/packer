@@ -19,12 +19,21 @@ They can also be seen in a template to run or skip provisioners and/or
 post-processors for a specific source:
 
 ```hcl
+source "amazon-ebs" "first-example" {
+}
+
+source "amazon-ebs" "second-example" {
+}
+
+source "amazon-ebs" "third-example" {
+}
+
 build {
   name = "my_build"
-  sources [
+  sources = [
     "source.amazon-ebs.first-example",
   ]
-  source "source.amazon-ebs.second-example"
+  source "source.amazon-ebs.second-example" {
     // setting the name field allows you to rename the source only for this
     // build section. To match this builder, you need to use
     // second-example-local-name, not second-example
@@ -32,8 +41,8 @@ build {
   }
 
   provisioner "shell-local" {
-    only = ["amazon-ebs.first-example"]
-    inline = ["echo I will only run for the second example source"]
+    only   = ["amazon-ebs.first-example"]
+    inline = ["echo I will only run for the first example source"]
   }
 
   provisioner "shell-local" {
@@ -43,7 +52,7 @@ build {
 }
 
 build {
-  sources [
+  sources = [
     "source.amazon-ebs.third-example",
   ]
 }

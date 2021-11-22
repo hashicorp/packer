@@ -101,18 +101,18 @@ func TestParse_datasource(t *testing.T) {
 			nil,
 			false,
 		},
-		{"inexistent source",
+		{"nonexistent source",
 			defaultParser,
-			parseTestArgs{"testdata/datasources/inexistent.pkr.hcl", nil, nil},
+			parseTestArgs{"testdata/datasources/nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
-						Type: "inexistant",
+						Type: "nonexistent",
 						Name: "test",
 					}: {
-						Type: "inexistant",
+						Type: "nonexistent",
 						Name: "test",
 					},
 				},

@@ -6,7 +6,7 @@ build {
         description = <<EOT
 Some description
     EOT
-        labels = {
+        bucket_labels = {
             "foo" = "bar"
         }
     }

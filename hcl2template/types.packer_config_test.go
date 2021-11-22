@@ -3,9 +3,11 @@ package hcl2template
 import (
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/go-version"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	hcl2template "github.com/hashicorp/packer/hcl2template/internal"
@@ -204,7 +206,39 @@ func TestParser_complete(t *testing.T) {
 				&packer.CoreBuild{
 					Type:     "virtualbox-iso.ubuntu-1204",
 					Prepared: true,
-					Builder:  basicMockBuilder,
+					Builder: &MockBuilder{
+						Config: MockConfig{
+							NestedMockConfig: NestedMockConfig{
+								// interpolates source and type in builder
+								String:   "ubuntu-1204-virtualbox-iso",
+								Int:      42,
+								Int64:    43,
+								Bool:     true,
+								Trilean:  config.TriTrue,
+								Duration: 10 * time.Second,
+								MapStringString: map[string]string{
+									"a": "b",
+									"c": "d",
+								},
+								SliceString: []string{
+									"a",
+									"b",
+									"c",
+								},
+								SliceSliceString: [][]string{
+									{"a", "b"},
+									{"c", "d"},
+								},
+								Tags:       []MockTag{},
+								Datasource: "string",
+							},
+							Nested: builderBasicNestedMockConfig,
+							NestedSlice: []NestedMockConfig{
+								builderBasicNestedMockConfig,
+								builderBasicNestedMockConfig,
+							},
+						},
+					},
 					Provisioners: []packer.CoreBuildProvisioner{
 						{
 							PType: "shell",

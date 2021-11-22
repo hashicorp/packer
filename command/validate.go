@@ -74,7 +74,12 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	})
 	diags = append(diags, fixerDiags...)
 
-	return writeDiags(c.Ui, nil, diags)
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret == 0 {
+		c.Ui.Say("The configuration is valid.")
+	}
+
+	return ret
 }
 
 func (*ValidateCommand) Help() string {

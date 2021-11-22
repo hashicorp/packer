@@ -1,4 +1,24 @@
-## 1.7.7 (Upcoming)
+## 1.7.9 (Upcoming)
+
+## 1.7.8 (October 27, 2021)
+
+### BUG FIXES
+* builder/amazon: Bump plugin to latest version to address a variable
+    interpolation issue for builder `run_tags`. [GH-11360](https://github.com/hashicorp/packer/pull/11360)
+
+## 1.7.7 (October 19, 2021)
+
+### IMPROVEMENTS:
+* Improved support and user experience for HCP Packer registry - [GH-11304](https://github.com/hashicorp/packer/pull/11304) [GH-11315](https://github.com/hashicorp/packer/pull/11315) [GH-11320](https://github.com/hashicorp/packer/pull/11320) [GH-11319](https://github.com/hashicorp/packer/pull/11319)
+
+* core: Show successful message upon successful packer validate - [GH-11337](https://github.com/hashicorp/packer/pull/11337)
+* core: Allow use in top level source variables in a build.source block - [GH-11318](https://github.com/hashicorp/packer/pull/11318)
+* core: Allow to use build variables in a post processor - [GH-11323](https://github.com/hashicorp/packer/pull/11323)
+* packer init: better error handling. - [GH-11330](https://github.com/hashicorp/packer/pull/11330)
+
+### Plugin Breakout:
+
+* The code of the Scaleway builder was handed over to the scaleway org [GH-11298](https://github.com/hashicorp/packer/pull/11298) [GH-11296](https://github.com/hashicorp/packer/pull/11296)
 
 ## 1.7.6 (September 28, 2021)
 

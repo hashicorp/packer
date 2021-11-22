@@ -1,0 +1,42 @@
+---
+description: |
+    Data sources used to data from the HCP Packer registry.
+page_title: HCP - Data sources
+sidebar_title: Overview
+---
+
+
+# HCP Packer Registry Data sources
+
+The HCP Packer registry bridges the gap between image factories and image 
+deployments, allowing development and security teams to work together to create, 
+manage, and consume golden images in a centralized way.
+
+The HCP Packer registry stores metadata about your images, including when they 
+were created, where the image exists in the cloud, and what (if any) git commit 
+is associated with your image build. You can use the registry to track 
+information about the golden images your Packer builds produce, clearly 
+designate which images are appropriate for test and production environments, 
+and query for the right golden images to use in both Packer and Terraform 
+configurations.
+
+HCP Packer is under active development, and we are currently offering a public 
+beta version to collect feedback and continue improving the product. We 
+encourage you to try HCP Packer and submit your feedback.
+
+Packer has two data sources that work together to retrieve information from the
+HCP Packer registry:
+
+ * [hcp-packer-iteration](/docs/datasources/hcp/hcp-packer-iteration) - 
+ 	retrieves information about an iteration in HCP Packer registry
+ * [hcp-packer-image](/docs/datasources/hcp/hcp-packer-image) - retrieves 
+ 	information about a specific image created in the HCP Packer registry
+
+These data sources are intended to be used together to determine source images
+for pipelined Packer builds. 
+
+## How to use this plugin
+
+This plugin comes bundled with the Packer core, so you do not need to install 
+it separately. Please install Packer v1.7.7 or above to use the latest version
+of the HCP Packer registry datasources. 

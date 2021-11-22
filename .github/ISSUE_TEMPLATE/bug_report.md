@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: You're experiencing an issue with Packer that is different than the documented behavior.
+about: You're experiencing an issue with Packer that is different from the documented behavior.
 labels: bug
 ---
 
@@ -19,7 +19,7 @@ Steps to reproduce this issue
 
 From `packer version`
 
-### Simplified Packer Buildfile
+### Simplified Packer Template
 
 If the file is longer than a few dozen lines, please include the URL to the
 [gist](https://gist.github.com/) of the log or use the [Github detailed

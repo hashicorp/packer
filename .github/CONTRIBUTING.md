@@ -11,10 +11,10 @@ contribute to the project, read on. This document will cover what we're looking
 for. By addressing all the points we're looking for, it raises the chances we
 can quickly merge or address your contributions.
 
-When contributing in any way to the Packer project (new issue, PR, etc), please 
-be aware that our team identifies with many gender pronouns. Please remember to 
-use nonbinary pronouns (they/them) and gender neutral language ("Hello folks") 
-when addressing our team. For more reading on our code of conduct, please see the 
+When contributing in any way to the Packer project (new issue, PR, etc), please
+be aware that our team identifies with many gender pronouns. Please remember to
+use nonbinary pronouns (they/them) and gender neutral language ("Hello folks")
+when addressing our team. For more reading on our code of conduct, please see the
 [HashiCorp community guidelines](https://www.hashicorp.com/community-guidelines).
 
 ## Issues
@@ -53,17 +53,15 @@ when addressing our team. For more reading on our code of conduct, please see th
    linked.
 
 5. Sometimes, if you have a specialized environment or use case, the maintainers
-   may ask for your help testing the patch. You are able to download an
+   may ask for your help to test the patch. You are able to download an
    experimental binary of Packer containing the Pull Request's patch via from
-   the Pull Request page on github. You can do this by scrolling to the
-   "checks" section on github, and clicking "details" on the
+   the Pull Request page on GitHub. You can do this by scrolling to the
+   "checks" section on GitHub, and clicking "details" on the
    "store_artifacts" check. This will take you to Packer's Circle CI page for
    the build, and you will be able to click a tab named "Artifacts" which will
    contain zipped Packer binaries for each major OS architecture.
 
 6. The issue is closed.
-
-
 
 ## Setting up Go
 
@@ -72,7 +70,7 @@ runtime in order to build packer.
 
 1. This project always releases from the latest version of golang.
 [Install go](https://golang.org/doc/install#install) To properly build from
-source, you need to have golang >= v1.16
+source, you need to have golang >= v1.17
 
 ## Setting up Packer for dev
 
@@ -121,14 +119,14 @@ executable extension
 go build -o bin/packer.exe
 ```
 
-### Opening an Pull Request
+### Opening a Pull Request
 
 Thank you for contributing! When you are ready to open a pull-request, you will
 need to [fork
 Packer](https://github.com/hashicorp/packer#fork-destination-box), push your
 changes to your fork, and then open a pull-request.
 
-For example, my github username is `cbednarski`, so I would do the following:
+For example, my GitHub username is `cbednarski`, so I would do the following:
 
 ```
 git checkout -b f-my-feature
