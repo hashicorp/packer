@@ -12,7 +12,7 @@ build {
         bucket_name = "pkr-acctest-temp-2"
         description = "blah"
 
-        labels = {
+        build_labels = {
             "foo-version" = "3.4.0"
             "foo"         = "bar"
         }
