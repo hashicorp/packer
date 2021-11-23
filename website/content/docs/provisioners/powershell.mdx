@@ -16,8 +16,12 @@ See the [section
 below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
 for details.
 
-~> On Windows, if possible, try to always use a backslash `\` as a path
-separator, especially when dealing with non full paths. This is because when 
+~> If possible, try to always use a forward slash `/` as the path separator,
+especially when dealing with relative paths. A backward slash `\` will work on
+Windows and is the official Windows path separator, but when building from any
+system that is not Windows, Packer will only treat slashes `/` as path
+separators, and treat backslashes as plain text. Which could lead to pathing
+errors.
 
 ## Basic Example
 
