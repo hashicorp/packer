@@ -1,0 +1,6 @@
+~> **Note:** If possible, try to always use a forward slash `/` as the path separator,
+especially when dealing with relative paths. A backward slash `\` will work on
+Windows and is the official Windows path separator, but when building from any
+system that is not Windows, Packer will only treat slashes `/` as path
+separators, and treat backslashes as plain text. Which could lead to pathing
+errors.
