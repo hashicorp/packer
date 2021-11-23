@@ -105,7 +105,6 @@ func (cfg *Config) UpsertIteration(
 		case int(codes.AlreadyExists), http.StatusConflict:
 			// all good here !
 			return cfg.GetIterationIDFromFingerPrint(bucketSlug, fingerprint)
-
 		}
 	}
 
