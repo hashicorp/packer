@@ -144,7 +144,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				})
 				continue
 			}
-			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
