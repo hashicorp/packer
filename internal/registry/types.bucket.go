@@ -77,13 +77,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
 
-	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
-		BucketSlug:  b.Slug,
-		Description: b.Description,
-		Labels:      b.BucketLabels,
-	}
-
-	err := UpsertBucket(ctx, b.client, bucketInput)
+	err := b.client.UpsertBucket(ctx, b.Slug, b.Description, b.BucketLabels)
 	if err != nil {
 		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
 	}
@@ -106,21 +100,19 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 // This initial creation is needed so that Packer can properly track when an iteration is complete.
 func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
 	status := models.HashicorpCloudPackerBuildStatusUNSET
-	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
-		BucketSlug:  b.Slug,
-		Fingerprint: b.Iteration.Fingerprint,
-		IterationID: b.Iteration.ID,
-		Build: &models.HashicorpCloudPackerBuildCreateBody{
-			ComponentType: componentType,
-			PackerRunUUID: b.Iteration.RunUUID,
-			Status:        status,
-		},
-	}
 
-	id, err := CreateBuild(ctx, b.client, buildInput)
+	resp, err := b.client.CreateBuild(ctx,
+		b.Slug,
+		b.Iteration.RunUUID,
+		b.Iteration.ID,
+		b.Iteration.Fingerprint,
+		componentType,
+		status,
+	)
 	if err != nil {
 		return err
 	}
+	id := resp.Payload.Build.ID
 
 	if b.BuildLabels == nil {
 		b.BuildLabels = make(map[string]string)

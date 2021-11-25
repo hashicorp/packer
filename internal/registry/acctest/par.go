@@ -165,11 +165,19 @@ func (cfg *Config) UpsertBuild(
 	runUUID,
 	iterationID,
 	cloudProvider,
+	componentType,
 	region string,
 	imageIDs []string,
 ) {
 
-	build, err := cfg.CreateBuild(context.Background(), bucketSlug, runUUID, iterationID, iterationFingerprint)
+	build, err := cfg.CreateBuild(context.Background(),
+		bucketSlug,
+		runUUID,
+		iterationID,
+		iterationFingerprint,
+		componentType,
+		models.HashicorpCloudPackerBuildStatusUNSET,
+	)
 	if err, ok := err.(*packer_service.PackerServiceCreateBuildDefault); ok {
 		switch err.Code() {
 		case int(codes.Aborted), http.StatusConflict:

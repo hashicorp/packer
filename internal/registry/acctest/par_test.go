@@ -43,7 +43,7 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 	}()
 
 	// create our bucket, this should fail if the bucket already exists
-	_, err = cfg.CreateBucket(context.Background(), tmpBucket)
+	_, err = cfg.CreateBucket(context.Background(), tmpBucket, "", nil)
 	if err != nil {
 		t.Fatalf("CreateBucket: %v", err)
 	}
@@ -83,8 +83,10 @@ func TestAcc_PAR_service_create_and_datasource(t *testing.T) {
 					runUUID,
 					iterationID,
 					cloud,
+					cloud,
 					region,
-					imageIDs)
+					imageIDs,
+				)
 			}
 		}
 
@@ -145,7 +147,7 @@ func TestAcc_PAR_pkr_build(t *testing.T) {
 		}
 	}()
 	// create our bucket, this should fail if the bucket already exists
-	_, err = cfg.CreateBucket(context.Background(), tmpBucket)
+	_, err = cfg.CreateBucket(context.Background(), tmpBucket, "", nil)
 	if err != nil {
 		t.Fatalf("CreateBucket: %v", err)
 	}
