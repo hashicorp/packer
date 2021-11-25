@@ -33,6 +33,7 @@ func (a *NullArtifact) State(name string) interface{} {
 			registryimage.WithID(a.Id()),
 			registryimage.WithProvider("null"),
 			registryimage.WithRegion("null"),
+			registryimage.WithSourceID("null"),
 		)
 		return img
 	case "generated_data":
