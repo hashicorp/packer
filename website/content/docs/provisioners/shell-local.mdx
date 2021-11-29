@@ -335,7 +335,9 @@ provisioner "shell-local" {
 
 Contents of "test_cmd.cmd":
 
-    echo %SHELLLOCALTEST%
+```
+echo %SHELLLOCALTEST%
+```
 
 Example of running an inline command on windows: Required customization:
 tempfile_extension
@@ -399,8 +401,10 @@ provisioner "shell-local" {
 
 Contents of `example_bash.sh`:
 
-    #!/bin/bash
-    echo $SHELLLOCALTEST
+```
+#!/bin/bash
+echo $SHELLLOCALTEST
+```
 
 Example of running a powershell script on windows: Required customizations:
 `env_var_format` and `execute_command`

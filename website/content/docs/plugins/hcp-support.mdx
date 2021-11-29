@@ -1,6 +1,7 @@
 ---
-description: |
-  HCP Packer support allows plugins to manage image metadata that can be stored in a HCP Packer registry.
+description: >
+  HCP Packer support allows plugins to manage image metadata that can be stored
+  in a HCP Packer registry.
 page_title: HCP Packer Support
 ---
 
@@ -30,6 +31,7 @@ override functions as the second argument, and that can be used to set different
 
 The [Image metadata](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#Image) must contain every
 metadata HCP Packer should store about this component. The structure is:
+
 ```go
 // Image represents the metadata for some Artifact in the HCP Packer Registry.
 type Image struct {
@@ -59,6 +61,7 @@ Where `ImageID`, `ProviderName`, and `SourceImageID` are mandatory fields.
 Examples using the `FromArtifact` method:
 
 - Simple form:
+
 ```go
 func (a *Artifact) State(name string) interface{} {
 	if name == registryimage.ArtifactStateURI {
@@ -74,6 +77,7 @@ func (a *Artifact) State(name string) interface{} {
 ```
 
 - Using overrides:
+
 ```go
 func (a *Artifact) State(name string) interface{} {
 	if name == registryimage.ArtifactStateURI {

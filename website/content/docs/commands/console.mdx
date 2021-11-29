@@ -10,7 +10,7 @@ page_title: packer console - Commands
 The `packer console` command allows you to experiment with Packer variable
 interpolations. You may access variables in the Packer config you called the
 console with, or provide variables when you call console using the -var or
--var-file command line options.
+\-var-file command line options.
 
 ~> **Note:** `console` is available from version 1.4.2 and above.
 
@@ -66,7 +66,7 @@ your example_template's variable section:
 ...
 ```
 
-and you enter `` {{user `myvar`}} `` in the Packer console, you'll see the value of
+and you enter ``{{user `myvar`}}`` in the Packer console, you'll see the value of
 myvar:
 
 ```shell-session

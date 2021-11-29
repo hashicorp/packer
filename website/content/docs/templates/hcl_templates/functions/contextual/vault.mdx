@@ -27,8 +27,10 @@ An example of using a v1 kv engine:
 
 If you store a value in vault using:
 
-    vault secrets enable -version=1 -path=secrets kv
-    vault kv put secrets/hello foo=world
+```
+vault secrets enable -version=1 -path=secrets kv
+vault kv put secrets/hello foo=world
+```
 
 You can access it using the following:
 

@@ -1,7 +1,8 @@
 ---
 description: >
-  The hcp_packer_registry allows operators the ability to customize the metadata sent to HCP Packer Registry.
-  It configures the base details of an image that is created or updated within HCP Packer.
+  The hcp_packer_registry allows operators the ability to customize the metadata
+  sent to HCP Packer Registry. It configures the base details of an image that
+  is created or updated within HCP Packer.
 page_title: hcp_packer_registry - build - Blocks
 ---
 
@@ -14,7 +15,6 @@ To get started, visit the
 [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the
 [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started)
 collection on HashiCorp Learn.
-
 
 The `hcp_packer_registry` block allows operators the ability to customize the
 metadata sent to HCP Packer Registry. It configures the details of an image
@@ -80,4 +80,3 @@ Some nice description about the image which artifact is being published to HCP P
   `build.description` if not set.
 
 - `labels` (map[string]string) - Deprecated in Packer 1.7.9. See [`bucket_labels`](#bucket_labels) for details.
-

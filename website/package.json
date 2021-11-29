@@ -15,11 +15,11 @@
     "@hashicorp/react-button": "^6.0.1",
     "@hashicorp/react-command-line-terminal": "^2.0.4",
     "@hashicorp/react-consent-manager": "^7.0.3",
-    "@hashicorp/react-docs-page": "^14.4.2",
+    "@hashicorp/react-docs-page": "^15.0.0-canary-20211029153859",
     "@hashicorp/react-hashi-stack-menu": "^2.0.7",
     "@hashicorp/react-head": "^3.1.2",
     "@hashicorp/react-inline-svg": "^6.0.3",
-    "@hashicorp/react-markdown-page": "^1.4.3",
+    "@hashicorp/react-markdown-page": "^2.0.0-canary-20211029153859",
     "@hashicorp/react-product-downloads-page": "^2.5.2",
     "@hashicorp/react-product-features-list": "^5.0.0",
     "@hashicorp/react-search": "^6.1.1",
@@ -30,12 +30,13 @@
     "adm-zip": "^0.5.5",
     "gray-matter": "^4.0.2",
     "next": "^11.1.2",
-    "next-mdx-remote": "3.0.1",
+    "next-mdx-remote": "^4.0.0-alpha.2",
     "next-remote-watch": "1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
+    "@hashicorp/mdx-v2-migrate": "^0.1.0-canary-20211029165746",
     "@hashicorp/platform-cli": "^1.2.0",
     "@hashicorp/platform-nextjs-plugin": "^1.0.1",
     "@hashicorp/platform-types": "^0.1.1",
@@ -64,6 +65,7 @@
     "linkcheck": "linkcheck https://packer.io"
   },
   "engines": {
-    "npm": ">=7.0.0"
+    "npm": ">=7.0.0",
+    "node": ">=14.0.0"
   }
 }

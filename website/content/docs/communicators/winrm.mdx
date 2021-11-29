@@ -50,12 +50,12 @@ There are some steps that you will normally need to take in order for Packer
 to be able to connect via WinRM
 
 1. Set up a username and password that Packer to connect with.
-2. Make any necesary registry edits to enable remote execution
+1. Make any necesary registry edits to enable remote execution
    (and remote execution with elevated privileges, if needed)
-3. Start WinRM, setting any config needed for allowing basic auth
-4. Open ports 5985 and/or 5986 depending on how you're connecting
-5. launch WinRM and set it to automatically launch when the computer restarts
-6. If necessary, generate a self-signed certificate or provide a real certificate
+1. Start WinRM, setting any config needed for allowing basic auth
+1. Open ports 5985 and/or 5986 depending on how you're connecting
+1. launch WinRM and set it to automatically launch when the computer restarts
+1. If necessary, generate a self-signed certificate or provide a real certificate
    to the WinRM listener.
 
 #### Configuring WinRM in VMWare

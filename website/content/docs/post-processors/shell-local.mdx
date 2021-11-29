@@ -103,7 +103,7 @@ Optional parameters:
   it is necessary below.
 
 - `execute_command` (array of strings) - The command used to execute the
-  script. By default, on \*nix systems this is:
+  script. By default, on *nix systems this is:
 
   ```text
   ["/bin/sh", "-c", "{{.Vars}} {{.Script}}"]
@@ -134,7 +134,7 @@ Optional parameters:
   one element is provided, Packer will replicate past behavior by appending
   your `execute_command` to the array of strings `["sh", "-c"]`. For example,
   if you set `"execute_command": "foo bar"`, the final `execute_command` that
-  Packer runs will be \["sh", "-c", "foo bar"\]. If you set
+  Packer runs will be ["sh", "-c", "foo bar"]. If you set
   `"execute_command": ["foo", "bar"]`, the final execute_command will remain
   `["foo", "bar"]`.
 
@@ -408,7 +408,9 @@ post-processor "shell-local" {
 
 Contents of `test_cmd.cmd`:
 
-    echo %SHELLLOCALTEST%
+```
+echo %SHELLLOCALTEST%
+```
 
 Example of running an inline command on windows: Required customization:
 tempfile_extension
@@ -472,8 +474,10 @@ post-processor "shell-local" {
 
 Contents of `example_bash.sh`:
 
-    #!/bin/bash
-    echo $SHELLLOCALTEST
+```
+#!/bin/bash
+echo $SHELLLOCALTEST
+```
 
 Example of running a PowerShell script on Windows:
 Required customizations: `env_var_format` and `execute_command`.

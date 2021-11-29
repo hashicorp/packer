@@ -1,11 +1,13 @@
 ---
 page_title: legacy_strftime - Functions - Configuration Language
-description: |-
-  The legacy_strftime function returns a string representation of the current date
+description: >-
+  The legacy_strftime function returns a string representation of the current
+  date
+
   and time.
 ---
 
-# `legacy_strftime` — UTC time, formated using the ISO C standard format 
+# `legacy_strftime` — UTC time, formated using the ISO C standard format
 
 The `legacy_strftime` function returns the current date and time using the given
 format string. The format string follows strftime's datetime formatting.
@@ -33,8 +35,8 @@ user variable and then access the user variable within your plugins.
 ## Related Functions
 
 - [`format`](/docs/templates/hcl_templates/functions/string/format) is a more general formatting function for arbitrary
-data.
+  data.
 - [`timestamp`](/docs/templates/hcl_templates/functions/datetime/timestamp) returns the current date and time in a format
-suitable for input to `formatdate`.
+  suitable for input to `formatdate`.
 - [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
   other date and time formats.

@@ -145,16 +145,20 @@ An example of using a v1 kv engine:
 
 If you store a value in vault using:
 
-    vault secrets enable -version=1 -path=secrets kv
-    vault kv put secrets/hello foo=world
+```
+vault secrets enable -version=1 -path=secrets kv
+vault kv put secrets/hello foo=world
+```
 
 You can access it using the following template engine:
 
-    {
-      "variables": {
-        "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
-      }
-    }
+```
+{
+  "variables": {
+    "VAULT_SECRETY_SECRET": "{{ vault `secrets/hello` `foo`}}"
+  }
+}
+```
 
 This example accesses the Vault path `secret/data/foo` and returns the value
 stored at the key `bar`, storing it as "my_secret".

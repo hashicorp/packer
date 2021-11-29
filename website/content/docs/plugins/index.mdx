@@ -65,7 +65,7 @@ it is a single-component plugin.
 <Tab heading="Packer init (from Packer v1.7.0)">
 
 ~> **Note**: Only _multi-component plugin binaries_ -- that is plugins named
-packer-plugin-\*, like the `packer-plugin-amazon` -- are expected to work with
+packer-plugin-*, like the `packer-plugin-amazon` -- are expected to work with
 Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
 types will keep on being detected but Packer cannot install them automatically.
 If a plugin you use has not been upgraded to use the multi-component plugin
@@ -223,24 +223,24 @@ Once the plugin is named properly, Packer automatically discovers plugins in
 the following directories in the given order. If a conflicting plugin is found
 later, it will take precedence over one found earlier.
 
-1.  The directory where `packer` is, or the executable directory.
+1. The directory where `packer` is, or the executable directory.
 
-2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
+1. The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
 
-3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
+1. The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
 
-4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
-    (windows)
+1. The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+   (windows)
 
-5.  The current working directory.
+1. The current working directory.
 
-6.  The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
-    than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
-    Separate directories in the PATH string using a colon (`:`) on posix systems and
-    a semicolon (`;`) on windows systems. The above example path would be able to
-    find a provisioner named `packer-provisioner-foo` in either
-    `~/custom-dir-1/packer-provisioner-foo` or
-    `~/custom-dir-2/packer-provisioner-foo`.
+1. The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
+   than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
+   Separate directories in the PATH string using a colon (`:`) on posix systems and
+   a semicolon (`;`) on windows systems. The above example path would be able to
+   find a provisioner named `packer-provisioner-foo` in either
+   `~/custom-dir-1/packer-provisioner-foo` or
+   `~/custom-dir-2/packer-provisioner-foo`.
 
 The valid types for plugins are:
 
@@ -269,24 +269,24 @@ Once the plugin is named properly, Packer automatically discovers plugins in
 the following directories in the given order. If a conflicting plugin is found
 later, it will take precedence over one found earlier.
 
-1.  The directory where `packer` is, or the executable directory.
+1. The directory where `packer` is, or the executable directory.
 
-2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
+1. The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
 
-3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
+1. The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
 
-4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
-    (windows)
+1. The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+   (windows)
 
-5.  The current working directory.
+1. The current working directory.
 
-6.  The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
-    than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
-    Separate directories in the PATH string using a colon (`:`) on posix systems and
-    a semicolon (`;`) on windows systems. The above example path would be able to
-    find a provisioner named `packer-provisioner-foo` in either
-    `~/custom-dir-1/packer-provisioner-foo` or
-    `~/custom-dir-2/packer-provisioner-foo`.
+1. The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
+   than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
+   Separate directories in the PATH string using a colon (`:`) on posix systems and
+   a semicolon (`;`) on windows systems. The above example path would be able to
+   find a provisioner named `packer-provisioner-foo` in either
+   `~/custom-dir-1/packer-provisioner-foo` or
+   `~/custom-dir-2/packer-provisioner-foo`.
 
 The valid types for plugins are:
 

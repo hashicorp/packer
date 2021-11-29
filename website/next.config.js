@@ -5,6 +5,9 @@ module.exports = withHashicorp({
   defaultLayout: true,
   nextOptimizedImages: true,
 })({
+  experimental: {
+    esmExternals: true,
+  },
   svgo: { plugins: [{ removeViewBox: false }] },
   rewrites: () => [
     {
