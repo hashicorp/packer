@@ -320,7 +320,7 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
-	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, b.Iteration.ID)
+	existingBuilds, err := b.client.ListBuilds(ctx, b.Slug, b.Iteration.ID)
 	if err != nil {
 		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
 	}

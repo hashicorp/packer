@@ -170,7 +170,12 @@ func (client *Client) CreateBuild(
 
 // ListBuilds queries an Iteration on HCP Packer registry for all of it's
 // associated builds. Currently all builds are returned regardless of status.
-func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iterationID string) ([]*models.HashicorpCloudPackerBuild, error) {
+func (client *Client) ListBuilds(
+	ctx context.Context,
+	bucketSlug string,
+	iterationID string,
+) ([]*models.HashicorpCloudPackerBuild, error) {
+
 	params := packer_service.NewPackerServiceListBuildsParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
