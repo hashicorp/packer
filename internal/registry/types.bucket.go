@@ -154,16 +154,15 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
-		BuildID: buildToUpdate.ID,
-		Updates: &models.HashicorpCloudPackerBuildUpdates{
-			PackerRunUUID: buildToUpdate.RunUUID,
-			Labels:        buildToUpdate.Labels,
-			Status:        status,
-		},
-	}
-
-	_, err := UpdateBuild(ctx, b.client, buildInput)
+	_, err := b.client.UpdateBuild(ctx,
+		buildToUpdate.ID,
+		buildToUpdate.RunUUID,
+		buildToUpdate.CloudProvider,
+		"",
+		buildToUpdate.Labels,
+		status,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
@@ -197,15 +196,6 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		return nil
 	}
 
-	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
-		BuildID: buildToUpdate.ID,
-		Updates: &models.HashicorpCloudPackerBuildUpdates{
-			PackerRunUUID: buildToUpdate.RunUUID,
-			Labels:        buildToUpdate.Labels,
-			Status:        status,
-		},
-	}
-
 	if len(buildToUpdate.Images) == 0 {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
@@ -225,11 +215,15 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
-	buildInput.Updates.CloudProvider = providerName
-	buildInput.Updates.SourceImageID = sourceID
-	buildInput.Updates.Images = images
-
-	_, err := UpdateBuild(ctx, b.client, buildInput)
+	_, err := b.client.UpdateBuild(ctx,
+		buildToUpdate.ID,
+		buildToUpdate.RunUUID,
+		buildToUpdate.CloudProvider,
+		sourceID,
+		buildToUpdate.Labels,
+		status,
+		images,
+	)
 	if err != nil {
 		return err
 	}

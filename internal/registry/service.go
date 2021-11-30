@@ -164,6 +164,7 @@ func (client *Client) CreateBuild(
 	params.Body = &models.HashicorpCloudPackerCreateBuildRequest{
 		Fingerprint: fingerprint,
 		Build: &models.HashicorpCloudPackerBuildCreateBody{
+			ComponentType: componentType,
 			PackerRunUUID: runUUID,
 			Status:        status,
 		},
@@ -191,12 +192,33 @@ func ListBuilds(ctx context.Context, client *Client, bucketSlug string, iteratio
 
 // UpdateBuild updates a single iteration build entry with the incoming input
 // data.
-func UpdateBuild(ctx context.Context, client *Client, input *models.HashicorpCloudPackerUpdateBuildRequest) (string, error) {
+func (client *Client) UpdateBuild(
+	ctx context.Context,
+	buildID,
+	runUUID,
+	cloudProvider,
+	sourceImageID string,
+	labels map[string]string,
+	status models.HashicorpCloudPackerBuildStatus,
+	images []*models.HashicorpCloudPackerImageCreateBody,
+) (string, error) {
+
 	params := packer_service.NewPackerServiceUpdateBuildParamsWithContext(ctx)
-	params.BuildID = input.BuildID
+	params.BuildID = buildID
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
-	params.Body = input
+
+	params.Body = &models.HashicorpCloudPackerUpdateBuildRequest{
+		BuildID: buildID,
+		Updates: &models.HashicorpCloudPackerBuildUpdates{
+			Images:        images,
+			PackerRunUUID: runUUID,
+			Labels:        labels,
+			Status:        status,
+			CloudProvider: cloudProvider,
+			SourceImageID: sourceImageID,
+		},
+	}
 
 	resp, err := client.Packer.PackerServiceUpdateBuild(params, nil)
 	if err != nil {
