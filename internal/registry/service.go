@@ -89,6 +89,7 @@ func (client *Client) CreateIteration(
 	params.BucketSlug = bucketSlug
 	params.Body = &models.HashicorpCloudPackerCreateIterationRequest{
 		Fingerprint: fingerprint,
+		BucketSlug:  bucketSlug,
 	}
 
 	return client.Packer.PackerServiceCreateIteration(params, nil)
@@ -141,6 +142,8 @@ func (client *Client) CreateBuild(
 	params.BucketSlug = bucketSlug
 	params.IterationID = iterationID
 	params.Body = &models.HashicorpCloudPackerCreateBuildRequest{
+		BucketSlug:  bucketSlug,
+		IterationID: iterationID,
 		Fingerprint: fingerprint,
 		Build: &models.HashicorpCloudPackerBuildCreateBody{
 			ComponentType: componentType,
