@@ -110,7 +110,7 @@ func CreateIteration(ctx context.Context, client *Client, input *models.Hashicor
 	return it.Payload.Iteration, nil
 }
 
-func (client *Client) GetIteration(
+func (client *Client) GetIteration_byID(
 	ctx context.Context,
 	bucketSlug,
 	id string,
@@ -125,24 +125,19 @@ func (client *Client) GetIteration(
 	return client.Packer.PackerServiceGetIteration(getItParams, nil)
 }
 
-// GetIteration queries the HCP Packer registry for an existing bucket
-// iteration.
-func GetIteration(ctx context.Context, client *Client, bucketslug string, fingerprint string) (*models.HashicorpCloudPackerIteration, error) {
-	params := packer_service.NewPackerServiceGetIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.OrganizationID
-	params.LocationProjectID = client.ProjectID
-	params.BucketSlug = bucketslug
+func (client *Client) GetIteration_byFingerprint(
+	ctx context.Context,
+	bucketSlug,
+	fingerprint string,
+) (*packer_service.PackerServiceGetIterationOK, error) {
 
-	// The identifier can be either fingerprint, iterationid, or incremental
-	// version for now, we only care about fingerprint so we're hardcoding it.
-	params.Fingerprint = &fingerprint
+	getItParams := packer_service.NewPackerServiceGetIterationParams()
+	getItParams.LocationOrganizationID = client.OrganizationID
+	getItParams.LocationProjectID = client.ProjectID
+	getItParams.BucketSlug = bucketSlug
+	getItParams.Fingerprint = &fingerprint
 
-	it, err := client.Packer.PackerServiceGetIteration(params, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return it.Payload.Iteration, nil
+	return client.Packer.PackerServiceGetIteration(getItParams, nil)
 }
 
 func (client *Client) CreateBuild(
@@ -258,24 +253,4 @@ func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug str
 
 	return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
 		channelName, bucketSlug)
-}
-
-// GetIteration queries the HCP Packer registry for an existing bucket
-// iteration.
-func GetIterationFromId(ctx context.Context, client *Client, bucketslug string, iterationId string) (*models.HashicorpCloudPackerIteration, error) {
-	params := packer_service.NewPackerServiceGetIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.OrganizationID
-	params.LocationProjectID = client.ProjectID
-	params.BucketSlug = bucketslug
-
-	// The identifier can be either fingerprint, iterationid, or incremental
-	// version for now, we only care about fingerprint so we're hardcoding it.
-	params.IterationID = &iterationId
-
-	it, err := client.Packer.PackerServiceGetIteration(params, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return it.Payload.Iteration, nil
 }

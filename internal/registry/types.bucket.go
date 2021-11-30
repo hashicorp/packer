@@ -282,27 +282,30 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 
 func (b *Bucket) initializeIteration(ctx context.Context) error {
 	// load existing iteration using fingerprint.
-	iterationResp, err := GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
+	createIterationResp, err := b.client.GetIteration_byFingerprint(ctx, b.Slug, b.Iteration.Fingerprint)
+	var iteration *models.HashicorpCloudPackerIteration
 	if checkErrorCode(err, codes.Aborted) {
 		// probably means Iteration doesn't exist need a way to check the error
-		iterationResp, err = b.createIteration()
+		iteration, err = b.createIteration()
+	} else {
+		iteration = createIterationResp.Payload.Iteration
 	}
 
 	if err != nil {
 		return fmt.Errorf("failed to initialize iteration for fingerprint %s: %s", b.Iteration.Fingerprint, err)
 	}
 
-	if iterationResp == nil {
+	if iteration == nil {
 		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	log.Println("[TRACE] a valid iteration was retrieved with the id", iterationResp.ID)
-	b.Iteration.ID = iterationResp.ID
+	log.Println("[TRACE] a valid iteration was retrieved with the id", iteration.ID)
+	b.Iteration.ID = iteration.ID
 
 	// If the iteration is completed and there are no new builds to add, Packer
 	// should exit and inform the user that artifacts already exists for the
 	// fingerprint associated with the iteration.
-	if iterationResp.Complete {
+	if iteration.Complete {
 		return fmt.Errorf("This iteration associated to the fingerprint %s is complete. "+
 			"If you wish to add a new build to this image a new iteration must be created by changing the build fingerprint.", b.Iteration.Fingerprint)
 	}

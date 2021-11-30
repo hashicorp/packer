@@ -109,6 +109,8 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
+	ctx := context.TODO()
+
 	cli, err := packerregistry.NewClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
@@ -118,11 +120,12 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
 
-	iteration, err := packerregistry.GetIterationFromId(context.TODO(), cli, d.config.Bucket, d.config.IterationID)
+	getIterationResp, err := cli.GetIteration_byID(ctx, d.config.Bucket, d.config.IterationID)
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"image iteration from HCP Packer registry: %s", err.Error())
 	}
+	iteration := getIterationResp.Payload.Iteration
 
 	output := DatasourceOutput{}
 
