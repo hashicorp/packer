@@ -68,6 +68,7 @@ func (client *Client) UpsertBucket(
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
 	params.Body = &models.HashicorpCloudPackerUpdateBucketRequest{
+		BucketSlug:  bucketSlug,
 		Description: bucketDescription,
 		Labels:      bucketLabels,
 	}
