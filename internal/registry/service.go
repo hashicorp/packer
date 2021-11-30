@@ -93,23 +93,6 @@ func (client *Client) CreateIteration(
 	return client.Packer.PackerServiceCreateIteration(params, nil)
 }
 
-// CreateIteration creates an Iteration for some Bucket on a HCP Packer
-// Registry.
-func CreateIteration(ctx context.Context, client *Client, input *models.HashicorpCloudPackerCreateIterationRequest) (*models.HashicorpCloudPackerIteration, error) {
-	params := packer_service.NewPackerServiceCreateIterationParamsWithContext(ctx)
-	params.LocationOrganizationID = client.OrganizationID
-	params.LocationProjectID = client.ProjectID
-	params.BucketSlug = input.BucketSlug
-	params.Body = input
-
-	it, err := client.Packer.PackerServiceCreateIteration(params, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return it.Payload.Iteration, nil
-}
-
 func (client *Client) GetIteration_byID(
 	ctx context.Context,
 	bucketSlug,
@@ -234,7 +217,12 @@ func (client *Client) UpdateBuild(
 
 // GetChannel loads the iterationId associated with a current channel. If the
 // channel does not exist in HCP Packer, GetChannel returns an error.
-func GetIterationFromChannel(ctx context.Context, client *Client, bucketSlug string, channelName string) (*models.HashicorpCloudPackerIteration, error) {
+func (client *Client) GetIterationFromChannel(
+	ctx context.Context,
+	bucketSlug string,
+	channelName string,
+) (*models.HashicorpCloudPackerIteration, error) {
+
 	params := packer_service.NewPackerServiceGetChannelParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID

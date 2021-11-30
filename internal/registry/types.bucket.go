@@ -262,22 +262,19 @@ func (b *Bucket) LoadDefaultSettingsFromEnv() {
 // The iteration can then be stored locally and used for tracking build status and images for a running
 // Packer build.
 func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error) {
-	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
-		BucketSlug:  b.Slug,
-		Fingerprint: b.Iteration.Fingerprint,
-	}
+	ctx := context.Background()
 
-	iterationResp, err := CreateIteration(context.TODO(), b.client, iterationInput)
+	createIterationResp, err := b.client.CreateIteration(ctx, b.Slug, b.Iteration.Fingerprint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	if iterationResp == nil {
+	if createIterationResp == nil {
 		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	log.Println("[TRACE] a valid iteration for build was created with the Id", iterationResp.ID)
-	return iterationResp, nil
+	log.Println("[TRACE] a valid iteration for build was created with the Id", createIterationResp.Payload.Iteration.ID)
+	return createIterationResp.Payload.Iteration, nil
 }
 
 func (b *Bucket) initializeIteration(ctx context.Context) error {
