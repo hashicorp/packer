@@ -94,7 +94,7 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
-	ctx := context.Background()
+	ctx := context.TODO()
 
 	cli, err := packerregistry.NewClient()
 	if err != nil {
