@@ -434,6 +434,17 @@ func TestBuild(t *testing.T) {
 			},
 			expectedCode: 1,
 		},
+		{
+			name: "hcl - using variables in build block",
+			args: []string{
+				testFixture("hcl", "vars-in-build-block.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"example.2.txt": two,
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
