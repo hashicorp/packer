@@ -279,7 +279,7 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 
 func (b *Bucket) initializeIteration(ctx context.Context) error {
 	// load existing iteration using fingerprint.
-	createIterationResp, err := b.client.GetIteration_byFingerprint(ctx, b.Slug, b.Iteration.Fingerprint)
+	createIterationResp, err := b.client.GetIteration(ctx, b.Slug, GetIteration_byFingerprint(b.Iteration.Fingerprint))
 	var iteration *models.HashicorpCloudPackerIteration
 	if checkErrorCode(err, codes.Aborted) {
 		// probably means Iteration doesn't exist need a way to check the error

@@ -95,32 +95,35 @@ func (client *Client) CreateIteration(
 	return client.Packer.PackerServiceCreateIteration(params, nil)
 }
 
-func (client *Client) GetIteration_byID(
+type GetIterationOption func(*packer_service.PackerServiceGetIterationParams)
+
+var (
+	GetIteration_byID = func(id string) GetIterationOption {
+		return func(params *packer_service.PackerServiceGetIterationParams) {
+			params.IterationID = &id
+		}
+	}
+	GetIteration_byFingerprint = func(fingerprint string) GetIterationOption {
+		return func(params *packer_service.PackerServiceGetIterationParams) {
+			params.Fingerprint = &fingerprint
+		}
+	}
+)
+
+func (client *Client) GetIteration(
 	ctx context.Context,
-	bucketSlug,
-	id string,
+	bucketSlug string,
+	opts ...GetIterationOption,
 ) (*packer_service.PackerServiceGetIterationOK, error) {
 
 	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = client.OrganizationID
 	getItParams.LocationProjectID = client.ProjectID
 	getItParams.BucketSlug = bucketSlug
-	getItParams.IterationID = &id
 
-	return client.Packer.PackerServiceGetIteration(getItParams, nil)
-}
-
-func (client *Client) GetIteration_byFingerprint(
-	ctx context.Context,
-	bucketSlug,
-	fingerprint string,
-) (*packer_service.PackerServiceGetIterationOK, error) {
-
-	getItParams := packer_service.NewPackerServiceGetIterationParams()
-	getItParams.LocationOrganizationID = client.OrganizationID
-	getItParams.LocationProjectID = client.ProjectID
-	getItParams.BucketSlug = bucketSlug
-	getItParams.Fingerprint = &fingerprint
+	for _, opt := range opts {
+		opt(getItParams)
+	}
 
 	return client.Packer.PackerServiceGetIteration(getItParams, nil)
 }
