@@ -35,7 +35,7 @@ func (b *HCPPackerRegistryBlock) WriteToBucketConfig(bucket *packerregistry.Buck
 	}
 }
 
-func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
+func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
 	par := &HCPPackerRegistryBlock{}
 	body := block.Body
 
@@ -48,7 +48,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, h
 		BuildLabels  map[string]string `hcl:"build_labels,optional"`
 		Config       hcl.Body          `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(body, nil, &b)
+	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}

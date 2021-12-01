@@ -97,7 +97,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(body, nil, &b)
+	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
@@ -144,7 +144,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				})
 				continue
 			}
-			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block)
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block, cfg)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
