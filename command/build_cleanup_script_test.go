@@ -7,7 +7,7 @@ import (
 
 func TestBuildWithCleanupScript(t *testing.T) {
 	c := &BuildCommand{
-		Meta: testMetaFile(t),
+		Meta: TestMetaFile(t),
 	}
 
 	args := []string{

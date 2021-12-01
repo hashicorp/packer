@@ -77,13 +77,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 
 	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
 
-	bucketInput := &models.HashicorpCloudPackerCreateBucketRequest{
-		BucketSlug:  b.Slug,
-		Description: b.Description,
-		Labels:      b.BucketLabels,
-	}
-
-	err := UpsertBucket(ctx, b.client, bucketInput)
+	err := b.client.UpsertBucket(ctx, b.Slug, b.Description, b.BucketLabels)
 	if err != nil {
 		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
 	}
@@ -106,21 +100,19 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 // This initial creation is needed so that Packer can properly track when an iteration is complete.
 func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
 	status := models.HashicorpCloudPackerBuildStatusUNSET
-	buildInput := &models.HashicorpCloudPackerCreateBuildRequest{
-		BucketSlug:  b.Slug,
-		Fingerprint: b.Iteration.Fingerprint,
-		IterationID: b.Iteration.ID,
-		Build: &models.HashicorpCloudPackerBuildCreateBody{
-			ComponentType: componentType,
-			PackerRunUUID: b.Iteration.RunUUID,
-			Status:        status,
-		},
-	}
 
-	id, err := CreateBuild(ctx, b.client, buildInput)
+	resp, err := b.client.CreateBuild(ctx,
+		b.Slug,
+		b.Iteration.RunUUID,
+		b.Iteration.ID,
+		b.Iteration.Fingerprint,
+		componentType,
+		status,
+	)
 	if err != nil {
 		return err
 	}
+	id := resp.Payload.Build.ID
 
 	if b.BuildLabels == nil {
 		b.BuildLabels = make(map[string]string)
@@ -162,16 +154,15 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
-		BuildID: buildToUpdate.ID,
-		Updates: &models.HashicorpCloudPackerBuildUpdates{
-			PackerRunUUID: buildToUpdate.RunUUID,
-			Labels:        buildToUpdate.Labels,
-			Status:        status,
-		},
-	}
-
-	_, err := UpdateBuild(ctx, b.client, buildInput)
+	_, err := b.client.UpdateBuild(ctx,
+		buildToUpdate.ID,
+		buildToUpdate.RunUUID,
+		buildToUpdate.CloudProvider,
+		"",
+		buildToUpdate.Labels,
+		status,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
@@ -205,15 +196,6 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		return nil
 	}
 
-	buildInput := &models.HashicorpCloudPackerUpdateBuildRequest{
-		BuildID: buildToUpdate.ID,
-		Updates: &models.HashicorpCloudPackerBuildUpdates{
-			PackerRunUUID: buildToUpdate.RunUUID,
-			Labels:        buildToUpdate.Labels,
-			Status:        status,
-		},
-	}
-
 	if len(buildToUpdate.Images) == 0 {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
@@ -233,11 +215,15 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
-	buildInput.Updates.CloudProvider = providerName
-	buildInput.Updates.SourceImageID = sourceID
-	buildInput.Updates.Images = images
-
-	_, err := UpdateBuild(ctx, b.client, buildInput)
+	_, err := b.client.UpdateBuild(ctx,
+		buildToUpdate.ID,
+		buildToUpdate.RunUUID,
+		buildToUpdate.CloudProvider,
+		sourceID,
+		buildToUpdate.Labels,
+		status,
+		images,
+	)
 	if err != nil {
 		return err
 	}
@@ -276,47 +262,47 @@ func (b *Bucket) LoadDefaultSettingsFromEnv() {
 // The iteration can then be stored locally and used for tracking build status and images for a running
 // Packer build.
 func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error) {
-	iterationInput := &models.HashicorpCloudPackerCreateIterationRequest{
-		BucketSlug:  b.Slug,
-		Fingerprint: b.Iteration.Fingerprint,
-	}
+	ctx := context.Background()
 
-	iterationResp, err := CreateIteration(context.TODO(), b.client, iterationInput)
+	createIterationResp, err := b.client.CreateIteration(ctx, b.Slug, b.Iteration.Fingerprint)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	if iterationResp == nil {
+	if createIterationResp == nil {
 		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	log.Println("[TRACE] a valid iteration for build was created with the Id", iterationResp.ID)
-	return iterationResp, nil
+	log.Println("[TRACE] a valid iteration for build was created with the Id", createIterationResp.Payload.Iteration.ID)
+	return createIterationResp.Payload.Iteration, nil
 }
 
 func (b *Bucket) initializeIteration(ctx context.Context) error {
 	// load existing iteration using fingerprint.
-	iterationResp, err := GetIteration(ctx, b.client, b.Slug, b.Iteration.Fingerprint)
+	createIterationResp, err := b.client.GetIteration(ctx, b.Slug, GetIteration_byFingerprint(b.Iteration.Fingerprint))
+	var iteration *models.HashicorpCloudPackerIteration
 	if checkErrorCode(err, codes.Aborted) {
 		// probably means Iteration doesn't exist need a way to check the error
-		iterationResp, err = b.createIteration()
+		iteration, err = b.createIteration()
+	} else {
+		iteration = createIterationResp.Payload.Iteration
 	}
 
 	if err != nil {
 		return fmt.Errorf("failed to initialize iteration for fingerprint %s: %s", b.Iteration.Fingerprint, err)
 	}
 
-	if iterationResp == nil {
+	if iteration == nil {
 		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	log.Println("[TRACE] a valid iteration was retrieved with the id", iterationResp.ID)
-	b.Iteration.ID = iterationResp.ID
+	log.Println("[TRACE] a valid iteration was retrieved with the id", iteration.ID)
+	b.Iteration.ID = iteration.ID
 
 	// If the iteration is completed and there are no new builds to add, Packer
 	// should exit and inform the user that artifacts already exists for the
 	// fingerprint associated with the iteration.
-	if iterationResp.Complete {
+	if iteration.Complete {
 		return fmt.Errorf("This iteration associated to the fingerprint %s is complete. "+
 			"If you wish to add a new build to this image a new iteration must be created by changing the build fingerprint.", b.Iteration.Fingerprint)
 	}
@@ -331,7 +317,7 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
-	existingBuilds, err := ListBuilds(ctx, b.client, b.Slug, b.Iteration.ID)
+	existingBuilds, err := b.client.ListBuilds(ctx, b.Slug, b.Iteration.ID)
 	if err != nil {
 		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
 	}

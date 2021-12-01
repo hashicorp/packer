@@ -23,14 +23,14 @@ func (c *ClientError) Error() string {
 	return fmt.Sprintf("status %d: err %v", c.StatusCode, c.Err)
 }
 
-// checkErrorCode checks the error string for err for some code and returns true if the code is found.
-// Ideally this function should use status.FromError https://pkg.go.dev/google.golang.org/grpc/status#pkg-functions
-// but that doesn't appear to work for all of the Cloud Packer Service response errors.
+// checkErrorCode checks the error string for err for some code and returns true
+// if the code is found. Ideally this function should use status.FromError
+// https://pkg.go.dev/google.golang.org/grpc/status#pkg-functions but that
+// doesn't appear to work for all of the Cloud Packer Service response errors.
 func checkErrorCode(err error, code codes.Code) bool {
 	if err == nil {
 		return false
 	}
 
 	return strings.Contains(err.Error(), fmt.Sprintf("Code:%d", code))
-
 }
