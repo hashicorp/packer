@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
 	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/zclconf/go-cty/cty"
 )
 
 const (
@@ -105,6 +106,12 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.Name = b.Name
 	build.Description = b.Description
 
+	// Expose build.name during parsing of pps and provisioners
+	ectx := cfg.EvalContext(BuildContext, nil)
+	ectx.Variables[buildAccessor] = cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal(b.Name),
+	})
+
 	for _, buildFrom := range b.FromSources {
 		ref := sourceRefFromString(buildFrom)
 
@@ -158,7 +165,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			build.Sources = append(build.Sources, ref)
 		case buildProvisionerLabel:
-			p, moreDiags := p.decodeProvisioner(block, cfg)
+			p, moreDiags := p.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -173,14 +180,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				})
 				continue
 			}
-			p, moreDiags := p.decodeProvisioner(block, cfg)
+			p, moreDiags := p.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 			build.ErrorCleanupProvisionerBlock = p
 		case buildPostProcessorLabel:
-			pp, moreDiags := p.decodePostProcessor(block, cfg)
+			pp, moreDiags := p.decodePostProcessor(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -197,7 +204,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			errored := false
 			postProcessors := []*PostProcessorBlock{}
 			for _, block := range content.Blocks {
-				pp, moreDiags := p.decodePostProcessor(block, cfg)
+				pp, moreDiags := p.decodePostProcessor(block, ectx)
 				diags = append(diags, moreDiags...)
 				if moreDiags.HasErrors() {
 					errored = true

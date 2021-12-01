@@ -534,6 +534,120 @@ func TestParse_build(t *testing.T) {
 			[]packersdk.Build{},
 			false,
 		},
+		{"use build.name in post-processor block",
+			defaultParser,
+			parseTestArgs{"testdata/build/post-processor_build_name_interpolation.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Name: "test-build",
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+						PostProcessorsLists: [][]*PostProcessorBlock{
+							{
+								{
+									PName: "test-build",
+									PType: "manifest",
+								},
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					BuildName:    "test-build",
+					Type:         "virtualbox-iso.ubuntu-1204",
+					Prepared:     true,
+					Builder:      emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{
+						{
+							{
+								PName: "test-build",
+								PType: "manifest",
+								PostProcessor: &HCL2PostProcessor{
+									PostProcessor: &MockPostProcessor{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{
+												Tags:        []MockTag{},
+												SliceString: []string{lockedVersion, "test-build"},
+											},
+											NestedSlice: []NestedMockConfig{},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			false,
+		},
+		{"use build.name in provisioner block",
+			defaultParser,
+			parseTestArgs{"testdata/build/provisioner_build_name_interpolation.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "build"),
+				Sources: map[SourceRef]SourceBlock{
+					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
+				},
+				Builds: Builds{
+					&BuildBlock{
+						Name: "build-name-test",
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+						ProvisionerBlocks: []*ProvisionerBlock{
+							{
+								PName: "build-name-test",
+								PType: "shell",
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					BuildName: "build-name-test",
+					Type:      "virtualbox-iso.ubuntu-1204",
+					Prepared:  true,
+					Builder:   emptyMockBuilder,
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PName: "build-name-test",
+							PType: "shell",
+							Provisioner: &HCL2Provisioner{
+								Provisioner: &MockProvisioner{
+									Config: MockConfig{
+										NestedMockConfig: NestedMockConfig{
+											Tags:        []MockTag{},
+											SliceString: []string{"build-name-test"},
+										},
+										NestedSlice: []NestedMockConfig{},
+									},
+								},
+							},
+						},
+					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+				},
+			},
+			false,
+		},
 	}
 	testParse(t, tests)
 }
