@@ -16,6 +16,8 @@ See the [section
 below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
 for details.
 
+`@include 'path/separator-note.mdx'`
+
 ## Basic Example
 
 The example below is fully functional.
@@ -25,7 +27,7 @@ The example below is fully functional.
 
 ```hcl
 provisioner "powershell" {
-  inline = ["dir c:\\"]
+  inline = ["dir c:/"]
 }
 ```
 
@@ -35,7 +37,7 @@ provisioner "powershell" {
 ```json
 {
   "type": "powershell",
-  "inline": ["dir c:\\"]
+  "inline": ["dir c:/"]
 }
 ```
 
@@ -47,7 +49,8 @@ provisioner "powershell" {
 @include 'provisioners/shell-config.mdx'
 
 - `debug_mode` - If set, sets PowerShell's [PSDebug mode](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-psdebug?view=powershell-7)
-  in order to make script debugging easier. For instance, setting the value to 1 results in adding this to the execute command:
+  in order to make script debugging easier. For instance, setting the value to 1
+  results in adding this to the execute command:
 
   ```powershell
   Set-PSDebug -Trace 1
@@ -60,9 +63,9 @@ provisioner "powershell" {
   powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
   ```
 
-  This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
-  may use user variables and template functions in this field. In addition,
-  you may use two extra variables:
+  This is a [template engine](/docs/templates/legacy_json_templates/engine).
+  Therefore, you may use user variables and template functions in this field. In
+  addition, you may use two extra variables:
 
   - `Path`: The path to the script to run
   - `Vars`: The location of a temp file containing the list of
@@ -112,9 +115,9 @@ provisioner "powershell" {
   powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
   ```
 
-  This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
-  may use user variables and template functions in this field. In addition,
-  you may use two extra variables:
+  This is a [template engine](/docs/templates/legacy_json_templates/engine).
+  Therefore, you may use user variables and template functions in this field. In
+  addition, you may use two extra variables:
 
   - `Path`: The path to the script to run
   - `Vars`: The location of a temp file containing the list of
