@@ -8,6 +8,9 @@
     },
     {
       "pattern": "^https://www.linode.com"
+    },
+    {
+      "pattern": "^https://oidref.com/"
     }
   ],
   "replacementPatterns": [

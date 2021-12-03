@@ -1,5 +1,38 @@
 ## 1.7.9 (Upcoming)
 
+### NOTES:
+
+* The `hcp_packer_registry.labels` argument has been deprecated in favor of
+    the new `bucket_labels` argument to support custom user generated bucket
+    labels. [GH-11401](https://github.com/hashicorp/packer/pull/11401)
+* The code of the Outscale builder was handed over to the outscale org
+    [GH-11428](https://github.com/hashicorp/packer/pull/11428)
+
+### IMPROVEMENTS:
+
+* core/hcl2: Add `bucket_labels` argument to the `hcp_packer_registry` block to
+    support custom user generated bucket labels.
+    [GH-11401](https://github.com/hashicorp/packer/pull/11401)
+* core/hcl2: Add `build_labels` argument to the `hcp_packer_registry` block to
+    support custom user generated build labels.
+    [GH-11401](https://github.com/hashicorp/packer/pull/11401)
+* core/hcl2: Allow for the use of variables and locals within a `build` block.
+    [GH-11421](https://github.com/hashicorp/packer/pull/11421)
+* core/hcl2: Allow for the use of variables and locals within a
+    `hcp_packer_registry` block.
+    [GH-11421](https://github.com/hashicorp/packer/pull/11421)
+* provisioner/powwershell: Tiny tweaks and fixes for the PowerShell
+    provisioner. [GH-11410](https://github.com/hashicorp/packer/pull/11410)
+
+### BUG FIXES:
+
+* core/hcl2: Fix crash when a provisioner `timeout` argument is not properly
+    formatted. [GH-11382](https://github.com/hashicorp/packer/pull/11382)
+* provisioner/file: File provisioner will now perform a noop when no source
+    file content is specified; previously missing content resulted in a hard fail.
+    [GH-11349](https://github.com/hashicorp/packer/pull/11349)
+
+
 ## 1.7.8 (October 27, 2021)
 
 ### BUG FIXES
@@ -8,17 +41,27 @@
 
 ## 1.7.7 (October 19, 2021)
 
+### NOTES:
+
+* The code of the Scaleway builder was handed over to the scaleway org
+    [GH-11298](https://github.com/hashicorp/packer/pull/11298)
+    [GH-11296](https://github.com/hashicorp/packer/pull/11296)
+
 ### IMPROVEMENTS:
-* Improved support and user experience for HCP Packer registry - [GH-11304](https://github.com/hashicorp/packer/pull/11304) [GH-11315](https://github.com/hashicorp/packer/pull/11315) [GH-11320](https://github.com/hashicorp/packer/pull/11320) [GH-11319](https://github.com/hashicorp/packer/pull/11319)
+* Improved support and user experience for HCP Packer registry.
+    [GH-11304](https://github.com/hashicorp/packer/pull/11304)
+    [GH-11315](https://github.com/hashicorp/packer/pull/11315)
+    [GH-11320](https://github.com/hashicorp/packer/pull/11320)
+    [GH-11319](https://github.com/hashicorp/packer/pull/11319)
 
-* core: Show successful message upon successful packer validate - [GH-11337](https://github.com/hashicorp/packer/pull/11337)
-* core: Allow use in top level source variables in a build.source block - [GH-11318](https://github.com/hashicorp/packer/pull/11318)
-* core: Allow to use build variables in a post processor - [GH-11323](https://github.com/hashicorp/packer/pull/11323)
-* packer init: better error handling. - [GH-11330](https://github.com/hashicorp/packer/pull/11330)
-
-### Plugin Breakout:
-
-* The code of the Scaleway builder was handed over to the scaleway org [GH-11298](https://github.com/hashicorp/packer/pull/11298) [GH-11296](https://github.com/hashicorp/packer/pull/11296)
+* core: Allow to use build variables in a post processor.
+    [GH-11323](https://github.com/hashicorp/packer/pull/11323)
+* core: Allow use in top level source variables in a build.source block.
+    [GH-11318](https://github.com/hashicorp/packer/pull/11318)
+* core: Show successful message upon successful packer validate.
+    [GH-11337](https://github.com/hashicorp/packer/pull/11337)
+* packer init: better error handling.
+    [GH-11330](https://github.com/hashicorp/packer/pull/11330)
 
 ## 1.7.6 (September 28, 2021)
 
