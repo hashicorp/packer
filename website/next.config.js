@@ -19,5 +19,6 @@ module.exports = withHashicorp({
     SEGMENT_WRITE_KEY: 'AjXdfmTTk1I9q9dfyePuDFHBrz1tCO3l',
     BUGSNAG_CLIENT_KEY: 'de0b822b269aa57b620efd8927e03744',
     BUGSNAG_SERVER_KEY: 'b6c57b27a37e531a5de94f065dd98bc0',
+    ENABLE_VERSIONED_DOCS: process.env.ENABLE_VERSIONED_DOCS || false,
   },
 })
