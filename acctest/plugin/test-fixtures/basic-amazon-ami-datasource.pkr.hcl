@@ -13,6 +13,7 @@ data "amazon-ami" "test" {
     root-device-type    = "ebs"
     virtualization-type = "hvm"
   }
+  region = "us-west-2"
   most_recent = true
   owners      = ["099720109477"]
 }
