@@ -29,12 +29,12 @@ machine image after booting. Provisioners prepare the system for use.
 The list of available provisioners can be found in the
 [provisioners](/docs/provisioners) section.
 
-## Run on Specific Builds
+## Run on Specific Sources
 
 You can use the `only` or `except` configurations to run a provisioner only
-with specific builds. These two configurations do what you expect: `only` will
-only run the provisioner on the specified builds and `except` will run the
-provisioner on anything other than the specified builds.
+with specific sources. These two configurations do what you expect: `only` will
+only run the provisioner on the specified sources and `except` will run the
+provisioner on anything other than the specified sources.
 
 An example of `only` being used is shown below, but the usage of `except` is
 effectively the same:
@@ -73,7 +73,13 @@ build {
 }
 ```
 
-The values within `only` or `except` are _build names_, not builder types.
+The source names within `only` and `except` must suppress `source.` prefix.
+
+The values within `only` or `except` are _source names_, not builder types nor build names.
+
+-> Note: In the cli `only` and `except` will match against **build names** (for
+example:`my_build.amazon-ebs.first-example`) but in a provisioner they will
+match on the **source name** (for example:`amazon-ebs.third-example`).
 
 ## Build-Specific Overrides
 
