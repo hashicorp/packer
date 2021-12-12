@@ -75,6 +75,6 @@ configuration:
 - `packer build -only '*.second-example-local-name' dir`: will only run that
   specifically named build.
 
--> Note: In the cli `only` and `except` will match agains **build names** (for
+-> Note: In the cli `only` and `except` will match against **build names** (for
 example:`my_build.amazon-ebs.first-example`) but in a provisioner they will
 match on the **source name** (for example:`amazon-ebs.third-example`).
