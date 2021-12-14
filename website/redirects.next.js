@@ -1,5 +1,10 @@
 module.exports = [
   {
+    source: '/home',
+    destination: '/',
+    permanent: true,
+  },
+  {
     source: '/docs/installation',
     destination: '/docs/install',
     permanent: true,
