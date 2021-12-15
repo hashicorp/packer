@@ -74,14 +74,15 @@ source, you need to have golang >= v1.17
 
 ## Setting up Packer for dev
 
-If/when you have go installed you can already `go get` packer and `make` in
+If/when you have go installed you can already clone packer and `make` in
 order to compile and test Packer. These instructions target
 POSIX-like environments (macOS, Linux, Cygwin, etc.) so you may need to
 adjust them for Windows or other shells.
 
-1. Download the Packer source (and its dependencies) by running
-   `go get github.com/hashicorp/packer`. This will download the Packer source to
-   `$GOPATH/src/github.com/hashicorp/packer`.
+
+1. Create a directory in your GOPATH for the code `mkdir -p $(go env GOPATH)/src/github.com/hashicorp && cd $_`
+and clone the packer repository from GitHub into your GOPATH `git clone https://github.com/hashicorp/packer.git`
+then change into the packer directory `cd packer`
 
 2. When working on Packer, first `cd $GOPATH/src/github.com/hashicorp/packer`
    so you can run `make` and easily access other files. Run `make help` to get
