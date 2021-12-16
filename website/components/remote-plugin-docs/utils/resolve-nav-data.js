@@ -139,7 +139,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     repo,
     version,
     pluginTier,
-    pluginIsHcpPackerReady = false,
+    isHcpPackerReady = false,
     sourceBranch = 'main',
     zipFile = '',
   } = pluginConfigEntry
@@ -185,7 +185,7 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
       remoteFile: { filePath, fileString, sourceUrl },
       pluginData: {
         tier: parsedPluginTier,
-        pluginIsHcpPackerReady,
+        isHcpPackerReady,
       },
     }
   })

@@ -90,7 +90,7 @@
     "path": "hashicups",
     "repo": "hashicorp/packer-plugin-hashicups",
     "version": "latest",
-    "pluginIsHcpPackerReady": true
+    "isHcpPackerReady": true
   },
   {
     "title": "hcloud",
