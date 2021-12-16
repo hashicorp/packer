@@ -160,7 +160,8 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
   // - filePath is the path to the source file in the source repo
   // - fileString is a string representing the file source
   // - sourceUrl is a link to the original file in the source repo
-  // We also add pluginTier and pluginIsHcpPackerReady attributes
+  // We also add pluginData, which is used to add badges
+  // such as the plugin's tier when rendering the page.
   const navNodes = docsMdxFiles.map((mdxFile) => {
     const { filePath, fileString } = mdxFile
     // Process into a NavLeaf, with a remoteFile attribute
@@ -183,7 +184,6 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
       path: urlPath,
       remoteFile: { filePath, fileString, sourceUrl },
       pluginData: {
-        repo,
         tier: parsedPluginTier,
         pluginIsHcpPackerReady,
       },
