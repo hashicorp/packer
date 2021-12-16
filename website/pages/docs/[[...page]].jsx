@@ -1,5 +1,6 @@
 import { productName, productSlug } from 'data/metadata'
 import DocsPage from '@hashicorp/react-docs-page'
+import BadgesHeader from 'components/badges-header'
 import PluginTierLabel from 'components/plugin-tier-label'
 import DevAlert from 'components/dev-alert'
 import Checklist from 'components/checklist'
@@ -10,7 +11,7 @@ import {
 } from 'components/remote-plugin-docs/server'
 
 //  Configure the docs path and remote plugin docs loading
-const additionalComponents = { PluginTierLabel, Checklist }
+const additionalComponents = { BadgesHeader, PluginTierLabel, Checklist }
 const baseRoute = 'docs'
 const localContentDir = 'content/docs'
 const mainBranch = 'master'

@@ -27,10 +27,10 @@ to match Terraform Registry tier labels.
     --text-color: #975b06;
   }
 
-  /* subsequent page titles should get cozy,
-  otherwise the label doesn't look associated */
-  & + h1 {
-    margin-top: 16px;
+  /* color variations */
+  &.tier-hcp_packer_ready {
+    --background-color: var(--packer-secondary);
+    --text-color: #026c9a;
   }
 }
 
@@ -45,11 +45,5 @@ to match Terraform Registry tier labels.
 
 .icon {
   margin-right: 4px;
-
-  & svg {
-    display: block;
-    & [fill] {
-      fill: var(--text-color);
-    }
-  }
+  color: var(--text-color);
 }

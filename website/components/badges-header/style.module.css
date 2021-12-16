@@ -1,0 +1,21 @@
+.root {
+  position: relative;
+  margin: 32px 0 0 0;
+
+  /* subsequent page titles should get cozy,
+  otherwise the label doesn't look associated */
+  & + h1 {
+    margin-top: 16px;
+  }
+}
+
+.surroundSpaceCompensator {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -4px;
+}
+
+.badgeSpacer {
+  line-height: 0;
+  padding: 4px;
+}
