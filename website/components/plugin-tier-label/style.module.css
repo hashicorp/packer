@@ -16,8 +16,13 @@ to match Terraform Registry tier labels.
   top: -1px;
   vertical-align: bottom;
 
-  /* variations */
-  &[data-tier='official'] {
+  /* add spacing when above heading */
+  &.isPageHeading {
+    margin-top: 32px;
+  }
+
+  /* color variations */
+  &.tier-official {
     --background-color: #f8e397;
     --text-color: #975b06;
   }
