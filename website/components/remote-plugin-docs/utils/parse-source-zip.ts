@@ -1,6 +1,6 @@
-const path = require('path')
-const AdmZip = require('adm-zip')
-const validatePluginDocsFiles = require('./validate-plugin-docs-files')
+import path from 'path'
+import AdmZip from 'adm-zip'
+import validatePluginDocsFiles from './validate-plugin-docs-files'
 
 /*
 
@@ -19,7 +19,7 @@ the full release archive
 // otherwise, return [err, null]
 // where err is an error message describing whether the
 // docs files were missing or invalid, with a path to resolution
-async function parseSourceZip(response) {
+export default async function parseSourceZip(response: Response) {
   const responseBuffer = Buffer.from(await response.arrayBuffer())
   const responseZip = new AdmZip(responseBuffer)
   const sourceEntries = responseZip.getEntries()
@@ -36,7 +36,7 @@ async function parseSourceZip(response) {
     return filePath
   })
   const validationError = validatePluginDocsFiles(docsFilePaths)
-  if (validationError) return [validationError, null]
+  if (validationError) return [validationError, null] as const
   // If valid, filter for MDX files only, and return
   // a { filePath, fileString } object for each mdx file
   const docsMdxFiles = docsEntries
@@ -50,7 +50,5 @@ async function parseSourceZip(response) {
       const fileString = e.getData().toString()
       return { filePath, fileString }
     })
-  return [null, docsMdxFiles]
+  return [null, docsMdxFiles] as const
 }
-
-module.exports = parseSourceZip

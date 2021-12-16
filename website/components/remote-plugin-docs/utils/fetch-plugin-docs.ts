@@ -1,6 +1,6 @@
-const fetch = require('isomorphic-unfetch')
-const parseSourceZip = require('./parse-source-zip')
-const parseDocsZip = require('./parse-docs-zip')
+import fetch from 'isomorphic-unfetch'
+import parseSourceZip from './parse-source-zip'
+import parseDocsZip from './parse-docs-zip'
 
 // Given a repo and tag,
 //
@@ -11,7 +11,13 @@ const parseDocsZip = require('./parse-docs-zip')
 // otherwise, return [err, null]
 // where err is an error message describing whether the
 // docs files were missing or invalid, with a path to resolution
-async function fetchDocsFiles({ repo, tag }) {
+async function fetchDocsFiles({
+  repo,
+  tag,
+}: {
+  repo: string
+  tag: string
+}): Promise<[string, null] | [null, string]> {
   // If there's a docs.zip asset, we'll prefer that
   const docsZipUrl =
     tag === 'latest'
@@ -61,4 +67,4 @@ function memoize(method) {
   }
 }
 
-module.exports = memoize(fetchPluginDocs)
+export default memoize(fetchPluginDocs)

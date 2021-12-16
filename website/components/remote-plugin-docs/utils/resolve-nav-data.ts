@@ -1,10 +1,10 @@
-const fs = require('fs')
-const path = require('path')
-const grayMatter = require('gray-matter')
-const fetchPluginDocs = require('./fetch-plugin-docs')
-const fetchDevPluginDocs = require('./fetch-dev-plugin-docs')
-const validateFilePaths = require('@hashicorp/react-docs-sidenav/utils/validate-file-paths')
-const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/validate-route-structure')
+import fs from 'fs'
+import path from 'path'
+import grayMatter from 'gray-matter'
+import fetchPluginDocs from './fetch-plugin-docs'
+// import fetchDevPluginDocs from './fetch-dev-plugin-docs'
+import validateFilePaths from '@hashicorp/react-docs-sidenav/utils/validate-file-paths'
+import validateRouteStructure from '@hashicorp/react-docs-sidenav/utils/validate-route-structure'
 
 /**
  * Resolves nav-data from file, including optional
@@ -16,7 +16,11 @@ const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/vali
  * @param {string} options.remotePluginsFile path to a remote-plugins.json file, relative to the cwd. Example: "data/docs-remote-plugins.json".
  * @returns {array} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
-async function resolveNavData(navDataFile, localContentDir, options = {}) {
+export default async function resolveNavData(
+  navDataFile: string,
+  localContentDir: string,
+  options = {} as { remotePluginsFile?: string; currentPath?: string }
+) {
   const { remotePluginsFile, currentPath } = options
   // Read in files
   const navDataPath = path.join(process.cwd(), navDataFile)
@@ -40,6 +44,15 @@ async function resolveNavData(navDataFile, localContentDir, options = {}) {
   return withFilePaths
 }
 
+interface PluginEntry {
+  title: string
+  path: string
+  repo: string
+  version: 'latest'
+  sourceBranch?: 'main' | 'master'
+  pluginTier?: 'community' | 'official'
+}
+
 // Given a remote plugins config file, and the full tree of docs navData which
 // contains top-level branch routes that match plugin component types,
 // fetch and parse all remote plugin docs, merge them into the
@@ -48,7 +61,9 @@ async function resolveNavData(navDataFile, localContentDir, options = {}) {
 async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
   // Read in and parse the plugin configuration JSON
   const remotePluginsPath = path.join(process.cwd(), remotePluginsFile)
-  const pluginEntries = JSON.parse(fs.readFileSync(remotePluginsPath, 'utf-8'))
+  const pluginEntries: PluginEntry[] = JSON.parse(
+    fs.readFileSync(remotePluginsPath, 'utf-8')
+  )
   // Add navData for each plugin's component.
   // Note that leaf nodes include a remoteFile property object with the full MDX fileString
   const pluginEntriesWithDocs = await Promise.all(
@@ -132,7 +147,10 @@ async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
 // Note that navData leaf nodes have a special remoteFile property,
 // which contains { filePath, fileString } data for the remote
 // plugin doc .mdx file
-async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
+async function resolvePluginEntryDocs(
+  pluginConfigEntry: PluginEntry,
+  currentPath: string
+) {
   const {
     title,
     path: slug,
@@ -140,14 +158,15 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     version,
     pluginTier,
     sourceBranch = 'main',
-    zipFile = '',
+    // zipFile = '',
   } = pluginConfigEntry
   var docsMdxFiles
-  if (zipFile !== '') {
-    docsMdxFiles = await fetchDevPluginDocs(zipFile)
-  } else {
-    docsMdxFiles = await fetchPluginDocs({ repo, tag: version })
-  }
+  // if (zipFile !== '') {
+  //   docsMdxFiles = await fetchDevPluginDocs(zipFile)
+  // } else {
+  docsMdxFiles = await fetchPluginDocs({ repo, tag: version })
+  // }
+
   // We construct a special kind of "NavLeaf" node, with a remoteFile property,
   // consisting of a { filePath, fileString, sourceUrl }, where:
   // - filePath is the path to the source file in the source repo
@@ -261,5 +280,3 @@ function visitNavLeaves(navData, visitFn) {
     return navNode
   })
 }
-
-module.exports = resolveNavData

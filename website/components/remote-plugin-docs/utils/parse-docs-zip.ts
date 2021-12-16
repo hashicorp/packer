@@ -1,6 +1,6 @@
-const path = require('path')
-const AdmZip = require('adm-zip')
-const validatePluginDocsFiles = require('./validate-plugin-docs-files')
+import path from 'path'
+import AdmZip from 'adm-zip'
+import validatePluginDocsFiles from './validate-plugin-docs-files'
 
 /*
 
@@ -18,7 +18,7 @@ NOTE: used for default `docs.zip` release assets
 // otherwise, return [err, null]
 // where err is an error message describing whether the
 // docs files were missing or invalid, with a path to resolution
-async function parseDocsZip(response) {
+export default async function parseDocsZip(response) {
   // the file path from the repo root is the same as the zip entryName,
   // which includes the docs directory as the first part of the path
   const responseBuffer = Buffer.from(await response.arrayBuffer())
@@ -46,5 +46,3 @@ async function parseDocsZip(response) {
    const dirs = path.dirname(e.entryName).split('/')
       const pathFromDocsDir = dirs.slice(1).join('/')
       */
-
-module.exports = parseDocsZip

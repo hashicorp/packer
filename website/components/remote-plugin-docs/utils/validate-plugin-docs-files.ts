@@ -1,4 +1,4 @@
-const path = require('path')
+import path from 'path'
 
 const COMPONENT_TYPES = [
   'builders',
@@ -11,7 +11,7 @@ const COMPONENT_TYPES = [
 // validate that no unexpected files are being included,
 // and that there is at least one component subfolder
 // with at least one .mdx file within it.
-function validatePluginDocsFiles(filePaths) {
+export default function validatePluginDocsFiles(filePaths) {
   function isValidPath(filePath) {
     // Allow the docs root folder
     const isDocsRoot = filePath === 'docs/'
@@ -49,5 +49,3 @@ function validatePluginDocsFiles(filePaths) {
   }
   return null
 }
-
-module.exports = validatePluginDocsFiles

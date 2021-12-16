@@ -1,6 +1,6 @@
-const path = require('path')
-const validatePluginDocsFiles = require('./validate-plugin-docs-files')
-const AdmZip = require('adm-zip')
+import path from 'path'
+import validatePluginDocsFiles from './validate-plugin-docs-files'
+import AdmZip from 'adm-zip'
 
 // Given a zipFile path,
 //
@@ -11,7 +11,7 @@ const AdmZip = require('adm-zip')
 // otherwise, return [err, null]
 // where err is an error message describing whether the
 // docs files were missing or invalid, with a path to resolution
-async function fetchDevPluginDocs(zipFile) {
+export default async function fetchDevPluginDocs(zipFile) {
   const [err, docsMdxFiles] = await parseZipFile(zipFile)
   if (err) {
     const errMsg = `Invalid plugin dev docs file ${zipFile}. ${err}`
@@ -50,5 +50,3 @@ async function parseZipFile(zipFile) {
     })
   return [null, docsMdxFiles]
 }
-
-module.exports = fetchDevPluginDocs

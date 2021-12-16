@@ -15,7 +15,7 @@ async function generateStaticPaths({
   const navData = await resolveNavData(navDataFile, localContentDir, {
     remotePluginsFile,
   })
-  const paths = await getPathsFromNavData(navData)
+  const paths = getPathsFromNavData(navData)
   return paths
 }
 
@@ -27,6 +27,19 @@ async function generateStaticProps({
   params,
   product,
   remotePluginsFile,
+}: {
+  additionalComponents: Record<string, any>
+  localContentDir: string
+  mainBranch?: string
+  navDataFile: string
+  params: {
+    page?: string[]
+  }
+  product: {
+    name: string
+    slug: string
+  }
+  remotePluginsFile: string
 }) {
   // Build the currentPath from page parameters
   const currentPath = params.page ? params.page.join('/') : ''
@@ -65,6 +78,42 @@ async function generateStaticProps({
     mdxContentHook,
   })
 
+  fs.writeFileSync(
+    path.join(process.cwd(), localContentDir, params.page.join('/')) +
+      '_INPUTS_' +
+      '.json',
+    JSON.stringify(
+      {
+        additionalComponents,
+        localContentDir,
+        mainBranch,
+        navDataFile,
+        params,
+        product,
+        remotePluginsFile,
+      },
+      null,
+      2
+    )
+  )
+  fs.writeFileSync(
+    path.join(process.cwd(), localContentDir, params.page.join('/')) + '.json',
+    JSON.stringify(
+      {
+        currentPath,
+        frontMatter,
+        mdxSource,
+        mdxString,
+        githubFileUrl,
+        navData,
+        navNode,
+        versions: [],
+      },
+      null,
+      2
+    )
+  )
+
   return {
     currentPath,
     frontMatter,
@@ -73,8 +122,8 @@ async function generateStaticProps({
     githubFileUrl,
     navData,
     navNode,
+    versions: [],
   }
 }
 
-export default { generateStaticPaths, generateStaticProps }
 export { generateStaticPaths, generateStaticProps }
