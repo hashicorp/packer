@@ -1,18 +1,19 @@
-import PluginTierLabel, { PluginTierType } from '../plugin-tier-label'
+import React from 'react'
 import s from './style.module.css'
 
 function BadgesHeader({
-  badges,
+  children,
 }: {
-  badges: PluginTierType[]
+  children: React.ReactChild[]
 }): React.ReactElement {
+  const childrenArray = React.Children.toArray(children)
   return (
     <div className={s.root}>
       <div className={s.surroundSpaceCompensator}>
-        {badges.map((tierSlug, idx) => {
+        {childrenArray.map((badge, idx) => {
           return (
             <div className={s.badgeSpacer} key={idx}>
-              <PluginTierLabel tier={tierSlug} />
+              {badge}
             </div>
           )
         })}

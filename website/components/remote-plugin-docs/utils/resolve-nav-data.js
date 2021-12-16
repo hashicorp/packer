@@ -143,6 +143,12 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     sourceBranch = 'main',
     zipFile = '',
   } = pluginConfigEntry
+  // Determine the pluginTier, which can be set manually,
+  // or will be automatically set based on repo ownership
+  const pluginOwner = repo.split('/')[0]
+  const parsedPluginTier =
+    pluginTier || (pluginOwner === 'hashicorp' ? 'official' : 'community')
+  // Fetch the MDX files for the plugin entry
   var docsMdxFiles
   if (zipFile !== '') {
     docsMdxFiles = await fetchDevPluginDocs(zipFile)
@@ -171,17 +177,17 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
     const title = nav_title || sidebar_title || basename
     // construct sourceUrl (used for "Edit this page" link)
     const sourceUrl = `https://github.com/${repo}/blob/${sourceBranch}/${filePath}`
-    // determine pluginTier
-    const pluginOwner = repo.split('/')[0]
-    const parsedPluginTier =
-      pluginTier || (pluginOwner === 'hashicorp' ? 'official' : 'community')
     // Construct and return a NavLeafRemote node
     return {
       title,
       path: urlPath,
       remoteFile: { filePath, fileString, sourceUrl },
-      pluginTier: parsedPluginTier,
-      pluginIsHcpPackerReady,
+      pluginData: {
+        repo,
+        tier: parsedPluginTier,
+        version,
+        pluginIsHcpPackerReady,
+      },
     }
   })
   //
