@@ -6,6 +6,7 @@ import {
 } from '@hashicorp/react-docs-page/server'
 import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import resolveNavData from './utils/resolve-nav-data'
+import fetchLatestReleaseTag from './utils/fetch-latest-release-tag'
 
 async function generateStaticPaths({
   navDataFile,
@@ -49,6 +50,14 @@ async function generateStaticProps({
   const githubFileUrl = remoteFile
     ? remoteFile.sourceUrl
     : `https://github.com/hashicorp/${product.slug}/blob/${mainBranch}/website/${filePath}`
+  // If this is a plugin, and if
+  // the version has been specified as "latest",
+  // determine the tag this corresponds to, so that
+  // we can show this explicit version number in docs
+  const latestReleaseTag =
+    pluginData?.version === 'latest'
+      ? await fetchLatestReleaseTag(pluginData.repo)
+      : pluginData?.version
   // For plugin pages, prefix the MDX content with a
   // label that reflects the plugin tier
   // (current options are "Official" or "Community")
@@ -63,6 +72,10 @@ async function generateStaticProps({
     // Add a badge if the plugin is "HCP Packer Ready"
     if (pluginData?.isHcpPackerReady) {
       badgesMdx.push(`<PluginBadge type="hcp_packer_ready" />`)
+    }
+    // Add badge showing the latest release version number
+    if (latestReleaseTag) {
+      badgesMdx.push(`<Badge label="${latestReleaseTag}" theme="light-gray"/>`)
     }
     // If we have badges to add, inject them into the MDX
     if (badgesMdx.length > 0) {
