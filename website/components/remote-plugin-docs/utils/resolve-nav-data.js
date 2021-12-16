@@ -185,7 +185,6 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
       pluginData: {
         repo,
         tier: parsedPluginTier,
-        version,
         pluginIsHcpPackerReady,
       },
     }
