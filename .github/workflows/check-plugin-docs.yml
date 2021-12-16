@@ -25,5 +25,6 @@ jobs:
         uses: actions/setup-node@v1
       - name: Install Dependencies
         run: npm i isomorphic-unfetch adm-zip gray-matter
+        # TODO use TypeScript here
       - name: Fetch and validate plugin docs
         run: node .github/workflows/check-plugin-docs.js

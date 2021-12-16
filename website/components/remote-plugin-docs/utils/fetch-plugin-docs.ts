@@ -11,13 +11,7 @@ import parseDocsZip from './parse-docs-zip'
 // otherwise, return [err, null]
 // where err is an error message describing whether the
 // docs files were missing or invalid, with a path to resolution
-async function fetchDocsFiles({
-  repo,
-  tag,
-}: {
-  repo: string
-  tag: string
-}): Promise<[string, null] | [null, string]> {
+async function fetchDocsFiles({ repo, tag }: { repo: string; tag: string }) {
   // If there's a docs.zip asset, we'll prefer that
   const docsZipUrl =
     tag === 'latest'
@@ -32,7 +26,7 @@ async function fetchDocsFiles({
   // unless we resort to calling the GitHub API, which we do not want to do
   if (tag === 'latest') {
     const err = `Failed to fetch. Could not find "docs.zip" at ${docsZipUrl}. To fall back to parsing docs from "source", please provide a specific version tag instead of "${tag}".`
-    return [err, null]
+    return [err, null] as const
   }
   // Else if docs.zip is not present, and we have a specific tag, then
   // fall back to parsing docs files from the source zip
@@ -41,7 +35,7 @@ async function fetchDocsFiles({
   const missingSourceZip = sourceZipResponse.status !== 200
   if (missingSourceZip) {
     const err = `Failed to fetch. Could not find "docs.zip" at ${docsZipUrl}, and could not find fallback source ZIP at ${sourceZipUrl}. Please ensure one of these assets is available.`
-    return [err, null]
+    return [err, null] as const
   }
   // Handle parsing from plugin source zip
   return await parseSourceZip(sourceZipResponse)
