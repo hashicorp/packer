@@ -6,7 +6,6 @@ import {
 } from '@hashicorp/react-docs-page/server'
 import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
 import resolveNavData from './utils/resolve-nav-data'
-import fetchLatestReleaseTag from './utils/fetch-latest-release-tag'
 
 async function generateStaticPaths({
   navDataFile,
