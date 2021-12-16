@@ -29,8 +29,8 @@ to match Terraform Registry tier labels.
 
   /* color variations */
   &.tier-hcp_packer_ready {
-    --background-color: var(--packer-secondary);
-    --text-color: #026c9a;
+    --background-color: var(--packer);
+    --text-color: var(--packer-text-on-primary);
   }
 }
 
