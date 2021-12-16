@@ -2,7 +2,7 @@ import { productName, productSlug } from 'data/metadata'
 import DocsPage from '@hashicorp/react-docs-page'
 import Badge from 'components/badge'
 import BadgesHeader from 'components/badges-header'
-import PluginBadge from 'components/plugin-tier-label'
+import PluginBadge from 'components/plugin-badge'
 import DevAlert from 'components/dev-alert'
 import Checklist from 'components/checklist'
 // Imports below are only used server-side
