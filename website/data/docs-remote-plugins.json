@@ -30,13 +30,15 @@
     "title": "Amazon EC2",
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Azure",
     "path": "azure",
     "repo": "hashicorp/packer-plugin-azure",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Chef",
@@ -70,7 +72,8 @@
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Git",
@@ -83,7 +86,8 @@
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "HashiCups",
@@ -283,7 +287,8 @@
     "title": "VMware vSphere",
     "path": "vsphere",
     "repo": "hashicorp/packer-plugin-vsphere",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "VMware",
