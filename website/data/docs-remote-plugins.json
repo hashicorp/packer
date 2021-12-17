@@ -89,7 +89,8 @@
     "title": "HashiCups",
     "path": "hashicups",
     "repo": "hashicorp/packer-plugin-hashicups",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": false
   },
   {
     "title": "hcloud",
