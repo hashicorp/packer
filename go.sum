@@ -763,8 +763,9 @@ github.com/hashicorp/packer-plugin-salt v1.0.0/go.mod h1:onggPITzeB6LPSW8XlSobu8
 github.com/hashicorp/packer-plugin-sdk v0.2.3/go.mod h1:MAOhxLneNh27t6N6SMyRcIR5qSE86e6yYCcEfRScwIE=
 github.com/hashicorp/packer-plugin-sdk v0.2.5/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.7/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
-github.com/hashicorp/packer-plugin-sdk v0.2.9 h1:oGLQ0/fPD+1pi2vA944FLv3/E0lu9o79bwHMfh605rM=
 github.com/hashicorp/packer-plugin-sdk v0.2.9/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
+github.com/hashicorp/packer-plugin-sdk v0.2.11 h1:FsL2oOfLJmXC9F6W9eMFe0eUi3+ggFuqkLGX41fyPE0=
+github.com/hashicorp/packer-plugin-sdk v0.2.11/go.mod h1:DI8REf9TEIcVkYPErI/nedo6zS2h81ze7sKuc/mIlTE=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.3 h1:8U2vMFyIE+pizoMDsSLyMBsbNdB1HzRAIaTJNIELyi4=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.3/go.mod h1:TCSlq9lCFU8H8eMMWNtwdnCeyHmaQ1A13PR11EJoJh0=
 github.com/hashicorp/packer-plugin-triton v1.0.0 h1:Uvh8fjEKqlii61BzIt1VEgSyJXL+UYfuMHCj44aVpU8=
