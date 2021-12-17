@@ -6,6 +6,11 @@ description: |
 page_title: HCP Packer Image - Data Sources
 ---
 
+<BadgesHeader>
+  <PluginBadge type="official" />
+  <PluginBadge type="hcp_packer_ready" />
+</BadgesHeader>
+
 # HCP Packer Image Data Source
 
 Type: `hcp-packer-image`
@@ -37,7 +42,6 @@ This data source can be used in conjunction with the hcp-packer-iteration
 data source to retrieve an image ID using a channel. You provide the channel
 name to the iteration data source, then use the iteration source in the image
 data source, then use the image data source inside your source block.
-
 
 ```hcl
 # Retrieves information about the HCP Packer "iteration"; an "iteration" can be

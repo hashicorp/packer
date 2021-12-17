@@ -38,7 +38,7 @@ async function generateStaticProps({
     currentPath,
   })
   const navNode = getNodeFromPath(currentPath, navData, localContentDir)
-  const { filePath, remoteFile, pluginTier } = navNode
+  const { filePath, remoteFile, pluginData } = navNode
   //  Fetch the MDX file content
   const mdxString = remoteFile
     ? remoteFile.fileString
@@ -52,10 +52,23 @@ async function generateStaticProps({
   // For plugin pages, prefix the MDX content with a
   // label that reflects the plugin tier
   // (current options are "Official" or "Community")
+  // and display whether the plugin is "HCP Packer Ready".
+  // Also add a badge to show the latest version
   function mdxContentHook(mdxContent) {
-    if (pluginTier) {
-      const tierMdx = `<br/><PluginTierLabel tier="${pluginTier}" />\n\n`
-      mdxContent = tierMdx + mdxContent
+    const badgesMdx = []
+    // Add a badge for the plugin tier
+    if (pluginData?.tier) {
+      badgesMdx.push(`<PluginBadge type="${pluginData.tier}" />`)
+    }
+    // Add a badge if the plugin is "HCP Packer Ready"
+    if (pluginData?.isHcpPackerReady) {
+      badgesMdx.push(`<PluginBadge type="hcp_packer_ready" />`)
+    }
+    // If we have badges to add, inject them into the MDX
+    if (badgesMdx.length > 0) {
+      const badgeChildrenMdx = badgesMdx.join('')
+      const badgesHeaderMdx = `<BadgesHeader>${badgeChildrenMdx}</BadgesHeader>`
+      mdxContent = badgesHeaderMdx + '\n\n' + mdxContent
     }
     return mdxContent
   }
