@@ -2,11 +2,16 @@
 
 ### NOTES:
 
-* The `hcp_packer_registry.labels` argument has been deprecated in favor of
-    the new `bucket_labels` argument to support custom user generated bucket
+* HCP Packer compatible plugins now contain a "HCP Packer Ready" badge on their
+    respective documentation pages.
+    [GH-11456](https://github.com/hashicorp/packer/pull/11456)
+* The `hcp_packer_registry.labels` argument has been deprecated in favor of the
+    new `bucket_labels` argument to support custom user generated bucket
     labels. [GH-11401](https://github.com/hashicorp/packer/pull/11401)
 * The code of the Outscale builder was handed over to the outscale org
     [GH-11428](https://github.com/hashicorp/packer/pull/11428)
+* Version information for external plugins is available on the plugin
+    docs. [GH-11457](https://github.com/hashicorp/packer/pull/11457)
 
 ### IMPROVEMENTS:
 
@@ -21,16 +26,24 @@
 * core/hcl2: Allow for the use of variables and locals within a
     `hcp_packer_registry` block.
     [GH-11421](https://github.com/hashicorp/packer/pull/11421)
+* core/website: Add HCP Packer Ready badge to support plugins.
+    [GH-11456](https://github.com/hashicorp/packer/pull/11456)
+* core/website: Add version information to external plugin docs.
+    [GH-11456](https://github.com/hashicorp/packer/pull/11456)
+* core: Bump github.com/hashicorp/packer-plugin-sdk from 0.2.9 to 0.2.11 to
+    prevent HCP Packer builds from failing when no SourceImageID is
+    provided.[GH-11459](https://github.com/hashicorp/packer/pull/11459)
 * provisioner/powwershell: Tiny tweaks and fixes for the PowerShell
     provisioner. [GH-11410](https://github.com/hashicorp/packer/pull/11410)
 
 ### BUG FIXES:
 
+* core: HCP Packer builds containing metadata not expected by Packer core will no longer fail the build [GH-11458](https://github.com/hashicorp/packer/pull/11458)
 * core/hcl2: Fix crash when a provisioner `timeout` argument is not properly
     formatted. [GH-11382](https://github.com/hashicorp/packer/pull/11382)
 * provisioner/file: File provisioner will now perform a noop when no source
-    file content is specified; previously missing content resulted in a hard fail.
-    [GH-11349](https://github.com/hashicorp/packer/pull/11349)
+    file content is specified; previously missing content resulted in a hard
+    fail. [GH-11349](https://github.com/hashicorp/packer/pull/11349)
 
 
 ## 1.7.8 (October 27, 2021)
