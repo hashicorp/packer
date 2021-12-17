@@ -65,7 +65,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Result:           &images,
 		WeaklyTypedInput: true,
-		ErrorUnused:      true,
+		ErrorUnused:      false,
 	})
 	if err != nil {
 		return source, false, false, fmt.Errorf("failed to create decoder for HCP Packer registry image: %w", err)
