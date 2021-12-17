@@ -9,6 +9,7 @@ import (
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/hashicorp/packer/version"
 )
 
 // Client is an HCP client capable of making requests on behalf of a service principal
@@ -35,7 +36,9 @@ func NewClient() (*Client, error) {
 		}
 	}
 
-	cl, err := httpclient.New(httpclient.Config{})
+	cl, err := httpclient.New(httpclient.Config{
+		SourceChannel: fmt.Sprintf("packer/%s", version.PackerVersion.FormattedVersion()),
+	})
 	if err != nil {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
