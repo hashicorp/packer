@@ -184,8 +184,10 @@ async function resolvePluginEntryDocs(pluginConfigEntry, currentPath) {
       path: urlPath,
       remoteFile: { filePath, fileString, sourceUrl },
       pluginData: {
+        repo,
         tier: parsedPluginTier,
         isHcpPackerReady,
+        version,
       },
     }
   })
