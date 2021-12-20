@@ -1,5 +1,7 @@
 import { productName, productSlug } from 'data/metadata'
 import DocsPage from '@hashicorp/react-docs-page'
+import { NextPage, InferGetStaticPropsType } from 'next'
+
 import Badge from 'components/badge'
 import BadgesHeader from 'components/badges-header'
 import PluginBadge from 'components/plugin-badge'
@@ -13,13 +15,18 @@ import {
 
 //  Configure the docs path and remote plugin docs loading
 const additionalComponents = { Badge, BadgesHeader, PluginBadge, Checklist }
-const baseRoute = 'docs'
-const localContentDir = 'content/docs'
+const baseRoute = 'plugins'
+const localContentDir = 'content/plugins'
 const mainBranch = 'master'
-const navDataFile = 'data/docs-nav-data.json'
+const navDataFile = 'data/plugins-nav-data.json'
 const product = { name: productName, slug: productSlug }
+const remotePluginsFile = 'data/plugins-manifest.json'
 
-function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
+type Props = InferGetStaticPropsType<typeof getStaticProps>
+const DocsLayout: NextPage<Props> = ({
+  isDevMissingRemotePlugins,
+  ...props
+}) => {
   return (
     <>
       {isDevMissingRemotePlugins ? (
@@ -49,6 +56,7 @@ function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
         additionalComponents={additionalComponents}
         baseRoute={baseRoute}
         product={product}
+        // @ts-expect-error
         staticProps={props}
       />
     </>
@@ -59,6 +67,7 @@ export async function getStaticPaths() {
   const paths = await generateStaticPaths({
     localContentDir,
     navDataFile,
+    remotePluginsFile,
   })
   return { paths, fallback: false }
 }
@@ -71,6 +80,7 @@ export async function getStaticProps({ params }) {
     navDataFile,
     params,
     product,
+    remotePluginsFile,
   })
   return { props }
 }
