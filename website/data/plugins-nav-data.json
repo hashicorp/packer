@@ -4,25 +4,5 @@
   },
   {
     "divider": true
-  },
-  {
-    "title": "Communicators",
-    "routes": [{ "title": "Overview", "path": "communicators" }]
-  },
-  {
-    "title": "Builders",
-    "routes": [{ "title": "Overview", "path": "builders" }]
-  },
-  {
-    "title": "Data Sources",
-    "routes": [{ "title": "Overview", "path": "templates" }]
-  },
-  {
-    "title": "Provisioners",
-    "routes": [{ "title": "Overview", "path": "provisioners" }]
-  },
-  {
-    "title": "Post-Processors",
-    "routes": [{ "title": "Overview", "path": "post-processors" }]
   }
 ]
