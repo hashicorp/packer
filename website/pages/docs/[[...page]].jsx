@@ -9,7 +9,7 @@ import Checklist from 'components/checklist'
 import {
   generateStaticPaths,
   generateStaticProps,
-} from 'components/remote-plugin-docs/server'
+} from '@hashicorp/react-docs-page'
 
 //  Configure the docs path and remote plugin docs loading
 const additionalComponents = { Badge, BadgesHeader, PluginBadge, Checklist }
