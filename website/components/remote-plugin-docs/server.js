@@ -102,5 +102,6 @@ async function generateStaticProps({
   }
 }
 
+// Note: this default export is consumed by `index_search_content.js`
 export default { generateStaticPaths, generateStaticProps }
 export { generateStaticPaths, generateStaticProps }
