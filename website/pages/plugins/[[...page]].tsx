@@ -65,7 +65,6 @@ const DocsLayout: NextPage<Props> = ({
 
 export async function getStaticPaths() {
   const paths = await generateStaticPaths({
-    localContentDir,
     navDataFile,
     remotePluginsFile,
   })

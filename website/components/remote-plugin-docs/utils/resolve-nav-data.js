@@ -3,46 +3,32 @@ const path = require('path')
 const grayMatter = require('gray-matter')
 const fetchPluginDocs = require('./fetch-plugin-docs')
 const fetchDevPluginDocs = require('./fetch-dev-plugin-docs')
-// const validateFilePaths = require('@hashicorp/react-docs-sidenav/utils/validate-file-paths')
-// const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/validate-route-structure')
 
 /**
- * Resolves nav-data from file, including optional
+ * Resolves nav-data from file with
  * resolution of remote plugin docs entries
  *
  * @param {string} navDataFile path to the nav-data.json file, relative to the cwd. Example: "data/docs-nav-data.json".
- * @param {string} localContentDir path to the content root, relative to the cwd. Example: "content/docs".
  * @param {object} options optional configuration object
  * @param {string} options.remotePluginsFile path to a remote-plugins.json file, relative to the cwd. Example: "data/docs-remote-plugins.json".
- * @returns {array} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
+ * @returns {Promise<array>} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
-async function resolveNavData(navDataFile, localContentDir, options = {}) {
+async function resolveNavDataWithRemotePlugins(navDataFile, options = {}) {
   const { remotePluginsFile, currentPath } = options
-  // Read in files
   const navDataPath = path.join(process.cwd(), navDataFile)
-  const navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
-  // Fetch remote plugin docs, if applicable
-  let withPlugins = await mergeRemotePlugins(
+  let navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
+  return await appendRemotePluginsNavData(
     remotePluginsFile,
     navData,
     currentPath
   )
-
-  // Resolve local filePaths for NavLeaf nodes
-  // const withFilePaths = await validateFilePaths(withPlugins, localContentDir)
-  // validateRouteStructure(withFilePaths)
-  // Return the nav data with:
-  // 1. Plugins merged, transformed into navData structures with NavLeafRemote nodes
-  // 2. filePaths added to all local NavLeaf nodes
-  return withPlugins
 }
 
-// Given a remote plugins config file, and the full tree of docs navData which
-// contains top-level branch routes that match plugin component types,
-// fetch and parse all remote plugin docs, merge them into the
-// broader tree of docs navData, and return the docs navData
-// with the merged plugin docs
-async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
+async function appendRemotePluginsNavData(
+  remotePluginsFile,
+  navData,
+  currentPath
+) {
   // Read in and parse the plugin configuration JSON
   const remotePluginsPath = path.join(process.cwd(), remotePluginsFile)
   const pluginEntries = JSON.parse(fs.readFileSync(remotePluginsPath, 'utf-8'))
@@ -238,4 +224,4 @@ function visitNavLeaves(navData, visitFn) {
   })
 }
 
-module.exports = resolveNavData
+module.exports = resolveNavDataWithRemotePlugins
