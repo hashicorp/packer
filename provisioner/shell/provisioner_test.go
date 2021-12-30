@@ -259,6 +259,41 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_Content(t *testing.T) {
+	config := testConfig()
+	delete(config, "inline")
+
+	content := `
+  #! /usr/bin/env bash
+  echo "hello"
+  exit 0
+  `
+
+	config["content"] = content
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if len(p.config.Scripts) != 1 {
+		t.Fatal("a packer-generated tempfile should now be the element in p.config.Scripts")
+	}
+
+	tempfile := p.config.Scripts[0]
+	defer os.Remove(tempfile)
+
+	result, err := ioutil.ReadFile(tempfile)
+	if err != nil {
+		t.Fatalf("should not have error: %s", err)
+	}
+
+	if string(result) != content {
+		t.Fatalf("content of file %s was not as expected", tempfile)
+	}
+}
+
 func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	config := testConfig()
 

@@ -173,6 +173,18 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		}
 	}
 
+	if p.config.Content != "" {
+		file, err := tmp.File("pkr-file-content")
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		if _, err := file.WriteString(p.config.Content); err != nil {
+			return err
+		}
+		p.config.Scripts = []string{file.Name()}
+	}
+
 	// Do a check for bad environment variables, such as '=foo', 'foobar'
 	for _, kv := range p.config.Vars {
 		vs := strings.SplitN(kv, "=", 2)
