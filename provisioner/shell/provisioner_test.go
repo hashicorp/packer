@@ -108,6 +108,60 @@ func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_ConflictingInputs(t *testing.T) {
+
+	var p Provisioner
+
+	tf, err := ioutil.TempFile("", "packer")
+	if err != nil {
+		t.Fatalf("error tempfile: %s", err)
+	}
+	defer os.Remove(tf.Name())
+
+	expectedError := "1 error(s) occurred:\n\n* Exactly one of inline, script, scripts, or content must be specified."
+
+	testCases := map[string]struct {
+		inline  []interface{}
+		script  string
+		scripts []interface{}
+		content string
+	}{
+		"inline and script":   {inline: []interface{}{"foo"}, script: tf.Name()},
+		"inline and scripts":  {inline: []interface{}{"foo"}, scripts: []interface{}{tf.Name()}},
+		"inline and content":  {inline: []interface{}{"foo"}, content: "foo"},
+		"script and scripts":  {script: tf.Name(), scripts: []interface{}{tf.Name()}},
+		"script and content":  {script: tf.Name(), content: "foo"},
+		"scripts and content": {scripts: []interface{}{tf.Name()}, content: "foo"},
+		"none":                {},
+	}
+
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			config := testConfig()
+			delete(config, "inline")
+			if tc.inline != nil {
+				config["inline"] = tc.inline
+			}
+			if tc.script != "" {
+				config["script"] = tc.script
+			}
+			if tc.scripts != nil {
+				config["scripts"] = tc.scripts
+			}
+			if tc.content != "" {
+				config["content"] = tc.content
+			}
+			err := p.Prepare(config)
+			if err == nil {
+				t.Fatal("should have error")
+			}
+			if err.Error() != expectedError {
+				t.Fatalf("expected error:\n%s\nreceived error:\n%s\n", expectedError, err.Error())
+			}
+		})
+	}
+}
+
 func TestProvisionerPrepare_Script(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")

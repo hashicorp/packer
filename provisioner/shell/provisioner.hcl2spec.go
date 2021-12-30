@@ -27,6 +27,7 @@ type FlatConfig struct {
 	Binary              *bool             `cty:"binary" hcl:"binary"`
 	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path" hcl:"remote_path"`
 	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
+	Content             *string           `mapstructure:"content" cty:"content" hcl:"content"`
 	InlineShebang       *string           `mapstructure:"inline_shebang" cty:"inline_shebang" hcl:"inline_shebang"`
 	PauseAfter          *string           `mapstructure:"pause_after" cty:"pause_after" hcl:"pause_after"`
 	UseEnvVarFile       *bool             `mapstructure:"use_env_var_file" cty:"use_env_var_file" hcl:"use_env_var_file"`
@@ -66,6 +67,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
 		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
 		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
+		"content":                    &hcldec.AttrSpec{Name: "content", Type: cty.String, Required: false},
 		"inline_shebang":             &hcldec.AttrSpec{Name: "inline_shebang", Type: cty.String, Required: false},
 		"pause_after":                &hcldec.AttrSpec{Name: "pause_after", Type: cty.String, Required: false},
 		"use_env_var_file":           &hcldec.AttrSpec{Name: "use_env_var_file", Type: cty.Bool, Required: false},
