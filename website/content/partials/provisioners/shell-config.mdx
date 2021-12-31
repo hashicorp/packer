@@ -20,6 +20,11 @@ Exactly _one_ of the following is required:
   executed in isolation, so state such as variables from one script won't
   carry on to the next.
 
+- `content` (string) - This is the content to write to the machine and execute.
+  It will be chmodded to 0755 and executed as-is. Any dependencies necessary on
+  the target machine for this content to execute successfully must already be
+  satisfied.
+
 Optional parameters:
 
 - `binary` (boolean) - If true, specifies that the script(s) are binary
