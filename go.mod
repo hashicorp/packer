@@ -24,7 +24,7 @@ require (
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/hashicorp/hcp-sdk-go v0.13.1-0.20211004174420-0f36fadb8a34
-	github.com/hashicorp/packer-plugin-amazon v1.0.4
+	github.com/hashicorp/packer-plugin-amazon v1.0.6
 	github.com/hashicorp/packer-plugin-sdk v0.2.11
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.5 // indirect
@@ -63,20 +63,20 @@ require (
 require (
 	github.com/caarlos0/env/v6 v6.7.2
 	github.com/hashicorp/packer-plugin-alicloud v1.0.1
-	github.com/hashicorp/packer-plugin-ansible v1.0.0
+	github.com/hashicorp/packer-plugin-ansible v1.0.1
 	github.com/hashicorp/packer-plugin-azure v1.0.4
 	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.1
 	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.3
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.8
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.9
 	github.com/hashicorp/packer-plugin-hcloud v1.0.2
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
-	github.com/hashicorp/packer-plugin-hyperv v1.0.0
+	github.com/hashicorp/packer-plugin-hyperv v1.0.1
 	github.com/hashicorp/packer-plugin-inspec v1.0.0
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
-	github.com/hashicorp/packer-plugin-linode v1.0.0
+	github.com/hashicorp/packer-plugin-linode v1.0.1
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
 	github.com/hashicorp/packer-plugin-ncloud v1.0.1
@@ -86,16 +86,16 @@ require (
 	github.com/hashicorp/packer-plugin-outscale v1.0.2
 	github.com/hashicorp/packer-plugin-parallels v1.0.0
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
-	github.com/hashicorp/packer-plugin-proxmox v1.0.3
+	github.com/hashicorp/packer-plugin-proxmox v1.0.4
 	github.com/hashicorp/packer-plugin-puppet v1.0.1
 	github.com/hashicorp/packer-plugin-qemu v1.0.1
 	github.com/hashicorp/packer-plugin-salt v1.0.0
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.3
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
-	github.com/hashicorp/packer-plugin-vagrant v1.0.0
-	github.com/hashicorp/packer-plugin-virtualbox v1.0.0
-	github.com/hashicorp/packer-plugin-vmware v1.0.3
+	github.com/hashicorp/packer-plugin-vagrant v1.0.1
+	github.com/hashicorp/packer-plugin-virtualbox v1.0.1
+	github.com/hashicorp/packer-plugin-vmware v1.0.5
 	github.com/hashicorp/packer-plugin-vsphere v1.0.2
 	github.com/hashicorp/packer-plugin-yandex v1.0.3
 	github.com/scaleway/packer-plugin-scaleway v1.0.4
@@ -136,7 +136,7 @@ require (
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
-	github.com/aws/aws-sdk-go v1.40.54 // indirect
+	github.com/aws/aws-sdk-go v1.41.14 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
@@ -212,7 +212,7 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
-	github.com/linode/linodego v0.28.5 // indirect
+	github.com/linode/linodego v0.30.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
