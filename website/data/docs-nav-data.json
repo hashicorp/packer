@@ -726,6 +726,11 @@
           {
             "title": "Image",
             "path": "datasources/hcp/hcp-packer-image"
+          },
+          {
+            "title": "Image-Deprecated",
+            "path": "datasources/hcp/packer-image-iteration",
+            "hidden": true
           }
         ]
       }
@@ -808,6 +813,10 @@
         "path": "post-processors/community-supported"
       }
     ]
+  },
+  {
+    "title": "External Plugins",
+    "href": "/plugins"
   },
   {
     "divider": true
