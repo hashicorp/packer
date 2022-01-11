@@ -58,6 +58,7 @@ const DocsLayout: NextPage<Props> = ({
         product={product}
         // @ts-expect-error
         staticProps={props}
+        showVersionSelect={false}
       />
     </>
   )
