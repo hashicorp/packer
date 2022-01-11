@@ -12,23 +12,19 @@ async function fetchLatestReleaseTag(repo) {
     },
   })
 
-  if (res.status === 429) {
-    console.error(
-      `failed to fetch: ${latestReleaseUrl}`,
-      res.status,
-      res.statusText
-    )
-    throw new Error(
-      'GitHub API rate limit exceeded: Double check that a `PLUGIN_REPO_GITHUB_TOKEN` environment variable is set.'
-    )
-  }
-
   if (res.status !== 200) {
     console.error(
       `failed to fetch: ${latestReleaseUrl}`,
       res.status,
       res.statusText
     )
+
+    if (res.status === 429) {
+      console.error(
+        'GitHub API rate limit exceeded: Double check that a `PLUGIN_REPO_GITHUB_TOKEN` environment variable is set.'
+      )
+    }
+
     return false
   }
 
