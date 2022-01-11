@@ -1,0 +1,258 @@
+## Installing Plugins
+
+Currently, you do not need to install plugins for builder, provisioner, or
+post-processor components documented on the Packer website; these components
+ship with the Packer core and Packer automatically knows how to find and launch
+them. These instructions are for installing custom components that are not
+bundled with the Packer core.
+
+The below tabs reference "multi-component" and "single-component" plugins. If
+you are not sure what kind of plugin you are trying to install, the easiest way
+to find out is to check the name. If the name starts with `packer-plugin-`, then
+it is a multi-component plugin. If the name starts with a prefix that actually
+says the component type (e.g. `packer-provisioner-` or `packer-builder`), then
+it is a single-component plugin.
+
+<Tabs>
+<Tab heading="Packer init (recomended from Packer v1.7.0)">
+
+~> **Note**: Only _multi-component plugin binaries_ -- that is plugins named
+packer-plugin-\*, like the `packer-plugin-amazon` -- are expected to work with
+Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
+types will keep on being detected but Packer cannot install them automatically.
+If a plugin you use has not been upgraded to use the multi-component plugin
+architecture, contact your maintainer to request an upgrade.
+
+### Create a required_plugins block
+
+1. Add a
+   [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+   block to your [packer block](/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
+   particular plugin can be installed. Make sure to set a valid [version
+   constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+
+Here is an example `required_plugins` block:
+
+```hcl
+packer {
+  required_plugins {
+    myawesomecloud = {
+      version = ">= 2.7.0"
+      source = "github.com/azr/myawesomecloud"
+    }
+    happycloud = {
+      version = ">= 1.1.3"
+      source = "github.com/azr/happycloud"
+    }
+  }
+}
+```
+
+2. Run [`packer init`](/docs/commands/init) from your project directory (the
+   directory containing your Packer templates) to install all missing plugin
+   binaries. Given the above example, Packer will try to look for a GitHub
+   repository owned by user or organization `azr` named
+   `packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
+
+## Names and Addresses
+
+Each plugin has two identifiers:
+
+- A `source` address, which is only necessary when requiring a plugin outside the HashiCorp domain.
+- A unique **local name**, which is used everywhere else in a Packer
+  configuration.
+
+### Local Names
+
+Local names allow you to access the components of a plugin and must be unique
+per configuration.
+
+This is best explained using an example. In the above `required_plugins` block,
+we declared the local name "myawesomecloud" for the plugin `azr/myawesomecloud`.
+If the "myawesomecloud" plugin contains both an "ebs" builder and an "import"
+post-processor, then the builder will be accessed in a source block by using:
+
+```hcl
+source "myawesomecloud-ebs" "example" {
+  // builder configuration...
+}
+```
+
+similarly, the import post-processor would be accessed by declaring the
+post-processor block:
+
+```hcl
+post-processor "myawesomecloud-import" {
+  // post-processor configuration...
+}
+```
+
+If we change the required_plugins block to use a different local name "foo":
+
+```hcl
+  required_plugins {
+    foo = {
+      version = ">= 2.7.0"
+      source = "github.com/azr/myawesomecloud"
+    }
+  }
+```
+
+Then we'd instead access that builder using the source:
+
+```hcl
+source "foo-ebs" "example" {
+  // builder configuration...
+}
+```
+
+## Source Addresses
+
+A plugin's source address is its global identifier. It also tells Packer where
+to download it.
+
+Source addresses consist of three parts delimited by slashes (`/`), as
+follows:
+
+`<HOSTNAME>/<NAMESPACE>/<TYPE>`
+
+- **Hostname:** The hostname of the location/service that
+  distributes the plugin. Currently, the only valid "hostname" is github.com,
+  but we plan to eventually support plugins downloaded from other domains.
+
+- **Namespace:** An organizational namespace within the specified host.
+  This often is the organization that publishes the plugin.
+
+- **Type:** A short name for the platform or system the plugin manages. The
+  type is usually the plugin's preferred local name.
+
+For example, the fictional `myawesomecloud` plugin could belong to the
+`hashicorp` namespace on `github.com`, so its `source` could be
+`github.com/hashicorp/myawesomecloud`,
+Note: the actual _repository_ that myawesomecloud comes from must always have
+the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
+`required_plugins` block omits the redundant `packer-plugin-` repository prefix
+for brevity.
+
+The source address with all three components given explicitly is called the
+plugin's _fully-qualified address_. You will see fully-qualified address in
+various outputs, like error messages.
+
+## Plugin location
+
+@include "plugins/plugin-location.mdx"
+
+## Implicit Github urls
+
+Using the following example :
+
+```hcl
+    required_plugins {
+      happycloud = {
+        version = ">= 2.7.0"
+        source = "github.com/azr/happycloud"
+      }
+    }
+```
+
+The plugin getter will look for plugins located at:
+
+- github.com/azr/packer-plugin-happycloud
+
+Packer will error if you set the `packer-plugin-` prefix in a `source`. This
+will avoid conflicting with other plugins for other tools, like Terraform.
+
+</Tab>
+<Tab heading="manually (multi-component plugin)">
+
+The easiest way to manually install a plugin is to name it correctly, then place
+it in the proper directory. To name a plugin correctly, make sure the binary is
+named `packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
+binary named "amazon". This binary will make one or more components available to
+use. Valid types for plugins are down this page.
+
+Once the plugin is named properly, Packer automatically discovers plugins in
+the following directories in the given order. If a conflicting plugin is found
+later, it will take precedence over one found earlier.
+
+1.  The directory where `packer` is, or the executable directory.
+
+2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
+
+3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
+
+4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+    (windows)
+
+5.  The current working directory.
+
+6.  The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
+    than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
+    Separate directories in the PATH string using a colon (`:`) on posix systems and
+    a semicolon (`;`) on windows systems. The above example path would be able to
+    find a provisioner named `packer-provisioner-foo` in either
+    `~/custom-dir-1/packer-provisioner-foo` or
+    `~/custom-dir-2/packer-provisioner-foo`.
+
+The valid types for plugins are:
+
+- `plugin` - A plugin binary that can contain one or more of each Packer component
+  type.
+
+- `builder` - Plugins responsible for building images for a specific
+  platform.
+
+- `post-processor` - A post-processor responsible for taking an artifact from
+  a builder and turning it into something else.
+
+- `provisioner` - A provisioner to install software on images created by a
+  builder.
+
+</Tab>
+<Tab heading="manually (single-component plugin)">
+
+The easiest way to manually install a plugin is to name it correctly, then place
+it in the proper directory. To name a plugin correctly, make sure the binary is
+named `packer-COMPONENT-NAME`. For example, `packer-provisioner-comment` for a "plugin"
+binary named "comment". This binary will make a single provisioner named `comment` available to
+use. Valid types for plugins are down this page.
+
+Once the plugin is named properly, Packer automatically discovers plugins in
+the following directories in the given order. If a conflicting plugin is found
+later, it will take precedence over one found earlier.
+
+1.  The directory where `packer` is, or the executable directory.
+
+2.  The `$HOME/.packer.d/plugins` directory, if `$HOME` is defined (unix)
+
+3.  The `%APPDATA%/packer.d/plugins` if `%APPDATA%` is defined (windows)
+
+4.  The `%USERPROFILE%/packer.d/plugins` if `%USERPROFILE%` is defined
+    (windows)
+
+5.  The current working directory.
+
+6.  The directory defined in the env var `PACKER_PLUGIN_PATH`. There can be more
+    than one directory defined; for example, `~/custom-dir-1:~/custom-dir-2`.
+    Separate directories in the PATH string using a colon (`:`) on posix systems and
+    a semicolon (`;`) on windows systems. The above example path would be able to
+    find a provisioner named `packer-provisioner-foo` in either
+    `~/custom-dir-1/packer-provisioner-foo` or
+    `~/custom-dir-2/packer-provisioner-foo`.
+
+The valid types for plugins are:
+
+- `plugin` - A plugin binary that can contain one or more of each Packer component
+  type.
+
+- `builder` - Plugins responsible for building images for a specific
+  platform.
+
+- `post-processor` - A post-processor responsible for taking an artifact from
+  a builder and turning it into something else.
+
+- `provisioner` - A provisioner to install software on images created by a
+  builder.
+
+</Tab>
+</Tabs>
