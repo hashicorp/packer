@@ -9,7 +9,12 @@ async function fetchLatestReleaseTag(repo) {
   let res = await fetch(latestReleaseUrl)
 
   if (res.status !== 200) {
-    console.error(`failed to fetch: ${latestReleaseUrl}`)
+    console.error(
+      `failed to fetch: ${latestReleaseUrl}`,
+      res.status,
+      res.statusText,
+      res.body
+    )
     return false
   }
 
