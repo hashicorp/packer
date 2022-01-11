@@ -5,15 +5,11 @@ import {
   getPathsFromNavData,
 } from '@hashicorp/react-docs-page/server'
 import renderPageMdx from '@hashicorp/react-docs-page/render-page-mdx'
-import resolveNavData from './utils/resolve-nav-data'
+import resolveNavDataWithRemotePlugins from './utils/resolve-nav-data'
 import fetchLatestReleaseTag from './utils/fetch-latest-release-tag'
 
-async function generateStaticPaths({
-  navDataFile,
-  localContentDir,
-  remotePluginsFile,
-}) {
-  const navData = await resolveNavData(navDataFile, localContentDir, {
+async function generateStaticPaths({ navDataFile, remotePluginsFile }) {
+  const navData = await resolveNavDataWithRemotePlugins(navDataFile, {
     remotePluginsFile,
   })
   const paths = await getPathsFromNavData(navData)
@@ -34,7 +30,7 @@ async function generateStaticProps({
   // Resolve navData, including the possibility that this
   // page is a remote plugin docs, in which case we'll provide
   // the MDX fileString in the resolved navData
-  const navData = await resolveNavData(navDataFile, localContentDir, {
+  const navData = await resolveNavDataWithRemotePlugins(navDataFile, {
     remotePluginsFile,
     currentPath,
   })
@@ -102,5 +98,4 @@ async function generateStaticProps({
   }
 }
 
-export default { generateStaticPaths, generateStaticProps }
 export { generateStaticPaths, generateStaticProps }
