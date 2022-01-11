@@ -12,12 +12,7 @@ const product = { name: productName, slug: productSlug }
 
 export default function IntroLayout(props) {
   return (
-    <DocsPage
-      baseRoute={baseRoute}
-      product={product}
-      staticProps={props}
-      showVersionSelect={process.env.ENABLE_VERSIONED_DOCS === 'true'}
-    />
+    <DocsPage baseRoute={baseRoute} product={product} staticProps={props} />
   )
 }
 
