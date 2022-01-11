@@ -5,7 +5,10 @@ const {
   indexContent,
   getDocsSearchObject,
 } = require('@hashicorp/react-search/tools')
-const resolveNavData = require('../components/remote-plugin-docs/utils/resolve-nav-data')
+const {
+  resolveNavData,
+} = require('@hashicorp/react-docs-page/server/resolve-nav-data')
+const resolveNavDataWithRemotePlugins = require('../components/remote-plugin-docs/utils/resolve-nav-data')
 
 // Run indexing
 indexContent({ getSearchObjects })
@@ -18,8 +21,7 @@ async function getSearchObjects() {
   async function fetchDocsObjects() {
     const navFile = 'data/docs-nav-data.json'
     const contentDir = 'content/docs'
-    const opts = { remotePluginsFile: 'data/docs-remote-plugins.json' }
-    const navData = await resolveNavData(navFile, contentDir, opts)
+    const navData = await resolveNavData(navFile, contentDir)
     return await searchObjectsFromNavData(navData, 'docs')
   }
   // Fetch objects for `guides` content
@@ -36,12 +38,20 @@ async function getSearchObjects() {
     const navData = await resolveNavData(navFile, contentDir)
     return await searchObjectsFromNavData(navData, 'intro')
   }
+  async function fetchPluginsObjects() {
+    const navFile = 'data/plugins-nav-data.json'
+    const opts = { remotePluginsFile: 'data/plugins-manifest.json' }
+    const navData = await resolveNavDataWithRemotePlugins(navFile, opts)
+    return await searchObjectsFromNavData(navData, 'plugins')
+  }
+
   // Collect, flatten and return the collected search objects
   const searchObjects = (
     await Promise.all([
       fetchDocsObjects(),
       fetchGuidesObjects(),
       fetchIntroObjects(),
+      fetchPluginsObjects(),
     ])
   ).reduce((acc, array) => acc.concat(array), [])
   return searchObjects

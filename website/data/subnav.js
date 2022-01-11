@@ -11,6 +11,11 @@ export default [
     type: 'inbound',
   },
   {
+    text: 'Plugins',
+    url: '/plugins',
+    type: 'inbound',
+  },
+  {
     text: 'Community',
     url: '/community',
     type: 'inbound',

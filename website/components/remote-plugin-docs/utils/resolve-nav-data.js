@@ -3,49 +3,32 @@ const path = require('path')
 const grayMatter = require('gray-matter')
 const fetchPluginDocs = require('./fetch-plugin-docs')
 const fetchDevPluginDocs = require('./fetch-dev-plugin-docs')
-const validateFilePaths = require('@hashicorp/react-docs-sidenav/utils/validate-file-paths')
-const validateRouteStructure = require('@hashicorp/react-docs-sidenav/utils/validate-route-structure')
 
 /**
- * Resolves nav-data from file, including optional
+ * Resolves nav-data from file with
  * resolution of remote plugin docs entries
  *
  * @param {string} navDataFile path to the nav-data.json file, relative to the cwd. Example: "data/docs-nav-data.json".
- * @param {string} localContentDir path to the content root, relative to the cwd. Example: "content/docs".
  * @param {object} options optional configuration object
  * @param {string} options.remotePluginsFile path to a remote-plugins.json file, relative to the cwd. Example: "data/docs-remote-plugins.json".
- * @returns {array} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
+ * @returns {Promise<array>} the resolved navData. This includes NavBranch nodes pulled from remote plugin repositories, as well as filePath properties on all local NavLeaf nodes, and remoteFile properties on all NavLeafRemote nodes.
  */
-async function resolveNavData(navDataFile, localContentDir, options = {}) {
+async function resolveNavDataWithRemotePlugins(navDataFile, options = {}) {
   const { remotePluginsFile, currentPath } = options
-  // Read in files
   const navDataPath = path.join(process.cwd(), navDataFile)
-  const navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
-  // Fetch remote plugin docs, if applicable
-  let withPlugins = navData
-  if (remotePluginsFile) {
-    // Resolve plugins, this yields branches with NavLeafRemote nodes
-    withPlugins = await mergeRemotePlugins(
-      remotePluginsFile,
-      navData,
-      currentPath
-    )
-  }
-  // Resolve local filePaths for NavLeaf nodes
-  const withFilePaths = await validateFilePaths(withPlugins, localContentDir)
-  validateRouteStructure(withFilePaths)
-  // Return the nav data with:
-  // 1. Plugins merged, transformed into navData structures with NavLeafRemote nodes
-  // 2. filePaths added to all local NavLeaf nodes
-  return withFilePaths
+  let navData = JSON.parse(fs.readFileSync(navDataPath, 'utf8'))
+  return await appendRemotePluginsNavData(
+    remotePluginsFile,
+    navData,
+    currentPath
+  )
 }
 
-// Given a remote plugins config file, and the full tree of docs navData which
-// contains top-level branch routes that match plugin component types,
-// fetch and parse all remote plugin docs, merge them into the
-// broader tree of docs navData, and return the docs navData
-// with the merged plugin docs
-async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
+async function appendRemotePluginsNavData(
+  remotePluginsFile,
+  navData,
+  currentPath
+) {
   // Read in and parse the plugin configuration JSON
   const remotePluginsPath = path.join(process.cwd(), remotePluginsFile)
   const pluginEntries = JSON.parse(fs.readFileSync(remotePluginsPath, 'utf-8'))
@@ -56,72 +39,42 @@ async function mergeRemotePlugins(remotePluginsFile, navData, currentPath) {
       async (entry) => await resolvePluginEntryDocs(entry, currentPath)
     )
   )
-  // group navData by component type, to prepare to merge plugin docs
-  // into the broader tree of navData.
-  const pluginDocsByComponent = pluginEntriesWithDocs.reduce(
-    (acc, pluginEntry) => {
-      const { components } = pluginEntry
-      Object.keys(components).forEach((type) => {
-        const navData = components[type]
-        if (!navData) return
-        if (!acc[type]) acc[type] = []
-        acc[type].push(navData[0])
-      })
-      return acc
-    },
-    {}
-  )
-  // merge plugin docs, by plugin component type,
-  // into the corresponding top-level component NavBranch
-  const navDataWithPlugins = navData.slice().map((n) => {
-    // we only care about top-level NavBranch nodes
-    if (!n.routes) return n
-    // for each component type, check if this NavBranch
-    // is the parent route for that type
-    const componentTypes = Object.keys(pluginDocsByComponent)
-    let typeMatch = false
-    for (var i = 0; i < componentTypes.length; i++) {
-      const componentType = componentTypes[i]
-      const routeMatches = n.routes.filter((r) => r.path === componentType)
-      if (routeMatches.length > 0) {
-        typeMatch = componentType
-        break
+
+  const titleMap = {
+    builders: 'Builders',
+    provisioners: 'Provisioners',
+    'post-processors': 'Post-Processors',
+    datasources: 'Data Sources',
+  }
+
+  return navData.concat(
+    pluginEntriesWithDocs.map((entry) => {
+      return {
+        title: entry.title,
+        routes: Object.entries(entry.components).map(
+          ([type, componentList]) => {
+            return {
+              title: titleMap[type],
+              // Flat map to avoid ┐
+              // > Proxmox         │
+              //   > Builders      │
+              //     > Proxmox <---┘
+              //       > Overview
+              //       > Clone
+              //       > ISO
+              routes: componentList.flatMap((c) => {
+                if ('path' in c) {
+                  return c
+                } else if ('routes' in c) {
+                  return c.routes
+                }
+              }),
+            }
+          }
+        ),
       }
-    }
-    // if this NavBranch does not match a component type slug,
-    // then return it unmodified
-    if (!typeMatch) return n
-    // if there are no matching remote plugin components,
-    // then return the navBranch unmodified
-    const pluginsOfType = pluginDocsByComponent[typeMatch]
-    if (!pluginsOfType || pluginsOfType.length == 0) return n
-    // if this NavBranch is the parent route for the type,
-    // then append all remote plugins of this type to the
-    // NavBranch's child routes
-    const routesWithPlugins = n.routes.slice().concat(pluginsOfType)
-    // console.log(JSON.stringify(routesWithPlugins, null, 2))
-    // Also, sort the child routes so the order is alphabetical
-    routesWithPlugins.sort((a, b) => {
-      // ensure casing does not affect ordering
-      const aTitle = a.title.toLowerCase()
-      const bTitle = b.title.toLowerCase()
-      // (exception: "Overview" comes first)
-      if (aTitle === 'overview') return -1
-      if (bTitle === 'overview') return 1
-      // (exception: "Community-Supported" comes last)
-      if (aTitle === 'community-supported') return 1
-      if (bTitle === 'community-supported') return -1
-      // (exception: "Custom" comes second-last)
-      if (aTitle === 'custom') return 1
-      if (bTitle === 'custom') return -1
-      return aTitle < bTitle ? -1 : aTitle > bTitle ? 1 : 0
     })
-    // return n
-    return { ...n, routes: routesWithPlugins }
-  })
-  // return the merged navData, which now includes special NavLeaf nodes
-  // for plugin docs with remoteFile properties
-  return navDataWithPlugins
+  )
 }
 
 // Fetch remote plugin docs .mdx files, and
@@ -271,4 +224,4 @@ function visitNavLeaves(navData, visitFn) {
   })
 }
 
-module.exports = resolveNavData
+module.exports = resolveNavDataWithRemotePlugins
