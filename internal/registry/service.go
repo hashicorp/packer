@@ -111,7 +111,7 @@ var (
 	}
 )
 
-func (client *Client) GetIteration(ctx context.Context, bucketSlug string, opts ...GetIterationOption, ) (*models.HashicorpCloudPackerIteration, error) {
+func (client *Client) GetIteration(ctx context.Context, bucketSlug string, opts ...GetIterationOption) (*models.HashicorpCloudPackerIteration, error) {
 	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = client.OrganizationID
 	getItParams.LocationProjectID = client.ProjectID
