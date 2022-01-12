@@ -111,12 +111,7 @@ var (
 	}
 )
 
-func (client *Client) GetIteration(
-	ctx context.Context,
-	bucketSlug string,
-	opts ...GetIterationOption,
-) (*packer_service.PackerServiceGetIterationOK, error) {
-
+func (client *Client) GetIteration(ctx context.Context, bucketSlug string, opts ...GetIterationOption, ) (*models.HashicorpCloudPackerIteration, error) {
 	getItParams := packer_service.NewPackerServiceGetIterationParams()
 	getItParams.LocationOrganizationID = client.OrganizationID
 	getItParams.LocationProjectID = client.ProjectID
@@ -126,7 +121,22 @@ func (client *Client) GetIteration(
 		opt(getItParams)
 	}
 
-	return client.Packer.PackerServiceGetIteration(getItParams, nil)
+	resp, err := client.Packer.PackerServiceGetIteration(getItParams, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Payload.Iteration != nil {
+		if !time.Time(resp.Payload.Iteration.RevokeAt).IsZero() {
+			// If RevokeAt is not a zero date, it means this iteration is revoked and should not be used
+			// to build new images.
+			return nil, fmt.Errorf("the iteration %s is revoked and can not be used on Packer builds",
+				resp.Payload.Iteration.ID)
+		}
+		return resp.Payload.Iteration, nil
+	}
+
+	return nil, fmt.Errorf("something went wrong retrieving the iteration for bucket %s", bucketSlug)
 }
 
 func (client *Client) CreateBuild(
