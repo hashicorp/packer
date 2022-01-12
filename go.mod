@@ -23,7 +23,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
 	github.com/hashicorp/hcl/v2 v2.11.1
-	github.com/hashicorp/hcp-sdk-go v0.13.1-0.20211004174420-0f36fadb8a34
+	github.com/hashicorp/hcp-sdk-go v0.15.1-0.20220112153249-f565607d7cc4
 	github.com/hashicorp/packer-plugin-amazon v1.0.6
 	github.com/hashicorp/packer-plugin-sdk v0.2.11
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
