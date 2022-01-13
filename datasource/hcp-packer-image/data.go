@@ -120,12 +120,11 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
 
-	getIterationResp, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
+	iteration, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"image iteration from HCP Packer registry: %s", err.Error())
 	}
-	iteration := getIterationResp.Payload.Iteration
 
 	output := DatasourceOutput{}
 
