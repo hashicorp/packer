@@ -189,7 +189,7 @@ jobs:
             cd website/
             npm install -g npm@latest
             npm install
-            npx ts-node -O '{"module":"commonjs"}' scripts/index_search_content.ts
+            npx ts-node --skip-ignore -P ./scripts/tsconfig.json ./scripts/index_search_content.ts
 
 workflows:
   version: 2
