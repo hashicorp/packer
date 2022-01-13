@@ -187,6 +187,7 @@ jobs:
               exit 0
             fi
             cd website/
+            npm install -g npm@latest
             npm install
             node scripts/index_search_content.js
 
