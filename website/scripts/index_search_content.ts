@@ -1,14 +1,13 @@
-require('dotenv').config()
-const fs = require('fs')
-const path = require('path')
-const {
+import { config } from 'dotenv'
+config()
+import fs from 'fs'
+import path from 'path'
+import {
   indexContent,
   getDocsSearchObject,
-} = require('@hashicorp/react-search/tools')
-const {
-  resolveNavData,
-} = require('@hashicorp/react-docs-page/server/resolve-nav-data')
-const resolveNavDataWithRemotePlugins = require('../components/remote-plugin-docs/utils/resolve-nav-data')
+} from '@hashicorp/react-search/tools'
+import { resolveNavData } from '@hashicorp/react-docs-page/server/resolve-nav-data'
+import resolveNavDataWithRemotePlugins from '../components/remote-plugin-docs/utils/resolve-nav-data'
 
 // Run indexing
 indexContent({ getSearchObjects })

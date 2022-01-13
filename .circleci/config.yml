@@ -189,7 +189,7 @@ jobs:
             cd website/
             npm install -g npm@latest
             npm install
-            node scripts/index_search_content.js
+            npx ts-node -O '{"module":"commonjs"}' scripts/index_search_content.ts
 
 workflows:
   version: 2
