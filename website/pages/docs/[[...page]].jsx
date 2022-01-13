@@ -5,10 +5,7 @@ import BadgesHeader from 'components/badges-header'
 import PluginBadge from 'components/plugin-badge'
 import Checklist from 'components/checklist'
 // Imports below are only used server-side
-import {
-  generateStaticPaths,
-  generateStaticProps,
-} from '@hashicorp/react-docs-page/server'
+import { getStaticGenerationFunctions } from '@hashicorp/react-docs-page/server'
 
 //  Configure the docs path and remote plugin docs loading
 const additionalComponents = { Badge, BadgesHeader, PluginBadge, Checklist }
@@ -18,7 +15,7 @@ const mainBranch = 'master'
 const navDataFile = 'data/docs-nav-data.json'
 const product = { name: productName, slug: productSlug }
 
-function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
+export default function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
   return (
     <DocsPage
       additionalComponents={additionalComponents}
@@ -29,24 +26,24 @@ function DocsLayout({ isDevMissingRemotePlugins, ...props }) {
   )
 }
 
-export async function getStaticPaths() {
-  const paths = await generateStaticPaths({
-    localContentDir,
-    navDataFile,
-  })
-  return { paths, fallback: false }
-}
+const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions(
+  process.env.ENABLE_VERSIONED_DOCS === 'true'
+    ? {
+        strategy: 'remote',
+        basePath: baseRoute,
+        fallback: 'blocking',
+        revalidate: 360, // 1 hour
+        product: productSlug,
+        mainBranch: mainBranch,
+      }
+    : {
+        strategy: 'fs',
+        localContentDir: localContentDir,
+        navDataFile: navDataFile,
+        product: productSlug,
+        revalidate: false,
+        mainBranch: mainBranch,
+      }
+)
 
-export async function getStaticProps({ params }) {
-  const props = await generateStaticProps({
-    additionalComponents,
-    localContentDir,
-    mainBranch,
-    navDataFile,
-    params,
-    product,
-  })
-  return { props }
-}
-
-export default DocsLayout
+export { getStaticPaths, getStaticProps }

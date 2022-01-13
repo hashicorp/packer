@@ -1,10 +1,7 @@
 import { productName, productSlug } from 'data/metadata'
 import DocsPage from '@hashicorp/react-docs-page'
 // Imports below are only used server-side
-import {
-  generateStaticPaths,
-  generateStaticProps,
-} from '@hashicorp/react-docs-page/server'
+import { getStaticGenerationFunctions } from '@hashicorp/react-docs-page/server'
 
 //  Configure the docs path
 const baseRoute = 'intro'
@@ -19,18 +16,24 @@ export default function IntroLayout(props) {
   )
 }
 
-export async function getStaticPaths() {
-  const paths = await generateStaticPaths({ localContentDir, navDataFile })
-  return { paths, fallback: false }
-}
+const { getStaticPaths, getStaticProps } = getStaticGenerationFunctions(
+  process.env.ENABLE_VERSIONED_DOCS === 'true'
+    ? {
+        strategy: 'remote',
+        basePath: baseRoute,
+        fallback: 'blocking',
+        revalidate: 360, // 1 hour
+        product: productSlug,
+        mainBranch: mainBranch,
+      }
+    : {
+        strategy: 'fs',
+        localContentDir: localContentDir,
+        navDataFile: navDataFile,
+        product: productSlug,
+        revalidate: false,
+        mainBranch: mainBranch,
+      }
+)
 
-export async function getStaticProps({ params }) {
-  const props = await generateStaticProps({
-    localContentDir,
-    mainBranch,
-    navDataFile,
-    params,
-    product,
-  })
-  return { props }
-}
+export { getStaticPaths, getStaticProps }
