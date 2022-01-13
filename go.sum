@@ -636,6 +636,8 @@ github.com/hashicorp/go-getter/s3/v2 v2.0.0-20200604122502-a6995fa1edad/go.mod h
 github.com/hashicorp/go-getter/v2 v2.0.0-20200511090339-3107ec4af37a/go.mod h1:QJ+LwRM91JBKBLyHoKBrcmi49i9Tu/ItpgTNXWSnpGM=
 github.com/hashicorp/go-getter/v2 v2.0.0 h1:wamdcQazMBZK6VwUo3HAOWLkcOJBWBoXPKfmf7/S17w=
 github.com/hashicorp/go-getter/v2 v2.0.0/go.mod h1:w65fE5glbccYjndAuj1kA5lnVBGZYEaH0e5qA1kpIks=
+github.com/hashicorp/go-getter/v2 v2.0.1-0.20220113143827-4dd0b87e5089 h1:wjnsShE9utgkWQ/IjBYqfsITclQSB4goMq/J6ix8Tno=
+github.com/hashicorp/go-getter/v2 v2.0.1-0.20220113143827-4dd0b87e5089/go.mod h1:w65fE5glbccYjndAuj1kA5lnVBGZYEaH0e5qA1kpIks=
 github.com/hashicorp/go-hclog v0.0.0-20180709165350-ff2cf002a8dd/go.mod h1:9bjs9uLqI8l75knNv3lV1kA55veR+WUPSiKIWcQHudI=
 github.com/hashicorp/go-hclog v0.8.0/go.mod h1:5CU+agLiy3J7N7QjHK5d05KxGsuXiQLrjA0H7acj2lQ=
 github.com/hashicorp/go-hclog v0.9.2/go.mod h1:5CU+agLiy3J7N7QjHK5d05KxGsuXiQLrjA0H7acj2lQ=

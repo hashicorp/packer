@@ -18,7 +18,7 @@ require (
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
-	github.com/hashicorp/go-getter/v2 v2.0.0
+	github.com/hashicorp/go-getter/v2 v2.0.1-0.20220113143827-4dd0b87e5089
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.3.0
