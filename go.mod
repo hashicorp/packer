@@ -47,7 +47,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10
 	github.com/zclconf/go-cty v1.10.0
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/mod v0.5.0
 	golang.org/x/net v0.0.0-20210902165921-8d991716f632
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
@@ -64,7 +64,7 @@ require (
 	github.com/caarlos0/env/v6 v6.7.2
 	github.com/hashicorp/packer-plugin-alicloud v1.0.1
 	github.com/hashicorp/packer-plugin-ansible v1.0.1
-	github.com/hashicorp/packer-plugin-azure v1.0.4
+	github.com/hashicorp/packer-plugin-azure v1.0.5
 	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.1
@@ -107,7 +107,7 @@ require (
 	github.com/Azure/azure-sdk-for-go v55.7.0+incompatible // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.19 // indirect
-	github.com/Azure/go-autorest/autorest/adal v0.9.14 // indirect
+	github.com/Azure/go-autorest/autorest/adal v0.9.18 // indirect
 	github.com/Azure/go-autorest/autorest/azure/auth v0.4.2 // indirect
 	github.com/Azure/go-autorest/autorest/azure/cli v0.4.2 // indirect
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
@@ -150,7 +150,6 @@ require (
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/color v1.12.0 // indirect
-	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
@@ -170,7 +169,7 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
