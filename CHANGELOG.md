@@ -16,6 +16,52 @@
 * Version information for external plugins is available on the plugin docs.
     [GH-11457](https://github.com/hashicorp/packer/pull/11457)
 
+
+### PLUGINS:
+
+External plugins have been pinned to the following versions. Please see
+    their respective changelogs for details on plugin specific bug fixes and
+    improvements.
+
+* "github.com/hashicorp/packer-plugin-alicloud@v1.0.1"
+* "github.com/hashicorp/packer-plugin-amazon@v1.0.6"
+* "github.com/hashicorp/packer-plugin-ansible@v1.0.1"
+* "github.com/hashicorp/packer-plugin-azure@v1.0.4"
+* "github.com/hashicorp/packer-plugin-chef@v1.0.2"
+* "github.com/hashicorp/packer-plugin-cloudstack@v1.0.0"
+* "github.com/hashicorp/packer-plugin-converge@v1.0.1"
+* "github.com/hashicorp/packer-plugin-digitalocean@v1.0.1"
+* "github.com/hashicorp/packer-plugin-docker@v1.0.3"
+* "github.com/hashicorp/packer-plugin-googlecompute@v1.0.9"
+* "github.com/hashicorp/packer-plugin-hcloud@v1.0.2"
+* "github.com/hashicorp/packer-plugin-hyperone@v1.0.0"
+* "github.com/hashicorp/packer-plugin-hyperv@v1.0.1"
+* "github.com/hashicorp/packer-plugin-inspec@v1.0.0"
+* "github.com/hashicorp/packer-plugin-jdcloud@v1.0.0"
+* "github.com/hashicorp/packer-plugin-linode@v1.0.1"
+* "github.com/hashicorp/packer-plugin-lxc@v1.0.0"
+* "github.com/hashicorp/packer-plugin-lxd@v1.0.0"
+* "github.com/hashicorp/packer-plugin-ncloud@v1.0.1"
+* "github.com/hashicorp/packer-plugin-oneandone@v1.0.0"
+* "github.com/hashicorp/packer-plugin-openstack@v1.0.0"
+* "github.com/hashicorp/packer-plugin-oracle@v1.0.1"
+* "github.com/hashicorp/packer-plugin-outscale@v1.0.2"
+* "github.com/hashicorp/packer-plugin-parallels@v1.0.0"
+* "github.com/hashicorp/packer-plugin-profitbricks@v1.0.1"
+* "github.com/hashicorp/packer-plugin-proxmox@v1.0.4"
+* "github.com/hashicorp/packer-plugin-puppet@v1.0.1"
+* "github.com/hashicorp/packer-plugin-qemu@v1.0.1"
+* "github.com/hashicorp/packer-plugin-salt@v1.0.0"
+* "github.com/hashicorp/packer-plugin-tencentcloud@v1.0.3"
+* "github.com/hashicorp/packer-plugin-triton@v1.0.0"
+* "github.com/hashicorp/packer-plugin-ucloud@v1.0.0"
+* "github.com/hashicorp/packer-plugin-vagrant@v1.0.1"
+* "github.com/hashicorp/packer-plugin-virtualbox@v1.0.1"
+* "github.com/hashicorp/packer-plugin-vmware@v1.0.5"
+* "github.com/hashicorp/packer-plugin-vsphere@v1.0.2"
+* "github.com/hashicorp/packer-plugin-yandex@v1.0.3"
+* "github.com/scaleway/packer-plugin-scaleway@v1.0.4"
+
 ### IMPROVEMENTS:
 
 * core/hcl2: Add `bucket_labels` argument to the `hcp_packer_registry` block to
