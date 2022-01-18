@@ -23,44 +23,44 @@ External plugins have been pinned to the following versions. Please see
     their respective changelogs for details on plugin specific bug fixes and
     improvements.
 
-* "github.com/hashicorp/packer-plugin-alicloud@v1.0.1"
-* "github.com/hashicorp/packer-plugin-amazon@v1.0.6"
-* "github.com/hashicorp/packer-plugin-ansible@v1.0.1"
-* "github.com/hashicorp/packer-plugin-azure@v1.0.4"
-* "github.com/hashicorp/packer-plugin-chef@v1.0.2"
-* "github.com/hashicorp/packer-plugin-cloudstack@v1.0.0"
-* "github.com/hashicorp/packer-plugin-converge@v1.0.1"
-* "github.com/hashicorp/packer-plugin-digitalocean@v1.0.1"
-* "github.com/hashicorp/packer-plugin-docker@v1.0.3"
-* "github.com/hashicorp/packer-plugin-googlecompute@v1.0.9"
-* "github.com/hashicorp/packer-plugin-hcloud@v1.0.2"
-* "github.com/hashicorp/packer-plugin-hyperone@v1.0.0"
-* "github.com/hashicorp/packer-plugin-hyperv@v1.0.1"
-* "github.com/hashicorp/packer-plugin-inspec@v1.0.0"
-* "github.com/hashicorp/packer-plugin-jdcloud@v1.0.0"
-* "github.com/hashicorp/packer-plugin-linode@v1.0.1"
-* "github.com/hashicorp/packer-plugin-lxc@v1.0.0"
-* "github.com/hashicorp/packer-plugin-lxd@v1.0.0"
-* "github.com/hashicorp/packer-plugin-ncloud@v1.0.1"
-* "github.com/hashicorp/packer-plugin-oneandone@v1.0.0"
-* "github.com/hashicorp/packer-plugin-openstack@v1.0.0"
-* "github.com/hashicorp/packer-plugin-oracle@v1.0.1"
-* "github.com/hashicorp/packer-plugin-outscale@v1.0.2"
-* "github.com/hashicorp/packer-plugin-parallels@v1.0.0"
-* "github.com/hashicorp/packer-plugin-profitbricks@v1.0.1"
-* "github.com/hashicorp/packer-plugin-proxmox@v1.0.4"
-* "github.com/hashicorp/packer-plugin-puppet@v1.0.1"
-* "github.com/hashicorp/packer-plugin-qemu@v1.0.1"
-* "github.com/hashicorp/packer-plugin-salt@v1.0.0"
-* "github.com/hashicorp/packer-plugin-tencentcloud@v1.0.3"
-* "github.com/hashicorp/packer-plugin-triton@v1.0.0"
-* "github.com/hashicorp/packer-plugin-ucloud@v1.0.0"
-* "github.com/hashicorp/packer-plugin-vagrant@v1.0.1"
-* "github.com/hashicorp/packer-plugin-virtualbox@v1.0.1"
-* "github.com/hashicorp/packer-plugin-vmware@v1.0.5"
-* "github.com/hashicorp/packer-plugin-vsphere@v1.0.2"
-* "github.com/hashicorp/packer-plugin-yandex@v1.0.3"
-* "github.com/scaleway/packer-plugin-scaleway@v1.0.4"
+* alicloud@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.1)
+* amazon@v1.0.6 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.0.6)
+* ansible@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ansible/releases/tag/v1.0.1)
+* azure@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-azure/releases/tag/v1.0.4)
+* chef@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-chef/releases/tag/v1.0.2)
+* cloudstack@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-cloudstack/releases/tag/v1.0.0)
+* converge@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-converge/releases/tag/v1.0.1)
+* digitalocean@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-digitalocean/releases/tag/v1.0.1)
+* docker@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-docker/releases/tag/v1.0.3)
+* googlecompute@v1.0.9 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-googlecompute/releases/tag/v1.0.9)
+* hcloud@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hcloud/releases/tag/v1.0.2)
+* hyperone@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hyperone/releases/tag/v1.0.0)
+* hyperv@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hyperv/releases/tag/v1.0.1)
+* inspec@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-inspec/releases/tag/v1.0.0)
+* jdcloud@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-jdcloud/releases/tag/v1.0.0)
+* linode@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-linode/releases/tag/v1.0.1)
+* lxc@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-lxc/releases/tag/v1.0.0)
+* lxd@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-lxd/releases/tag/v1.0.0)
+* ncloud@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ncloud/releases/tag/v1.0.1)
+* oneandone@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-oneandone/releases/tag/v1.0.0)
+* openstack@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-openstack/releases/tag/v1.0.0)
+* oracle@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-oracle/releases/tag/v1.0.1)
+* outscale@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-outscale/releases/tag/v1.0.2)
+* parallels@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-parallels/releases/tag/v1.0.0)
+* profitbricks@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-profitbricks/releases/tag/v1.0.1)
+* proxmox@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.0.4)
+* puppet@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-puppet/releases/tag/v1.0.1)
+* qemu@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.1)
+* salt@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-salt/releases/tag/v1.0.0)
+* tencentcloud@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-tencentcloud/releases/tag/v1.0.3)
+* triton@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-triton/releases/tag/v1.0.0)
+* ucloud@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ucloud/releases/tag/v1.0.0)
+* vagrant@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vagrant/releases/tag/v1.0.1)
+* virtualbox@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-virtualbox/releases/tag/v1.0.1)
+* vmware@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vmware/releases/tag/v1.0.5)
+* vsphere@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.2)
+* yandex@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-yandex/releases/tag/v1.0.3)
+* scaleway@v1.0.4 - [CHANGELOG](https://github.com/scaleway/packer-plugin-scaleway/releases/tag/v1.0.4)
 
 ### IMPROVEMENTS:
 
