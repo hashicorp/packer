@@ -1,4 +1,4 @@
-## 1.7.9 (Upcoming)
+## 1.7.9 (January 19, 2022)
 
 ### NOTES:
 
