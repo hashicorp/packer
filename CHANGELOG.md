@@ -16,6 +16,12 @@
 * Version information for external plugins has been added as a badge to the
     plugin documentation.
     [GH-11457](https://github.com/hashicorp/packer/pull/11457)
+* The following unmaintained external provisioner plugins have been archived: chef,
+    converge, inspec, salt-masterless, puppet. More
+    information on what this deprecation means for users can be found on the
+    blog post - [Plans to Archive Unmaintained Provisioner
+    Plugins](https://www.hashicorp.com/blog/plans-to-archive-unmaintained-
+    packer- provisioner-plugins)
 
 
 ### PLUGINS:
