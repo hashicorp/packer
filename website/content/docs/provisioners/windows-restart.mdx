@@ -78,8 +78,9 @@ Optional parameters:
 - `restart_command` (string) - The command to execute to initiate the
   restart. By default this is `shutdown /r /f /t 0 /c "packer restart"`.
 
-- `restart_check_command` (string) - A command to execute to check if the
-  restart succeeded. This will be done in a loop. Example usage:
+- `restart_check_command` (string) - The command to run after executing `restart_command`
+  to check if the guest machine has restarted. This command will retry until the connection
+  to the guest machine has been restored or `restart_timeout` has exceeded.
 
 <Tabs>
 <Tab heading="HCL2">
