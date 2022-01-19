@@ -20,8 +20,7 @@
     converge, inspec, salt-masterless, puppet. More
     information on what this deprecation means for users can be found on the
     blog post - [Plans to Archive Unmaintained Provisioner
-    Plugins](https://www.hashicorp.com/blog/plans-to-archive-unmaintained-
-    packer- provisioner-plugins)
+    Plugins](https://www.hashicorp.com/blog/plans-to-archive-unmaintained-packer-provisioner-plugins)
 
 
 ### PLUGINS:
