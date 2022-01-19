@@ -2,18 +2,19 @@
 
 ### NOTES:
 
-* HCP Packer compatible plugins now contain a "HCP Packer Ready" badge on their
-    respective documentation pages.
+* HCP Packer compatible plugins will contain a "HCP Packer Ready" badge at the
+    top of on their documentation page.
     [GH-11456](https://github.com/hashicorp/packer/pull/11456)
 * Packer core [documentation](https://packer.io/docs) now supports versioning
-    on Packer.io. Users can select documentation for the version of Packer
-    they are using. [GH-11434](https://github.com/hashicorp/packer/pull/11434)
+    on Packer.io. Users can select documentation for the version of Packer they
+    are using. [GH-11434](https://github.com/hashicorp/packer/pull/11434)
 * The `hcp_packer_registry.labels` argument has been deprecated in favor of the
     new `bucket_labels` argument to support custom user generated bucket
     labels. [GH-11401](https://github.com/hashicorp/packer/pull/11401)
 * The code of the Outscale builder was handed over to the outscale org
     [GH-11428](https://github.com/hashicorp/packer/pull/11428)
-* Version information for external plugins is available on the plugin docs.
+* Version information for external plugins has been added as a badge to the
+    plugin documentation.
     [GH-11457](https://github.com/hashicorp/packer/pull/11457)
 
 
@@ -75,11 +76,11 @@ External plugins have been pinned to the following versions. Please see
 * core/hcl2: Allow for the use of variables and locals within a
     `hcp_packer_registry` block.
     [GH-11421](https://github.com/hashicorp/packer/pull/11421)
-* core/website: Add HCP Packer Ready badge to support plugins.
+* core/website: Add HCP Packer Ready badge to supported plugins.
     [GH-11456](https://github.com/hashicorp/packer/pull/11456)
-* core/website: Add Packer version selection toggle to core documentation page.
-    [GH-11434](https://github.com/hashicorp/packer/pull/11434)
-* core/website: Add version information to external plugin docs.
+* core/website: Add Packer version selection toggle to Packer core
+    documentation. [GH-11434](https://github.com/hashicorp/packer/pull/11434)
+* core/website: Add version information to external plugin documentation.
     [GH-11456](https://github.com/hashicorp/packer/pull/11456)
 * core/website: Extract external plugins documentation from `packer.io/docs/`
     into `packer.io/plugins`.
@@ -97,12 +98,12 @@ External plugins have been pinned to the following versions. Please see
 
 ### BUG FIXES:
 
-* core/hcl2: Fix crash when a provisioner `timeout` argument is not properly
+* core/hcl2: Allow the use of `build.name` for naming provisioners and
+    post-processors. [GH-11432](https://github.com/hashicorp/packer/pull/11432)
+* core/hcl2: Fix crash when a provisioner `timeout` argument is improperly
     formatted. [GH-11382](https://github.com/hashicorp/packer/pull/11382)
-* core: Allow the use of `build.name` for naming provisioners and post-
-    processors. [GH-11432](https://github.com/hashicorp/packer/pull/11432)
-* core: HCP Packer builds containing metadata not expected by Packer core will
-    no longer fail the build
+* core/hcl2: HCP Packer builds containing metadata not expected by Packer core
+    will no longer fail the build.
     [GH-11458](https://github.com/hashicorp/packer/pull/11458)
 * provisioner/file: File provisioner will now perform a noop when no source
     file content is specified; previously missing content resulted in a hard
@@ -5068,3 +5069,4 @@ making changes for HCL2.
 ## 0.1.0 (June 28, 2013)
 
 * Initial release
+
