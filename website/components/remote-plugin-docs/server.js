@@ -69,9 +69,13 @@ async function generateStaticProps({
     if (pluginData?.isHcpPackerReady) {
       badgesMdx.push(`<PluginBadge type="hcp_packer_ready" />`)
     }
-    // Add badge showing the latest release version number
+    // Add badge showing the latest release version number,
+    // and link this badge to the latest release
     if (latestReleaseTag) {
-      badgesMdx.push(`<Badge label="${latestReleaseTag}" theme="light-gray"/>`)
+      const href = `https://github.com/${pluginData.repo}/releases/tag/${latestReleaseTag}`
+      badgesMdx.push(
+        `<Badge href="${href}" label="${latestReleaseTag}" theme="light-gray"/>`
+      )
     }
     // If we have badges to add, inject them into the MDX
     if (badgesMdx.length > 0) {
