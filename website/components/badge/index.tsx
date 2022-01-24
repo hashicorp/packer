@@ -9,18 +9,21 @@ interface BadgeProps {
   label: string
   iconSvg?: string
   theme?: BadgeTheme
+  href?: string
 }
 
 function Badge({
   theme = 'gray',
   label,
   iconSvg,
+  href,
 }: BadgeProps): React.ReactElement {
+  const Elem = href ? 'a' : 'div'
   return (
-    <div className={classnames(s.root, s[`theme-${theme}`])}>
+    <Elem href={href} className={classnames(s.root, s[`theme-${theme}`])}>
       {iconSvg ? <InlineSvg className={s.icon} src={iconSvg} /> : null}
       <span className={s.text}>{label}</span>
-    </div>
+    </Elem>
   )
 }
 
