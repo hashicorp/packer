@@ -262,7 +262,7 @@ The documentation structure needed for Packer.io can be generated manually, by c
 
 Once the first `docs.zip` file has been included into a release you will need to open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
 
-This is done by adding the block below for the respective plugin to the file [website/data/docs-remote-plugins.json](https://github.com/hashicorp/packer/blob/master/website/data/docs-remote-plugins.json).
+This is done by adding the block below for the respective plugin to the file [website/data/plugins-manifest.json](https://github.com/hashicorp/packer/blob/master/website/data/plugins-manifest.json).
 
 ```json
 {
@@ -288,7 +288,7 @@ Follow the next steps to get the Packer website running and preview the document
 
 - Get the [Packer source code](https://github.com/hashicorp/packer). Our website code is under the [website folder](https://github.com/hashicorp/packer/tree/master/website).
 - Generate the `docs.zip` file. You can find above the steps to do so.
-- Add the `zipFile` attribute to the plugin entry in `docs-remote-plugins.json`. The value should be the full path of the `docs.zip` generated. For example:
+- Add the `zipFile` attribute to the plugin entry in `plugins-manifest.json`. The value should be the full path of the `docs.zip` generated. For example:
 
 ```json
 {
