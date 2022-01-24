@@ -40,8 +40,9 @@ type Config struct {
 	// The command used to restart the guest machine
 	RestartCommand string `mapstructure:"restart_command"`
 
-	// The command used to check if the guest machine has restarted
-	// The output of this command will be displayed to the user
+	// The command to run after executing `restart_command` to check if the guest machine has restarted.
+	// This command will retry until the connection to the guest machine has been restored or `restart_timeout` has exceeded.
+	// The output of this command will be displayed to the user.
 	RestartCheckCommand string `mapstructure:"restart_check_command"`
 
 	// The timeout for waiting for the machine to restart
