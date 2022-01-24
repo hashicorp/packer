@@ -41,7 +41,24 @@ locals {
 This example accesses the Vault path `secret/foo` and returns the value
 stored at the key `foo`, storing it as the local variable `local.foo`.
 
-In order for this to work, you must set the environment variables `VAULT_TOKEN`
+If the Vault secret contains a highly sensitive value the `local` block, not to be confused with
+the `locals` block, can be used to mark the value as sensitive.
+
+```hcl
+local "foo" {
+    expression = vault("secrets/hello", "foo")
+    sensitive  = true
+}
+
+The `local` block example accesses the Vault path `secrets/foo` and returns the value
+stored at the key `foo`, storing it as the local variable `local.foo`. However, the output of
+the newly stored local variable will be filtered from the Packer build output, and replaced
+with the value '<sensitive>'. See [Local Values](/docs/templates/hcl_templates/locals) for more details.
+
+
+## Usage
+
+In order for the Vault function to work, you must set the environment variables `VAULT_TOKEN`
 and `VAULT_ADDR` to valid values.
 
 -> **NOTE:** HCL functions can be used in local variable definitions or inline
