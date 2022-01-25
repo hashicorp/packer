@@ -35,7 +35,7 @@ The images that Packer creates can easily be turned into
 ## Quick Start
 
 **Note:** There is a great
-[introduction and getting started guide](https://www.packer.io/intro)
+[introduction and getting started guide](https://learn.hashicorp.com/tutorials/packer/get-started-install-cli)
 for those with a bit more patience. Otherwise, the quick start below
 will get you up and running quickly, at the sacrifice of not explaining some
 key points.
