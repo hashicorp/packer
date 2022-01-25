@@ -225,6 +225,21 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 	return locals, diags
 }
 
+func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
+	var local_diags hcl.Diagnostics
+
+	// divide by 2 so that you don't get duplicate locals
+	// appear to have double locals in LocalBlock, not sure if intentional
+	for i := 0; i < len(locals)/2; i++ {
+		diags := c.evaluateLocalVariable(locals[i])
+		if diags.HasErrors() {
+			local_diags = append(local_diags, diags...)
+		}
+	}
+
+	return local_diags
+}
+
 func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -232,9 +247,11 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 		c.LocalVariables = Variables{}
 	}
 
+	fmt.Println(fmt.Sprintf("locals length: %v", len(locals)))
 	var retry, previousL int
 	for len(locals) > 0 {
 		local := locals[0]
+		fmt.Println(fmt.Sprintf("Locals 0: %v", local))
 		moreDiags := c.evaluateLocalVariable(local)
 		if moreDiags.HasErrors() {
 			if len(locals) == 1 {
@@ -245,7 +262,8 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 			if previousL == len(locals) {
 				if retry == 100 {
 					// To get to this point, locals must have a circle dependency
-					return append(diags, moreDiags...)
+					fmt.Println("Hitting 100 retry logic")
+					return c.evaluateAllLocalVariables(locals)
 				}
 				retry++
 			}

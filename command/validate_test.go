@@ -33,6 +33,9 @@ func TestValidateCommand(t *testing.T) {
 
 		// wrong packer block
 		{path: filepath.Join(testFixture("validate", "invalid_packer_block.pkr.hcl")), exitCode: 1},
+
+		// Should return multiple errors,
+		{path: filepath.Join(testFixture("validate", "circular_error.pkr.hcl")), exitCode: 1},
 	}
 
 	for _, tc := range tt {
@@ -132,7 +135,7 @@ func TestValidateCommandBadVersion(t *testing.T) {
 	}
 
 	stdout, stderr := outputCommand(t, c.Meta)
-	expected := `Error: 
+	expected := `Error:
 
 This template requires Packer version 101.0.0 or higher; using 100.0.0
 
