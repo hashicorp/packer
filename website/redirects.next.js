@@ -202,8 +202,8 @@ module.exports = [
     permanent: true,
   },
   {
-    source: '/intro/getting-started',
-    destination: 'https://learn.hashicorp.com/packer/getting-started/install',
+    source: '/intro/',
+    destination: 'https://learn.hashicorp.com/packer',
     permanent: true,
   },
   {
