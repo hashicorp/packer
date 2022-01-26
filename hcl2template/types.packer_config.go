@@ -247,11 +247,9 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 		c.LocalVariables = Variables{}
 	}
 
-	fmt.Println(fmt.Sprintf("locals length: %v", len(locals)))
 	var retry, previousL int
 	for len(locals) > 0 {
 		local := locals[0]
-		fmt.Println(fmt.Sprintf("Locals 0: %v", local))
 		moreDiags := c.evaluateLocalVariable(local)
 		if moreDiags.HasErrors() {
 			if len(locals) == 1 {
@@ -262,7 +260,6 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 			if previousL == len(locals) {
 				if retry == 100 {
 					// To get to this point, locals must have a circle dependency
-					fmt.Println("Hitting 100 retry logic")
 					return c.evaluateAllLocalVariables(locals)
 				}
 				retry++
