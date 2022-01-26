@@ -33,6 +33,9 @@ func TestValidateCommand(t *testing.T) {
 
 		// wrong packer block
 		{path: filepath.Join(testFixture("validate", "invalid_packer_block.pkr.hcl")), exitCode: 1},
+
+		// Should return multiple errors,
+		{path: filepath.Join(testFixture("validate", "circular_error.pkr.hcl")), exitCode: 1},
 	}
 
 	for _, tc := range tt {
