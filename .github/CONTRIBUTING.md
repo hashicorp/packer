@@ -216,6 +216,13 @@ the back-and-forth as we make sure that we understand the changes fully. Please
 bear with us, and please know that we appreciate the time and energy you put
 into the project.
 
+### PR Checks
+
+The following checks run when a PR is opened:
+
+- Contributor License Agreement (CLA): If this is your first contribution to Packer you will be asked to sign the CLA.
+- Tests: tests include unit tests, documentation checks, and code formatting checks, and all checks must pass before a PR can be merged.
+
 #### Working on forks
 
 The easiest way to work on a fork is to set it as a remote of the Packer
