@@ -225,6 +225,21 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 	return locals, diags
 }
 
+func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
+	var local_diags hcl.Diagnostics
+
+	// divide by 2 so that you don't get duplicate locals
+	// appear to have double locals in LocalBlock, not sure if intentional
+	for i := 0; i < len(locals)/2; i++ {
+		diags := c.evaluateLocalVariable(locals[i])
+		if diags.HasErrors() {
+			local_diags = append(local_diags, diags...)
+		}
+	}
+
+	return local_diags
+}
+
 func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -245,7 +260,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 			if previousL == len(locals) {
 				if retry == 100 {
 					// To get to this point, locals must have a circle dependency
-					return append(diags, moreDiags...)
+					return c.evaluateAllLocalVariables(locals)
 				}
 				retry++
 			}
