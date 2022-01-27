@@ -275,18 +275,8 @@ var localBlockSchema = &hcl.BodySchema{
 	},
 }
 
-func decodeLocalBlock(block *hcl.Block, locals []*LocalBlock) (*LocalBlock, hcl.Diagnostics) {
+func decodeLocalBlock(block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
 	name := block.Labels[0]
-	for _, loc := range locals {
-		if loc.Name == name {
-			return nil, []*hcl.Diagnostic{{
-				Severity: hcl.DiagError,
-				Summary:  "Duplicate variable",
-				Detail:   "Duplicate " + block.Labels[0] + " variable definition found.",
-				Context:  block.DefRange.Ptr(),
-			}}
-		}
-	}
 
 	content, diags := block.Body.Content(localBlockSchema)
 	if !hclsyntax.ValidIdentifier(name) {
