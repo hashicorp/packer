@@ -186,7 +186,7 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 	content, moreDiags := f.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
-	locals := c.LocalBlocks
+	var locals []*LocalBlock
 
 	for _, block := range content.Blocks {
 		switch block.Type {
@@ -221,7 +221,6 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 		}
 	}
 
-	c.LocalBlocks = locals
 	return locals, diags
 }
 
