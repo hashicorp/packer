@@ -225,18 +225,15 @@ func (c *PackerConfig) parseLocalVariables(f *hcl.File) ([]*LocalBlock, hcl.Diag
 }
 
 func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
-	var local_diags hcl.Diagnostics
+	var diags hcl.Diagnostics
 
 	// divide by 2 so that you don't get duplicate locals
 	// appear to have double locals in LocalBlock, not sure if intentional
-	for i := 0; i < len(locals)/2; i++ {
-		diags := c.evaluateLocalVariable(locals[i])
-		if diags.HasErrors() {
-			local_diags = append(local_diags, diags...)
-		}
+	for _, local := range locals {
+		diags.Append(c.evaluateLocalVariable(local)...)
 	}
 
-	return local_diags
+	return diags
 }
 
 func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
