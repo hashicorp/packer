@@ -215,7 +215,7 @@ func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagn
 	var diags hcl.Diagnostics
 
 	for _, local := range locals {
-		diags = diags.Append(c.evaluateLocalVariable(local)...)
+		diags = append(diags, c.evaluateLocalVariable(local)...)
 	}
 
 	return diags
