@@ -193,7 +193,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		}
 
 		for _, file := range files {
-			moreLocals, morediags := cfg.parseLocalVariables(file)
+			moreLocals, morediags := parseLocalVariableBlocks(file)
 			diags = append(diags, morediags...)
 			cfg.LocalBlocks = append(cfg.LocalBlocks, moreLocals...)
 		}
@@ -315,6 +315,7 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	moreDiags = cfg.LocalVariables.ValidateValues()
 	diags = append(diags, moreDiags...)
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
+	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
 	filterVarsFromLogs(cfg.InputVariables)
