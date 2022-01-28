@@ -609,7 +609,10 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				BuildName: build.Name,
 				Type:      srcUsage.String(),
 			}
+
 			pcb.SetDebug(cfg.debug)
+			pcb.SetForce(cfg.force)
+			pcb.SetOnError(cfg.onError)
 
 			// Apply the -only and -except command-line options to exclude matching builds.
 			buildName := pcb.Name()
