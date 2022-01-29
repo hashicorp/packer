@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -22,6 +23,11 @@ func logOutput() (logOutput io.Writer, err error) {
 
 		if logPath := os.Getenv(EnvLogFile); logPath != "" {
 			var err error
+			err = os.MkdirAll(filepath.Dir(logPath), 0o755)
+			if err != nil {
+				return nil, err
+			}
+
 			logOutput, err = os.Create(logPath)
 			if err != nil {
 				return nil, err
