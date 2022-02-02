@@ -1,4 +1,4 @@
-## 1.7.10 (Upcoming)
+## 1.7.10 (February 02, 2022)
 ### NOTES:
 
 This patch release fixes a crash in m1 caused by the psutils dep,
