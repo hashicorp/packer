@@ -1,7 +1,21 @@
 ## 1.7.10 (Upcoming)
+### NOTES:
+
+This patch release fixes a crash in m1 caused by the psutils dep,
+    https://github.com/hashicorp/packer/pull/11546, originally reported by the
+    HomeBrew team here https://github.com/hashicorp/packer/issues/11512
+
+### IMPROVEMENTS
+* Print all locals errors when there is a circular error.
+    [GH-11527](https://github.com/hashicorp/packer/pull/11527
+
+### BUG FIXES
+* Prevent duplicate local block creation.
+    [GH-11534](https://github.com/hashicorp/packer/pull/11534)
+* Update psutils dep to avoid crash on Arm64 Macs.
+    [GH-11546](https://github.com/hashicorp/packer/pull/11546)
 
 ## 1.7.9 (January 19, 2022)
-
 ### NOTES:
 
 * HCP Packer compatible plugins will contain a "HCP Packer Ready" badge at the
