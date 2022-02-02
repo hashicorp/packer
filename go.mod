@@ -2,7 +2,6 @@ module github.com/hashicorp/packer
 
 require (
 	cloud.google.com/go v0.97.0 // indirect
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/biogo/hts v1.4.3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
@@ -42,7 +41,7 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible
 	github.com/pkg/sftp v1.13.2 // indirect
 	github.com/posener/complete v1.2.3
-	github.com/shirou/gopsutil v3.21.1+incompatible
+	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10
 	github.com/zclconf/go-cty v1.10.0
@@ -52,7 +51,7 @@ require (
 	golang.org/x/net v0.0.0-20210902165921-8d991716f632
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
+	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.5
@@ -153,7 +152,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
-	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/analysis v0.20.0 // indirect
 	github.com/go-openapi/errors v0.19.9 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -239,6 +238,8 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.283 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.283 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.283 // indirect
+	github.com/tklauser/go-sysconf v0.3.9 // indirect
+	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ucloud/ucloud-sdk-go v0.20.2 // indirect
 	github.com/ufilesdk-dev/ufile-gosdk v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
@@ -247,6 +248,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	github.com/yandex-cloud/go-genproto v0.0.0-20211202135052-789603780fb2 // indirect
 	github.com/yandex-cloud/go-sdk v0.0.0-20211206101223-7c4e7926bf53 // indirect
+	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.mongodb.org/mongo-driver v1.4.6 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/mobile v0.0.0-20210901025245-1fde1d6c3ca1 // indirect
