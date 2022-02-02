@@ -18,6 +18,15 @@
         "path": "commands/init"
       },
       {
+        "title": "<code>plugins</code>",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "commands/plugins"
+          }
+        ]
+      },
+      {
         "title": "<code>build</code>",
         "path": "commands/build"
       },
