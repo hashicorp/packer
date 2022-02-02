@@ -2,7 +2,6 @@ module github.com/hashicorp/packer
 
 require (
 	cloud.google.com/go v0.97.0 // indirect
-	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/biogo/hts v1.4.3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
