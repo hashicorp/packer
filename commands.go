@@ -62,6 +62,12 @@ func init() {
 			}, nil
 		},
 
+		"plugins": func() (cli.Command, error) {
+			return &command.PluginsCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
 				Meta: *CommandMeta,
