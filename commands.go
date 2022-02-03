@@ -69,7 +69,7 @@ func init() {
 		},
 
 		"plugins installed": func() (cli.Command, error) {
-			return &command.PluginsCommand{
+			return &command.PluginsInstalledCommand{
 				Meta: *CommandMeta,
 			}, nil
 		},
