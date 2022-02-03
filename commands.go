@@ -81,7 +81,7 @@ func init() {
 		},
 
 		"plugins remove": func() (cli.Command, error) {
-			return &command.PluginsCommand{
+			return &command.PluginsRemoveCommand{
 				Meta: *CommandMeta,
 			}, nil
 		},
