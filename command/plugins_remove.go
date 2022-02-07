@@ -25,6 +25,7 @@ func (c *PluginsRemoveCommand) Synopsis() string {
 func (c *PluginsRemoveCommand) Help() string {
 	helpText := `
 Usage: packer plugins remove github.com/hashicorp/happycloud v1.2.3
+
   This command will remove a Packer plugin for a specific version constrain.
   When the version is omitted all versions will be removed.
 `

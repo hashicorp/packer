@@ -23,6 +23,7 @@ func (c *PluginsRequiredCommand) Synopsis() string {
 func (c *PluginsRequiredCommand) Help() string {
 	helpText := `
 Usage: packer plugins required <path>
+
   This command will list all Packer plugin required by a Packer config.
 
   Ex: packer plugins required require.pkr.hcl

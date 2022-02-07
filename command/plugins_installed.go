@@ -21,6 +21,7 @@ func (c *PluginsInstalledCommand) Synopsis() string {
 func (c *PluginsInstalledCommand) Help() string {
 	helpText := `
 Usage: packer plugins installed
+
   This command lists all installed plugins and their version.
 `
 
