@@ -87,7 +87,7 @@ func init() {
 		},
 
 		"plugins required": func() (cli.Command, error) {
-			return &command.PluginsCommand{
+			return &command.PluginsRequiredCommand{
 				Meta: *CommandMeta,
 			}, nil
 		},
