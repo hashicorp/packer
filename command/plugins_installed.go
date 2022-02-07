@@ -15,14 +15,16 @@ type PluginsInstalledCommand struct {
 }
 
 func (c *PluginsInstalledCommand) Synopsis() string {
-	return "List all installed Packer plugins and their version"
+	return "List all installed Packer plugins binaries"
 }
 
 func (c *PluginsInstalledCommand) Help() string {
 	helpText := `
 Usage: packer plugins installed
 
-  This command lists all installed plugins and their version.
+  This command lists all installed plugins binaries that match with the current
+  OS and architecture. Packer's API version will be ignored.
+
 `
 
 	return strings.TrimSpace(helpText)
