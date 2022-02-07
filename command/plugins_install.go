@@ -29,7 +29,7 @@ func (c *PluginsInstallCommand) Help() string {
 	helpText := `
 Usage: packer plugins install <plugin-path> [<version>]
   This command will install a Packer plugins at a specific version constrain.
-  When the version is omitted the most recent plugin will be installed.
+  When the version is omitted the most recent version will be installed.
 
   Ex: packer plugins install github.com/hashicorp/happycloud v1.2.3
 `
