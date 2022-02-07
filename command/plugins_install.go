@@ -22,15 +22,16 @@ type PluginsInstallCommand struct {
 }
 
 func (c *PluginsInstallCommand) Synopsis() string {
-	return "Install a Packer plugin [at a version]"
+	return "Install latest Packer plugin [matching version constraint]"
 }
 
 func (c *PluginsInstallCommand) Help() string {
 	helpText := `
-Usage: packer plugins install <plugin-path> [<version>]
+Usage: packer plugins install <plugin> [<version constraint>]
 
-  This command will install a Packer plugins at a specific version constrain.
-  When the version is omitted the most recent version will be installed.
+  This command will install the most recent compatible Packer plugins matching
+  version constraint. When the version constraint is omitted, the most recent
+  version will be installed.
 
   Ex: packer plugins install github.com/hashicorp/happycloud v1.2.3
 `
