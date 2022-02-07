@@ -22,7 +22,7 @@ func (c *PluginsInstalledCommand) Help() string {
 	helpText := `
 Usage: packer plugins installed
 
-  This command lists all installed plugins binaries that match with the current
+  This command lists all installed plugin binaries that match with the current
   OS and architecture. Packer's API version will be ignored.
 
 `

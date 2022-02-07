@@ -25,8 +25,8 @@ func (c *PluginsRemoveCommand) Help() string {
 	helpText := `
 Usage: packer plugins remove <plugin> [<version constraint>]
 
-  This command will remove all Packer plugins matching version constraint and
-  the current OS and architecture.
+  This command will remove all Packer plugins matching the version constraint
+  for the current OS and architecture.
   When the version is omitted all installed versions will be removed.
 
   Ex: packer plugins remove github.com/hashicorp/happycloud v1.2.3
