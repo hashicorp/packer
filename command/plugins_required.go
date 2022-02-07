@@ -24,7 +24,10 @@ func (c *PluginsRequiredCommand) Help() string {
 	helpText := `
 Usage: packer plugins required <path>
 
-  This command will list all Packer plugin required by a Packer config.
+  This command will list every Packer plugins required by a Packer config.
+  All binaries matching the required version constrain and the current OS and 
+  Architecture will be listed.
+
 
   Ex: packer plugins required require.pkr.hcl
   Ex: packer plugins required path/to/folder/
