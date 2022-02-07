@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
-	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/mitchellh/cli"
@@ -19,15 +18,18 @@ type PluginsRemoveCommand struct {
 }
 
 func (c *PluginsRemoveCommand) Synopsis() string {
-	return "Remove a Packer plugin [at a version]"
+	return "Remove Packer plugins [matching a version]"
 }
 
 func (c *PluginsRemoveCommand) Help() string {
 	helpText := `
-Usage: packer plugins remove <plugin-path> [<version>]
+Usage: packer plugins remove <plugin> [<version constraint>]
 
-  This command will remove a Packer plugin for a specific version constrain.
+  This command will remove all Packer plugins matching version constraint and
+  the current OS and architecture.
   When the version is omitted all installed versions will be removed.
+
+  Ex: packer plugins remove github.com/hashicorp/happycloud v1.2.3
 `
 
 	return strings.TrimSpace(helpText)
@@ -48,10 +50,8 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 	opts := plugingetter.ListInstallationsOptions{
 		FromFolders: c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
-			OS:              runtime.GOOS,
-			ARCH:            runtime.GOARCH,
-			APIVersionMajor: pluginsdk.APIVersionMajor,
-			APIVersionMinor: pluginsdk.APIVersionMinor,
+			OS:   runtime.GOOS,
+			ARCH: runtime.GOARCH,
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
