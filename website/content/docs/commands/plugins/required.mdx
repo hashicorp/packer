@@ -1,0 +1,27 @@
+---
+description: |
+  The "plugins required" command can install a plugin at a version constraint.
+page_title: plugins Command
+---
+
+# `plugins required`
+
+The `plugins required` command lists all plugins required by a Packer config and
+binaries.
+
+```shell-session
+$ packer plugins required -h
+Usage: packer plugins required <path>
+
+  This command will list every Packer plugins required by a Packer config.
+  All binaries matching the required version constrain and the current OS and
+  Architecture will be listed.
+
+
+  Ex: packer plugins required require.pkr.hcl
+  Ex: packer plugins required path/to/folder/
+```
+
+## Related
+
+- [`packer init`](/docs/commands/init) will install all required plugins.

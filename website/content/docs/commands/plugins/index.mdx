@@ -9,12 +9,22 @@ page_title: plugins Command
 
 The `plugins` command groups subcommands for interacting with Packers' plugins.
 
-- `installed` lists all installed plugins and their version. Ex: `packer plugins installed`.
-- `install` a plugin version with `packer plugins install <plugin> <version>`.
-- `required` lists required plugins. Ex: `packer plugins required <path>`.
-- `remove` a plugin version with `packer plugins remove <plugin> <version>`.
-  Ommit the version parameter to remove all versions.
+```shell-session
+$ packer plugins -h
+Usage: packer plugins <subcommand> [options] [args]
+  This command groups subcommands for interacting with Packer plugins.
 
-Related but not under the `plugins` command :
+Related but not under the "plugins" command :
 
-- `packer init <path>` will install all plugins required by a config.
+- "packer init <path>" will install all plugins required by a config.
+
+Subcommands:
+    install      Install latest Packer plugin [matching version constraint]
+    installed    List all installed Packer plugins binaries
+    remove       Remove Packer plugins [matching a version]
+    required     List plugins required by a config
+```
+
+## Related
+
+- [`packer init`](/docs/commands/init) will install all required plugins.
