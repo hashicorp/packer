@@ -3,7 +3,6 @@ package command
 import (
 	"context"
 	"crypto/sha256"
-	"fmt"
 	"log"
 	"runtime"
 	"strings"
@@ -69,7 +68,7 @@ func (c *PluginsInstalledCommand) RunContext(buildCtx context.Context) int {
 	}
 
 	for _, installation := range installations {
-		fmt.Printf("%v\n", installation)
+		c.Ui.Message(installation.BinaryPath)
 	}
 
 	return 0
