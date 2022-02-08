@@ -15,7 +15,7 @@ type PluginsInstalledCommand struct {
 }
 
 func (c *PluginsInstalledCommand) Synopsis() string {
-	return "List all installed Packer plugins binaries"
+	return "List all installed Packer plugin binaries"
 }
 
 func (c *PluginsInstalledCommand) Help() string {
