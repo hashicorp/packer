@@ -93,15 +93,15 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			[]*Installation{
 				{
 					Version:    "v1.2.3",
-					BinaryPath: "testdata/plugins/github.com/hashicorp/amazon/packer-plugin-amazon_v1.2.3_x5.0_windows_amd64.exe",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_windows_amd64.exe"),
 				},
 				{
 					Version:    "v1.2.4",
-					BinaryPath: "testdata/plugins/github.com/hashicorp/amazon/packer-plugin-amazon_v1.2.4_x5.0_windows_amd64.exe",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_windows_amd64.exe"),
 				},
 				{
 					Version:    "v1.2.5",
-					BinaryPath: "testdata/plugins/github.com/hashicorp/amazon/packer-plugin-amazon_v1.2.5_x5.0_windows_amd64.exe",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_windows_amd64.exe"),
 				},
 				{
 					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
