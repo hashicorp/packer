@@ -7,7 +7,8 @@ page_title: plugins Command
 # `plugins required`
 
 The `plugins required` command lists all plugins required by a Packer config and
-binaries.
+all the installed binaries that match the constraint. The first binary 
+— also the most recent version — will be  the one picked by Packer in a build.
 
 ```shell-session
 $ packer plugins required -h
