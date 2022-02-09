@@ -57,7 +57,7 @@ If you want to be able to use provisioners, the Answer file must also contain
 a script that sets up SSH or WinRM so that Packer can connect to the instance.
 
 Finally, your Packer build will be much smoother if the Answer File handles or
-disables windows updates rather than you tyring to run them using a Packer
+disables windows updates rather than you trying to run them using a Packer
 provisioner. This is because the winrm communicator does not handle the
 disconnects caused by automatic reboots in Windows updates well, and the
 disconnections can fail a build.
