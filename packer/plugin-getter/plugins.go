@@ -83,6 +83,9 @@ func (rlerr *RateLimitError) Error() string {
 }
 
 func (pr Requirement) FilenamePrefix() string {
+	if pr.Identifier == nil {
+		return "packer-plugin-"
+	}
 	return "packer-plugin-" + pr.Identifier.Type + "_"
 }
 
@@ -104,7 +107,12 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	filenameSuffix := opts.filenameSuffix()
 	log.Printf("[TRACE] listing potential installations for %q that match %q. %#v", pr.Identifier, pr.VersionConstraints, opts)
 	for _, knownFolder := range opts.FromFolders {
-		glob := filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, FilenamePrefix+"*"+filenameSuffix)
+		glob := ""
+		if pr.Identifier == nil {
+			glob = filepath.Join(knownFolder, "*", "*", "*", FilenamePrefix+"*"+filenameSuffix)
+		} else {
+			glob = filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, FilenamePrefix+"*"+filenameSuffix)
+		}
 
 		matches, err := filepath.Glob(glob)
 		if err != nil {
@@ -120,7 +128,13 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
 			versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
 
-			// versionsStr now looks like v1.2.3_x5.1
+			if pr.Identifier == nil {
+				if idx := strings.Index(versionsStr, "_"); idx > 0 {
+					versionsStr = versionsStr[idx+1:]
+				}
+			}
+
+			// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 			parts := strings.SplitN(versionsStr, "_", 2)
 			pluginVersionStr, protocolVerionStr := parts[0], parts[1]
 			pv, err := version.NewVersion(pluginVersionStr)
@@ -131,7 +145,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			}
 
 			// no constraint means always pass, this will happen for implicit
-			// plugin requirements
+			// plugin requirements and when we list all plugins.
 			if !pr.VersionConstraints.Check(pv) {
 				log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
 				continue
@@ -257,6 +271,11 @@ func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string
 		return fmt.Errorf("Invalid remote protocol: %q, expected something like '%s.%s'", remoteProt, binOpts.APIVersionMajor, binOpts.APIVersionMinor)
 	}
 	vMajor, vMinor := parts[0], parts[1]
+
+	// no protocol version check
+	if binOpts.APIVersionMajor == "" && binOpts.APIVersionMinor == "" {
+		return nil
+	}
 
 	if vMajor != binOpts.APIVersionMajor {
 		return fmt.Errorf("Unsupported remote protocol MAJOR version %q. The current MAJOR protocol version is %q."+

@@ -18,6 +18,31 @@
         "path": "commands/init"
       },
       {
+        "title": "<code>plugins</code>",
+        "routes": [
+          {
+            "title": "Overview",
+            "path": "commands/plugins"
+          },
+          {
+            "title": "<code>install</code>",
+            "path": "commands/plugins/install"
+          },
+          {
+            "title": "<code>installed</code>",
+            "path": "commands/plugins/installed"
+          },
+          {
+            "title": "<code>remove</code>",
+            "path": "commands/plugins/remove"
+          },
+          {
+            "title": "<code>required</code>",
+            "path": "commands/plugins/required"
+          }
+        ]
+      },
+      {
         "title": "<code>build</code>",
         "path": "commands/build"
       },

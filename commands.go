@@ -62,6 +62,36 @@ func init() {
 			}, nil
 		},
 
+		"plugins": func() (cli.Command, error) {
+			return &command.PluginsCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
+		"plugins installed": func() (cli.Command, error) {
+			return &command.PluginsInstalledCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
+		"plugins install": func() (cli.Command, error) {
+			return &command.PluginsInstallCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
+		"plugins remove": func() (cli.Command, error) {
+			return &command.PluginsRemoveCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
+		"plugins required": func() (cli.Command, error) {
+			return &command.PluginsRequiredCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
 		"validate": func() (cli.Command, error) {
 			return &command.ValidateCommand{
 				Meta: *CommandMeta,
