@@ -386,7 +386,12 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		// It's possible no type attribute was assigned so lets make sure we
 		// have a valid type otherwise there could be issues parsing the value.
-		if v.Type == cty.NilType {
+		if v.Type == cty.NilType &&
+			// converting a value to one of these empty type works but makes the
+			// converted value empty.
+			!defaultValue.Type().Equals(cty.EmptyObject) &&
+			!defaultValue.Type().Equals(cty.EmptyTuple) {
+
 			v.Type = defaultValue.Type()
 		}
 	}
