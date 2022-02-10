@@ -1,0 +1,28 @@
+name: "Website Docker Image"
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      # Push events on master branch
+      - 'master'
+      - 'crt-onboarding' # for testing only. remove before merging. 
+
+jobs:
+  website-docker-image:
+    runs-on: ubuntu-latest  
+    name: Build Docker Image if Necessary
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          IMAGE_TAG=$(cat website/Dockerfile website/package-lock.json | sha256sum | awk '{print $1;}')
+          echo "Using $IMAGE_TAG"
+          if curl https://hub.docker.com/v2/repositories/hashicorp/packer-website/tags/$IMAGE_TAG -fsL > /dev/null; then
+              echo "Dependencies have not changed, not building a new website docker image."
+          else
+            cd website/
+            docker login -u $WEBSITE_DOCKER_USER -p $WEBSITE_DOCKER_PASS
+            docker build -t hashicorp/packer-website:$IMAGE_TAG .
+            docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
+            docker push hashicorp/packer-website
+          fi

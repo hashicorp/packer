@@ -25,7 +25,7 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) $(LDFLAGS)
 export GOLDFLAGS
 
 .PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
-	releasebin test testacc testrace
+	releasebin test testacc testrace version
 
 default: install-build-deps install-gen-deps generate dev
 
@@ -74,6 +74,45 @@ dev: ## Build and install a development build
 	@go install -ldflags '$(GOLDFLAGS)'
 	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
+
+# Docker build variables and targets
+REGISTRY_NAME?=docker.io/hashicorp
+IMAGE_NAME=packer
+VERSION?=1.7.10
+IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
+IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(shell git rev-parse --short HEAD)
+
+docker: docker-official
+docker-light: docker-official
+
+# Builds from the releases.hashicorp.com official binary
+docker-official:
+	docker build \
+		--tag $(IMAGE_TAG) \
+		--tag hashicorp/packer:latest \
+		--target=official \
+		--build-arg VERSION=$(VERSION) \
+		.
+
+# Builds multiarch from the releases.hashicorp.com official binary
+docker-multiarch-official:
+	docker buildx build \
+		--tag $(IMAGE_TAG) \
+		--tag hashicorp/packer:latest \
+		--target=official \
+		--build-arg VERSION=$(VERSION) \
+		--platform linux/amd64,linux/arm64 \
+		.
+
+# Builds from the locally generated binary in ./bin/
+# To generate the local binary, run `make dev`
+docker-dev: export GOOS=linux
+docker-dev: export GOARCH=amd64
+docker-dev: dev
+	@docker build \
+		--tag $(IMAGE_TAG_DEV) \
+		--target=dev \
+		.
 
 lint: install-lint-deps ## Lint Go code
 	@if [ ! -z  $(PKG_NAME) ]; then \
@@ -161,3 +200,7 @@ vet: ## Vet Go code
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+
+# This is used for release builds by .github/workflows/build.yml
+version:
+	@$(CURDIR)/scripts/version.sh version/version.go
