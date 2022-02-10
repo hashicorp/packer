@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -97,20 +98,40 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 		m.Ui.Error(fmt.Sprintf("%q: %s", cla.Path, err))
 		return nil, 1
 	}
+	cla.ConfigType = cfgType
 
 	switch cfgType {
 	case ConfigTypeHCL2:
 		// TODO(azr): allow to pass a slice of files here.
 		return m.GetConfigFromHCL(cla)
 	default:
-		// TODO: uncomment once we've polished HCL a bit more.
-		// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
-		// The template will be parsed in the legacy configuration style. This style
-		// will continue to work but users are encouraged to move to the new style.
-		// See: https://packer.io/guides/hcl
-		// `)
 		return m.GetConfigFromJSON(cla)
 	}
+}
+
+//DisplayLegacyConfigWarning displays Packer defined legacy warnings
+// This is an internal-only method that should be called by commands that don't have
+// a different mode when handling legacy JSON templates; mainly build, validate.
+func DisplayLegacyConfigWarning(ui packersdk.Ui) {
+	if v, ok := os.LookupEnv("PACKER_LEGACY_MODE"); ok && strings.ToLower(v) == "on" {
+		return
+	}
+
+	coloredUi := packer.ColoredUi{
+		Color: packer.UiColorRed,
+		Ui:    ui,
+	}
+
+	coloredUi.Say(`
+Legacy JSON Configuration Mode enabled.
+The template will be parsed in the legacy configuration style. Legacy style
+templates will continue to work but users are encouraged to move HCL style templates.
+templates will continue to work but users are encouraged to move to HCL style templates.
+See: https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade
+
+To disable legacy warnings including this one set the environment variable PACKER_LEGACY_MODE=on
+`)
+
 }
 
 func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
@@ -148,6 +169,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
 		return ret
+	}
+
+	if cla.ConfigType == ConfigTypeJSON {
+		DisplayLegacyConfigWarning(c.Ui)
 	}
 
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
