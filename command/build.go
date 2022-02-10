@@ -128,8 +128,12 @@ The template will be parsed in the legacy configuration style. Legacy style
 templates will continue to work but users are encouraged to move HCL style templates.
 templates will continue to work but users are encouraged to move to HCL style templates.
 See: https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade
+`)
 
-To disable legacy warnings including this one set the environment variable PACKER_LEGACY_MODE=on
+	coloredUi.Say(`In JSON mode automatic loading of vendored plugins is enabled by default.  In future
+this feature will be removed and Packer will rely only on system installed plugins.
+To disable automatic loading of vendored plugins set PACKER_LEGACY_MODE=off
+See: https://packer.io/docs/templates/legacy-mode
 `)
 
 }

@@ -1,6 +1,9 @@
 package command
 
 import (
+	"os"
+	"strings"
+
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 
 	// Previously core-bundled components, split into their own plugins but
@@ -187,6 +190,14 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 // Upon init lets load up any plugins that were vendored manually into the default
 // set of plugins.
 func init() {
+
+	// By default PACKER_LEGACY_MODE=auto to enable automatic loading of vendored plugins.
+	// In preparation for removing vendored plugins entirely we are providing users a flag to
+	//  to control if vendored plugins should be loaded or not.
+	if v, ok := os.LookupEnv("PACKER_LEGACY_MODE"); ok && strings.ToLower(v) == "off" {
+		return
+	}
+
 	for k, v := range VendoredDatasources {
 		if _, ok := Datasources[k]; ok {
 			continue
