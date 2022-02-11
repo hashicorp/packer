@@ -159,9 +159,6 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	core := hdl.(*CoreWrapper).Core
-	if err := core.Initialize(); err != nil {
-		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
-	}
 	tpl := core.Template
 
 	// Parse blocks
@@ -217,8 +214,9 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 		WithAnnotations: cla.WithAnnotations,
 	}
 	if err := sources.Parse(tpl); err != nil {
-		c.Ui.Error(fmt.Sprintf("Ignoring following sources.Parse error: %v", err))
-		ret = 1
+		c.Ui.Error(fmt.Sprintf("\nIgnoring following sources.Parse error: %v\n"+
+			"Please install any missing builder types before executing a build with the newly upgraded template.\n"+
+			"See: https://www.packer.io/plugins#installing-plugins\n", err))
 	}
 
 	build := &BuildParser{

@@ -17,7 +17,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		exitCode  int
 		exitEarly bool
 	}{
-		{folder: "unknown_builder", flags: []string{}, exitCode: 1},
+		{folder: "unknown_builder", flags: []string{}, exitCode: 0},
 		{folder: "complete", flags: []string{"-with-annotations"}},
 		{folder: "without-annotations", flags: []string{}},
 		{folder: "minimal", flags: []string{"-with-annotations"}},
@@ -28,7 +28,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "variables-with-variables", flags: []string{}},
 		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "escaping", flags: []string{}},
-		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
+		{folder: "vsphere_linux_options_and_network_interface", exitCode: 0, flags: []string{}},
 		{folder: "nonexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 	}
 
