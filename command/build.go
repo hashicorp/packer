@@ -113,7 +113,7 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 // This is an internal-only method that should be called by commands that don't have
 // a different mode when handling legacy JSON templates; mainly build, validate.
 func DisplayLegacyConfigWarning(ui packersdk.Ui) {
-	if v, ok := os.LookupEnv("PACKER_LEGACY_MODE"); ok && strings.ToLower(v) == "on" {
+	if v := os.Getenv("PACKER_LEGACY_MODE"); strings.ToLower(v) == "on" {
 		return
 	}
 
