@@ -17,10 +17,10 @@ require (
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
-	github.com/hashicorp/go-getter/v2 v2.0.0
+	github.com/hashicorp/go-getter/v2 v2.0.1
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
-	github.com/hashicorp/go-version v1.3.0
+	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/hcl/v2 v2.11.1
 	github.com/hashicorp/hcp-sdk-go v0.15.1-0.20220112153249-f565607d7cc4
 	github.com/hashicorp/packer-plugin-amazon v1.0.6
