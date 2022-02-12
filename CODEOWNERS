@@ -70,3 +70,7 @@
 /post-processor/yandex-export/          @GennadySpb
 /post-processor/yandex-import/          @GennadySpb
 /post-processor/vsphere-template/       nelson@bennu.cl
+
+# release configuration
+
+/.release/                              @hashicorp/release-engineering
