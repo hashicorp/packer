@@ -1,6 +1,6 @@
 # Packer Docker Container
 
-The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `default`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com. 
+The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release-default`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com. 
 
 ## Build
 

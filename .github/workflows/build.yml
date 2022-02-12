@@ -219,8 +219,8 @@ jobs:
           name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
-  build-docker:
-    name: Docker ${{ matrix.arch }} build
+  build-docker-light:
+    name: Docker {{ matrix.arch }} light build
     needs:
       - get-product-version
       - build-linux
@@ -247,8 +247,48 @@ jobs:
         uses: hashicorp/actions-docker-build@v1
         with:
           version: ${{env.version}}
-          target: default
+          target: release-default
           arch: ${{matrix.arch}}
           tags: |
+            docker.io/hashicorp/${{env.repo}}:light
+            docker.io/hashicorp/${{env.repo}}:light-${{env.version}}
             docker.io/hashicorp/${{env.repo}}:${{env.version}}
+            public.ecr.aws/hashicorp/${{env.repo}}:light
+            public.ecr.aws/hashicorp/${{env.repo}}:light-${{env.version}}
             public.ecr.aws/hashicorp/${{env.repo}}:${{env.version}}
+  
+    build-docker-full:
+    name: Docker {{ matrix.arch }} full build
+    needs:
+      - get-product-version
+      - build-linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: ["arm", "arm64", "386", "amd64"]
+    env:
+      repo: ${{ github.event.repository.name }}
+      version: ${{ needs.get-product-version.outputs.product-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to Artifactory
+        uses: docker/login-action@v1
+        with:
+          registry: docker.artifactory.hashicorp.engineering
+          username: ${{ secrets.ARTIFACTORY_RO_USER }}
+          password: ${{ secrets.ARTIFACTORY_RO_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: docker.artifactory.hashicorp.engineering/prodsec-binfmt:latest
+      - name: Docker Build (Action)
+        uses: hashicorp/actions-docker-build@v1
+        with:
+          version: ${{env.version}}
+          target: release-default
+          arch: ${{matrix.arch}}
+          tags: |
+            docker.io/hashicorp/${{env.repo}}:full
+            docker.io/hashicorp/${{env.repo}}:full-${{env.version}}
+            public.ecr.aws/hashicorp/${{env.repo}}:full
+            public.ecr.aws/hashicorp/${{env.repo}}:full-${{env.version}}
