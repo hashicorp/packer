@@ -257,7 +257,7 @@ jobs:
             public.ecr.aws/hashicorp/${{env.repo}}:light-${{env.version}}
             public.ecr.aws/hashicorp/${{env.repo}}:${{env.version}}
   
-    build-docker-full:
+  build-docker-full:
     name: Docker {{ matrix.arch }} full build
     needs:
       - get-product-version
