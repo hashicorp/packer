@@ -72,9 +72,9 @@ RUN set -eux && \
 ENTRYPOINT ["/bin/packer"]
 
 
-# Production docker image
-# Remember, this cannot be built locally
-FROM docker.mirror.hashicorp.services/alpine:latest as default
+# Production docker `light` image, which `latest` points to.
+# Remember, this cannot be built locally.
+FROM docker.mirror.hashicorp.services/alpine:latest as release-default
 
 ARG VERSION
 ARG BIN_NAME
@@ -91,6 +91,32 @@ LABEL name="Packer" \
       description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
 
 RUN apk add --no-cache git bash wget openssl gnupg
+
+COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
+
+ENTRYPOINT ["/bin/packer"]
+
+
+# Full development docker image
+# This image includes all source code found in this repository, 
+# and is also pushed to DockerHub under the `full` tag. 
+FROM docker.mirror.hashicorp.services/alpine:latest as release-full
+
+ARG VERSION
+ARG BIN_NAME
+
+LABEL name="Packer" \
+      maintainer="HashiCorp Packer Team <packer@hashicorp.com>" \
+      vendor="HashiCorp" \
+      version=$VERSION \
+      release=$VERSION \
+      summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
+      description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
+
+# TARGETARCH and TARGETOS are set automatically when --platform is provided.
+ARG TARGETOS TARGETARCH
+
+RUN apk add --no-cache git bash openssl ca-certificates
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
 
