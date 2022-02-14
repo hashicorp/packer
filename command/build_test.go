@@ -451,7 +451,8 @@ func TestBuild(t *testing.T) {
 			args: []string{
 				testFixture("hcl", "recursive_local_with_unset_input"),
 			},
-			fileCheck: fileCheck{},
+			fileCheck:    fileCheck{},
+			expectedCode: 1,
 		},
 	}
 
