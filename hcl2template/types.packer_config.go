@@ -232,30 +232,18 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 		c.LocalVariables = Variables{}
 	}
 
-	llen := len(locals)
-	var retry int
-	// avoid to retrying more than the number of items we have in the slice
-	for i := 0; llen > 0 && retry < llen+1; i++ {
-		i := i % llen
-		local := locals[i]
-		moreDiags := c.evaluateLocalVariable(local)
-		if moreDiags.HasErrors() {
-			if llen == 1 {
-				// If this is the only local left there's no need
-				// to try evaluating again
-				return append(diags, moreDiags...)
+	for foundSomething := true; foundSomething; {
+		foundSomething = false
+		for i := 0; i < len(locals); {
+			local := locals[i]
+			moreDiags := c.evaluateLocalVariable(local)
+			if moreDiags.HasErrors() {
+				i++
+				continue
 			}
-			retry++
-			continue
+			foundSomething = true
+			locals = append(locals[:i], locals[i+1:]...)
 		}
-
-		// could evaluate
-		retry = 0
-		diags = append(diags, moreDiags...)
-
-		// Remove local from slice
-		locals = append(locals[:i], locals[i+1:]...)
-		llen--
 	}
 
 	if len(locals) != 0 {
