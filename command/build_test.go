@@ -436,7 +436,7 @@ func TestBuild(t *testing.T) {
 			},
 		},
 		{
-			name: "hcl - recursive local using input vars",
+			name: "hcl - recursive local using input var",
 			args: []string{
 				testFixture("hcl", "recursive_local_with_input"),
 			},
@@ -445,6 +445,13 @@ func TestBuild(t *testing.T) {
 					"hey.txt": "hello",
 				},
 			},
+		},
+		{
+			name: "hcl - recursive local using an unset input var",
+			args: []string{
+				testFixture("hcl", "recursive_local_with_unset_input"),
+			},
+			fileCheck: fileCheck{},
 		},
 	}
 
