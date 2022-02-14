@@ -454,6 +454,17 @@ func TestBuild(t *testing.T) {
 			fileCheck:    fileCheck{},
 			expectedCode: 1,
 		},
+		{
+			name: "hcl - war with default value empty object/list can be set",
+			args: []string{
+				testFixture("hcl", "empty_object"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"foo.txt": "yo",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
