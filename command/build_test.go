@@ -455,7 +455,7 @@ func TestBuild(t *testing.T) {
 			expectedCode: 1,
 		},
 		{
-			name: "hcl - war with default value empty object/list can be set",
+			name: "hcl - var with default value empty object/list can be set",
 			args: []string{
 				testFixture("hcl", "empty_object"),
 			},
