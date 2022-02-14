@@ -387,7 +387,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		// It's possible no type attribute was assigned so lets make sure we
 		// have a valid type otherwise there could be issues parsing the value.
-		if v.Type == cty.NilType {
+		if v.Type == cty.DynamicPseudoType {
 			v.Type = defaultValue.Type()
 		}
 	}
