@@ -435,6 +435,17 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - recursive local using input vars",
+			args: []string{
+				testFixture("hcl", "recursive_local_with_input"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"hey.txt": "hello",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {
