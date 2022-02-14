@@ -191,10 +191,10 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 // set of plugins.
 func init() {
 
-	// By default PACKER_LEGACY_MODE=auto to enable automatic loading of vendored plugins.
+	// By default PACKER_LEGACY_MODE is unset to enable automatic loading of vendored plugins.
 	// In preparation for removing vendored plugins entirely we are providing users a flag to
 	//  to control if vendored plugins should be loaded or not.
-	if v := os.Getenv("PACKER_LEGACY_MODE"); strings.ToLower(v) == "off" {
+	if v := os.Getenv(PackerLegacyModeEnv); strings.ToUpper(v) == packerLegacyModeOff {
 		return
 	}
 

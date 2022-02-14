@@ -113,7 +113,7 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 // This is an internal-only method that should be called by commands that don't have
 // a different mode when handling legacy JSON templates; mainly build, validate.
 func DisplayLegacyConfigWarning(ui packersdk.Ui) {
-	if v := os.Getenv("PACKER_LEGACY_MODE"); strings.ToLower(v) == "on" {
+	if v := os.Getenv(PackerLegacyModeEnv); strings.ToUpper(v) == packerLegacyModeOn {
 		return
 	}
 
@@ -130,11 +130,11 @@ templates will continue to work but users are encouraged to move to HCL style te
 See: https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade
 `)
 
-	coloredUi.Say(`In JSON mode automatic loading of vendored plugins is enabled by default.  In future
-this feature will be removed and Packer will rely only on system installed plugins.
-To disable automatic loading of vendored plugins set PACKER_LEGACY_MODE=off
+	coloredUi.Say(fmt.Sprintf(`In JSON mode automatic loading of vendored plugins is enabled by default. In the
+future this feature will be removed and Packer will rely only on system installed plugins.
+To disable automatic loading of vendored plugins set %s=%s
 See: https://packer.io/docs/templates/legacy-mode
-`)
+`, PackerLegacyModeEnv, packerLegacyModeOff))
 
 }
 

@@ -23,6 +23,19 @@ const (
 	FlagSetVars
 )
 
+const (
+	/*
+		PACKER_LEGACY_MODE is an environment variable used by Packer to control features consider legacy as of 1.8.0.
+		By default when the variable is unset Packer will display warnings to the user.
+
+		Setting PACKER_LEGACY_MODE=OFF will display warnings to the user when running, and may disable other features.
+		Setting PACKER_LEGACY_MODE=ON  will not display warnings, and will Packer with all legacy features enabled.
+	*/
+	PackerLegacyModeEnv string = "PACKER_LEGACY_MODE"
+	packerLegacyModeOn  string = "ON"
+	packerLegacyModeOff string = "OFF"
+)
+
 // Meta contains the meta-options and functionality that nearly every
 // Packer command inherits.
 type Meta struct {
