@@ -335,6 +335,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 	v := &Variable{
 		Name:  name,
 		Range: block.DefRange,
+		Type:  cty.DynamicPseudoType,
 	}
 
 	if attr, exists := content.Attributes["description"]; exists {
