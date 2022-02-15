@@ -23,7 +23,7 @@ build {
     }
     inline           = [
       "echo yo, my secret is $MY_SECRET",
-      "echo '' > $MY_SECRET.txt",
+      "echo '' > $MY_SECRET",
     ]
   }
   provisioner "shell-local" {
@@ -33,7 +33,7 @@ build {
     }
     inline           = [
       "echo yo, my secret is %MY_SECRET%",
-      "echo '' > %MY_SECRET%.txt",
+      "echo '' > %MY_SECRET%",
     ]
   }
 }

@@ -475,7 +475,7 @@ func TestBuild(t *testing.T) {
 					"foo.txt": "foo",
 				},
 				expected: []string{
-					"s3cr3t.txt",
+					"s3cr3t",
 				},
 			},
 		},
