@@ -15,6 +15,7 @@ source "file" "foo" {
 build {
   sources = ["file.foo"]
   provisioner "shell-local" {
+    only_on = ["darwin", "freebsd", "linux", "openbsd", "solaris"]
     # original bug in :
     # environment_vars = ["MY_SECRET=${local.secret}"]
     env = {
@@ -23,6 +24,16 @@ build {
     inline           = [
       "echo yo, my secret is $MY_SECRET",
       "echo '' > $MY_SECRET.txt",
+    ]
+  }
+  provisioner "shell-local" {
+    only_on = ["windows"]
+    env = {
+      "MY_SECRET":"${local.secret}",
+    }
+    inline           = [
+      "echo yo, my secret is %MY_SECRET%",
+      "echo '' > %MY_SECRET%.txt",
     ]
   }
 }
