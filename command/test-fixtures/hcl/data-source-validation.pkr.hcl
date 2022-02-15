@@ -20,6 +20,9 @@ build {
     env = {
       "MY_SECRET":"${local.secret}",
     }
-    inline           = ["echo yo, my secret is $MY_SECRET"]
+    inline           = [
+      "echo yo, my secret is $MY_SECRET",
+      "echo '' > $MY_SECRET.txt",
+    ]
   }
 }
