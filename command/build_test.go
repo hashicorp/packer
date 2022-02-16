@@ -465,6 +465,20 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - unknown ",
+			args: []string{
+				testFixture("hcl", "data-source-validation.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"foo.txt": "foo",
+				},
+				expected: []string{
+					"s3cr3t",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {

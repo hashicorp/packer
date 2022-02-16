@@ -52,6 +52,11 @@ provisioner "shell" {
 
 @include 'provisioners/shell-config.mdx'
 
+- `env` (map of strings) - A map of key/value pairs to inject prior to the
+  execute_command. Packer injects some environmental variables by default into
+  the environment, as well, which are covered in the section below. Duplciate
+  `env` settings override `environment_vars` settings.
+
 - `environment_vars` (array of strings) - An array of key/value pairs to
   inject prior to the execute_command. The format should be `key=value`.
   Packer injects some environmental variables by default into the

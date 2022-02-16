@@ -17,8 +17,8 @@ The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
 It assumes that the communicator in use is WinRM. However, the provisioner can
 work equally well (with a few caveats) when combined with the SSH communicator.
 See the [section
-below](/docs/provisioners/powershell#combining-the-powershell-provisioner-with-the-ssh-communicator)
-for details.
+below](#combining-the-powershell-provisioner-with-the-ssh-communicator) for
+details.
 
 `@include 'path/separator-note.mdx'`
 
@@ -74,6 +74,12 @@ provisioner "powershell" {
   - `Path`: The path to the script to run
   - `Vars`: The location of a temp file containing the list of
     `environment_vars`, if configured.
+
+- `env` (map of strings) - A map of key/value pairs to inject prior to the
+  execute_command. Packer injects some environmental variables by default into
+  the environment, as well, which are covered in the section below. Duplciate
+  `env` settings override `environment_vars` settings. This is not a JSON
+  template engine enabled function. HCL interpolation works as usual.
 
 - `environment_vars` (array of strings) - An array of key/value pairs to
   inject prior to the execute_command. The format should be `key=value`.
