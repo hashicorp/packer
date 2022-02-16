@@ -126,13 +126,12 @@ func DisplayLegacyConfigWarning(ui packersdk.Ui) {
 Legacy JSON Configuration Mode enabled.
 The template will be parsed in the legacy configuration style. Legacy style
 templates will continue to work but users are encouraged to move HCL style templates.
-templates will continue to work but users are encouraged to move to HCL style templates.
 See: https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade
 `)
 
-	coloredUi.Say(fmt.Sprintf(`In JSON mode automatic loading of vendored plugins is enabled by default. In the
-future this feature will be removed and Packer will rely only on system installed plugins.
-To disable automatic loading of vendored plugins set %s=%s
+	coloredUi.Say(fmt.Sprintf(`In JSON mode automatic loading of bundled plugins is enabled by default.
+In the future this feature will be removed and Packer will rely only on system installed plugins.
+To disable automatic loading of bundled plugins set %s=%s
 See: https://packer.io/docs/templates/legacy-mode
 `, PackerLegacyModeEnv, packerLegacyModeOff))
 
