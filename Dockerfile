@@ -1,29 +1,32 @@
+# ========================================================================
+# 
 # This Dockerfile contains multiple targets.
 # Use 'docker build --target=<name> .' to build one.
-# e.g. `docker build --target=official-light .`
+# e.g. `docker build --target=release-default .`
 #
 # All non-dev targets have a VERSION argument that must be provided 
 # via --build-arg=VERSION=<version> when building. 
 # e.g. --build-arg VERSION=1.11.2
 #
-# `default` is the production docker image which cannot be built locally. 
 # For local dev and testing purposes, please build and use the `dev` docker image.
+#
+# ========================================================================
 
 
-# Development docker image
-# This image includes all source code found in this repository.
-# This is primarily used for development and debugging.
+# Development docker image primarily used for development and debugging.
+# This image builds from the locally generated binary in ./bin/.
+# To generate the local binary, run `make dev`.
 FROM docker.mirror.hashicorp.services/alpine:latest as dev
 
 RUN apk add --no-cache git bash openssl ca-certificates
 
-ADD bin/packer /bin/packer
+COPY bin/packer /bin/packer
 
 ENTRYPOINT ["/bin/packer"]
 
 
-# Official docker image that includes binaries from releases.hashicorp.com. This
-# downloads the release from releases.hashicorp.com and therefore requires that
+# Official docker image that includes binaries from releases.hashicorp.com. 
+# This downloads the release from releases.hashicorp.com and therefore requires that
 # the release is published before building the Docker image.
 FROM docker.mirror.hashicorp.services/alpine:latest as official
 
@@ -72,8 +75,10 @@ RUN set -eux && \
 ENTRYPOINT ["/bin/packer"]
 
 
-# Production docker `light` image, which `latest` points to.
-# Remember, this cannot be built locally.
+# Light development docker image which can be used to run the binary from a container.
+# This image builds from the locally generated binary in ./bin/, and from CI-built binaries within CI. 
+# To generate the local binary, run `make dev`.
+# This image is published to DockerHub under the `light`, `light-$VERSION`, and `latest` tags.
 FROM docker.mirror.hashicorp.services/alpine:latest as release-default
 
 ARG VERSION
@@ -97,10 +102,10 @@ COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
 ENTRYPOINT ["/bin/packer"]
 
 
-# Full development docker image
-# This image includes all source code found in this repository, 
-# and is also pushed to DockerHub under the `full` tag. 
-FROM docker.mirror.hashicorp.services/alpine:latest as release-full
+# Full development docker image primarily used for development and debugging.
+# This image builds from source from the default branch of this repository. 
+# This image is published to DockerHub under the `full` and `full-$VERSION` tags.
+FROM docker.mirror.hashicorp.services/golang:alpine as release-full
 
 ARG VERSION
 ARG BIN_NAME
@@ -116,8 +121,24 @@ LABEL name="Packer" \
 # TARGETARCH and TARGETOS are set automatically when --platform is provided.
 ARG TARGETOS TARGETARCH
 
+ENV PACKER_DEV=1
+
 RUN apk add --no-cache git bash openssl ca-certificates
 
-COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
+RUN go install github.com/mitchellh/gox@latest
+RUN git clone https://github.com/hashicorp/packer $GOPATH/src/github.com/hashicorp/packer
 
+RUN /bin/bash $GOPATH/src/github.com/hashicorp/packer/scripts/build.sh
+
+COPY /bin/ /bin/
+
+WORKDIR $GOPATH
 ENTRYPOINT ["/bin/packer"]
+
+
+# ========================================================================
+# 
+#   Set default target to 'dev'.
+#
+# ========================================================================
+FROM dev
