@@ -2,7 +2,7 @@
 # 
 # This Dockerfile contains multiple targets.
 # Use 'docker build --target=<name> .' to build one.
-# e.g. `docker build --target=release-default .`
+# e.g. `docker build --target=release-light .`
 #
 # All non-dev targets have a VERSION argument that must be provided 
 # via --build-arg=VERSION=<version> when building. 
@@ -79,7 +79,7 @@ ENTRYPOINT ["/bin/packer"]
 # This image builds from the locally generated binary in ./bin/, and from CI-built binaries within CI. 
 # To generate the local binary, run `make dev`.
 # This image is published to DockerHub under the `light`, `light-$VERSION`, and `latest` tags.
-FROM docker.mirror.hashicorp.services/alpine:latest as release-default
+FROM docker.mirror.hashicorp.services/alpine:latest as release-light
 
 ARG VERSION
 ARG BIN_NAME
@@ -129,8 +129,6 @@ RUN go install github.com/mitchellh/gox@latest
 RUN git clone https://github.com/hashicorp/packer $GOPATH/src/github.com/hashicorp/packer
 
 RUN /bin/bash $GOPATH/src/github.com/hashicorp/packer/scripts/build.sh
-
-COPY /bin/ /bin/
 
 WORKDIR $GOPATH
 ENTRYPOINT ["/bin/packer"]

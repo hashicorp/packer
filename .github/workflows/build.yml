@@ -220,7 +220,7 @@ jobs:
           path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
   build-docker-light:
-    name: Docker {{ matrix.arch }} light build
+    name: Docker light ${{ matrix.arch }} build
     needs:
       - get-product-version
       - build-linux
@@ -246,9 +246,9 @@ jobs:
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v1
         with:
-          version: ${{env.version}}
-          target: release-default
-          arch: ${{matrix.arch}}
+          version: ${{ env.version }}
+          target: release-light
+          arch: ${{ matrix.arch }}
           tags: |
             docker.io/hashicorp/${{env.repo}}:light
             docker.io/hashicorp/${{env.repo}}:light-${{env.version}}
@@ -258,7 +258,7 @@ jobs:
             public.ecr.aws/hashicorp/${{env.repo}}:${{env.version}}
   
   build-docker-full:
-    name: Docker {{ matrix.arch }} full build
+    name: Docker full ${{ matrix.arch }} build
     needs:
       - get-product-version
       - build-linux
@@ -284,9 +284,9 @@ jobs:
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v1
         with:
-          version: ${{env.version}}
+          version: ${{ env.version }}
           target: release-full
-          arch: ${{matrix.arch}}
+          arch: ${{ matrix.arch }}
           tags: |
             docker.io/hashicorp/${{env.repo}}:full
             docker.io/hashicorp/${{env.repo}}:full-${{env.version}}
