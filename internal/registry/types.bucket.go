@@ -118,17 +118,21 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		b.BuildLabels = make(map[string]string)
 	}
 
-	build := &Build{
+	build := Build{
 		ID:            id,
 		ComponentType: componentType,
 		RunUUID:       b.Iteration.RunUUID,
 		Status:        status,
-		Labels:        b.BuildLabels,
+		Labels:        make(map[string]string),
 		Images:        make(map[string]registryimage.Image),
 	}
 
+	for k, v := range b.BuildLabels {
+		build.Labels[k] = v
+	}
+
 	log.Println("[TRACE] creating initial build for component", componentType)
-	b.Iteration.builds.Store(componentType, build)
+	b.Iteration.builds.Store(componentType, &build)
 
 	return nil
 }
