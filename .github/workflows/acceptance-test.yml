@@ -26,7 +26,7 @@ jobs:
     name: Acceptance Test
     needs: get-go-version
     env: 
-      ROLE_ARN: ${{ secrets.PACKER_PROD_USER_ARN }}
+      ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
