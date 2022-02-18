@@ -37,8 +37,8 @@ jobs:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: env.ROLE_ARN
-          aws-region: us-east-1
+          role-to-assume: $ROLE_ARN
+          aws-region: $AWS_REGION
       - run: |
           mkdir -p /tmp/test-results
           make dev
