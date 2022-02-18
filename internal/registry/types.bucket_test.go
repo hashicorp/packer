@@ -71,35 +71,69 @@ func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
 }
 
 func TestBucket_UpdateLabelsForBuild(t *testing.T) {
-	subject := createInitialBucket(t)
-
-	componentName := "happycloud.image"
-	subject.RegisterBuildForComponent(componentName)
-	err := subject.CreateInitialBuildForIteration(context.TODO(), componentName)
-	checkError(t, err)
-
-	err = subject.UpdateLabelsForBuild(componentName, map[string]string{
-		"source_image": "another-happycloud-image",
-	})
-	checkError(t, err)
-
-	// Assert that a build stored on the iteration
-	iBuild, ok := subject.Iteration.builds.Load(componentName)
-	if !ok {
-		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+	tc := []struct {
+		desc           string
+		components     []string
+		labels         map[string]string
+		labelsCount    int
+		noDiffExpected bool
+	}{
+		{
+			desc:           "only global build labels",
+			components:     []string{"happcloud.image"},
+			labelsCount:    2,
+			noDiffExpected: true,
+		},
+		{
+			desc:       "global build labels and one additional build specific label",
+			components: []string{"happcloud.image"},
+			labels: map[string]string{
+				"source_image": "another-happycloud-image",
+			},
+			labelsCount:    3,
+			noDiffExpected: false,
+		},
 	}
 
-	build, ok := iBuild.(*Build)
-	if !ok {
-		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
-	}
+	for _, tt := range tc {
+		tt := tt
+		t.Run(tt.desc, func(t *testing.T) {
+			subject := createInitialBucket(t)
 
-	if build.ComponentType != componentName {
-		t.Errorf("expected the initial build to have the defined component type")
-	}
+			for _, componentName := range tt.components {
+				subject.RegisterBuildForComponent(componentName)
+				err := subject.CreateInitialBuildForIteration(context.TODO(), componentName)
+				checkError(t, err)
 
-	if diff := cmp.Diff(build.Labels, subject.BuildLabels); diff == "" {
-		t.Errorf("expected the initial build to have an additional build label but thee is no diff: %q", diff)
+				err = subject.UpdateLabelsForBuild(componentName, tt.labels)
+				checkError(t, err)
+
+				// Assert that the build is stored on the iteration
+				iBuild, ok := subject.Iteration.builds.Load(componentName)
+				if !ok {
+					t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+				}
+
+				build, ok := iBuild.(*Build)
+				if !ok {
+					t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+				}
+
+				if build.ComponentType != componentName {
+					t.Errorf("expected the build to have the defined component type")
+				}
+
+				if len(build.Labels) != tt.labelsCount {
+					t.Errorf("expected the build to have %d build labels but there is only: %d", tt.labelsCount, len(build.Labels))
+				}
+
+				diff := cmp.Diff(build.Labels, subject.BuildLabels)
+				if (diff == "") != tt.noDiffExpected {
+					t.Errorf("expected the build to have an additional build label but there is no diff: %q", diff)
+				}
+
+			}
+		})
 	}
 }
 
@@ -123,9 +157,11 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 
 	err = subject.UpdateLabelsForBuild(secondComponent, map[string]string{
 		"source_image": "the-original-happycloud-image",
+		"role_name":    "no-role-is-a-good-role",
 	})
 	checkError(t, err)
 
+	var registeredBuilds []*Build
 	expectedComponents := []string{firstComponent, secondComponent}
 	for _, componentName := range expectedComponents {
 		// Assert that a build stored on the iteration
@@ -138,14 +174,23 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 		if !ok {
 			t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 		}
+		registeredBuilds = append(registeredBuilds, build)
 
 		if build.ComponentType != componentName {
 			t.Errorf("expected the initial build to have the defined component type")
 		}
 
-		t.Logf("Comparing component build labels: %v \n against global build labels: %v", build.Labels, subject.BuildLabels)
 		if ok := cmp.Equal(build.Labels, subject.BuildLabels); ok {
-			t.Errorf("expected the initial build to have an additional build label but they are equal")
+			t.Errorf("expected the build to have an additional build label but they are equal")
 		}
 	}
+
+	if len(registeredBuilds) != 2 {
+		t.Errorf("expected the bucket to have 2 registered builds but got %d", len(registeredBuilds))
+	}
+
+	if ok := cmp.Equal(registeredBuilds[0].Labels, registeredBuilds[1].Labels); ok {
+		t.Errorf("expected registered builds to have different labels but they are equal")
+	}
+
 }

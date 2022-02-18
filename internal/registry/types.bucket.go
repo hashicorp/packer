@@ -29,7 +29,10 @@ type Bucket struct {
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
 // images to the HCP Packer registry.
 func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
-	b := Bucket{}
+	b := Bucket{
+		BucketLabels: make(map[string]string),
+		BuildLabels:  make(map[string]string),
+	}
 
 	i, err := NewIteration(opts)
 	if err != nil {
@@ -113,10 +116,6 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 		return err
 	}
 	id := resp.Payload.Build.ID
-
-	if b.BuildLabels == nil {
-		b.BuildLabels = make(map[string]string)
-	}
 
 	build := Build{
 		ID:            id,
