@@ -26,7 +26,7 @@ jobs:
     name: Acceptance Test
     needs: get-go-version
     env: 
-      ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
@@ -35,14 +35,18 @@ jobs:
       - uses: actions/setup-go@v2
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: IAM Assume Role
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ env.ROLE_ARN }}
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           role-duration-seconds: 3600
-      - run: |
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+      - name: Run acceptance tests per module
+        run: |
           mkdir -p /tmp/test-results
           make dev
           PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
