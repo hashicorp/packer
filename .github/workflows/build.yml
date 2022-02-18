@@ -1,12 +1,6 @@
 name: build
 
-on:
-  push:
-    # Sequence of patterns matched against refs/heads
-    branches:    
-      # Push events on main branch
-      - 'main'
-      - 'crt-onboarding' # Used for testing ONLY. Must be removed before merging
+on: [ workflow_dispatch, push ]
 
 env:
   PKG_NAME: "packer"
@@ -28,8 +22,24 @@ jobs:
           make version
           echo "::set-output name=product-version::$(make version)"
 
+  get-go-version:
+    name: "Determine Go version"
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.get-go-version.outputs.go-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Determine Go version
+        id: get-go-version
+        # We use .go-version as our source of truth for current Go
+        # version, because "goenv" can react to it automatically.
+        run: |
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
+
   generate-metadata-file:
-    needs: get-product-version
+    needs: 
+      - get-product-version
     runs-on: ubuntu-latest
     outputs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
@@ -65,13 +75,14 @@ jobs:
   build-other:
     needs: 
       - get-product-version
+      - get-go-version
       - set-ld-flags
     runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [ freebsd, windows, netbsd, openbsd, solaris ]
         goarch: [ "386", "amd64", "arm" ]
-        go: [ "1.17.5" ]
+        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
         exclude:
           - goos: solaris
             goarch: 386
@@ -288,7 +299,7 @@ jobs:
           target: release-full
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{env.repo}}:full
-            docker.io/hashicorp/${{env.repo}}:full-${{env.version}}
-            public.ecr.aws/hashicorp/${{env.repo}}:full
-            public.ecr.aws/hashicorp/${{env.repo}}:full-${{env.version}}
+            docker.io/hashicorp/${{ env.repo }}:full
+            docker.io/hashicorp/${{ env.repo }}:full-${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.repo }}:full
+            public.ecr.aws/hashicorp/${{ env.repo }}:full-${{ env.version }}

@@ -78,7 +78,7 @@ dev: ## Build and install a development build
 # Docker build variables and targets
 REGISTRY_NAME?=docker.io/hashicorp
 IMAGE_NAME=packer
-VERSION?=1.7.10
+VERSION?=$(shell $(CURDIR)/scripts/version.sh version/version.go)
 IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
 IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(shell git rev-parse --short HEAD)
 

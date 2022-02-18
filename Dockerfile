@@ -134,9 +134,5 @@ WORKDIR $GOPATH
 ENTRYPOINT ["/bin/packer"]
 
 
-# ========================================================================
-# 
-#   Set default target to 'dev'.
-#
-# ========================================================================
+# Set default target to 'dev'.
 FROM dev
