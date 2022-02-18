@@ -75,7 +75,7 @@ RUN set -eux && \
 ENTRYPOINT ["/bin/packer"]
 
 
-# Light development docker image which can be used to run the binary from a container.
+# Light docker image which can be used to run the binary from a container.
 # This image builds from the locally generated binary in ./bin/, and from CI-built binaries within CI. 
 # To generate the local binary, run `make dev`.
 # This image is published to DockerHub under the `light`, `light-$VERSION`, and `latest` tags.
@@ -99,38 +99,6 @@ RUN apk add --no-cache git bash wget openssl gnupg
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
 
-ENTRYPOINT ["/bin/packer"]
-
-
-# Full development docker image primarily used for development and debugging.
-# This image builds from source from the default branch of this repository. 
-# This image is published to DockerHub under the `full` and `full-$VERSION` tags.
-FROM docker.mirror.hashicorp.services/golang:alpine as release-full
-
-ARG VERSION
-ARG BIN_NAME
-
-LABEL name="Packer" \
-      maintainer="HashiCorp Packer Team <packer@hashicorp.com>" \
-      vendor="HashiCorp" \
-      version=$VERSION \
-      release=$VERSION \
-      summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
-      description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
-
-# TARGETARCH and TARGETOS are set automatically when --platform is provided.
-ARG TARGETOS TARGETARCH
-
-ENV PACKER_DEV=1
-
-RUN apk add --no-cache git bash openssl ca-certificates
-
-RUN go install github.com/mitchellh/gox@latest
-RUN git clone https://github.com/hashicorp/packer $GOPATH/src/github.com/hashicorp/packer
-
-RUN /bin/bash $GOPATH/src/github.com/hashicorp/packer/scripts/build.sh
-
-WORKDIR $GOPATH
 ENTRYPOINT ["/bin/packer"]
 
 

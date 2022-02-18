@@ -1,17 +1,45 @@
 name: "Acceptance Test"
 
-on:
-  schedule:
-  # Runs every day at midnight
-  - cron: "0 0 * * *"
+on: [ workflow_dispatch, push ]
+
+# on:
+#   schedule:
+#   # Runs every day at midnight
+#   - cron: "0 0 * * *"
 
 jobs:
+  get-go-version:
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.get-go-version.outputs.go-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Determine Go version'
+        id: get-go-version
+        # We use .go-version as our source of truth for current Go
+        # version, because "goenv" can react to it automatically.
+        run: |
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
   acceptance-test:
     runs-on: ubuntu-latest
     name: Acceptance Test
+    needs: get-go-version
+    env: 
+      ARN: ${{ secrets.PACKER_PROD_USER_ARN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.17'
-      - run: make testacc
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: env.ARN
+          aws-region: env.AWS_REGION
+      - run: |
+          mkdir -p /tmp/test-results
+          make dev
+          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)

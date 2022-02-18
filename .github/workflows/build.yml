@@ -23,13 +23,12 @@ jobs:
           echo "::set-output name=product-version::$(make version)"
 
   get-go-version:
-    name: "Determine Go version"
     runs-on: ubuntu-latest
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Determine Go version
+      - name: 'Determine Go version'
         id: get-go-version
         # We use .go-version as our source of truth for current Go
         # version, because "goenv" can react to it automatically.
@@ -123,13 +122,14 @@ jobs:
   build-linux:
     needs: 
       - get-product-version
+      - get-go-version
       - set-ld-flags
     runs-on: ubuntu-latest
     strategy:
       matrix:
         goos: [linux]
         goarch: ["arm", "arm64", "386", "amd64"]
-        go: [ "1.17.5" ]
+        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
       fail-fast: true
 
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
@@ -194,13 +194,14 @@ jobs:
   build-darwin:
     needs: 
       - get-product-version
+      - get-go-version
       - set-ld-flags
     runs-on: macos-latest
     strategy:
       matrix:
         goos: [ darwin ]
         goarch: [ "amd64", "arm64" ]
-        go: [ "1.17.5" ]
+        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
       fail-fast: true
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
 
@@ -230,7 +231,7 @@ jobs:
           name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
-  build-docker-light:
+  build-docker:
     name: Docker light ${{ matrix.arch }} build
     needs:
       - get-product-version
@@ -267,39 +268,3 @@ jobs:
             public.ecr.aws/hashicorp/${{env.repo}}:light
             public.ecr.aws/hashicorp/${{env.repo}}:light-${{env.version}}
             public.ecr.aws/hashicorp/${{env.repo}}:${{env.version}}
-  
-  build-docker-full:
-    name: Docker full ${{ matrix.arch }} build
-    needs:
-      - get-product-version
-      - build-linux
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: ["arm", "arm64", "386", "amd64"]
-    env:
-      repo: ${{ github.event.repository.name }}
-      version: ${{ needs.get-product-version.outputs.product-version }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Login to Artifactory
-        uses: docker/login-action@v1
-        with:
-          registry: docker.artifactory.hashicorp.engineering
-          username: ${{ secrets.ARTIFACTORY_RO_USER }}
-          password: ${{ secrets.ARTIFACTORY_RO_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: docker.artifactory.hashicorp.engineering/prodsec-binfmt:latest
-      - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v1
-        with:
-          version: ${{ env.version }}
-          target: release-full
-          arch: ${{ matrix.arch }}
-          tags: |
-            docker.io/hashicorp/${{ env.repo }}:full
-            docker.io/hashicorp/${{ env.repo }}:full-${{ env.version }}
-            public.ecr.aws/hashicorp/${{ env.repo }}:full
-            public.ecr.aws/hashicorp/${{ env.repo }}:full-${{ env.version }}

@@ -1,15 +1,6 @@
 name: "Go Validate"
 
-on:
-  push:
-    # Sequence of patterns matched against refs/heads
-    branches:    
-      # Push events on main branch
-      - 'main'
-      - 'crt-onboarding' # Used for testing ONLY. Must be removed before merging
-  pull_request:
-    paths:
-      - "**"
+on: [ workflow_dispatch, push ]
 
 jobs:
   check-mod-tidy:

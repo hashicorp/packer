@@ -1,16 +1,17 @@
 schema = "1"
 
 project "packer" {
-  team = "#team-packer"
+  team = "packer"
   slack {
-    notification_channel = "C032JM64THT"
+    // #proj-packer-releases
+    notification_channel = "C032TD9KCMQ"
   }
   github {
     organization = "hashicorp"
     repository = "packer"
     release_branches = [
         "main",
-        "crt-onboarding"
+        "crt-onboarding-test"
     ]
   }
 }
