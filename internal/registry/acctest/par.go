@@ -46,8 +46,8 @@ func NewTestConfig(t *testing.T) (*Config, error) {
 	return &Config{
 		Client: cli,
 		Loc: &sharedmodels.HashicorpCloudLocationLocation{
-			OrganizationID: cli.OrganizationID,
-			ProjectID:      cli.ProjectID,
+			OrganizationID: cfg.OrgId,
+			ProjectID:      cfg.ProjectId,
 		},
 		T: t,
 	}, nil
