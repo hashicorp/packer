@@ -34,15 +34,15 @@ func NewBuildFromCloudPackerBuild(src *models.HashicorpCloudPackerBuild) (*Build
 	var err error
 	for _, image := range src.Images {
 		image := image
-		build.AddImages(registryimage.Image{
+		err = build.AddImages(registryimage.Image{
 			ImageID:        image.ImageID,
 			ProviderName:   build.CloudProvider,
 			ProviderRegion: image.Region,
 		})
-	}
 
-	if err != nil {
-		return nil, fmt.Errorf("NewBuildFromCloudPackerBuild: %w", err)
+		if err != nil {
+			return nil, fmt.Errorf("NewBuildFromCloudPackerBuild: %w", err)
+		}
 	}
 
 	return &build, nil
