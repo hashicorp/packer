@@ -16,20 +16,18 @@ func createInitialBucket(t testing.TB) *Bucket {
 	}()
 
 	t.Helper()
-	subject, err := NewBucketWithIteration(IterationOptions{})
+	bucket, err := NewBucketWithIteration(IterationOptions{})
 	if err != nil {
 		t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
 	}
 
-	subject.Slug = "TestBucket"
-	subject.BuildLabels = map[string]string{
-		"version":   "1.7.0",
-		"based_off": "alpine",
-	}
-	subject.client = &Client{
+	bucket.Slug = "TestBucket"
+	bucket.client = &Client{
 		Packer: NewMockPackerClientService(),
 	}
-	return subject
+	bucket.Iteration.RunUUID = "1234567890abcedfghijkl"
+
+	return bucket
 }
 
 func checkError(t testing.TB, err error) {
@@ -43,15 +41,19 @@ func checkError(t testing.TB, err error) {
 }
 
 func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
-	subject := createInitialBucket(t)
+	bucket := createInitialBucket(t)
 
 	componentName := "happycloud.image"
-	subject.RegisterBuildForComponent(componentName)
-	err := subject.CreateInitialBuildForIteration(context.TODO(), componentName)
+	bucket.RegisterBuildForComponent(componentName)
+	bucket.BuildLabels = map[string]string{
+		"version":   "1.7.0",
+		"based_off": "alpine",
+	}
+	err := bucket.CreateInitialBuildForIteration(context.TODO(), componentName)
 	checkError(t, err)
 
 	// Assert that a build stored on the iteration
-	iBuild, ok := subject.Iteration.builds.Load(componentName)
+	iBuild, ok := bucket.Iteration.builds.Load(componentName)
 	if !ok {
 		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 	}
@@ -65,32 +67,55 @@ func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
 		t.Errorf("expected the initial build to have the defined component type")
 	}
 
-	if diff := cmp.Diff(build.Labels, subject.BuildLabels); diff != "" {
+	if diff := cmp.Diff(build.Labels, bucket.BuildLabels); diff != "" {
 		t.Errorf("expected the initial build to have the defined build labels %v", diff)
 	}
 }
 
 func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 	tc := []struct {
-		desc           string
-		components     []string
-		labels         map[string]string
-		labelsCount    int
-		noDiffExpected bool
+		desc              string
+		buildName         string
+		bucketBuildLabels map[string]string
+		buildLabels       map[string]string
+		labelsCount       int
+		noDiffExpected    bool
 	}{
 		{
-			desc:           "only global build labels",
-			components:     []string{"happcloud.image"},
+			desc:           "no bucket or build specific labels",
+			buildName:      "happcloud.image",
+			noDiffExpected: true,
+		},
+		{
+			desc:      "bucket build labels",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.0",
+				"based_off": "alpine",
+			},
 			labelsCount:    2,
 			noDiffExpected: true,
 		},
 		{
-			desc:       "global build labels and one additional build specific label",
-			components: []string{"happcloud.image"},
-			labels: map[string]string{
+			desc:      "bucket build labels and build specific label",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.0",
+				"based_off": "alpine",
+			},
+			buildLabels: map[string]string{
 				"source_image": "another-happycloud-image",
 			},
 			labelsCount:    3,
+			noDiffExpected: false,
+		},
+		{
+			desc:      "build specific label",
+			buildName: "happcloud.image",
+			buildLabels: map[string]string{
+				"source_image": "another-happycloud-image",
+			},
+			labelsCount:    1,
 			noDiffExpected: false,
 		},
 	}
@@ -98,64 +123,67 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 	for _, tt := range tc {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
-			subject := createInitialBucket(t)
+			bucket := createInitialBucket(t)
 
-			for _, componentName := range tt.components {
-				subject.RegisterBuildForComponent(componentName)
-				err := subject.CreateInitialBuildForIteration(context.TODO(), componentName)
-				checkError(t, err)
+			componentName := tt.buildName
+			bucket.RegisterBuildForComponent(componentName)
 
-				err = subject.UpdateLabelsForBuild(componentName, tt.labels)
-				checkError(t, err)
-
-				// Assert that the build is stored on the iteration
-				iBuild, ok := subject.Iteration.builds.Load(componentName)
-				if !ok {
-					t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
-				}
-
-				build, ok := iBuild.(*Build)
-				if !ok {
-					t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
-				}
-
-				if build.ComponentType != componentName {
-					t.Errorf("expected the build to have the defined component type")
-				}
-
-				if len(build.Labels) != tt.labelsCount {
-					t.Errorf("expected the build to have %d build labels but there is only: %d", tt.labelsCount, len(build.Labels))
-				}
-
-				diff := cmp.Diff(build.Labels, subject.BuildLabels)
-				if (diff == "") != tt.noDiffExpected {
-					t.Errorf("expected the build to have an additional build label but there is no diff: %q", diff)
-				}
-
+			for k, v := range tt.bucketBuildLabels {
+				bucket.BuildLabels[k] = v
 			}
+
+			err := bucket.PopulateIteration(context.TODO())
+			checkError(t, err)
+
+			err = bucket.UpdateLabelsForBuild(componentName, tt.buildLabels)
+			checkError(t, err)
+
+			// Assert that the build is stored on the iteration
+			iBuild, ok := bucket.Iteration.builds.Load(componentName)
+			if !ok {
+				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			}
+
+			build, ok := iBuild.(*Build)
+			if !ok {
+				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			}
+
+			if build.ComponentType != componentName {
+				t.Errorf("expected the build to have the defined component type")
+			}
+
+			if len(build.Labels) != tt.labelsCount {
+				t.Errorf("expected the build to have %d build labels but there is only: %d", tt.labelsCount, len(build.Labels))
+			}
+
+			diff := cmp.Diff(build.Labels, bucket.BuildLabels)
+			if (diff == "") != tt.noDiffExpected {
+				t.Errorf("expected the build to have an additional build label but there is no diff: %q", diff)
+			}
+
 		})
 	}
 }
 
 func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
-	subject := createInitialBucket(t)
+	bucket := createInitialBucket(t)
 
 	firstComponent := "happycloud.image"
-	subject.RegisterBuildForComponent(firstComponent)
-	err := subject.CreateInitialBuildForIteration(context.TODO(), firstComponent)
+	bucket.RegisterBuildForComponent(firstComponent)
+
+	secondComponent := "happycloud.image2"
+	bucket.RegisterBuildForComponent(secondComponent)
+
+	err := bucket.PopulateIteration(context.TODO())
 	checkError(t, err)
 
-	err = subject.UpdateLabelsForBuild(firstComponent, map[string]string{
+	err = bucket.UpdateLabelsForBuild(firstComponent, map[string]string{
 		"source_image": "another-happycloud-image",
 	})
 	checkError(t, err)
 
-	secondComponent := "happycloud.image2"
-	subject.RegisterBuildForComponent(secondComponent)
-	err = subject.CreateInitialBuildForIteration(context.TODO(), secondComponent)
-	checkError(t, err)
-
-	err = subject.UpdateLabelsForBuild(secondComponent, map[string]string{
+	err = bucket.UpdateLabelsForBuild(secondComponent, map[string]string{
 		"source_image": "the-original-happycloud-image",
 		"role_name":    "no-role-is-a-good-role",
 	})
@@ -165,7 +193,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	expectedComponents := []string{firstComponent, secondComponent}
 	for _, componentName := range expectedComponents {
 		// Assert that a build stored on the iteration
-		iBuild, ok := subject.Iteration.builds.Load(componentName)
+		iBuild, ok := bucket.Iteration.builds.Load(componentName)
 		if !ok {
 			t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 		}
@@ -180,7 +208,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 			t.Errorf("expected the initial build to have the defined component type")
 		}
 
-		if ok := cmp.Equal(build.Labels, subject.BuildLabels); ok {
+		if ok := cmp.Equal(build.Labels, bucket.BuildLabels); ok {
 			t.Errorf("expected the build to have an additional build label but they are equal")
 		}
 	}
@@ -192,5 +220,96 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	if ok := cmp.Equal(registeredBuilds[0].Labels, registeredBuilds[1].Labels); ok {
 		t.Errorf("expected registered builds to have different labels but they are equal")
 	}
+}
 
+func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
+	tc := []struct {
+		desc              string
+		buildName         string
+		bucketBuildLabels map[string]string
+		buildLabels       map[string]string
+		labelsCount       int
+		buildCompleted    bool
+		noDiffExpected    bool
+	}{
+		{
+			desc:      "should update build labels on existing incomplete build",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.0",
+				"based_off": "alpine",
+			},
+			labelsCount:    2,
+			buildCompleted: false,
+			noDiffExpected: true,
+		},
+		{
+			desc:      "should not update build labels on completed build",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.0",
+				"based_off": "alpine",
+			},
+			labelsCount:    0,
+			buildCompleted: true,
+			noDiffExpected: false,
+		},
+	}
+
+	for _, tt := range tc {
+		tt := tt
+		t.Run(tt.desc, func(t *testing.T) {
+
+			mockService := NewMockPackerClientService()
+			mockService.BucketAlreadyExist = true
+			mockService.IterationAlreadyExist = true
+			mockService.BuildAlreadyDone = tt.buildCompleted
+
+			bucket, err := NewBucketWithIteration(IterationOptions{})
+
+			if err != nil {
+				t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
+			}
+
+			bucket.Slug = "TestBucket"
+			bucket.client = &Client{
+				Packer: mockService,
+			}
+			for k, v := range tt.bucketBuildLabels {
+				bucket.BuildLabels[k] = v
+			}
+
+			firstComponent := "happycloud.image"
+			bucket.RegisterBuildForComponent(firstComponent)
+
+			mockService.ExistingBuilds = append(mockService.ExistingBuilds, firstComponent)
+			err = bucket.PopulateIteration(context.TODO())
+			checkError(t, err)
+
+			componentName := firstComponent
+			// Assert that a build stored on the iteration
+			iBuild, ok := bucket.Iteration.builds.Load(componentName)
+			if !ok {
+				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			}
+
+			build, ok := iBuild.(*Build)
+			if !ok {
+				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			}
+
+			if build.ComponentType != componentName {
+				t.Errorf("expected the initial build to have the defined component type")
+			}
+
+			if len(build.Labels) != tt.labelsCount {
+				t.Errorf("expected the build to have %d build labels but there is only: %d", tt.labelsCount, len(build.Labels))
+			}
+
+			diff := cmp.Diff(build.Labels, bucket.BuildLabels)
+			if (diff == "") != tt.noDiffExpected {
+				t.Errorf("expected the build to have bucket build label but there is no diff: %q", diff)
+			}
+		})
+	}
 }

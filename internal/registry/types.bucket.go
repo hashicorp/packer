@@ -115,23 +115,22 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 	if err != nil {
 		return err
 	}
-	id := resp.Payload.Build.ID
 
-	build := Build{
-		ID:            id,
-		ComponentType: componentType,
-		RunUUID:       b.Iteration.RunUUID,
-		Status:        status,
-		Labels:        make(map[string]string),
-		Images:        make(map[string]registryimage.Image),
+	build, err := NewBuildFromCloudPackerBuild(resp.Payload.Build)
+	if err != nil {
+		log.Printf("[TRACE] unable to load created build for %q: %v", componentType, err)
 	}
 
-	for k, v := range b.BuildLabels {
-		build.Labels[k] = v
-	}
+	build.Labels = make(map[string]string)
+	build.Images = make(map[string]registryimage.Image)
 
-	log.Println("[TRACE] creating initial build for component", componentType)
-	b.Iteration.builds.Store(componentType, &build)
+	// Initial build labels are only pushed to the registry when an actual Packer run is executed on the said build.
+	// For example filtered builds (e.g --only or except) will not get the initial build labels until a build is executed on them.
+	// Global build label updates to existing builds are handled in PopulateIteration.
+	if len(b.BuildLabels) > 0 {
+		build.MergeLabels(b.BuildLabels)
+	}
+	b.Iteration.builds.Store(componentType, build)
 
 	return nil
 }
@@ -310,7 +309,7 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 	return nil
 }
 
-// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// PopulateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
 // If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
 // that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
 // All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
@@ -328,30 +327,23 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 		for _, existing := range existingBuilds {
 			if existing.ComponentType == expected {
 				found = true
-				build := &Build{
-					ID:            existing.ID,
-					ComponentType: existing.ComponentType,
-					RunUUID:       b.Iteration.RunUUID,
-					Status:        existing.Status,
-					Labels:        existing.Labels,
+				build, err := NewBuildFromCloudPackerBuild(existing)
+				if err != nil {
+					return fmt.Errorf("Unable to load existing build for %q: %v", existing.ComponentType, err)
 				}
+
+				// When running against an existing build the Packer RunUUID is mostly likely different
+				// we capture that difference here to know that the image was created in a different Packer run.
+				build.RunUUID = b.Iteration.RunUUID
+
+				// In cases where global bucket build labels represent some dynamic data set via some user variable.
+				// We need to make sure that any newly executed builds get the labels at runtime.
+				if build.IsNotDone() {
+					build.MergeLabels(b.BuildLabels)
+				}
+				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
 				b.Iteration.builds.Store(existing.ComponentType, build)
 
-				// TODO validate that this is safe. For builds that are DONE do we want to keep track of completed things
-				// potential issue on updating the status of a build that is already DONE. Is this possible?
-				for _, image := range existing.Images {
-
-					err := b.UpdateImageForBuild(existing.ComponentType, registryimage.Image{
-						ImageID:        image.ImageID,
-						ProviderRegion: image.Region,
-					})
-
-					if err != nil {
-						log.Printf("[TRACE] unable to load existing images for %q: %v", existing.ComponentType, err)
-					}
-				}
-
-				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
 				break
 			}
 		}
@@ -398,9 +390,5 @@ func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 	}
 
 	build := v.(*Build)
-	hasBuildID := build.ID != ""
-	hasImages := len(build.Images) == 0
-	isNotDone := build.Status != models.HashicorpCloudPackerBuildStatusDONE
-
-	return hasBuildID && hasImages && isNotDone
+	return build.IsNotDone()
 }

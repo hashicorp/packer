@@ -86,7 +86,7 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 func (i *Iteration) AddImageToBuild(buildName string, images ...registryimage.Image) error {
 	existingBuild, ok := i.builds.Load(buildName)
 	if !ok {
-		return errors.New("no build found for the name " + buildName)
+		return errors.New("no associated build found for the name " + buildName)
 	}
 
 	build, ok := existingBuild.(*Build)
@@ -94,27 +94,9 @@ func (i *Iteration) AddImageToBuild(buildName string, images ...registryimage.Im
 		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
 	}
 
-	if build.Images == nil {
-		build.Images = make(map[string]registryimage.Image)
-	}
-
-	for _, image := range images {
-		if err := image.Validate(); err != nil {
-			return fmt.Errorf("failed to add image to build %q: %v", buildName, err)
-		}
-
-		if build.CloudProvider == "" {
-			build.CloudProvider = image.ProviderName
-		}
-
-		for k, v := range image.Labels {
-			if _, ok := build.Labels[k]; ok {
-				continue
-			}
-			build.Labels[k] = v
-		}
-
-		build.Images[image.String()] = image
+	err := build.AddImages(images...)
+	if err != nil {
+		return fmt.Errorf("AddImageForBuild: %w", err)
 	}
 
 	i.builds.Store(buildName, build)
@@ -133,14 +115,8 @@ func (i *Iteration) AddLabelsToBuild(buildName string, data map[string]string) e
 		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
 	}
 
-	for k, v := range data {
-		if _, ok := build.Labels[k]; ok {
-			continue
-		}
-		build.Labels[k] = v
-	}
+	build.MergeLabels(data)
 
 	i.builds.Store(buildName, build)
-
 	return nil
 }
