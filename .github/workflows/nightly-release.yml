@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Kick off a fresh build
-        uses: ./.github/workflows/build.yml
+        uses: hashicorp/packer/.github/workflows/build.yml@main
       - name: Create a draft GitHub Release
         uses: ncipollo/release-action@v1
         with:
