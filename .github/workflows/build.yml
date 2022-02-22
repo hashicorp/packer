@@ -1,6 +1,6 @@
 name: build
 
-on: [ workflow_dispatch, push ]
+on: [ workflow_dispatch, push, workflow_call ]
 
 env:
   PKG_NAME: "packer"
