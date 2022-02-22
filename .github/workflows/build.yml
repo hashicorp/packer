@@ -246,16 +246,6 @@ jobs:
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Login to Artifactory
-        uses: docker/login-action@v1
-        with:
-          registry: docker.artifactory.hashicorp.engineering
-          username: ${{ secrets.ARTIFACTORY_RO_USER }}
-          password: ${{ secrets.ARTIFACTORY_RO_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: docker.artifactory.hashicorp.engineering/prodsec-binfmt:latest
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v1
         with:
