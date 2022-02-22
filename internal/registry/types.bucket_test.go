@@ -223,7 +223,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	}
 }
 
-func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
+func TestBucket_PopulateIteration(t *testing.T) {
 	tc := []struct {
 		desc              string
 		buildName         string
@@ -245,15 +245,15 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "existing incomplete build with previous build labels",
+			desc:      "existing incomplete build with improperly set build labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
 				"based_off": "alpine-3.14",
 			},
 			buildLabels: map[string]string{
-				"version":   "1.7.0",
-				"based_off": "alpine",
+				"version":   "packer.version",
+				"based_off": "var.distro",
 			},
 			labelsCount:    2,
 			buildCompleted: false,
@@ -271,7 +271,7 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 			noDiffExpected: false,
 		},
 		{
-			desc:      "existing incomplete build with extra previously set build labels",
+			desc:      "existing incomplete build with extra previously set build label",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
