@@ -10,14 +10,14 @@ on: [ workflow_dispatch, push ]
 jobs:
   build-artifacts:
     uses: hashicorp/packer/.github/workflows/build.yml@crt-onboarding
-  # github-release:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Create a draft GitHub Release
-  #       uses: ncipollo/release-action@v1
-  #       with:
-  #         name: "nightly"
-  #         artifacts: "out/*.zip,out/*.rpm,out/*.deb,*.docker.tar"
-  #         bodyFile: ".github/workflows/nightly-release-readme.md"
-  #         token: "${{ secrets.GITHUB_TOKEN }}"
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create a draft GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "nightly"
+          artifacts: "out/*.zip,out/*.rpm,out/*.deb,*.docker.tar"
+          bodyFile: ".github/workflows/nightly-release-readme.md"
+          token: "${{ secrets.GITHUB_TOKEN }}"
