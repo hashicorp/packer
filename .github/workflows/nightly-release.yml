@@ -11,6 +11,7 @@ jobs:
   nightly-release:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Kick off a fresh build
         uses: ./.github/workflows/build.yml
       - name: Create a draft GitHub Release
