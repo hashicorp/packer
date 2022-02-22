@@ -1,15 +1,15 @@
 # Packer Docker Container
 
-The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release-default`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com. 
+The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com. 
 
 ## Build
 
 See the Makefile targets in the root of this repository for building Packer images in either
 development or release modes:
 
-  - `make docker-dev` or `make docker-full`
+  - `make docker-dev`
+  - `make docker-official`
   - `make docker-multiarch-official`
-  - `make docker-official` or `make docker-light`
   - `make docker`
 
 ### Usage
@@ -20,7 +20,7 @@ varieties of build, an `official` version, aka `light`, which just contains the 
 It also contains a `dev` version, aka `full`, which compiles the binary from source 
 inside the container before exposing it for use.
 
-##### `official` aka `light` (default)
+##### `official`
 
 The `official` version of this container will copy the current stable version of
 the binary, taken from releases.hashicorp.com, into the container. It will also
@@ -34,7 +34,7 @@ You can use this version with the following:
 docker run <args> hashicorp/packer:official <command>
 ```
 
-##### `dev` aka `full`
+##### `dev`
 
 The `dev` version of this container contains all of the source code found in
 the current ref of this [repository](https://github.com/hashicorp/packer). Using [Google's

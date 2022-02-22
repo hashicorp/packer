@@ -1,4 +1,4 @@
-name: "Website Docker Image"
+name: "Website Docker Publish"
 
 on:
   push:
@@ -6,14 +6,20 @@ on:
     branches:    
       # Push events on master branch
       - 'master'
-      - 'crt-onboarding' # for testing only. remove before merging. 
 
 jobs:
   website-docker-image:
     runs-on: ubuntu-latest  
     name: Build Docker Image if Necessary
+    env: 
+      DOCKER_USER: ${{ secrets.WEBSITE_DOCKER_USER }}
+      DOCKER_TOKEN: ${{ secrets.WEBSITE_DOCKER_TOKEN }}
     steps:
       - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_TOKEN }}
       - run: |
           IMAGE_TAG=$(cat website/Dockerfile website/package-lock.json | sha256sum | awk '{print $1;}')
           echo "Using $IMAGE_TAG"
@@ -21,7 +27,6 @@ jobs:
               echo "Dependencies have not changed, not building a new website docker image."
           else
             cd website/
-            docker login -u $WEBSITE_DOCKER_USER -p $WEBSITE_DOCKER_PASS
             docker build -t hashicorp/packer-website:$IMAGE_TAG .
             docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
             docker push hashicorp/packer-website
