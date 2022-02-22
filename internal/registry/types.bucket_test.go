@@ -233,7 +233,7 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 		noDiffExpected    bool
 	}{
 		{
-			desc:      "should update build labels on existing incomplete build",
+			desc:      "existing incomplete build",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
@@ -244,7 +244,22 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "should not update build labels on completed build",
+			desc:      "existing incomplete build with previous build labels",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.3",
+				"based_off": "alpine-3.14",
+			},
+			buildLabels: map[string]string{
+				"version":   "1.7.0",
+				"based_off": "alpine",
+			},
+			labelsCount:    2,
+			buildCompleted: false,
+			noDiffExpected: true,
+		},
+		{
+			desc:      "completed build with no labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
@@ -252,6 +267,20 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 			},
 			labelsCount:    0,
 			buildCompleted: true,
+			noDiffExpected: false,
+		},
+		{
+			desc:      "existing incomplete build with extra previously set build labels",
+			buildName: "happcloud.image",
+			bucketBuildLabels: map[string]string{
+				"version":   "1.7.3",
+				"based_off": "alpine-3.14",
+			},
+			buildLabels: map[string]string{
+				"arch": "linux/386",
+			},
+			labelsCount:    3,
+			buildCompleted: false,
 			noDiffExpected: false,
 		},
 	}
@@ -266,7 +295,6 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 			mockService.BuildAlreadyDone = tt.buildCompleted
 
 			bucket, err := NewBucketWithIteration(IterationOptions{})
-
 			if err != nil {
 				t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
 			}
@@ -279,14 +307,15 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 				bucket.BuildLabels[k] = v
 			}
 
-			firstComponent := "happycloud.image"
-			bucket.RegisterBuildForComponent(firstComponent)
+			componentName := "happycloud.image"
+			bucket.RegisterBuildForComponent(componentName)
 
-			mockService.ExistingBuilds = append(mockService.ExistingBuilds, firstComponent)
+			mockService.ExistingBuilds = append(mockService.ExistingBuilds, componentName)
+			mockService.ExistingBuildLabels = tt.buildLabels
+
 			err = bucket.PopulateIteration(context.TODO())
 			checkError(t, err)
 
-			componentName := firstComponent
 			// Assert that a build stored on the iteration
 			iBuild, ok := bucket.Iteration.builds.Load(componentName)
 			if !ok {
@@ -308,7 +337,7 @@ func TestBucket_UpdateLabelsForBuild_withExistingBuilds(t *testing.T) {
 
 			diff := cmp.Diff(build.Labels, bucket.BuildLabels)
 			if (diff == "") != tt.noDiffExpected {
-				t.Errorf("expected the build to have bucket build label but there is no diff: %q", diff)
+				t.Errorf("expected the build to have bucket build labels but there is no diff: %q", diff)
 			}
 		})
 	}

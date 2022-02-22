@@ -25,7 +25,8 @@ type MockPackerClientService struct {
 	// Mock Gets
 	GetIterationResp *models.HashicorpCloudPackerGetIterationResponse
 
-	ExistingBuilds []string
+	ExistingBuilds      []string
+	ExistingBuildLabels map[string]string
 
 	packerSvc.ClientService
 }
@@ -205,9 +206,14 @@ func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.Pa
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	images := make([]*models.HashicorpCloudPackerImage, 0)
+	labels := make(map[string]string)
 	if svc.BuildAlreadyDone {
 		status = models.HashicorpCloudPackerBuildStatusDONE
 		images = append(images, &models.HashicorpCloudPackerImage{ImageID: "image-id", Region: "somewhere"})
+	}
+
+	for k, v := range svc.ExistingBuildLabels {
+		labels[k] = v
 	}
 
 	builds := make([]*models.HashicorpCloudPackerBuild, 0, len(svc.ExistingBuilds))
@@ -218,7 +224,7 @@ func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.Pa
 			CloudProvider: "mockProvider",
 			Status:        status,
 			Images:        images,
-			Labels:        make(map[string]string),
+			Labels:        labels,
 		})
 	}
 
