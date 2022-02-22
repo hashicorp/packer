@@ -8,16 +8,16 @@ name: Nightly Release
 on: [ workflow_dispatch, push ]
 
 jobs:
-  nightly-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Kick off a fresh build
-        uses: hashicorp/packer/.github/workflows/build.yml@main
-      - name: Create a draft GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          name: "nightly"
-          artifacts: "out/*.zip,out/*.rpm,out/*.deb,*.docker.tar"
-          bodyFile: ".github/workflows/nightly-release-readme.md"
-          token: "${{ secrets.GITHUB_TOKEN }}"
+  build-artifacts:
+    uses: hashicorp/packer/.github/workflows/build.yml@main
+  # github-release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Create a draft GitHub Release
+  #       uses: ncipollo/release-action@v1
+  #       with:
+  #         name: "nightly"
+  #         artifacts: "out/*.zip,out/*.rpm,out/*.deb,*.docker.tar"
+  #         bodyFile: ".github/workflows/nightly-release-readme.md"
+  #         token: "${{ secrets.GITHUB_TOKEN }}"
