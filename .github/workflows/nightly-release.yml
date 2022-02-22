@@ -9,7 +9,7 @@ on: [ workflow_dispatch, push ]
 
 jobs:
   build-artifacts:
-    uses: hashicorp/packer/.github/workflows/build.yml@main
+    uses: hashicorp/packer/.github/workflows/build.yml@crt-onboarding
   # github-release:
   #   runs-on: ubuntu-latest
   #   steps:
