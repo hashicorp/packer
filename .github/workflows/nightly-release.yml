@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Kick off a fresh build
-        uses: hashicorp/packer/.github/workflows/build.yml
+        uses: ./.github/workflows/build.yml
       - name: Create a draft GitHub Release
         uses: ncipollo/release-action@v1
         with:
