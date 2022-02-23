@@ -9,15 +9,66 @@ on: [ workflow_dispatch, push ]
 
 jobs:
   build-artifacts:
-    uses: hashicorp/packer/.github/workflows/build.yml@crt-onboarding
+    uses: hashicorp/crt-core-helloworld/.github/workflows/build.yml@nightly-release
   github-release:
+    needs: build-artifacts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Create a draft GitHub Release
-        uses: ncipollo/release-action@v1
+      - name: Download built artifacts
+        uses: actions/download-artifact@v2
         with:
-          name: "nightly"
-          artifacts: "out/*.zip,out/*.rpm,out/*.deb,*.docker.tar"
-          bodyFile: ".github/workflows/nightly-release-readme.md"
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          path: out/
+      # Set BUILD_OUTPUT_LIST to out\<project>-<version>.<fileext>\*,out\...
+      # This is needed to attach the build artifacts to the GitHub Release
+      - name: Create BUILD_OUTPUT_LIST
+        run: |
+          echo "$(ls -xm1 out/)" > tmp.txt
+          cat tmp.txt | sed 's:.*:out/&/*:' > tmp2.txt
+          echo "BUILD_OUTPUT_LIST=$(cat tmp2.txt | tr '\n' ',' | perl -ple 'chop')" >> $GITHUB_ENV
+          rm -rf tmp.txt && rm -rf tmp2.txt
+      # - name: Advance nightly tag
+      #   uses: actions/github-script@v3
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}          
+      #     script: |
+      #       try {
+      #           await github.git.deleteRef({
+      #             owner: context.repo.owner,
+      #             repo: context.repo.repo,
+      #             ref: "tags/nightly"
+      #           })
+      #       } catch (e) {
+      #         console.log("Warning: The nightly tag doesn't exist yet, so there's nothing to do. Trace: " + e)
+      #       }
+      #       await github.git.createRef({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         ref: "refs/tags/nightly",
+      #         sha: context.sha
+      #       })
+      # # This will create a new GitHub Release called `nightly`
+      # # If a release already exists, it will overwrite the existing data
+      # - name: Create a prerelease on GitHub
+      #   uses: ncipollo/release-action@v1
+      #   with:
+      #     name: nightly
+      #     artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
+      #     tag: nightly
+      #     bodyFile: ".github/workflows/nightly-release-readme.md"
+      #     prerelease: true
+      #     allowUpdates: true
+      #     removeArtifacts: true
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Send slack notification on failure
+      #   if: always()
+      #   uses: slackapi/slack-github-action@v1.18.0
+      #   with:
+      #     # This data can be any valid JSON from a previous step in the GitHub Action
+      #     payload: |
+      #       {
+      #         "key": "value",
+      #         "foo": "bar"
+      #       }
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
