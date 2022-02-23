@@ -216,7 +216,7 @@ Here's what you need to create releases using GitHub Actions:
 4. Go to your repository page on GitHub and navigate to Settings > Secrets. Add
    the following secrets:
    - `GPG_PRIVATE_KEY` - Your ASCII-armored GPG private key. You can export this with `gpg --armor --export-secret-keys [key ID or email]`.
-   - `PASSPHRASE` - The passphrase for your GPG private key.
+   - `GPG_PASSPHRASE` - The passphrase for your GPG private key.
 5. Push a new valid version tag (e.g. `v1.2.3`) to test that the GitHub Actions
    releaser is working. The tag must be a valid
    [Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
