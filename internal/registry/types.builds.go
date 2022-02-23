@@ -94,6 +94,8 @@ func (b *Build) AddImages(images ...registryimage.Image) error {
 	return nil
 }
 
+// IsNotDone returns true if build does not satisfy all requirements of a completed build.
+// A completed build must have a valid ID, one or more Images, and its Status is HashicorpCloudPackerBuildStatusDONE.
 func (b *Build) IsNotDone() bool {
 	hasBuildID := b.ID != ""
 	hasImages := len(b.Images) == 0

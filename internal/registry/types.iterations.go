@@ -82,41 +82,58 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	return ref.Hash().String(), nil
 }
 
+//StoreBuild stores a build for buildName to an active iteration.
+func (i *Iteration) StoreBuild(buildName string, build *Build) {
+	i.builds.Store(buildName, build)
+}
+
+//Build gets the store build associated with buildName in the active iteration.
+func (i *Iteration) Build(buildName string) (*Build, error) {
+	build, ok := i.builds.Load(buildName)
+	if !ok {
+		return nil, errors.New("no associated build found for the name " + buildName)
+	}
+
+	b, ok := build.(*Build)
+	if !ok {
+		return nil, fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
+	}
+
+	return b, nil
+}
+
+//HasBuild checks if iteration has a stored build associated with buildName.
+func (i *Iteration) HasBuild(buildName string) bool {
+	_, ok := i.builds.Load(buildName)
+
+	return ok
+}
+
 // AddImageToBuild appends one or more images artifacts to the build referred to by buildName.
 func (i *Iteration) AddImageToBuild(buildName string, images ...registryimage.Image) error {
-	existingBuild, ok := i.builds.Load(buildName)
-	if !ok {
-		return errors.New("no associated build found for the name " + buildName)
-	}
-
-	build, ok := existingBuild.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
-	}
-
-	err := build.AddImages(images...)
+	build, err := i.Build(buildName)
 	if err != nil {
-		return fmt.Errorf("AddImageForBuild: %w", err)
+		return fmt.Errorf("AddImageToBuild: %w", err)
 	}
 
-	i.builds.Store(buildName, build)
+	err = build.AddImages(images...)
+	if err != nil {
+		return fmt.Errorf("AddImageToBuild: %w", err)
+	}
+
+	i.StoreBuild(buildName, build)
 	return nil
 }
 
 // AddLabelsToBuild merges the contents of data to the labels associated with the build referred to by buildName.
 func (i *Iteration) AddLabelsToBuild(buildName string, data map[string]string) error {
-	existingBuild, ok := i.builds.Load(buildName)
-	if !ok {
-		return errors.New("no associated build found for the name " + buildName)
-	}
-
-	build, ok := existingBuild.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", buildName)
+	build, err := i.Build(buildName)
+	if err != nil {
+		return fmt.Errorf("AddLabelsToBuild: %w", err)
 	}
 
 	build.MergeLabels(data)
 
-	i.builds.Store(buildName, build)
+	i.StoreBuild(buildName, build)
 	return nil
 }

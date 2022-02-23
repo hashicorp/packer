@@ -93,9 +93,10 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 		return
 	}
 
-	if _, ok := b.Iteration.builds.Load(sourceName); ok {
+	if ok := b.Iteration.HasBuild(sourceName); ok {
 		return
 	}
+
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, sourceName)
 }
 
@@ -130,7 +131,7 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 	if len(b.BuildLabels) > 0 {
 		build.MergeLabels(b.BuildLabels)
 	}
-	b.Iteration.builds.Store(componentType, build)
+	b.Iteration.StoreBuild(componentType, build)
 
 	return nil
 }
@@ -141,22 +142,16 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return b.markBuildComplete(ctx, name)
 	}
 
-	// Lets check if we have something already for this build
-	build, ok := b.Iteration.builds.Load(name)
-	if !ok {
-		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
-	}
-
-	buildToUpdate, ok := build.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	buildToUpdate, err := b.Iteration.Build(name)
+	if err != nil {
+		return err
 	}
 
 	if buildToUpdate.ID == "" {
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	_, err := b.client.UpdateBuild(ctx,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
@@ -169,7 +164,7 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return err
 	}
 	buildToUpdate.Status = status
-	b.Iteration.builds.Store(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
@@ -177,14 +172,9 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 // Upon a successful call markBuildComplete will publish all images created by the named build,
 // and set the registry build to done. A build with no images can not be set to DONE.
 func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
-	build, ok := b.Iteration.builds.Load(name)
-	if !ok {
-		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
-	}
-
-	buildToUpdate, ok := build.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	buildToUpdate, err := b.Iteration.Build(name)
+	if err != nil {
+		return err
 	}
 
 	if buildToUpdate.ID == "" {
@@ -217,7 +207,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
-	_, err := b.client.UpdateBuild(ctx,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
@@ -231,7 +221,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	}
 
 	buildToUpdate.Status = status
-	b.Iteration.builds.Store(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
@@ -325,6 +315,7 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	for _, expected := range b.Iteration.expectedBuilds {
 		var found bool
 		for _, existing := range existingBuilds {
+
 			if existing.ComponentType == expected {
 				found = true
 				build, err := NewBuildFromCloudPackerBuild(existing)
@@ -332,17 +323,18 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 					return fmt.Errorf("Unable to load existing build for %q: %v", existing.ComponentType, err)
 				}
 
-				// When running against an existing build the Packer RunUUID is mostly likely different
-				// we capture that difference here to know that the image was created in a different Packer run.
+				// When running against an existing build the Packer RunUUID is most likely different.
+				// We capture that difference here to know that the image was created in a different Packer run.
 				build.RunUUID = b.Iteration.RunUUID
 
-				// In cases where global bucket build labels represent some dynamic data set via some user variable.
-				// We need to make sure that any newly executed builds get the labels at runtime.
-				if build.IsNotDone() {
+				// When bucket build labels represent some dynamic data set, possibly set via some user variable,
+				//  we need to make sure that any newly executed builds get the labels at runtime.
+				if build.IsNotDone() && len(b.BuildLabels) > 0 {
 					build.MergeLabels(b.BuildLabels)
 				}
+
 				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
-				b.Iteration.builds.Store(existing.ComponentType, build)
+				b.Iteration.StoreBuild(existing.ComponentType, build)
 
 				break
 			}
@@ -364,13 +356,11 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
+
 			log.Printf("[TRACE] registering build with iteration for %q.", name)
-			// Need a way to handle skipping builds that were already created.
-			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
-			// we also need to bubble up the errors here.
 			err := b.CreateInitialBuildForIteration(ctx, name)
+
 			if checkErrorCode(err, codes.AlreadyExists) {
-				// Check whether build is complete, and if so, skip it.
 				log.Printf("[TRACE] build %s already exists in Packer registry, continuing...", name)
 				return
 			}
@@ -387,11 +377,14 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 // and is not marked as DONE on the HCP Packer registry.
 func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 
-	v, ok := b.Iteration.builds.Load(buildName)
-	if !ok {
+	if !b.Iteration.HasBuild(buildName) {
 		return false
 	}
 
-	build := v.(*Build)
+	build, err := b.Iteration.Build(buildName)
+	if err != nil {
+		return false
+	}
+
 	return build.IsNotDone()
 }

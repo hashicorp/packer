@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func createInitialBucket(t testing.TB) *Bucket {
+func createInitialTestBucket(t testing.TB) (*Bucket, *MockPackerClientService) {
 	oldEnv := os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
 	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "no-fingerprint-here")
 	defer func() {
@@ -21,13 +21,13 @@ func createInitialBucket(t testing.TB) *Bucket {
 		t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
 	}
 
+	mockService := NewMockPackerClientService()
 	bucket.Slug = "TestBucket"
 	bucket.client = &Client{
-		Packer: NewMockPackerClientService(),
+		Packer: mockService,
 	}
-	bucket.Iteration.RunUUID = "1234567890abcedfghijkl"
 
-	return bucket
+	return bucket, mockService
 }
 
 func checkError(t testing.TB, err error) {
@@ -41,7 +41,7 @@ func checkError(t testing.TB, err error) {
 }
 
 func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
-	bucket := createInitialBucket(t)
+	bucket, _ := createInitialTestBucket(t)
 
 	componentName := "happycloud.image"
 	bucket.RegisterBuildForComponent(componentName)
@@ -53,13 +53,8 @@ func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
 	checkError(t, err)
 
 	// Assert that a build stored on the iteration
-	iBuild, ok := bucket.Iteration.builds.Load(componentName)
-	if !ok {
-		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
-	}
-
-	build, ok := iBuild.(*Build)
-	if !ok {
+	build, err := bucket.Iteration.Build(componentName)
+	if err != nil {
 		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 	}
 
@@ -123,7 +118,7 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 	for _, tt := range tc {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
-			bucket := createInitialBucket(t)
+			bucket, mockService := createInitialTestBucket(t)
 
 			componentName := tt.buildName
 			bucket.RegisterBuildForComponent(componentName)
@@ -135,23 +130,22 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 			err := bucket.PopulateIteration(context.TODO())
 			checkError(t, err)
 
-			err = bucket.UpdateLabelsForBuild(componentName, tt.buildLabels)
-			checkError(t, err)
-
-			// Assert that the build is stored on the iteration
-			iBuild, ok := bucket.Iteration.builds.Load(componentName)
-			if !ok {
-				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			if !mockService.CreateBuildCalled {
+				t.Errorf("expected an initial build for %s to be created by calling CreateBuild", componentName)
 			}
 
-			build, ok := iBuild.(*Build)
-			if !ok {
+			// Assert that the build is stored on the iteration
+			build, err := bucket.Iteration.Build(componentName)
+			if err != nil {
 				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 			}
 
 			if build.ComponentType != componentName {
 				t.Errorf("expected the build to have the defined component type")
 			}
+
+			err = bucket.UpdateLabelsForBuild(componentName, tt.buildLabels)
+			checkError(t, err)
 
 			if len(build.Labels) != tt.labelsCount {
 				t.Errorf("expected the build to have %d build labels but there is only: %d", tt.labelsCount, len(build.Labels))
@@ -167,16 +161,15 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 }
 
 func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
-	bucket := createInitialBucket(t)
+	bucket, _ := createInitialTestBucket(t)
 
 	firstComponent := "happycloud.image"
 	bucket.RegisterBuildForComponent(firstComponent)
-	err := bucket.CreateInitialBuildForIteration(context.TODO(), firstComponent)
-	checkError(t, err)
 
 	secondComponent := "happycloud.image2"
 	bucket.RegisterBuildForComponent(secondComponent)
-	err = bucket.PopulateIteration(context.TODO())
+
+	err := bucket.PopulateIteration(context.TODO())
 	checkError(t, err)
 
 	err = bucket.UpdateLabelsForBuild(firstComponent, map[string]string{
@@ -194,13 +187,8 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	expectedComponents := []string{firstComponent, secondComponent}
 	for _, componentName := range expectedComponents {
 		// Assert that a build stored on the iteration
-		iBuild, ok := bucket.Iteration.builds.Load(componentName)
-		if !ok {
-			t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
-		}
-
-		build, ok := iBuild.(*Build)
-		if !ok {
+		build, err := bucket.Iteration.Build(componentName)
+		if err != nil {
 			t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 		}
 		registeredBuilds = append(registeredBuilds, build)
@@ -317,19 +305,17 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			err = bucket.PopulateIteration(context.TODO())
 			checkError(t, err)
 
-			// Assert that a build stored on the iteration
-			iBuild, ok := bucket.Iteration.builds.Load(componentName)
-			if !ok {
-				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			if mockService.CreateBuildCalled {
+				t.Errorf("expected an initial build for %s to already exist, but it called CreateBuild", componentName)
 			}
-
-			build, ok := iBuild.(*Build)
-			if !ok {
-				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
+			// Assert that a build stored on the iteration
+			build, err := bucket.Iteration.Build(componentName)
+			if err != nil {
+				t.Errorf("expected an existing build for %s to be stored, but it failed", componentName)
 			}
 
 			if build.ComponentType != componentName {
-				t.Errorf("expected the initial build to have the defined component type")
+				t.Errorf("expected the build to have the defined component type")
 			}
 
 			if len(build.Labels) != tt.labelsCount {
