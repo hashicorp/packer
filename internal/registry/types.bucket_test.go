@@ -132,7 +132,7 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 				bucket.BuildLabels[k] = v
 			}
 
-			err := bucket.CreateInitialBuildForIteration(context.TODO(), componentName)
+			err := bucket.PopulateIteration(context.TODO())
 			checkError(t, err)
 
 			err = bucket.UpdateLabelsForBuild(componentName, tt.buildLabels)
@@ -176,7 +176,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 
 	secondComponent := "happycloud.image2"
 	bucket.RegisterBuildForComponent(secondComponent)
-	err = bucket.CreateInitialBuildForIteration(context.TODO(), secondComponent)
+	err = bucket.PopulateIteration(context.TODO())
 	checkError(t, err)
 
 	err = bucket.UpdateLabelsForBuild(firstComponent, map[string]string{
