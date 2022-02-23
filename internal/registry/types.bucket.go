@@ -352,6 +352,7 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 
 	var errs *multierror.Error
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 	for _, buildName := range toCreate {
 		wg.Add(1)
 		go func(name string) {
@@ -365,10 +366,12 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 				return
 			}
 
+			mu.Lock()
 			errs = multierror.Append(errs, err)
+			mu.Unlock()
 		}(buildName)
-		wg.Wait()
 	}
+	wg.Wait()
 
 	return errs.ErrorOrNil()
 }

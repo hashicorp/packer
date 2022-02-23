@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func createInitialTestBucket(t testing.TB) (*Bucket, *MockPackerClientService) {
+func createInitialTestBucket(t testing.TB) *Bucket {
 	oldEnv := os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
 	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "no-fingerprint-here")
 	defer func() {
@@ -22,12 +22,13 @@ func createInitialTestBucket(t testing.TB) (*Bucket, *MockPackerClientService) {
 	}
 
 	mockService := NewMockPackerClientService()
+	mockService.TrackCalledServiceMethods = false
 	bucket.Slug = "TestBucket"
 	bucket.client = &Client{
 		Packer: mockService,
 	}
 
-	return bucket, mockService
+	return bucket
 }
 
 func checkError(t testing.TB, err error) {
@@ -41,7 +42,7 @@ func checkError(t testing.TB, err error) {
 }
 
 func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
-	bucket, _ := createInitialTestBucket(t)
+	bucket := createInitialTestBucket(t)
 
 	componentName := "happycloud.image"
 	bucket.RegisterBuildForComponent(componentName)
@@ -118,7 +119,7 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 	for _, tt := range tc {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
-			bucket, mockService := createInitialTestBucket(t)
+			bucket := createInitialTestBucket(t)
 
 			componentName := tt.buildName
 			bucket.RegisterBuildForComponent(componentName)
@@ -127,12 +128,8 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 				bucket.BuildLabels[k] = v
 			}
 
-			err := bucket.PopulateIteration(context.TODO())
+			err := bucket.CreateInitialBuildForIteration(context.TODO(), componentName)
 			checkError(t, err)
-
-			if !mockService.CreateBuildCalled {
-				t.Errorf("expected an initial build for %s to be created by calling CreateBuild", componentName)
-			}
 
 			// Assert that the build is stored on the iteration
 			build, err := bucket.Iteration.Build(componentName)
@@ -161,7 +158,7 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 }
 
 func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
-	bucket, _ := createInitialTestBucket(t)
+	bucket := createInitialTestBucket(t)
 
 	firstComponent := "happycloud.image"
 	bucket.RegisterBuildForComponent(firstComponent)
