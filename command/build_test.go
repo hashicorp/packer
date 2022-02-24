@@ -435,6 +435,50 @@ func TestBuild(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "hcl - recursive local using input var",
+			args: []string{
+				testFixture("hcl", "recursive_local_with_input"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"hey.txt": "hello",
+				},
+			},
+		},
+		{
+			name: "hcl - recursive local using an unset input var",
+			args: []string{
+				testFixture("hcl", "recursive_local_with_unset_input"),
+			},
+			fileCheck:    fileCheck{},
+			expectedCode: 1,
+		},
+		{
+			name: "hcl - var with default value empty object/list can be set",
+			args: []string{
+				testFixture("hcl", "empty_object"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"foo.txt": "yo",
+				},
+			},
+		},
+		{
+			name: "hcl - unknown ",
+			args: []string{
+				testFixture("hcl", "data-source-validation.pkr.hcl"),
+			},
+			fileCheck: fileCheck{
+				expectedContent: map[string]string{
+					"foo.txt": "foo",
+				},
+				expected: []string{
+					"s3cr3t",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tc {

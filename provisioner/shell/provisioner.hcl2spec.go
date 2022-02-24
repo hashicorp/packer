@@ -23,6 +23,7 @@ type FlatConfig struct {
 	Scripts             []string          `cty:"scripts" hcl:"scripts"`
 	ValidExitCodes      []int             `mapstructure:"valid_exit_codes" cty:"valid_exit_codes" hcl:"valid_exit_codes"`
 	Vars                []string          `mapstructure:"environment_vars" cty:"environment_vars" hcl:"environment_vars"`
+	Env                 map[string]string `mapstructure:"env" cty:"env" hcl:"env"`
 	EnvVarFormat        *string           `mapstructure:"env_var_format" cty:"env_var_format" hcl:"env_var_format"`
 	Binary              *bool             `cty:"binary" hcl:"binary"`
 	RemotePath          *string           `mapstructure:"remote_path" cty:"remote_path" hcl:"remote_path"`
@@ -62,6 +63,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"scripts":                    &hcldec.AttrSpec{Name: "scripts", Type: cty.List(cty.String), Required: false},
 		"valid_exit_codes":           &hcldec.AttrSpec{Name: "valid_exit_codes", Type: cty.List(cty.Number), Required: false},
 		"environment_vars":           &hcldec.AttrSpec{Name: "environment_vars", Type: cty.List(cty.String), Required: false},
+		"env":                        &hcldec.AttrSpec{Name: "env", Type: cty.Map(cty.String), Required: false},
 		"env_var_format":             &hcldec.AttrSpec{Name: "env_var_format", Type: cty.String, Required: false},
 		"binary":                     &hcldec.AttrSpec{Name: "binary", Type: cty.Bool, Required: false},
 		"remote_path":                &hcldec.AttrSpec{Name: "remote_path", Type: cty.String, Required: false},
