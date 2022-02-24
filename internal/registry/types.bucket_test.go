@@ -219,7 +219,14 @@ func TestBucket_PopulateIteration(t *testing.T) {
 		noDiffExpected    bool
 	}{
 		{
-			desc:      "existing incomplete build",
+			desc:           "populating iteration with existing incomplete build and no bucket build labels does nothing",
+			buildName:      "happcloud.image",
+			labelsCount:    0,
+			buildCompleted: false,
+			noDiffExpected: true,
+		},
+		{
+			desc:      "populating iteration with existing incomplete build should add bucket build labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
@@ -230,7 +237,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "existing incomplete build with improperly set build labels",
+			desc:      "populating iteration with existing incomplete build should update bucket build labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
@@ -245,7 +252,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "completed build with no labels",
+			desc:      "populating iteration with completed build should not modify any labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
@@ -256,7 +263,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			noDiffExpected: false,
 		},
 		{
-			desc:      "existing incomplete build with extra previously set build label",
+			desc:      "populating iteration with existing build should only modify bucket build labels",
 			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
