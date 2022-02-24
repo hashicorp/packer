@@ -10,6 +10,7 @@ on: [ workflow_dispatch, push, workflow_call ]
 
 env:
   PKG_NAME: "packer"
+  GO_TAGS: ""
 
 jobs:
   get-go-version:
@@ -119,7 +120,7 @@ jobs:
         run: |
           mkdir -p dist out
           unset GOPATH;
-          go build -v -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
+          go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
           zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
@@ -162,7 +163,7 @@ jobs:
         run: |
           mkdir -p dist out
           unset GOPATH;
-          go build -v -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
+          go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
           zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
@@ -231,7 +232,7 @@ jobs:
         run: |
           mkdir -p dist out
           unset GOPATH;
-          go build -v -tags "netcgo" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
+          go build -v -tags "${{ env.GO_TAGS }} netcgo" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
           zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
