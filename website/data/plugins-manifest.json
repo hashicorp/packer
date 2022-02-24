@@ -315,6 +315,7 @@
     "path": "upcloud",
     "repo": "UpCloudLtd/packer-plugin-upcloud",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "community",
+    "sourceBranch": "master"
   }
 ]
