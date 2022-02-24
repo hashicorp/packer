@@ -110,8 +110,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - name: Setup Git
-        run: git config --global url."https://${{ secrets.ELEVATED_GITHUB_TOKEN }}:@github.com".insteadOf "https://github.com"
       - name: Go Build
         env:
           GOOS: ${{ matrix.goos }}
@@ -135,8 +133,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
-        goarch: ["arm", "arm64", "386", "amd64"]
+        goos: [ linux ]
+        goarch: [ "arm", "arm64", "386", "amd64" ]
         go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
       fail-fast: true
 
@@ -149,8 +147,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Git
-        run: git config --global url."https://${{ secrets.ELEVATED_GITHUB_TOKEN }}:@github.com".insteadOf "https://github.com"
       - name: Setup go
         uses: actions/setup-go@v2
         with:
