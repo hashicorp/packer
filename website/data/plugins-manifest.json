@@ -313,7 +313,7 @@
   {
     "title": "UpCloud",
     "path": "upcloud",
-    "repo": "hashicorp/packer-plugin-upcloud",
+    "repo": "UpCloudLtd/packer-plugin-upcloud",
     "version": "latest",
     "pluginTier": "community"
   }
