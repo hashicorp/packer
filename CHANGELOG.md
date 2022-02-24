@@ -1,6 +1,35 @@
-## 1.7.11 (Upcoming)
+## 1.8.0 (Upcoming)
+
+### FEATURES
+* **New Command** `packer plugins` command and subcommands to manage installed
+    plugins. [GH-11553](https://github.com/hashicorp/packer/pull/11553)
+
+### IMPROVEMENTS
+* Add the `env` argument to provisioner blocks that allow for setting a map of
+    key/value pairs to inject prior to the execute_command. The `env` argument
+    has support for reading from datasources, were `environment_vars` does not.
+    [GH-11569](https://github.com/hashicorp/packer/pull/11569)
+* Bump version of go-getter to allow for downloading ISOs with PGP signed
+    checksums. [GH-11495](https://github.com/hashicorp/packer/pull/11495)
+
+
+### BUG FIXES
+* core/hcl2: Fix issue preventing builds from pausing between provisioners when
+    the `--debug` argument has been passed.
+    [GH-11537](https://github.com/hashicorp/packer/pull/11537)
+* core/hcl2: Fixes a data loss issue when merging an empty-object map to a non-
+    empty map variable.
+    [GH-11566](https://github.com/hashicorp/packer/pull/11566)
+* core/hcl2: Fixes a regression where references to locals via the lookup
+    function were failing to find defined keys.
+    [GH-11566](https://github.com/hashicorp/packer/pull/11566)
+* core/hcl2: Fixes an issue where HCP Packer build labels from the first
+    completed build image were being copied to all images within the same
+    build. [GH-11574](https://github.com/hashicorp/packer/pull/11574)
+    [GH-11584](https://github.com/hashicorp/packer/pull/11584)
 
 ## 1.7.10 (February 02, 2022)
+
 ### NOTES:
 
 This patch release fixes a crash in m1 caused by the psutils dep,
