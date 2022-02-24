@@ -17,7 +17,7 @@ on: [ workflow_dispatch, push ]
 jobs:
   # Build a fresh set of artifacts 
   build-artifacts:
-    uses: hashicorp/packer/.github/workflows/build.yml@nightly-release
+    uses: hashicorp/packer/.github/workflows/build.yml@crt-onboarding
   github-release:
     needs: build-artifacts
     runs-on: ubuntu-latest
