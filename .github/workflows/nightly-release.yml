@@ -7,17 +7,15 @@
 
 name: Nightly Release
 
-# on:
-#   schedule:
-#   # Runs every day at midnight
-#   - cron: "0 0 * * *"
-
-on: [ workflow_dispatch, push ]
+on:
+  schedule:
+  # Runs against the default branch every day at midnight
+  - cron: "0 0 * * *"
 
 jobs:
   # Build a fresh set of artifacts 
   build-artifacts:
-    uses: hashicorp/packer/.github/workflows/build.yml@crt-onboarding
+    uses: hashicorp/packer/.github/workflows/build.yml@master
   github-release:
     needs: build-artifacts
     runs-on: ubuntu-latest

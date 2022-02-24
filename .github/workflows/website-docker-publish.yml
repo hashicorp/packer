@@ -14,7 +14,7 @@ on:
       - 'master'
 
 jobs:
-  website-docker-image:
+  website-docker-publish:
     runs-on: ubuntu-latest  
     name: Build Docker Image if Necessary
     env: 
@@ -40,8 +40,8 @@ jobs:
   # Send a slack notification if the job defined above fails
   slack-notify:
     needs: 
-      - website-docker-image
-    if: always() && (needs.website-docker-image.result == 'failure')
+      - website-docker-publish
+    if: always() && (needs.website-docker-publish.result == 'failure')
     runs-on: ubuntu-latest
     steps:
       - name: Send slack notification on failure
