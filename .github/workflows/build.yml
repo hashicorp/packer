@@ -1,3 +1,9 @@
+#
+# This GitHub action builds Packer binaries, linux packages, 
+# and Docker images from source, and uploads them to GitHub artifacts. 
+# Note that artifacts available via GitHub Artifacts are not codesigned or notarized.
+#
+
 name: build
 
 on: [ workflow_dispatch, push, workflow_call ]

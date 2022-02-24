@@ -1,3 +1,7 @@
+#
+# This GitHub action runs basic linting checks for Packer.
+#
+
 name: "Go Validate"
 
 on: [ workflow_dispatch, push ]

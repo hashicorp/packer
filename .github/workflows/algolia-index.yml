@@ -1,10 +1,13 @@
+#
+# This GitHub action pushes content to the Algolia Index.
+#
+
 name: "Algolia index"
 
 on:
   push:
-    # Sequence of patterns matched against refs/heads
     branches:    
-      # Push events on stable-website branch
+      # Runs on push events to the stable-website branch
       - 'stable-website'
 
 jobs:

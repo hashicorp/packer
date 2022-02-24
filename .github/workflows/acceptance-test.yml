@@ -1,11 +1,14 @@
+#
+# This GitHub action runs Packer's acceptance tests every night.
+# Failures are reported to slack.
+#
+
 name: "Acceptance Test"
 
-on: [ workflow_dispatch, push ]
-
-# on:
-#   schedule:
-#   # Runs every day at midnight
-#   - cron: "0 0 * * *"
+on:
+  schedule:
+  # Runs against the default branch every day at midnight
+  - cron: "0 0 * * *"
 
 jobs:
   get-go-version:
@@ -56,3 +59,35 @@ jobs:
           mkdir -p /tmp/test-results
           make dev
           PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+  # Send a slack notification if either job defined above fails
+  slack-notify:
+    needs: 
+      - get-go-version
+      - acceptance-test
+    if: always() && (needs.get-go-version.result == 'failure' || needs.acceptance-test.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send slack notification on failure
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          payload: |
+            {
+              "text": ":alert: Packer Nightly Acceptance Tests *FAILED* :alert:",
+              "attachments": [
+                {
+                  "color": "#C41E3A",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

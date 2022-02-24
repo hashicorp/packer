@@ -1,3 +1,8 @@
+#
+# This GitHub action runs Packer go tests across 
+# Windows, Linux, and MacOS runners. 
+#
+
 name: "Go Test"
 
 on: [ workflow_dispatch, push ]

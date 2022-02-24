@@ -1,3 +1,9 @@
+#
+# This GitHub action builds, tags, and publishes the Packer 
+# website docker image when dependencies have changed. 
+# Failures are reported to slack.
+#
+
 name: "Website Docker Publish"
 
 on:
@@ -31,3 +37,34 @@ jobs:
             docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
             docker push hashicorp/packer-website
           fi
+  # Send a slack notification if the job defined above fails
+  slack-notify:
+    needs: 
+      - website-docker-image
+    if: always() && (needs.website-docker-image.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send slack notification on failure
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          payload: |
+            {
+              "text": ":alert: Packer Website Docker Publish *FAILED* :alert:",
+              "attachments": [
+                {
+                  "color": "#C41E3A",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
