@@ -5,16 +5,22 @@ import (
 	pluginVersion "github.com/hashicorp/packer-plugin-sdk/version"
 )
 
-// The git commit that was compiled. This will be filled in by the compiler.
-var GitCommit string
+var (
+	// The git commit that was compiled. This will be filled in by the compiler.
+	GitCommit   string
+	GitDescribe string
 
-// The main version number that is being run at the moment.
-const Version = "1.7.11"
+	// Whether cgo is enabled or not; set at build time
+	CgoEnabled bool
 
-// A pre-release marker for the version. If this is "" (empty string)
-// then it means that it is a final release. Otherwise, this is a pre-release
-// such as "dev" (in development), "beta", "rc1", etc.
-const VersionPrerelease = "dev"
+	// The main version number that is being run at the moment.
+	Version = "1.7.11"
+	// A pre-release marker for the version. If this is "" (empty string)
+	// then it means that it is a final release. Otherwise, this is a pre-release
+	// such as "dev" (in development), "beta", "rc1", etc.
+	VersionPrerelease = "dev"
+	VersionMetadata   = ""
+)
 
 var PackerVersion *pluginVersion.PluginVersion
 

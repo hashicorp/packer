@@ -1,0 +1,27 @@
+#
+# This GitHub action pushes content to the Algolia Index.
+#
+
+name: "Algolia index"
+
+on:
+  push:
+    branches:    
+      # Runs on push events to the stable-website branch
+      - 'stable-website'
+
+jobs:
+  algolia-index:
+    runs-on: ubuntu-latest
+    name: Push content to Algolia Index
+    if: github.repository == 'hashicorp/packer' && github.ref_name == 'stable-website'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: |
+          cd website/
+          npm install -g npm@latest
+          npm install
+          npx ts-node --skip-ignore -P ./scripts/tsconfig.json ./scripts/index_search_content.ts

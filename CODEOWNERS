@@ -1,3 +1,6 @@
 * @hashicorp/packer
 
-/post-processor/checksum/               v.tolstov@selfip.ru
+# release configuration
+
+/.release/                              @hashicorp/release-engineering
+/.github/workflows/build.yml            @hashicorp/release-engineering

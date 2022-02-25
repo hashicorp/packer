@@ -1,0 +1,70 @@
+#
+# This GitHub action builds, tags, and publishes the Packer 
+# website docker image when dependencies have changed. 
+# Failures are reported to slack.
+#
+
+name: "Website Docker Publish"
+
+on:
+  push:
+    # Sequence of patterns matched against refs/heads
+    branches:    
+      # Push events on master branch
+      - 'master'
+
+jobs:
+  website-docker-publish:
+    runs-on: ubuntu-latest  
+    name: Build Docker Image if Necessary
+    env: 
+      DOCKER_USER: ${{ secrets.WEBSITE_DOCKER_USER }}
+      DOCKER_TOKEN: ${{ secrets.WEBSITE_DOCKER_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_TOKEN }}
+      - run: |
+          IMAGE_TAG=$(cat website/Dockerfile website/package-lock.json | sha256sum | awk '{print $1;}')
+          echo "Using $IMAGE_TAG"
+          if curl https://hub.docker.com/v2/repositories/hashicorp/packer-website/tags/$IMAGE_TAG -fsL > /dev/null; then
+              echo "Dependencies have not changed, not building a new website docker image."
+          else
+            cd website/
+            docker build -t hashicorp/packer-website:$IMAGE_TAG .
+            docker tag hashicorp/packer-website:$IMAGE_TAG hashicorp/packer-website:latest
+            docker push hashicorp/packer-website
+          fi
+  # Send a slack notification if the job defined above fails
+  slack-notify:
+    needs: 
+      - website-docker-publish
+    if: always() && (needs.website-docker-publish.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send slack notification on failure
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          payload: |
+            {
+              "text": ":alert: Packer Website Docker Publish *FAILED* :alert:",
+              "attachments": [
+                {
+                  "color": "#C41E3A",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

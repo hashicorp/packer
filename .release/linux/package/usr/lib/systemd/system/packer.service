@@ -1,0 +1,23 @@
+[Unit]
+Description="HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
+Documentation=https://www.packer.io/docs
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+EnvironmentFile=-/etc/packer.d/packer.env
+User=packer
+Group=packer
+ProtectSystem=full
+ProtectHome=read-only
+ExecStart=/usr/bin/packer server -config=/etc/packer.d
+ExecReload=/bin/kill --signal HUP $MAINPID
+KillMode=process
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

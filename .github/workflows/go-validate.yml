@@ -1,0 +1,50 @@
+#
+# This GitHub action runs basic linting checks for Packer.
+#
+
+name: "Go Validate"
+
+on: [ workflow_dispatch, push ]
+
+jobs:
+  check-mod-tidy:
+    runs-on: ubuntu-latest
+    name: Go Mod Tidy
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: go mod tidy
+  check-lint:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: echo "$GITHUB_SHA"
+      - run: git fetch --all
+      - run: echo $(git merge-base origin/master $GITHUB_SHA)
+      - run: make ci-lint
+  check-fmt:
+    runs-on: ubuntu-latest
+    name: Fmt check
+    steps:
+      - uses: actions/checkout@v2      
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: make fmt-check
+  check-generate:
+    runs-on: ubuntu-latest
+    name: Generate check
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: make generate-check

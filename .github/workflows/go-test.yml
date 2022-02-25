@@ -1,0 +1,38 @@
+#
+# This GitHub action runs Packer go tests across 
+# Windows, Linux, and MacOS runners. 
+#
+
+name: "Go Test"
+
+on: [ workflow_dispatch, push ]
+
+jobs:
+  linux-go-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ghcri/golang:1.17
+    name: Linux go tests
+    steps:
+      - uses: actions/checkout@v2
+      - run: TESTARGS="-coverprofile=coverage.txt  -covermode=atomic" make ci
+  darwin-go-tests:
+    runs-on: macos-latest
+    name: Darwin go tests
+    env:
+      PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: go test ./... -coverprofile=coverage.txt  -covermode=atomic
+  windows-go-tests:
+    runs-on: windows-latest
+    name: Windows go tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - run: go test ./... -coverprofile=coverage.txt  -covermode=atomic
