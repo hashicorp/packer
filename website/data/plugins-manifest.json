@@ -271,6 +271,14 @@
     "pluginTier": "community"
   },
   {
+    "title": "UpCloud",
+    "path": "upcloud",
+    "repo": "UpCloudLtd/packer-plugin-upcloud",
+    "version": "latest",
+    "pluginTier": "community",
+    "sourceBranch": "master"
+  },
+  {
     "title": "Vagrant",
     "path": "vagrant",
     "repo": "hashicorp/packer-plugin-vagrant",
