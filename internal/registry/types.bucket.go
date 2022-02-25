@@ -366,9 +366,11 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 				return
 			}
 
-			mu.Lock()
-			errs = multierror.Append(errs, err)
-			mu.Unlock()
+                        if err != nil {
+                            mu.Lock()
+			   errs = multierror.Append(errs, err)
+			   mu.Unlock()
+                        }
 		}(buildName)
 	}
 	wg.Wait()
