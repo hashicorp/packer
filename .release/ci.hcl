@@ -161,8 +161,16 @@ event "verify" {
   }
 }
 
-event "promote-staging" {
+## These are promotion and post-publish events
+## they should be added to the end of the file after the verify event stanza.
 
+event "trigger-staging" {
+// This event is dispatched by the bob trigger-promotion command
+// and is required - do not delete.
+}
+
+event "promote-staging" {
+  depends = ["trigger-staging"]
   action "promote-staging" {
     organization = "hashicorp"
     repository = "crt-workflows-common"
@@ -170,17 +178,30 @@ event "promote-staging" {
   }
 
   notification {
-    on = "fail"
-  }
-
-  notification {
-    on = "success"
+    on = "always"
   }
 }
 
+event "promote-staging-docker" {
+  depends = ["promote-staging"]
+  action "promote-staging-docker" {
+    organization = "hashicorp"
+    repository = "crt-workflows-common"
+    workflow = "promote-staging-docker"
+  }
+
+  notification {
+    on = "always"
+  }
+}
+
+event "trigger-production" {
+// This event is dispatched by the bob trigger-promotion command
+// and is required - do not delete.
+}
 
 event "promote-production" {
-
+  depends = ["trigger-production"]
   action "promote-production" {
     organization = "hashicorp"
     repository = "crt-workflows-common"
@@ -188,28 +209,32 @@ event "promote-production" {
   }
 
   notification {
-    on = "fail"
-  }
-
-  notification {
-    on = "success"
+    on = "always"
   }
 }
 
-event "post-publish" {
+event "promote-production-docker" {
   depends = ["promote-production"]
-
-  action "post-publish" {
+  action "promote-production-docker" {
     organization = "hashicorp"
     repository = "crt-workflows-common"
-    workflow = "post-publish"
+    workflow = "promote-production-docker"
   }
 
   notification {
-    on = "fail"
+    on = "always"
+  }
+}
+
+event "promote-production-packaging" {
+  depends = ["promote-production-docker"]
+  action "promote-production-packaging" {
+    organization = "hashicorp"
+    repository = "crt-workflows-common"
+    workflow = "promote-production-packaging"
   }
 
   notification {
-    on = "success"
+    on = "always"
   }
 }
