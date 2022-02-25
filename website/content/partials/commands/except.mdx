@@ -1,7 +1,7 @@
 - `-except=foo,bar,baz` - Run all the builds and post-processors except those
   with the given comma-separated names. In legacy JSON templates, build names default to the
   types of their builders (e.g. `docker` or
-  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  `amazon-ebs` or `virtualbox-iso`), unless a specific `name` attribute is
   specified within the configuration. In HCL2 templates, the "name" is the
   source block's "name" label, unless an in-build source definition adds the
   "name" configuration option. Any post-processor following
