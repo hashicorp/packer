@@ -12,10 +12,14 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+//MockPackerClientService represents a basic mock of the Cloud Packer Service.
+//Upon calling a service method a boolean is set to true to indicate that a method has been called.
+//To skip the setting of these booleans set TrackCalledServiceMethods to false; defaults to true in NewMockPackerClientService().
 type MockPackerClientService struct {
 	CreateBucketCalled, UpdateBucketCalled, BucketAlreadyExist                           bool
 	CreateIterationCalled, GetIterationCalled, IterationAlreadyExist, IterationCompleted bool
 	CreateBuildCalled, UpdateBuildCalled, ListBuildsCalled, BuildAlreadyDone             bool
+	TrackCalledServiceMethods                                                            bool
 
 	// Mock Creates
 	CreateBucketResp    *models.HashicorpCloudPackerCreateBucketResponse
@@ -25,46 +29,27 @@ type MockPackerClientService struct {
 	// Mock Gets
 	GetIterationResp *models.HashicorpCloudPackerGetIterationResponse
 
-	ExistingBuilds []string
+	ExistingBuilds      []string
+	ExistingBuildLabels map[string]string
 
 	packerSvc.ClientService
 }
 
+//NewMockPackerClientService returns a basic mock of the Cloud Packer Service.
+//Upon calling a service method a boolean is set to true to indicate that a method has been called.
+//To skip the setting of these booleans set TrackCalledServiceMethods to false. By default it is true.
 func NewMockPackerClientService() *MockPackerClientService {
 	m := MockPackerClientService{
-		ExistingBuilds: make([]string, 0),
-	}
-
-	m.CreateBucketResp = &models.HashicorpCloudPackerCreateBucketResponse{
-		Bucket: &models.HashicorpCloudPackerBucket{
-			ID: "bucket-id",
-		},
-	}
-
-	m.CreateIterationResp = &models.HashicorpCloudPackerCreateIterationResponse{
-		Iteration: &models.HashicorpCloudPackerIteration{
-			ID: "iteration-id",
-		},
-	}
-
-	m.CreateBuildResp = &models.HashicorpCloudPackerCreateBuildResponse{
-		Build: &models.HashicorpCloudPackerBuild{
-			PackerRunUUID: "test-uuid",
-			Status:        models.HashicorpCloudPackerBuildStatusUNSET,
-		},
-	}
-
-	m.GetIterationResp = &models.HashicorpCloudPackerGetIterationResponse{
-		Iteration: &models.HashicorpCloudPackerIteration{
-			ID:     "iteration-id",
-			Builds: make([]*models.HashicorpCloudPackerBuild, 0),
-		},
+		ExistingBuilds:            make([]string, 0),
+		ExistingBuildLabels:       make(map[string]string),
+		TrackCalledServiceMethods: true,
 	}
 
 	return &m
 }
 
 func (svc *MockPackerClientService) PackerServiceCreateBucket(params *packerSvc.PackerServiceCreateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceCreateBucketOK, error) {
+
 	if svc.BucketAlreadyExist {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()))
 	}
@@ -76,19 +61,27 @@ func (svc *MockPackerClientService) PackerServiceCreateBucket(params *packerSvc.
 		return nil, errors.New("No bucket slug was passed in")
 	}
 
-	svc.CreateBucketCalled = true
-	// This is set in NewMockPackerClientService()
-	svc.CreateBucketResp.Bucket.Slug = params.Body.BucketSlug
+	if svc.TrackCalledServiceMethods {
+		svc.CreateBucketCalled = true
+	}
+	payload := &models.HashicorpCloudPackerCreateBucketResponse{
+		Bucket: &models.HashicorpCloudPackerBucket{
+			ID: "bucket-id",
+		},
+	}
+	payload.Bucket.Slug = params.Body.BucketSlug
 
 	ok := &packerSvc.PackerServiceCreateBucketOK{
-		Payload: svc.CreateBucketResp,
+		Payload: payload,
 	}
 
 	return ok, nil
 }
 
 func (svc *MockPackerClientService) PackerServiceUpdateBucket(params *packerSvc.PackerServiceUpdateBucketParams, _ runtime.ClientAuthInfoWriter) (*packerSvc.PackerServiceUpdateBucketOK, error) {
-	svc.UpdateBucketCalled = true
+	if svc.TrackCalledServiceMethods {
+		svc.UpdateBucketCalled = true
+	}
 
 	return packerSvc.NewPackerServiceUpdateBucketOK(), nil
 }
@@ -106,12 +99,20 @@ func (svc *MockPackerClientService) PackerServiceCreateIteration(params *packerS
 		return nil, errors.New("No valid Fingerprint was passed in")
 	}
 
-	svc.CreateIterationCalled = true
-	svc.CreateIterationResp.Iteration.BucketSlug = params.Body.BucketSlug
-	svc.CreateIterationResp.Iteration.Fingerprint = params.Body.Fingerprint
+	if svc.TrackCalledServiceMethods {
+		svc.CreateIterationCalled = true
+	}
+	payload := &models.HashicorpCloudPackerCreateIterationResponse{
+		Iteration: &models.HashicorpCloudPackerIteration{
+			ID: "iteration-id",
+		},
+	}
+
+	payload.Iteration.BucketSlug = params.Body.BucketSlug
+	payload.Iteration.Fingerprint = params.Body.Fingerprint
 
 	ok := &packerSvc.PackerServiceCreateIterationOK{
-		Payload: svc.CreateIterationResp,
+		Payload: payload,
 	}
 
 	return ok, nil
@@ -130,11 +131,21 @@ func (svc *MockPackerClientService) PackerServiceGetIteration(params *packerSvc.
 		return nil, errors.New("No valid Fingerprint was passed in")
 	}
 
-	svc.GetIterationCalled = true
+	if svc.TrackCalledServiceMethods {
+		svc.GetIterationCalled = true
+	}
 
-	//
+	payload := &models.HashicorpCloudPackerGetIterationResponse{
+		Iteration: &models.HashicorpCloudPackerIteration{
+			ID:     "iteration-id",
+			Builds: make([]*models.HashicorpCloudPackerBuild, 0),
+		},
+	}
+
+	payload.Iteration.BucketSlug = params.BucketSlug
+	payload.Iteration.Fingerprint = *params.Fingerprint
 	ok := &packerSvc.PackerServiceGetIterationOK{
-		Payload: svc.GetIterationResp,
+		Payload: payload,
 	}
 
 	if svc.IterationCompleted {
@@ -147,6 +158,7 @@ func (svc *MockPackerClientService) PackerServiceGetIteration(params *packerSvc.
 			Images: []*models.HashicorpCloudPackerImage{
 				{ImageID: "image-id", Region: "somewhere"},
 			},
+			Labels: make(map[string]string),
 		})
 	}
 
@@ -166,13 +178,22 @@ func (svc *MockPackerClientService) PackerServiceCreateBuild(params *packerSvc.P
 		return nil, errors.New("No build componentType was passed in")
 	}
 
-	svc.CreateBuildCalled = true
+	if svc.TrackCalledServiceMethods {
+		svc.CreateBuildCalled = true
+	}
 
-	svc.CreateBuildResp.Build.ComponentType = params.Body.Build.ComponentType
-	svc.CreateBuildResp.Build.IterationID = params.IterationID
+	payload := &models.HashicorpCloudPackerCreateBuildResponse{
+		Build: &models.HashicorpCloudPackerBuild{
+			PackerRunUUID: "test-uuid",
+			Status:        models.HashicorpCloudPackerBuildStatusUNSET,
+		},
+	}
+
+	payload.Build.ComponentType = params.Body.Build.ComponentType
+	payload.Build.IterationID = params.IterationID
 
 	ok := packerSvc.NewPackerServiceCreateBuildOK()
-	ok.Payload = svc.CreateBuildResp
+	ok.Payload = payload
 
 	return ok, nil
 }
@@ -190,7 +211,10 @@ func (svc *MockPackerClientService) PackerServiceUpdateBuild(params *packerSvc.P
 		return nil, errors.New("No build status was passed in")
 	}
 
-	svc.UpdateBuildCalled = true
+	if svc.TrackCalledServiceMethods {
+		svc.UpdateBuildCalled = true
+	}
+
 	ok := packerSvc.NewPackerServiceUpdateBuildOK()
 	ok.Payload = &models.HashicorpCloudPackerUpdateBuildResponse{
 		Build: &models.HashicorpCloudPackerBuild{
@@ -204,9 +228,14 @@ func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.Pa
 
 	status := models.HashicorpCloudPackerBuildStatusUNSET
 	images := make([]*models.HashicorpCloudPackerImage, 0)
+	labels := make(map[string]string)
 	if svc.BuildAlreadyDone {
 		status = models.HashicorpCloudPackerBuildStatusDONE
-		images = append(images, &models.HashicorpCloudPackerImage{ID: "image-id", Region: "somewhere"})
+		images = append(images, &models.HashicorpCloudPackerImage{ImageID: "image-id", Region: "somewhere"})
+	}
+
+	for k, v := range svc.ExistingBuildLabels {
+		labels[k] = v
 	}
 
 	builds := make([]*models.HashicorpCloudPackerBuild, 0, len(svc.ExistingBuilds))
@@ -214,8 +243,10 @@ func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.Pa
 		builds = append(builds, &models.HashicorpCloudPackerBuild{
 			ID:            name + "--" + strconv.Itoa(i),
 			ComponentType: name,
+			CloudProvider: "mockProvider",
 			Status:        status,
 			Images:        images,
+			Labels:        labels,
 		})
 	}
 

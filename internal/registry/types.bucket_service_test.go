@@ -58,7 +58,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
-	if _, ok := b.Iteration.builds.Load("happycloud.image"); !ok {
+	if ok := b.Iteration.HasBuild("happycloud.image"); !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
 	}
 
@@ -115,7 +115,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
-	if _, ok := b.Iteration.builds.Load("happycloud.image"); !ok {
+	if ok := b.Iteration.HasBuild("happycloud.image"); !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
 	}
 
@@ -182,14 +182,10 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	loadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
-	if !ok {
-		t.Errorf("expected a basic build entry to be created but it didn't")
-	}
 
-	existingBuild, ok := loadedBuild.(*Build)
-	if !ok {
-		t.Errorf("expected the existing build loaded from an existing bucket to be valid")
+	existingBuild, err := b.Iteration.Build("happycloud.image")
+	if err != nil {
+		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
@@ -278,14 +274,9 @@ func TestUpdateBuildStatus(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	loadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
-	if !ok {
-		t.Errorf("expected a basic build entry to be created but it didn't")
-	}
-
-	existingBuild, ok := loadedBuild.(*Build)
-	if !ok {
-		t.Errorf("expected the existing build loaded from an existing bucket to be valid")
+	existingBuild, err := b.Iteration.Build("happycloud.image")
+	if err != nil {
+		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
@@ -297,14 +288,9 @@ func TestUpdateBuildStatus(t *testing.T) {
 		t.Errorf("unexpected failure for PublishBuildStatus: %v", err)
 	}
 
-	reloadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
-	if !ok {
-		t.Errorf("expected a basic build entry to be created but it didn't")
-	}
-
-	existingBuild, ok = reloadedBuild.(*Build)
-	if !ok {
-		t.Errorf("expected the existing build loaded from an existing bucket to be valid")
+	existingBuild, err = b.Iteration.Build("happycloud.image")
+	if err != nil {
+		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusRUNNING {
@@ -345,14 +331,9 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	loadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
-	if !ok {
-		t.Errorf("expected a basic build entry to be created but it didn't")
-	}
-
-	existingBuild, ok := loadedBuild.(*Build)
-	if !ok {
-		t.Errorf("expected the existing build loaded from an existing bucket to be valid")
+	existingBuild, err := b.Iteration.Build("happycloud.image")
+	if err != nil {
+		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
@@ -367,14 +348,9 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 		t.Errorf("expected failure for PublishBuildStatus when setting status to DONE with no images")
 	}
 
-	reloadedBuild, ok := b.Iteration.builds.Load("happycloud.image")
-	if !ok {
-		t.Errorf("expected a basic build entry to be created but it didn't")
-	}
-
-	existingBuild, ok = reloadedBuild.(*Build)
-	if !ok {
-		t.Errorf("expected the existing build loaded from an existing bucket to be valid")
+	existingBuild, err = b.Iteration.Build("happycloud.image")
+	if err != nil {
+		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
 	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusRUNNING {
