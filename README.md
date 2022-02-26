@@ -1,6 +1,6 @@
 # Packer
 
-[![Build Status]][github-badge]
+[![Build Status](https://github.com/hashicorp/packer/actions/workflows/build.yml/badge.svg)](https://github.com/hashicorp/packer/actions/workflows/build.yml)
 [![Discuss](https://img.shields.io/badge/discuss-packer-3d89ff?style=flat)](https://discuss.hashicorp.com/c/packer)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
 [![GoReportCard][report-badge]][report]
