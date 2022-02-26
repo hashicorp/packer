@@ -169,7 +169,7 @@ jobs:
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
-          name: ${{ github.event.repository.name }}
+          name: "${{ env.PKG_NAME }}"
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
           arch: ${{ matrix.goarch }}
           version: ${{ needs.get-product-version.outputs.product-version }}
