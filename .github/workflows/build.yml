@@ -245,7 +245,7 @@ jobs:
       matrix:
         arch: ["arm", "arm64", "386", "amd64"]
     env:
-      repo: ${{ github.event.repository.name }}
+      repo: "${{ env.PKG_NAME }}"
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
