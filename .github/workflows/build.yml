@@ -245,7 +245,6 @@ jobs:
       matrix:
         arch: ["arm", "arm64", "386", "amd64"]
     env:
-      repo: ${{ github.event.repository.name }}
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
@@ -256,9 +255,9 @@ jobs:
           target: release-light
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{env.repo}}:light
-            docker.io/hashicorp/${{env.repo}}:light-${{env.version}}
-            docker.io/hashicorp/${{env.repo}}:${{env.version}}
-            public.ecr.aws/hashicorp/${{env.repo}}:light
-            public.ecr.aws/hashicorp/${{env.repo}}:light-${{env.version}}
-            public.ecr.aws/hashicorp/${{env.repo}}:${{env.version}}
+            docker.io/hashicorp/${{ env.PKG_NAME }}:light
+            docker.io/hashicorp/${{ env.PKG_NAME }}:light-${{ env.version }}
+            docker.io/hashicorp/${{ env.PKG_NAME }}:${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:light
+            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:light-${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:${{ env.version }}
