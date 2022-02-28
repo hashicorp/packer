@@ -22,6 +22,7 @@ const { ConsentManager, openConsentManager } = createConsentManager({
 })
 
 export default function App({ Component, pageProps }) {
+  console.log('ALERT_BANNER_ACTIVE', ALERT_BANNER_ACTIVE, alertBannerData)
   useFathomAnalytics()
   useAnchorLinkAnalytics()
 
