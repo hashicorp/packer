@@ -1,16 +1,42 @@
 ## 1.8.0 (Upcoming)
+### NOTES:
+* **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc#packer-sdc). The previous command was removed to prevent plugin release issues caused by Packer dependencies not related to the actual Packer plugin SDK or the command itself.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
 
 ### FEATURES
 * **New Command** `packer plugins` command and subcommands to manage installed
     plugins. [GH-11553](https://github.com/hashicorp/packer/pull/11553)
 
 ### IMPROVEMENTS
-* Add the `env` argument to provisioner blocks that allow for setting a map of
-    key/value pairs to inject prior to the execute_command. The `env` argument
-    has support for reading from datasources, were `environment_vars` does not.
-    [GH-11569](https://github.com/hashicorp/packer/pull/11569)
-* Bump version of go-getter to allow for downloading ISOs with PGP signed
+* core: Add the `env` argument to provisioner blocks that allow for setting a
+    map of key/value pairs to inject prior to the execute_command. The `env`
+    argument has support for reading from datasources, were `environment_vars`
+    does not. [GH-11569](https://github.com/hashicorp/packer/pull/11569)
+* core: Bump version of go-getter to allow for downloading ISOs with PGP signed
     checksums. [GH-11495](https://github.com/hashicorp/packer/pull/11495)
+* core: Docker images are now available for all supported architectures that
+    the linux binaries are built for including arm, arm64, 386, and amd64
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: Packer's linux package service configs and pre/post install scripts are
+    now available under .release/linux
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: Packer's linux packages are now available for all supported linux
+    architectures including arm, arm64, 386, and amd64
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: The dockerfile that is used to build the packer docker image available
+    at hashicorp/packer now lives in the root of this repo. The README that
+    describes how to build the docker targets defined in the Dockerfile are
+    available under ./release/docker/README.md.
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: The packer-plugin-check command has been removed. Plugin maintainer
+    should update their release configuration to use the `packer-sdc plugin-
+    check` command.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
 
 
 ### BUG FIXES
