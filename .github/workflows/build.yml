@@ -28,16 +28,11 @@ jobs:
           echo "::set-output name=go-version::$(cat .go-version)"
 
   get-product-version:
-    needs: get-go-version
     runs-on: ubuntu-latest
     outputs:
       product-version: ${{ steps.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v2
-        with:
-          go-version: "${{ needs.get-go-version.outputs.go-version }}"
       - name: get product version
         id: get-product-version
         run: |
@@ -169,7 +164,7 @@ jobs:
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
-          name: "${{ env.PKG_NAME }}"
+          name: ${{ env.PKG_NAME }}
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
           arch: ${{ matrix.goarch }}
           version: ${{ needs.get-product-version.outputs.product-version }}
@@ -243,8 +238,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: ["arm", "arm64", "386", "amd64"]
+        arch: [ "arm", "arm64", "386", "amd64" ]
     env:
+      repo: ${{ env.PKG_NAME }}
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
