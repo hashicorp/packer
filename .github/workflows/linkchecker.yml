@@ -27,7 +27,7 @@ jobs:
       run:
         echo "DEPLOYMENT_URL=${{ needs.vercel-deployment-poll.outputs.url }}" >> $GITHUB_ENV
     - name: Checkout source branch
-      uses: actions/checkout@master
+      uses: actions/checkout@v3
     - name: Check links
       uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:

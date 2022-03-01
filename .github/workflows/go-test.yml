@@ -14,7 +14,7 @@ jobs:
       image: ghcr.io/ghcri/golang:1.17
     name: Linux go tests
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: TESTARGS="-coverprofile=coverage.txt  -covermode=atomic" make ci
   darwin-go-tests:
     runs-on: macos-latest
@@ -22,7 +22,7 @@ jobs:
     env:
       PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
@@ -31,7 +31,7 @@ jobs:
     runs-on: windows-latest
     name: Windows go tests
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-go@v2
         with:
           go-version: '1.17'
