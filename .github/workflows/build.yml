@@ -164,7 +164,7 @@ jobs:
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
-          name: ${{ env.PKG_NAME }}
+          name: "${{ env.PKG_NAME }}"
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
           arch: ${{ matrix.goarch }}
           version: ${{ needs.get-product-version.outputs.product-version }}
@@ -240,7 +240,7 @@ jobs:
       matrix:
         arch: [ "arm", "arm64", "386", "amd64" ]
     env:
-      repo: ${{ env.PKG_NAME }}
+      repo: "${{ env.PKG_NAME }}"
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
