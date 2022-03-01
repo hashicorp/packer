@@ -9,8 +9,10 @@ name: Nightly Release
 
 on:
   schedule:
-  # Runs against the default branch every day at midnight
-  - cron: "0 0 * * *"
+    # Runs against the default branch every day at midnight
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
 
 jobs:
   # Build a fresh set of artifacts 
@@ -88,7 +90,7 @@ jobs:
                       "type": "section",
                       "text": {
                         "type": "mrkdwn",
-                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.sha }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                       }
                     }
                   ]
