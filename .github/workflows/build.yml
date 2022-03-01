@@ -9,7 +9,7 @@ name: build
 on: [ workflow_dispatch, push, workflow_call ]
 
 env:
-  PKG_NAME: "packer"
+  REPO_NAME: "packer"
   GO_TAGS: ""
 
 jobs:
@@ -53,7 +53,7 @@ jobs:
         uses: hashicorp/actions-generate-metadata@main
         with:
           version: ${{ needs.get-product-version.outputs.product-version }}
-          product: ${{ env.PKG_NAME }}
+          product: ${{ env.REPO_NAME }}
 
       - uses: actions/upload-artifact@v2
         with:
@@ -114,11 +114,11 @@ jobs:
           mkdir -p dist out
           unset GOPATH;
           go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
+          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
   build-linux:
     needs: 
@@ -155,23 +155,23 @@ jobs:
           mkdir -p dist out
           unset GOPATH;
           go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
+          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
-          name: ${{ env.PKG_NAME }}
+          name: ${{ env.REPO_NAME }}
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
           arch: ${{ matrix.goarch }}
           version: ${{ needs.get-product-version.outputs.product-version }}
           maintainer: "HashiCorp"
           homepage: "https://www.packer.io/docs"
           license: "MPL-2.0"
-          binary: "dist/${{ env.PKG_NAME }}"
+          binary: "dist/${{ env.REPO_NAME }}"
           deb_depends: "openssl"
           rpm_depends: "openssl"
           config_dir: ".release/linux/package/"
@@ -224,11 +224,11 @@ jobs:
           mkdir -p dist out
           unset GOPATH;
           go build -v -tags "${{ env.GO_TAGS }} netcgo" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
+          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
       - uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.PKG_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
   build-docker:
     name: Docker light ${{ matrix.arch }} build
@@ -240,7 +240,6 @@ jobs:
       matrix:
         arch: [ "arm", "arm64", "386", "amd64" ]
     env:
-      repo: ${{ env.PKG_NAME }}
       version: ${{ needs.get-product-version.outputs.product-version }}
     steps:
       - uses: actions/checkout@v2
@@ -251,9 +250,9 @@ jobs:
           target: release-light
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{ env.PKG_NAME }}:light
-            docker.io/hashicorp/${{ env.PKG_NAME }}:light-${{ env.version }}
-            docker.io/hashicorp/${{ env.PKG_NAME }}:${{ env.version }}
-            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:light
-            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:light-${{ env.version }}
-            public.ecr.aws/hashicorp/${{ env.PKG_NAME }}:${{ env.version }}
+            docker.io/hashicorp/${{ env.REPO_NAME }}:light
+            docker.io/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
+            docker.io/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light
+            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
