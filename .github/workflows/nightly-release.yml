@@ -67,6 +67,7 @@ jobs:
           prerelease: true
           allowUpdates: true
           removeArtifacts: true
+          draft: false
           token: ${{ secrets.GITHUB_TOKEN }}
   # Send a slack notification if either job defined above fails
   slack-notify:
