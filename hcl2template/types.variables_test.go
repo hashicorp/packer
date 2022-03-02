@@ -868,7 +868,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			}
 			values := map[string]cty.Value{}
 			for k, v := range tt.variables {
-				value, diag := v.Value(), v.ValidateValue()
+				value, diag := v.Value(), v.Validate()
 				if diag != nil {
 					t.Fatalf("Value %s: %v", k, diag)
 				}

@@ -160,9 +160,9 @@ func (v *Variable) Value() cty.Value {
 	return val.Value
 }
 
-// ValidateValue tells if the selected value for the Variable is valid according
-// to its validation settings.
-func (v *Variable) ValidateValue() hcl.Diagnostics {
+// Validate tells if the selected value for the Variable is set and valid
+// according to its validation settings.
+func (v *Variable) Validate() hcl.Diagnostics {
 	if len(v.Values) == 0 {
 		return hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -199,7 +199,7 @@ func (variables Variables) Values() map[string]cty.Value {
 func (variables Variables) ValidateValues() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 	for _, v := range variables {
-		diags = append(diags, v.ValidateValue()...)
+		diags = append(diags, v.Validate()...)
 	}
 	return diags
 }
