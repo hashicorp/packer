@@ -445,9 +445,9 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "hcp_par"),
 				InputVariables: Variables{
 					"bucket": &Variable{
-						Name:   "bucket",
-						Type:   cty.String,
-						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("variable-bucket-slug")}},
+						Name:         "bucket",
+						ExpectedType: cty.String,
+						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("variable-bucket-slug")}},
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{
@@ -509,13 +509,13 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "hcp_par"),
 				InputVariables: Variables{
 					"bucket_labels": &Variable{
-						Name:   "bucket_labels",
-						Type:   cty.Map(cty.String),
-						Values: []VariableAssignment{{From: "default", Value: cty.MapVal(map[string]cty.Value{"team": cty.StringVal("development")})}},
+						Name:         "bucket_labels",
+						ExpectedType: cty.Map(cty.String),
+						Values:       []VariableAssignment{{From: "default", Value: cty.MapVal(map[string]cty.Value{"team": cty.StringVal("development")})}},
 					},
 					"build_labels": &Variable{
-						Name: "build_labels",
-						Type: cty.Map(cty.String),
+						Name:         "build_labels",
+						ExpectedType: cty.Map(cty.String),
 						Values: []VariableAssignment{{
 							From: "default",
 							Value: cty.MapVal(map[string]cty.Value{

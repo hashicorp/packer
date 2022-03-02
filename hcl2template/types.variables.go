@@ -50,15 +50,11 @@ type Variable struct {
 	// validated.
 	Validations []*VariableValidation
 
-	// Cty Type of the variable. If the default value or a collected value is
-	// not of this type nor can be converted to this type an error diagnostic
-	// will show up. This allows us to assume that values are valid later in
-	// code.
-	//
-	// When a default value - and no type - is passed in the variable
-	// declaration, the type of the default variable will be used. This will
-	// allow to ensure that users set this variable correctly.
-	Type cty.Type
+	// ExpectedType of the variable. If the default value or a collected
+	// value is not of this type nor can be converted to this type an error
+	// diagnostic will show up. This allows us to assume that values are valid
+	// later in code.
+	ExpectedType cty.Type
 	// Common name of the variable
 	Name string
 	// Description of the variable
@@ -72,7 +68,7 @@ type Variable struct {
 
 func (v *Variable) GoString() string {
 	b := &strings.Builder{}
-	fmt.Fprintf(b, "{type:%s", v.Type.GoString())
+	fmt.Fprintf(b, "{type:%s", v.ExpectedType.GoString())
 	for _, vv := range v.Values {
 		fmt.Fprintf(b, ",%s:%s", vv.From, vv.Value)
 	}
@@ -154,7 +150,7 @@ func (v *Variable) validateValue(val VariableAssignment) (diags hcl.Diagnostics)
 // Value returns the last found value from the list of variable settings.
 func (v *Variable) Value() cty.Value {
 	if len(v.Values) == 0 {
-		return cty.UnknownVal(v.Type)
+		return cty.UnknownVal(v.ExpectedType)
 	}
 	val := v.Values[len(v.Values)-1]
 	return val.Value
@@ -235,8 +231,8 @@ func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx
 			Value: value,
 			Expr:  attr.Expr,
 		}},
-		Type:  value.Type(),
-		Range: attr.Range,
+		ExpectedType: value.Type(),
+		Range:        attr.Range,
 	}
 
 	return diags
@@ -333,9 +329,9 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 	}
 
 	v := &Variable{
-		Name:  name,
-		Range: block.DefRange,
-		Type:  cty.DynamicPseudoType,
+		Name:         name,
+		Range:        block.DefRange,
+		ExpectedType: cty.DynamicPseudoType,
 	}
 
 	if attr, exists := content.Attributes["description"]; exists {
@@ -350,7 +346,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 			return diags
 		}
 
-		v.Type = tp
+		v.ExpectedType = tp
 	}
 
 	if attr, exists := content.Attributes["sensitive"]; exists {
@@ -365,9 +361,9 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 			return diags
 		}
 
-		if v.Type != cty.NilType {
+		if v.ExpectedType != cty.NilType {
 			var err error
-			defaultValue, err = convert.Convert(defaultValue, v.Type)
+			defaultValue, err = convert.Convert(defaultValue, v.ExpectedType)
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -387,10 +383,10 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		// It's possible no type attribute was assigned so lets make sure we
 		// have a valid type otherwise there could be issues parsing the value.
-		if v.Type == cty.DynamicPseudoType &&
+		if v.ExpectedType == cty.DynamicPseudoType &&
 			!defaultValue.Type().Equals(cty.EmptyObject) &&
 			!defaultValue.Type().Equals(cty.EmptyTuple) {
-			v.Type = defaultValue.Type()
+			v.ExpectedType = defaultValue.Type()
 		}
 	}
 
@@ -584,7 +580,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		}
 
 		fakeFilename := fmt.Sprintf("<value for var.%s from env>", name)
-		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.Type)
+		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.ExpectedType)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -592,9 +588,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
-		if variable.Type != cty.NilType {
+		if variable.ExpectedType != cty.NilType {
 			var err error
-			val, err = convert.Convert(val, variable.Type)
+			val, err = convert.Convert(val, variable.ExpectedType)
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -679,9 +675,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 			val, moreDiags := attr.Expr.Value(nil)
 			diags = append(diags, moreDiags...)
 
-			if variable.Type != cty.NilType {
+			if variable.ExpectedType != cty.NilType {
 				var err error
-				val, err = convert.Convert(val, variable.Type)
+				val, err = convert.Convert(val, variable.ExpectedType)
 				if err != nil {
 					diags = append(diags, &hcl.Diagnostic{
 						Severity: hcl.DiagError,
@@ -718,7 +714,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		}
 
 		fakeFilename := fmt.Sprintf("<value for var.%s from arguments>", name)
-		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.Type)
+		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.ExpectedType)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -727,9 +723,9 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		val, valDiags := expr.Value(nil)
 		diags = append(diags, valDiags...)
 
-		if variable.Type != cty.NilType {
+		if variable.ExpectedType != cty.NilType {
 			var err error
-			val, err = convert.Convert(val, variable.Type)
+			val, err = convert.Convert(val, variable.ExpectedType)
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,

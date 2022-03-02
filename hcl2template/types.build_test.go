@@ -481,16 +481,16 @@ func TestParse_build(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "build"),
 				InputVariables: Variables{
 					"name": &Variable{
-						Name:   "name",
-						Type:   cty.String,
-						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("build-name")}},
+						Name:         "name",
+						ExpectedType: cty.String,
+						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("build-name")}},
 					},
 				},
 				LocalVariables: Variables{
 					"description": &Variable{
-						Name:   "description",
-						Type:   cty.String,
-						Values: []VariableAssignment{{From: "default", Value: cty.StringVal("This is the description for build-name.")}},
+						Name:         "description",
+						ExpectedType: cty.String,
+						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("This is the description for build-name.")}},
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{

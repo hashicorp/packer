@@ -291,7 +291,7 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 			Expr:  local.Expr,
 			From:  "default",
 		}},
-		Type: value.Type(),
+		ExpectedType: value.Type(),
 	}
 
 	return diags
