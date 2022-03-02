@@ -70,6 +70,19 @@ func (v *Variable) Type() cty.Type {
 	return v.ExpectedType
 }
 
+func (v *Variable) References() ([]*addrs.Reference, hcl.Diagnostics) {
+	if len(v.Values) == 0 {
+		return nil, nil
+	}
+	refs := []*addrs.Reference{}
+	var diags hcl.Diagnostics
+	for _, v := range v.Values[len(v.Values)-1].Expr.Variables() {
+		ref, moreDiags := addrs.ParseRef(v)
+		diags = append(diags, moreDiags...)
+		refs = append(refs, ref)
+	}
+	return refs, diags
+}
 func (v *Variable) GoString() string {
 	b := &strings.Builder{}
 	fmt.Fprintf(b, "{type:%s", v.ExpectedType.GoString())
