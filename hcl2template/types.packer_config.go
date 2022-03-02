@@ -169,7 +169,7 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 			attrs, moreDiags := block.Body.JustAttributes()
 			diags = append(diags, moreDiags...)
 			for key, attr := range attrs {
-				moreDiags = c.InputVariables.decodeVariable(key, attr, ectx)
+				moreDiags = c.InputVariables.decodeVariablesSetting(key, attr, ectx)
 				diags = append(diags, moreDiags...)
 			}
 		}

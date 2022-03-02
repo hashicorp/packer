@@ -217,8 +217,8 @@ func (variables Variables) ValidateValues() hcl.Diagnostics {
 	return diags
 }
 
-// decodeVariable decodes a variable key and value into Variables
-func (variables *Variables) decodeVariable(key string, attr *hcl.Attribute, ectx *hcl.EvalContext) hcl.Diagnostics {
+// decodeVariablesSetting decodes a variable key and value into Variables
+func (variables *Variables) decodeVariablesSetting(key string, attr *hcl.Attribute, ectx *hcl.EvalContext) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	if (*variables) == nil {
