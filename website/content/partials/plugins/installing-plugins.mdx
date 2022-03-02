@@ -165,6 +165,9 @@ will avoid conflicting with other plugins for other tools, like Terraform.
 </Tab>
 <Tab heading="manually (multi-component plugin)">
 
+-> The [`packer plugins`](/docs/commands/plugins) command allows to install plugins without going through
+`init`. For manual installation of plugin binaries, without the `packer plugins` command, please continue reading.
+
 The easiest way to manually install a plugin is to name it correctly, then place
 it in the proper directory. To name a plugin correctly, make sure the binary is
 named `packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
