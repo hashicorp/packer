@@ -36,7 +36,7 @@ jobs:
           echo "BUILD_OUTPUT_LIST=$(cat tmp2.txt | tr '\n' ',' | perl -ple 'chop')" >> $GITHUB_ENV
           rm -rf tmp.txt && rm -rf tmp2.txt
       - name: Advance nightly tag
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
