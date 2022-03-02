@@ -77,6 +77,10 @@ async function generateStaticProps({
         `<Badge href="${href}" label="${latestReleaseTag}" theme="light-gray"/>`
       )
     }
+    // If the plugin is archived, add an "Archived" badge
+    if (pluginData?.archived == true) {
+      badgesMdx.push(`<PluginBadge type="archived" />`)
+    }
     // If we have badges to add, inject them into the MDX
     if (badgesMdx.length > 0) {
       const badgeChildrenMdx = badgesMdx.join('')
