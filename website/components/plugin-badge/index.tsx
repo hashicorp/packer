@@ -14,12 +14,20 @@ const badgeTypes = {
   community: {
     label: 'Community',
     theme: 'gray',
-    iconSvg: false,
   },
   hcp_packer_ready: {
     label: 'HCP Packer Ready',
     theme: 'blue',
     iconSvg: svgCheckIcon,
+  },
+  verified: {
+    label: 'Verified',
+    theme: 'purple',
+    iconSvg: svgRibbonIcon,
+  },
+  archived: {
+    label: 'Archived',
+    theme: 'light-gray',
   },
 }
 
