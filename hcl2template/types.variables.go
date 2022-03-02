@@ -235,7 +235,7 @@ func (variables *Variables) decodeVariablesSetting(key string, attr *hcl.Attribu
 		return diags
 	}
 
-	value, moreDiags := attr.Expr.Value(ectx)
+	defaultValue, moreDiags := attr.Expr.Value(ectx)
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
@@ -245,10 +245,10 @@ func (variables *Variables) decodeVariablesSetting(key string, attr *hcl.Attribu
 		Name: key,
 		Values: []VariableAssignment{{
 			From:  "default",
-			Value: value,
+			Value: defaultValue,
 			Expr:  attr.Expr,
 		}},
-		ExpectedType: value.Type(),
+		ExpectedType: defaultValue.Type(),
 		Range:        attr.Range,
 	}
 
