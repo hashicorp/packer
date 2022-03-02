@@ -127,8 +127,9 @@ func (client *Client) GetIteration(ctx context.Context, bucketSlug string, opts 
 	}
 
 	if resp.Payload.Iteration != nil {
-		if !time.Time(resp.Payload.Iteration.RevokeAt).IsZero() {
-			// If RevokeAt is not a zero date, it means this iteration is revoked and should not be used
+		revokeAt := time.Time(resp.Payload.Iteration.RevokeAt)
+		if !revokeAt.IsZero() && revokeAt.Before(time.Now().UTC()) {
+			// If RevokeAt is not a zero date and is before NOW, it means this iteration is revoked and should not be used
 			// to build new images.
 			return nil, fmt.Errorf("the iteration %s is revoked and can not be used on Packer builds",
 				resp.Payload.Iteration.ID)
@@ -254,8 +255,9 @@ func (client *Client) GetIterationFromChannel(
 
 	if resp.Payload.Channel != nil {
 		if resp.Payload.Channel.Iteration != nil {
-			if !time.Time(resp.Payload.Channel.Iteration.RevokeAt).IsZero() {
-				// If RevokeAt is not a zero date, it means this iteration is revoked and should not be used
+			revokeAt := time.Time(resp.Payload.Channel.Iteration.RevokeAt)
+			if !revokeAt.IsZero() && revokeAt.Before(time.Now().UTC()) {
+				// If RevokeAt is not a zero date and is before NOW, it means this iteration is revoked and should not be used
 				// to build new images.
 				return nil, fmt.Errorf("the iteration associated with the channel %s is revoked and can not be used on Packer builds",
 					channelName)
