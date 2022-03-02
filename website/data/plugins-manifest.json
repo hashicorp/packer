@@ -11,7 +11,8 @@
     "path": "alicloud",
     "repo": "hashicorp/packer-plugin-alicloud",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Anka",
@@ -24,20 +25,24 @@
     "title": "Ansible",
     "path": "ansible",
     "repo": "hashicorp/packer-plugin-ansible",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Amazon EC2",
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
     "version": "latest",
-    "isHcpPackerReady": true
+    "pluginTier": "verified",
+    "isHcpPackerReady": true,
+    "archived": true
   },
   {
     "title": "Azure",
     "path": "azure",
     "repo": "hashicorp/packer-plugin-azure",
     "version": "latest",
+    "pluginTier": "verified",
     "isHcpPackerReady": true
   },
   {
@@ -94,6 +99,7 @@
     "path": "hashicups",
     "repo": "hashicorp/packer-plugin-hashicups",
     "version": "latest",
+    "pluginTier": "verified",
     "isHcpPackerReady": false
   },
   {
