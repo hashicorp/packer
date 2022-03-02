@@ -66,6 +66,10 @@ type Variable struct {
 	Range hcl.Range
 }
 
+func (v *Variable) Type() cty.Type {
+	return v.ExpectedType
+}
+
 func (v *Variable) GoString() string {
 	b := &strings.Builder{}
 	fmt.Fprintf(b, "{type:%s", v.ExpectedType.GoString())
