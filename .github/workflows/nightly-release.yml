@@ -15,7 +15,7 @@ on:
 
 
 jobs:
-  # Build a fresh set of artifacts 
+  # Build a fresh set of artifacts
   build-artifacts:
     uses: hashicorp/packer/.github/workflows/build.yml@master
   github-release:
@@ -38,7 +38,7 @@ jobs:
       - name: Advance nightly tag
         uses: actions/github-script@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}          
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             try {
                 await github.git.deleteRef({
@@ -58,6 +58,7 @@ jobs:
       # This will create a new GitHub Release called `nightly`
       # If a release with this name already exists, it will overwrite the existing data
       - name: Create a nightly GitHub prerelease
+        id: create_prerelease
         uses: ncipollo/release-action@v1
         with:
           name: nightly
@@ -69,9 +70,15 @@ jobs:
           removeArtifacts: true
           draft: false
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish nightly GitHub prerelease
+        uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_prerelease.outputs.id }}
   # Send a slack notification if either job defined above fails
   slack-notify:
-    needs: 
+    needs:
       - build-artifacts
       - github-release
     if: always() && (needs.build-artifacts.result == 'failure' || needs.github-release.result == 'failure')
