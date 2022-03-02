@@ -53,6 +53,9 @@
     completed build image were being copied to all images within the same
     build. [GH-11574](https://github.com/hashicorp/packer/pull/11574)
     [GH-11584](https://github.com/hashicorp/packer/pull/11584)
+* core: Packer darwin builds now use macOS system DNS resolver for resolving
+    hostnames.[GH-9710](https://github.com/hashicorp/packer/issues/9710)
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
 
 ## 1.7.10 (February 02, 2022)
 
