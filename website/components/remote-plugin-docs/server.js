@@ -61,6 +61,10 @@ async function generateStaticProps({
   // Also add a badge to show the latest version
   function mdxContentHook(mdxContent) {
     const badgesMdx = []
+    // If the plugin is archived, add an "Archived" badge
+    if (pluginData?.archived == true) {
+      badgesMdx.push(`<PluginBadge type="archived" />`)
+    }
     // Add a badge for the plugin tier
     if (pluginData?.tier) {
       badgesMdx.push(`<PluginBadge type="${pluginData.tier}" />`)
@@ -76,10 +80,6 @@ async function generateStaticProps({
       badgesMdx.push(
         `<Badge href="${href}" label="${latestReleaseTag}" theme="light-gray"/>`
       )
-    }
-    // If the plugin is archived, add an "Archived" badge
-    if (pluginData?.archived == true) {
-      badgesMdx.push(`<PluginBadge type="archived" />`)
     }
     // If we have badges to add, inject them into the MDX
     if (badgesMdx.length > 0) {
