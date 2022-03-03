@@ -13,10 +13,9 @@ export default function Homepage() {
       <section id="hero">
         <HomepageHero
           alert={{
-            url:
-              'https://www.hashicorp.com/blog/announcing-the-public-beta-of-hcp-packer',
+            url: 'hashicorp.com/blog/hcp-packer-is-now-generally-available',
             tag: 'BLOG POST',
-            text: 'Announcing HCP Packer public beta',
+            text: 'Announcing HCP Packer Standard tier',
           }}
           heading="Build automated machine images"
           subheading="Create identical machine images for multiple platforms from a single source configuration."
