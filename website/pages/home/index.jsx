@@ -13,7 +13,8 @@ export default function Homepage() {
       <section id="hero">
         <HomepageHero
           alert={{
-            url: 'hashicorp.com/blog/hcp-packer-is-now-generally-available',
+            url:
+              'https://hashicorp.com/blog/hcp-packer-is-now-generally-available',
             tag: 'BLOG POST',
             text: 'Announcing HCP Packer Standard tier',
           }}
