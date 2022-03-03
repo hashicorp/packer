@@ -5,6 +5,7 @@
 ### FEATURES
 * **New Command** `packer plugins` command and subcommands to manage installed
     plugins. [GH-11553](https://github.com/hashicorp/packer/pull/11553)
+    [GH-11625](https://github.com/hashicorp/packer/pull/11625)
 
 ### IMPROVEMENTS
 * core: Add the `env` argument to provisioner blocks that allow for setting a
