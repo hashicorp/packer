@@ -45,7 +45,8 @@
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Cloudstack",
@@ -59,7 +60,8 @@
     "path": "converge",
     "repo": "hashicorp/packer-plugin-converge",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "DigitalOcean",
@@ -130,7 +132,8 @@
     "path": "inspec",
     "repo": "hashicorp/packer-plugin-inspec",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "JD Cloud",
@@ -193,7 +196,7 @@
     "path": "outscale",
     "repo": "outscale/packer-plugin-outscale",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "verified"
   },
   {
     "title": "Parallels",
@@ -220,7 +223,8 @@
     "path": "puppet",
     "repo": "hashicorp/packer-plugin-puppet",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "community",
+    "archived": true
   },
   {
     "title": "QEMU",
@@ -233,13 +237,14 @@
     "path": "salt",
     "repo": "hashicorp/packer-plugin-salt",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "scaleway/packer-plugin-scaleway",
-    "pluginTier": "community",
+    "pluginTier": "verified",
     "version": "latest"
   },
   {
@@ -275,7 +280,7 @@
     "path": "upcloud",
     "repo": "UpCloudLtd/packer-plugin-upcloud",
     "version": "latest",
-    "pluginTier": "community",
+    "pluginTier": "verified",
     "sourceBranch": "master"
   },
   {
