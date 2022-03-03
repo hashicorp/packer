@@ -86,6 +86,10 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args []stri
 		pluginRequirement.VersionConstraints = constraints
 	}
 
+	if runtime.GOOS == "windows" && opts.Ext == "" {
+		opts.BinaryInstallationOptions.Ext = ".exe"
+	}
+
 	getters := []plugingetter.Getter{
 		&github.Getter{
 			// In the past some terraform plugins downloads were blocked from a
