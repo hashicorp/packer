@@ -61,10 +61,6 @@ async function generateStaticProps({
   // Also add a badge to show the latest version
   function mdxContentHook(mdxContent) {
     const badgesMdx = []
-    // If the plugin is archived, add an "Archived" badge
-    if (pluginData?.archived == true) {
-      badgesMdx.push(`<PluginBadge type="archived" />`)
-    }
     // Add a badge for the plugin tier
     if (pluginData?.tier) {
       badgesMdx.push(`<PluginBadge type="${pluginData.tier}" />`)
@@ -72,6 +68,10 @@ async function generateStaticProps({
     // Add a badge if the plugin is "HCP Packer Ready"
     if (pluginData?.isHcpPackerReady) {
       badgesMdx.push(`<PluginBadge type="hcp_packer_ready" />`)
+    }
+    // If the plugin is archived, add an "Archived" badge
+    if (pluginData?.archived == true) {
+      badgesMdx.push(`<PluginBadge type="archived" />`)
     }
     // Add badge showing the latest release version number,
     // and link this badge to the latest release
