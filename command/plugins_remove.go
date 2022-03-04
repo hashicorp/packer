@@ -58,6 +58,10 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 		},
 	}
 
+	if runtime.GOOS == "windows" && opts.Ext == "" {
+		opts.BinaryInstallationOptions.Ext = ".exe"
+	}
+
 	plugin, diags := addrs.ParsePluginSourceString(args[0])
 	if diags.HasErrors() {
 		c.Ui.Error(diags.Error())
