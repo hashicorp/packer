@@ -19,8 +19,9 @@ The `Packer Image Iteration` Data Source retrieves information about an
 iteration from the HCP Packer registry. This information can be parsed to
 provide a source image to various Packer builders.
 
-~> **Note:** HCP Packer is under active development, and we are currently offering a [public beta version](https://portal.cloud.hashicorp.com) to collect feedback and continue improving the product.
-To get started, visit the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started) collection on HashiCorp Learn.
+To get started with HCP Packer, refer to the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started) collection on HashiCorp Learn.
+
+~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry. An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
 
 ## Basic Example
 
