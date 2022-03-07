@@ -7,18 +7,11 @@ page_title: hcp_packer_registry - build - Blocks
 
 # The `hcp_packer_registry` block
 
-~> **Note:** HCP Packer is under active development, and we are currently
-offering a [public beta version](https://portal.cloud.hashicorp.com) to collect
-feedback and continue improving the product.
-To get started, visit the
-[HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the
-[Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started)
-collection on HashiCorp Learn.
+The `hcp_packer_registry` block lets you customize the metadata Packer sends to HCP Packer Registry. It configures the details of an image that is created or updated within the HCP Packer registry.
 
+To get started with HCP Packer, refer to the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer](https://learn.hashicorp.com/collections/packer/hcp-get-started) collection on HashiCorp Learn.
 
-The `hcp_packer_registry` block allows operators the ability to customize the
-metadata sent to HCP Packer Registry. It configures the details of an image
-that is created or updated within the HCP Packer registry.
+## Usage
 
 This block is available from version 1.7.7 of Packer.
 
@@ -28,6 +21,8 @@ registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and
 `HCP_CLIENT_SECRET`). If no HCP credentials are set, Packer will fail the build
 and exit immediately to avoid any potential artifact drift between the defined
 builders (source blocks) and the HCP Packer registry.
+
+~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry. An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
 
 ```hcl
 # file: builds.pkr.hcl
