@@ -3,7 +3,12 @@ import Badge, { BadgeTheme } from '../badge'
 import svgRibbonIcon from './ribbon-icon.svg?include'
 import svgCheckIcon from './check-icon.svg?include'
 
-type PluginLabelType = 'official' | 'community' | 'hcp_packer_ready'
+type PluginLabelType =
+  | 'official'
+  | 'community'
+  | 'hcp_packer_ready'
+  | 'verified'
+  | 'archived'
 
 const badgeTypes = {
   official: {
@@ -20,6 +25,16 @@ const badgeTypes = {
     label: 'HCP Packer Ready',
     theme: 'blue',
     iconSvg: svgCheckIcon,
+  },
+  verified: {
+    label: 'Verified',
+    theme: 'purple',
+    iconSvg: svgRibbonIcon,
+  },
+  archived: {
+    label: 'Archived',
+    theme: 'light-gray',
+    iconSvg: false,
   },
 }
 

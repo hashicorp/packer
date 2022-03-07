@@ -69,6 +69,10 @@ async function generateStaticProps({
     if (pluginData?.isHcpPackerReady) {
       badgesMdx.push(`<PluginBadge type="hcp_packer_ready" />`)
     }
+    // If the plugin is archived, add an "Archived" badge
+    if (pluginData?.archived == true) {
+      badgesMdx.push(`<PluginBadge type="archived" />`)
+    }
     // Add badge showing the latest release version number,
     // and link this badge to the latest release
     if (latestReleaseTag) {

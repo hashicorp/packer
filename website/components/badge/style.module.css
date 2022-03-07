@@ -1,5 +1,5 @@
 .root {
-  /* theming. Note that gold and gray
+  /* theming. Note that gold, gray, and purple
   have been set to hex values in order
   to match Terraform Registry tier labels. */
   &.theme-gray {
@@ -17,6 +17,10 @@
   &.theme-blue {
     --background-color: var(--packer);
     --text-color: var(--packer-text-on-primary);
+  }
+  &.theme-purple {
+    --background-color: #5c4ee5;
+    --text-color: var(--white);
   }
 
   align-items: center;
