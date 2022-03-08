@@ -18,6 +18,7 @@
     "path": "anka",
     "repo": "veertuinc/packer-plugin-veertu-anka",
     "pluginTier": "community",
+    "source_branch": "master",
     "version": "latest"
   },
   {
@@ -252,7 +253,7 @@
     "path": "sshkey",
     "repo": "ivoronin/packer-plugin-sshkey",
     "pluginTier": "community",
-    "version": "v0.1.0"
+    "version": "latest"
   },
   {
     "title": "Tencent Cloud",
