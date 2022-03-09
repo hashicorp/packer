@@ -83,7 +83,7 @@ res="$(curl --show-error --silent --fail --user "${CIRCLE_TOKEN}:" \
   --request POST \
   --header 'Content-Type: application/json' \
   --header 'Accept: application/json' \
-  --data "{ \"branch\": \"master\" ,\"parameters\": { \"PRODUCT\": \"${PRODUCT_NAME}\", \"PKG_NAME\": \"${SN_ID}.zip\" } }" \
+  --data "{ \"branch\": \"main\" ,\"parameters\": { \"PRODUCT\": \"${PRODUCT_NAME}\", \"PKG_NAME\": \"${SN_ID}.zip\" } }" \
   "${CIRCLE_ENDPOINT}/${CIRCLE_PROJECT}/pipeline")"
 pipeline_id="$(echo "$res" | jq -r '.id')"
 echo "CircleCI Pipeline $pipeline_id started"

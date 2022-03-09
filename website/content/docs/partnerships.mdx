@@ -76,7 +76,7 @@ In an effort to support our self-serve model we’ve included links to resources
 - [Writing vendor extension guide](/docs/plugins/creation)
 - Sample development implemented by a [partner](https://github.com/exoscale/packer-plugin-exoscale)
 - [Scaffolding plugin repository](https://github.com/hashicorp/packer-plugin-scaffolding) to help bootstrap a new contribution:
-- Contributing to Packer [guidelines](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md)
+- Contributing to Packer [guidelines](https://github.com/hashicorp/packer/blob/main/.github/CONTRIBUTING.md)
 - [Packer developer community forum](https://discuss.hashicorp.com/c/packer/23)
 - [Packer's source code](https://github.com/hashicorp/packer)
 
@@ -87,22 +87,27 @@ We encourage vendors to closely follow the above guidance. Adopting the same str
 Packer requires all code-level integrations to be written in the [Go](https://golang.org/) programming language and contain an [MPL-2.0](https://en.wikipedia.org/wiki/Mozilla_Public_License) open source license. The only knowledge necessary to write a plugin is basic command-line skills and knowledge of the Go programming language. When writing in Go-Language, HashiCorp has found the integration development process to be straightforward and simple when vendors pay close attention and follow the resources and by adopting the same structure and coding patterns helps expedite the review and release cycles. Please remember that all integration major steps should contain acceptance testing and the appropriate documentation.
 
 Data Sources
+
 - [Custom Data Sources documentation](/docs/plugins/creation/custom-datasources)
 - [Example Data Source](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/datasource)
 
 Builders
+
 - [Custom Builders documentation](/docs/plugins/creation/custom-builders)
 - [Example Builder](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/builder/order)
 
 Provisioners
+
 - [Custom Provisioners documentation](/docs/plugins/creation/custom-provisioners)
 - [Example Provisioner](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/provisioner/toppings)
 
 Post-Processors
+
 - [Custom Post-Processors documentation](/docs/plugins/creation/custom-post-processors)
 - [Example Post-Processor](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/post-processor/receipt)
 
 Packer-Plugin-SDK
+
 - The [Packer-plugin SDK](https://github.com/hashicorp/packer-plugin-sdk) contains tools to help plugin developers with common needs, like handling SSH connections or basic plugin architecture.
 
 #### 4. Review

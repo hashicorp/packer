@@ -11,7 +11,7 @@ import { getStaticGenerationFunctions } from '@hashicorp/react-docs-page/server'
 const additionalComponents = { Badge, BadgesHeader, PluginBadge, Checklist }
 const baseRoute = 'docs'
 const localContentDir = 'content/docs'
-const mainBranch = 'master'
+const mainBranch = 'main'
 const navDataFile = 'data/docs-nav-data.json'
 const product = { name: productName, slug: productSlug }
 

@@ -7,7 +7,7 @@ import { getStaticGenerationFunctions } from '@hashicorp/react-docs-page/server'
 const baseRoute = 'intro'
 const navDataFile = 'data/intro-nav-data.json'
 const localContentDir = 'content/intro'
-const mainBranch = 'master'
+const mainBranch = 'main'
 const product = { name: productName, slug: productSlug }
 
 export default function IntroLayout(props) {
