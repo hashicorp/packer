@@ -1,3 +1,5 @@
+## 1.8.1 (Upcoming)
+
 ## 1.8.0 (March 4, 2022)
 ### NOTES:
 * **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc#packer-sdc). Plugin maintainers who may be using the packer-plugin-check as part of their release pipeline are encouraged to move to the packer-sdc command. As an alternative, maintainers can continue to use the packer-plugin-check by pinning the command to Packer 1.7.10.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
@@ -9,8 +11,8 @@
 
 ### IMPROVEMENTS
 * core: Add a `env` argument to provisioner blocks that allow for setting a
-    map of key/value pairs to inject prior to the execute_command. The env argument 
-    is an alternative to using environment_vars for setting environment variables, 
+    map of key/value pairs to inject prior to the execute_command. The env argument
+    is an alternative to using environment_vars for setting environment variables,
     which has the added ability to read from Packer datasources. [GH-11569](https://github.com/hashicorp/packer/pull/11569)
 * core: Bump version of go-getter to allow for downloading ISOs with PGP signed
     checksums. [GH-11495](https://github.com/hashicorp/packer/pull/11495)
