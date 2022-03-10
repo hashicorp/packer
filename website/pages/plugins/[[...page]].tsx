@@ -17,7 +17,7 @@ import {
 const additionalComponents = { Badge, BadgesHeader, PluginBadge, Checklist }
 const baseRoute = 'plugins'
 const localContentDir = 'content/plugins'
-const mainBranch = 'master'
+const mainBranch = 'main'
 const navDataFile = 'data/plugins-nav-data.json'
 const product = { name: productName, slug: productSlug }
 const remotePluginsFile = 'data/plugins-manifest.json'

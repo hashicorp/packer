@@ -17,7 +17,7 @@ on:
 jobs:
   # Build a fresh set of artifacts
   build-artifacts:
-    uses: hashicorp/packer/.github/workflows/build.yml@master
+    uses: hashicorp/packer/.github/workflows/build.yml@main
   github-release:
     needs: build-artifacts
     runs-on: ubuntu-latest

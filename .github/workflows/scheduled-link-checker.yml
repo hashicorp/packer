@@ -8,7 +8,7 @@ jobs:
     steps:
     - name: Set deployment URL env
       run:
-        echo "DEPLOYMENT_URL=https://packer-git-master.hashicorp.vercel.app" >> $GITHUB_ENV
+        echo "DEPLOYMENT_URL=https://packer-git-main.hashicorp.vercel.app" >> $GITHUB_ENV
     - uses: actions/checkout@master
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:

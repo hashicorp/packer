@@ -7,7 +7,7 @@ import { getStaticGenerationFunctions } from '@hashicorp/react-docs-page/server'
 const baseRoute = 'guides'
 const navDataFile = 'data/guides-nav-data.json'
 const localContentDir = 'content/guides'
-const mainBranch = 'master'
+const mainBranch = 'main'
 const product = { name: productName, slug: productSlug }
 
 export default function GuidesLayout(props) {

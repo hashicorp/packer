@@ -10,8 +10,8 @@ on:
   push:
     # Sequence of patterns matched against refs/heads
     branches:    
-      # Push events on master branch
-      - 'master'
+      # Push events on main branch
+      - 'main'
 
 jobs:
   website-docker-publish:
