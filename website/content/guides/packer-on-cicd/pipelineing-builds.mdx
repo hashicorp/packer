@@ -345,7 +345,7 @@ pipeline.sh
 
 ```sh
 #!/bin/bash
-set -o errexit # abort if there is an issue with any build
+set -e # abort if there is an issue with any build
 packer build -only='step1.docker.example' .
 packer build -only='step2.docker.example' .
 ```
