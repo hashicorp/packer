@@ -69,7 +69,8 @@
     "path": "digitalocean",
     "repo": "hashicorp/packer-plugin-digitalocean",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Docker",
