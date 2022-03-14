@@ -35,3 +35,5 @@ jobs:
         file-extension: 'mdx'
         check-modified-files-only: 'yes'
         folder-path: 'website/content'
+        base-branch: 'main'
+        config-file: '.mlc_config.json'
