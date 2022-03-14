@@ -15,3 +15,5 @@ jobs:
         use-quiet-mode: 'yes'
         file-extension: 'mdx'
         folder-path: 'website/content'
+        base-branch: 'main'
+        config-file: '.mlc_config.json'
