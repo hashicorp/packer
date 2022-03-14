@@ -151,8 +151,8 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 			}[runtime.GOOS],
 			map[string]string{
 				"darwin":  "h1:FBBGQ1SKngN9PvF98awv8TZcKaS+CKzJmQoS7vuSXqY=",
-				"linux":   "h1:Ez7SU1GZLvNGJmoTm9PeFIwHv9fvEgzZAZTMl6874iM=",
-				"windows": "h1:RrXlhy9tG9Bi3c2aOzjx/FLLyVNQolcY+MAr4V1etRI=",
+				"linux":   "h1:F8lN4Q3sv45ig8r1BLOS/wFuQQy6tSfmuIJf3fnbD5k=",
+				"windows": "h1:DOfH6WR1eJNLJcaL8ar8j1xu2WB7Jcn6oG7LGEvNBZI=",
 			}[runtime.GOOS],
 		},
 		{
@@ -183,7 +183,7 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				t.Fatalf("HashDir: %v", err)
 			}
 			if diff := cmp.Diff(tt.ExpectedPackerConfigDirHashBeforeRemove, hash); diff != "" {
-				t.Errorf("unexpected dir hash before plugins install: +found -expected %s", diff)
+				t.Errorf("unexpected dir hash before plugins remove: +found -expected %s", diff)
 			}
 
 			c := &PluginsRemoveCommand{
@@ -212,7 +212,7 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				t.Fatalf("HashDir: %v", err)
 			}
 			if diff := cmp.Diff(tt.ExpectedPackerConfigDirHashAfterRemove, hash); diff != "" {
-				t.Errorf("unexpected dir hash after plugins install: %s", diff)
+				t.Errorf("unexpected dir hash after plugins remove: %s", diff)
 			}
 		})
 	}
