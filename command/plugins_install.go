@@ -29,7 +29,7 @@ func (c *PluginsInstallCommand) Help() string {
 	helpText := `
 Usage: packer plugins install <plugin> [<version constraint>]
 
-  This command will install the most recent compatible Packer plugin matching 
+  This command will install the most recent compatible Packer plugin matching
   version constraint.
   When the version constraint is omitted, the most recent version will be
   installed.

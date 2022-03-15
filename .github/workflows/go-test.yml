@@ -1,11 +1,14 @@
 #
-# This GitHub action runs Packer go tests across 
-# Windows, Linux, and MacOS runners. 
+# This GitHub action runs Packer go tests across
+# Windows, Linux, and MacOS runners.
 #
 
 name: "Go Test"
 
 on: [ workflow_dispatch, push ]
+
+env:
+  PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   linux-go-tests:
@@ -19,8 +22,6 @@ jobs:
   darwin-go-tests:
     runs-on: macos-latest
     name: Darwin go tests
-    env:
-      PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
