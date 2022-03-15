@@ -15,12 +15,12 @@ type testCasePluginsRemove struct {
 	name                                    string
 	Meta                                    Meta
 	inPluginFolder                          map[string]string
-	ExpectedPackerConfigDirHashBeforeRemove string
+	expectedPackerConfigDirHashBeforeRemove string
 	packerConfigDir                         string
 	pluginSourceArgs                        []string
 	want                                    int
 	dirFiles                                []string
-	ExpectedPackerConfigDirHashAfterRemove  string
+	expectedPackerConfigDirHashAfterRemove  string
 }
 
 func TestPluginsRemoveCommand_Run(t *testing.T) {
@@ -29,9 +29,9 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 
 	tests := []testCasePluginsRemove{
 		{
-			"version-not-installed-no-op",
-			TestMetaFile(t),
-			map[string]string{
+			name: "version-not-installed-no-op",
+			Meta: TestMetaFile(t),
+			inPluginFolder: map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
@@ -39,17 +39,17 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
 			},
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
-			cfg.dir("1_pkr_plugins_config"),
-			[]string{"github.com/sylviamoss/comment", "v0.2.19"},
-			0,
-			nil,
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			expectedPackerConfigDirHashBeforeRemove: "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			packerConfigDir:                         cfg.dir("1_pkr_plugins_config"),
+			pluginSourceArgs:                        []string{"github.com/sylviamoss/comment", "v0.2.19"},
+			want:                                    0,
+			dirFiles:                                nil,
+			expectedPackerConfigDirHashAfterRemove:  "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
 		},
 		{
-			"remove-specific-version",
-			TestMetaFile(t),
-			map[string]string{
+			name: "remove-specific-version",
+			Meta: TestMetaFile(t),
+			inPluginFolder: map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
@@ -57,11 +57,11 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
 			},
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
-			cfg.dir("2_pkr_plugins_config"),
-			[]string{"github.com/sylviamoss/comment", "v0.2.18"},
-			0,
-			map[string][]string{
+			expectedPackerConfigDirHashBeforeRemove: "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			packerConfigDir:                         cfg.dir("2_pkr_plugins_config"),
+			pluginSourceArgs:                        []string{"github.com/sylviamoss/comment", "v0.2.18"},
+			want:                                    0,
+			dirFiles: map[string][]string{
 				"darwin": {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
@@ -84,16 +84,16 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
 				},
 			}[runtime.GOOS],
-			map[string]string{
+			expectedPackerConfigDirHashAfterRemove: map[string]string{
 				"darwin":  "h1:IMsWPgJZzRhn80t78zE45003gFKN6EXq562/wjaCrKE=",
 				"linux":   "h1:Ez7SU1GZLvNGJmoTm9PeFIwHv9fvEgzZAZTMl6874iM=",
 				"windows": "h1:RrXlhy9tG9Bi3c2aOzjx/FLLyVNQolcY+MAr4V1etRI=",
 			}[runtime.GOOS],
 		},
 		{
-			"remove-all-installed-versions",
-			TestMetaFile(t),
-			map[string]string{
+			name: "remove-all-installed-versions",
+			Meta: TestMetaFile(t),
+			inPluginFolder: map[string]string{
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64":                "1",
@@ -107,11 +107,11 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64":                 "1.out",
 				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
 			},
-			"h1:IEvr6c46+Uk776Hnzy04PuXqnyHGKnnEvIJ713cv0iU=",
-			cfg.dir("2_pkr_plugins_config"),
-			[]string{"github.com/sylviamoss/comment"},
-			0,
-			map[string][]string{
+			expectedPackerConfigDirHashBeforeRemove: "h1:IEvr6c46+Uk776Hnzy04PuXqnyHGKnnEvIJ713cv0iU=",
+			packerConfigDir:                         cfg.dir("2_pkr_plugins_config"),
+			pluginSourceArgs:                        []string{"github.com/sylviamoss/comment"},
+			want:                                    0,
+			dirFiles: map[string][]string{
 				"darwin": {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64_SHA256SUM",
@@ -149,22 +149,22 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe_SHA256SUM",
 				},
 			}[runtime.GOOS],
-			map[string]string{
+			expectedPackerConfigDirHashAfterRemove: map[string]string{
 				"darwin":  "h1:FBBGQ1SKngN9PvF98awv8TZcKaS+CKzJmQoS7vuSXqY=",
 				"linux":   "h1:F8lN4Q3sv45ig8r1BLOS/wFuQQy6tSfmuIJf3fnbD5k=",
 				"windows": "h1:DOfH6WR1eJNLJcaL8ar8j1xu2WB7Jcn6oG7LGEvNBZI=",
 			}[runtime.GOOS],
 		},
 		{
-			"no-installed-binaries",
-			TestMetaFile(t),
-			nil,
-			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
-			cfg.dir("3_pkr_plugins_config"),
-			[]string{"example.com/sylviamoss/comment", "v0.2.19"},
-			0,
-			nil,
-			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			name:                                    "no-installed-binaries",
+			Meta:                                    TestMetaFile(t),
+			inPluginFolder:                          nil,
+			expectedPackerConfigDirHashBeforeRemove: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+			packerConfigDir:                         cfg.dir("3_pkr_plugins_config"),
+			pluginSourceArgs:                        []string{"example.com/sylviamoss/comment", "v0.2.19"},
+			want:                                    0,
+			dirFiles:                                nil,
+			expectedPackerConfigDirHashAfterRemove:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},
 	}
 
@@ -182,7 +182,7 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 			if err != nil {
 				t.Fatalf("HashDir: %v", err)
 			}
-			if diff := cmp.Diff(tt.ExpectedPackerConfigDirHashBeforeRemove, hash); diff != "" {
+			if diff := cmp.Diff(tt.expectedPackerConfigDirHashBeforeRemove, hash); diff != "" {
 				t.Errorf("unexpected dir hash before plugins remove: +found -expected %s", diff)
 			}
 
@@ -211,7 +211,7 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 			if err != nil {
 				t.Fatalf("HashDir: %v", err)
 			}
-			if diff := cmp.Diff(tt.ExpectedPackerConfigDirHashAfterRemove, hash); diff != "" {
+			if diff := cmp.Diff(tt.expectedPackerConfigDirHashAfterRemove, hash); diff != "" {
 				t.Errorf("unexpected dir hash after plugins remove: %s", diff)
 			}
 		})
