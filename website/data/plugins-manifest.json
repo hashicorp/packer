@@ -156,7 +156,8 @@
     "path": "linode",
     "repo": "hashicorp/packer-plugin-linode",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "LXC",
