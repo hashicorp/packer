@@ -62,7 +62,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	return res, diags
 }
 
-func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef, secondaryEvaluation bool) (packersdk.Datasource, hcl.Diagnostics) {
+func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef) (packersdk.Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	block := cfg.Datasources[ref].block
 
