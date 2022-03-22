@@ -29,31 +29,31 @@ func TestParse_variables(t *testing.T) {
 					"image_name": &Variable{
 						Name:         "image_name",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo-image-{{user `my_secret`}}")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo-image-{{user `my_secret`}}")}},
 					},
 					"key": &Variable{
 						Name:         "key",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
 					},
 					"my_secret": &Variable{
 						Name:         "my_secret",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 					},
 					"image_id": &Variable{
 						Name:         "image_id",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
 					},
 					"port": &Variable{
 						Name:         "port",
 						ExpectedType: cty.Number,
-						Values:       []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From: "default",
 							Value: cty.ListVal([]cty.Value{
 								cty.StringVal("us-west-1a"),
@@ -65,7 +65,7 @@ func TestParse_variables(t *testing.T) {
 					"super_secret_password": &Variable{
 						Name:      "super_secret_password",
 						Sensitive: true,
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.NullVal(cty.String),
 						}},
@@ -76,7 +76,7 @@ func TestParse_variables(t *testing.T) {
 				LocalVariables: Variables{
 					"owner": &Variable{
 						Name: "owner",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.StringVal("Community Team"),
 						}},
@@ -84,7 +84,7 @@ func TestParse_variables(t *testing.T) {
 					},
 					"service_name": &Variable{
 						Name: "service_name",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.StringVal("forum"),
 						}},
@@ -92,7 +92,7 @@ func TestParse_variables(t *testing.T) {
 					},
 					"supersecret": &Variable{
 						Name: "supersecret",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.StringVal("secretvar"),
 						}},
@@ -114,7 +114,7 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"boolean_value": &Variable{
 						Name: "boolean_value",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.BoolVal(false),
 						}},
@@ -135,7 +135,7 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"boolean_value": &Variable{
 						Name: "boolean_value",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.BoolVal(false),
 						}},
@@ -155,7 +155,7 @@ func TestParse_variables(t *testing.T) {
 				Basedir:                 "testdata/variables/duplicate_locals",
 				LocalVariables: Variables{
 					"sensible": &Variable{
-						Values: []VariableAssignment{
+						Assignments: []VariableAssignment{
 							{
 								From:  "default",
 								Value: cty.StringVal("something"),
@@ -179,7 +179,7 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"broken_type": &Variable{
 						Name: "broken_type",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From:  "default",
 							Value: cty.UnknownVal(cty.DynamicPseudoType),
 						}},
@@ -201,7 +201,7 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"broken_variable": &Variable{
 						Name:         "broken_variable",
-						Values:       []VariableAssignment{{From: "default", Value: cty.BoolVal(true)}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.BoolVal(true)}},
 						ExpectedType: cty.Bool,
 					},
 				},
@@ -279,34 +279,34 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"name_prefix": &Variable{
 						Name:         "name_prefix",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 						ExpectedType: cty.String,
 					},
 				},
 				LocalVariables: Variables{
 					"name_prefix": &Variable{
 						Name:         "name_prefix",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 						ExpectedType: cty.String,
 					},
 					"foo": &Variable{
 						Name:         "foo",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 						ExpectedType: cty.String,
 					},
 					"bar": &Variable{
 						Name:         "bar",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 						ExpectedType: cty.String,
 					},
 					"for_var": &Variable{
 						Name:         "for_var",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("foo")}},
 						ExpectedType: cty.String,
 					},
 					"bar_var": &Variable{
 						Name: "bar_var",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From: "default",
 							Value: cty.TupleVal([]cty.Value{
 								cty.StringVal("foo"),
@@ -348,7 +348,7 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name: "foo",
-						Values: []VariableAssignment{
+						Assignments: []VariableAssignment{
 							VariableAssignment{"default", cty.StringVal("bar"), nil},
 							VariableAssignment{"varfile", cty.StringVal("wee"), nil},
 						},
@@ -382,12 +382,12 @@ func TestParse_variables(t *testing.T) {
 				InputVariables: Variables{
 					"max_retries": &Variable{
 						Name:         "max_retries",
-						Values:       []VariableAssignment{{"default", cty.StringVal("1"), nil}},
+						Assignments:  []VariableAssignment{{"default", cty.StringVal("1"), nil}},
 						ExpectedType: cty.String,
 					},
 					"max_retries_int": &Variable{
 						Name:         "max_retries_int",
-						Values:       []VariableAssignment{{"default", cty.NumberIntVal(1), nil}},
+						Assignments:  []VariableAssignment{{"default", cty.NumberIntVal(1), nil}},
 						ExpectedType: cty.Number,
 					},
 				},
@@ -470,7 +470,7 @@ func TestParse_variables(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "variables", "validation"),
 				InputVariables: Variables{
 					"image_id": &Variable{
-						Values: []VariableAssignment{
+						Assignments: []VariableAssignment{
 							{"default", cty.StringVal("ami-something-something"), nil},
 						},
 						Name:         "image_id",
@@ -496,7 +496,7 @@ func TestParse_variables(t *testing.T) {
 				Basedir:                 filepath.Join("testdata", "variables", "validation"),
 				InputVariables: Variables{
 					"image_id": &Variable{
-						Values:       []VariableAssignment{{"default", cty.StringVal("potato"), nil}},
+						Assignments:  []VariableAssignment{{"default", cty.StringVal("potato"), nil}},
 						Name:         "image_id",
 						ExpectedType: cty.String,
 						Validations: []*VariableValidation{
@@ -534,7 +534,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 		{name: "string",
 			variables: Variables{"used_string": &Variable{
-				Values: []VariableAssignment{
+				Assignments: []VariableAssignment{
 					{"default", cty.StringVal("default_value"), nil},
 				},
 				ExpectedType: cty.String,
@@ -555,7 +555,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_string": &Variable{
 					ExpectedType: cty.String,
-					Values: []VariableAssignment{
+					Assignments: []VariableAssignment{
 						{"default", cty.StringVal(`default_value`), nil},
 						{"env", cty.StringVal(`env_value`), nil},
 						{"varfile", cty.StringVal(`xy`), nil},
@@ -571,7 +571,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 		{name: "quoted string",
 			variables: Variables{"quoted_string": &Variable{
-				Values: []VariableAssignment{
+				Assignments: []VariableAssignment{
 					{"default", cty.StringVal(`"default_value"`), nil},
 				},
 				ExpectedType: cty.String,
@@ -592,7 +592,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"quoted_string": &Variable{
 					ExpectedType: cty.String,
-					Values: []VariableAssignment{
+					Assignments: []VariableAssignment{
 						{"default", cty.StringVal(`"default_value"`), nil},
 						{"env", cty.StringVal(`"env_value"`), nil},
 						{"varfile", cty.StringVal(`"xy"`), nil},
@@ -608,7 +608,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 		{name: "array of strings",
 			variables: Variables{"used_strings": &Variable{
-				Values: []VariableAssignment{
+				Assignments: []VariableAssignment{
 					{"default", stringListVal("default_value_1"), nil},
 				},
 				ExpectedType: cty.List(cty.String),
@@ -629,7 +629,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_strings": &Variable{
 					ExpectedType: cty.List(cty.String),
-					Values: []VariableAssignment{
+					Assignments: []VariableAssignment{
 						{"default", stringListVal("default_value_1"), nil},
 						{"env", stringListVal("env_value_1", "env_value_2"), nil},
 						{"varfile", stringListVal("xy"), nil},
@@ -645,7 +645,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 		{name: "bool",
 			variables: Variables{"enabled": &Variable{
-				Values:       []VariableAssignment{{"default", cty.False, nil}},
+				Assignments:  []VariableAssignment{{"default", cty.False, nil}},
 				ExpectedType: cty.Bool,
 			}},
 			args: args{
@@ -663,7 +663,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"enabled": &Variable{
 					ExpectedType: cty.Bool,
-					Values: []VariableAssignment{
+					Assignments: []VariableAssignment{
 						{"default", cty.False, nil},
 						{"env", cty.True, nil},
 						{"varfile", cty.False, nil},
@@ -678,7 +678,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 		{name: "invalid env var",
 			variables: Variables{"used_string": &Variable{
-				Values:       []VariableAssignment{{"default", cty.StringVal("default_value"), nil}},
+				Assignments:  []VariableAssignment{{"default", cty.StringVal("default_value"), nil}},
 				ExpectedType: cty.String,
 			}},
 			args: args{
@@ -690,7 +690,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_string": &Variable{
 					ExpectedType: cty.String,
-					Values:       []VariableAssignment{{"default", cty.StringVal("default_value"), nil}},
+					Assignments:  []VariableAssignment{{"default", cty.StringVal("default_value"), nil}},
 				},
 			},
 			wantValues: map[string]cty.Value{
@@ -770,7 +770,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_string": &Variable{
 					ExpectedType: cty.List(cty.String),
-					Values:       []VariableAssignment{{"env", cty.DynamicVal, nil}},
+					Assignments:  []VariableAssignment{{"env", cty.DynamicVal, nil}},
 				},
 			},
 			wantValues: map[string]cty.Value{
@@ -794,7 +794,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_string": &Variable{
 					ExpectedType: cty.Bool,
-					Values:       []VariableAssignment{{"varfile", cty.DynamicVal, nil}},
+					Assignments:  []VariableAssignment{{"varfile", cty.DynamicVal, nil}},
 				},
 			},
 			wantValues: map[string]cty.Value{
@@ -820,7 +820,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			wantVariables: Variables{
 				"used_string": &Variable{
 					ExpectedType: cty.Bool,
-					Values:       []VariableAssignment{{"cmd", cty.DynamicVal, nil}},
+					Assignments:  []VariableAssignment{{"cmd", cty.DynamicVal, nil}},
 				},
 			},
 			wantValues: map[string]cty.Value{

@@ -47,22 +47,22 @@ func TestParser_complete(t *testing.T) {
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name:         "foo",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
 						ExpectedType: cty.String,
 					},
 					"image_id": &Variable{
 						Name:         "image_id",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
 						ExpectedType: cty.String,
 					},
 					"port": &Variable{
 						Name:         "port",
-						Values:       []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
 						ExpectedType: cty.Number,
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From: "default",
 							Value: cty.ListVal([]cty.Value{
 								cty.StringVal("A"),
@@ -76,17 +76,17 @@ func TestParser_complete(t *testing.T) {
 				LocalVariables: Variables{
 					"feefoo": &Variable{
 						Name:         "feefoo",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("value_image-id-default")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("value_image-id-default")}},
 						ExpectedType: cty.String,
 					},
 					"data_source": &Variable{
 						Name:         "data_source",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("string")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("string")}},
 						ExpectedType: cty.String,
 					},
 					"standard_tags": &Variable{
 						Name: "standard_tags",
-						Values: []VariableAssignment{{From: "default",
+						Assignments: []VariableAssignment{{From: "default",
 							Value: cty.ObjectVal(map[string]cty.Value{
 								"Component":   cty.StringVal("user-service"),
 								"Environment": cty.StringVal("production"),
@@ -99,7 +99,7 @@ func TestParser_complete(t *testing.T) {
 					},
 					"abc_map": &Variable{
 						Name: "abc_map",
-						Values: []VariableAssignment{{From: "default",
+						Assignments: []VariableAssignment{{From: "default",
 							Value: cty.TupleVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
 									"id": cty.StringVal("a"),
@@ -126,7 +126,7 @@ func TestParser_complete(t *testing.T) {
 					},
 					"supersecret": &Variable{
 						Name: "supersecret",
-						Values: []VariableAssignment{{From: "default",
+						Assignments: []VariableAssignment{{From: "default",
 							Value: cty.StringVal("image-id-default-password")}},
 						ExpectedType: cty.String,
 						Sensitive:    true,
@@ -546,22 +546,22 @@ func TestParser_no_init(t *testing.T) {
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name:         "foo",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("value")}},
 						ExpectedType: cty.String,
 					},
 					"image_id": &Variable{
 						Name:         "image_id",
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("image-id-default")}},
 						ExpectedType: cty.String,
 					},
 					"port": &Variable{
 						Name:         "port",
-						Values:       []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.NumberIntVal(42)}},
 						ExpectedType: cty.Number,
 					},
 					"availability_zone_names": &Variable{
 						Name: "availability_zone_names",
-						Values: []VariableAssignment{{
+						Assignments: []VariableAssignment{{
 							From: "default",
 							Value: cty.ListVal([]cty.Value{
 								cty.StringVal("A"),

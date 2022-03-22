@@ -40,20 +40,20 @@ type VariableAssignment struct {
 }
 
 type Variable struct {
-	// Values contains possible values for the variable; The last value set
+	// Assignments contains possible values for the variable; The last value set
 	// from these will be the one used. If none is set; an error will be
 	// returned by Value().
-	Values []VariableAssignment
+	Assignments []VariableAssignment
 
 	// Validations contains all variables validation rules to be applied to the
 	// used value. Only the used value - the last value from Values - is
 	// validated.
 	Validations []*VariableValidation
 
-	// ExpectedType of the variable. If the default value or a collected
-	// value is not of this type nor can be converted to this type an error
-	// diagnostic will show up. This allows us to assume that values are valid
-	// later in code.
+	// ExpectedType of the variable. If the default value or a collected value
+	// is not of this type nor can be converted to this type an error diagnostic
+	// will show up. This allows us to assume that values are valid later in
+	// code.
 	ExpectedType cty.Type
 	// Common name of the variable
 	Name string
@@ -70,27 +70,30 @@ func (v *Variable) Type() cty.Type {
 	return v.ExpectedType
 }
 
+func (v *Variable) Evaluate(ectx *hcl.EvalContext) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+	for _, assignment := range v.Assignments {
+		val, moreDiags := assignment.Expr.Value(ectx)
+		diags = append(diags, moreDiags...)
+		assignment.Value = val
+	}
+	return diags
+}
+
 func (v *Variable) References() ([]*addrs.Reference, hcl.Diagnostics) {
-	if len(v.Values) == 0 {
+	if len(v.Assignments) == 0 {
 		return nil, nil
 	}
 	refs := []*addrs.Reference{}
 	var diags hcl.Diagnostics
-	for _, v := range v.Values[len(v.Values)-1].Expr.Variables() {
-		ref, moreDiags := addrs.ParseRef(v)
-		diags = append(diags, moreDiags...)
-		refs = append(refs, ref)
+	for _, assignment := range v.Assignments {
+		for _, v := range assignment.Expr.Variables() {
+			ref, moreDiags := addrs.ParseRef(v)
+			diags = append(diags, moreDiags...)
+			refs = append(refs, ref)
+		}
 	}
 	return refs, diags
-}
-func (v *Variable) GoString() string {
-	b := &strings.Builder{}
-	fmt.Fprintf(b, "{type:%s", v.ExpectedType.GoString())
-	for _, vv := range v.Values {
-		fmt.Fprintf(b, ",%s:%s", vv.From, vv.Value)
-	}
-	fmt.Fprintf(b, "}")
-	return b.String()
 }
 
 // validateValue ensures that all of the configured custom validations for a
@@ -166,17 +169,16 @@ func (v *Variable) validateValue(val VariableAssignment) (diags hcl.Diagnostics)
 
 // Value returns the last found value from the list of variable settings.
 func (v *Variable) Value() cty.Value {
-	if len(v.Values) == 0 {
+	if len(v.Assignments) == 0 {
 		return cty.UnknownVal(v.ExpectedType)
 	}
-	val := v.Values[len(v.Values)-1]
+	val := v.Assignments[len(v.Assignments)-1]
 	return val.Value
 }
 
-// Validate tells if the selected value for the Variable is set and valid
-// according to its validation settings.
+// Validate runs validation rules on the variable assignments.
 func (v *Variable) Validate() hcl.Diagnostics {
-	if len(v.Values) == 0 {
+	if len(v.Assignments) == 0 {
 		return hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  fmt.Sprintf("Unset variable %q", v.Name),
@@ -187,7 +189,11 @@ func (v *Variable) Validate() hcl.Diagnostics {
 		}}
 	}
 
-	return v.validateValue(v.Values[len(v.Values)-1])
+	var diags hcl.Diagnostics
+	for _, assignment := range v.Assignments {
+		diags = append(diags, v.validateValue(assignment)...)
+	}
+	return diags
 }
 
 type Variables map[string]*Variable
@@ -243,7 +249,7 @@ func (variables *Variables) decodeVariablesSetting(key string, attr *hcl.Attribu
 
 	(*variables)[key] = &Variable{
 		Name: key,
-		Values: []VariableAssignment{{
+		Assignments: []VariableAssignment{{
 			From:  "default",
 			Value: defaultValue,
 			Expr:  attr.Expr,
@@ -372,39 +378,10 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 	}
 
 	if def, ok := content.Attributes["default"]; ok {
-		defaultValue, moreDiags := def.Expr.Value(ectx)
-		diags = append(diags, moreDiags...)
-		if moreDiags.HasErrors() {
-			return diags
-		}
-
-		if v.ExpectedType != cty.NilType {
-			var err error
-			defaultValue, err = convert.Convert(defaultValue, v.ExpectedType)
-			if err != nil {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Invalid default value for variable",
-					Detail:   fmt.Sprintf("This default value is not compatible with the variable's type constraint: %s.", err),
-					Subject:  def.Expr.Range().Ptr(),
-				})
-				defaultValue = cty.DynamicVal
-			}
-		}
-
-		v.Values = append(v.Values, VariableAssignment{
-			From:  "default",
-			Value: defaultValue,
-			Expr:  def.Expr,
+		v.Assignments = append(v.Assignments, VariableAssignment{
+			From: "default",
+			Expr: def.Expr,
 		})
-
-		// It's possible no type attribute was assigned so lets make sure we
-		// have a valid type otherwise there could be issues parsing the value.
-		if v.ExpectedType == cty.DynamicPseudoType &&
-			!defaultValue.Type().Equals(cty.EmptyObject) &&
-			!defaultValue.Type().Equals(cty.EmptyTuple) {
-			v.ExpectedType = defaultValue.Type()
-		}
 	}
 
 	for _, block := range content.Blocks {
@@ -618,7 +595,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 				val = cty.DynamicVal
 			}
 		}
-		variable.Values = append(variable.Values, VariableAssignment{
+		variable.Assignments = append(variable.Assignments, VariableAssignment{
 			From:  "env",
 			Value: val,
 			Expr:  expr,
@@ -706,7 +683,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 				}
 			}
 
-			variable.Values = append(variable.Values, VariableAssignment{
+			variable.Assignments = append(variable.Assignments, VariableAssignment{
 				From:  "varfile",
 				Value: val,
 				Expr:  attr.Expr,
@@ -754,7 +731,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 			}
 		}
 
-		variable.Values = append(variable.Values, VariableAssignment{
+		variable.Assignments = append(variable.Assignments, VariableAssignment{
 			From:  "cmd",
 			Value: val,
 			Expr:  expr,

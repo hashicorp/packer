@@ -483,14 +483,14 @@ func TestParse_build(t *testing.T) {
 					"name": &Variable{
 						Name:         "name",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("build-name")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("build-name")}},
 					},
 				},
 				LocalVariables: Variables{
 					"description": &Variable{
 						Name:         "description",
 						ExpectedType: cty.String,
-						Values:       []VariableAssignment{{From: "default", Value: cty.StringVal("This is the description for build-name.")}},
+						Assignments:  []VariableAssignment{{From: "default", Value: cty.StringVal("This is the description for build-name.")}},
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{
