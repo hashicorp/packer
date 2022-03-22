@@ -90,7 +90,7 @@
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
-    "version": "v1.0.11",
+    "version": "v1.0.10",
     "isHcpPackerReady": true
   },
   {
