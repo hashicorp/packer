@@ -155,10 +155,6 @@
                 "title": "Contextual Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/contextual"
-                  },
-                  {
                     "title": "aws_secretsmanager",
                     "path": "templates/hcl_templates/functions/contextual/aws_secretsmanager"
                   },
@@ -309,10 +305,6 @@
               {
                 "title": "Collection Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/collection"
-                  },
                   {
                     "title": "chunklist",
                     "path": "templates/hcl_templates/functions/collection/chunklist"
