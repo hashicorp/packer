@@ -41,7 +41,7 @@ jobs:
       HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - name: IAM Assume Role
