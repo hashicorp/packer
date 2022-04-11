@@ -155,10 +155,6 @@
                 "title": "Contextual Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/contextual"
-                  },
-                  {
                     "title": "aws_secretsmanager",
                     "path": "templates/hcl_templates/functions/contextual/aws_secretsmanager"
                   },
@@ -179,10 +175,6 @@
               {
                 "title": "Numeric Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/numeric"
-                  },
                   {
                     "title": "abs",
                     "path": "templates/hcl_templates/functions/numeric/abs"
@@ -224,10 +216,6 @@
               {
                 "title": "String Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/string"
-                  },
                   {
                     "title": "chomp",
                     "path": "templates/hcl_templates/functions/string/chomp"
@@ -309,10 +297,6 @@
               {
                 "title": "Collection Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/collection"
-                  },
                   {
                     "title": "chunklist",
                     "path": "templates/hcl_templates/functions/collection/chunklist"
@@ -411,10 +395,6 @@
                 "title": "Encoding Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/encoding"
-                  },
-                  {
                     "title": "base64decode",
                     "path": "templates/hcl_templates/functions/encoding/base64decode"
                   },
@@ -451,10 +431,6 @@
               {
                 "title": "Filesystem Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/file"
-                  },
                   {
                     "title": "abspath",
                     "path": "templates/hcl_templates/functions/file/abspath"
@@ -518,10 +494,6 @@
                 "title": "Hash and Crypto Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/crypto"
-                  },
-                  {
                     "title": "bcrypt",
                     "path": "templates/hcl_templates/functions/crypto/bcrypt"
                   },
@@ -551,10 +523,6 @@
                 "title": "UUID Functions",
                 "routes": [
                   {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/uuid"
-                  },
-                  {
                     "title": "uuidv4",
                     "path": "templates/hcl_templates/functions/uuid/uuidv4"
                   },
@@ -567,10 +535,6 @@
               {
                 "title": "IP Network Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/ipnet"
-                  },
                   {
                     "title": "cidrhost",
                     "path": "templates/hcl_templates/functions/ipnet/cidrhost"
@@ -592,10 +556,6 @@
               {
                 "title": "Type Conversion Functions",
                 "routes": [
-                  {
-                    "title": "Overview",
-                    "path": "templates/hcl_templates/functions/conversion"
-                  },
                   {
                     "title": "can",
                     "path": "templates/hcl_templates/functions/conversion/can"
