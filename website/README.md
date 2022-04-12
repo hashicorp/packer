@@ -1,8 +1,6 @@
 # Packer Documentation Website
 
-[![Netlify Status](https://img.shields.io/netlify/0b9f9a3b-9bea-4889-8ad0-9c79583cb70e?style=flat-square)](https://app.netlify.com/sites/packer-www/deploys)
-
-This subdirectory contains the entire source for the [Packer Website](https://packer.io/). This is a [NextJS](https://nextjs.org/) project, which builds a static site from these source files.
+This subdirectory contains the content for the [Packer Website](https://packer.io/).
 
 <!--
   This readme file contains several blocks of generated text, to make it easier to share common information
