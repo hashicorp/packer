@@ -235,7 +235,7 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	prefix := ""
+	var prefix string
 	res := make(map[string]string)
 	// Sort the matches so we add the newer version of a plugin last
 	sort.Strings(matches)
