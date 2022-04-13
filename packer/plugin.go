@@ -271,7 +271,7 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		pluginName := file[len(prefix):]
 
 		// if Plugin name has OS_ARCH in it, split at _v(0-9) with regex
-		if strings.Contains(pluginName, OS_ARCH) {
+		if strings.HasSuffix(pluginName, OS_ARCH) {
 			regex := regexp.MustCompile(`_v[0-9]`)
 			pluginName = regex.Split(pluginName, -1)[0]
 
