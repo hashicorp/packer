@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -240,8 +239,8 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	// Sort the matches so we add the newer version of a plugin last
 	sort.Strings(matches)
 	//If we see OS_ARCH (i.e. darwin_arm64 for an m1 mac user) ignore it in the binary name
-        prefix := filepath.Base(glob)
-        prefix = prefix[:strings.Index(prefix, "*")]
+	prefix = filepath.Base(glob)
+	prefix = prefix[:strings.Index(prefix, "*")]
 	for _, match := range matches {
 		file := filepath.Base(match)
 		// skip folders like packer-plugin-sdk
@@ -268,8 +267,7 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 
 		// if Plugin name has OS_ARCH in it, split at _v(0-9) with regex
 		if strings.HasSuffix(pluginName, OS_ARCH) {
-			regex := regexp.MustCompile(`_v[0-9]`)
-			pluginName = regex.Split(pluginName, -1)[0]
+			pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
 		}
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)
