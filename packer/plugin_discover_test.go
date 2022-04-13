@@ -154,52 +154,6 @@ func TestDiscoverDatasource(t *testing.T) {
 	}
 }
 
-func TestDiscoverPluginsInstalledWithPackerPluginsCommand(t *testing.T) {
-	dir, _, cleanUpFunc, err := generateInstalledFakePlugins("custom_plugin_dir",
-		[]string{"packer-datasource-partyparrot"})
-	if err != nil {
-		t.Fatalf("Error creating fake custom plugins: %s", err)
-	}
-
-	defer cleanUpFunc()
-
-	pathsep := ":"
-	if runtime.GOOS == "windows" {
-		pathsep = ";"
-	}
-
-	// Create a second dir to look in that will be empty
-	decoyDir, err := ioutil.TempDir("", "decoy")
-	if err != nil {
-		t.Fatalf("Failed to create a temporary test dir.")
-	}
-	defer os.Remove(decoyDir)
-
-	pluginPath := dir + pathsep + decoyDir
-
-	// Add temp dir to path.
-	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
-	defer os.Unsetenv("PACKER_PLUGIN_PATH")
-
-	config := newPluginConfig()
-
-	err = config.Discover()
-	if err != nil {
-		t.Fatalf("Should not have errored: %s", err)
-	}
-
-	if len(config.DataSources.List()) == 0 {
-		t.Fatalf("Should have found partyparrot datasource")
-	}
-	if !config.DataSources.Has("partyparrot") {
-		t.Fatalf("Should have found partyparrot datasource.")
-	}
-}
-
-func TestDiscoverInvalidPluginBinariesIgnored(t *testing.T) {
-	t.Fatalf("To be implemented maybe")
-}
-
 func generateFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
 	dir, err := ioutil.TempDir("", dirname)
 	if err != nil {
@@ -208,46 +162,6 @@ func generateFakePlugins(dirname string, pluginNames []string) (string, []string
 
 	cleanUpFunc := func() {
 		os.RemoveAll(dir)
-	}
-
-	var suffix string
-	if runtime.GOOS == "windows" {
-		suffix = ".exe"
-	}
-
-	plugins := make([]string, len(pluginNames))
-	for i, plugin := range pluginNames {
-		plug := filepath.Join(dir, plugin+suffix)
-		plugins[i] = plug
-		_, err := os.Create(plug)
-		if err != nil {
-			cleanUpFunc()
-			return "", nil, nil, fmt.Errorf("failed to create temporary plugin file (%s): %v", plug, err)
-		}
-	}
-
-	return dir, plugins, cleanUpFunc, nil
-}
-
-func generateInstalledFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
-	topLevelDir, err := ioutil.TempDir("", dirname)
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
-	}
-	dir, err := ioutil.TempDir(topLevelDir, "github.com")
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
-	}
-	dir, err = ioutil.TempDir(dir, "hashicorp")
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
-	}
-	dir, err = ioutil.TempDir(dir, "plugin")
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
-	}
-	cleanUpFunc := func() {
-		os.RemoveAll(topLevelDir)
 	}
 
 	var suffix string
@@ -476,6 +390,14 @@ func Test_multiplugin_describe(t *testing.T) {
 			}
 		}
 	}
+}
+
+func Test_multiplugin_describe_installed(t *testing.T) {
+	t.Fatalf("unimplemented")
+}
+
+func Test_multiplugin_describe_installed_ignores_unformatted(t *testing.T) {
+	t.Fatalf("unimplemented")
 }
 
 func Test_multiplugin_defaultName(t *testing.T) {
