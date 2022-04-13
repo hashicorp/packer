@@ -2,10 +2,12 @@ package packer
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strings"
@@ -46,6 +48,8 @@ type PluginConfig struct {
 // PACKERSPACE is used to represent the spaces that separate args for a command
 // without being confused with spaces in the path to the command itself.
 const PACKERSPACE = "-PACKERSPACE-"
+
+const OS_ARCH = runtime.GOOS + "_" + runtime.GOARCH
 
 // Discover discovers plugins.
 //
@@ -200,6 +204,18 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 		log.Printf("using external datasource %v", externallyUsed)
 	}
 
+	//Check for installed plugins using the `packer plugins install` command
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", OS_ARCH)))
+	if err != nil {
+		return err
+	}
+
+	for pluginName, pluginPath := range pluginPaths {
+		if err := c.DiscoverMultiPlugin(pluginName, pluginPath); err != nil {
+			return err
+		}
+	}
+
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
 	if err != nil {
 		return err
@@ -219,14 +235,19 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	prefix := ""
 	res := make(map[string]string)
-
-	prefix := filepath.Base(glob)
-	prefix = prefix[:strings.Index(prefix, "*")]
+	// Sort the matches so we add the newer version of a plugin last
+	sort.Strings(matches)
+	//If we see OS_ARCH (i.e. darwin_arm64 for an m1 mac user) ignore it in the binary name
+	if strings.Contains(glob, OS_ARCH) {
+		prefix = "packer-plugin-"
+	} else {
+		prefix = filepath.Base(glob)
+		prefix = prefix[:strings.Index(prefix, "*")]
+	}
 	for _, match := range matches {
 		file := filepath.Base(match)
-
 		// skip folders like packer-plugin-sdk
 		if stat, err := os.Stat(file); err == nil && stat.IsDir() {
 			continue
@@ -247,7 +268,15 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		}
 
 		// Look for foo-bar-baz. The plugin name is "baz"
-		pluginName := file[len(prefix):]
+		pluginName := ""
+		pluginName = file[len(prefix):]
+
+		// if Plugin name has OS_ARCH in it, split at _v(0-9) with regex
+		if strings.Contains(pluginName, OS_ARCH) {
+			regex := regexp.MustCompile(`_v[0-9]`)
+			pluginName = regex.Split(pluginName, -1)[0]
+
+		}
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)
 		res[pluginName] = match
 	}
