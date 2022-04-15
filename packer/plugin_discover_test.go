@@ -527,7 +527,7 @@ func Test_multiplugin_describe_installed_ignores_unformatted(t *testing.T) {
 	if c.Builders.Has("feather") {
 		t.Fatalf("expected to not find builder %q", "feather")
 	}
-	for mockPluginName, plugin := range mockInstalledPlugins {
+	for mockPluginName, plugin := range invalidInstalledPluginsMock {
 		mockPluginName = strings.Split(mockPluginName, "_")[0]
 		for mockBuilderName := range plugin.Builders {
 			expectedBuilderName := mockPluginName + "-" + mockBuilderName
