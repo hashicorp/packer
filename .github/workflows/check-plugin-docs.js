@@ -9,7 +9,7 @@ const COLOR_RED = "\x1b[31m";
 
 async function checkPluginDocs() {
   const failureMessages = [];
-  const pluginsPath = "website/data/docs-remote-plugins.json";
+  const pluginsPath = "website/data/plugins-manifest.json";
   const pluginsFile = fs.readFileSync(path.join(process.cwd(), pluginsPath));
   const pluginEntries = JSON.parse(pluginsFile);
   const pluginEntriesWithDocs = await resolvePluginDocs(pluginEntries);
