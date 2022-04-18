@@ -538,19 +538,19 @@ func Test_multiplugin_describe_installed_for_invalid(t *testing.T) {
 		for mockProvisionerName := range plugin.Provisioners {
 			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
 			if c.Provisioners.Has(expectedProvisionerName) {
-				t.Fatalf("expected to find builder %q", expectedProvisionerName)
+				t.Fatalf("expected to not find builder %q", expectedProvisionerName)
 			}
 		}
 		for mockPostProcessorName := range plugin.PostProcessors {
 			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
 			if c.PostProcessors.Has(expectedPostProcessorName) {
-				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
+				t.Fatalf("expected to not find post-processor %q", expectedPostProcessorName)
 			}
 		}
 		for mockDatasourceName := range plugin.Datasources {
 			expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
 			if c.DataSources.Has(expectedDatasourceName) {
-				t.Fatalf("expected to find datasource %q", expectedDatasourceName)
+				t.Fatalf("expected to not find datasource %q", expectedDatasourceName)
 			}
 		}
 	}

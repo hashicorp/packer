@@ -48,7 +48,7 @@ type PluginConfig struct {
 // without being confused with spaces in the path to the command itself.
 const PACKERSPACE = "-PACKERSPACE-"
 
-const OS_ARCH = runtime.GOOS + "_" + runtime.GOARCH
+const osArch = runtime.GOOS + "_" + runtime.GOARCH
 
 // Discover discovers plugins.
 //
@@ -204,7 +204,7 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	}
 
 	//Check for installed plugins using the `packer plugins install` command
-	pluginPaths, err = c.discoverSingle(filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", OS_ARCH)))
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", osArch)))
 	if err != nil {
 		return err
 	}
@@ -264,7 +264,7 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		// Look for foo-bar-baz. The plugin name is "baz"
 		pluginName := file[len(prefix):]
 
-		if strings.HasSuffix(pluginName, OS_ARCH) {
+		if strings.HasSuffix(pluginName, osArch) {
 			pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
 		}
