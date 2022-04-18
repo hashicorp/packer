@@ -238,7 +238,6 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 	res := make(map[string]string)
 	// Sort the matches so we add the newer version of a plugin last
 	sort.Strings(matches)
-	//If we see OS_ARCH (i.e. darwin_arm64 for an m1 mac user) ignore it in the binary name
 	prefix = filepath.Base(glob)
 	prefix = prefix[:strings.Index(prefix, "*")]
 	for _, match := range matches {
