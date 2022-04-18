@@ -532,7 +532,7 @@ func Test_multiplugin_describe_installed_for_invalid(t *testing.T) {
 		for mockBuilderName := range plugin.Builders {
 			expectedBuilderName := mockPluginName + "-" + mockBuilderName
 			if c.Builders.Has(expectedBuilderName) {
-				t.Fatalf("expected to find builder %q", expectedBuilderName)
+				t.Fatalf("expected to not find builder %q", expectedBuilderName)
 			}
 		}
 		for mockProvisionerName := range plugin.Provisioners {
