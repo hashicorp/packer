@@ -265,7 +265,6 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		// Look for foo-bar-baz. The plugin name is "baz"
 		pluginName := file[len(prefix):]
 
-		// if Plugin name has OS_ARCH in it, split at _v(0-9) with regex
 		if strings.HasSuffix(pluginName, OS_ARCH) {
 			pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
