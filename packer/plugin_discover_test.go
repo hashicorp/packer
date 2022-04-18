@@ -514,7 +514,7 @@ func Test_multiplugin_describe_installed(t *testing.T) {
 	}
 }
 
-func Test_multiplugin_describe_installed_ignores_unformatted(t *testing.T) {
+func Test_multiplugin_describe_installed_for_invalid(t *testing.T) {
 	createMockInstalledPlugins(t, invalidInstalledPluginsMock)
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
