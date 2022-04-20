@@ -24,6 +24,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1
       - name: Install Dependencies
-        run: npm i isomorphic-unfetch adm-zip gray-matter
+        run: npm i @hashicorp/platform-packer-plugins
       - name: Fetch and validate plugin docs
         run: node .github/workflows/check-plugin-docs.js

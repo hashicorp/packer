@@ -1,21 +1,25 @@
 const fs = require("fs");
 const path = require("path");
-const fetchPluginDocs = require("../../website/components/remote-plugin-docs/utils/fetch-plugin-docs");
+const { resolvePluginDocs } = require("@hashicorp/platform-packer-plugins");
 
 const COLOR_RESET = "\x1b[0m";
 const COLOR_GREEN = "\x1b[32m";
 const COLOR_BLUE = "\x1b[34m";
 const COLOR_RED = "\x1b[31m";
 
+const VALID_PLUGIN_TIERS = ["official", "community", "verified"];
+
+
 async function checkPluginDocs() {
   const failureMessages = [];
-  const pluginsPath = "website/data/docs-remote-plugins.json";
+  const pluginsPath = "website/data/plugins-manifest.json";
   const pluginsFile = fs.readFileSync(path.join(process.cwd(), pluginsPath));
   const pluginEntries = JSON.parse(pluginsFile);
+  const pluginEntriesWithDocs = await resolvePluginDocs(pluginEntries);
   const entriesCount = pluginEntries.length;
   console.log(`\nResolving plugin docs from ${entriesCount} repositories …`);
   for (var i = 0; i < entriesCount; i++) {
-    const pluginEntry = pluginEntries[i];
+    const pluginEntry = pluginEntriesWithDocs[i];
     const { title, repo, version } = pluginEntry;
     console.log(`\n${COLOR_BLUE}${repo}${COLOR_RESET} | ${title}`);
     console.log(`Fetching docs from release "${version}" …`);
@@ -38,14 +42,13 @@ async function checkPluginDocs() {
       // Validate pluginTier property
       const { pluginTier } = pluginEntry;
       if (typeof pluginTier !== "undefined") {
-        const validPluginTiers = ["official", "community"];
-        const isValid = validPluginTiers.indexOf(pluginTier) !== -1;
+        const isValid = VALID_PLUGIN_TIERS.indexOf(pluginTier) !== -1;
         if (!isValid) {
           throw new Error(
             `Failed to validate plugin docs config. Invalid pluginTier "${pluginTier}" found for "${
               title || pluginEntry.path || repo
             }". In "website/data/docs-remote-plugins.json", the optional pluginTier property must be one of ${JSON.stringify(
-              validPluginTiers
+              VALID_PLUGIN_TIERS
             )}. The pluginTier property can also be omitted, in which case it will be determined from the plugin repository owner.`
           );
         }
@@ -59,7 +62,7 @@ async function checkPluginDocs() {
         );
       }
       // Attempt to fetch plugin docs files
-      const docsMdxFiles = await fetchPluginDocs({ repo, tag: version });
+      const docsMdxFiles = pluginEntry.files
       const mdxFilesByComponent = docsMdxFiles.reduce((acc, mdxFile) => {
         const componentType = mdxFile.filePath.split("/")[1];
         if (!acc[componentType]) acc[componentType] = [];
