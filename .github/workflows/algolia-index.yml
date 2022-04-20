@@ -10,6 +10,9 @@ on:
       # Runs on push events to the stable-website branch
       - 'stable-website'
 
+permissions:
+  contents: read
+
 jobs:
   algolia-index:
     runs-on: ubuntu-latest

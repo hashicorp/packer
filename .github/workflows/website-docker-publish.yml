@@ -13,6 +13,9 @@ on:
       # Push events on main branch
       - 'main'
 
+permissions:
+  contents: read
+
 jobs:
   website-docker-publish:
     runs-on: ubuntu-latest  
@@ -39,6 +42,8 @@ jobs:
           fi
   # Send a slack notification if the job defined above fails
   slack-notify:
+    permissions:
+      contents: none
     needs: 
       - website-docker-publish
     if: always() && (needs.website-docker-publish.result == 'failure')

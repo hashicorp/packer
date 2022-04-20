@@ -17,6 +17,8 @@ on:
 jobs:
   # Build a fresh set of artifacts
   build-artifacts:
+    permissions:
+      contents: none
     uses: hashicorp/packer/.github/workflows/build.yml@main
   github-release:
     needs: build-artifacts
@@ -78,6 +80,8 @@ jobs:
           release_id: ${{ steps.create_prerelease.outputs.id }}
   # Send a slack notification if either job defined above fails
   slack-notify:
+    permissions:
+      contents: none
     needs:
       - build-artifacts
       - github-release
