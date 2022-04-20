@@ -7,8 +7,13 @@ on:
       - closed
       - labeled
 
+permissions:
+  contents: read
+
 jobs:
   backport:
+    permissions:
+      contents: none
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     container: hashicorpdev/backport-assistant:0.2.3
