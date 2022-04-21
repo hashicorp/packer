@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,6 +15,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
 func newPluginConfig() PluginConfig {
@@ -287,7 +289,7 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 			fileContent += strings.Join(
 				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, name, "$@")...),
 				" ")
-			if err := ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
+			if err := os.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
 				t.Fatalf("failed to create fake plugin binary: %v", err)
 			}
 		}
@@ -295,7 +297,28 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
 }
 
-func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
+func withMockChecksumFile(t testing.TB, filePath string) {
+	cs := plugingetter.Checksummer{
+		Type: "sha256",
+		Hash: sha256.New(),
+	}
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		t.Fatalf("failed to open fake plugin binary: %v", err)
+	}
+	defer f.Close()
+
+	sum, err := cs.Sum(f)
+	if err != nil {
+		t.Fatalf("failed to checksum fake plugin binary: %v", err)
+	}
+
+	t.Logf("creating fake plugin checksum file %s with contents %x", filePath+cs.FileExt(), string(sum))
+	os.WriteFile(filePath+cs.FileExt(), []byte(fmt.Sprintf("%x", sum)), os.ModePerm)
+}
+
+func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set, opts ...func(tb testing.TB, filePath string)) {
 	pluginDir, err := tmp.Dir("pkr-multi-component-plugin-test-*")
 	{
 		// create an exectutable file with a `sh` sheebang
@@ -333,8 +356,12 @@ func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set) 
 			fileContent += strings.Join(
 				append([]string{"PKR_WANT_TEST_PLUGINS=1"}, helperCommand(t, strings.Split(name, "_")[0], "$@")...),
 				" ")
-			if err := ioutil.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
+			if err := os.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
 				t.Fatalf("failed to create fake plugin binary: %v", err)
+			}
+
+			for _, opt := range opts {
+				opt(t, plugin)
 			}
 		}
 	}
@@ -347,36 +374,36 @@ func getFormattedInstalledPluginSuffix() string {
 
 var (
 	mockPlugins = map[string]pluginsdk.Set{
-		"bird": pluginsdk.Set{
+		"bird": {
 			Builders: map[string]packersdk.Builder{
 				"feather":   nil,
 				"guacamole": nil,
 			},
 		},
-		"chimney": pluginsdk.Set{
+		"chimney": {
 			PostProcessors: map[string]packersdk.PostProcessor{
 				"smoke": nil,
 			},
 		},
-		"data": pluginsdk.Set{
+		"data": {
 			Datasources: map[string]packersdk.Datasource{
 				"source": nil,
 			},
 		},
 	}
 	mockInstalledPlugins = map[string]pluginsdk.Set{
-		fmt.Sprintf("bird_%s", getFormattedInstalledPluginSuffix()): pluginsdk.Set{
+		fmt.Sprintf("bird_%s", getFormattedInstalledPluginSuffix()): {
 			Builders: map[string]packersdk.Builder{
 				"feather":   nil,
 				"guacamole": nil,
 			},
 		},
-		fmt.Sprintf("chimney_%s", getFormattedInstalledPluginSuffix()): pluginsdk.Set{
+		fmt.Sprintf("chimney_%s", getFormattedInstalledPluginSuffix()): {
 			PostProcessors: map[string]packersdk.PostProcessor{
 				"smoke": nil,
 			},
 		},
-		fmt.Sprintf("data_%s", getFormattedInstalledPluginSuffix()): pluginsdk.Set{
+		fmt.Sprintf("data_%s", getFormattedInstalledPluginSuffix()): {
 			Datasources: map[string]packersdk.Datasource{
 				"source": nil,
 			},
@@ -384,25 +411,25 @@ var (
 	}
 
 	invalidInstalledPluginsMock = map[string]pluginsdk.Set{
-		"bird_v0.1.1_x5.0_wrong_architecture": pluginsdk.Set{
+		"bird_v0.1.1_x5.0_wrong_architecture": {
 			Builders: map[string]packersdk.Builder{
 				"feather":   nil,
 				"guacamole": nil,
 			},
 		},
-		"chimney_cool_ranch": pluginsdk.Set{
+		"chimney_cool_ranch": {
 			PostProcessors: map[string]packersdk.PostProcessor{
 				"smoke": nil,
 			},
 		},
-		"data": pluginsdk.Set{
+		"data": {
 			Datasources: map[string]packersdk.Datasource{
 				"source": nil,
 			},
 		},
 	}
 	defaultNameMock = map[string]pluginsdk.Set{
-		"foo": pluginsdk.Set{
+		"foo": {
 			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
@@ -412,7 +439,7 @@ var (
 	}
 
 	doubleDefaultMock = map[string]pluginsdk.Set{
-		"yolo": pluginsdk.Set{
+		"yolo": {
 			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
@@ -425,7 +452,7 @@ var (
 	}
 
 	badDefaultNameMock = map[string]pluginsdk.Set{
-		"foo": pluginsdk.Set{
+		"foo": {
 			Builders: map[string]packersdk.Builder{
 				"bar":                  nil,
 				"baz":                  nil,
@@ -475,7 +502,7 @@ func Test_multiplugin_describe(t *testing.T) {
 }
 
 func Test_multiplugin_describe_installed(t *testing.T) {
-	createMockInstalledPlugins(t, mockInstalledPlugins)
+	createMockInstalledPlugins(t, mockInstalledPlugins, withMockChecksumFile)
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
@@ -515,44 +542,69 @@ func Test_multiplugin_describe_installed(t *testing.T) {
 }
 
 func Test_multiplugin_describe_installed_for_invalid(t *testing.T) {
-	createMockInstalledPlugins(t, invalidInstalledPluginsMock)
-	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
-	defer os.RemoveAll(pluginDir)
+	tc := []struct {
+		desc                 string
+		installedPluginsMock map[string]pluginsdk.Set
+		createMockFn         func(*testing.T, map[string]pluginsdk.Set)
+	}{
+		{
+			desc:                 "Incorrectly named plugins",
+			installedPluginsMock: invalidInstalledPluginsMock,
+			createMockFn: func(t *testing.T, mocks map[string]pluginsdk.Set) {
+				createMockInstalledPlugins(t, mocks, withMockChecksumFile)
+			},
+		},
+		{
+			desc:                 "Plugins missing checksums",
+			installedPluginsMock: mockInstalledPlugins,
+			createMockFn: func(t *testing.T, mocks map[string]pluginsdk.Set) {
+				createMockInstalledPlugins(t, mocks)
+			},
+		},
+	}
 
-	c := PluginConfig{}
-	err := c.Discover()
-	if err != nil {
-		t.Fatalf("error discovering plugins; %s", err.Error())
-	}
-	if c.Builders.Has("feather") {
-		t.Fatalf("expected to not find builder %q", "feather")
-	}
-	for mockPluginName, plugin := range invalidInstalledPluginsMock {
-		mockPluginName = strings.Split(mockPluginName, "_")[0]
-		for mockBuilderName := range plugin.Builders {
-			expectedBuilderName := mockPluginName + "-" + mockBuilderName
-			if c.Builders.Has(expectedBuilderName) {
-				t.Fatalf("expected to not find builder %q", expectedBuilderName)
+	for _, tt := range tc {
+		t.Run(tt.desc, func(t *testing.T) {
+			tt.createMockFn(t, tt.installedPluginsMock)
+			pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
+			defer os.RemoveAll(pluginDir)
+
+			c := PluginConfig{}
+			err := c.Discover()
+			if err != nil {
+				t.Fatalf("error discovering plugins; %s", err.Error())
 			}
-		}
-		for mockProvisionerName := range plugin.Provisioners {
-			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
-			if c.Provisioners.Has(expectedProvisionerName) {
-				t.Fatalf("expected to not find builder %q", expectedProvisionerName)
+			if c.Builders.Has("feather") {
+				t.Fatalf("expected to not find builder %q", "feather")
 			}
-		}
-		for mockPostProcessorName := range plugin.PostProcessors {
-			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
-			if c.PostProcessors.Has(expectedPostProcessorName) {
-				t.Fatalf("expected to not find post-processor %q", expectedPostProcessorName)
+			for mockPluginName, plugin := range tt.installedPluginsMock {
+				mockPluginName = strings.Split(mockPluginName, "_")[0]
+				for mockBuilderName := range plugin.Builders {
+					expectedBuilderName := mockPluginName + "-" + mockBuilderName
+					if c.Builders.Has(expectedBuilderName) {
+						t.Fatalf("expected to not find builder %q", expectedBuilderName)
+					}
+				}
+				for mockProvisionerName := range plugin.Provisioners {
+					expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
+					if c.Provisioners.Has(expectedProvisionerName) {
+						t.Fatalf("expected to not find builder %q", expectedProvisionerName)
+					}
+				}
+				for mockPostProcessorName := range plugin.PostProcessors {
+					expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
+					if c.PostProcessors.Has(expectedPostProcessorName) {
+						t.Fatalf("expected to not find post-processor %q", expectedPostProcessorName)
+					}
+				}
+				for mockDatasourceName := range plugin.Datasources {
+					expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
+					if c.DataSources.Has(expectedDatasourceName) {
+						t.Fatalf("expected to not find datasource %q", expectedDatasourceName)
+					}
+				}
 			}
-		}
-		for mockDatasourceName := range plugin.Datasources {
-			expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
-			if c.DataSources.Has(expectedDatasourceName) {
-				t.Fatalf("expected to not find datasource %q", expectedDatasourceName)
-			}
-		}
+		})
 	}
 }
 
