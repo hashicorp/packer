@@ -3,7 +3,6 @@ package packer
 import (
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -86,7 +85,7 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 	}
 
 	// Create a second dir to look in that will be empty
-	decoyDir, err := ioutil.TempDir("", "decoy")
+	decoyDir, err := os.MkdirTemp("", "decoy")
 	if err != nil {
 		t.Fatalf("Failed to create a temporary test dir.")
 	}
@@ -129,7 +128,7 @@ func TestDiscoverDatasource(t *testing.T) {
 	}
 
 	// Create a second dir to look in that will be empty
-	decoyDir, err := ioutil.TempDir("", "decoy")
+	decoyDir, err := os.MkdirTemp("", "decoy")
 	if err != nil {
 		t.Fatalf("Failed to create a temporary test dir.")
 	}
@@ -157,7 +156,7 @@ func TestDiscoverDatasource(t *testing.T) {
 }
 
 func generateFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
-	dir, err := ioutil.TempDir("", dirname)
+	dir, err := os.MkdirTemp("", dirname)
 	if err != nil {
 		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
 	}
@@ -297,7 +296,7 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
 }
 
-func withMockChecksumFile(t testing.TB, filePath string) {
+func createMockChecksumFile(t testing.TB, filePath string) {
 	cs := plugingetter.Checksummer{
 		Type: "sha256",
 		Hash: sha256.New(),
@@ -335,15 +334,15 @@ func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set, 
 		if err != nil {
 			t.Fatal(err)
 		}
-		dir, err := ioutil.TempDir(pluginDir, "github.com")
+		dir, err := os.MkdirTemp(pluginDir, "github.com")
 		if err != nil {
 			t.Fatalf("failed to create temporary test directory: %v", err)
 		}
-		dir, err = ioutil.TempDir(dir, "hashicorp")
+		dir, err = os.MkdirTemp(dir, "hashicorp")
 		if err != nil {
 			t.Fatalf("failed to create temporary test directory: %v", err)
 		}
-		dir, err = ioutil.TempDir(dir, "plugin")
+		dir, err = os.MkdirTemp(dir, "plugin")
 		if err != nil {
 			t.Fatalf("failed to create temporary test directory: %v", err)
 		}
@@ -504,7 +503,7 @@ func Test_multiplugin_describe(t *testing.T) {
 }
 
 func Test_multiplugin_describe_installed(t *testing.T) {
-	createMockInstalledPlugins(t, mockInstalledPlugins, withMockChecksumFile)
+	createMockInstalledPlugins(t, mockInstalledPlugins, createMockChecksumFile)
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
@@ -553,7 +552,7 @@ func Test_multiplugin_describe_installed_for_invalid(t *testing.T) {
 			desc:                 "Incorrectly named plugins",
 			installedPluginsMock: invalidInstalledPluginsMock,
 			createMockFn: func(t *testing.T, mocks map[string]pluginsdk.Set) {
-				createMockInstalledPlugins(t, mocks, withMockChecksumFile)
+				createMockInstalledPlugins(t, mocks, createMockChecksumFile)
 			},
 		},
 		{
