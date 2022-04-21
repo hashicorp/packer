@@ -1,6 +1,7 @@
 package packer
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -14,6 +15,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
 // PluginConfig helps load and use packer plugins
@@ -47,8 +49,6 @@ type PluginConfig struct {
 // PACKERSPACE is used to represent the spaces that separate args for a command
 // without being confused with spaces in the path to the command itself.
 const PACKERSPACE = "-PACKERSPACE-"
-
-const osArch = runtime.GOOS + "_" + runtime.GOARCH
 
 // Discover discovers plugins.
 //
@@ -204,17 +204,54 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 	}
 
 	//Check for installed plugins using the `packer plugins install` command
-	pluginPaths, err = c.discoverSingle(filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", osArch)))
+	binInstallOpts := plugingetter.BinaryInstallationOptions{
+		OS:              runtime.GOOS,
+		ARCH:            runtime.GOARCH,
+		APIVersionMajor: pluginsdk.APIVersionMajor,
+		APIVersionMinor: pluginsdk.APIVersionMinor,
+		Checksummers: []plugingetter.Checksummer{
+			{Type: "sha256", Hash: sha256.New()},
+		},
+	}
+
+	if runtime.GOOS == "windows" {
+		binInstallOpts.Ext = ".exe"
+	}
+
+	pluginPaths, err = c.discoverSingle(filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", binInstallOpts.FilenameSuffix())))
 	if err != nil {
 		return err
 	}
 
 	for pluginName, pluginPath := range pluginPaths {
+		var checksumOk bool
+		for _, checksummer := range binInstallOpts.Checksummers {
+			cs, err := checksummer.GetCacheChecksumOfFile(pluginPath)
+			if err != nil {
+				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", pluginPath, err)
+				continue
+			}
+
+			if err := checksummer.ChecksumFile(cs, pluginPath); err != nil {
+				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", pluginPath, err)
+				continue
+			}
+			checksumOk = true
+			break
+		}
+
+		if !checksumOk {
+			log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
+			continue
+		}
+
 		if err := c.DiscoverMultiPlugin(pluginName, pluginPath); err != nil {
 			return err
 		}
 	}
 
+	// Manually installed plugins take precedence over all. Duplicate plugins installed
+	// prior to the packer plugins install command should be removed by user to avoid overrides.
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
 	if err != nil {
 		return err
@@ -263,11 +300,10 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 
 		// Look for foo-bar-baz. The plugin name is "baz"
 		pluginName := file[len(prefix):]
+		// For multi-component plugins installed via the plugins we expect the name to look like baz_vx.y.z_x5.0_os_arch.
+		// The plugin name is "baz"
+		pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
-		if strings.HasSuffix(pluginName, osArch) {
-			pluginName = strings.SplitN(pluginName, "_", 2)[0]
-
-		}
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)
 		res[pluginName] = match
 	}

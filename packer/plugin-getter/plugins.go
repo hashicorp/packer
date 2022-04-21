@@ -89,7 +89,7 @@ func (pr Requirement) FilenamePrefix() string {
 	return "packer-plugin-" + pr.Identifier.Type + "_"
 }
 
-func (opts BinaryInstallationOptions) filenameSuffix() string {
+func (opts BinaryInstallationOptions) FilenameSuffix() string {
 	return "_" + opts.OS + "_" + opts.ARCH + opts.Ext
 }
 
@@ -104,7 +104,7 @@ func (opts BinaryInstallationOptions) filenameSuffix() string {
 func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
 	FilenamePrefix := pr.FilenamePrefix()
-	filenameSuffix := opts.filenameSuffix()
+	filenameSuffix := opts.FilenameSuffix()
 	log.Printf("[TRACE] listing potential installations for %q that match %q. %#v", pr.Identifier, pr.VersionConstraints, opts)
 	for _, knownFolder := range opts.FromFolders {
 		glob := ""
