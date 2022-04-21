@@ -300,8 +300,8 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 
 		// Look for foo-bar-baz. The plugin name is "baz"
 		pluginName := file[len(prefix):]
-		// For multi-component plugins installed via the plugins we expect the name to look like baz_vx.y.z_x5.0_os_arch.
-		// The plugin name is "baz"
+		// multi-component plugins installed via the plugins subcommand will have a name that looks like baz_vx.y.z_x5.0_darwin_arm64.
+		// After the split the plugin name is "baz".
 		pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)
