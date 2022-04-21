@@ -250,6 +250,8 @@ func (c *PluginConfig) discoverExternalComponents(path string) error {
 		}
 	}
 
+	// Manually installed plugins take precedence over all. Duplicate plugins installed
+	// prior to the packer plugins install command should be removed by user to avoid overrides.
 	pluginPaths, err = c.discoverSingle(filepath.Join(path, "packer-plugin-*"))
 	if err != nil {
 		return err
@@ -298,7 +300,8 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 
 		// Look for foo-bar-baz. The plugin name is "baz"
 		pluginName := file[len(prefix):]
-		// For multi-plugins installed via the plugins slit name  baz_vx.y.z_x5.0_os_arch. The plugin name is "baz"
+		// For multi-compent plugins installed via the plugins split name  baz_vx.y.z_x5.0_os_arch.
+		// The plugin name is "baz"
 		pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
 		log.Printf("[DEBUG] Discovered plugin: %s = %s", pluginName, match)

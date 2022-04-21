@@ -315,7 +315,9 @@ func withMockChecksumFile(t testing.TB, filePath string) {
 	}
 
 	t.Logf("creating fake plugin checksum file %s with contents %x", filePath+cs.FileExt(), string(sum))
-	os.WriteFile(filePath+cs.FileExt(), []byte(fmt.Sprintf("%x", sum)), os.ModePerm)
+	if err := os.WriteFile(filePath+cs.FileExt(), []byte(fmt.Sprintf("%x", sum)), os.ModePerm); err != nil {
+		t.Fatalf("failed to write checksum fake plugin binary: %v", err)
+	}
 }
 
 func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set, opts ...func(tb testing.TB, filePath string)) {
