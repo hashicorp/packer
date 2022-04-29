@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.4.0
-	github.com/hashicorp/hcl/v2 v2.11.1
+	github.com/hashicorp/hcl/v2 v2.12.0
 	github.com/hashicorp/hcp-sdk-go v0.15.1-0.20220112153249-f565607d7cc4
 	github.com/hashicorp/packer-plugin-amazon v1.0.8
 	github.com/hashicorp/packer-plugin-sdk v0.2.12-0.20220216103740-f7d4bf877a45
