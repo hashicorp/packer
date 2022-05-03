@@ -188,6 +188,7 @@ event "promote-staging-docker" {
     organization = "hashicorp"
     repository = "crt-workflows-common"
     workflow = "promote-staging-docker"
+    config = "release-metadata.hcl"
   }
 
   notification {
