@@ -7,12 +7,16 @@ page_title: Builders
 
 # Builders
 
-Builders are responsible for creating machines and generating images from them
-for various platforms. For example, there are separate builders for EC2,
-VMware, VirtualBox, etc. Packer comes with many builders by default, and can
-also be extended to add new builders. See [`plugins`](/plugins) for a list of plugins and their builders.
+Builders create machines and generate images from those machines for various platforms. Packer also has some builders that perform helper tasks, like running provisioners.
 
-See the [`source`](/docs/templates/hcl_templates/blocks/source) block documentation to learn more
-about configuring builders in the Packer language.
-For information on an individual builder, choose it from the sidebar. Each
-builder has its own configuration options and parameters.
+Packer has the following types of builders:
+
+- [Plugin](/plugin): Each plugin has its own associated set of builders. For example, there are separate builders for EC2, VMware, VirtualBox, etc.
+- [File](/docs/builders/file): The `file` builder creates an artifact from a file.
+- [Null](/docs/builders/null): The `null` builder sets up an SSH connection and runs the provisioners.
+- [Custom](/docs/plugins/creation/custom-builders): You can write new builders for new or existing platforms.
+- [Community-Supported](/docs/builders/community-supported): The Packer community develops and maintains builders for several additional platforms.
+
+Refer to the [`source`](/docs/templates/hcl_templates/blocks/source) block documentation to learn more about configuring builders in the Packer language.
+
+
