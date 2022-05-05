@@ -160,6 +160,13 @@
     "isHcpPackerReady": true
   },
   {
+    "title": "Libvirt",
+    "path": "libvirt",
+    "repo": "thomasklein94/packer-plugin-libvirt",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "LXC",
     "path": "lxc",
     "repo": "hashicorp/packer-plugin-lxc",
