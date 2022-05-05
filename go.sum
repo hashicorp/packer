@@ -768,8 +768,8 @@ github.com/hashicorp/packer-plugin-sdk v0.2.5/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7
 github.com/hashicorp/packer-plugin-sdk v0.2.7/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.9/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.11/go.mod h1:DI8REf9TEIcVkYPErI/nedo6zS2h81ze7sKuc/mIlTE=
-github.com/hashicorp/packer-plugin-sdk v0.2.12-0.20220216103740-f7d4bf877a45 h1:NOEkBi0iohcGGVFjM8QBlZS69AbrXCuv5Vx+41CG34A=
-github.com/hashicorp/packer-plugin-sdk v0.2.12-0.20220216103740-f7d4bf877a45/go.mod h1:DI8REf9TEIcVkYPErI/nedo6zS2h81ze7sKuc/mIlTE=
+github.com/hashicorp/packer-plugin-sdk v0.2.12 h1:YYvNPPayNFfr8L7hR2QkC2s/PE93oOCCnEFwFavjKiM=
+github.com/hashicorp/packer-plugin-sdk v0.2.12/go.mod h1:/smseyg0inyxWv1B+XWppPU0FJz2hwIzFOM172U3i0Y=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.3 h1:8U2vMFyIE+pizoMDsSLyMBsbNdB1HzRAIaTJNIELyi4=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.3/go.mod h1:TCSlq9lCFU8H8eMMWNtwdnCeyHmaQ1A13PR11EJoJh0=
 github.com/hashicorp/packer-plugin-triton v1.0.0 h1:Uvh8fjEKqlii61BzIt1VEgSyJXL+UYfuMHCj44aVpU8=
@@ -1251,8 +1251,9 @@ golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2/go.mod h1:T9bdIzuCu7OtxOm
 golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
 golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
 golang.org/x/crypto v0.0.0-20210817164053-32db794688a5/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
-golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 h1:7I4JAnoQBe7ZtJcBaYHi5UtiO8tQHbUSXxL+pnGRANg=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
+golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f h1:OeJjE6G4dgCY4PIXvIRQbE8+RX+uXZyGhUy/ksMGJoc=
+golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f/go.mod h1:IxCIyHEi3zRg3s0A5j5BB6A9Jmi73HwBIUl50j+osU4=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522/go.mod h1:ZjyILWgesfNpC6sMxTJOJm9Kp84zZh5NQWvqDGG3Qr8=
@@ -1354,8 +1355,8 @@ golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4/go.mod h1:p54w0d4576C0XHj96b
 golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210614182718-04defd469f4e/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210825183410-e898025ed96a/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
-golang.org/x/net v0.0.0-20210902165921-8d991716f632 h1:900XJE4Rn/iPU+xD5ZznOe4GKKc4AdFK0IO1P6Z3/lQ=
-golang.org/x/net v0.0.0-20210902165921-8d991716f632/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
+golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 h1:CIJ76btIcR3eFI5EgSo6k1qKw9KJexJuRLI9G7Hp5wE=
+golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
