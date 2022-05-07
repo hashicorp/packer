@@ -345,8 +345,9 @@ pipeline.sh
 
 ```sh
 #!/bin/bash
+set -e # abort if there is an issue with any build
 packer build -only='step1.docker.example' .
 packer build -only='step2.docker.example' .
 ```
 
-To run the pipeline, call pipeline.sh. You can add error checking to this script to abort if there's an issue with a build. You can create as many build steps as you want. Each can either inhabit one file
+To run the pipeline, call pipeline.sh. You can create as many build steps as you want. Each can either inhabit one file

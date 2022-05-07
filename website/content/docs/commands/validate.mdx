@@ -34,7 +34,7 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 - `-except=foo,bar,baz` - Validates all the builds except those with the
   comma-separated names. In legacy JSON templates, build names default to the
   types of their builders (e.g. `docker` or
-  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  `amazon-ebs` or `virtualbox-iso`), unless a specific `name` attribute is
   specified within the configuration. In HCL2 templates, the "name" is the
   source block's "name" label, unless an in-build source definition adds the
   "name" configuration option.
@@ -42,7 +42,7 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 - `-only=foo,bar,baz` - Only validate the builds with the given comma-separated
   names. In legacy JSON templates, build names default to the
   types of their builders (e.g. `docker` or
-  `amazon-ebs` or `virtualbox-iso`, unless a specific `name` attribute is
+  `amazon-ebs` or `virtualbox-iso`), unless a specific `name` attribute is
   specified within the configuration. In HCL2 templates, the "name" is the
   source block's "name" label, unless an in-build source definition adds the
   "name" configuration option.

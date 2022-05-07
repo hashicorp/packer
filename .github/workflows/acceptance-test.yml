@@ -1,0 +1,93 @@
+#
+# This GitHub action runs Packer's acceptance tests every night.
+# Failures are reported to slack.
+#
+
+name: "Acceptance Test"
+
+on:
+  schedule:
+  # Runs against the default branch every day at midnight
+  - cron: "0 0 * * *"
+
+jobs:
+  get-go-version:
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.get-go-version.outputs.go-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Determine Go version'
+        id: get-go-version
+        # We use .go-version as our source of truth for current Go
+        # version, because "goenv" can react to it automatically.
+        run: |
+          echo "Building with Go $(cat .go-version)"
+          echo "::set-output name=go-version::$(cat .go-version)"
+  acceptance-test:
+    runs-on: ubuntu-latest
+    name: Acceptance Test
+    needs: get-go-version
+    env: 
+      # AWS Creds for Assume Role
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
+      # HCP Creds for Acceptance Tests
+      HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+      HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+      HCP_ORG_ID: ${{ secrets.HCP_ORG_ID }}
+      HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
+      - name: IAM Assume Role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          role-duration-seconds: 3600
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
+      - name: Run acceptance tests per module
+        run: |
+          mkdir -p /tmp/test-results
+          make dev
+          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+  # Send a slack notification if either job defined above fails
+  slack-notify:
+    needs: 
+      - get-go-version
+      - acceptance-test
+    if: always() && (needs.get-go-version.result == 'failure' || needs.acceptance-test.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send slack notification on failure
+        uses: slackapi/slack-github-action@v1.18.0
+        with:
+          payload: |
+            {
+              "text": ":alert: Packer Nightly Acceptance Tests *FAILED* :alert:",
+              "attachments": [
+                {
+                  "color": "#C41E3A",
+                  "blocks": [
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "Branch: `${{ github.ref_name }}`\nRef: ${{ github.event.pull_request.html_url || github.event.head_commit.url }}\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

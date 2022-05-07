@@ -1,0 +1,24 @@
+---
+description: |
+  The "plugins remove" command can remove a plugin at a version constraint.
+page_title: plugins Command
+---
+
+# `plugins remove`
+
+The `plugins remove` subcommand removes a Packer plugin at a version constraint
+
+```shell-session
+$ packer  plugins remove -h
+Usage: packer plugins remove <plugin> [<version constraint>]
+
+  This command will remove all Packer plugins matching the version constraint
+  for the current OS and architecture.
+  When the version is omitted all installed versions will be removed.
+
+  Ex: packer plugins remove github.com/hashicorp/happycloud v1.2.3
+```
+
+## Related
+
+- [`packer init`](/docs/commands/init) will install all required plugins.

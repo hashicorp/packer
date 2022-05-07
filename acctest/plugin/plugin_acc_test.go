@@ -86,9 +86,8 @@ func cleanupPluginInstallation(plugin addrs.Plugin) error {
 		plugin.Namespace,
 		plugin.Type)
 
-	if _, ok := os.LookupEnv("CIRCLECI"); ok {
-		pluginPath = filepath.Join(home,
-			".config",
+	if xdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); xdgConfigHome != "" {
+		pluginPath = filepath.Join(xdgConfigHome,
 			"packer",
 			"plugins",
 			plugin.Hostname,
@@ -118,9 +117,8 @@ func checkPluginInstallation(initOutput string, plugin addrs.Plugin) error {
 		plugin.Namespace,
 		plugin.Type)
 
-	if _, ok := os.LookupEnv("CIRCLECI"); ok {
-		pluginPath = filepath.Join(home,
-			".config",
+	if xdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); xdgConfigHome != "" {
+		pluginPath = filepath.Join(xdgConfigHome,
 			"packer",
 			"plugins",
 			plugin.Hostname,

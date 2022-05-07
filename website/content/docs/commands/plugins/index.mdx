@@ -1,0 +1,30 @@
+---
+description: |
+  The "plugin" command groups subcommands for interacting with
+  Packer's plugin and the plugin catalog.
+page_title: plugins Command
+---
+
+# `plugins`
+
+The `plugins` command groups subcommands for interacting with Packers' plugins.
+
+```shell-session
+$ packer plugins -h
+Usage: packer plugins <subcommand> [options] [args]
+  This command groups subcommands for interacting with Packer plugins.
+
+Related but not under the "plugins" command :
+
+- "packer init <path>" will install all plugins required by a config.
+
+Subcommands:
+    install      Install latest Packer plugin [matching version constraint]
+    installed    List all installed Packer plugin binaries
+    remove       Remove Packer plugins [matching a version]
+    required     List plugins required by a config
+```
+
+## Related
+
+- [`packer init`](/docs/commands/init) will install all required plugins.

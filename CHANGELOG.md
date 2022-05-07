@@ -1,6 +1,70 @@
-## 1.7.11 (Upcoming)
+## 1.8.1 (Upcoming)
+
+## 1.8.0 (March 4, 2022)
+### NOTES:
+* **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc#packer-sdc). Plugin maintainers who may be using the packer-plugin-check as part of their release pipeline are encouraged to move to the packer-sdc command. As an alternative, maintainers can continue to use the packer-plugin-check by pinning the command to Packer 1.7.10.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
+
+### FEATURES
+* **New Command** `packer plugins` command and subcommands to manage external
+    plugins. [GH-11553](https://github.com/hashicorp/packer/pull/11553)
+    [GH-11625](https://github.com/hashicorp/packer/pull/11625)
+
+### IMPROVEMENTS
+* core: Add a `env` argument to provisioner blocks that allow for setting a
+    map of key/value pairs to inject prior to the execute_command. The env argument
+    is an alternative to using environment_vars for setting environment variables,
+    which has the added ability to read from Packer datasources. [GH-11569](https://github.com/hashicorp/packer/pull/11569)
+* core: Bump version of go-getter to allow for downloading ISOs with PGP signed
+    checksums. [GH-11495](https://github.com/hashicorp/packer/pull/11495)
+* core: Docker images are now available for all supported architectures that
+    the linux binaries are built for including arm, arm64, 386, and amd64
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: Packer's linux package service configs and pre/post install scripts are
+    now available under .release/linux.
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: Packer's linux packages are now available for all supported linux
+    architectures including arm, arm64, 386, and amd64
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: The dockerfile that is used to build the packer docker image available
+    at hashicorp/packer now lives in the root of this repo. The README that
+    describes how to build the docker targets defined in the Dockerfile are
+    available under ./release/docker/README.md.
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+* core: The packer-plugin-check command has been removed. Plugin maintainers
+    should update their release configuration to use the `packer-sdc plugin-
+    check` command.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
+
+
+### BUG FIXES
+* core/hcl2: Fixes an issue preventing builds from pausing between provisioners when
+    the `--debug` argument has been passed.
+    [GH-11537](https://github.com/hashicorp/packer/pull/11537)
+* core/hcl2: Fixes a data loss issue when merging an empty-object map to a non-
+    empty map variable.
+    [GH-11566](https://github.com/hashicorp/packer/pull/11566)
+* core/hcl2: Fixes a regression where references to locals via the lookup
+    function were failing to find defined keys.
+    [GH-11566](https://github.com/hashicorp/packer/pull/11566)
+* core/hcl2: Fixes an issue where HCP Packer build labels from the first
+    completed build image were being copied to all images within the same
+    build. [GH-11574](https://github.com/hashicorp/packer/pull/11574)
+    [GH-11584](https://github.com/hashicorp/packer/pull/11584)
+* core: HCP Packer datasources will no longer fail for iterations with
+    scheduled revocations.
+    [GH-11619](https://github.com/hashicorp/packer/pull/11619)
+* core: Packer darwin builds now use macOS system DNS resolver for resolving
+    hostnames.[GH-9710](https://github.com/hashicorp/packer/issues/9710)
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
 
 ## 1.7.10 (February 02, 2022)
+
 ### NOTES:
 
 This patch release fixes a crash in m1 caused by the psutils dep,

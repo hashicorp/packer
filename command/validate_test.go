@@ -36,6 +36,9 @@ func TestValidateCommand(t *testing.T) {
 
 		// Should return multiple errors,
 		{path: filepath.Join(testFixture("validate", "circular_error.pkr.hcl")), exitCode: 1},
+
+		// datasource could be unknown at that moment
+		{path: filepath.Join(testFixture("hcl", "data-source-validation.pkr.hcl")), exitCode: 0},
 	}
 
 	for _, tc := range tt {

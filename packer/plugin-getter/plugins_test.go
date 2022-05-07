@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
@@ -66,6 +67,61 @@ func TestPlugin_ListInstallations(t *testing.T) {
 		wantErr bool
 		want    InstallList
 	}{
+
+		{
+			"windows_all_plugins",
+			fields{
+				// empty
+			},
+			ListInstallationsOptions{
+				[]string{
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					OS: "windows", ARCH: "amd64",
+					Ext: ".exe",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			},
+			false,
+			[]*Installation{
+				{
+					Version:    "v1.2.3",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_windows_amd64.exe"),
+				},
+				{
+					Version:    "v1.2.4",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_windows_amd64.exe"),
+				},
+				{
+					Version:    "v1.2.5",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_windows_amd64.exe"),
+				},
+				{
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
+					Version:    "v4.5.6",
+				},
+				{
+					Version:    "v4.5.7",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_x5.0_windows_amd64.exe"),
+				},
+				{
+					Version:    "v4.5.8",
+					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_x5.0_windows_amd64.exe"),
+				},
+				{
+					Version:    "v4.5.9",
+					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
+				},
+			},
+		},
+
 		{
 			"darwin_amazon_prot_5.0",
 			fields{
@@ -227,9 +283,13 @@ func TestPlugin_ListInstallations(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			identifier, diags := addrs.ParsePluginSourceString(tt.fields.Identifier)
-			if diags.HasErrors() {
-				t.Fatalf("%v", diags)
+			var identifier *addrs.Plugin
+			if tt.fields.Identifier != "" {
+				var diags hcl.Diagnostics
+				identifier, diags = addrs.ParsePluginSourceString(tt.fields.Identifier)
+				if diags.HasErrors() {
+					t.Fatalf("%v", diags)
+				}
 			}
 			p := Requirement{
 				Identifier:         identifier,

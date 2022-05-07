@@ -18,6 +18,7 @@
     "path": "anka",
     "repo": "veertuinc/packer-plugin-veertu-anka",
     "pluginTier": "community",
+    "source_branch": "master",
     "version": "latest"
   },
   {
@@ -45,7 +46,8 @@
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Cloudstack",
@@ -59,14 +61,16 @@
     "path": "converge",
     "repo": "hashicorp/packer-plugin-converge",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "DigitalOcean",
     "path": "digitalocean",
     "repo": "hashicorp/packer-plugin-digitalocean",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Docker",
@@ -130,7 +134,8 @@
     "path": "inspec",
     "repo": "hashicorp/packer-plugin-inspec",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "JD Cloud",
@@ -151,7 +156,8 @@
     "path": "linode",
     "repo": "hashicorp/packer-plugin-linode",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "LXC",
@@ -193,7 +199,7 @@
     "path": "outscale",
     "repo": "outscale/packer-plugin-outscale",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "verified"
   },
   {
     "title": "Parallels",
@@ -220,7 +226,8 @@
     "path": "puppet",
     "repo": "hashicorp/packer-plugin-puppet",
     "version": "latest",
-    "pluginTier": "community"
+    "pluginTier": "community",
+    "archived": true
   },
   {
     "title": "QEMU",
@@ -233,13 +240,14 @@
     "path": "salt",
     "repo": "hashicorp/packer-plugin-salt",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "archived": true
   },
   {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "scaleway/packer-plugin-scaleway",
-    "pluginTier": "community",
+    "pluginTier": "verified",
     "version": "latest"
   },
   {
@@ -269,6 +277,14 @@
     "repo": "hashicorp/packer-plugin-ucloud",
     "version": "latest",
     "pluginTier": "community"
+  },
+  {
+    "title": "UpCloud",
+    "path": "upcloud",
+    "repo": "UpCloudLtd/packer-plugin-upcloud",
+    "version": "latest",
+    "pluginTier": "verified",
+    "sourceBranch": "master"
   },
   {
     "title": "Vagrant",

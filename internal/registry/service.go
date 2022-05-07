@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/client/packer_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/preview/2021-04-30/models"
@@ -127,12 +126,6 @@ func (client *Client) GetIteration(ctx context.Context, bucketSlug string, opts 
 	}
 
 	if resp.Payload.Iteration != nil {
-		if !time.Time(resp.Payload.Iteration.RevokeAt).IsZero() {
-			// If RevokeAt is not a zero date, it means this iteration is revoked and should not be used
-			// to build new images.
-			return nil, fmt.Errorf("the iteration %s is revoked and can not be used on Packer builds",
-				resp.Payload.Iteration.ID)
-		}
 		return resp.Payload.Iteration, nil
 	}
 
@@ -254,12 +247,6 @@ func (client *Client) GetIterationFromChannel(
 
 	if resp.Payload.Channel != nil {
 		if resp.Payload.Channel.Iteration != nil {
-			if !time.Time(resp.Payload.Channel.Iteration.RevokeAt).IsZero() {
-				// If RevokeAt is not a zero date, it means this iteration is revoked and should not be used
-				// to build new images.
-				return nil, fmt.Errorf("the iteration associated with the channel %s is revoked and can not be used on Packer builds",
-					channelName)
-			}
 			return resp.Payload.Channel.Iteration, nil
 		}
 		return nil, fmt.Errorf("there is no iteration associated with the channel %s",

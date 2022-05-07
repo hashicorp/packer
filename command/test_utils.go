@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/packer/builder/null"
 	hcppackerimagedatasource "github.com/hashicorp/packer/datasource/hcp-packer-image"
 	hcppackeriterationdatasource "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
+	nulldatasource "github.com/hashicorp/packer/datasource/null"
 	"github.com/hashicorp/packer/packer"
 	"github.com/hashicorp/packer/post-processor/manifest"
 	shell_local_pp "github.com/hashicorp/packer/post-processor/shell-local"
@@ -51,6 +52,7 @@ func testCoreConfigBuilder(t *testing.T) *packer.CoreConfig {
 			},
 			DataSources: packer.MapOfDatasource{
 				"mock":                 func() (packersdk.Datasource, error) { return &packersdk.MockDatasource{}, nil },
+				"null":                 func() (packersdk.Datasource, error) { return &nulldatasource.Datasource{}, nil },
 				"hcp-packer-image":     func() (packersdk.Datasource, error) { return &hcppackerimagedatasource.Datasource{}, nil },
 				"hcp-packer-iteration": func() (packersdk.Datasource, error) { return &hcppackeriterationdatasource.Datasource{}, nil },
 			},

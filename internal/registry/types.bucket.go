@@ -29,7 +29,10 @@ type Bucket struct {
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
 // images to the HCP Packer registry.
 func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
-	b := Bucket{}
+	b := Bucket{
+		BucketLabels: make(map[string]string),
+		BuildLabels:  make(map[string]string),
+	}
 
 	i, err := NewIteration(opts)
 	if err != nil {
@@ -90,9 +93,10 @@ func (b *Bucket) RegisterBuildForComponent(sourceName string) {
 		return
 	}
 
-	if _, ok := b.Iteration.builds.Load(sourceName); ok {
+	if ok := b.Iteration.HasBuild(sourceName); ok {
 		return
 	}
+
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, sourceName)
 }
 
@@ -112,23 +116,22 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 	if err != nil {
 		return err
 	}
-	id := resp.Payload.Build.ID
 
-	if b.BuildLabels == nil {
-		b.BuildLabels = make(map[string]string)
+	build, err := NewBuildFromCloudPackerBuild(resp.Payload.Build)
+	if err != nil {
+		log.Printf("[TRACE] unable to load created build for %q: %v", componentType, err)
 	}
 
-	build := &Build{
-		ID:            id,
-		ComponentType: componentType,
-		RunUUID:       b.Iteration.RunUUID,
-		Status:        status,
-		Labels:        b.BuildLabels,
-		Images:        make(map[string]registryimage.Image),
-	}
+	build.Labels = make(map[string]string)
+	build.Images = make(map[string]registryimage.Image)
 
-	log.Println("[TRACE] creating initial build for component", componentType)
-	b.Iteration.builds.Store(componentType, build)
+	// Initial build labels are only pushed to the registry when an actual Packer run is executed on the said build.
+	// For example filtered builds (e.g --only or except) will not get the initial build labels until a build is executed on them.
+	// Global build label updates to existing builds are handled in PopulateIteration.
+	if len(b.BuildLabels) > 0 {
+		build.MergeLabels(b.BuildLabels)
+	}
+	b.Iteration.StoreBuild(componentType, build)
 
 	return nil
 }
@@ -139,22 +142,16 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return b.markBuildComplete(ctx, name)
 	}
 
-	// Lets check if we have something already for this build
-	build, ok := b.Iteration.builds.Load(name)
-	if !ok {
-		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
-	}
-
-	buildToUpdate, ok := build.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	buildToUpdate, err := b.Iteration.Build(name)
+	if err != nil {
+		return err
 	}
 
 	if buildToUpdate.ID == "" {
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	_, err := b.client.UpdateBuild(ctx,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
@@ -167,7 +164,7 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return err
 	}
 	buildToUpdate.Status = status
-	b.Iteration.builds.Store(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
@@ -175,14 +172,9 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 // Upon a successful call markBuildComplete will publish all images created by the named build,
 // and set the registry build to done. A build with no images can not be set to DONE.
 func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
-	build, ok := b.Iteration.builds.Load(name)
-	if !ok {
-		return fmt.Errorf("no build for the component %q associated to the iteration %q", name, b.Iteration.ID)
-	}
-
-	buildToUpdate, ok := build.(*Build)
-	if !ok {
-		return fmt.Errorf("the build for the component %q does not appear to be a valid registry Build", name)
+	buildToUpdate, err := b.Iteration.Build(name)
+	if err != nil {
+		return err
 	}
 
 	if buildToUpdate.ID == "" {
@@ -215,7 +207,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
-	_, err := b.client.UpdateBuild(ctx,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
@@ -229,7 +221,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	}
 
 	buildToUpdate.Status = status
-	b.Iteration.builds.Store(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
@@ -307,7 +299,7 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 	return nil
 }
 
-// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// PopulateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
 // If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
 // that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
 // All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
@@ -323,32 +315,27 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 	for _, expected := range b.Iteration.expectedBuilds {
 		var found bool
 		for _, existing := range existingBuilds {
+
 			if existing.ComponentType == expected {
 				found = true
-				build := &Build{
-					ID:            existing.ID,
-					ComponentType: existing.ComponentType,
-					RunUUID:       b.Iteration.RunUUID,
-					Status:        existing.Status,
-					Labels:        existing.Labels,
+				build, err := NewBuildFromCloudPackerBuild(existing)
+				if err != nil {
+					return fmt.Errorf("Unable to load existing build for %q: %v", existing.ComponentType, err)
 				}
-				b.Iteration.builds.Store(existing.ComponentType, build)
 
-				// TODO validate that this is safe. For builds that are DONE do we want to keep track of completed things
-				// potential issue on updating the status of a build that is already DONE. Is this possible?
-				for _, image := range existing.Images {
+				// When running against an existing build the Packer RunUUID is most likely different.
+				// We capture that difference here to know that the image was created in a different Packer run.
+				build.RunUUID = b.Iteration.RunUUID
 
-					err := b.UpdateImageForBuild(existing.ComponentType, registryimage.Image{
-						ImageID:        image.ImageID,
-						ProviderRegion: image.Region,
-					})
-
-					if err != nil {
-						log.Printf("[TRACE] unable to load existing images for %q: %v", existing.ComponentType, err)
-					}
+				// When bucket build labels represent some dynamic data set, possibly set via some user variable,
+				//  we need to make sure that any newly executed builds get the labels at runtime.
+				if build.IsNotDone() && len(b.BuildLabels) > 0 {
+					build.MergeLabels(b.BuildLabels)
 				}
 
 				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
+				b.Iteration.StoreBuild(existing.ComponentType, build)
+
 				break
 			}
 		}
@@ -359,25 +346,31 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 		}
 	}
 
+	if len(toCreate) == 0 {
+		return nil
+	}
+
 	var errs *multierror.Error
 	var wg sync.WaitGroup
-
+	var mu sync.Mutex
 	for _, buildName := range toCreate {
 		wg.Add(1)
 		go func(name string) {
 			defer wg.Done()
+
 			log.Printf("[TRACE] registering build with iteration for %q.", name)
-			// Need a way to handle skipping builds that were already created.
-			// TODO when we load an existing iteration we will probably have a build Id so we should skip.
-			// we also need to bubble up the errors here.
 			err := b.CreateInitialBuildForIteration(ctx, name)
+
 			if checkErrorCode(err, codes.AlreadyExists) {
-				// Check whether build is complete, and if so, skip it.
 				log.Printf("[TRACE] build %s already exists in Packer registry, continuing...", name)
 				return
 			}
 
-			errs = multierror.Append(errs, err)
+			if err != nil {
+				mu.Lock()
+				errs = multierror.Append(errs, err)
+				mu.Unlock()
+			}
 		}(buildName)
 	}
 	wg.Wait()
@@ -389,15 +382,14 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 // and is not marked as DONE on the HCP Packer registry.
 func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 
-	v, ok := b.Iteration.builds.Load(buildName)
-	if !ok {
+	if !b.Iteration.HasBuild(buildName) {
 		return false
 	}
 
-	build := v.(*Build)
-	hasBuildID := build.ID != ""
-	hasImages := len(build.Images) == 0
-	isNotDone := build.Status != models.HashicorpCloudPackerBuildStatusDONE
+	build, err := b.Iteration.Build(buildName)
+	if err != nil {
+		return false
+	}
 
-	return hasBuildID && hasImages && isNotDone
+	return build.IsNotDone()
 }

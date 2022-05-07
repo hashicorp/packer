@@ -1,0 +1,154 @@
+---
+description: |
+  The HashiCorp Packer Integration Program allows vendors to integrate
+  their products to work with Packer.
+page_title: Integration Program
+---
+
+# Packer Integration Program
+
+The HashiCorp Packer Integration Program allows vendors to integrate their products to work with Packer.
+
+Vendors integrating their solutions via the Packer Integration Process provide their customers a verified and seamless user experience. The Packer Integration Program currently only supports coding with the Go programming language.
+
+This program is intended to be largely a self-service process with links and guidance to information sources, clearly defined steps, and checkpoints.
+
+### Types of Packer Integrations
+
+Packer is an open source tool for creating identical machine images for multiple platforms from a single source configuration.
+Packer is lightweight, runs on every major operating system, and is highly performant, creating machine images for multiple platforms in parallel. Packer does not replace configuration management like Chef or Puppet. In fact, when building images, Packer is able to use tools like Chef or Puppet to install software onto the image.
+
+A machine image is a single static unit that contains a pre-configured operating system and installed software which is used to quickly create new running machines. Machine image formats change for each platform. Some examples include AMIs for EC2, VMDK/VMX files for VMware, OVF exports for VirtualBox, etc. To know more about use cases of Packer click ([Use Cases - Introduction | Packer by HashiCorp](/#features))
+
+The diagram below depicts the key Packer integration categories and types.
+
+<figure style={{ margin: '3rem 0', textAlign: 'center' }}>
+  <img
+    src="/img/docs/packer-ecosystem-diagram.png"
+    alt="Packer Ecosystem Integration Diagram"
+    style={{ margin: '1rem auto', width: '460px', display: 'block' }}
+  />
+  <figcaption class="g-type-body-small" style={{ color: '#6d6d6d' }}>
+    Packer Ecosystem Intergation Diagram
+  </figcaption>
+</figure>
+
+Main Packer categories for partners to integrate with include:
+
+- **Data Sources**
+  - Data Sources allow users to retrieve values from a remote API and store them as variables in the Packer configuration template. An example is the [AWS secrets manager](/docs/datasources/amazon/secretsmanager) data source.
+- **Builders**
+  - Builders manage the VM lifecycle. They manage launching a vm/instance, running provisioners against that instance, shutting the instance down, and saving an artifact image from that instance. Your builder handles all of the setup and cleanup costs associated with creating the output image artifact.
+- **Provisioners**
+  - Provisioners are run against the instance launched by the builder. They generally provide an interface for interacting with a particular provisioning tool, such as Ansible, Puppet, or Chef.
+- **Post-Processors**
+  - Post-Processors manage the image artifact after it has been created. This can be something general like running a compression tool against the artifact, or something specific like uploading it to a particular cloud service.
+
+### Development Process
+
+The Packer integration development process is divided into six steps. By following these steps, Packer integrations can be developed alongside HashiCorp to ensure that the integrations are able to be verified and supported in Packer as quickly as possible. A visual representation of the self-guided steps is depicted below.
+
+![Packer Integration Program Steps](/img/docs/packer-integration-steps-diagram.png 'Packer Integration Program Steps')
+
+The individual Packer integration steps include:
+
+1. Engage: Initial contact between vendor and HashiCorp
+1. Enable: Information and articles to aid with the development of the integration
+1. Dev/Test: Integration development and test process
+1. Review: HashiCorp code review and verification of integration (iterative process)
+1. Release: Verified integration made available and listed on the HashiCorp website once the HashiCorp technology partnership agreement has been executed
+1. Support: Ongoing maintenance and support of the provider by the vendor.
+
+#### 1. Engage
+
+Please begin by providing some basic information about the integration that is being built via a simple [webform](https://docs.google.com/forms/d/e/1FAIpQLSfgq3HJ9Rfsi7LgPLFln28ZrmarATGlD_6A47-Io-bPUftKUw/viewform)
+
+This information is recorded and used by HashiCorp to track the integration through various stages. The information is also used to notify the integration developer of any overlapping work, perhaps coming from the community so you may better focus resources.
+
+Packer has an active community and ecosystem of partners that may have already started working on a similar integration. We'll do our best to connect similar parties to avoid duplicate work.
+
+#### 2. Enable
+
+While not mandatory, HashiCorp encourages vendors to sign an MNDA (Mutual Non-Disclosure Agreement) to allow for open dialog and sharing of ideas during the integration process.
+
+In an effort to support our self-serve model we’ve included links to resources, documentation, examples and best practices to guide you through the Packer integration development and testing process.
+
+- [Writing vendor extension guide](/docs/plugins/creation)
+- Sample development implemented by a [partner](https://github.com/exoscale/packer-plugin-exoscale)
+- [Scaffolding plugin repository](https://github.com/hashicorp/packer-plugin-scaffolding) to help bootstrap a new contribution:
+- Contributing to Packer [guidelines](https://github.com/hashicorp/packer/blob/main/.github/CONTRIBUTING.md)
+- [Packer developer community forum](https://discuss.hashicorp.com/c/packer/23)
+- [Packer's source code](https://github.com/hashicorp/packer)
+
+We encourage vendors to closely follow the above guidance. Adopting the same structure and coding patterns helps expedite the review and release cycles.
+
+#### 3. Dev & Test
+
+Packer requires all code-level integrations to be written in the [Go](https://golang.org/) programming language and contain an [MPL-2.0](https://en.wikipedia.org/wiki/Mozilla_Public_License) open source license. The only knowledge necessary to write a plugin is basic command-line skills and knowledge of the Go programming language. When writing in Go-Language, HashiCorp has found the integration development process to be straightforward and simple when vendors pay close attention and follow the resources and by adopting the same structure and coding patterns helps expedite the review and release cycles. Please remember that all integration major steps should contain acceptance testing and the appropriate documentation.
+
+Data Sources
+
+- [Custom Data Sources documentation](/docs/plugins/creation/custom-datasources)
+- [Example Data Source](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/datasource)
+
+Builders
+
+- [Custom Builders documentation](/docs/plugins/creation/custom-builders)
+- [Example Builder](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/builder/order)
+
+Provisioners
+
+- [Custom Provisioners documentation](/docs/plugins/creation/custom-provisioners)
+- [Example Provisioner](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/provisioner/toppings)
+
+Post-Processors
+
+- [Custom Post-Processors documentation](/docs/plugins/creation/custom-post-processors)
+- [Example Post-Processor](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/post-processor/receipt)
+
+Packer-Plugin-SDK
+
+- The [Packer-plugin SDK](https://github.com/hashicorp/packer-plugin-sdk) contains tools to help plugin developers with common needs, like handling SSH connections or basic plugin architecture.
+
+#### 4. Review
+
+During the review process, HashiCorp will provide feedback on the newly developed integration. This is an important step to allow HashiCorp to review and verify your Packer integration. Please send the integration code and other relevant logs for verification to: [Packer-integration-dev@hashicorp.com](mailto:packer-integration-dev@hashicorp.com).
+
+In order to document your plugins with Packer, please submit a GitHub pull request (PR) against the [Packer project](https://github.com/hashicorp/packer). See [Registering Plugin Documentation](/docs/plugins/creation#registering-plugin-documentation) for instructions on how to register your remote plugin documentation with Packer.
+The review process can take a while to complete and may require some iterations through the code to address any problems identified by the HashiCorp team.
+
+#### 5. Release
+
+At this stage, it is expected that the integration is fully complete, the necessary documentation has been written, the acceptance tests have all passed, and that HashiCorp has reviewed the integration. Once the plugin has been validated and accepted by HashiCorp, the plugin can be hosted on GitHub so it can easily be [downloaded then installed within Packer](/docs/plugins/creation#creating-a-github-release).
+
+Once the integration has been released the vendor is requested to sign the HashiCorp Technology Partner Agreement so that we can have their integration be listed on the HashiCorp website.
+
+#### 6. Support
+
+Many vendors view the release step to be the end of the journey, while at HashiCorp we view it to be the beginning of the journey. Getting the integration built is just the first step in enabling users to leverage it against their infrastructure. Once development is completed, on-going effort is required to support the developed integration, maintain the plugin and address any issues in a timely manner.
+
+The expectation from the vendor/partner is to create a mechanism for them to track and resolve all issues on an ongoing basis. Vendors who choose to not support their integration will not be considered a verified integration and cannot be listed on the website.
+
+### Checklist
+
+Below is an ordered checklist of steps that should be followed during the integration process. This just reiterates the steps already documented in the sections above.
+
+Below is an ordered checklist of steps that should be followed during the integration process. This just reiterates the steps already documented in the sections above.
+
+<Checklist>
+
+- Fill out the Packer integration [webform](https://docs.google.com/forms/d/e/1FAIpQLSfgq3HJ9Rfsi7LgPLFln28ZrmarATGlD_6A47-Io-bPUftKUw/viewform)
+- Execute the HashiCorp MNDA (Mutual Non-Disclosure Agreement) if needed
+- Develop and test Packer integration along with the acceptance tests and documentation
+- Send email to [packer-integration-dev@hashicorp.com](mailto:packer-integration-dev@hashicorp.com) to schedule an initial review
+- Address review feedback and finalize the development process
+- Provide HashiCorp with credentials for underlying infrastructure for test purposes
+- Demo the integration and/or send the test logs to HashiCorp at: [packer-integration-dev@hashicorp.com](mailto:packer-integration-dev@hashicorp.com)
+- Execute HashiCorp Partner Agreement Documents, review logo guidelines, partner listing and more
+- Plan to continue supporting the integration with additional functionality and responding to customer issues.
+
+</Checklist>
+
+### Contact Us
+
+For any questions or feedback, please contact us at: packer-integration-dev@hashicorp.com.

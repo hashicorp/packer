@@ -99,10 +99,15 @@ func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 	ia.MetaArgs.AddFlagSets(flags)
 }
 
-// InitArgs represents a parsed cli line for a `packer build`
+// InitArgs represents a parsed cli line for a `packer init <path>`
 type InitArgs struct {
 	MetaArgs
 	Upgrade bool
+}
+
+// PluginsRequiredArgs represents a parsed cli line for a `packer plugins required <path>`
+type PluginsRequiredArgs struct {
+	MetaArgs
 }
 
 // ConsoleArgs represents a parsed cli line for a `packer console`
