@@ -117,7 +117,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return cty.NullVal(cty.EmptyObject), err
+		return cty.NullVal(cty.EmptyObject), fmt.Errorf("HTTP request error. Response code: %d", resp.StatusCode)
 	}
 
 	contentType := resp.Header.Get("Content-Type")
