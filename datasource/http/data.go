@@ -101,6 +101,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	// TODO: How to make a test case for this?
 	if err != nil {
+		fmt.Println("Error creating http request")
 		return cty.NullVal(cty.EmptyObject), err
 	}
 
@@ -111,6 +112,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	resp, err := client.Do(req)
 	// TODO: How to make test case for this
 	if err != nil {
+		fmt.Println("Error making performing http request")
 		return cty.NullVal(cty.EmptyObject), err
 	}
 
@@ -131,6 +133,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	bytes, err := ioutil.ReadAll(resp.Body)
 	// TODO: How to make test case for this?
 	if err != nil {
+		fmt.Println("Error processing response body of call")
 		return cty.NullVal(cty.EmptyObject), err
 	}
 

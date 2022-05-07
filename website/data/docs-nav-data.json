@@ -713,6 +713,10 @@
             "path": "datasources/hcp/hcp-packer-image"
           },
           {
+            "title": "Http",
+            "path": "datasources/http/http"
+          },
+          {
             "title": "Image-Deprecated",
             "path": "datasources/hcp/packer-image-iteration",
             "hidden": true
