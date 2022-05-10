@@ -19,15 +19,15 @@ The `http` data source makes an HTTP GET request to the given URL and exports in
 
 ## Basic Example
 
-Below is a fully functioning example. It stores information about an image
-iteration, which can then be parsed and accessed using HCL tools.
+```hcl 
+data "http" "example" {
+  url = "https://checkpoint-api.hashicorp.com/v1/check/terraform"
 
-```hcl
-data "packer-image-iteration" "hardened-source" {
-  bucket = "hardened-ubuntu-16-04"
-  channel = "production-stable"
+  # Optional request headers
+  request_headers = {
+    Accept = "application/json"
+  }
 }
-```
 
 ## Configuration Reference
 
