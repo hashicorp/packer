@@ -255,7 +255,7 @@
     "path": "sshkey",
     "repo": "ivoronin/packer-plugin-sshkey",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Tencent Cloud",
