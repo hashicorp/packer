@@ -111,7 +111,7 @@
     "title": "HuaweiCloud",
     "path": "huaweicloud",
     "repo": "huaweicloud/packer-plugin-huaweicloud",
-    "version": "latest",
+    "version": "v0.4.0",
     "pluginTier": "community",
     "sourceBranch": "master"
   },
@@ -255,7 +255,7 @@
     "path": "sshkey",
     "repo": "ivoronin/packer-plugin-sshkey",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Tencent Cloud",
