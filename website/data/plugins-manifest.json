@@ -111,7 +111,7 @@
     "title": "HuaweiCloud",
     "path": "huaweicloud",
     "repo": "huaweicloud/packer-plugin-huaweicloud",
-    "version": "latest",
+    "version": "v0.4.0",
     "pluginTier": "community",
     "sourceBranch": "master"
   },
