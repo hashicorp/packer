@@ -32,8 +32,12 @@ type Datasource struct {
 }
 
 type DatasourceOutput struct {
+        // The URL the data was requested from. 
 	Url              string            `mapstructure:"url"`
+	// The raw body of the HTTP response.
 	Response_body    string            `mapstructure:"body"`
+	// A map of strings representing the response HTTP headers. 
+	// Duplicate headers are contatenated with , according to [RFC2616](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2)
 	Response_headers map[string]string `mapstructure:"request_headers"`
 }
 
