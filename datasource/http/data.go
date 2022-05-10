@@ -23,7 +23,7 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	// The URL to request data from. This URL must respond with a `200 OK` response and a `text/*` or `application/json` Content-Type
 	Url string `mapstructure:"url" required:"true"`
-	// Request headers for call
+	// A map of strings representing additional HTTP headers to include in the request.
 	Request_headers map[string]string `mapstructure:"request_headers" required:"false"`
 }
 
