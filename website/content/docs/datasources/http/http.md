@@ -14,8 +14,7 @@ page_title: Http - Data Sources
 
 Type: `http`
 
-The `http` Data Source retrieves information from an http endpoint to be used
-during packer builds
+The `http` data source makes an HTTP GET request to the given URL and exports information about the response.
 
 
 ## Basic Example
