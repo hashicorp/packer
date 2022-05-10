@@ -39,6 +39,7 @@ described.
 
 @include 'datasource/http/Config-required.mdx'
 
+### Not Required:
 @include 'datasource/http/Config-not-required.mdx'
 
 ## Datasource outputs
