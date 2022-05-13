@@ -256,3 +256,6 @@ jobs:
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
+          dev_tags: |
+            hashicorppreview/${{ env.REPO_NAME }}:${{ env.version }}-dev
+            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
