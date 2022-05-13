@@ -258,4 +258,4 @@ jobs:
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
           dev_tags: |
             hashicorppreview/${{ env.REPO_NAME }}:${{ env.version }}-dev
-            docker.io/hashicorppreview/${{ env.repo }}:${{ env.version }}-${{ github.sha }}
+            docker.io/hashicorppreview/${{ env.REPO_NAME }}:${{ env.version }}-${{ github.sha }}
