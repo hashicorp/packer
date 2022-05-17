@@ -718,6 +718,10 @@
             "hidden": true
           }
         ]
+      },
+      {
+        "title": "Http",
+        "path": "datasources/http"
       }
     ]
   },

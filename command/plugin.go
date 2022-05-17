@@ -17,6 +17,7 @@ import (
 	nullbuilder "github.com/hashicorp/packer/builder/null"
 	hcppackerimagedatasource "github.com/hashicorp/packer/datasource/hcp-packer-image"
 	hcppackeriterationdatasource "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
+	httpdatasource "github.com/hashicorp/packer/datasource/http"
 	nulldatasource "github.com/hashicorp/packer/datasource/null"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
@@ -64,6 +65,7 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 var Datasources = map[string]packersdk.Datasource{
 	"hcp-packer-image":     new(hcppackerimagedatasource.Datasource),
 	"hcp-packer-iteration": new(hcppackeriterationdatasource.Datasource),
+	"http":                 new(httpdatasource.Datasource),
 	"null":                 new(nulldatasource.Datasource),
 }
 
