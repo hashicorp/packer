@@ -1,6 +1,6 @@
 ---
 description: |
-  The http Data Source retrieves information from an http endpoint to be used
+  The HTTP Data Source retrieves information from an http endpoint to be used
   during Packer builds
 page_title: Http - Data Sources
 ---
@@ -19,7 +19,7 @@ The `http` data source makes an HTTP GET request to the given URL and exports in
 
 ## Basic Example
 
-```hcl 
+```hcl
 data "http" "example" {
   url = "https://checkpoint-api.hashicorp.com/v1/check/terraform"
 
@@ -28,6 +28,7 @@ data "http" "example" {
     Accept = "application/json"
   }
 }
+```
 
 ## Configuration Reference
 
