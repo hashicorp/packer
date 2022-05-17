@@ -19,7 +19,7 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	Url                 *string           `mapstructure:"url" required:"true" cty:"url" hcl:"url"`
-	Request_headers     map[string]string `mapstructure:"request_headers" required:"false" cty:"request_headers" hcl:"request_headers"`
+	RequestHeaders      map[string]string `mapstructure:"request_headers" required:"false" cty:"request_headers" hcl:"request_headers"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -51,9 +51,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 // FlatDatasourceOutput is an auto-generated flat version of DatasourceOutput.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatDatasourceOutput struct {
-	Url              *string           `mapstructure:"url" cty:"url" hcl:"url"`
-	Response_body    *string           `mapstructure:"body" cty:"body" hcl:"body"`
-	Response_headers map[string]string `mapstructure:"request_headers" cty:"request_headers" hcl:"request_headers"`
+	Url             *string           `mapstructure:"url" cty:"url" hcl:"url"`
+	ResponseBody    *string           `mapstructure:"body" cty:"body" hcl:"body"`
+	ResponseHeaders map[string]string `mapstructure:"request_headers" cty:"request_headers" hcl:"request_headers"`
 }
 
 // FlatMapstructure returns a new FlatDatasourceOutput.
