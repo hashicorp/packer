@@ -21,10 +21,10 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	// The URL to request data from. This URL must respond with a `200 OK` response and a `text/*` or `application/json` Content-Type
+	// The URL to request data from. This URL must respond with a `200 OK` response and a `text/*` or `application/json` Content-Type.
 	Url string `mapstructure:"url" required:"true"`
 	// A map of strings representing additional HTTP headers to include in the request.
-	Request_headers map[string]string `mapstructure:"request_headers" required:"false"`
+	RequestHeaders map[string]string `mapstructure:"request_headers" required:"false"`
 }
 
 type Datasource struct {
@@ -32,13 +32,13 @@ type Datasource struct {
 }
 
 type DatasourceOutput struct {
-        // The URL the data was requested from. 
-	Url              string            `mapstructure:"url"`
+	// The URL the data was requested from.
+	Url string `mapstructure:"url"`
 	// The raw body of the HTTP response.
-	Response_body    string            `mapstructure:"body"`
-	// A map of strings representing the response HTTP headers. 
-	// Duplicate headers are contatenated with , according to [RFC2616](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2)
-	Response_headers map[string]string `mapstructure:"request_headers"`
+	ResponseBody string `mapstructure:"body"`
+	// A map of strings representing the response HTTP headers.
+	// Duplicate headers are concatenated with, according to [RFC2616](https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2).
+	ResponseHeaders map[string]string `mapstructure:"request_headers"`
 }
 
 func (d *Datasource) ConfigSpec() hcldec.ObjectSpec {
@@ -99,7 +99,7 @@ func isContentTypeText(contentType string) bool {
 // https://github.com/hashicorp/terraform-provider-http/blob/main/internal/provider/data_source.go
 func (d *Datasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
-	url, headers := d.config.Url, d.config.Request_headers
+	url, headers := d.config.Url, d.config.RequestHeaders
 	client := &http.Client{}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -149,9 +149,9 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	}
 
 	output := DatasourceOutput{
-		Url:              d.config.Url,
-		Response_headers: responseHeaders,
-		Response_body:    string(bytes),
+		Url:             d.config.Url,
+		ResponseHeaders: responseHeaders,
+		ResponseBody:    string(bytes),
 	}
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
 }
