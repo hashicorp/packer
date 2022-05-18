@@ -381,6 +381,39 @@ func TestProvisionerProvision_ValidExitCodes(t *testing.T) {
 	}
 }
 
+func TestProvisionerProvision_PauseAfter(t *testing.T) {
+	config := testConfig()
+	delete(config, "inline")
+
+	// Defaults provided by Packer
+	config["remote_path"] = "c:/Windows/Temp/inlineScript.ps1"
+	config["inline"] = []string{"whoami"}
+	ui := testUi()
+	p := new(Provisioner)
+
+	// Defaults provided by Packer
+	p.config.PackerBuildName = "vmware"
+	p.config.PackerBuilderType = "iso"
+	p.config.ValidExitCodes = []int{0, 200}
+	pause_amount := time.Duration(1 * time.Second)
+	p.config.PauseAfter = pause_amount
+	comm := new(packersdk.MockCommunicator)
+	comm.StartExitStatus = 200
+	p.Prepare(config)
+
+	start_time := time.Now()
+	err := p.Provision(context.Background(), ui, comm, generatedData())
+	end_time := time.Now()
+
+	if err != nil {
+		t.Fatal("should not have error")
+	}
+
+	if end_time.Sub(start_time) < pause_amount {
+		t.Fatal("Didn't wait pause_amount")
+	}
+}
+
 func TestProvisionerProvision_InvalidExitCodes(t *testing.T) {
 	config := testConfig()
 	delete(config, "inline")

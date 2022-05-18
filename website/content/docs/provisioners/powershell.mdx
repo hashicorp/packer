@@ -244,6 +244,9 @@ provisioner "powershell" {
   exists in order to deal with times when SSH may restart, such as a system
   reboot. Set this to a higher value if reboots take a longer amount of time.
 
+- `pause_after` (string) - Wait the amount of time after provisioning a powershell
+  script, this pause be taken if all previous steps were successful.
+
 @include 'provisioners/common-config.mdx'
 
 ## Default Environmental Variables
