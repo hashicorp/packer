@@ -52,12 +52,7 @@ install-build-deps: ## Install dependencies for bin build
 	@go install github.com/mitchellh/gox@v1.0.1
 
 install-gen-deps: ## Install dependencies for code generation
-	# to avoid having to tidy our go deps, we `go get` our binaries from a temp
-	# dir. `go get` will change our deps and the following deps are not part of
-	# out code dependencies; so a go mod tidy will remove them again. `go
-	# install` seems to install the last tagged version and we want to install
-	# master.
-	@(cd $(TEMPDIR) && GO111MODULE=on go get github.com/alvaroloes/enumer@master)
+	@GO111MODULE=on go install github.com/alvaroloes/enumer@master
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
 
 install-lint-deps: ## Install linter dependencies
