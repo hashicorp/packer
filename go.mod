@@ -23,7 +23,7 @@ require (
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/hcl/v2 v2.12.0
 	github.com/hashicorp/hcp-sdk-go v0.19.0
-	github.com/hashicorp/packer-plugin-amazon v1.0.8
+	github.com/hashicorp/packer-plugin-amazon v1.1.0
 	github.com/hashicorp/packer-plugin-sdk v0.2.13
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.5 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20220128215802-99c3d69c2c27 // indirect
@@ -62,41 +62,41 @@ require (
 require (
 	github.com/caarlos0/env/v6 v6.7.2
 	github.com/hashicorp/packer-plugin-alicloud v1.0.1
-	github.com/hashicorp/packer-plugin-ansible v1.0.1
-	github.com/hashicorp/packer-plugin-azure v1.0.6
+	github.com/hashicorp/packer-plugin-ansible v1.0.2
+	github.com/hashicorp/packer-plugin-azure v1.0.7
 	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
 	github.com/hashicorp/packer-plugin-converge v1.0.1
-	github.com/hashicorp/packer-plugin-digitalocean v1.0.1
+	github.com/hashicorp/packer-plugin-digitalocean v1.0.5
 	github.com/hashicorp/packer-plugin-docker v1.0.3
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.9
-	github.com/hashicorp/packer-plugin-hcloud v1.0.2
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.12
+	github.com/hashicorp/packer-plugin-hcloud v1.0.3
 	github.com/hashicorp/packer-plugin-hyperone v1.0.0
 	github.com/hashicorp/packer-plugin-hyperv v1.0.2
 	github.com/hashicorp/packer-plugin-inspec v1.0.0
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
-	github.com/hashicorp/packer-plugin-linode v1.0.1
+	github.com/hashicorp/packer-plugin-linode v1.0.2
 	github.com/hashicorp/packer-plugin-lxc v1.0.0
 	github.com/hashicorp/packer-plugin-lxd v1.0.0
-	github.com/hashicorp/packer-plugin-ncloud v1.0.1
+	github.com/hashicorp/packer-plugin-ncloud v1.0.2
 	github.com/hashicorp/packer-plugin-oneandone v1.0.0
 	github.com/hashicorp/packer-plugin-openstack v1.0.0
 	github.com/hashicorp/packer-plugin-oracle v1.0.1
 	github.com/hashicorp/packer-plugin-outscale v1.0.2
-	github.com/hashicorp/packer-plugin-parallels v1.0.0
+	github.com/hashicorp/packer-plugin-parallels v1.0.1
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
-	github.com/hashicorp/packer-plugin-proxmox v1.0.4
+	github.com/hashicorp/packer-plugin-proxmox v1.0.6
 	github.com/hashicorp/packer-plugin-puppet v1.0.1
-	github.com/hashicorp/packer-plugin-qemu v1.0.2
+	github.com/hashicorp/packer-plugin-qemu v1.0.4
 	github.com/hashicorp/packer-plugin-salt v1.0.0
-	github.com/hashicorp/packer-plugin-tencentcloud v1.0.3
+	github.com/hashicorp/packer-plugin-tencentcloud v1.0.4
 	github.com/hashicorp/packer-plugin-triton v1.0.0
 	github.com/hashicorp/packer-plugin-ucloud v1.0.0
-	github.com/hashicorp/packer-plugin-vagrant v1.0.1
-	github.com/hashicorp/packer-plugin-virtualbox v1.0.1
+	github.com/hashicorp/packer-plugin-vagrant v1.0.2
+	github.com/hashicorp/packer-plugin-virtualbox v1.0.2
 	github.com/hashicorp/packer-plugin-vmware v1.0.5
-	github.com/hashicorp/packer-plugin-vsphere v1.0.3
-	github.com/hashicorp/packer-plugin-yandex v1.0.3
+	github.com/hashicorp/packer-plugin-vsphere v1.0.4
+	github.com/hashicorp/packer-plugin-yandex v1.1.0
 	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
@@ -124,7 +124,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
-	github.com/Telmate/proxmox-api-go v0.0.0-20210804143723-a6998deceba2 // indirect
+	github.com/Telmate/proxmox-api-go v0.0.0-20220107223401-b9c909d83a3b // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
@@ -135,7 +135,7 @@ require (
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
-	github.com/aws/aws-sdk-go v1.41.14 // indirect
+	github.com/aws/aws-sdk-go v1.42.29 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
@@ -235,9 +235,9 @@ require (
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.283 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.283 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.283 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.366 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.366 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ucloud/ucloud-sdk-go v0.20.2 // indirect
