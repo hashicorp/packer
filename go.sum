@@ -755,8 +755,8 @@ github.com/hashicorp/packer-plugin-oracle v1.0.1 h1:J2jNLTslCoq9RmMIGA+tsPjqdIZZ
 github.com/hashicorp/packer-plugin-oracle v1.0.1/go.mod h1:9sQcSpS48i4jv3PHWSBuOuO+deAuitZ4ODuZCo/KJfU=
 github.com/hashicorp/packer-plugin-outscale v1.0.2 h1:vO+sMTJNvudtwgJN4C8J4jDMvAhOzYo9YBRLepdVFUo=
 github.com/hashicorp/packer-plugin-outscale v1.0.2/go.mod h1:ZMG1MCuIDqsCr5tNHFNX8PbsQSmAdUNVlGYmdTPx1oM=
-github.com/hashicorp/packer-plugin-parallels v1.0.0 h1:01KR2Br+x8JjjXA4+0RphPU5VKmGlHwQd/baZwncGH0=
-github.com/hashicorp/packer-plugin-parallels v1.0.0/go.mod h1:iRJuNflTXPLxdWEXCNA2JdeQPglric8xidCKaouBazY=
+github.com/hashicorp/packer-plugin-parallels v1.0.1 h1:ejIRJYVeLYhejMz4pVgTogE4zIXI95YpDwzUT6EJ+Cg=
+github.com/hashicorp/packer-plugin-parallels v1.0.1/go.mod h1:e1lODIE9sjtQAR+Y5C5XF7MIqPvEiHGfYLjoIG4oumU=
 github.com/hashicorp/packer-plugin-profitbricks v1.0.1 h1:yFLUoDvm/zwzqj3J4a4pe49JpeDDGx08U9B38FXEyNk=
 github.com/hashicorp/packer-plugin-profitbricks v1.0.1/go.mod h1:qtDQ7sbc0hMXWuxt0gweUwsVyVIazRLyNCHPO19CPU0=
 github.com/hashicorp/packer-plugin-proxmox v1.0.4 h1:z0D7NjGRjHGzlQTk62O33XQiOz4dhOvEnb6e757bniE=
