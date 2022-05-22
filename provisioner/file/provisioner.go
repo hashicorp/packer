@@ -25,7 +25,7 @@ type Config struct {
 	// This is the content to copy to `destination`. If destination is a file,
 	// content will be written to that file, in case of a directory a file named
 	// `pkr-file-content` is created. It's recommended to use a file as the
-	// destination. A template_file might be referenced in here, or any
+	// destination. The `templatefile` function might be used here, or any
 	// interpolation syntax. This attribute cannot be specified with source or
 	// sources.
 	Content string `mapstructure:"content" required:"true"`
