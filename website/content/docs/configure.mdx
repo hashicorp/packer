@@ -34,12 +34,12 @@ to be set :
 Packer can optionally read a JSON file for the end user to set core settings.
 The config file of Packer will be looked up on the following paths:
 
-| unix                            | windows                          |
-| ------------------------------- | -------------------------------- |
-| `${PACKER_CONFIG}`              | `%PACKER_CONFIG%`                |
-| `PACKER_HOME_DIR/.packerconfig` | `PACKER_HOME_DIR/packer.config/` |
-
-It is not an error if no config file was found.
+| unix                             | windows                          |
+| -------------------------------  | -------------------------------- |
+| `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                |
+| `PACKER_HOME_DIR/.packerconfig`  | `PACKER_HOME_DIR/packer.config/` |
+| `${XDG_CONFIG_HOME}/packer`      |                                  |
+| `PACKER_HOME_DIR/.config/packer` |                                  |
 
 ## Packer's config directory
 
