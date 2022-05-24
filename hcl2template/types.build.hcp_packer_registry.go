@@ -48,7 +48,8 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 		BuildLabels  map[string]string `hcl:"build_labels,optional"`
 		Config       hcl.Body          `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
+	ectx := cfg.EvalContext(DatasourceContext, nil)
+	diags := gohcl.DecodeBody(body, ectx, &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
