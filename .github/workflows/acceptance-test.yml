@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir -p /tmp/test-results
           make dev
-          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)  acceptance-test:
+          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone) 
   hpats:
     runs-on: ubuntu-latest
     name: HCP Packer Acceptance Test (HPATS)
