@@ -1,5 +1,83 @@
 ## 1.8.1 (Upcoming)
 
+### NOTES:
+* All bundled plugins have been updated to their latest release to address any
+    open issues pertaining to the legacy SSH key algorithm fix made to the
+    Packer plugin SDK.
+    [GH-11761](https://github.com/hashicorp/packer/pull/11761)
+    [GH-11802](https://github.com/hashicorp/packer/pull/11802)
+* This release contains the latest golang.org/x/crypto/ssh module which
+    implements client authentication support for signature algorithms based on
+    SHA-2 for use with existing RSA keys. Previously, a client would fail to
+    authenticate with RSA keys to servers that reject signature algorithms
+    based on SHA-1.
+
+### FEATURES:
+* **New Datasource** HTTP datasource retrieves information from a HTTP
+    endpoint to be used during Packer builds.
+    [GH-11658](https://github.com/hashicorp/packer/pull/11658)
+
+### PLUGINS:
+
+External plugins have been pinned to the following versions. Please see their
+    respective changelogs for details on plugin specific bug fixes and
+    improvements.
+
+* alicloud@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.2)
+* amazon@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.1.0)
+* ansible@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ansible/releases/tag/v1.0.2)
+* azure@v1.0.8 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-azure/releases/tag/v1.0.8)
+* chef@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-chef/releases/tag/v1.0.2)
+* cloudstack@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-cloudstack/releases/tag/v1.0.1)
+* converge@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-converge/releases/tag/v1.0.1)
+* digitalocean@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-digitalocean/releases/tag/v1.0.3)
+* docker@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-docker/releases/tag/v1.0.5)
+* googlecompute@v1.0.13 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-googlecompute/releases/tag/v1.0.13)
+* hcloud@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hcloud/releases/tag/v1.0.4)
+* hyperone@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hyperone/releases/tag/v1.0.1)
+* hyperv@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hyperv/releases/tag/v1.0.3)
+* inspec@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-inspec/releases/tag/v1.0.0)
+* jdcloud@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-jdcloud/releases/tag/v1.0.1)
+* linode@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-linode/releases/tag/v1.0.3)
+* lxc@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-lxc/releases/tag/v1.0.1)
+* lxd@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-lxd/releases/tag/v1.0.1)
+* ncloud@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ncloud/releases/tag/v1.0.3)
+* oneandone@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-oneandone/releases/tag/v1.0.1)
+* openstack@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-openstack/releases/tag/v1.0.1)
+* oracle@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-oracle/releases/tag/v1.0.2)
+* parallels@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-parallels/releases/tag/v1.0.2)
+* profitbricks@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-profitbricks/releases/tag/v1.0.2)
+* proxmox@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.0.7)
+* puppet@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-puppet/releases/tag/v1.0.1)
+* qemu@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.4)
+* salt@v1.0.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-salt/releases/tag/v1.0.0)
+* tencentcloud@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-tencentcloud/releases/tag/v1.0.5)
+* triton@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-triton/releases/tag/v1.0.1)
+* ucloud@v1.0.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ucloud/releases/tag/v1.0.1)
+* vagrant@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vagrant/releases/tag/v1.0.2)
+* virtualbox@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-virtualbox/releases/tag/v1.0.3)
+* vmware@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vmware/releases/tag/v1.0.5)
+* vsphere@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.4)
+* yandex@v1.1.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-yandex/releases/tag/v1.1.1)
+
+### IMPROVEMENTS:
+* Bump hcp-sdk-go to latest version.
+    [GH-11763](https://github.com/hashicorp/packer/pull/11763)
+* Plugins installed via the `packer plugins install` command will now
+    automatically load for builds using HCL2 templates without a
+    required_plugins block.
+    [GH-11712](https://github.com/hashicorp/packer/pull/11712)
+* Plugins installed via the `packer plugins install` command will now
+    automatically load for builds using JSON templates.
+    [GH-11712](https://github.com/hashicorp/packer/pull/11712)
+
+### BUG FIXES:
+* Bump github.com/hashicorp/go-getter to fix the untarring of OVA files
+    regression. [GH-11675](https://github.com/hashicorp/packer/pull/11675)
+* Bump github.com/hashicorp/packer-plugin-sdk to address legacy SSH key
+    algorithms in SSH communicator.
+    [GH-11774](https://github.com/hashicorp/packer/pull/11774)
+    [GH-11754](https://github.com/hashicorp/packer/pull/11754)
 ## 1.8.0 (March 4, 2022)
 ### NOTES:
 * **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc#packer-sdc). Plugin maintainers who may be using the packer-plugin-check as part of their release pipeline are encouraged to move to the packer-sdc command. As an alternative, maintainers can continue to use the packer-plugin-check by pinning the command to Packer 1.7.10.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
