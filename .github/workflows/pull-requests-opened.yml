@@ -1,0 +1,14 @@
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  add-to-project:
+    name: Add pull-requests to request queue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/add-to-project@main
+        with:
+          project-url: https://github.com/orgs/hashicorp/projects/105
+          github-token: ${{ secrets.PACKER_PROJ_BOARD_TOKEN }}
