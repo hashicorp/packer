@@ -61,42 +61,42 @@ require (
 
 require (
 	github.com/caarlos0/env/v6 v6.7.2
-	github.com/hashicorp/packer-plugin-alicloud v1.0.1
+	github.com/hashicorp/packer-plugin-alicloud v1.0.2
 	github.com/hashicorp/packer-plugin-ansible v1.0.2
-	github.com/hashicorp/packer-plugin-azure v1.0.7
+	github.com/hashicorp/packer-plugin-azure v1.0.8
 	github.com/hashicorp/packer-plugin-chef v1.0.2
-	github.com/hashicorp/packer-plugin-cloudstack v1.0.0
+	github.com/hashicorp/packer-plugin-cloudstack v1.0.1
 	github.com/hashicorp/packer-plugin-converge v1.0.1
-	github.com/hashicorp/packer-plugin-digitalocean v1.0.5
-	github.com/hashicorp/packer-plugin-docker v1.0.3
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.12
-	github.com/hashicorp/packer-plugin-hcloud v1.0.3
-	github.com/hashicorp/packer-plugin-hyperone v1.0.0
-	github.com/hashicorp/packer-plugin-hyperv v1.0.2
+	github.com/hashicorp/packer-plugin-digitalocean v1.0.6
+	github.com/hashicorp/packer-plugin-docker v1.0.5
+	github.com/hashicorp/packer-plugin-googlecompute v1.0.13
+	github.com/hashicorp/packer-plugin-hcloud v1.0.4
+	github.com/hashicorp/packer-plugin-hyperone v1.0.1
+	github.com/hashicorp/packer-plugin-hyperv v1.0.3
 	github.com/hashicorp/packer-plugin-inspec v1.0.0
-	github.com/hashicorp/packer-plugin-jdcloud v1.0.0
-	github.com/hashicorp/packer-plugin-linode v1.0.2
-	github.com/hashicorp/packer-plugin-lxc v1.0.0
-	github.com/hashicorp/packer-plugin-lxd v1.0.0
-	github.com/hashicorp/packer-plugin-ncloud v1.0.2
-	github.com/hashicorp/packer-plugin-oneandone v1.0.0
-	github.com/hashicorp/packer-plugin-openstack v1.0.0
-	github.com/hashicorp/packer-plugin-oracle v1.0.1
+	github.com/hashicorp/packer-plugin-jdcloud v1.0.1
+	github.com/hashicorp/packer-plugin-linode v1.0.3
+	github.com/hashicorp/packer-plugin-lxc v1.0.1
+	github.com/hashicorp/packer-plugin-lxd v1.0.1
+	github.com/hashicorp/packer-plugin-ncloud v1.0.3
+	github.com/hashicorp/packer-plugin-oneandone v1.0.1
+	github.com/hashicorp/packer-plugin-openstack v1.0.1
+	github.com/hashicorp/packer-plugin-oracle v1.0.2
 	github.com/hashicorp/packer-plugin-outscale v1.0.2
-	github.com/hashicorp/packer-plugin-parallels v1.0.1
-	github.com/hashicorp/packer-plugin-profitbricks v1.0.1
-	github.com/hashicorp/packer-plugin-proxmox v1.0.6
+	github.com/hashicorp/packer-plugin-parallels v1.0.2
+	github.com/hashicorp/packer-plugin-profitbricks v1.0.2
+	github.com/hashicorp/packer-plugin-proxmox v1.0.7
 	github.com/hashicorp/packer-plugin-puppet v1.0.1
 	github.com/hashicorp/packer-plugin-qemu v1.0.4
 	github.com/hashicorp/packer-plugin-salt v1.0.0
-	github.com/hashicorp/packer-plugin-tencentcloud v1.0.4
-	github.com/hashicorp/packer-plugin-triton v1.0.0
-	github.com/hashicorp/packer-plugin-ucloud v1.0.0
+	github.com/hashicorp/packer-plugin-tencentcloud v1.0.5
+	github.com/hashicorp/packer-plugin-triton v1.0.1
+	github.com/hashicorp/packer-plugin-ucloud v1.0.1
 	github.com/hashicorp/packer-plugin-vagrant v1.0.2
-	github.com/hashicorp/packer-plugin-virtualbox v1.0.2
-	github.com/hashicorp/packer-plugin-vmware v1.0.5
+	github.com/hashicorp/packer-plugin-virtualbox v1.0.3
+	github.com/hashicorp/packer-plugin-vmware v1.0.6
 	github.com/hashicorp/packer-plugin-vsphere v1.0.4
-	github.com/hashicorp/packer-plugin-yandex v1.1.0
+	github.com/hashicorp/packer-plugin-yandex v1.1.1
 	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
@@ -130,6 +130,7 @@ require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible // indirect
 	github.com/antihax/optional v1.0.0 // indirect
+	github.com/apache/cloudstack-go/v2 v2.12.0 // indirect
 	github.com/apparentlymart/go-cidr v1.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
@@ -169,6 +170,7 @@ require (
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
@@ -244,7 +246,6 @@ require (
 	github.com/ufilesdk-dev/ufile-gosdk v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/vmware/govmomi v0.26.0 // indirect
-	github.com/xanzy/go-cloudstack v2.4.1+incompatible // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	github.com/yandex-cloud/go-genproto v0.0.0-20211202135052-789603780fb2 // indirect
 	github.com/yandex-cloud/go-sdk v0.0.0-20211206101223-7c4e7926bf53 // indirect
