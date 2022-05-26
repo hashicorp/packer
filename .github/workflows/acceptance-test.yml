@@ -9,7 +9,7 @@ on:
   schedule:
   # Runs against the default branch every day at midnight
   - cron: "0 0 * * *"
-
+  workflow-dispatch: 
 jobs:
   get-go-version:
     runs-on: ubuntu-latest
