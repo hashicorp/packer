@@ -76,10 +76,7 @@ jobs:
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - name: Clone HPATS
-        run: |
-          eval `ssh-agent -s` && ssh-add - <<< '${{ secrets.HPATS_ACCESS_TOKEN }}'
-          git clone git@github.com:hashicorp/hcp-packer-acceptance-tests.github
-          cd hcp-packer-acceptance-tests
+        run: git clone git@github.com:hashicorp/hcp-packer-acceptance-tests.github && cd hcp-packer-acceptance-tests
       - name: Set HCP Access Token
         run: export HCP_ACCESS_TOKEN=$(make hcp/get-auth0-m2m-access-token)
       - name: Run HPATS
