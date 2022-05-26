@@ -9,7 +9,7 @@ on:
   schedule:
   # Runs against the default branch every day at midnight
   - cron: "0 0 * * *"
-  workflow-dispatch:
+  workflow_dispatch:
 
 jobs:
   get-go-version:
