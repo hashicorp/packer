@@ -82,8 +82,7 @@ jobs:
           cd hcp-packer-acceptance-tests
       - name: Set HCP Access Token
         run: |
-          export HCP_ACCESS_TOKEN=$(curl --request POST --header "Content-Type: application/json" --data '{"audience": "https://api.hashicorp.cloud","grant_type": "client_credentials","client_id": "'"$AUTH0_CLIENT_ID"'","client_secret": "'"$AUTH0_CLIENT_SECRET"'"}' "${AUTH0_HOST}/oauth/token" | jq '.access_token' --raw-output)
-          if [ -z $HCP_ACCESS_TOKEN ]; then; echo "HCP_ACCESS_TOKEN was not set" && exit 1; else echo "HCP_ACCESS_TOKEN set"; fi;
+          export HCP_ACCESS_TOKEN=$(curl --silent --request POST --header "Content-Type: application/json" --data '{"audience": "https://api.hashicorp.cloud","grant_type": "client_credentials","client_id": "'"$AUTH0_CLIENT_ID"'","client_secret": "'"$AUTH0_CLIENT_SECRET"'"}' "${AUTH0_HOST}/oauth/token" | jq '.access_token' --raw-output)
       - name: Run HPATS
         run: make test
   # Send a slack notification if one of the jobs defined above fails
