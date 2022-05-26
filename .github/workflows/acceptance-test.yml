@@ -9,7 +9,6 @@ on:
   schedule:
   # Runs against the default branch every day at midnight
   - cron: "0 0 * * *"
-  workflow-dispatch:
 
 jobs:
   get-go-version:
@@ -27,7 +26,7 @@ jobs:
           echo "::set-output name=go-version::$(cat .go-version)"
   acceptance-test:
     runs-on: ubuntu-latest
-    name: Packer Acceptance Test
+    name: Acceptance Test
     needs: get-go-version
     env: 
       # AWS Creds for Assume Role
@@ -35,6 +34,11 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
+      # HCP Creds for Acceptance Tests
+      HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
+      HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
+      HCP_ORG_ID: ${{ secrets.HCP_ORG_ID }}
+      HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -54,40 +58,13 @@ jobs:
         run: |
           mkdir -p /tmp/test-results
           make dev
-          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone) 
-  hpats:
-    runs-on: ubuntu-latest
-    name: HCP Packer Acceptance Test (HPATS)
-    needs: get-go-version
-    env:
-      # Set HCP credentials
-      HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-      HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-      AUTH0_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-      AUTH0_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-      AUTH0_HOST: ${{ secrets.AUTH0_HOST }}
-      HCP_ORG_ID: ${{ secrets.HCP_ORG_ID }}
-      HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
-      HCP_API_HOST: ${{ secrets.HCP_API_HOST }}
-      HPATS_API_URL: https://${{ secrets.HCP_API_HOST }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: ${{ needs.get-go-version.outputs.go-version }}
-      - name: Clone HPATS
-        run: git clone git@github.com:hashicorp/hcp-packer-acceptance-tests.github && cd hcp-packer-acceptance-tests
-      - name: Set HCP Access Token
-        run: export HCP_ACCESS_TOKEN=$(make hcp/get-auth0-m2m-access-token)
-      - name: Run HPATS
-        run: make test
-  # Send a slack notification if one of the jobs defined above fails
+          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+  # Send a slack notification if either job defined above fails
   slack-notify:
     needs: 
       - get-go-version
       - acceptance-test
-      - hpats
-    if: always() && (needs.get-go-version.result == 'failure' || needs.acceptance-test.result == 'failure' || needs.hpats.result == 'failure')
+    if: always() && (needs.get-go-version.result == 'failure' || needs.acceptance-test.result == 'failure')
     runs-on: ubuntu-latest
     steps:
       - name: Send slack notification on failure
