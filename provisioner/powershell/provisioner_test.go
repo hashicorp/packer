@@ -395,14 +395,17 @@ func TestProvisionerProvision_PauseAfter(t *testing.T) {
 	p.config.PackerBuildName = "vmware"
 	p.config.PackerBuilderType = "iso"
 	p.config.ValidExitCodes = []int{0, 200}
-	pause_amount := time.Duration(1 * time.Second)
+	pause_amount := time.Second
 	p.config.PauseAfter = pause_amount
 	comm := new(packersdk.MockCommunicator)
 	comm.StartExitStatus = 200
-	p.Prepare(config)
+	err := p.Prepare(config)
+	if err != nil {
+		t.Fatalf("Prepar failed: %s", err)
+	}
 
 	start_time := time.Now()
-	err := p.Provision(context.Background(), ui, comm, generatedData())
+	err = p.Provision(context.Background(), ui, comm, generatedData())
 	end_time := time.Now()
 
 	if err != nil {
