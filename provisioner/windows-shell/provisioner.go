@@ -258,6 +258,11 @@ func (p *Provisioner) createFlattenedEnvVars() (flattened string) {
 		keyValue := strings.SplitN(envVar, "=", 2)
 		envVars[keyValue[0]] = keyValue[1]
 	}
+
+	for k, v := range p.config.Env {
+		envVars[k] = v
+	}
+
 	// Create a list of env var keys in sorted order
 	var keys []string
 	for k := range envVars {
