@@ -439,6 +439,18 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 		envVars[keyValue[0]] = escapedEnvVarValue
 	}
 
+	for k, v := range p.config.Env {
+		envVarName, err := interpolate.Render(k, &p.config.ctx)
+		if err != nil {
+			return
+		}
+		envVarValue, err := interpolate.Render(v, &p.config.ctx)
+		if err != nil {
+			return
+		}
+		envVars[envVarName] = psEscape.Replace(envVarValue)
+	}
+
 	// Create a list of env var keys in sorted order
 	var keys []string
 	for k := range envVars {

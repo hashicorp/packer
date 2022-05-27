@@ -606,16 +606,44 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 		{"FOO=bar`baz"},  // User env var with value containing a backtick
 
 	}
+	userEnvVarmapTests := []map[string]string{
+		{},
+		{
+			"BAR": "foo",
+		},
+		{
+			"BAR": "foo",
+			"YAR": "yaa",
+		},
+		{
+			"BAR": "foo=yaa",
+		},
+		{
+			"BAR": "=foo",
+		},
+		{
+			"BAR": "foo$yaa",
+		},
+		{
+			"BAR": "foo\"yaa",
+		},
+		{
+			"BAR": "foo'yaa",
+		},
+		{
+			"BAR": "foo`yaa",
+		},
+	}
 	expected := []string{
 		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		`$env:BAR="foo"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:BAR="foo"; $env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; $env:YAR="yaa"; `,
+		`$env:BAR="foo=yaa"; $env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:BAR="=foo"; $env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		"$env:BAR=\"foo`$yaa\"; $env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo`\"yaa\"; $env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo`'yaa\"; $env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo``yaa\"; $env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
@@ -628,6 +656,7 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 
 	for i, expectedValue := range expected {
 		p.config.Vars = userEnvVarTests[i]
+		p.config.Env = userEnvVarmapTests[i]
 		flattenedEnvVars = p.createFlattenedEnvVars(true)
 		if flattenedEnvVars != expectedValue {
 			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
@@ -758,16 +787,44 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 		{"FOO=bar'baz"},  // User env var with value containing a single quote
 		{"FOO=bar`baz"},  // User env var with value containing a backtick
 	}
+	userEnvVarmapTests := []map[string]string{
+		{},
+		{
+			"BAR": "foo",
+		},
+		{
+			"BAR": "foo",
+			"YAR": "yaa",
+		},
+		{
+			"BAR": "foo=yaa",
+		},
+		{
+			"BAR": "=foo",
+		},
+		{
+			"BAR": "foo$yaa",
+		},
+		{
+			"BAR": "foo\"yaa",
+		},
+		{
+			"BAR": "foo'yaa",
+		},
+		{
+			"BAR": "foo`yaa",
+		},
+	}
 	expected := []string{
 		`$env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		`$env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
-		"$env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
-		"$env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		`$env:BAR="foo"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:BAR="foo"; $env:BAZ="qux"; $env:FOO="bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; $env:YAR="yaa"; `,
+		`$env:BAR="foo=yaa"; $env:FOO="bar=baz"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		`$env:BAR="=foo"; $env:FOO="=bar"; $env:PACKER_BUILDER_TYPE="iso"; $env:PACKER_BUILD_NAME="vmware"; `,
+		"$env:BAR=\"foo`$yaa\"; $env:FOO=\"bar`$baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo`\"yaa\"; $env:FOO=\"bar`\"baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo`'yaa\"; $env:FOO=\"bar`'baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
+		"$env:BAR=\"foo``yaa\"; $env:FOO=\"bar``baz\"; $env:PACKER_BUILDER_TYPE=\"iso\"; $env:PACKER_BUILD_NAME=\"vmware\"; ",
 	}
 
 	p := new(Provisioner)
@@ -780,6 +837,7 @@ func TestProvisioner_createFlattenedEnvVars_windows(t *testing.T) {
 
 	for i, expectedValue := range expected {
 		p.config.Vars = userEnvVarTests[i]
+		p.config.Env = userEnvVarmapTests[i]
 		flattenedEnvVars = p.createFlattenedEnvVars(false)
 		if flattenedEnvVars != expectedValue {
 			t.Fatalf("expected flattened env vars to be: %s, got %s.", expectedValue, flattenedEnvVars)
