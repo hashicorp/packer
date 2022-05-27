@@ -1,4 +1,4 @@
-## 1.8.1 (Upcoming)
+## 1.8.1 (May 27, 2022)
 
 ### NOTES:
 * All bundled plugins have been updated to their latest release to address any
