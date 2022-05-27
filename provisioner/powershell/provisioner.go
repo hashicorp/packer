@@ -28,8 +28,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
 )
 
-var retryableSleep = 2 * time.Second
-
 var psEscape = strings.NewReplacer(
 	"$", "`$",
 	"\"", "`\"",
