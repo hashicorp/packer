@@ -257,7 +257,7 @@ func extractScript(p *Provisioner) (string, error) {
 }
 
 func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
-	ui.Say(fmt.Sprintf("Provisioning with Powershell..."))
+	ui.Say("Provisioning with Powershell...")
 	p.communicator = comm
 	p.generatedData = generatedData
 
