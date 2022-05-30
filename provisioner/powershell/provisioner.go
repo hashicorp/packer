@@ -86,6 +86,9 @@ type Config struct {
 	//    ```
 	DebugMode int `mapstructure:"debug_mode"`
 
+	// A duration of how long to pause after the provisioner
+	PauseAfter time.Duration `mapstructure:"pause_after"`
+
 	ctx interpolate.Context
 }
 
@@ -347,6 +350,11 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	})
 	if err != nil {
 		log.Printf("remote cleanup script failed to upload; skipping the removal of temporary files: %s; ", strings.Join(uploadedScripts, ","))
+	}
+
+	if p.config.PauseAfter != 0 {
+		ui.Say(fmt.Sprintf("Pausing %s after this provisioner...", p.config.PauseAfter))
+		time.Sleep(p.config.PauseAfter)
 	}
 
 	return nil
