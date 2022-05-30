@@ -1,0 +1,23 @@
+name: Close Stale Issues
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  stale-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v5.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-issue-stale: 23
+          days-before-pr-stale: -1 # deactivate the action for PRs
+          days-before-close: 7
+          stale-issue-message: |
+            Hi,
+
+            This issue has not received any update in the last 3 weeks, and will automatically be closed in 7 days if it does not receive any activity by then.
+
+            If you find the [community forum](https://discuss.hashicorp.com/c/packer) to be more helpful or if you've found the answer to your question elsewhere please feel free to post a response and close the issue.
+          only-labels: needs-reply
