@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Packer Community Support
+    url: https://discuss.hashicorp.com/c/packer/23
+    about: If you have a question, or are looking for advice, please post on our Discuss forum! The community loves to chime in to help. Happy Coding!
