@@ -438,6 +438,13 @@ func (p *Provisioner) escapeEnvVars() ([]string, map[string]string) {
 		envVars[keyValue[0]] = strings.Replace(keyValue[1], "'", `'"'"'`, -1)
 	}
 
+	// Add the environment variables defined in the HCL specs
+	for k, v := range p.config.Env {
+		// As with p.config.Vars, we escape single-quotes so they're not
+		// misinterpreted by the remote shell.
+		envVars[k] = strings.Replace(v, "'", `'"'"'`, -1)
+	}
+
 	// Create a list of env var keys in sorted order
 	var keys []string
 	for k := range envVars {
