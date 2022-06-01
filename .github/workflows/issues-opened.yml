@@ -40,7 +40,7 @@ jobs:
             If no activity is taken on this question within 30 days it will be automatically closed.
 
             If you find the forum to be more helpful or if you've found the answer to your question elsewhere please feel free to post a response and close the issue.
-      - uses: actions-ecosystem/action-add-labels@v1.1.0
+      - uses: actions-ecosystem/action-add-labels@v1.1.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: needs-reply
