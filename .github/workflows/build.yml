@@ -1,6 +1,6 @@
 #
-# This GitHub action builds Packer binaries, linux packages, 
-# and Docker images from source, and uploads them to GitHub artifacts. 
+# This GitHub action builds Packer binaries, linux packages,
+# and Docker images from source, and uploads them to GitHub artifacts.
 # Note that artifacts available via GitHub Artifacts are not codesigned or notarized.
 #
 
@@ -40,7 +40,7 @@ jobs:
           echo "::set-output name=product-version::$(make version)"
 
   generate-metadata-file:
-    needs: 
+    needs:
       - get-product-version
     runs-on: ubuntu-latest
     outputs:
@@ -75,7 +75,7 @@ jobs:
           echo "::set-output name=ldflags::"-s -w -X \'$project/version.GitCommit=$sha\'""
 
   build-other:
-    needs: 
+    needs:
       - get-product-version
       - get-go-version
       - set-ld-flags
@@ -121,7 +121,7 @@ jobs:
           path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
 
   build-linux:
-    needs: 
+    needs:
       - get-product-version
       - get-go-version
       - set-ld-flags
@@ -174,9 +174,6 @@ jobs:
           binary: "dist/${{ env.REPO_NAME }}"
           deb_depends: "openssl"
           rpm_depends: "openssl"
-          config_dir: ".release/linux/package/"
-          preinstall: ".release/linux/preinst"
-          postremove: ".release/linux/postrm"
       - name: Add Linux Package names to env
         run: |
           echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
@@ -191,7 +188,7 @@ jobs:
           path: out/${{ env.DEB_PACKAGE }}
 
   build-darwin:
-    needs: 
+    needs:
       - get-product-version
       - get-go-version
       - set-ld-flags
