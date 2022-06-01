@@ -1,8 +1,0 @@
-#!/bin/bash
-
-if [ "$1" = "purge" ]
-then
-  userdel packer
-fi
-
-exit 0
