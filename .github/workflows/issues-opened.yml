@@ -28,7 +28,7 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'question')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-create-comment@v1.0.0
+      - uses: actions-ecosystem/action-create-comment@v1.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
