@@ -12,6 +12,9 @@ env:
   REPO_NAME: "packer"
   GO_TAGS: ""
 
+permissions:
+  contents: read
+
 jobs:
   get-go-version:
     runs-on: ubuntu-latest

@@ -6,6 +6,9 @@ name: "Go Validate"
 
 on: [ workflow_dispatch, push ]
 
+permissions:
+  contents: read
+
 jobs:
   check-mod-tidy:
     runs-on: ubuntu-latest

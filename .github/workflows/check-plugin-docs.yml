@@ -15,6 +15,9 @@ on:
   schedule:
     - cron: "45 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   check-plugin-docs:
     runs-on: ubuntu-latest

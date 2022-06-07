@@ -10,6 +10,9 @@ on: [ workflow_dispatch, push ]
 env:
   PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  contents: read
+
 jobs:
   linux-go-tests:
     runs-on: ubuntu-latest
