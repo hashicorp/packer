@@ -366,6 +366,9 @@ var cmpOpts = []cmp.Option{
 	cmpopts.IgnoreFields(packerregistry.Iteration{},
 		"Fingerprint", // Fingerprint will change everytime
 	),
+	cmpopts.IgnoreFields(packerregistry.Bucket{},
+		"SourceImagesToParentIterations", // Requires execution of datasource at this time
+	),
 	cmpopts.IgnoreFields(VariableAssignment{},
 		"Expr", // its an interface
 	),

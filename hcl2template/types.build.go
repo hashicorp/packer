@@ -265,8 +265,8 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 		for _, value := range dsValues.AsValueMap() {
 			values := value.AsValueMap()
-			imgId, itId := values["id"], values["iteration_id"]
-			cfg.bucket.SourceImagesToParentIterations[imgId.AsString()] = itId.AsString()
+			imgID, itID := values["id"], values["iteration_id"]
+			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = itID.AsString()
 		}
 	}
 

@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -278,9 +279,12 @@ func TestBucket_PopulateIteration(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tc {
+	for i, tt := range tc {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
+
+			os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "test-run-"+strconv.Itoa(i))
+			defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 
 			mockService := NewMockPackerClientService()
 			mockService.BucketAlreadyExist = true
