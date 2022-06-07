@@ -2,6 +2,10 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  contents: read
+  issues: write  # for github/issue-labeler to create or remove labels
+
 jobs:
   issue_triage:
     name: Issue Opened Triage
