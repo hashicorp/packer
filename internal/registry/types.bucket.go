@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
@@ -14,6 +15,10 @@ import (
 	"github.com/hashicorp/packer/internal/registry/env"
 	"google.golang.org/grpc/codes"
 )
+
+// HeartbeatPeriod dictates how often a heartbeat is sent to HCP to signal a
+// build is still alive.
+const HeartbeatPeriod = 2 * time.Minute
 
 // Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
@@ -401,4 +406,57 @@ func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 	}
 
 	return build.IsNotDone()
+}
+
+// HeartbeatBuild periodically sends status updates for the build
+//
+// This lets HCP infer that a build is still running and should not be marked
+// as cancelled by the HCP Packer registry service.
+//
+// Usage: defer (b.HeartbeatBuild(ctx, build, period))()
+func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), error) {
+	buildToUpdate, err := b.Iteration.Build(build)
+	if err != nil {
+		return nil, err
+	}
+
+	heartbeatChan := make(chan struct{})
+	go func() {
+		log.Printf("[TRACE] starting heartbeats")
+
+		tick := time.NewTicker(HeartbeatPeriod)
+
+	outHeartbeats:
+		for {
+			select {
+			case <-heartbeatChan:
+				tick.Stop()
+				break outHeartbeats
+			case <-ctx.Done():
+				tick.Stop()
+				break outHeartbeats
+			case <-tick.C:
+				_, err = b.client.UpdateBuild(ctx,
+					buildToUpdate.ID,
+					buildToUpdate.RunUUID,
+					"",
+					"",
+					"",
+					nil,
+					models.HashicorpCloudPackerBuildStatusRUNNING,
+					nil,
+				)
+				if err != nil {
+					log.Printf("[ERROR] failed to send heartbeat for build %q: %s", build, err)
+				} else {
+					log.Printf("[TRACE] updating build status for %q to running", build)
+				}
+			}
+		}
+
+		log.Printf("[TRACE] stopped heartbeating build %s", build)
+	}()
+	return func() {
+		close(heartbeatChan)
+	}, nil
 }

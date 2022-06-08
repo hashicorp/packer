@@ -53,6 +53,26 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		return r, true, false, nil
 	}
 
+	// Bump build status first so we don't end-up chaining post-processors
+	// that don't heartbeat, hence letting too long happen between two
+	// refreshes, and letting the build go to the FAILED status.
+	err := p.ArtifactMetadataPublisher.UpdateBuildStatus(
+		ctx,
+		p.BuilderType,
+		models.HashicorpCloudPackerBuildStatusRUNNING,
+	)
+	if err != nil {
+		log.Printf("[TRACE] failed to heartbeat running build %s: %s", p.BuilderType, err)
+	}
+
+	cleanupHeartbeat, err := p.ArtifactMetadataPublisher.HeartbeatBuild(ctx, p.BuilderType)
+	if err != nil {
+		log.Printf("[ERROR] failed to start heartbeat function")
+	}
+	if cleanupHeartbeat != nil {
+		defer cleanupHeartbeat()
+	}
+
 	source, keep, override, err := p.PostProcessor.PostProcess(ctx, ui, source)
 	if err != nil {
 		if parErr := p.ArtifactMetadataPublisher.UpdateBuildStatus(ctx, p.BuilderType, models.HashicorpCloudPackerBuildStatusFAILED); parErr != nil {
