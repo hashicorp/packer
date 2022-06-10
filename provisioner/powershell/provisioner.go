@@ -89,6 +89,9 @@ type Config struct {
 	// A duration of how long to pause after the provisioner
 	PauseAfter time.Duration `mapstructure:"pause_after"`
 
+	// Run pwsh.exe instead of powershell.exe - latest version of powershell.
+	UsePwsh bool `mapstructure:"use_pwsh"`
+
 	ctx interpolate.Context
 }
 
@@ -112,7 +115,12 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		return baseCmd
 	}
 
-	return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+	if p.config.UsePwsh {
+		return fmt.Sprintf(`pwsh -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
+	} else {
+		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+	}
+
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }

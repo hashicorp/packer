@@ -86,6 +86,8 @@ provisioner "powershell" {
   Packer injects some environmental variables by default into the
   environment, as well, which are covered in the section below.
 
+- `use_pwsh` (boolean) - Run `pwsh.exe` instead of `powershell.exe`. Defaults to false.
+
   This is a [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
   may use user variables and template functions in this field. If you are
   running on AWS, Azure, Google Compute, or OpenStack and would like to access
