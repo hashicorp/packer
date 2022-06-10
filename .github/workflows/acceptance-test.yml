@@ -34,11 +34,6 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
-      # HCP Creds for Acceptance Tests
-      HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
-      HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
-      HCP_ORG_ID: ${{ secrets.HCP_ORG_ID }}
-      HCP_PROJECT_ID: ${{ secrets.HCP_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
