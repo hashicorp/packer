@@ -192,6 +192,7 @@ func (client *Client) UpdateBuild(
 	runUUID,
 	cloudProvider,
 	sourceImageID string,
+	sourceIterationID string,
 	labels map[string]string,
 	status models.HashicorpCloudPackerBuildStatus,
 	images []*models.HashicorpCloudPackerImageCreateBody,
@@ -205,12 +206,13 @@ func (client *Client) UpdateBuild(
 	params.Body = &models.HashicorpCloudPackerUpdateBuildRequest{
 		BuildID: buildID,
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
-			Images:        images,
-			PackerRunUUID: runUUID,
-			Labels:        labels,
-			Status:        status,
-			CloudProvider: cloudProvider,
-			SourceImageID: sourceImageID,
+			Images:            images,
+			PackerRunUUID:     runUUID,
+			Labels:            labels,
+			Status:            status,
+			CloudProvider:     cloudProvider,
+			SourceImageID:     sourceImageID,
+			SourceIterationID: sourceIterationID,
 		},
 	}
 

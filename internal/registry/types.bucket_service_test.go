@@ -10,7 +10,7 @@ import (
 
 func TestInitialize_NewBucketNewIteration(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 
@@ -66,7 +66,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
@@ -123,7 +123,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
@@ -195,7 +195,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
@@ -243,7 +243,7 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 
 func TestUpdateBuildStatus(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
@@ -300,7 +300,7 @@ func TestUpdateBuildStatus(t *testing.T) {
 
 func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGEPRINT", "testnumber")
+	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true

@@ -17,21 +17,23 @@ import (
 
 // Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
-	Slug         string
-	Description  string
-	Destination  string
-	BucketLabels map[string]string
-	BuildLabels  map[string]string
-	Iteration    *Iteration
-	client       *Client
+	Slug                           string
+	Description                    string
+	Destination                    string
+	BucketLabels                   map[string]string
+	BuildLabels                    map[string]string
+	SourceImagesToParentIterations map[string]string
+	Iteration                      *Iteration
+	client                         *Client
 }
 
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
 // images to the HCP Packer registry.
 func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
 	b := Bucket{
-		BucketLabels: make(map[string]string),
-		BuildLabels:  make(map[string]string),
+		BucketLabels:                   make(map[string]string),
+		BuildLabels:                    make(map[string]string),
+		SourceImagesToParentIterations: make(map[string]string),
 	}
 
 	i, err := NewIteration(opts)
@@ -156,6 +158,7 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
 		"",
+		"",
 		buildToUpdate.Labels,
 		status,
 		nil,
@@ -192,7 +195,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
-	var providerName, sourceID string
+	var providerName, sourceID, sourceIterationID string
 	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
 	for _, image := range buildToUpdate.Images {
 		// These values will always be the same for all images in a single build,
@@ -204,6 +207,11 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 			sourceID = image.SourceImageID
 		}
 
+		// Check if image is using some other HCP Packer image
+		if v, ok := b.SourceImagesToParentIterations[image.SourceImageID]; ok {
+			sourceIterationID = v
+		}
+
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
@@ -212,6 +220,7 @@ func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 		buildToUpdate.RunUUID,
 		buildToUpdate.CloudProvider,
 		sourceID,
+		sourceIterationID,
 		buildToUpdate.Labels,
 		status,
 		images,

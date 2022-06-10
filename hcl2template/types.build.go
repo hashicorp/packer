@@ -253,6 +253,21 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		for _, source := range build.Sources {
 			cfg.bucket.RegisterBuildForComponent(source.String())
 		}
+
+		// Known HCP Packer Image Datasource, whose id is the SourceImageId for some build.
+		const hcpDatasourceType string = "hcp-packer-image"
+		values := ectx.Variables[dataAccessor].AsValueMap()
+
+		dsValues, ok := values[hcpDatasourceType]
+		if !ok {
+			return build, diags
+		}
+
+		for _, value := range dsValues.AsValueMap() {
+			values := value.AsValueMap()
+			imgID, itID := values["id"], values["iteration_id"]
+			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = itID.AsString()
+		}
 	}
 
 	return build, diags
