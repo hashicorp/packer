@@ -273,6 +273,24 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 	}
 }
 
+func TestProvisionerPrepare_Pwsh(t *testing.T){
+
+	config := testConfig()
+
+	config["pwsh"] = true
+
+	p := new(Provisioner)
+	err := p.Prepare(config)
+
+	if err != nil {
+		t.Fatalf("Should not be error: %s", err)
+	}
+
+	if p.config.Pwsh != true {
+		t.Fatalf("Expected 'pwsh' to be: true")
+	}
+}
+
 func TestProvisionerPrepare_EnvironmentVars(t *testing.T) {
 	config := testConfig()
 
