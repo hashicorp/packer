@@ -1,4 +1,49 @@
-## 1.8.2 (Upcoming)
+## 1.8.2 (June 14, 2022)
+
+### NOTES:
+* The Packer plugin SDK includes the latest version of the go-getter library,
+    which has been updated to a address the vulnerabilities listed in
+    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-
+    vulnerabilities-in-go-getter-library/39930). The updated SDK contains can
+    be breaking for some plugins as the updated go-getter settings in the SDK
+    prevent reading/writing through symlinks and to sub-directories that
+    require upward path traversal (e.g /tmp/.../etc/hosts). The updates also
+    includes a 30 minute maximum timeout for file downloading, which can be an
+    issue for very large or slow downloads if they exceed more then 30 minutes
+    to complete.
+
+### SECURITY:
+* Bump packer-plugin-sdk to v0.3.0 to address reported vulnerabilities within
+    the go-getter library.
+    [GH-11843](https://github.com/hashicorp/packer/pull/11843)
+* Bump plugins relying on go-getter for downloading remote files to address
+    reported vulnerabilities within the go-getter library. See
+    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-
+    vulnerabilities-in-go-getter-library/39930) for details.
+    [GH-11844](https://github.com/hashicorp/packer/pull/11844)
+
+### FEATURES:
+* Future Scaffolding: This release contains changes that allow Packer core to
+    validate that a newly built image is a direct child of a HCP Packer
+    registry source image. This feature is only available for HCP Packer
+    enabled builds using the `hcp_packer_image` data source for setting a
+    builder's source image.
+    [GH-11832](https://github.com/hashicorp/packer/pull/11832)
+
+### IMPROVEMENTS:
+* Add `pause_after` configuration argument to Powershell provisioner.
+    [GH-11792](https://github.com/hashicorp/packer/pull/11792)
+* HCP Packer data sources will now fail for revoked iterations to prevent building non-compliant images.
+    [GH-11854](https://github.com/hashicorp/packer/pull/11854)
+
+### BUG FIXES:
+
+* Add missing support for the `env` configuration argument in remote shell
+    provisioners. [GH-11819](https://github.com/hashicorp/packer/pull/11819)
+* The preinst and postrm user scripts, including the service configuration
+    directives, have been removed from the Packer rpm installations packages,
+    as Packer does not require a service user in order to run.
+    [GH-11831](https://github.com/hashicorp/packer/pull/11831)
 
 ## 1.8.1 (May 27, 2022)
 
@@ -15,7 +60,7 @@
     based on SHA-1.
 
 ### FEATURES:
-* **New Datasource** HTTP datasource retrieves information from a HTTP
+* **New Datasource** HTTP data source retrieves information from a HTTP
     endpoint to be used during Packer builds.
     [GH-11658](https://github.com/hashicorp/packer/pull/11658)
 
