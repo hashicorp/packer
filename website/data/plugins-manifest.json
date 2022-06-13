@@ -332,5 +332,12 @@
     "repo": "hashicorp/packer-plugin-yandex",
     "version": "latest",
     "pluginTier": "community"
-  }
+  },
+  {
+    "title": "Password",
+    "path": "password",
+    "repo": " alexp-computematrix/packer-plugin-password",
+    "pluginTier": "community",    
+    "version": "latest",
+  }  
 ]
