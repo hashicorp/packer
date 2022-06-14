@@ -4,8 +4,14 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   issue_comment_triage:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+      issues: write  # for actions-ecosystem/action-remove-labels to remove issue labels
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

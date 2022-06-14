@@ -10,6 +10,9 @@ on:
   # Runs against the default branch every day at midnight
   - cron: "0 0 * * *"
 
+permissions:
+  contents: read
+
 jobs:
   get-go-version:
     runs-on: ubuntu-latest
@@ -56,6 +59,8 @@ jobs:
           PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
   # Send a slack notification if either job defined above fails
   slack-notify:
+    permissions:
+      contents: none
     needs: 
       - get-go-version
       - acceptance-test
