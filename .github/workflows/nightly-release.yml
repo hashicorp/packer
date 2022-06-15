@@ -14,11 +14,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  permissions:
-    contents: write
   # Build a fresh set of artifacts
   build-artifacts:
     uses: hashicorp/packer/.github/workflows/build.yml@main
