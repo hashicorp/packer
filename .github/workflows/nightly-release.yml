@@ -13,12 +13,12 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: read
 
 jobs:
   # Build a fresh set of artifacts
   build-artifacts:
-    permissions:
-      contents: none
     uses: hashicorp/packer/.github/workflows/build.yml@main
   github-release:
     needs: build-artifacts
