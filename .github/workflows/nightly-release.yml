@@ -17,6 +17,8 @@ permissions:
   contents: read
 
 jobs:
+  permissions:
+    contents: write
   # Build a fresh set of artifacts
   build-artifacts:
     uses: hashicorp/packer/.github/workflows/build.yml@main
