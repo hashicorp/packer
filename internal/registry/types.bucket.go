@@ -161,10 +161,10 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
-		buildToUpdate.CloudProvider,
 		"",
 		"",
-		buildToUpdate.Labels,
+		"",
+		nil,
 		status,
 		nil,
 	)
