@@ -2,14 +2,14 @@
 
 ### NOTES:
 * The Packer plugin SDK includes the latest version of the go-getter library,
-    which has been updated to a address the vulnerabilities listed in
-    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-
-    vulnerabilities-in-go-getter-library/39930). The updated SDK contains can
+    which has been updated to address the vulnerabilities listed in
+    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-vulnerabilities-in-go-getter-library/39930). 
+    The updated SDK contains changes that can
     be breaking for some plugins as the updated go-getter settings in the SDK
     prevent reading/writing through symlinks and to sub-directories that
     require upward path traversal (e.g /tmp/.../etc/hosts). The updates also
     includes a 30 minute maximum timeout for file downloading, which can be an
-    issue for very large or slow downloads if they exceed more then 30 minutes
+    issue for very large or slow downloads if they exceed more than 30 minutes
     to complete.
 
 ### SECURITY:
@@ -17,9 +17,7 @@
     the go-getter library.
     [GH-11843](https://github.com/hashicorp/packer/pull/11843)
 * Bump plugins relying on go-getter for downloading remote files to address
-    reported vulnerabilities within the go-getter library. See
-    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-
-    vulnerabilities-in-go-getter-library/39930) for details.
+    reported vulnerabilities within the go-getter library. See [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-vulnerabilities-in-go-getter-library/39930) for details.
     [GH-11844](https://github.com/hashicorp/packer/pull/11844)
 
 ### FEATURES:
@@ -29,6 +27,22 @@
     enabled builds using the `hcp_packer_image` data source for setting a
     builder's source image.
     [GH-11832](https://github.com/hashicorp/packer/pull/11832)
+    
+### PLUGINS:
+
+External plugins have been pinned to the following versions. Please see their
+    respective changelogs for details on plugin specific bug fixes and
+    improvements.
+
+* azure@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-azure/releases/tag/v1.1.0)
+* hyperv@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-hyperv/releases/tag/v1.0.4)
+* parallels@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-parallels/releases/tag/v1.0.3)
+* proxmox@v1.0.8 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.0.8)
+* qemu@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.5)
+* vagrant@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vagrant/releases/tag/v1.0.3)
+* virtualbox@v1.0.4 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-virtualbox/releases/tag/v1.0.4)
+* vmware@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vmware/releases/tag/v1.0.7)
+* vsphere@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.5)
 
 ### IMPROVEMENTS:
 * Add `pause_after` configuration argument to Powershell provisioner.
