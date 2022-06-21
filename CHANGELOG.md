@@ -1,4 +1,4 @@
-## 1.8.2 (June 14, 2022)
+## 1.8.2 (June 21, 2022)
 
 ### NOTES:
 * The Packer plugin SDK includes the latest version of the go-getter library,
