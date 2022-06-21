@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/zclconf/go-cty/cty"
 
@@ -109,6 +110,15 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"iteration from HCP Packer registry: %s", err.Error())
 	}
+
+	revokeAt := time.Time(iteration.RevokeAt)
+	if !revokeAt.IsZero() && revokeAt.Before(time.Now().UTC()) {
+		// If RevokeAt is not a zero date and is before NOW, it means this iteration is revoked and should not be used
+		// to build new images.
+		return cty.NullVal(cty.EmptyObject), fmt.Errorf("the iteration associated with the channel %s is revoked and can not be used on Packer builds",
+			d.config.Channel)
+	}
+
 	output := DatasourceOutput{
 		AuthorID:           iteration.AuthorID,
 		BucketName:         iteration.BucketSlug,

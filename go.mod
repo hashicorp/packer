@@ -96,7 +96,7 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.0.5
 	github.com/hashicorp/packer-plugin-yandex v1.1.1
-	github.com/scaleway/packer-plugin-scaleway v1.0.5
+	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
 require (

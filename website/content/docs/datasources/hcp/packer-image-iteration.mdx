@@ -23,6 +23,11 @@ To get started with HCP Packer, refer to the [HCP Packer documentation](https://
 
 ~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry. An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
 
+## Revoked Iterations
+
+If an iteration is revoked, the `hcp-packer-iteration` data source will fail and Packer won't proceed with the build. Building new images from a revoked image is not compliant.
+Iterations that are scheduled to be revoked will still be considered valid until the revocation date.
+
 ## Basic Example
 
 Below is a fully functioning example. It stores information about an image
