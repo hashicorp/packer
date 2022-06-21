@@ -1,9 +1,11 @@
+## 1.8.3 (Upcoming)
+
 ## 1.8.2 (June 21, 2022)
 
 ### NOTES:
 * The Packer plugin SDK includes the latest version of the go-getter library,
     which has been updated to address the vulnerabilities listed in
-    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-vulnerabilities-in-go-getter-library/39930). 
+    [HCSEC-2022-13](https://discuss.hashicorp.com/t/hcsec-2022-13-multiple-vulnerabilities-in-go-getter-library/39930).
     The updated SDK contains changes that can
     be breaking for some plugins as the updated go-getter settings in the SDK
     prevent reading/writing through symlinks and to sub-directories that
@@ -27,7 +29,7 @@
     enabled builds using the `hcp_packer_image` data source for setting a
     builder's source image.
     [GH-11832](https://github.com/hashicorp/packer/pull/11832)
-    
+
 ### PLUGINS:
 
 External plugins have been pinned to the following versions. Please see their
