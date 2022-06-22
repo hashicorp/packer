@@ -144,9 +144,10 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 }
 
 // UpdateBuildStatus updates the status of a build entry on the HCP Packer registry with its current local status.
+// For updating a build status to DONE use CompleteBuild.
 func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
 	if status == models.HashicorpCloudPackerBuildStatusDONE {
-		return b.markBuildComplete(ctx, name)
+		return fmt.Errorf("do not use UpdateBuildStatus for updating to DONE")
 	}
 
 	buildToUpdate, err := b.Iteration.Build(name)
@@ -176,10 +177,10 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 	return nil
 }
 
-// markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
+// CompleteBuild should be called to set a build on the HCP Packer registry to DONE.
 // Upon a successful call markBuildComplete will publish all images created by the named build,
 // and set the registry build to done. A build with no images can not be set to DONE.
-func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
+func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
 	buildToUpdate, err := b.Iteration.Build(name)
 	if err != nil {
 		return err
