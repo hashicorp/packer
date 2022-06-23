@@ -159,6 +159,10 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
+	if buildToUpdate.Status == models.HashicorpCloudPackerBuildStatusDONE {
+		return fmt.Errorf("cannot modify status of DONE build %s", name)
+	}
+
 	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
