@@ -285,7 +285,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 			values := value.AsValueMap()
 			imgID, itID := values["id"], values["iteration_id"]
-			sourceIteration := packerregistry.SourceIteration{
+			sourceIteration := packerregistry.ParentIteration{
 				IterationID: itID.AsString(),
 			}
 			for _, itValue := range iterationDatasourceValues.AsValueMap() {
