@@ -144,10 +144,19 @@ func (d *DeactivatedDatasource) Execute() (cty.Value, error) {
 	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, channel=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.Channel)
 
-	iteration, err := cli.GetIterationFromChannel(ctx, d.config.Bucket, d.config.Channel)
+	channel, err := cli.GetChannel(ctx, d.config.Bucket, d.config.Channel)
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"image iteration from HCP Packer registry: %s", err.Error())
+	}
+
+	var iteration *models.HashicorpCloudPackerIteration
+	if channel != nil {
+		if channel.Iteration != nil {
+			iteration = channel.Iteration
+		}
+		return cty.NullVal(cty.EmptyObject), fmt.Errorf("there is no iteration associated with the channel %s",
+			d.config.Channel)
 	}
 
 	revokeAt := time.Time(iteration.RevokeAt)
