@@ -94,6 +94,13 @@
     "isHcpPackerReady": true
   },
   {
+    "title": "Gridscale",
+    "path": "gridscale",
+    "repo": "gridscale/packer-plugin-gridscale",
+    "version": "latest",
+    "isHcpPackerReady": false
+  },
+  {
     "title": "HashiCups",
     "path": "hashicups",
     "repo": "hashicorp/packer-plugin-hashicups",
