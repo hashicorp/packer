@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
@@ -14,6 +15,10 @@ import (
 	"github.com/hashicorp/packer/internal/registry/env"
 	"google.golang.org/grpc/codes"
 )
+
+// HeartbeatPeriod dictates how often a heartbeat is sent to HCP to signal a
+// build is still alive.
+const HeartbeatPeriod = 2 * time.Minute
 
 // Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
@@ -139,9 +144,10 @@ func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentTy
 }
 
 // UpdateBuildStatus updates the status of a build entry on the HCP Packer registry with its current local status.
+// For updating a build status to DONE use CompleteBuild.
 func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
 	if status == models.HashicorpCloudPackerBuildStatusDONE {
-		return b.markBuildComplete(ctx, name)
+		return fmt.Errorf("do not use UpdateBuildStatus for updating to DONE")
 	}
 
 	buildToUpdate, err := b.Iteration.Build(name)
@@ -153,13 +159,17 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
+	if buildToUpdate.Status == models.HashicorpCloudPackerBuildStatusDONE {
+		return fmt.Errorf("cannot modify status of DONE build %s", name)
+	}
+
 	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
-		buildToUpdate.CloudProvider,
 		"",
 		"",
-		buildToUpdate.Labels,
+		"",
+		nil,
 		status,
 		nil,
 	)
@@ -171,10 +181,10 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 	return nil
 }
 
-// markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
+// CompleteBuild should be called to set a build on the HCP Packer registry to DONE.
 // Upon a successful call markBuildComplete will publish all images created by the named build,
 // and set the registry build to done. A build with no images can not be set to DONE.
-func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
+func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
 	buildToUpdate, err := b.Iteration.Build(name)
 	if err != nil {
 		return err
@@ -401,4 +411,57 @@ func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 	}
 
 	return build.IsNotDone()
+}
+
+// HeartbeatBuild periodically sends status updates for the build
+//
+// This lets HCP infer that a build is still running and should not be marked
+// as cancelled by the HCP Packer registry service.
+//
+// Usage: defer (b.HeartbeatBuild(ctx, build, period))()
+func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), error) {
+	buildToUpdate, err := b.Iteration.Build(build)
+	if err != nil {
+		return nil, err
+	}
+
+	heartbeatChan := make(chan struct{})
+	go func() {
+		log.Printf("[TRACE] starting heartbeats")
+
+		tick := time.NewTicker(HeartbeatPeriod)
+
+	outHeartbeats:
+		for {
+			select {
+			case <-heartbeatChan:
+				tick.Stop()
+				break outHeartbeats
+			case <-ctx.Done():
+				tick.Stop()
+				break outHeartbeats
+			case <-tick.C:
+				_, err = b.client.UpdateBuild(ctx,
+					buildToUpdate.ID,
+					buildToUpdate.RunUUID,
+					"",
+					"",
+					"",
+					nil,
+					models.HashicorpCloudPackerBuildStatusRUNNING,
+					nil,
+				)
+				if err != nil {
+					log.Printf("[ERROR] failed to send heartbeat for build %q: %s", build, err)
+				} else {
+					log.Printf("[TRACE] updating build status for %q to running", build)
+				}
+			}
+		}
+
+		log.Printf("[TRACE] stopped heartbeating build %s", build)
+	}()
+	return func() {
+		close(heartbeatChan)
+	}, nil
 }

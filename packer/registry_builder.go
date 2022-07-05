@@ -50,6 +50,14 @@ func (b *RegistryBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packers
 		log.Printf("[TRACE] failed to update HCP Packer registry status for %q: %s", b.Name, err)
 	}
 
+	cleanupHeartbeat, err := b.ArtifactMetadataPublisher.HeartbeatBuild(ctx, b.Name)
+	if err != nil {
+		log.Printf("[ERROR] failed to start heartbeat function")
+	}
+	if cleanupHeartbeat != nil {
+		defer cleanupHeartbeat()
+	}
+
 	ui.Say(fmt.Sprintf("Publishing build details for %s to the HCP Packer registry", b.Name))
 	artifact, err := b.Builder.Run(ctx, ui, hook)
 	if err != nil {

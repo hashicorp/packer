@@ -39,7 +39,7 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 	// This is a bit of a hack for now to denote that this pp should just update the state of a build in the Packer registry.
 	// TODO create an actual post-processor that we can embed here that will do the updating and printing.
 	if p.PostProcessor == nil {
-		if parErr := p.ArtifactMetadataPublisher.UpdateBuildStatus(ctx, p.BuilderType, models.HashicorpCloudPackerBuildStatusDONE); parErr != nil {
+		if parErr := p.ArtifactMetadataPublisher.CompleteBuild(ctx, p.BuilderType); parErr != nil {
 			err := fmt.Errorf("[TRACE] failed to update Packer registry with image artifacts for %q: %s", p.BuilderType, parErr)
 			return nil, false, true, err
 		}
@@ -51,6 +51,26 @@ func (p *RegistryPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui
 		}
 
 		return r, true, false, nil
+	}
+
+	// Bump build status first so we don't end-up chaining post-processors
+	// that don't heartbeat, hence letting too long happen between two
+	// refreshes, and letting the build go to the FAILED status.
+	err := p.ArtifactMetadataPublisher.UpdateBuildStatus(
+		ctx,
+		p.BuilderType,
+		models.HashicorpCloudPackerBuildStatusRUNNING,
+	)
+	if err != nil {
+		log.Printf("[TRACE] failed to heartbeat running build %s: %s", p.BuilderType, err)
+	}
+
+	cleanupHeartbeat, err := p.ArtifactMetadataPublisher.HeartbeatBuild(ctx, p.BuilderType)
+	if err != nil {
+		log.Printf("[ERROR] failed to start heartbeat function")
+	}
+	if cleanupHeartbeat != nil {
+		defer cleanupHeartbeat()
 	}
 
 	source, keep, override, err := p.PostProcessor.PostProcess(ctx, ui, source)
