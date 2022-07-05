@@ -98,6 +98,7 @@
     "path": "gridscale",
     "repo": "gridscale/packer-plugin-gridscale",
     "version": "latest",
+    "pluginTier": "verified",
     "isHcpPackerReady": false
   },
   {
