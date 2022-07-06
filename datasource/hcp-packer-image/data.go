@@ -4,6 +4,7 @@ package hcp_packer_image
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -11,10 +12,12 @@ import (
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer/internal/registry"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
@@ -26,7 +29,19 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	// The name of the bucket your image is in.
 	Bucket string `mapstructure:"bucket_name" required:"true"`
+	// The name of the channel to use when retrieving your image.
+	// Either this or `iteration_id` MUST be set.
+	// Mutually exclusive with `iteration_id`.
+	// If using several images from a single iteration, you may prefer
+	// sourcing an iteration first, and referencing it for subsequent uses,
+	// as every `hcp_packer_image` with the channel set will generate a
+	// potentially billable HCP Packer request, but if several
+	// `hcp_packer_image`s use a shared `hcp_packer_iteration` that will
+	// only generate one potentially billable request.
+	Channel string `mapstructure:"channel" required:"true"`
 	// The name of the iteration Id to use when retrieving your image
+	// Either this or `channel` MUST be set.
+	// Mutually exclusive with `channel`
 	IterationID string `mapstructure:"iteration_id" required:"true"`
 	// The name of the cloud provider that your image is for. For example,
 	// "aws" or "gce".
@@ -53,12 +68,19 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	if d.config.Bucket == "" {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The `bucket_name` must be specified"))
 	}
-	if d.config.IterationID == "" {
-		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("The `iteration_id`"+
-			" must be specified. If you do not know your iteration_id, you "+
-			"can retrieve it using the bucket name and desired channel using"+
-			" the hcp-packer-iteration data source."))
+
+	// Ensure either channel or iteration_id are set, and not both at the same time
+	if d.config.Channel == "" &&
+		d.config.IterationID == "" {
+		errs = packersdk.MultiErrorAppend(errs, errors.New(
+			"The `iteration_id` or `channel` must be specified."))
 	}
+	if d.config.Channel != "" &&
+		d.config.IterationID != "" {
+		errs = packersdk.MultiErrorAppend(errs, errors.New(
+			"`iteration_id` and `channel` cannot both be specified."))
+	}
+
 	if d.config.Region == "" {
 		errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("`region` is "+
 			"currently a required field."))
@@ -109,6 +131,31 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 	return (&DatasourceOutput{}).FlatMapstructure().HCL2Spec()
 }
 
+func (d *Datasource) getIteration(
+	ctx context.Context,
+	cli *registry.Client,
+) (*models.HashicorpCloudPackerIteration, error) {
+	if d.config.IterationID != "" {
+		iter, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error retrieving image iteration from HCP Packer registry: %s",
+				err)
+		}
+
+		return iter, nil
+	}
+
+	iter, err := cli.GetIterationFromChannel(ctx, d.config.Bucket, d.config.Channel)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error retrieving iteration from HCP Packer registry: %s",
+			err)
+	}
+
+	return iter, nil
+}
+
 func (d *Datasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
 
@@ -121,10 +168,9 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
 
-	iteration, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
+	iteration, err := d.getIteration(ctx, cli)
 	if err != nil {
-		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
-			"image iteration from HCP Packer registry: %s", err.Error())
+		return cty.NullVal(cty.EmptyObject), err
 	}
 
 	revokeAt := time.Time(iteration.RevokeAt)
