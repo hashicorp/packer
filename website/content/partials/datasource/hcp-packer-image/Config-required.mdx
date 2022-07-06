@@ -2,7 +2,19 @@
 
 - `bucket_name` (string) - The name of the bucket your image is in.
 
+- `channel` (string) - The name of the channel to use when retrieving your image.
+  Either this or `iteration_id` MUST be set.
+  Mutually exclusive with `iteration_id`.
+  If using several images from a single iteration, you may prefer
+  sourcing an iteration first, and referencing it for subsequent uses,
+  as every `hcp_packer_image` with the channel set will generate a
+  potentially billable HCP Packer request, but if several
+  `hcp_packer_image`s use a shared `hcp_packer_iteration` that will
+  only generate one potentially billable request.
+
 - `iteration_id` (string) - The name of the iteration Id to use when retrieving your image
+  Either this or `channel` MUST be set.
+  Mutually exclusive with `channel`
 
 - `cloud_provider` (string) - The name of the cloud provider that your image is for. For example,
   "aws" or "gce".

@@ -19,6 +19,7 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	Bucket              *string           `mapstructure:"bucket_name" required:"true" cty:"bucket_name" hcl:"bucket_name"`
+	Channel             *string           `mapstructure:"channel" required:"true" cty:"channel" hcl:"channel"`
 	IterationID         *string           `mapstructure:"iteration_id" required:"true" cty:"iteration_id" hcl:"iteration_id"`
 	CloudProvider       *string           `mapstructure:"cloud_provider" required:"true" cty:"cloud_provider" hcl:"cloud_provider"`
 	Region              *string           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
@@ -45,6 +46,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"bucket_name":                &hcldec.AttrSpec{Name: "bucket_name", Type: cty.String, Required: false},
+		"channel":                    &hcldec.AttrSpec{Name: "channel", Type: cty.String, Required: false},
 		"iteration_id":               &hcldec.AttrSpec{Name: "iteration_id", Type: cty.String, Required: false},
 		"cloud_provider":             &hcldec.AttrSpec{Name: "cloud_provider", Type: cty.String, Required: false},
 		"region":                     &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
