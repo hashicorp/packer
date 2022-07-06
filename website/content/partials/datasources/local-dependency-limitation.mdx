@@ -17,8 +17,8 @@ data "happycloud" "happycloud-linux2-east" {
 ```
 
 Locals can reference data sources but data sources can not reference locals to avoid cyclic dependencies, where a local
-may reference a data source that references the same local or some other locals variable. The preferred method, at this time
-for using user input data within a data source is to use the `variable` block. 
+may reference a data source that references the same local or some other locals variable. The preferred method, at this time,
+for referencing user input data within a data source is to use the `variable` block. 
 
 ```hcl
 variable "cloud_base_filter_name" {
