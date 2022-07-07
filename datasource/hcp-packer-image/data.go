@@ -39,7 +39,7 @@ type Config struct {
 	// `hcp_packer_image`s use a shared `hcp_packer_iteration` that will
 	// only generate one potentially billable request.
 	Channel string `mapstructure:"channel" required:"true"`
-	// The name of the iteration Id to use when retrieving your image
+	// The ID of the iteration to use when retrieving your image
 	// Either this or `channel` MUST be set.
 	// Mutually exclusive with `channel`
 	IterationID string `mapstructure:"iteration_id" required:"true"`
