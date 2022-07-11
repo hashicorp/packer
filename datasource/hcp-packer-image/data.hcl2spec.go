@@ -22,6 +22,7 @@ type FlatConfig struct {
 	IterationID         *string           `mapstructure:"iteration_id" required:"true" cty:"iteration_id" hcl:"iteration_id"`
 	CloudProvider       *string           `mapstructure:"cloud_provider" required:"true" cty:"cloud_provider" hcl:"cloud_provider"`
 	Region              *string           `mapstructure:"region" required:"true" cty:"region" hcl:"region"`
+	ComponentType       *string           `mapstructure:"component_type" required:"false" cty:"component_type" hcl:"component_type"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -48,6 +49,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"iteration_id":               &hcldec.AttrSpec{Name: "iteration_id", Type: cty.String, Required: false},
 		"cloud_provider":             &hcldec.AttrSpec{Name: "cloud_provider", Type: cty.String, Required: false},
 		"region":                     &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},
+		"component_type":             &hcldec.AttrSpec{Name: "component_type", Type: cty.String, Required: false},
 	}
 	return s
 }
