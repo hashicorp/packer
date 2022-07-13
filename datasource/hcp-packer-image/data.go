@@ -34,7 +34,7 @@ type Config struct {
 	CloudProvider string `mapstructure:"cloud_provider" required:"true"`
 	// The name of the cloud region your image is in. For example "us-east-1".
 	Region string `mapstructure:"region" required:"true"`
-	// The specific Packer builder or post-processor used to create the image.
+	// The specific Packer builder used to create the image.
 	// For example, "amazon-ebs.example"
 	ComponentType string `mapstructure:"component_type" required:"false"`
 	// TODO: Version          string `mapstructure:"version"`
