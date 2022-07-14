@@ -87,8 +87,11 @@ described.
 
 @include 'datasource/hcp-packer-image/Config-required.mdx'
 
-There are currently no optional fields for this datasource, though we intend
-to add filtering fields in the future.
+### Optional:
+
+~> **Note:** This data source only returns the first found image's metadata filtered by the given options, from the returned list of images associated with the specified iteration. Therefore, if multiple images exist in the same region, it will only pick one of them. In this case, you can filter images by a source build name (Ex: `amazon-ebs.example`) using the `component_type` option.
+
+@include 'datasource/hcp-packer-image/Config-not-required.mdx'
 
 ### Output Fields:
 

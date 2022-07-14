@@ -48,6 +48,9 @@ type Config struct {
 	CloudProvider string `mapstructure:"cloud_provider" required:"true"`
 	// The name of the cloud region your image is in. For example "us-east-1".
 	Region string `mapstructure:"region" required:"true"`
+	// The specific Packer builder used to create the image.
+	// For example, "amazon-ebs.example"
+	ComponentType string `mapstructure:"component_type" required:"false"`
 	// TODO: Version          string `mapstructure:"version"`
 	// TODO: Fingerprint          string `mapstructure:"fingerprint"`
 	// TODO: Label          string `mapstructure:"label"`
@@ -190,7 +193,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		}
 		for _, image := range build.Images {
 			cloudAndRegions[build.CloudProvider] = append(cloudAndRegions[build.CloudProvider], image.Region)
-			if image.Region == d.config.Region {
+			if image.Region == d.config.Region && filterBuildByComponentType(build, d.config.ComponentType) {
 				// This is the desired image.
 				output = DatasourceOutput{
 					CloudProvider: build.CloudProvider,
@@ -209,6 +212,15 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	}
 
 	return cty.NullVal(cty.EmptyObject), fmt.Errorf("could not find a build result matching "+
-		"region (%q) and cloud provider (%q). Available: %v ",
-		d.config.Region, d.config.CloudProvider, cloudAndRegions)
+		"[region=%q, cloud_provider=%q, component_type=%q]. Available: %v ",
+		d.config.Region, d.config.CloudProvider, d.config.ComponentType, cloudAndRegions)
+}
+
+func filterBuildByComponentType(build *models.HashicorpCloudPackerBuild, componentType string) bool {
+	// optional field is not specified, passthrough
+	if componentType == "" {
+		return true
+	}
+	// if specified, only the matched image metadata is returned by this effect
+	return build.ComponentType == componentType
 }
