@@ -104,9 +104,28 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*Pr
 	}
 
 	if !b.Override.IsNull() {
+		if !b.Override.Type().IsObjectType() {
+			return nil, append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "provisioner's override block must be an HCL object",
+				Subject:  block.DefRange.Ptr(),
+			})
+		}
+
 		override := make(map[string]interface{})
 		for buildName, overrides := range b.Override.AsValueMap() {
 			buildOverrides := make(map[string]interface{})
+
+			if !overrides.Type().IsObjectType() {
+				return nil, append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary: fmt.Sprintf(
+						"provisioner's override.'%s' block must be an HCL object",
+						buildName),
+					Subject: block.DefRange.Ptr(),
+				})
+			}
+
 			for option, value := range overrides.AsValueMap() {
 				buildOverrides[option] = hcl2shim.ConfigValueFromHCL2(value)
 			}
