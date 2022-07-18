@@ -264,6 +264,19 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 
 		for _, value := range dsValues.AsValueMap() {
+			// Only try to check ancestry if we have fetched the
+			// data from HCP for the data source.
+			//
+			// NOTE: this will happen especially during validate as
+			// when we reach this point, we haven't fetched the
+			// data from HCP.
+			//
+			// TODO: maybe move this HCP-related logic outside that
+			// decode block so it's only executed during build?
+			if !value.IsKnown() {
+				continue
+			}
+
 			values := value.AsValueMap()
 			imgID, itID := values["id"], values["iteration_id"]
 			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = itID.AsString()
