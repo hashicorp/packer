@@ -67,8 +67,8 @@
   {
     "title": "DigitalOcean",
     "path": "digitalocean",
-    "repo": "hashicorp/packer-plugin-digitalocean",
-    "pluginTier": "community",
+    "repo": "digitalocean/packer-plugin-digitalocean",
+    "pluginTier": "verified",
     "version": "latest",
     "isHcpPackerReady": true
   },
