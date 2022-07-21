@@ -25,7 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
       - name: Install Dependencies
         run: npm i @hashicorp/platform-packer-plugins
       - name: Fetch and validate plugin docs
