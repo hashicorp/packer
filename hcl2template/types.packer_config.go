@@ -55,7 +55,7 @@ type PackerConfig struct {
 	Builds Builds
 
 	// Represents registry bucket defined in the config files.
-	bucket *packerregistry.Bucket
+	Bucket *packerregistry.Bucket
 
 	parser *Parser
 	files  []*hcl.File
@@ -120,10 +120,10 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 	}
 
 	// Store the iteration_id, if it exists. Otherwise, it'll be "unknown"
-	if cfg.bucket != nil {
+	if cfg.Bucket != nil {
 		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
 			"version":     cty.StringVal(cfg.CorePackerVersionString),
-			"iterationID": cty.StringVal(cfg.bucket.Iteration.ID),
+			"iterationID": cty.StringVal(cfg.Bucket.Iteration.ID),
 		})
 	}
 
@@ -545,9 +545,9 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 				continue
 			}
 
-			if cfg.bucket != nil {
+			if cfg.Bucket != nil {
 				postProcessor = &packer.RegistryPostProcessor{
-					ArtifactMetadataPublisher: cfg.bucket,
+					ArtifactMetadataPublisher: cfg.Bucket,
 					BuilderType:               source.String(),
 					PostProcessor:             postProcessor,
 				}
@@ -678,12 +678,12 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				continue
 			}
 
-			if cfg.bucket != nil {
+			if cfg.Bucket != nil {
 				pps = append(pps, []packer.CoreBuildPostProcessor{
 					{
 						PostProcessor: &packer.RegistryPostProcessor{
 							BuilderType:               srcUsage.String(),
-							ArtifactMetadataPublisher: cfg.bucket,
+							ArtifactMetadataPublisher: cfg.Bucket,
 						},
 					},
 				})
@@ -700,11 +700,11 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				}
 			}
 
-			if cfg.bucket != nil && cfg.bucket.Validate() == nil {
+			if cfg.Bucket != nil && cfg.Bucket.Validate() == nil {
 				builder = &packer.RegistryBuilder{
 					Name:                      srcUsage.String(),
 					Builder:                   builder,
-					ArtifactMetadataPublisher: cfg.bucket,
+					ArtifactMetadataPublisher: cfg.Bucket,
 				}
 			}
 

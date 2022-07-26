@@ -10,7 +10,7 @@ import (
 func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.Bucket, hcl.Diagnostics) {
 	// If this was a PAR (HCP Packer registry) build either the env. variables are set, or if there is a hcp_packer_registry block
 	// defined we would have a non-nil bucket. So if nil assume we are not in a some sort of PAR mode.
-	if cfg.bucket == nil {
+	if cfg.Bucket == nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
 				Summary: "Publishing build artifacts to HCP Packer Registry not enabled",
@@ -21,7 +21,7 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 		}
 	}
 
-	err := cfg.bucket.Validate()
+	err := cfg.Bucket.Validate()
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -32,5 +32,5 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 		}
 	}
 
-	return cfg.bucket, nil
+	return cfg.Bucket, nil
 }

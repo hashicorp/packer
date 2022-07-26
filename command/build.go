@@ -13,7 +13,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/sync/semaphore"
 
@@ -84,6 +83,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	diags := packerStarter.Initialize(packer.InitializeOptions{})
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
+
+	diags = TrySetupHCP(packerStarter)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret

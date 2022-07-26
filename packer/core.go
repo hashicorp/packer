@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strconv"
@@ -20,7 +19,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
-	"github.com/hashicorp/packer/internal/registry/env"
 	packerversion "github.com/hashicorp/packer/version"
 )
 
@@ -29,12 +27,13 @@ import (
 type Core struct {
 	Template *template.Template
 
+	Bucket *packerregistry.Bucket
+
 	components ComponentFinder
 	variables  map[string]string
 	builds     map[string]*template.Builder
 	version    string
 	secrets    []string
-	bucket     *packerregistry.Bucket
 
 	except []string
 	only   []string
@@ -143,17 +142,6 @@ func (core *Core) Initialize() error {
 		packersdk.LogSecretFilter.Set(secret)
 	}
 
-	if env.IsPAREnabled() {
-		var err error
-		core.bucket, err = packerregistry.NewBucketWithIteration(packerregistry.IterationOptions{
-			TemplateBaseDir: filepath.Dir(core.Template.Path),
-		})
-		if err != nil {
-			return err
-		}
-		core.bucket.LoadDefaultSettingsFromEnv()
-	}
-
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
 	core.builds = make(map[string]*template.Builder)
@@ -166,8 +154,6 @@ func (core *Core) Initialize() error {
 		}
 
 		core.builds[v] = b
-		// Get all builds slated within config ignoring any only or exclude flags.
-		core.bucket.RegisterBuildForComponent(b.Name)
 	}
 	return nil
 }
@@ -391,10 +377,10 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
-			if c.bucket != nil {
+			if c.Bucket != nil {
 				postProcessor = &RegistryPostProcessor{
 					BuilderType:               n,
-					ArtifactMetadataPublisher: c.bucket,
+					ArtifactMetadataPublisher: c.Bucket,
 					PostProcessor:             postProcessor,
 				}
 			}
@@ -415,12 +401,12 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 		postProcessors = append(postProcessors, current)
 	}
-	if c.bucket != nil {
+	if c.Bucket != nil {
 		postProcessors = append(postProcessors, []CoreBuildPostProcessor{
 			{
 				PostProcessor: &RegistryPostProcessor{
 					BuilderType:               n,
-					ArtifactMetadataPublisher: c.bucket,
+					ArtifactMetadataPublisher: c.Bucket,
 				},
 			},
 		})
@@ -428,10 +414,10 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// TODO hooks one day
 
-	if c.bucket != nil {
+	if c.Bucket != nil {
 		builder = &RegistryBuilder{
 			Name:                      n,
-			ArtifactMetadataPublisher: c.bucket,
+			ArtifactMetadataPublisher: c.Bucket,
 			Builder:                   builder,
 		}
 	}
@@ -912,5 +898,5 @@ func (c *Core) init() error {
 /// GetRegistryBucket returns a configured bucket that can be used for
 // publishing build image artifacts to some HCP Packer Registry.
 func (c *Core) GetRegistryBucket() *packerregistry.Bucket {
-	return c.bucket
+	return c.Bucket
 }
