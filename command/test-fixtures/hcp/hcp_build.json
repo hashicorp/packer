@@ -1,0 +1,10 @@
+{
+  "description": "Some legacy JSON build",
+  "builders": [
+    {
+      "type": "file",
+      "content": " ",
+      "target": "output"
+    }
+  ]
+}

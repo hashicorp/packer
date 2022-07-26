@@ -376,21 +376,6 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				continue
 			}
 
-			// If we are in PAR (HCP Packer registry) mode check that only one build block has been parsed.
-			// If we've already parsed one fail because PAR does not support more than one build block.
-			// bucket is created upon the call to decodeBuildConfig.
-			if cfg.bucket != nil && len(cfg.Builds) > 0 {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Multiple " + buildLabel + " blocks",
-					Detail: fmt.Sprintf("For Packer Registry enabled builds,  only one " + buildLabel +
-						" block can be defined. Please remove any additional " + buildLabel +
-						" block(s). If this build is not meant for the Packer registry please " +
-						"clear any HCP_PACKER_* environment variables."),
-					Subject: block.DefRange.Ptr(),
-				})
-			}
-
 			cfg.Builds = append(cfg.Builds, build)
 		}
 	}

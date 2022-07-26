@@ -1,0 +1,16 @@
+{
+  "source": {
+    "file": {
+      "test": {
+        "content": " ",
+        "target": "output"
+      }
+    }
+  },
+  "build": {
+    "name": "test-file",
+    "description": "Some build description",
+    "sources": ["sources.file.test"]
+  }
+}
+
