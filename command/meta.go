@@ -3,14 +3,18 @@ package command
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 
+	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	kvflag "github.com/hashicorp/packer/command/flag-kv"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/helper/wrappedstreams"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/version"
 )
 
 // FlagSetFlags is an enum to define what flags are present in the
@@ -102,4 +106,68 @@ func (m *Meta) StdinPiped() bool {
 	}
 
 	return fi.Mode()&os.ModeNamedPipe != 0
+}
+
+func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
+	cfgType, err := cla.GetConfigType()
+	if err != nil {
+		m.Ui.Error(fmt.Sprintf("%q: %s", cla.Path, err))
+		return nil, 1
+	}
+
+	switch cfgType {
+	case ConfigTypeHCL2:
+		// TODO(azr): allow to pass a slice of files here.
+		return m.GetConfigFromHCL(cla)
+	default:
+		// TODO: uncomment once we've polished HCL a bit more.
+		// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
+		// The template will be parsed in the legacy configuration style. This style
+		// will continue to work but users are encouraged to move to the new style.
+		// See: https://packer.io/guides/hcl
+		// `)
+		return m.GetConfigFromJSON(cla)
+	}
+}
+
+func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int) {
+	parser := &hcl2template.Parser{
+		CorePackerVersion:       version.SemVer,
+		CorePackerVersionString: version.FormattedVersion(),
+		Parser:                  hclparse.NewParser(),
+		PluginConfig:            m.CoreConfig.Components.PluginConfig,
+	}
+	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
+	return cfg, writeDiags(m.Ui, parser.Files(), diags)
+}
+
+func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
+	// Parse the template
+	var tpl *template.Template
+	var err error
+	if cla.Path == "" {
+		// here cla validation passed so this means we want a default builder
+		// and we probably are in the console command
+		tpl, err = template.Parse(TiniestBuilder)
+	} else {
+		tpl, err = template.ParseFile(cla.Path)
+	}
+
+	if err != nil {
+		m.Ui.Error(fmt.Sprintf("Failed to parse file as legacy JSON template: "+
+			"if you are using an HCL template, check your file extensions; they "+
+			"should be either *.pkr.hcl or *.pkr.json; see the docs for more "+
+			"details: https://www.packer.io/docs/templates/hcl_templates. \n"+
+			"Original error: %s", err))
+		return nil, 1
+	}
+
+	// Get the core
+	core, err := m.Core(tpl, cla)
+	ret := 0
+	if err != nil {
+		m.Ui.Error(err.Error())
+		ret = 1
+	}
+	return &CoreWrapper{core}, ret
 }
