@@ -284,7 +284,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			imgID, itID, channelID := values["id"], values["iteration_id"], values["channel_id"]
 			sourceIteration := packerregistry.ParentIteration{
 				IterationID: itID.AsString(),
-				ChannelID: channelID.AsString(),
+				ChannelID:   channelID.AsString(),
 			}
 
 			if sourceIteration.ChannelID == "" && usingIterationDatasource {
