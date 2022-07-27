@@ -147,7 +147,7 @@ func (d *DeactivatedDatasource) Execute() (cty.Value, error) {
 	channel, err := cli.GetChannel(ctx, d.config.Bucket, d.config.Channel)
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
-			"image iteration from HCP Packer registry: %s", err.Error())
+			"channel from HCP Packer registry: %s", err.Error())
 	}
 
 	var iteration *models.HashicorpCloudPackerIteration
