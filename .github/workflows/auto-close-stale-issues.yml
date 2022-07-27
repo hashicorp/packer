@@ -8,7 +8,7 @@ jobs:
   stale-bot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v5.0.0
+      - uses: actions/stale@v5.1.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           days-before-issue-stale: 23
