@@ -117,9 +117,7 @@ type DatasourceOutput struct {
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	IterationID string `mapstructure:"iteration_id"`
-	// The channel id. This is a ULID, which is a unique identifier similar
-	// to a UUID. It is created by the HCP Packer Registry when a channel is created,
-	// and is unique to this iteration.
+	// The ID of the channel used to query the image iteration.
 	ChannelID string `mapstructure:"channel_id"`
 	// The UUID associated with the Packer run that created this image.
 	PackerRunUUID string `mapstructure:"packer_run_uuid"`

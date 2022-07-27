@@ -88,9 +88,7 @@ type DatasourceOutput struct {
 	IncrementalVersion int32 `mapstructure:"incremental_version"`
 	// The date when this iteration was last updated.
 	UpdatedAt string `mapstructure:"updated_at"`
-	// The channel id. This is a ULID, which is a unique identifier similar
-	// to a UUID. It is created by the HCP Packer Registry when a channel is created,
-	// and is unique to this iteration.
+	// The ID of the channel used to query the image iteration.
 	ChannelID string `mapstructure:"channel_id"`
 }
 
