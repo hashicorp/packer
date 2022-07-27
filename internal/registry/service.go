@@ -244,10 +244,10 @@ func (client *Client) GetChannel(ctx context.Context, bucketSlug string, channel
 		return nil, err
 	}
 
-	if resp.Payload.Channel != nil {
-		return resp.Payload.Channel, nil
+	if resp.Payload.Channel == nil {
+		return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
+			channelName, bucketSlug)
 	}
 
-	return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
-		channelName, bucketSlug)
+	return resp.Payload.Channel, nil
 }

@@ -264,7 +264,17 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 
 		const hcpIterationDatasourceType string = "hcp-packer-iteration"
-		iterationDatasourceValues, usingIterationDatasource := values[hcpIterationDatasourceType]
+		iterationToChannel := make(map[string]string)
+		if iterationDatasourceValues, ok := values[hcpIterationDatasourceType]; ok {
+			for _, itValue := range iterationDatasourceValues.AsValueMap() {
+				if !itValue.IsKnown() {
+					continue
+				}
+				itValues := itValue.AsValueMap()
+				iterationID, channelID := itValues["id"].AsString(), itValues["channel_id"].AsString()
+				iterationToChannel[iterationID] = channelID
+			}
+		}
 
 		for _, value := range imageDatasourceValues.AsValueMap() {
 			// Only try to check ancestry if we have fetched the
@@ -287,28 +297,10 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				ChannelID:   channelID.AsString(),
 			}
 
-			if sourceIteration.ChannelID == "" && usingIterationDatasource {
-				for _, itValue := range iterationDatasourceValues.AsValueMap() {
-					// Only try to check ancestry if we have fetched the
-					// data from HCP for the data source.
-					//
-					// NOTE: this will happen especially during validate as
-					// when we reach this point, we haven't fetched the
-					// data from HCP.
-					//
-					// TODO: maybe move this HCP-related logic outside that
-					// decode block so it's only executed during build?
-					if !itValue.IsKnown() {
-						continue
-					}
-
-					itValues := itValue.AsValueMap()
-					if itValues["id"].Equals(itID).True() {
-						sourceIteration.ChannelID = itValues["channel_id"].AsString()
-						break
-					}
-				}
+			if sourceIteration.ChannelID == "" {
+				sourceIteration.ChannelID = iterationToChannel[itID.AsString()]
 			}
+
 			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = sourceIteration
 		}
 	}
