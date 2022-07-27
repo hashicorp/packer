@@ -264,10 +264,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		}
 
 		const hcpIterationDatasourceType string = "hcp-packer-iteration"
-		iterationDatasourceValues, ok := values[hcpIterationDatasourceType]
-		if !ok {
-			return build, diags
-		}
+		iterationDatasourceValues, usingIterationDatasource := values[hcpIterationDatasourceType]
 
 		for _, value := range imageDatasourceValues.AsValueMap() {
 			// Only try to check ancestry if we have fetched the
@@ -284,29 +281,32 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 
 			values := value.AsValueMap()
-			imgID, itID := values["id"], values["iteration_id"]
+			imgID, itID, channelID := values["id"], values["iteration_id"], values["channel_id"]
 			sourceIteration := packerregistry.ParentIteration{
 				IterationID: itID.AsString(),
+				ChannelID: channelID.AsString(),
 			}
-			for _, itValue := range iterationDatasourceValues.AsValueMap() {
-				// Only try to check ancestry if we have fetched the
-				// data from HCP for the data source.
-				//
-				// NOTE: this will happen especially during validate as
-				// when we reach this point, we haven't fetched the
-				// data from HCP.
-				//
-				// TODO: maybe move this HCP-related logic outside that
-				// decode block so it's only executed during build?
-				if !itValue.IsKnown() {
-					continue
-				}
 
-				itValues := itValue.AsValueMap()
-				if itValues["id"] == itID {
-					channelID := itValues["channel_id"]
-					sourceIteration.ChannelID = channelID.AsString()
-					break
+			if sourceIteration.ChannelID == "" && usingIterationDatasource {
+				for _, itValue := range iterationDatasourceValues.AsValueMap() {
+					// Only try to check ancestry if we have fetched the
+					// data from HCP for the data source.
+					//
+					// NOTE: this will happen especially during validate as
+					// when we reach this point, we haven't fetched the
+					// data from HCP.
+					//
+					// TODO: maybe move this HCP-related logic outside that
+					// decode block so it's only executed during build?
+					if !itValue.IsKnown() {
+						continue
+					}
+
+					itValues := itValue.AsValueMap()
+					if itValues["id"].Equals(itID).True() {
+						sourceIteration.ChannelID = itValues["channel_id"].AsString()
+						break
+					}
 				}
 			}
 			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = sourceIteration

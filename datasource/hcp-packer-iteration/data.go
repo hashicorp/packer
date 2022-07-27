@@ -8,7 +8,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -115,15 +114,12 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"iteration from HCP Packer registry: %s", err.Error())
 	}
-
-	var iteration *models.HashicorpCloudPackerIteration
-	if channel != nil {
-		if channel.Iteration != nil {
-			iteration = channel.Iteration
-		}
+	if channel.Iteration == nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("there is no iteration associated with the channel %s",
 			d.config.Channel)
 	}
+
+	iteration := channel.Iteration
 
 	revokeAt := time.Time(iteration.RevokeAt)
 	if !revokeAt.IsZero() && revokeAt.Before(time.Now().UTC()) {

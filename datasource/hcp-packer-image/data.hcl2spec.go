@@ -64,6 +64,7 @@ type FlatDatasourceOutput struct {
 	CreatedAt     *string           `mapstructure:"created_at" cty:"created_at" hcl:"created_at"`
 	BuildID       *string           `mapstructure:"build_id" cty:"build_id" hcl:"build_id"`
 	IterationID   *string           `mapstructure:"iteration_id" cty:"iteration_id" hcl:"iteration_id"`
+	ChannelID     *string           `mapstructure:"channel_id" cty:"channel_id" hcl:"channel_id"`
 	PackerRunUUID *string           `mapstructure:"packer_run_uuid" cty:"packer_run_uuid" hcl:"packer_run_uuid"`
 	ID            *string           `mapstructure:"id" cty:"id" hcl:"id"`
 	Region        *string           `mapstructure:"region" cty:"region" hcl:"region"`
@@ -87,6 +88,7 @@ func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 		"created_at":      &hcldec.AttrSpec{Name: "created_at", Type: cty.String, Required: false},
 		"build_id":        &hcldec.AttrSpec{Name: "build_id", Type: cty.String, Required: false},
 		"iteration_id":    &hcldec.AttrSpec{Name: "iteration_id", Type: cty.String, Required: false},
+		"channel_id":      &hcldec.AttrSpec{Name: "channel_id", Type: cty.String, Required: false},
 		"packer_run_uuid": &hcldec.AttrSpec{Name: "packer_run_uuid", Type: cty.String, Required: false},
 		"id":              &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},
 		"region":          &hcldec.AttrSpec{Name: "region", Type: cty.String, Required: false},

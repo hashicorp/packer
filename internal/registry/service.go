@@ -214,6 +214,7 @@ func (client *Client) UpdateBuild(
 			CloudProvider:     cloudProvider,
 			SourceImageID:     sourceImageID,
 			SourceIterationID: sourceIterationID,
+			SourceChannelID:   sourceChannelID,
 		},
 	}
 
