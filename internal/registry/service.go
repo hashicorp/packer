@@ -230,7 +230,7 @@ func (client *Client) UpdateBuild(
 	return resp.Payload.Build.ID, nil
 }
 
-// GetChannel loads the iterationId associated with a current channel. If the
+// GetChannel loads the named channel that is associated to the bucket slug . If the
 // channel does not exist in HCP Packer, GetChannel returns an error.
 func (client *Client) GetChannel(ctx context.Context, bucketSlug string, channelName string) (*models.HashicorpCloudPackerChannel, error) {
 	params := packer_service.NewPackerServiceGetChannelParamsWithContext(ctx)
