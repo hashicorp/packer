@@ -1,5 +1,97 @@
 ## 1.8.3 (Upcoming)
 
+### NOTES:
+* There's been a change in the way the `ssh_timeout` and the
+    `ssh_handshake_attempts` configuration arguments work together. The
+    behaviour is unchanged if both or none are specified. However, if only one
+    of the two is set the other won't have a default value anymore and will be
+    ignored. See [Packer Plugin SDK change](https://github.com/hashicorp/packer-plugin-sdk/pull/116) for details
+
+* packer-plugin-digitalocean: The Digital Ocean Packer plugin has been handed over
+    to the Digital Ocean team. New releases for this plugin are available at
+    https://github.com/digitalocean/packer-plugin-digitalocean. This plugin is
+    still being bundled in the Packer binary but will be removed in a future
+    release. Existing references to the plugin will continue to work but
+    users are advised to update the required_plugins block to use the new
+    plugin source address.
+    [GH-11912](https://github.com/hashicorp/packer/pull/11912)
+```
+required_plugins {
+    digitalocean = {
+     source =  "github.com/digitalocean/digitalocean"
+     version = ">=1.0.8"
+    }
+}
+```
+* packer-plugin-outscale:  The Outscale Packer plugin managed by the Outscale
+    team, since Packer 1.7.9, has been removed from the Packer binary. Users are
+    advised to install the latest version of the plugin by running
+    `packer plugins install github.com/outscale/outscale`. [GH-11912](https://github.com/hashicorp/packer/pull/11912)
+
+* packer-plugin-outscale:  The Scaleway Packer plugin managed by the Scaleway
+    team, since Packer 1.7.7, has been removed from the Packer binary. Users are
+    advised to install the latest version of the plugin by running
+    `packer plugins install github.com/scaleway/scaleway`. [GH-11912](https://github.com/hashicorp/packer/pull/11912)
+
+### FEATURES:
+* Future Scaffolding: This release contains additional changes that allow
+    Packer core to validate that a newly built image is a direct child of a HCP
+    Packer registry source image. This feature is only available for HCP Packer
+    enabled builds using the `hcp_packer_image` and `hcp_packer_iteration` data
+    source for setting a builder's source image.
+    [GH-11861](https://github.com/hashicorp/packer/pull/11861)
+
+### PLUGINS:
+
+The following external plugins have been updated and pinned to address open
+    issues. Please see their respective changelogs for details on plugin
+    specific bug fixes and improvements.
+
+* amazon@v1.1.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.1.2)
+* ansible@v1.0.3 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-ansible/releases/tag/v1.0.3)
+* azure@v1.3.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-azure/releases/tag/v1.3.0)
+* docker@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-docker/releases/tag/v1.0.7)
+* googlecompute@v1.0.14 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-googlecompute/releases/tag/v1.0.14)
+* lxc@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-lxc/releases/tag/v1.0.2)
+* triton@v1.0.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-triton/releases/tag/v1.0.2)
+* vsphere@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.7)
+* yandex@v1.1.2 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-yandex/releases/tag/v1.1.2)
+
+
+### IMPROVEMENTS:
+* Bump packer-plugin-sdk to v0.3.1 to fix inconsistencies between `ssh_timeout`
+    and `ssh_handshake_attempts` configuration arguments in the SSH
+    communicator. [GH-11909](https://github.com/hashicorp/packer/pull/11909)
+* core: During long running builds the HCP Packer registry will mark a build as
+    timed out if it has not posted an update in the last 10 minutes. For HCP
+    Packer enabled builds a status update will now be sent every 6 minutes to
+    the registry to prevent long builds from being marked as timed
+    out.[GH-11846](https://github.com/hashicorp/packer/pull/11846)
+* datasource/hcp_packer_image: Add `component_type` configuration argument to
+    support specifying an exact build image when multiple images exist in the
+    same provider and region for a given HCP Packer bucker iteration.
+    [GH-11872](https://github.com/hashicorp/packer/pull/11872)
+* datasource/hcp_packer_image: Add support for `channel` as input argument to
+    retrieve an image from the associated iteration. If
+    using several images from a single iteration, you may prefer sourcing an
+    iteration first, and referencing it for subsequent uses, as every
+    `hcp_packer_image` with the channel set will generate a potentially
+    billable HCP Packer request, but if several `hcp_packer_image`s use a
+    shared `hcp_packer_iteration` that will only generate one potentially
+    billable request.
+    [GH-11865](https://github.com/hashicorp/packer/pull/11865)
+
+
+
+### BUG FIXES
+
+* core/hcl2: Fix crash when parsing malformed provisioner override blocks.
+    [GH-11881](https://github.com/hashicorp/packer/pull/11881)
+* core/hcl2: Fix crash when running `packer validate` on templates containing
+    one or more  HCP data sources.
+    [GH-11883](https://github.com/hashicorp/packer/pull/11883)
+
+
 ## 1.8.2 (June 21, 2022)
 
 ### NOTES:
