@@ -95,7 +95,6 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.0.5
 	github.com/hashicorp/packer-plugin-yandex v1.1.1
-	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
 require (
@@ -231,7 +230,6 @@ require (
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect

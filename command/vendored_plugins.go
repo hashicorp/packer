@@ -79,7 +79,6 @@ import (
 	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
 	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
-	scalewaybuilder "github.com/scaleway/packer-plugin-scaleway/builder/scaleway"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
@@ -125,7 +124,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
-	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"ucloud-uhost":        new(uclouduhostbuilder.Builder),

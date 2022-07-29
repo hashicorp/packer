@@ -267,7 +267,6 @@ github.com/digitalocean/packer-plugin-digitalocean v1.0.8/go.mod h1:wDTyf6Qmfudn
 github.com/dimchansky/utfbom v1.1.0/go.mod h1:rO41eb7gLfo8SF1jd9F8HplJm1Fewwi4mQvIirEdv+8=
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
-github.com/dnaeon/go-vcr v1.0.1/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
 github.com/dnaeon/go-vcr v1.1.0 h1:ReYa/UBrRyQdant9B4fNHGoCNKw6qh6P0fsdGmZpR7c=
 github.com/dnaeon/go-vcr v1.1.0/go.mod h1:M7tiix8f0r6mKKJ3Yq/kqU1OYf3MnfmBWVbPx/yU9ko=
 github.com/docker/distribution v2.7.1+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
@@ -744,7 +743,6 @@ github.com/hashicorp/packer-plugin-qemu v1.0.5 h1:xa7OLs22ws5rYz0j7fU1kp3KoxMapn
 github.com/hashicorp/packer-plugin-qemu v1.0.5/go.mod h1:pS6CMs+KY3hfMEsgI6dmVZgi68XJTplheNJi9VTJc/8=
 github.com/hashicorp/packer-plugin-salt v1.0.0 h1:bLGdlDG2nLyOzjp/5d2rmZ9XVxDeDUGejOK3wayqEL4=
 github.com/hashicorp/packer-plugin-salt v1.0.0/go.mod h1:onggPITzeB6LPSW8XlSobu8eI6yj3IMUi5cS6vWnL7s=
-github.com/hashicorp/packer-plugin-sdk v0.2.5/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.7/go.mod h1:ii9ub5UNAp30RGod3i3W8qj7wA+H7kpURnD+Jt7oDkQ=
 github.com/hashicorp/packer-plugin-sdk v0.2.12/go.mod h1:/smseyg0inyxWv1B+XWppPU0FJz2hwIzFOM172U3i0Y=
 github.com/hashicorp/packer-plugin-sdk v0.2.13/go.mod h1:bk4RHi2F836IaGffQr9kwBFQ1UBH1yAKKtu630KiDfA=
@@ -1037,10 +1035,6 @@ github.com/ryanuber/go-glob v1.0.0 h1:iQh3xXAumdQ+4Ufa5b25cRpC5TYKlno6hsv6Cb3pkB
 github.com/ryanuber/go-glob v1.0.0/go.mod h1:807d1WSdnB0XRJzKNil9Om6lcp/3a0v4qIHxIXzX/Yc=
 github.com/satori/go.uuid v1.2.0 h1:0uYX9dsZ2yD7q2RtLRtPSdGDWzjeM3TbMJP9utgA0ww=
 github.com/satori/go.uuid v1.2.0/go.mod h1:dA0hQrYB0VpLJoorglMZABFdXlWrHn1NEOzdhQKdks0=
-github.com/scaleway/packer-plugin-scaleway v1.0.4 h1:3nVUSsUTA5BjVX0+CTJ7Zr7oerLesb52GKNhpC5ncpo=
-github.com/scaleway/packer-plugin-scaleway v1.0.4/go.mod h1:BQ74nXrd4cJsZ5AiOfmLKfGiJgEuXzhYIVGGbmuCkNg=
-github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 h1:Do8ksLD4Nr3pA0x0hnLOLftZgkiTDvwPDShRTUxtXpE=
-github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7/go.mod h1:CJJ5VAbozOl0yEw7nHB9+7BXTJbIn6h7W+f6Gau5IP8=
 github.com/sean-/conswriter v0.0.0-20180208195008-f5ae3917a627/go.mod h1:7zjs06qF79/FKAJpBvFx3P8Ww4UTIMAe+lpNXDHziac=
 github.com/sean-/pager v0.0.0-20180208200047-666be9bf53b5/go.mod h1:BeybITEsBEg6qbIiqJ6/Bqeq25bCLbL7YFmpaFfJDuM=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529 h1:nn5Wsu0esKSJiIVhscUtVbo7ada43DJhG55ua/hjS5I=
