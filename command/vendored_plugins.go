@@ -7,6 +7,8 @@ import (
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
 
+	digitaloceanbuilder "github.com/digitalocean/packer-plugin-digitalocean/builder/digitalocean"
+	digitaloceanimportpostprocessor "github.com/digitalocean/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
 	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
@@ -27,8 +29,6 @@ import (
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
 	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
-	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
-	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -51,10 +51,6 @@ import (
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	oracleclassicbuilder "github.com/hashicorp/packer-plugin-oracle/builder/classic"
 	oracleocibuilder "github.com/hashicorp/packer-plugin-oracle/builder/oci"
-	oscbsubuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsu"
-	oscbsusurrogatebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsusurrogate"
-	oscbsuvolumebuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/bsuvolume"
-	oscchrootbuilder "github.com/hashicorp/packer-plugin-outscale/builder/osc/chroot"
 	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer-plugin-profitbricks/builder/profitbricks"
@@ -83,7 +79,6 @@ import (
 	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
 	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
 	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
-	scalewaybuilder "github.com/scaleway/packer-plugin-scaleway/builder/scaleway"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
@@ -129,7 +124,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
-	"scaleway":            new(scalewaybuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
 	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
@@ -141,10 +135,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
-	"osc-bsu":             new(oscbsubuilder.Builder),
-	"osc-bsusurrogate":    new(oscbsusurrogatebuilder.Builder),
-	"osc-bsuvolume":       new(oscbsuvolumebuilder.Builder),
-	"osc-chroot":          new(oscchrootbuilder.Builder),
 	"yandex":              new(yandexbuilder.Builder),
 }
 

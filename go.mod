@@ -60,13 +60,13 @@ require (
 )
 
 require (
+	github.com/digitalocean/packer-plugin-digitalocean v1.0.8
 	github.com/hashicorp/packer-plugin-alicloud v1.0.2
 	github.com/hashicorp/packer-plugin-ansible v1.0.2
 	github.com/hashicorp/packer-plugin-azure v1.1.0
 	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.1
 	github.com/hashicorp/packer-plugin-converge v1.0.1
-	github.com/hashicorp/packer-plugin-digitalocean v1.0.6
 	github.com/hashicorp/packer-plugin-docker v1.0.5
 	github.com/hashicorp/packer-plugin-googlecompute v1.0.13
 	github.com/hashicorp/packer-plugin-hcloud v1.0.4
@@ -81,7 +81,6 @@ require (
 	github.com/hashicorp/packer-plugin-oneandone v1.0.1
 	github.com/hashicorp/packer-plugin-openstack v1.0.1
 	github.com/hashicorp/packer-plugin-oracle v1.0.2
-	github.com/hashicorp/packer-plugin-outscale v1.0.2
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.2
 	github.com/hashicorp/packer-plugin-proxmox v1.0.8
@@ -96,8 +95,6 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.0.5
 	github.com/hashicorp/packer-plugin-yandex v1.1.1
-	github.com/prometheus/common v0.9.1
-	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
 require (
@@ -127,8 +124,6 @@ require (
 	github.com/Telmate/proxmox-api-go v0.0.0-20220107223401-b9c909d83a3b // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
-	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible // indirect
 	github.com/antihax/optional v1.0.0 // indirect
@@ -230,13 +225,11 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/oracle/oci-go-sdk/v36 v36.2.0 // indirect
-	github.com/outscale/osc-sdk-go v1.11.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
-	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.7 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect
@@ -260,7 +253,6 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20211021150943-2b146023228c // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
-	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
