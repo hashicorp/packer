@@ -284,7 +284,8 @@
     "repo": "UpCloudLtd/packer-plugin-upcloud",
     "version": "latest",
     "pluginTier": "verified",
-    "sourceBranch": "master"
+    "sourceBranch": "master",
+    "isHcpPackerReady": true
   },
   {
     "title": "Vagrant",
