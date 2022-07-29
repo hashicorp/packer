@@ -7,6 +7,8 @@ import (
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
 
+	digitaloceanbuilder "github.com/digitalocean/packer-plugin-digitalocean/builder/digitalocean"
+	digitaloceanimportpostprocessor "github.com/digitalocean/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
 	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
@@ -27,8 +29,6 @@ import (
 	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
 	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
-	digitaloceanbuilder "github.com/hashicorp/packer-plugin-digitalocean/builder/digitalocean"
-	digitaloceanimportpostprocessor "github.com/hashicorp/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"

@@ -139,10 +139,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
-github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 h1:JYp7IbQjafoB+tBA3gMyHYHrpOtNuDiK/uB5uXxq5wM=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
-github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 h1:Hs82Z41s6SdL1CELW+XaDYmOH4hkBN4/N9og/AsOv7E=
 github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 h1:lBif3zUMR6sjgfONVqfnjjjdXIK09S4Lvkze20ApE8w=
 github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028/go.mod h1:pUKYbK5JQ+1Dfxk80P0qxGqe5dkxDoabbZS7zOcouyA=
@@ -270,6 +268,8 @@ github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001 h1:WAg57gnaAW
 github.com/digitalocean/go-qemu v0.0.0-20210326154740-ac9e0b687001/go.mod h1:IetBE52JfFxK46p2n2Rqm+p5Gx1gpu2hRHsrbnPOWZQ=
 github.com/digitalocean/godo v1.65.0 h1:3SywGJBC18HaYtPQF+T36jYzXBi+a6eIMonSjDll7TA=
 github.com/digitalocean/godo v1.65.0/go.mod h1:p7dOjjtSBqCTUksqtA5Fd3uaKs9kyTq2xcz76ulEJRU=
+github.com/digitalocean/packer-plugin-digitalocean v1.0.8 h1:i2xrssxVOIvVfRFRfxeHbG2mUjthgSlzwPwoqSWJhRY=
+github.com/digitalocean/packer-plugin-digitalocean v1.0.8/go.mod h1:wDTyf6Qmfudn9CvVp9UzJm8SMYZg3TdGHpZipW4H8Us=
 github.com/dimchansky/utfbom v1.1.0/go.mod h1:rO41eb7gLfo8SF1jd9F8HplJm1Fewwi4mQvIirEdv+8=
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
@@ -722,8 +722,6 @@ github.com/hashicorp/packer-plugin-cloudstack v1.0.1 h1:8B7poboe50lDmT0EJ0dEUV5F
 github.com/hashicorp/packer-plugin-cloudstack v1.0.1/go.mod h1:dbVNmnWPJRjB5jNbJXR2nNC0bcRJZ4IdbANDV5Ejjyo=
 github.com/hashicorp/packer-plugin-converge v1.0.1 h1:LNjhWQCaPNHSgeKGj/vXwqlEuqz3lA4P7gD7YQ1XsNA=
 github.com/hashicorp/packer-plugin-converge v1.0.1/go.mod h1:iXfr0QvDEOmSIK2ry53KCfztK3QaeQuTo8eHqzWMlVI=
-github.com/hashicorp/packer-plugin-digitalocean v1.0.6 h1:Sky2MoIn5Ffoo2mexWTQYpmA4lQL6OqolD9i7Nasvg8=
-github.com/hashicorp/packer-plugin-digitalocean v1.0.6/go.mod h1:GlpobMQDMtgU3yvrCbSBqQ3pa3tDVK+ZNoDCdhMsD9E=
 github.com/hashicorp/packer-plugin-docker v1.0.5 h1:xPb3IBUpRAKBiLpnw+sKo+GkdshLfViqLq4WrsPR/hs=
 github.com/hashicorp/packer-plugin-docker v1.0.5/go.mod h1:L+/b5qv/nzLoYEjaA+iYCjZMOv6N4xgJQ7tcQcGHrKk=
 github.com/hashicorp/packer-plugin-googlecompute v1.0.13 h1:zS7tKsP7WpFaZz5Ci/NM/FSJ5DdBPIEj2+mAUD3o/9g=
@@ -1050,7 +1048,6 @@ github.com/prometheus/common v0.0.0-20181113130724-41aa239b4cce/go.mod h1:daVV7q
 github.com/prometheus/common v0.0.0-20181126121408-4724e9255275/go.mod h1:daVV7qP5qjZbuso7PdcryaAu0sAZbrN9i7WWcTMWvro=
 github.com/prometheus/common v0.4.0/go.mod h1:TNfzLD0ON7rHzMJeJkieUDPYmFC7Snx/y86RQel1bk4=
 github.com/prometheus/common v0.4.1/go.mod h1:TNfzLD0ON7rHzMJeJkieUDPYmFC7Snx/y86RQel1bk4=
-github.com/prometheus/common v0.9.1 h1:KOMtN28tlbam3/7ZKEYKHhKoJZYYj3gMH4uc62x7X7U=
 github.com/prometheus/common v0.9.1/go.mod h1:yhUN8i9wzaXS3w1O07YhxHEBxD+W35wd8bs7vj7HSQ4=
 github.com/prometheus/procfs v0.0.0-20180125133057-cb4147076ac7/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
 github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d/go.mod h1:c3At6R/oaqEKCNdg8wHV1ftS6bRYblBhIjjI8uT2IGk=
@@ -1733,7 +1730,6 @@ google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQ
 google.golang.org/protobuf v1.27.1 h1:SnqbnDw1V7RiZcXPx5MEeqPv2s79L9i7BJUlG/+RurQ=
 google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 gopkg.in/airbrake/gobrake.v2 v2.0.9/go.mod h1:/h5ZAUhDkGaJfjzjKLSjv6zCL6O0LLBxU4K+aSYdM/U=
-gopkg.in/alecthomas/kingpin.v2 v2.2.6 h1:jMFz6MfLP0/4fUyZle81rXUoxOBFi19VUFKVDOQfozc=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d/go.mod h1:cuepJuh7vyXfUyUwEgHQXw849cJrilpS5NeIjOWESAw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
