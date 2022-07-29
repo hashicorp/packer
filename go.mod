@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/hcl/v2 v2.13.0
-	github.com/hashicorp/hcp-sdk-go v0.19.0
+	github.com/hashicorp/hcp-sdk-go v0.20.1-0.20220726131832-34fbcf69a746
 	github.com/hashicorp/packer-plugin-amazon v1.1.0
 	github.com/hashicorp/packer-plugin-sdk v0.3.1
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
@@ -96,6 +96,7 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.0.5
 	github.com/hashicorp/packer-plugin-yandex v1.1.1
+	github.com/prometheus/common v0.9.1
 	github.com/scaleway/packer-plugin-scaleway v1.0.4
 )
 
@@ -126,6 +127,8 @@ require (
 	github.com/Telmate/proxmox-api-go v0.0.0-20220107223401-b9c909d83a3b // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible // indirect
 	github.com/antihax/optional v1.0.0 // indirect
@@ -162,7 +165,6 @@ require (
 	github.com/go-openapi/strfmt v0.20.0 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
 	github.com/go-openapi/validate v0.20.2 // indirect
-	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/go-resty/resty/v2 v2.6.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
@@ -258,6 +260,7 @@ require (
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20211021150943-2b146023228c // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
+	gopkg.in/alecthomas/kingpin.v2 v2.2.6 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect

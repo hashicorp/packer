@@ -254,16 +254,29 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			cfg.bucket.RegisterBuildForComponent(source.String())
 		}
 
-		// Known HCP Packer Image Datasource, whose id is the SourceImageId for some build.
-		const hcpDatasourceType string = "hcp-packer-image"
+		// Known HCP Packer Image Datasource, whose id is the SourceImageId and ChannelID for some build.
 		values := ectx.Variables[dataAccessor].AsValueMap()
 
-		dsValues, ok := values[hcpDatasourceType]
+		const hcpImageDatasourceType string = "hcp-packer-image"
+		imageDatasourceValues, ok := values[hcpImageDatasourceType]
 		if !ok {
 			return build, diags
 		}
 
-		for _, value := range dsValues.AsValueMap() {
+		const hcpIterationDatasourceType string = "hcp-packer-iteration"
+		iterationToChannel := make(map[string]string)
+		if iterationDatasourceValues, ok := values[hcpIterationDatasourceType]; ok {
+			for _, itValue := range iterationDatasourceValues.AsValueMap() {
+				if !itValue.IsKnown() {
+					continue
+				}
+				itValues := itValue.AsValueMap()
+				iterationID, channelID := itValues["id"].AsString(), itValues["channel_id"].AsString()
+				iterationToChannel[iterationID] = channelID
+			}
+		}
+
+		for _, value := range imageDatasourceValues.AsValueMap() {
 			// Only try to check ancestry if we have fetched the
 			// data from HCP for the data source.
 			//
@@ -278,8 +291,17 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 
 			values := value.AsValueMap()
-			imgID, itID := values["id"], values["iteration_id"]
-			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = itID.AsString()
+			imgID, itID, channelID := values["id"], values["iteration_id"], values["channel_id"]
+			sourceIteration := packerregistry.ParentIteration{
+				IterationID: itID.AsString(),
+				ChannelID:   channelID.AsString(),
+			}
+
+			if sourceIteration.ChannelID == "" {
+				sourceIteration.ChannelID = iterationToChannel[itID.AsString()]
+			}
+
+			cfg.bucket.SourceImagesToParentIterations[imgID.AsString()] = sourceIteration
 		}
 	}
 

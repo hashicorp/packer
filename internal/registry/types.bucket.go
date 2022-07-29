@@ -27,9 +27,14 @@ type Bucket struct {
 	Destination                    string
 	BucketLabels                   map[string]string
 	BuildLabels                    map[string]string
-	SourceImagesToParentIterations map[string]string
+	SourceImagesToParentIterations map[string]ParentIteration
 	Iteration                      *Iteration
 	client                         *Client
+}
+
+type ParentIteration struct {
+	IterationID string
+	ChannelID   string
 }
 
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
@@ -38,7 +43,7 @@ func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
 	b := Bucket{
 		BucketLabels:                   make(map[string]string),
 		BuildLabels:                    make(map[string]string),
-		SourceImagesToParentIterations: make(map[string]string),
+		SourceImagesToParentIterations: make(map[string]ParentIteration),
 	}
 
 	i, err := NewIteration(opts)
@@ -169,6 +174,7 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 		"",
 		"",
 		"",
+		"",
 		nil,
 		status,
 		nil,
@@ -205,7 +211,7 @@ func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
 		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
-	var providerName, sourceID, sourceIterationID string
+	var providerName, sourceID, sourceIterationID, sourceChannelID string
 	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
 	for _, image := range buildToUpdate.Images {
 		// These values will always be the same for all images in a single build,
@@ -219,7 +225,8 @@ func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
 
 		// Check if image is using some other HCP Packer image
 		if v, ok := b.SourceImagesToParentIterations[image.SourceImageID]; ok {
-			sourceIterationID = v
+			sourceIterationID = v.IterationID
+			sourceChannelID = v.ChannelID
 		}
 
 		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
@@ -231,6 +238,7 @@ func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
 		buildToUpdate.CloudProvider,
 		sourceID,
 		sourceIterationID,
+		sourceChannelID,
 		buildToUpdate.Labels,
 		status,
 		images,
@@ -444,6 +452,7 @@ func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), erro
 				_, err = b.client.UpdateBuild(ctx,
 					buildToUpdate.ID,
 					buildToUpdate.RunUUID,
+					"",
 					"",
 					"",
 					"",

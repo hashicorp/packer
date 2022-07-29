@@ -59,6 +59,7 @@ type FlatDatasourceOutput struct {
 	ID                 *string `mapstructure:"id" cty:"id" hcl:"id"`
 	IncrementalVersion *int32  `mapstructure:"incremental_version" cty:"incremental_version" hcl:"incremental_version"`
 	UpdatedAt          *string `mapstructure:"updated_at" cty:"updated_at" hcl:"updated_at"`
+	ChannelID          *string `mapstructure:"channel_id" cty:"channel_id" hcl:"channel_id"`
 }
 
 // FlatMapstructure returns a new FlatDatasourceOutput.
@@ -81,6 +82,7 @@ func (*FlatDatasourceOutput) HCL2Spec() map[string]hcldec.Spec {
 		"id":                  &hcldec.AttrSpec{Name: "id", Type: cty.String, Required: false},
 		"incremental_version": &hcldec.AttrSpec{Name: "incremental_version", Type: cty.Number, Required: false},
 		"updated_at":          &hcldec.AttrSpec{Name: "updated_at", Type: cty.String, Required: false},
+		"channel_id":          &hcldec.AttrSpec{Name: "channel_id", Type: cty.String, Required: false},
 	}
 	return s
 }

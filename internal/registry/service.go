@@ -193,6 +193,7 @@ func (client *Client) UpdateBuild(
 	cloudProvider,
 	sourceImageID string,
 	sourceIterationID string,
+	sourceChannelID string,
 	labels map[string]string,
 	status models.HashicorpCloudPackerBuildStatus,
 	images []*models.HashicorpCloudPackerImageCreateBody,
@@ -213,6 +214,7 @@ func (client *Client) UpdateBuild(
 			CloudProvider:     cloudProvider,
 			SourceImageID:     sourceImageID,
 			SourceIterationID: sourceIterationID,
+			SourceChannelID:   sourceChannelID,
 		},
 	}
 
@@ -228,14 +230,9 @@ func (client *Client) UpdateBuild(
 	return resp.Payload.Build.ID, nil
 }
 
-// GetIterationFromChannel loads the iterationId associated with a current channel. If the
+// GetChannel loads the named channel that is associated to the bucket slug . If the
 // channel does not exist in HCP Packer, GetChannel returns an error.
-func (client *Client) GetIterationFromChannel(
-	ctx context.Context,
-	bucketSlug string,
-	channelName string,
-) (*models.HashicorpCloudPackerIteration, error) {
-
+func (client *Client) GetChannel(ctx context.Context, bucketSlug string, channelName string) (*models.HashicorpCloudPackerChannel, error) {
 	params := packer_service.NewPackerServiceGetChannelParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
@@ -247,14 +244,10 @@ func (client *Client) GetIterationFromChannel(
 		return nil, err
 	}
 
-	if resp.Payload.Channel != nil {
-		if resp.Payload.Channel.Iteration != nil {
-			return resp.Payload.Channel.Iteration, nil
-		}
-		return nil, fmt.Errorf("there is no iteration associated with the channel %s",
-			channelName)
+	if resp.Payload.Channel == nil {
+		return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
+			channelName, bucketSlug)
 	}
 
-	return nil, fmt.Errorf("there is no channel with the name %s associated with the bucket %s",
-		channelName, bucketSlug)
+	return resp.Payload.Channel, nil
 }

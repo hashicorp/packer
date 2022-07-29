@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	"github.com/hashicorp/packer/internal/registry"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
@@ -99,7 +98,7 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	return nil
 }
 
-// Information from []*models.HashicorpCloudPackerImage with some information
+// DatasourceOutput Information from []*models.HashicorpCloudPackerImage with some information
 // from the parent []*models.HashicorpCloudPackerBuild included where it seemed
 // like it might be relevant. Need to copy so we can generate
 type DatasourceOutput struct {
@@ -118,6 +117,9 @@ type DatasourceOutput struct {
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	IterationID string `mapstructure:"iteration_id"`
+	// The ID of the channel used to query the image iteration. This value will be empty if the `iteration_id` was used
+	// directly instead of a channel.
+	ChannelID string `mapstructure:"channel_id"`
 	// The UUID associated with the Packer run that created this image.
 	PackerRunUUID string `mapstructure:"packer_run_uuid"`
 	// ID or URL of the remote cloud image as given by a build.
@@ -134,31 +136,6 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 	return (&DatasourceOutput{}).FlatMapstructure().HCL2Spec()
 }
 
-func (d *Datasource) getIteration(
-	ctx context.Context,
-	cli *registry.Client,
-) (*models.HashicorpCloudPackerIteration, error) {
-	if d.config.IterationID != "" {
-		iter, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
-		if err != nil {
-			return nil, fmt.Errorf(
-				"error retrieving image iteration from HCP Packer registry: %s",
-				err)
-		}
-
-		return iter, nil
-	}
-
-	iter, err := cli.GetIterationFromChannel(ctx, d.config.Bucket, d.config.Channel)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"error retrieving iteration from HCP Packer registry: %s",
-			err)
-	}
-
-	return iter, nil
-}
-
 func (d *Datasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
 
@@ -167,13 +144,35 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		return cty.NullVal(cty.EmptyObject), err
 	}
 
-	// Load channel.
-	log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
-		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
+	var iteration *models.HashicorpCloudPackerIteration
+	var channelID string
+	if d.config.IterationID != "" {
+		log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
+			d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
 
-	iteration, err := d.getIteration(ctx, cli)
-	if err != nil {
-		return cty.NullVal(cty.EmptyObject), err
+		iter, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
+		if err != nil {
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf(
+				"error retrieving image iteration from HCP Packer registry: %s",
+				err)
+		}
+		iteration = iter
+	} else {
+		log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, channel=%s]",
+			d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.Channel)
+
+		channel, err := cli.GetChannel(ctx, d.config.Bucket, d.config.Channel)
+		if err != nil {
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
+				"channel from HCP Packer registry: %s", err.Error())
+		}
+
+		if channel.Iteration == nil {
+			return cty.NullVal(cty.EmptyObject), fmt.Errorf("there is no iteration associated with the channel %s",
+				d.config.Channel)
+		}
+		channelID = channel.ID
+		iteration = channel.Iteration
 	}
 
 	revokeAt := time.Time(iteration.RevokeAt)
@@ -201,6 +200,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 					CreatedAt:     image.CreatedAt.String(),
 					BuildID:       build.ID,
 					IterationID:   build.IterationID,
+					ChannelID:     channelID,
 					PackerRunUUID: build.PackerRunUUID,
 					ID:            image.ImageID,
 					Region:        image.Region,

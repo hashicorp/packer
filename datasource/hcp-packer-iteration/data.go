@@ -58,7 +58,7 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	return nil
 }
 
-// Essentially a copy of []*models.HashicorpCloudPackerIteration, but without the
+// DatasourceOutput is essentially a copy of []*models.HashicorpCloudPackerIteration, but without the
 // []Builds or ancestor id.
 type DatasourceOutput struct {
 	// who created the iteration
@@ -88,6 +88,8 @@ type DatasourceOutput struct {
 	IncrementalVersion int32 `mapstructure:"incremental_version"`
 	// The date when this iteration was last updated.
 	UpdatedAt string `mapstructure:"updated_at"`
+	// The ID of the channel used to query the image iteration.
+	ChannelID string `mapstructure:"channel_id"`
 }
 
 func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
@@ -105,11 +107,17 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	log.Printf("[INFO] Reading iteration info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, channel=%s]",
 		d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.Channel)
 
-	iteration, err := cli.GetIterationFromChannel(ctx, d.config.Bucket, d.config.Channel)
+	channel, err := cli.GetChannel(ctx, d.config.Bucket, d.config.Channel)
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("error retrieving "+
 			"iteration from HCP Packer registry: %s", err.Error())
 	}
+	if channel.Iteration == nil {
+		return cty.NullVal(cty.EmptyObject), fmt.Errorf("there is no iteration associated with the channel %s",
+			d.config.Channel)
+	}
+
+	iteration := channel.Iteration
 
 	revokeAt := time.Time(iteration.RevokeAt)
 	if !revokeAt.IsZero() && revokeAt.Before(time.Now().UTC()) {
@@ -128,6 +136,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		ID:                 iteration.ID,
 		IncrementalVersion: iteration.IncrementalVersion,
 		UpdatedAt:          iteration.UpdatedAt.String(),
+		ChannelID:          channel.ID,
 	}
 
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
