@@ -1,4 +1,4 @@
-## 1.8.3 (Upcoming)
+## 1.8.3 (August 2, 2022)
 
 ### NOTES:
 * There's been a change in the way the `ssh_timeout` and the
@@ -66,7 +66,7 @@ The following external plugins have been updated and pinned to address open
     timed out if it has not posted an update in the last 10 minutes. For HCP
     Packer enabled builds a status update will now be sent every 6 minutes to
     the registry to prevent long builds from being marked as timed
-    out.[GH-11846](https://github.com/hashicorp/packer/pull/11846)
+    out. [GH-11846](https://github.com/hashicorp/packer/pull/11846)
 * datasource/hcp_packer_image: Add `component_type` configuration argument to
     support specifying an exact build image when multiple images exist in the
     same provider and region for a given HCP Packer bucker iteration.
@@ -88,7 +88,7 @@ The following external plugins have been updated and pinned to address open
 * core/hcl2: Fix crash when parsing malformed provisioner override blocks.
     [GH-11881](https://github.com/hashicorp/packer/pull/11881)
 * core/hcl2: Fix crash when running `packer validate` on templates containing
-    one or more  HCP data sources.
+    one or more  HCP Packer data sources.
     [GH-11883](https://github.com/hashicorp/packer/pull/11883)
 
 
