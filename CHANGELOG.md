@@ -63,15 +63,15 @@ The following external plugins have been updated and pinned to address open
     and `ssh_handshake_attempts` configuration arguments in the SSH
     communicator. [GH-11909](https://github.com/hashicorp/packer/pull/11909)
 * core: During long running builds the HCP Packer registry will mark a build as
-    timed out if it has not posted an update in the last 10 minutes. For HCP
-    Packer enabled builds a status update will now be sent every 6 minutes to
-    the registry to prevent long builds from being marked as timed
+    timed out if it has not posted an update after a certain number of minutes.
+    For HCP Packer enabled builds a status update will now be sent every 2
+    minutes to the registry to prevent long builds from being marked as timed
     out. [GH-11846](https://github.com/hashicorp/packer/pull/11846)
-* datasource/hcp_packer_image: Add `component_type` configuration argument to
+* data/hcp_packer_image: Add `component_type` configuration argument to
     support specifying an exact build image when multiple images exist in the
-    same provider and region for a given HCP Packer bucker iteration.
+    same provider and region for a given HCP Packer bucket iteration.
     [GH-11872](https://github.com/hashicorp/packer/pull/11872)
-* datasource/hcp_packer_image: Add support for `channel` as input argument to
+* data/hcp_packer_image: Add support for `channel` as input argument to
     retrieve an image from the associated iteration. If
     using several images from a single iteration, you may prefer sourcing an
     iteration first, and referencing it for subsequent uses, as every
