@@ -8,6 +8,7 @@ import (
 
 // dummy Artifact implementation - does nothing
 type NullArtifact struct {
+	SourceImageId string
 }
 
 func (*NullArtifact) BuilderId() string {
@@ -33,7 +34,7 @@ func (a *NullArtifact) State(name string) interface{} {
 			registryimage.WithID(a.Id()),
 			registryimage.WithProvider("null"),
 			registryimage.WithRegion("null"),
-			registryimage.WithSourceID("null"),
+			registryimage.WithSourceID(a.SourceImageId),
 		)
 		return img
 	case "generated_data":

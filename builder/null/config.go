@@ -16,6 +16,10 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
 	CommConfig communicator.Config `mapstructure:",squash"`
+
+	// Is used by the packer team to test HCP Packer ancestry. This value will be pushed to HCP Packer as the source
+	// image of this build.
+	SourceImageID string `mapstructure:"source_image_id"`
 }
 
 func (c *Config) Prepare(raws ...interface{}) ([]string, error) {

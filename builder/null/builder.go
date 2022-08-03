@@ -59,6 +59,8 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	}
 
 	// No errors, must've worked
-	artifact := &NullArtifact{}
+	artifact := &NullArtifact{
+		SourceImageId: b.config.SourceImageID,
+	}
 	return artifact, nil
 }
