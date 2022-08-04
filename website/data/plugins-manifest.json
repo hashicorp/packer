@@ -7,7 +7,7 @@
     "version": "latest"
   },
   {
-    "title": "Alicloud",
+    "title": "Alibaba Cloud",
     "path": "alicloud",
     "repo": "hashicorp/packer-plugin-alicloud",
     "pluginTier": "community",
@@ -50,7 +50,7 @@
     "archived": true
   },
   {
-    "title": "Cloudstack",
+    "title": "CloudStack",
     "path": "cloudstack",
     "repo": "hashicorp/packer-plugin-cloudstack",
     "pluginTier": "community",
@@ -109,7 +109,7 @@
     "isHcpPackerReady": false
   },
   {
-    "title": "hcloud",
+    "title": "Hetzner Cloud",
     "path": "hetzner-cloud",
     "repo": "hashicorp/packer-plugin-hcloud",
     "version": "latest",
@@ -188,7 +188,7 @@
     "version": "latest"
   },
   {
-    "title": "Openstack",
+    "title": "OpenStack",
     "path": "openstack",
     "repo": "hashicorp/packer-plugin-openstack",
     "pluginTier": "community",
