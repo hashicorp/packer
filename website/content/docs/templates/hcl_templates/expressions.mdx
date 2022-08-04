@@ -203,7 +203,7 @@ A _splat expression_ provides a more concise way to express a common operation
 that could otherwise be performed with a `for` expression.
 
 If `var.list` is a list of objects that all have an attribute `id`, then a list
-of the ids could be produced with the following `for` expression:
+of the IDs could be produced with the following `for` expression:
 
 ```hcl
 [for o in var.list : o.id]
@@ -248,7 +248,7 @@ may not produce a tuple value:
 aws_instance.example[*].id
 ```
 
-The above will produce a list of ids whether `aws_instance.example` has `count`
+The above will produce a list of IDs whether `aws_instance.example` has `count`
 set or not, avoiding the need to revise various other expressions in the
 configuration when a particular resource switches to and from having `count`
 set.

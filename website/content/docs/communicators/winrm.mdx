@@ -17,7 +17,7 @@ The WinRM communicator is not the default communicator, so you will always have
 to set the `"communicator": "winrm",` template option explicitly. In addition,
 you will almost always have to provide a pre-run script that enables and
 configures WinRM on the guest machine. This will generally be in the form of a
-powershell script or a batch file.
+PowerShell script or a batch file.
 
 If you are building from a brand-new and unconfigured operating system
 image, you will need to provide this pre-run script as part of your
@@ -58,7 +58,7 @@ to be able to connect via WinRM
 6. If necessary, generate a self-signed certificate or provide a real certificate
    to the WinRM listener.
 
-#### Configuring WinRM in VMWare
+#### Configuring WinRM in VMware
 
 If you are configuring WinRM using an Autounattend.xml, the simplest way to set
 up WinRM is to put the configuration commands directly into the Autounattend
@@ -84,7 +84,7 @@ Autounattend file.
 </FirstLogonCommands>
 ```
 
-It is also possible to call powershell scripts in a similar manner.
+It is also possible to call PowerShell scripts in a similar manner.
 
 The winrmConfig.bat referenced above can be as simple as
 
@@ -108,7 +108,7 @@ Please note that the above batch file is _extremely_ simplistic, and not secure.
 It is intended to be an example of the bare minimum configuration. Below, you'll
 find a more complicated example of a more secure WinRM configuration process.
 
-This batch file will only work for http connections, not https, but will enable
+This batch file will only work for HTTP connections, not HTTPS, but will enable
 you to connect using only the username and password created earlier in the
 Autounattend file. The above batchfile will allow you to connect using a very
 simple Packer config:
@@ -119,7 +119,7 @@ simple Packer config:
         "winrm_password": "SecretPassword"
 ```
 
-A more complex example of a powershell script used for configuration can be seen
+A more complex example of a PowerShell script used for configuration can be seen
 below.
 
 ```powershell

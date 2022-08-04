@@ -2,7 +2,7 @@
 page_title: Unattended Windows Installation
 description: |-
   Learn how to use an autounattend file to automatically answer installation
-  questions and enable Packer to connect to your windows instance.
+  questions and enable Packer to connect to your Windows instance.
 ---
 
 # Unattended Installation for Windows
@@ -57,21 +57,21 @@ If you want to be able to use provisioners, the Answer file must also contain
 a script that sets up SSH or WinRM so that Packer can connect to the instance.
 
 Finally, your Packer build will be much smoother if the Answer File handles or
-disables windows updates rather than you trying to run them using a Packer
+disables Windows updates rather than you trying to run them using a Packer
 provisioner. This is because the winrm communicator does not handle the
 disconnects caused by automatic reboots in Windows updates well, and the
 disconnections can fail a build.
 
 ## Examples
 
-The chef-maintained bento boxes are a great example of a windows build that
+The chef-maintained bento boxes are a great example of a Windows build that
 sets up openssh as part of the unattended installation so that Packer can
 connect using the SSH communicator. The functioning answer files for every
 modern Windows version can be found [here](https://github.com/chef/bento/tree/master/packer_templates/windows/answer_files).
 
 Stefan Scherer's [packer-windows repo](https://github.com/StefanScherer/packer-windows)
-is a great example of windows builds that set up WinRM as part of the unattended
-installation so that Packer can connect using the winrm communicator:
+is a great example of Windows builds that set up WinRM as part of the unattended
+installation so that Packer can connect using the `winrm` communicator:
 
 ```json
 {
