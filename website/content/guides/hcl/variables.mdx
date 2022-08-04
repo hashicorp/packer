@@ -120,9 +120,9 @@ build {
   ]
   provisioner "shell-local" {
     // Note that for options that are documented as template engines,
-    // we still have to use the golang template engine syntax rather than our
+    // we still have to use the Go template engine syntax rather than our
     // specialized HCL2 variable syntax. This example shows a combination of
-    // an HCL2 variable and the golang template engines built into the
+    // an HCL2 variable and the Go template engines built into the
     // execute_command option
     execute_command  = ["/bin/sh", "-c", "echo ${var.sudo_password}| {{.Vars}} {{.Script}}"]
     environment_vars = ["HELLO_USER=packeruser", "UUID=${build.PackerRunUUID}"]
@@ -139,7 +139,7 @@ build {
 As you can see in the example, you can access your variables directly by
 giving them the `var.` or `local.` prefix. If you want to embed the variables
 in a string, you can do so with the `${}` HCL interpolation syntax. If you are
-using an option that is a template engine, you still need to use the golang
+using an option that is a template engine, you still need to use the Go
 templating engine syntax `{{ .OPTION }}` for those engines.
 
 ## Assigning Variables
