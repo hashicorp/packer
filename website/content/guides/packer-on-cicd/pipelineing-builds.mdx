@@ -287,7 +287,7 @@ sources.pkr.hcl
 
 source "docker" "example" {
   commit = true
-  // any other configuration you want for your docker containers
+  // any other configuration you want for your Docker containers
 }
 ```
 
@@ -314,7 +314,7 @@ build {
   }
 
   // Make sure that the output from your build can be used in the next build.
-  // In this example, we're tagging the docker image so that the step-2
+  // In this example, we're tagging the Docker image so that the step-2
   // builder can find it without us having to track it down in a manifest.
   post-processor "docker-tag" {
     repository = "ubuntu"

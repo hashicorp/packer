@@ -46,7 +46,7 @@ type Image struct {
 	// Labels represents additional details about an image that a builder or post-processor may with to provide for a given build.
 	// Any additional metadata will be made available as build labels within a HCP Packer registry iteration.
 	Labels map[string]string
-	// SourceImageID is the cloud image id of the image that was used as the
+	// SourceImageID is the cloud image ID of the image that was used as the
 	// source for this image. If set, the HCP Packer registry will be able
 	// link the parent and child images for ancestry visualizations and
 	// dependency tracking.

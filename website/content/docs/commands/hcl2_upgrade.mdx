@@ -75,7 +75,7 @@ variable "aws_secret_key" {
 
 ## Go template functions
 
-`hcl2_upgrade` will do its best to transform your go _template calls_ to HCL2,
+`hcl2_upgrade` will do its best to transform your Go _template calls_ to HCL2,
 here is the list of calls that should get transformed:
 
 - `` {{ user `my_var` }} `` becomes `${var.my_var}`.
@@ -87,7 +87,7 @@ here is the list of calls that should get transformed:
   will be created for all generated files.
 - `` {{ build `ID` }} `` becomes `${build.ID}`.
 
-The rest of the calls should remain go template calls for now, this will be
+The rest of the calls should remain Go template calls for now, this will be
 improved over time.
 
 -> **Note**: The `hcl2_upgrade` command does its best to transform template

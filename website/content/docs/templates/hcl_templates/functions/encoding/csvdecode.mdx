@@ -43,7 +43,7 @@ You can use the result of `csvdecode` with
 to describe a collection of similar objects whose differences are
 described by the rows in the given CSV file.
 
-There must be one column in the CSV file that can serve as a unique id for each
+There must be one column in the CSV file that can serve as a unique ID for each
 row, which we can then use as the tracking key for the individual instances in
 the `for_each` expression. For example:
 
@@ -91,5 +91,5 @@ then you could instead use
 to define an object for each CSV row, with each one identified by its index into
 the list returned by `csvdecode`. However, in that case any future updates to
 the CSV may be disruptive if they change the positions of particular objects in
-the list. We recommend using `for_each` with a unique id column to make
+the list. We recommend using `for_each` with a unique ID column to make
 behavior more predictable on future changes.

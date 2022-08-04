@@ -7,11 +7,11 @@ within the corresponding `variable` block:
 ```hcl
 variable "image_id" {
   type        = string
-  description = "The id of the machine image (AMI) to use for the server."
+  description = "The ID of the machine image (AMI) to use for the server."
 
   validation {
     condition     = length(var.image_id) > 4 && substr(var.image_id, 0, 4) == "ami-"
-    error_message = "The image_id value must be a valid AMI id, starting with \"ami-\"."
+    error_message = "The image_id value must be a valid AMI ID, starting with \"ami-\"."
   }
 }
 ```
@@ -27,12 +27,12 @@ If the failure of an expression is the basis of the validation decision, use
 ```hcl
 variable "image_id" {
   type        = string
-  description = "The id of the machine image (AMI) to use for the server."
+  description = "The ID of the machine image (AMI) to use for the server."
 
   validation {
     # regex(...) fails if it cannot find a match
     condition     = can(regex("^ami-", var.image_id))
-    error_message = "The image_id value must be a valid AMI id, starting with \"ami-\"."
+    error_message = "The image_id value must be a valid AMI ID, starting with \"ami-\"."
   }
 }
 ```

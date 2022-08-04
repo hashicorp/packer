@@ -28,7 +28,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 
 ### Plugin System Architecture
 
-A Packer plugin is just a go binary. Instead of loading plugins directly into a
+A Packer plugin is just a Go binary. Instead of loading plugins directly into a
 running application, Packer runs each plugin as a _separate application_.
 The multiple separate Packer plugin processes communicate with the Core using
 an RPC defined in the packer-plugin SDK. The Packer core itself is responsible
