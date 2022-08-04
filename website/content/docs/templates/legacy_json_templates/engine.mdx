@@ -119,7 +119,7 @@ Here is a full list of the available functions for reference.
   issue tracker on GitHub.
 
 - `isotime [FORMAT]` - UTC time, which can be
-  [formatted](https://golang.org/pkg/time/#example_Time_Format). See more
+  [formatted](https://pkg.go.dev/time#example_Time_Format). See more
   examples below in [the `isotime` format
   reference](/docs/templates/legacy_json_templates/engine#isotime-function-format-reference).
   `strftime FORMAT` - UTC time, formated using the ISO C standard format
@@ -236,15 +236,15 @@ documentation for more information on user variables.
 
 # isotime Function Format Reference
 
-The isotime template engine uses golang to generate timestamps. If you're
-unfamiliar with golang, then the way you format the timestamp is going to
+The isotime template engine uses Go to generate timestamps. If you're
+unfamiliar with Go, then the way you format the timestamp is going to
 feel a bit unusual compared to how you may be used to formatting
 datetime strings.
 
-Full docs and examples for the golang time formatting function can be found
-[here](https://golang.org/pkg/time/#example_Time_Format)
+Full docs and examples for the Go time formatting function can be found
+[here](https://pkg.go.dev/time#example_Time_Format)
 
-However, the formatting basics are worth describing here. From the [golang docs](https://golang.org/pkg/time/#pkg-constants):
+However, the formatting basics are worth describing here. From the [Go docs](https://pkg.go.dev/time#pkg-constants):
 
 > These are predefined layouts for use in Time.Format and time.Parse. The
 > reference time used in the layouts is the specific time:
