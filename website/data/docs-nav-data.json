@@ -720,7 +720,7 @@
         ]
       },
       {
-        "title": "Http",
+        "title": "HTTP",
         "path": "datasources/http"
       }
     ]
