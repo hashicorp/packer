@@ -205,9 +205,9 @@ provisioner "powershell" {
 </Tab>
 </Tabs>
 
-- `execution_policy` - To run ps scripts on windows packer defaults this to
+- `execution_policy` - To run ps scripts on Windows, Packer defaults this to
   "bypass" and wraps the command to run. Setting this to "none" will prevent
-  wrapping, allowing to see exit codes on docker for windows. Possible values
+  wrapping, allowing to see exit codes on Docker for Windows. Possible values
   are `bypass`, `allsigned`, `default`, `remotesigned`, `restricted`,
   `undefined`, `unrestricted`, and `none`.
 
@@ -244,7 +244,7 @@ provisioner "powershell" {
   exists in order to deal with times when SSH may restart, such as a system
   reboot. Set this to a higher value if reboots take a longer amount of time.
 
-- `pause_after` (string) - Wait the amount of time after provisioning a powershell
+- `pause_after` (string) - Wait the amount of time after provisioning a PowerShell
   script, this pause be taken if all previous steps were successful.
 
 @include 'provisioners/common-config.mdx'
@@ -371,7 +371,7 @@ The above snippet should result in the following output on the Packer console:
 
 ```shell-session
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
+==> amazon-ebs: Provisioning with PowerShell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner508190439
     amazon-ebs: A literal dollar $ must be escaped
     amazon-ebs: A literal backtick ` must be escaped
     amazon-ebs: Here "double quotes" must be escaped
@@ -468,10 +468,10 @@ The above snippet should result in the following output on the Packer console:
 
 ```shell-session
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
+==> amazon-ebs: Provisioning with PowerShell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner961728919
     amazon-ebs: The dollar in the elevated_password is interpreted correctly
 ==> amazon-ebs: Provisioning with Powershell...
-==> amazon-ebs: Provisioning with powershell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
+==> amazon-ebs: Provisioning with PowerShell script: /var/folders/15/d0f7gdg13rnd1cxp7tgmr55c0000gn/T/packer-powershell-provisioner142826554
     amazon-ebs: In the following examples the special character is interpreted correctly:
     amazon-ebs: The dollar in VAR1:                            A$Dollar
     amazon-ebs: The backtick in VAR2:                          A`Backtick

@@ -59,12 +59,12 @@ Some nice description about the image which artifact is being published to HCP P
   `HCP_PACKER_BUCKET_NAME` is set.
 
 - `bucket_labels` (map[string]string) - Map of labels. Can provide any information,
-  such as tools versions (e.g. go 1.17, python 3.5, etc...). The bucket labels will
+  such as tools versions (e.g. Go 1.17, Python 3.5, etc...). The bucket labels will
   appear at the image's main page and will be updated whenever it is changed
   and a new iteration for the bucket is pushed to the HCP Packer registry.
 
 - `build_labels` (map[string]string) - Map of labels. Can provide any information,
-  such as tools versions (e.g. go 1.17, python 3.5, etc...). The build labels will
+  such as tools versions (e.g. Go 1.17, Python 3.5, etc...). The build labels will
   appear in the build section of an iteration. Build labels are specific to an iteration
   and will be added to a build when is pushed to the HCP Packer registry.
   Updates to build labels on a completed iteration is not allowed.

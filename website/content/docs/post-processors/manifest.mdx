@@ -17,7 +17,7 @@ Artifact BuilderId: `packer.post-processor.manifest`
 The manifest post-processor writes a JSON file with a list of all of the
 artifacts packer produces during a run. If your Packer template includes
 multiple builds, this helps you keep track of which output artifacts (files,
-AMI IDs, docker containers, etc.) correspond to each build.
+AMI IDs, Docker containers, etc.) correspond to each build.
 
 The manifest post-processor is invoked each time a build completes and
 _updates_ data in the manifest file. Builds are identified by name and type,
@@ -194,7 +194,7 @@ Example usage:
 
 The manifest can be very useful for cleaning up old artifacts, or printing
 important values to logs. The following example uses jq, a command-line tool for
-parsing json output, to find and echo the AWS ami-id of an ami created by a
+parsing json output, to find and echo the AWS ami-id of an AMI created by a
 build.
 
 ```bash
