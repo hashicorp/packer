@@ -80,7 +80,7 @@ Exactly _one_ of the following is required:
 
 - `command` (string) - This is a single command to execute. It will be
   written to a temporary file and run using the `execute_command` call below.
-  If you are building a windows vm on AWS, Azure, Google Compute, or OpenStack
+  If you are building a Windows VM on AWS, Azure, Google Compute, or OpenStack
   and would like to access the generated password that Packer uses to connect
   to the instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
   to set this as an environment variable.
@@ -112,7 +112,7 @@ Optional parameters:
   inject prior to the `execute_command`. The format should be `key=value`.
   Packer injects some environmental variables by default into the
   environment, as well, which are covered in the section below. If you are
-  building a windows vm on AWS, Azure, Google Compute, or OpenStack and would
+  building a Windows VM on AWS, Azure, Google Compute, or OpenStack and would
   like to access the generated password that Packer uses to connect to the
   instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
   to set this as an environment variable. For example:
@@ -127,7 +127,7 @@ Optional parameters:
 
 - `execute_command` (array of strings) - The command used to execute the
   script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
-  on unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on windows. This is
+  on Unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on Windows. This is
   treated as a [template engine](/docs/templates/legacy_json_templates/engine). There are two
   available variables: `Script`, which is the path to the script to run, and
   `Vars`, which is the list of `environment_vars`, if configured.
@@ -147,7 +147,7 @@ Optional parameters:
   sake of clarity, as even when you set only a single `command` to run,
   Packer writes it to a temporary file and then runs it as a script.
 
-  If you are building a windows vm on AWS, Azure, Google Compute, or OpenStack
+  If you are building a Windows VM on AWS, Azure, Google Compute, or OpenStack
   and would like to access the generated password that Packer uses to connect
   to the instance via WinRM, you can use the template variable `{{.WinRMPassword}}`
   to set this as an environment variable.
@@ -161,16 +161,16 @@ Optional parameters:
   provisioner.
 
 - `only_on` (array of strings) - This is an array of [runtime operating
-  systems](https://golang.org/doc/install/source#environment) where
+  systems](https://go.dev/doc/install/source#environment) where
   `shell-local` will execute. This allows you to execute `shell-local` _only_
   on specific operating systems. By default, shell-local will always run if
   `only_on` is not set."
 
-- `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
+- `use_linux_pathing` (bool) - This is only relevant to Windows hosts. If you
   are running Packer in a Windows environment with the Windows Subsystem for
   Linux feature enabled, and would like to invoke a bash script rather than
   invoking a Cmd script, you'll need to set this flag to true; it tells
-  Packer to use the linux subsystem path for your script rather than the
+  Packer to use the Linux subsystem path for your script rather than the
   Windows path. (e.g. /mnt/c/path/to/your/file instead of
   C:/path/to/your/file). Please see the example below for more guidance on
   how to use this feature. If you are not on a Windows host, or you do not
@@ -316,7 +316,7 @@ _must_ be extra careful to `exit 0` when necessary.
 
 ### Windows Host
 
-Example of running a .cmd file on windows:
+Example of running a .cmd file on Windows:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -346,7 +346,7 @@ Contents of "test_cmd.cmd":
 
     echo %SHELLLOCALTEST%
 
-Example of running an inline command on windows: Required customization:
+Example of running an inline command on Windows: Required customization:
 tempfile_extension
 
 <Tabs>
@@ -375,7 +375,7 @@ provisioner "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a bash command on windows using WSL: Required
+Example of running a bash command on Windows using WSL: Required
 customizations: use_linux_pathing and execute_command
 
 <Tabs>
@@ -411,7 +411,7 @@ Contents of `example_bash.sh`:
     #!/bin/bash
     echo $SHELLLOCALTEST
 
-Example of running a powershell script on windows: Required customizations:
+Example of running a PowerShell script on Windows: Required customizations:
 `env_var_format` and `execute_command`
 
 <Tabs>
@@ -442,7 +442,7 @@ provisioner "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a powershell script on windows as "inline": Required
+Example of running a PowerShell script on Windows as "inline": Required
 customizations: `env_var_format`, `tempfile_extension`, and `execute_command`
 
 <Tabs>
@@ -477,7 +477,7 @@ provisioner "shell-local" {
 
 ### Unix Host
 
-Example of running a Shell script on unix:
+Example of running a Shell script on Unix:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -503,7 +503,7 @@ provisioner "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a Shell script "inline" on unix:
+Example of running a Shell script "inline" on Unix:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -530,7 +530,7 @@ provisioner "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a Python script on unix:
+Example of running a Python script on Unix:
 
 <Tabs>
 <Tab heading="HCL2">

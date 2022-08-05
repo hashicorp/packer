@@ -19,7 +19,7 @@ Plugins and core configuration files can exist in the home directory of Packer.
 The home directory of Packer will be the first one of the following env values
 to be set :
 
-| unix                   | windows               |
+| Unix                   | Windows               |
 | ---------------------- | --------------------- |
 | `${PACKER_CONFIG_DIR}` | `%PACKER_CONFIG_DIR%` |
 | `${APPDATA}`           | `%APPDATA%`           |
@@ -34,7 +34,7 @@ to be set :
 Packer can optionally read a JSON file for the end user to set core settings.
 The config file of Packer will be looked up on the following paths:
 
-| unix                             | windows                          |
+| Unix                             | Windows                          |
 | -------------------------------  | -------------------------------- |
 | `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                |
 | `PACKER_HOME_DIR/.packerconfig`  | `PACKER_HOME_DIR/packer.config/` |
@@ -46,18 +46,18 @@ The config file of Packer will be looked up on the following paths:
 Packer's configuration directory can potentially contain plugins and internal
 Packer files. The config dir of Packer will be looked up on the following paths:
 
-| unix                        | windows                     |
+| Unix                        | Windows                     |
 | --------------------------- | --------------------------- |
 | `PACKER_HOME_DIR/.packer.d` | `PACKER_HOME_DIR/packer.d/` |
 
 Examples:
 
-- On a 'unix' system, if the `$PACKER_CONFIG_DIR` env var is set to
+- On a Unix system, if the `$PACKER_CONFIG_DIR` env var is set to
   `/home/packer`, the config directory will be: `/home/packer/.packer.d/` and
   other values will not be checked.
-- On a 'unix' system, if the `HOME` env var is `/home/azr` or the `USER` env var
+- On a Unix system, if the `HOME` env var is `/home/azr` or the `USER` env var
   is `azr`, then the config directory will default to `/home/azr/.packer.d/`.
-- On a 'windows' system, if the `PACKER_CONFIG_DIR` env var is set to `C:/`,the
+- On a Windows system, if the `PACKER_CONFIG_DIR` env var is set to `C:/`,the
   config directory will be: `C:/packer.d/` and other values will not be checked.
 
 ## Packer's plugin directory
@@ -139,8 +139,8 @@ each can be found below:
 
 - `PACKER_PLUGIN_PATH` - a PATH variable for finding third-party packer
   plugins. For example: `~/custom-dir-1:~/custom-dir-2`. Separate directories in
-  the PATH string using a colon (`:`) on posix systems and a semicolon (`;`) on
-  windows systems. The above example path would be able to find a provisioner
+  the PATH string using a colon (`:`) on POSIX systems and a semicolon (`;`) on
+  Windows systems. The above example path would be able to find a provisioner
   named `packer-provisioner-foo` in either
   `~/custom-dir-1/packer-provisioner-foo` or
   `~/custom-dir-2/packer-provisioner-foo`. See the documentation on [plugin

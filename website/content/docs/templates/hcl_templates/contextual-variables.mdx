@@ -39,19 +39,19 @@ Here is the list of available build variables:
 - **name** Represents the name of the build block being run. This is different
   than the name of the source block being run.
 
-- **ID**: Represents the vm being provisioned. For example, in Amazon it is the instance id; in digitalocean,
-  it is the droplet id; in Vmware, it is the vm name.
+- **ID**: Represents the VM being provisioned. For example, in Amazon it is the instance ID; in DigitalOcean,
+  it is the Droplet ID; in VMware, it is the VM name.
 
 - **Host**, **Port**, **User** and **Password**: The host, port, user, and password that Packer uses to access the machine.
   Useful for using the shell local provisioner to run Ansible or Inspec against the provisioned instance.
 
 - **ConnType**: Type of communicator being used. For example, for SSH communicator this will be "ssh".
 
-- **PackerRunUUID**: Current build's unique id. Can be used to specify build artifacts.
+- **PackerRunUUID**: Current build's unique ID. Can be used to specify build artifacts.
   An example of that, is when multiple builds runs at the same time producing the same artifact.
-  It's possible to differentiate these artifacts by naming them with the builds' unique ids.
+  It's possible to differentiate these artifacts by naming them with the builds' unique IDs.
 
-- **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the vm. The HTTP address is displayed in the format `IP:PORT`.
+- **PackerHTTPIP**, **PackerHTTPPort**, and **PackerHTTPAddr**: HTTP IP, port, and address of the file server Packer creates to serve items in the "http" dir to the VM. The HTTP address is displayed in the format `IP:PORT`.
 
 - **SSHPublicKey** and **SSHPrivateKey**: The public and private key that Packer uses to connect to the instance.
   These are unique to the SSH communicator and are unset when using other communicators.

@@ -38,7 +38,7 @@ Main Packer categories for partners to integrate with include:
 - **Data Sources**
   - Data Sources allow users to retrieve values from a remote API and store them as variables in the Packer configuration template. An example is the [AWS secrets manager](/docs/datasources/amazon/secretsmanager) data source.
 - **Builders**
-  - Builders manage the VM lifecycle. They manage launching a vm/instance, running provisioners against that instance, shutting the instance down, and saving an artifact image from that instance. Your builder handles all of the setup and cleanup costs associated with creating the output image artifact.
+  - Builders manage the VM lifecycle. They manage launching a VM/instance, running provisioners against that instance, shutting the instance down, and saving an artifact image from that instance. Your builder handles all of the setup and cleanup costs associated with creating the output image artifact.
 - **Provisioners**
   - Provisioners are run against the instance launched by the builder. They generally provide an interface for interacting with a particular provisioning tool, such as Ansible, Puppet, or Chef.
 - **Post-Processors**
@@ -84,7 +84,7 @@ We encourage vendors to closely follow the above guidance. Adopting the same str
 
 #### 3. Dev & Test
 
-Packer requires all code-level integrations to be written in the [Go](https://golang.org/) programming language and contain an [MPL-2.0](https://en.wikipedia.org/wiki/Mozilla_Public_License) open source license. The only knowledge necessary to write a plugin is basic command-line skills and knowledge of the Go programming language. When writing in Go-Language, HashiCorp has found the integration development process to be straightforward and simple when vendors pay close attention and follow the resources and by adopting the same structure and coding patterns helps expedite the review and release cycles. Please remember that all integration major steps should contain acceptance testing and the appropriate documentation.
+Packer requires all code-level integrations to be written in the [Go](https://go.dev/) programming language and contain an [MPL-2.0](https://en.wikipedia.org/wiki/Mozilla_Public_License) open source license. The only knowledge necessary to write a plugin is basic command-line skills and knowledge of the Go programming language. When writing in Go, HashiCorp has found the integration development process to be straightforward and simple when vendors pay close attention and follow the resources and by adopting the same structure and coding patterns helps expedite the review and release cycles. Please remember that all integration major steps should contain acceptance testing and the appropriate documentation.
 
 Data Sources
 

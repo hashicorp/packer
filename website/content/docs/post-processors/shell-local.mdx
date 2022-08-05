@@ -168,22 +168,22 @@ Optional parameters:
   post-processor after your shell-local processor has run.
 
 - `only_on` (array of strings) - This is an array of [runtime operating
-  systems](https://golang.org/doc/install/source#environment) where
+  systems](https://go.dev/doc/install/source#environment) where
   `shell-local` will execute. This allows you to execute `shell-local` _only_
   on specific operating systems. By default, shell-local will always run if
   `only_on` is not set."
 
-- `use_linux_pathing` (bool) - This is only relevant to windows hosts. If you
+- `use_linux_pathing` (bool) - This is only relevant to Windows hosts. If you
   are running Packer in a Windows environment with the Windows Subsystem for
   Linux feature enabled, and would like to invoke a bash script rather than
   invoking a Cmd script, you'll need to set this flag to true; it tells
-  Packer to use the linux subsystem path for your script rather than the
+  Packer to use the Linux subsystem path for your script rather than the
   Windows path. (e.g. /mnt/c/path/to/your/file instead of
   C:/path/to/your/file). Please see the example below for more guidance on
   how to use this feature. If you are not on a Windows host, or you do not
   intend to use the shell-local post-processor to run a bash script, please
   ignore this option. If you set this flag to true, you still need to provide
-  the standard windows path to the script when providing a `script`. This is
+  the standard Windows path to the script when providing a `script`. This is
   a beta feature.
 
 - `valid_exit_codes` (list of ints) - Valid exit codes for the script. By
@@ -389,7 +389,7 @@ _must_ be extra careful to `exit 0` when necessary.
 
 ### Windows Host
 
-Example of running a .cmd file on windows:
+Example of running a .cmd file on Windows:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -419,7 +419,7 @@ Contents of `test_cmd.cmd`:
 
     echo %SHELLLOCALTEST%
 
-Example of running an inline command on windows: Required customization:
+Example of running an inline command on Windows: Required customization:
 tempfile_extension
 
 <Tabs>
@@ -448,7 +448,7 @@ post-processor "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a bash command on windows using WSL: Required
+Example of running a bash command on Windows using WSL: Required
 customizations: `use_linux_pathing` and `execute_command`:
 
 <Tabs>
@@ -515,7 +515,7 @@ post-processor "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a powershell script on windows as "inline": Required
+Example of running a PowerShell script on Windows as "inline": Required
 customizations: `env_var_format`, `tempfile_extension`, and `execute_command`
 
 <Tabs>
@@ -550,7 +550,7 @@ post-processor "shell-local" {
 
 ### Unix Host
 
-Example of running a Shell script on unix:
+Example of running a Shell script on Unix:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -576,7 +576,7 @@ post-processor "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a bash "inline" on unix:
+Example of running a bash "inline" on Unix:
 
 <Tabs>
 <Tab heading="HCL2">
@@ -603,7 +603,7 @@ post-processor "shell-local" {
 </Tab>
 </Tabs>
 
-Example of running a python script on unix:
+Example of running a Python script on Unix:
 
 <Tabs>
 <Tab heading="HCL2">

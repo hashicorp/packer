@@ -6,9 +6,9 @@ description: >
 
   artifacts you specify. The primary use-case is to build artifacts inside a
 
-  packer builder -- for example, spinning up an EC2 instance to build a docker
+  packer builder -- for example, spinning up an EC2 instance to build a Docker
 
-  container -- and then extracting the docker container and throwing away the
+  container -- and then extracting the Docker container and throwing away the
   EC2
 
   instance.
@@ -35,7 +35,7 @@ post-processors.
 A major benefit of this is that you can modify builder
 artifacts using shell-local and pass those modified artifacts into
 post-processors that may not have worked with the original builder.
-For example, maybe you want to export a docker container from an amazon-ebs
+For example, maybe you want to export a Docker container from an amazon-ebs
 builder and then use Docker-push to put that Docker container into your Docker
 Hub account.
 
@@ -170,4 +170,4 @@ result.
 ```
 
 You can create multiple post-processor chains to handle multiple builders (for
-example, building linux and windows binaries during the same build).
+example, building Linux and Windows binaries during the same build).

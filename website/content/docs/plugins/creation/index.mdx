@@ -20,7 +20,7 @@ This page will document how you can develop your own Packer plugins. Prior to
 reading this, you should be comfortable with Packer and know the
 basics of [how plugins work from a user standpoint](/docs/plugins).
 
-Packer plugins must be written in [Go](https://golang.org/), so you should also
+Packer plugins must be written in [Go](https://go.dev/), so you should also
 be familiar with the language.
 
 ~> **Warning!** This is an advanced topic. If you're new to Packer, we
@@ -28,7 +28,7 @@ recommend getting a bit more comfortable before you dive into writing plugins.
 
 ### Plugin System Architecture
 
-A Packer plugin is just a go binary. Instead of loading plugins directly into a
+A Packer plugin is just a Go binary. Instead of loading plugins directly into a
 running application, Packer runs each plugin as a _separate application_.
 The multiple separate Packer plugin processes communicate with the Core using
 an RPC defined in the packer-plugin SDK. The Packer core itself is responsible
@@ -39,7 +39,7 @@ launching and cleaning up the plugin processes.
 The components that can be created and used in a Packer plugin are builders,
 provisioners, post-processors, and data sources.
 
-Each of these components has a corresponding [interface](https://golang.org/doc/effective_go.html#interfaces_and_types).
+Each of these components has a corresponding [interface](https://go.dev/doc/effective_go.html#interfaces_and_types).
 
 All you need to do to create a plugin is:
 
