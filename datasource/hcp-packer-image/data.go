@@ -109,11 +109,11 @@ type DatasourceOutput struct {
 	ComponentType string `mapstructure:"component_type"`
 	// The date and time at which the image was created.
 	CreatedAt string `mapstructure:"created_at"`
-	// The id of the build that created the image. This is a ULID, which is a
+	// The ID of the build that created the image. This is a ULID, which is a
 	// unique identifier similar to a UUID. It is created by the HCP Packer
 	// Registry when an build is first created, and is unique to this build.
 	BuildID string `mapstructure:"build_id"`
-	// The iteration id. This is a ULID, which is a unique identifier similar
+	// The iteration ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	IterationID string `mapstructure:"iteration_id"`

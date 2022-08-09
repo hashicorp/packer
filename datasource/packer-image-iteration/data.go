@@ -71,14 +71,14 @@ type ParBuild struct {
 	ComponentType string `mapstructure:"component_type"`
 	// The date and time at which the build was run.
 	CreatedAt string `mapstructure:"created_at"`
-	// The build id. This is a ULID, which is a unique identifier similar
+	// The build ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an build is
 	// first created, and is unique to this build.
 	ID string `mapstructure:"id"`
 	// A list of images as stored in the HCP Packer registry. See the ParImage
 	// docs for more information.
 	Images []ParImage `mapstructure:"images"`
-	// The iteration id. This is a ULID, which is a unique identifier similar
+	// The iteration ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	IterationID string `mapstructure:"iteration_id"`
@@ -99,7 +99,7 @@ type ParBuild struct {
 type ParImage struct {
 	// The date and time at which the build was last updated.
 	CreatedAt string `mapstructure:"created_at,omitempty"`
-	// The iteration id. This is a ULID, which is a unique identifier similar
+	// The iteration ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	ID string `mapstructure:"id,omitempty"`
@@ -112,7 +112,7 @@ type ParImage struct {
 }
 
 type DatasourceOutput struct {
-	// The iteration id. This is a ULID, which is a unique identifier similar
+	// The iteration ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	Id string `mapstructure:"Id"`
@@ -125,7 +125,7 @@ type DatasourceOutput struct {
 	// The date the iteration was created.
 	CreatedAt string `mapstructure:"created_at"`
 	// A list of builds that are stored in the iteration. These builds can be
-	// parsed using HCL to find individual image ids for specific providers.
+	// parsed using HCL to find individual image IDs for specific providers.
 	Builds []ParBuild `mapstructure:"builds"`
 }
 
