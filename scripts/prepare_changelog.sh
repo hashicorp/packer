@@ -11,7 +11,7 @@ is_doc_or_tech_debt_pr(){
         echo "jq not found"
         return 1
     fi
-    out=$(cat pull.json | python -m json.tool \
+    out=$(cat pull.json | python3 -m json.tool \
     | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt" or .labels[].name == "website"] | any')
     grep -q true <<< $out
     return $?
@@ -49,7 +49,7 @@ get_prs(){
             echo "Skipping PR ${PR_NUM}: labeled as tech debt, docs or website. (waiting a second so we don't get rate-limited...)"
             continue
         fi
-        echo "$(cat pull.json | python -m json.tool | jq -r '.title') - [GH-${PR_NUM}](https://github.com/hashicorp/packer/pull/${PR_NUM})"
+        echo "$(cat pull.json | python3 -m json.tool | jq -r '.title') - [GH-${PR_NUM}](https://github.com/hashicorp/packer/pull/${PR_NUM})"
     done
 }
 

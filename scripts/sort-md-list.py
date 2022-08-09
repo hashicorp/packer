@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 sort-md-list.py sorts markdown lists
 
@@ -55,19 +55,19 @@ if __name__ == '__main__':
     # take care of blank line at start of selection
     sys.stdin.seek(0)
     if sys.stdin.readlines()[0].strip() == "":
-        print ""
+        print()
 
     for line in sorted(lines, key=lambda s: s.lower()):
         if line.strip() == "":
             continue
         # print "-"*79
         wrapped = textwrap.wrap(line, 79)
-        print wrapped[0]
+        print( wrapped[0] )
         indented = " ".join([s.strip() for s in wrapped[1:]])
         for iline in textwrap.wrap(indented, 79-4):
-            print "    " + iline
+            print("     " + iline)
 
     # take care of blank line at end of selection
     sys.stdin.seek(0)
     if sys.stdin.readlines()[-1].strip() == "":
-        print ""
+        print()
