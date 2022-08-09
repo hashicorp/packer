@@ -76,7 +76,7 @@ type DatasourceOutput struct {
 	// The fingerprint of the build; this could be a git sha or other unique
 	// identifier as set by the Packer build that created this iteration.
 	Fingerprint string `mapstructure:"fingerprint"`
-	// The iteration id. This is a ULID, which is a unique identifier similar
+	// The iteration ID. This is a ULID, which is a unique identifier similar
 	// to a UUID. It is created by the HCP Packer Registry when an iteration is
 	// first created, and is unique to this iteration.
 	ID string `mapstructure:"id"`
