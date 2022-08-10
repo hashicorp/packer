@@ -1,5 +1,16 @@
 ## 1.8.4 (Upcoming)
 
+### NOTES:
+* **Supported Architectures**: In Packer 1.8.0 support for the following
+     architectures `ppc64le, mips, mips64, mipsle, mipsle64, s390x` were removed
+     from the Packer releases page. Packer, along with the HashiCorp maintained
+     Packer plugins, were updated to release binaries for the HashiCorp
+     supported architectures arm, arm64, 386, and amd64. A full list of
+     supported platforms can be found on the [Packer Downloads](https://www.packer.io/downloads) page.
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+
 ## 1.8.3 (August 2, 2022)
 
 ### NOTES:
@@ -235,9 +246,27 @@ External plugins have been pinned to the following versions. Please see their
     algorithms in SSH communicator.
     [GH-11774](https://github.com/hashicorp/packer/pull/11774)
     [GH-11754](https://github.com/hashicorp/packer/pull/11754)
+
 ## 1.8.0 (March 4, 2022)
+
 ### NOTES:
-* **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc#packer-sdc). Plugin maintainers who may be using the packer-plugin-check as part of their release pipeline are encouraged to move to the packer-sdc command. As an alternative, maintainers can continue to use the packer-plugin-check by pinning the command to Packer 1.7.10.  [GH-11317](https://github.com/hashicorp/packer/pull/11317)
+* **Breaking Change**: Support for the following  architectures `ppc64le, mips,
+     mips64, mipsle, mipsle64, s390x` have been removed from the Packer releases
+     page. Packer, along with the HashiCorp maintained Packer plugins, have been
+     updated to release binaries for the HashiCorp supported architectures arm,
+     arm64, 386, and amd64. A full list of supported platforms can be found
+     on the [Packer Downloads](https://www.packer.io/downloads) page.
+    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
+    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
+    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
+
+* **Breaking Change**: The `packer-plugin-check`(github.com/hashicorp/packer/cmd/packer-plugins-check) has been
+     replaced by the [`packer-sdc plugin-check` command](https://github.com/hashicorp/packer- plugin sdk/tree/main/cmd/packer-sdc#packer-sdc).
+     Plugin maintainers who may be using the packer-plugin-check as part of their
+     release pipeline are encouraged to move to the packer-sdc command. As an
+     alternative, maintainers can continue to use the packer-plugin-check by
+     pinning the command to Packer 1.7.10.
+     [GH-11317](https://github.com/hashicorp/packer/pull/11317)
 
 ### FEATURES
 * **New Command** `packer plugins` command and subcommands to manage external
@@ -256,11 +285,11 @@ External plugins have been pinned to the following versions. Please see their
     [GH-11564](https://github.com/hashicorp/packer/pull/11564)
     [GH-11601](https://github.com/hashicorp/packer/pull/11601)
     [GH-11603](https://github.com/hashicorp/packer/pull/11603)
-* core: Packer's linux package service configs and pre/post install scripts are
+* core: Packer's Linux package service configs and pre/post install scripts are
     now available under .release/linux.
     [GH-11601](https://github.com/hashicorp/packer/pull/11601)
     [GH-11603](https://github.com/hashicorp/packer/pull/11603)
-* core: Packer's linux packages are now available for all supported linux
+* core: Packer's Linux packages are now available for all supported Linux
     architectures including arm, arm64, 386, and amd64
     [GH-11564](https://github.com/hashicorp/packer/pull/11564)
     [GH-11601](https://github.com/hashicorp/packer/pull/11601)
