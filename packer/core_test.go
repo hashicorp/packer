@@ -116,8 +116,7 @@ func TestCoreBuild_basicInterpolated(t *testing.T) {
 }
 
 func TestCoreBuild_env(t *testing.T) {
-	os.Setenv("PACKER_TEST_ENV", "test")
-	defer os.Setenv("PACKER_TEST_ENV", "")
+	t.Setenv("PACKER_TEST_ENV", "test")
 
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-env.json"))
@@ -148,8 +147,7 @@ func TestCoreBuild_env(t *testing.T) {
 }
 
 func TestCoreBuild_IgnoreTemplateVariables(t *testing.T) {
-	os.Setenv("PACKER_TEST_ENV", "test")
-	defer os.Setenv("PACKER_TEST_ENV", "")
+	t.Setenv("PACKER_TEST_ENV", "test")
 
 	config := TestCoreConfig(t)
 	testCoreTemplate(t, config, fixtureDir("build-ignore-template-variable.json"))
@@ -733,10 +731,10 @@ func TestIsDoneInterpolating(t *testing.T) {
 }
 
 func TestEnvAndFileVars(t *testing.T) {
-	os.Setenv("INTERPOLATE_TEST_ENV_1", "bulbasaur")
-	os.Setenv("INTERPOLATE_TEST_ENV_3", "/path/to/nowhere")
-	os.Setenv("INTERPOLATE_TEST_ENV_2", "5")
-	os.Setenv("INTERPOLATE_TEST_ENV_4", "bananas")
+	t.Setenv("INTERPOLATE_TEST_ENV_1", "bulbasaur")
+	t.Setenv("INTERPOLATE_TEST_ENV_3", "/path/to/nowhere")
+	t.Setenv("INTERPOLATE_TEST_ENV_2", "5")
+	t.Setenv("INTERPOLATE_TEST_ENV_4", "bananas")
 
 	f, err := os.Open(fixtureDir("complex-recursed-env-user-var-file.json"))
 	if err != nil {
@@ -778,12 +776,6 @@ func TestEnvAndFileVars(t *testing.T) {
 				expected[k], k, v)
 		}
 	}
-
-	// Clean up env vars
-	os.Unsetenv("INTERPOLATE_TEST_ENV_1")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_3")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_2")
-	os.Unsetenv("INTERPOLATE_TEST_ENV_4")
 }
 
 func testCoreTemplate(t *testing.T, c *CoreConfig, p string) {

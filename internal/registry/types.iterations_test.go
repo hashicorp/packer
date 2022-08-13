@@ -13,17 +13,14 @@ func TestNewIteration(t *testing.T) {
 		name          string
 		fingerprint   string
 		opts          IterationOptions
-		setupFn       func() func()
+		setupFn       func(t *testing.T)
 		errorExpected bool
 	}{
 		{
 			name:        "using fingerprint env variable",
 			fingerprint: "6825d1ad0d5e",
-			setupFn: func() func() {
-				os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "6825d1ad0d5e")
-				return func() {
-					os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
-				}
+			setupFn: func(t *testing.T) {
+				t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "6825d1ad0d5e")
 			},
 		},
 		{
@@ -32,7 +29,7 @@ func TestNewIteration(t *testing.T) {
 			opts: IterationOptions{
 				TemplateBaseDir: tempdir("4ec004e18e"),
 			},
-			setupFn: func() func() {
+			setupFn: func(t *testing.T) {
 				//nolint:errcheck
 				git.PlainClone(tempdir("4ec004e18e"), false, &git.CloneOptions{
 					// Archived repo
@@ -40,10 +37,10 @@ func TestNewIteration(t *testing.T) {
 					Depth: 1,
 				})
 
-				return func() {
+				t.Cleanup(func() {
 					//nolint:errcheck
 					os.RemoveAll(tempdir("4ec004e18e"))
-				}
+				})
 			},
 		},
 		{
@@ -51,13 +48,13 @@ func TestNewIteration(t *testing.T) {
 			opts: IterationOptions{
 				TemplateBaseDir: tempdir("empty-init"),
 			},
-			setupFn: func() func() {
+			setupFn: func(t *testing.T) {
 				//nolint:errcheck
 				git.PlainInit(tempdir("empty-init"), false)
-				return func() {
+				t.Cleanup(func() {
 					//nolint:errcheck
 					os.RemoveAll(tempdir("empty-init"))
-				}
+				})
 			},
 			errorExpected: true,
 		},
@@ -74,8 +71,7 @@ func TestNewIteration(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.setupFn != nil {
-				cleanup := tt.setupFn()
-				defer cleanup()
+				tt.setupFn(t)
 			}
 
 			i, err := NewIteration(tt.opts)

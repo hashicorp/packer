@@ -1,7 +1,6 @@
 package command
 
 import (
-	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -410,13 +409,8 @@ func TestRegistrySetup(t *testing.T) {
 
 func runRegistryTest(t *testing.T, args registryTestArgs) {
 	for evar, val := range args.envvars {
-		os.Setenv(evar, val)
+		t.Setenv(evar, val)
 	}
-	defer func() {
-		for evar := range args.envvars {
-			os.Setenv(evar, "")
-		}
-	}()
 
 	defaultMeta := TestMetaFile(t)
 

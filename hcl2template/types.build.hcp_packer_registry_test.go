@@ -1,7 +1,6 @@
 package hcl2template
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -11,8 +10,7 @@ import (
 )
 
 func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "hcp-par-test")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "hcp-par-test")
 
 	defaultParser := getBasicParser()
 
