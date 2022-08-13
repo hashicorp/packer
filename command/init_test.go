@@ -328,7 +328,7 @@ func TestInitCommand_Run(t *testing.T) {
 			t.Cleanup(func() {
 				_ = os.RemoveAll(tt.packerUserFolder)
 			})
-			os.Setenv("PACKER_CONFIG_DIR", tt.packerConfigDir)
+			t.Setenv("PACKER_CONFIG_DIR", tt.packerConfigDir)
 			for _, init := range tt.setup {
 				init(t, tt)
 				if t.Skipped() {

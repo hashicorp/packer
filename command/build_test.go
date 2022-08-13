@@ -798,8 +798,7 @@ func TestHCL2PostProcessorForceFlag(t *testing.T) {
 
 	UUID, _ := uuid.GenerateUUID()
 	// Manifest will only clean with force if the build's PACKER_RUN_UUID are different
-	os.Setenv("PACKER_RUN_UUID", UUID)
-	defer os.Unsetenv("PACKER_RUN_UUID")
+	t.Setenv("PACKER_RUN_UUID", UUID)
 
 	args := []string{
 		filepath.Join(testFixture("hcl"), "force.pkr.hcl"),
@@ -833,7 +832,7 @@ func TestHCL2PostProcessorForceFlag(t *testing.T) {
 
 	// Second build should override previous manifest
 	UUID, _ = uuid.GenerateUUID()
-	os.Setenv("PACKER_RUN_UUID", UUID)
+	t.Setenv("PACKER_RUN_UUID", UUID)
 
 	args = []string{
 		"-force",

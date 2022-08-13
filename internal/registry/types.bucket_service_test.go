@@ -2,16 +2,13 @@ package registry
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 )
 
 func TestInitialize_NewBucketNewIteration(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 
 	b := &Bucket{
@@ -65,9 +62,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 }
 
 func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 
@@ -122,9 +117,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 }
 
 func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
@@ -194,9 +187,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 }
 
 func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
@@ -242,9 +233,7 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 }
 
 func TestUpdateBuildStatus(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
@@ -299,9 +288,7 @@ func TestUpdateBuildStatus(t *testing.T) {
 }
 
 func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
-	//nolint:errcheck
-	os.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	defer os.Unsetenv("HCP_PACKER_BUILD_FINGERPRINT")
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
 	mockService := NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true

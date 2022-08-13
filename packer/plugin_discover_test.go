@@ -27,8 +27,7 @@ func newPluginConfig() PluginConfig {
 func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
 	config := newPluginConfig()
 
-	os.Setenv(pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue)
-	defer os.Unsetenv(pluginsdk.MagicCookieKey)
+	t.Setenv(pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue)
 
 	err := config.Discover()
 	if err != nil {
@@ -51,8 +50,7 @@ func TestEnvVarPackerPluginPath(t *testing.T) {
 	defer cleanUpFunc()
 
 	// Add temp dir to path.
-	os.Setenv("PACKER_PLUGIN_PATH", dir)
-	defer os.Unsetenv("PACKER_PLUGIN_PATH")
+	t.Setenv("PACKER_PLUGIN_PATH", dir)
 
 	config := newPluginConfig()
 
@@ -94,8 +92,7 @@ func TestEnvVarPackerPluginPath_MultiplePaths(t *testing.T) {
 	pluginPath := dir + pathsep + decoyDir
 
 	// Add temp dir to path.
-	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
-	defer os.Unsetenv("PACKER_PLUGIN_PATH")
+	t.Setenv("PACKER_PLUGIN_PATH", pluginPath)
 
 	config := newPluginConfig()
 
@@ -137,8 +134,7 @@ func TestDiscoverDatasource(t *testing.T) {
 	pluginPath := dir + pathsep + decoyDir
 
 	// Add temp dir to path.
-	os.Setenv("PACKER_PLUGIN_PATH", pluginPath)
-	defer os.Unsetenv("PACKER_PLUGIN_PATH")
+	t.Setenv("PACKER_PLUGIN_PATH", pluginPath)
 
 	config := newPluginConfig()
 
@@ -293,7 +289,7 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 			}
 		}
 	}
-	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
+	t.Setenv("PACKER_PLUGIN_PATH", pluginDir)
 }
 
 func createMockChecksumFile(t testing.TB, filePath string) {
@@ -366,7 +362,7 @@ func createMockInstalledPlugins(t *testing.T, plugins map[string]pluginsdk.Set, 
 			}
 		}
 	}
-	os.Setenv("PACKER_PLUGIN_PATH", pluginDir)
+	t.Setenv("PACKER_PLUGIN_PATH", pluginDir)
 }
 
 func getFormattedInstalledPluginSuffix() string {

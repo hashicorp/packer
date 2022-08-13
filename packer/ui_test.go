@@ -2,7 +2,6 @@ package packer
 
 import (
 	"bytes"
-	"os"
 	"strings"
 	"testing"
 
@@ -86,9 +85,7 @@ func TestColoredUi_noColorEnv(t *testing.T) {
 	ui := &ColoredUi{UiColorYellow, UiColorRed, bufferUi, &UiProgressBar{}}
 
 	// Set the env var to get rid of the color
-	oldenv := os.Getenv("PACKER_NO_COLOR")
-	os.Setenv("PACKER_NO_COLOR", "1")
-	defer os.Setenv("PACKER_NO_COLOR", oldenv)
+	t.Setenv("PACKER_NO_COLOR", "1")
 
 	ui.Say("foo")
 	result := readWriter(bufferUi)
