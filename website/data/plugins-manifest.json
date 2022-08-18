@@ -181,6 +181,13 @@
     "version": "latest"
   },
   {
+    "title": "Mondoo",
+    "path": "mondoo",
+    "repo": "mondoohq/packer-plugin-mondoo",
+    "pluginTier": "verified",
+    "version": "latest"
+  },
+  {
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
