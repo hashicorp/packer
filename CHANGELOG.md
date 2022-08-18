@@ -1,5 +1,11 @@
 ## 1.8.4 (Upcoming)
 
+### IMPROVEMENTS:
+
+* Bump Go to 1.18 [GH-11927](https://github.com/hashicorp/packer/pull/11927)
+
+### BUG FIXES:
+
 ### NOTES:
 * **Supported Architectures**: In Packer 1.8.0 support for the following
      architectures `ppc64le, mips, mips64, mipsle, mipsle64, s390x` were removed
