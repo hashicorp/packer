@@ -4,9 +4,9 @@
 # Use 'docker build --target=<name> .' to build one.
 # e.g. `docker build --target=release-light .`
 #
-# All non-dev targets have a VERSION argument that must be provided 
-# via --build-arg=VERSION=<version> when building. 
-# e.g. --build-arg VERSION=1.11.2
+# All non-dev targets have a PRODUCT_VERSION argument that must be provided 
+# via --build-arg=PRODUCT_VERSION=<version> when building. 
+# e.g. --build-arg PRODUCT_VERSION=1.11.2
 #
 # For local dev and testing purposes, please build and use the `dev` docker image.
 #
@@ -31,13 +31,13 @@ ENTRYPOINT ["/bin/packer"]
 FROM docker.mirror.hashicorp.services/alpine:latest as official
 
 # This is the release of Packer to pull in.
-ARG VERSION
+ARG PRODUCT_VERSION
 
 LABEL name="Packer" \
       maintainer="HashiCorp Packer Team <packer@hashicorp.com>" \
       vendor="HashiCorp" \
-      version=$VERSION \
-      release=$VERSION \
+      version=$PRODUCT_VERSION \
+      release=$PRODUCT_VERSION \
       summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
       description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
 
@@ -55,14 +55,14 @@ RUN set -eux && \
         armhf) packerArch='arm' ;; \
         x86) packerArch='386' ;; \
         x86_64) packerArch='amd64' ;; \
-        *) echo >&2 "error: unsupported architecture: ${apkArch} (see ${HASHICORP_RELEASES}/packer/${VERSION}/)" && exit 1 ;; \
+        *) echo >&2 "error: unsupported architecture: ${apkArch} (see ${HASHICORP_RELEASES}/packer/${PRODUCT_VERSION}/)" && exit 1 ;; \
     esac && \
-    wget ${HASHICORP_RELEASES}/packer/${VERSION}/packer_${VERSION}_linux_${packerArch}.zip && \
-    wget ${HASHICORP_RELEASES}/packer/${VERSION}/packer_${VERSION}_SHA256SUMS && \
-    wget ${HASHICORP_RELEASES}/packer/${VERSION}/packer_${VERSION}_SHA256SUMS.sig && \
-    gpg --batch --verify packer_${VERSION}_SHA256SUMS.sig packer_${VERSION}_SHA256SUMS && \
-    grep packer_${VERSION}_linux_${packerArch}.zip packer_${VERSION}_SHA256SUMS | sha256sum -c && \
-    unzip -d /tmp/build packer_${VERSION}_linux_${packerArch}.zip && \
+    wget ${HASHICORP_RELEASES}/packer/${PRODUCT_VERSION}/packer_${PRODUCT_VERSION}_linux_${packerArch}.zip && \
+    wget ${HASHICORP_RELEASES}/packer/${PRODUCT_VERSION}/packer_${PRODUCT_VERSION}_SHA256SUMS && \
+    wget ${HASHICORP_RELEASES}/packer/${PRODUCT_VERSION}/packer_${PRODUCT_VERSION}_SHA256SUMS.sig && \
+    gpg --batch --verify packer_${PRODUCT_VERSION}_SHA256SUMS.sig packer_${PRODUCT_VERSION}_SHA256SUMS && \
+    grep packer_${PRODUCT_VERSION}_linux_${packerArch}.zip packer_${PRODUCT_VERSION}_SHA256SUMS | sha256sum -c && \
+    unzip -d /tmp/build packer_${PRODUCT_VERSION}_linux_${packerArch}.zip && \
     cp /tmp/build/packer /bin/packer && \
     cd /tmp && \
     rm -rf /tmp/build && \
@@ -81,7 +81,7 @@ ENTRYPOINT ["/bin/packer"]
 # This image is published to DockerHub under the `light`, `light-$VERSION`, and `latest` tags.
 FROM docker.mirror.hashicorp.services/alpine:latest as release-light
 
-ARG VERSION
+ARG PRODUCT_VERSION
 ARG BIN_NAME
 
 # TARGETARCH and TARGETOS are set automatically when --platform is provided.
@@ -90,8 +90,8 @@ ARG TARGETOS TARGETARCH
 LABEL name="Packer" \
       maintainer="HashiCorp Packer Team <packer@hashicorp.com>" \
       vendor="HashiCorp" \
-      version=$VERSION \
-      release=$VERSION \
+      version=$PRODUCT_VERSION \
+      release=$PRODUCT_VERSION \
       summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
       description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
 
