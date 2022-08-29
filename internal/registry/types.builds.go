@@ -98,8 +98,8 @@ func (b *Build) AddImages(images ...registryimage.Image) error {
 // A completed build must have a valid ID, one or more Images, and its Status is HashicorpCloudPackerBuildStatusDONE.
 func (b *Build) IsNotDone() bool {
 	hasBuildID := b.ID != ""
-	hasImages := len(b.Images) == 0
+	hasNoImages := len(b.Images) == 0
 	isNotDone := b.Status != models.HashicorpCloudPackerBuildStatusDONE
 
-	return hasBuildID && hasImages && isNotDone
+	return hasBuildID && hasNoImages && isNotDone
 }
