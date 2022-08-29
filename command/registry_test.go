@@ -47,7 +47,6 @@ var registryCmpOpts = cmp.Options{
 		file.Builder{},
 		registry.Bucket{},
 		registry.Iteration{},
-		packer.RegistryBuilder{},
 	),
 }
 
@@ -58,74 +57,20 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/multiple_sources.pkr.hcl",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					BuildName: "bucket-slug",
-					Type:      "file.test",
-					Prepared:  true,
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "Some description\n",
-							BucketLabels:                   map[string]string{"foo": "bar"},
-							BuildLabels:                    map[string]string{"python_version": "3.0"},
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "Some description\n",
-										BucketLabels:                   map[string]string{"foo": "bar"},
-										BuildLabels:                    map[string]string{"python_version": "3.0"},
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					BuildName:      "bucket-slug",
+					Type:           "file.test",
+					Prepared:       true,
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 				&packer.CoreBuild{
-					BuildName: "bucket-slug",
-					Type:      "file.other",
-					Prepared:  true,
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.other",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "Some description\n",
-							BucketLabels:                   map[string]string{"foo": "bar"},
-							BuildLabels:                    map[string]string{"python_version": "3.0"},
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.other",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "Some description\n",
-										BucketLabels:                   map[string]string{"foo": "bar"},
-										BuildLabels:                    map[string]string{"python_version": "3.0"},
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					BuildName:      "bucket-slug",
+					Type:           "file.other",
+					Prepared:       true,
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,
@@ -136,37 +81,12 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/slug.pkr.hcl",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					BuildName: "bucket-slug",
-					Type:      "file.test",
-					Prepared:  true,
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "real-bucket-slug",
-							Description:                    "Some description\n",
-							BucketLabels:                   map[string]string{"foo": "bar"},
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "real-bucket-slug",
-										Description:                    "Some description\n",
-										BucketLabels:                   map[string]string{"foo": "bar"},
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					BuildName:      "bucket-slug",
+					Type:           "file.test",
+					Prepared:       true,
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,
@@ -177,35 +97,12 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/build-description.pkr.hcl",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					Type:      "file.test",
-					Prepared:  true,
-					BuildName: "bucket-slug",
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "Some build description",
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "Some build description",
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					Type:           "file.test",
+					Prepared:       true,
+					BuildName:      "bucket-slug",
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,
@@ -216,34 +113,11 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/override-build-description.pkr.hcl",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					Type:     "file.test",
-					Prepared: true,
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "Some override description",
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "Some override description",
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					Type:           "file.test",
+					Prepared:       true,
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,
@@ -254,34 +128,11 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/deprecated_labels.pkr.hcl",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					Type:     "file.test",
-					Prepared: true,
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							BucketLabels:                   map[string]string{"foo": "bar"},
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										BucketLabels:                   map[string]string{"foo": "bar"},
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-									},
-								},
-							},
-						},
-					},
+					Type:           "file.test",
+					Prepared:       true,
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			true,
@@ -306,39 +157,12 @@ func TestRegistrySetup(t *testing.T) {
 			"test-fixtures/hcp/hcp_normal.pkr.json",
 			[]packersdk.Build{
 				&packer.CoreBuild{
-					Type:      "file.test",
-					Prepared:  true,
-					BuildName: "test-file",
-					Builder: &packer.RegistryBuilder{
-						Name:    "file.test",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "Some build description",
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-							BucketLabels:                   map[string]string{},
-							BuildLabels:                    map[string]string{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file.test",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "Some build description",
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-										BucketLabels:                   map[string]string{},
-										BuildLabels:                    map[string]string{},
-									},
-								},
-							},
-						},
-					},
+					Type:           "file.test",
+					Prepared:       true,
+					BuildName:      "test-file",
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,
@@ -360,36 +184,9 @@ func TestRegistrySetup(t *testing.T) {
 						"content": " ",
 						"target":  "output",
 					},
-					Builder: &packer.RegistryBuilder{
-						Name:    "file",
-						Builder: &file.Builder{},
-						ArtifactMetadataPublisher: &registry.Bucket{
-							Slug:                           "bucket-slug",
-							Description:                    "",
-							Iteration:                      &registry.Iteration{},
-							SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-							BucketLabels:                   map[string]string{},
-							BuildLabels:                    map[string]string{},
-						},
-					},
-					Provisioners: []packer.CoreBuildProvisioner{},
-					PostProcessors: [][]packer.CoreBuildPostProcessor{
-						{
-							{
-								PostProcessor: &packer.RegistryPostProcessor{
-									BuilderType: "file",
-									ArtifactMetadataPublisher: &registry.Bucket{
-										Slug:                           "bucket-slug",
-										Description:                    "",
-										Iteration:                      &registry.Iteration{},
-										SourceImagesToParentIterations: map[string]registry.ParentIteration{},
-										BucketLabels:                   map[string]string{},
-										BuildLabels:                    map[string]string{},
-									},
-								},
-							},
-						},
-					},
+					Builder:        &file.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
 			},
 			false,

@@ -359,7 +359,6 @@ var cmpOpts = []cmp.Option{
 		null.Builder{},
 		packerregistry.Bucket{},
 		packerregistry.Iteration{},
-		packer.RegistryBuilder{},
 	),
 	cmpopts.IgnoreFields(PackerConfig{},
 		"Cwd", // Cwd will change for every os type

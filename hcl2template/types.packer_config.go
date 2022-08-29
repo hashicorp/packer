@@ -545,14 +545,6 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 				continue
 			}
 
-			if cfg.Bucket != nil {
-				postProcessor = &packer.RegistryPostProcessor{
-					ArtifactMetadataPublisher: cfg.Bucket,
-					BuilderType:               source.String(),
-					PostProcessor:             postProcessor,
-				}
-			}
-
 			pps = append(pps, packer.CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PName:             ppb.PName,
@@ -686,17 +678,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				continue
 			}
 
-			if cfg.Bucket != nil {
-				pps = append(pps, []packer.CoreBuildPostProcessor{
-					{
-						PostProcessor: &packer.RegistryPostProcessor{
-							BuilderType:               srcUsage.String(),
-							ArtifactMetadataPublisher: cfg.Bucket,
-						},
-					},
-				})
-			}
-
 			if build.ErrorCleanupProvisionerBlock != nil {
 				if !build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
 					errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
@@ -705,14 +686,6 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 						continue
 					}
 					pcb.CleanupProvisioner = errorCleanupProv
-				}
-			}
-
-			if cfg.Bucket != nil && cfg.Bucket.Validate() == nil {
-				builder = &packer.RegistryBuilder{
-					Name:                      srcUsage.String(),
-					Builder:                   builder,
-					ArtifactMetadataPublisher: cfg.Bucket,
 				}
 			}
 

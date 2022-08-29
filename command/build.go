@@ -248,6 +248,22 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			defer limitParallel.Release(1)
 
+			if ArtifactMetadataPublisher != nil {
+				err := ArtifactMetadataPublisher.BuildStart(buildCtx, name)
+				if err != nil {
+					msg := err.Error()
+					if strings.Contains(msg, "already done") {
+						ui.Say(fmt.Sprintf(
+							"Build %q already done for bucket %q, skipping to prevent drift: %q",
+							name,
+							ArtifactMetadataPublisher.Slug,
+							err))
+						return
+					}
+
+				}
+			}
+
 			log.Printf("Starting build run: %s", name)
 			runArtifacts, err := b.Run(buildCtx, ui)
 
@@ -255,6 +271,19 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			buildEnd := time.Now()
 			buildDuration := buildEnd.Sub(buildStart)
 			fmtBuildDuration := durafmt.Parse(buildDuration).LimitFirstN(2)
+
+			if ArtifactMetadataPublisher != nil {
+				runArtifacts, err = ArtifactMetadataPublisher.BuildDone(
+					buildCtx,
+					name,
+					runArtifacts,
+					err,
+				)
+				if err != nil {
+					ui.Error(fmt.Sprintf("failed to complete HCP build %q: %s",
+						name, err))
+				}
+			}
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored after %s: %s", name, fmtBuildDuration, err))
@@ -280,7 +309,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
-
 	}
 
 	// Wait for both the builds to complete and the interrupt handler,
