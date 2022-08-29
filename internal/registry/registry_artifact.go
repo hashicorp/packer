@@ -1,4 +1,4 @@
-package packer
+package registry
 
 import (
 	"fmt"

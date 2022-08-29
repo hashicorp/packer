@@ -338,10 +338,6 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// rawName is the uninterpolated name that we use for various lookups
 	rawName := configBuilder.Name
 
-	// hcpName is the name we use for HCP, i.e. a concatenation of type+name
-	// if both are specified.
-	hcpName := HCPName(configBuilder)
-
 	// Setup the provisioners for this build
 	provisioners := make([]CoreBuildProvisioner, 0, len(c.Template.Provisioners))
 	for _, rawP := range c.Template.Provisioners {
@@ -399,14 +395,6 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 					"post-processor type not found: %s", rawP.Type)
 			}
 
-			if c.Bucket != nil {
-				postProcessor = &RegistryPostProcessor{
-					BuilderType:               hcpName,
-					ArtifactMetadataPublisher: c.Bucket,
-					PostProcessor:             postProcessor,
-				}
-			}
-
 			current = append(current, CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PType:             rawP.Type,
@@ -423,26 +411,8 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 		postProcessors = append(postProcessors, current)
 	}
-	if c.Bucket != nil {
-		postProcessors = append(postProcessors, []CoreBuildPostProcessor{
-			{
-				PostProcessor: &RegistryPostProcessor{
-					BuilderType:               hcpName,
-					ArtifactMetadataPublisher: c.Bucket,
-				},
-			},
-		})
-	}
 
 	// TODO hooks one day
-
-	if c.Bucket != nil {
-		builder = &RegistryBuilder{
-			Name:                      hcpName,
-			ArtifactMetadataPublisher: c.Bucket,
-			Builder:                   builder,
-		}
-	}
 
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template

@@ -11,8 +11,10 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 )
 
@@ -28,6 +30,7 @@ type Bucket struct {
 	BucketLabels                   map[string]string
 	BuildLabels                    map[string]string
 	SourceImagesToParentIterations map[string]ParentIteration
+	RunningBuilds                  map[string]chan struct{}
 	Iteration                      *Iteration
 	client                         *Client
 }
@@ -44,6 +47,7 @@ func NewBucketWithIteration() *Bucket {
 		BucketLabels:                   make(map[string]string),
 		BuildLabels:                    make(map[string]string),
 		SourceImagesToParentIterations: make(map[string]ParentIteration),
+		RunningBuilds:                  make(map[string]chan struct{}),
 	}
 	b.Iteration = NewIteration()
 
@@ -403,7 +407,6 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 // IsExpectingBuildForComponent returns true if the component referenced by buildName is part of the iteration
 // and is not marked as DONE on the HCP Packer registry.
 func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
-
 	if !b.Iteration.HasBuild(buildName) {
 		return false
 	}
@@ -468,4 +471,109 @@ func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), erro
 	return func() {
 		close(heartbeatChan)
 	}, nil
+}
+
+func (b *Bucket) BuildStart(ctx context.Context, buildName string) error {
+	if !b.IsExpectingBuildForComponent(buildName) {
+		return fmt.Errorf("already done")
+	}
+
+	err := b.UpdateBuildStatus(ctx, buildName, models.HashicorpCloudPackerBuildStatusRUNNING)
+	if err != nil {
+		return fmt.Errorf("failed to update HCP Packer registry status for %q: %s", buildName, err)
+	}
+
+	cleanupHeartbeat, err := b.HeartbeatBuild(ctx, buildName)
+	if err != nil {
+		log.Printf("[ERROR] failed to start heartbeat function")
+	}
+
+	buildDone := make(chan struct{}, 1)
+	go func() {
+		log.Printf("[TRACE] waiting for heartbeat completion")
+		select {
+		case <-ctx.Done():
+			cleanupHeartbeat()
+			err := b.UpdateBuildStatus(
+				context.Background(),
+				buildName,
+				models.HashicorpCloudPackerBuildStatusCANCELLED)
+			if err != nil {
+				log.Printf(
+					"[ERROR] failed to update HCP Packer registry status for %q: %s",
+					buildName,
+					err)
+			}
+		case <-buildDone:
+			cleanupHeartbeat()
+		}
+		log.Printf("[TRACE] done waiting for heartbeat completion")
+	}()
+
+	b.RunningBuilds[buildName] = buildDone
+
+	return nil
+}
+
+func (b *Bucket) BuildDone(
+	ctx context.Context,
+	buildName string,
+	artifacts []packer.Artifact,
+	buildErr error,
+) ([]packer.Artifact, error) {
+	doneCh, ok := b.RunningBuilds[buildName]
+	if !ok {
+		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
+	} else {
+		log.Printf("[TRACE] signal stopping heartbeats")
+		// Stop heartbeating
+		doneCh <- struct{}{}
+		log.Printf("[TRACE] stopped heartbeats")
+	}
+
+	if buildErr != nil {
+		err := b.UpdateBuildStatus(ctx, buildName, models.HashicorpCloudPackerBuildStatusFAILED)
+		if err != nil {
+			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
+		}
+		return artifacts, fmt.Errorf("build failed, not uploading artifacts")
+	}
+
+	for _, art := range artifacts {
+		var images []registryimage.Image
+		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
+			Result:           &images,
+			WeaklyTypedInput: true,
+			ErrorUnused:      false,
+		})
+		if err != nil {
+			return artifacts, fmt.Errorf("failed to create decoder for HCP Packer registry image: %w", err)
+		}
+
+		state := art.State(registryimage.ArtifactStateURI)
+		err = decoder.Decode(state)
+		if err != nil {
+			return artifacts, fmt.Errorf("failed to obtain HCP Packer registry image from post-processor artifact: %w", err)
+		}
+		log.Printf("[TRACE] updating artifacts for build %q", buildName)
+		err = b.UpdateImageForBuild(buildName, images...)
+
+		if err != nil {
+			return artifacts, fmt.Errorf("failed to add image artifact for %q: %s", buildName, err)
+		}
+	}
+
+	parErr := b.CompleteBuild(ctx, buildName)
+	if parErr != nil {
+		return artifacts, fmt.Errorf(
+			"failed to update Packer registry with image artifacts for %q: %s",
+			buildName,
+			parErr)
+	}
+
+	return append(artifacts, &RegistryArtifact{
+		BuildName:   buildName,
+		BucketSlug:  b.Slug,
+		IterationID: b.Iteration.ID,
+	}), nil
 }
