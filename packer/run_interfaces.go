@@ -22,7 +22,7 @@ type BuildGetter interface {
 	// GetBuilds return all possible builds for a config. It also starts all
 	// builders.
 	// TODO(azr): rename to builder starter ?
-	GetBuilds(GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics)
+	GetBuilds(GetBuildsOptions) ([]packersdk.Build, map[string]string, hcl.Diagnostics)
 }
 
 type Evaluator interface {

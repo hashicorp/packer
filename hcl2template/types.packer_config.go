@@ -563,10 +563,13 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
+func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, map[string]string, hcl.Diagnostics) {
 	res := []packersdk.Build{}
 	var diags hcl.Diagnostics
 	possibleBuildNames := []string{}
+
+	// hcpTranslationMap maps the local name of a Corebuild to its HCP name
+	hcpTranslationMap := map[string]string{}
 
 	cfg.debug = opts.Debug
 	cfg.force = opts.Force
@@ -598,6 +601,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				Type:      srcUsage.String(),
 			}
 
+			hcpTranslationMap[pcb.Name()] = srcUsage.String()
+
 			pcb.SetDebug(cfg.debug)
 			pcb.SetForce(cfg.force)
 			pcb.SetOnError(cfg.onError)
@@ -609,7 +614,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			if len(opts.Only) > 0 {
 				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
 				if diags.HasErrors() {
-					return nil, diags
+					return nil, nil, diags
 				}
 				cfg.only = onlyGlobs
 				include := false
@@ -629,7 +634,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			if len(opts.Except) > 0 {
 				exceptGlobs, diags := convertFilterOption(opts.Except, "except")
 				if diags.HasErrors() {
-					return nil, diags
+					return nil, nil, diags
 				}
 				cfg.except = exceptGlobs
 				exclude := false
@@ -726,7 +731,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
 		})
 	}
-	return res, diags
+	return res, hcpTranslationMap, diags
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`

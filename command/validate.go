@@ -64,7 +64,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
+	_, _, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:   cla.Only,
 		Except: cla.Except,
 	})
