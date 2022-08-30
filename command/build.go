@@ -119,7 +119,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		}
 	}
 
-	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
+	builds, hcpMap, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
 		Debug:   cla.Debug,
@@ -249,7 +249,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			defer limitParallel.Release(1)
 
 			if ArtifactMetadataPublisher != nil {
-				err := ArtifactMetadataPublisher.BuildStart(buildCtx, name)
+				err := ArtifactMetadataPublisher.BuildStart(buildCtx, hcpMap[name])
 				if err != nil {
 					msg := err.Error()
 					if strings.Contains(msg, "already done") {
@@ -275,7 +275,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			if ArtifactMetadataPublisher != nil {
 				runArtifacts, err = ArtifactMetadataPublisher.BuildDone(
 					buildCtx,
-					name,
+					hcpMap[name],
 					runArtifacts,
 					err,
 				)

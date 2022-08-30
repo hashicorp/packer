@@ -242,7 +242,7 @@ func runRegistryTest(t *testing.T, args registryTestArgs) {
 		return
 	}
 
-	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
+	builds, _, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
 		Debug:   cla.Debug,

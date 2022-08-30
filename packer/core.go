@@ -246,9 +246,10 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 
 // This is used for json templates to launch the build plugins.
 // They will be prepared via b.Prepare() later.
-func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
+func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]string, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []packersdk.Build{}
+	hcpTranslationMap := map[string]string{}
 	diags := hcl.Diagnostics{}
 	for _, n := range buildNames {
 		b, err := c.Build(n)
@@ -260,6 +261,8 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnost
 			})
 			continue
 		}
+
+		hcpTranslationMap[n] = HCPName(c.builds[n])
 
 		// Now that build plugin has been launched, call Prepare()
 		log.Printf("Preparing build: %s", b.Name())
@@ -290,7 +293,7 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnost
 			}
 		}
 	}
-	return builds, diags
+	return builds, hcpTranslationMap, diags
 }
 
 // HCPName is a helper to get a curated HCP name for a legacy JSON builder.
