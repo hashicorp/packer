@@ -169,5 +169,5 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 		m.Ui.Error(err.Error())
 		ret = 1
 	}
-	return &CoreWrapper{core}, ret
+	return core, ret
 }

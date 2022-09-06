@@ -1,33 +1,25 @@
-package command
+package hcp
 
 import (
+	"context"
 	"fmt"
-	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
+	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	imgds "github.com/hashicorp/packer/datasource/hcp-packer-image"
 	iterds "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/internal/registry"
 	"github.com/hashicorp/packer/internal/registry/env"
-	"github.com/hashicorp/packer/packer"
-
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
-// HCPConfigMode types specify the mode in which HCP configuration
-// is defined for a given Packer build execution.
-type HCPConfigMode int
-
-const (
-	// HCPConfigUnset mode is set when no HCP configuration has been found for the Packer execution.
-	HCPConfigUnset HCPConfigMode = iota
-	// HCPConfigEnabled mode is set when the HCP configuration is codified in the template.
-	HCPConfigEnabled
-	// HCPEnvEnabled mode is set when the HCP configuration is read from environment variables.
-	HCPEnvEnabled
-)
+// hclOrchestrator is a HCP handler made for handling HCL configurations
+type hclOrchestrator struct {
+	configuration *hcl2template.PackerConfig
+	bucket        *registry.Bucket
+}
 
 const (
 	// Known HCP Packer Image Datasource, whose id is the SourceImageId for some build.
@@ -36,53 +28,65 @@ const (
 	buildLabel                 string = "build"
 )
 
-// TrySetupHCP attempts to configure the HCP-related structures if
-// Packer has been configured to publish to a HCP Packer registry.
-func TrySetupHCP(cfg packer.Handler) hcl.Diagnostics {
-	switch cfg := cfg.(type) {
-	case *hcl2template.PackerConfig:
-		return setupRegistryForPackerConfig(cfg)
-	case *CoreWrapper:
-		return setupRegistryForPackerCore(cfg)
+// PopulateIteration creates the metadata on HCP for a build
+func (h *hclOrchestrator) PopulateIteration(ctx context.Context) error {
+	err := h.bucket.Initialize(ctx)
+	if err != nil {
+		return err
 	}
 
-	return hcl.Diagnostics{
-		&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "unknown Handler type",
-			Detail: "TrySetupHCP called with an unknown Handler. " +
-				"This is a Packer bug and should be brought to the attention " +
-				"of the Packer team, please consider opening an issue for this.",
-		},
+	err = h.bucket.PopulateIteration(ctx)
+	if err != nil {
+		return err
 	}
+
+	iterationID := h.bucket.Iteration.ID
+
+	h.configuration.HCPVars["iterationID"] = cty.StringVal(iterationID)
+
+	return nil
 }
 
-func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics {
+// BuildStart is invoked when one build for the configuration is starting to be processed
+func (h *hclOrchestrator) BuildStart(ctx context.Context, buildName string) error {
+	return h.bucket.BuildStart(ctx, buildName)
+}
 
+// BuildDone is invoked when one build for the configuration has finished
+func (h *hclOrchestrator) BuildDone(
+	ctx context.Context,
+	buildName string,
+	artifacts []sdkpacker.Artifact,
+	buildErr error,
+) ([]sdkpacker.Artifact, error) {
+	return h.bucket.BuildDone(ctx, buildName, artifacts, buildErr)
+}
+
+func newHCLOrchestrator(config *hcl2template.PackerConfig) (Orchestrator, hcl.Diagnostics) {
 	// HCP_PACKER_REGISTRY is explicitly turned off
 	if env.IsHCPDisabled() {
-		return nil
+		return newNoopHandler(), nil
 	}
 
 	mode := HCPConfigUnset
 
-	for _, build := range pc.Builds {
+	for _, build := range config.Builds {
 		if build.HCPPackerRegistry != nil {
 			mode = HCPConfigEnabled
 		}
 	}
 
-	// HCP_PACKER_BUCKET_NAME is set or  HCP_PACKER_REGISTRY not toggled off
+	// HCP_PACKER_BUCKET_NAME is set or HCP_PACKER_REGISTRY not toggled off
 	if mode == HCPConfigUnset && (env.HasPackerRegistryBucket() || env.IsHCPExplicitelyEnabled()) {
 		mode = HCPEnvEnabled
 	}
 
 	if mode == HCPConfigUnset {
-		return nil
+		return newNoopHandler(), nil
 	}
 
 	var diags hcl.Diagnostics
-	if len(pc.Builds) > 1 {
+	if len(config.Builds) > 1 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Multiple " + buildLabel + " blocks",
@@ -92,7 +96,7 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 				"clear any HCP_PACKER_* environment variables."),
 		})
 
-		return diags
+		return nil, diags
 	}
 
 	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
@@ -113,117 +117,34 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 	}
 
 	// Capture Datasource configuration data
-	vals, dsDiags := pc.Datasources.Values()
+	vals, dsDiags := config.Datasources.Values()
 	if dsDiags != nil {
 		diags = append(diags, dsDiags...)
 	}
 
-	build := pc.Builds[0]
-	pc.Bucket, diags = createConfiguredBucket(
-		pc.Basedir,
+	build := config.Builds[0]
+	bucket, bucketDiags := createConfiguredBucket(
+		config.Basedir,
 		withPackerEnvConfiguration,
 		withHCLBucketConfiguration(build),
 		withDatasourceConfiguration(vals),
 	)
+	if bucketDiags != nil {
+		diags = append(diags, bucketDiags...)
+	}
 
 	if diags.HasErrors() {
-		return diags
+		return nil, diags
 	}
 
 	for _, source := range build.Sources {
-		pc.Bucket.RegisterBuildForComponent(source.String())
+		bucket.RegisterBuildForComponent(source.String())
 	}
 
-	return diags
-}
-
-func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
-	if env.IsHCPDisabled() {
-		return nil
-	}
-
-	if !env.HasPackerRegistryBucket() && !env.IsHCPExplicitelyEnabled() {
-		return nil
-	}
-
-	bucket, diags := createConfiguredBucket(
-		filepath.Dir(cfg.Core.Template.Path),
-		withPackerEnvConfiguration,
-	)
-
-	if diags.HasErrors() {
-		return diags
-	}
-
-	cfg.Core.Bucket = bucket
-	for _, b := range cfg.Core.Template.Builders {
-		// Get all builds slated within config ignoring any only or exclude flags.
-		cfg.Core.Bucket.RegisterBuildForComponent(packer.HCPName(b))
-	}
-
-	return diags
-}
-
-type bucketConfigurationOpts func(*registry.Bucket) hcl.Diagnostics
-
-// createConfiguredBucket returns a bucket that can be used for connecting to the HCP Packer registry.
-// Configuration for the bucket is obtained from the base iteration setting and any addition configuration
-// options passed in as opts. All errors during configuration are collected and returned as Diagnostics.
-func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts) (*registry.Bucket, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-
-	if !env.HasHCPCredentials() {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: "HCP authentication information required",
-			Detail: fmt.Sprintf("The client authentication requires both %s and %s environment "+
-				"variables to be set for authenticating with HCP.",
-				env.HCPClientID,
-				env.HCPClientSecret),
-			Severity: hcl.DiagError,
-		})
-	}
-
-	bucket := registry.NewBucketWithIteration()
-
-	for _, opt := range opts {
-		if optDiags := opt(bucket); optDiags.HasErrors() {
-			diags = append(diags, optDiags...)
-		}
-	}
-
-	if bucket.Slug == "" {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Image bucket name required",
-			Detail: "You must provide an image bucket name for HCP Packer builds. " +
-				"You can set the HCP_PACKER_BUCKET_NAME environment variable. " +
-				"For HCL2 templates, the registry either uses the name of your " +
-				"template's build block, or you can set the bucket_name argument " +
-				"in an hcp_packer_registry block.",
-			Severity: hcl.DiagError,
-		})
-	}
-
-	err := bucket.Iteration.Initialize(registry.IterationOptions{
-		TemplateBaseDir: templateDir,
-	})
-
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Iteration initialization failed",
-			Detail: fmt.Sprintf("Initialization of the iteration failed with "+
-				"the following error message: %s", err),
-			Severity: hcl.DiagError,
-		})
-	}
-	return bucket, diags
-}
-
-func withPackerEnvConfiguration(bucket *registry.Bucket) hcl.Diagnostics {
-	// Add default values for Packer settings configured via EnvVars.
-	// TODO look to break this up to be more explicit on what is loaded here.
-	bucket.LoadDefaultSettingsFromEnv()
-
-	return nil
+	return &hclOrchestrator{
+		configuration: config,
+		bucket:        bucket,
+	}, nil
 }
 
 func imageValueToDSOutput(imageVal map[string]cty.Value) imgds.DatasourceOutput {

@@ -524,6 +524,7 @@ func (b *Bucket) BuildDone(
 	doneCh, ok := b.RunningBuilds[buildName]
 	if !ok {
 		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
+
 	} else {
 		log.Printf("[TRACE] signal stopping heartbeats")
 		// Stop heartbeating
@@ -547,13 +548,17 @@ func (b *Bucket) BuildDone(
 			ErrorUnused:      false,
 		})
 		if err != nil {
-			return artifacts, fmt.Errorf("failed to create decoder for HCP Packer registry image: %w", err)
+			return artifacts, fmt.Errorf(
+				"failed to create decoder for HCP Packer registry image: %w",
+				err)
 		}
 
 		state := art.State(registryimage.ArtifactStateURI)
 		err = decoder.Decode(state)
 		if err != nil {
-			return artifacts, fmt.Errorf("failed to obtain HCP Packer registry image from post-processor artifact: %w", err)
+			return artifacts, fmt.Errorf(
+				"failed to obtain HCP Packer registry image from post-processor artifact: %w",
+				err)
 		}
 		log.Printf("[TRACE] updating artifacts for build %q", buildName)
 		err = b.UpdateImageForBuild(buildName, images...)
