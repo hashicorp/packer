@@ -137,6 +137,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		Basedir:                 basedir,
 		Cwd:                     wd,
 		CorePackerVersionString: p.CorePackerVersionString,
+		HCPVars:                 map[string]cty.Value{},
 		parser:                  p,
 		files:                   files,
 	}

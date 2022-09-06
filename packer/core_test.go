@@ -43,9 +43,9 @@ func TestCoreBuildNames(t *testing.T) {
 			Template:  tpl,
 			Variables: tc.Vars,
 		})
-		err = core.Initialize()
-		if err != nil {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		diags := core.Initialize(InitializeOptions{})
+		if diags.HasErrors() {
+			t.Fatalf("err: %s\n\n%s", tc.File, diags)
 		}
 
 		names := core.BuildNames(nil, nil)
@@ -493,9 +493,9 @@ func TestCoreValidate(t *testing.T) {
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
-		err = core.Initialize()
+		diags := core.Initialize(InitializeOptions{})
 
-		if (err != nil) != tc.Err {
+		if diags.HasErrors() != tc.Err {
 			t.Fatalf("err: %s\n\n%s", tc.File, err)
 		}
 	}
@@ -541,13 +541,13 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 			Template: tpl,
 			Version:  "1.0.0",
 		})
-		err = ccf.Initialize()
+		diags := ccf.Initialize(InitializeOptions{})
 
-		if (err != nil) != tc.Err {
+		if diags.HasErrors() != tc.Err {
 			if tc.Err == false {
-				t.Fatalf("Error interpolating %s: Expected no error, but got: %s", tc.File, err)
+				t.Fatalf("Error interpolating %s: Expected no error, but got: %s", tc.File, diags)
 			} else {
-				t.Fatalf("Error interpolating %s: Expected an error, but got: %s", tc.File, err)
+				t.Fatalf("Error interpolating %s: Expected an error, but got: %s", tc.File, diags)
 			}
 
 		}
@@ -614,10 +614,10 @@ func TestCore_InterpolateUserVars_VarFile(t *testing.T) {
 			Version:   "1.0.0",
 			Variables: tc.Variables,
 		})
-		err = ccf.Initialize()
+		diags := ccf.Initialize(InitializeOptions{})
 
-		if (err != nil) != tc.Err {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		if diags.HasErrors() != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, diags)
 		}
 		if !tc.Err {
 			for k, v := range ccf.variables {
@@ -674,10 +674,10 @@ func TestSensitiveVars(t *testing.T) {
 			Variables: tc.Vars,
 			Version:   "1.0.0",
 		})
-		err = ccf.Initialize()
+		diags := ccf.Initialize(InitializeOptions{})
 
-		if (err != nil) != tc.Err {
-			t.Fatalf("err: %s\n\n%s", tc.File, err)
+		if diags.HasErrors() != tc.Err {
+			t.Fatalf("err: %s\n\n%s", tc.File, diags)
 		}
 		// Check that filter correctly manipulates strings:
 		filtered := packersdk.LogSecretFilter.FilterString("the foo jumped over the bar_extra_sensitive_probably_a_password")
@@ -756,7 +756,7 @@ func TestEnvAndFileVars(t *testing.T) {
 			"final_var": "{{user `env_1`}}/{{user `env_2`}}/{{user `env_4`}}{{user `env_3`}}-{{user `var_1`}}/vmware/{{user `var_2`}}.vmx",
 		},
 	})
-	err = ccf.Initialize()
+	diags := ccf.Initialize(InitializeOptions{})
 
 	expected := map[string]string{
 		"var_1":     "partyparrot",
@@ -767,8 +767,8 @@ func TestEnvAndFileVars(t *testing.T) {
 		"env_3":     "/path/to/nowhere",
 		"env_4":     "bananas",
 	}
-	if err != nil {
-		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", err)
+	if diags.HasErrors() {
+		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", diags)
 	}
 	for k, v := range ccf.variables {
 		if expected[k] != v {

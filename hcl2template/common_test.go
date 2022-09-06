@@ -361,7 +361,8 @@ var cmpOpts = []cmp.Option{
 		packerregistry.Iteration{},
 	),
 	cmpopts.IgnoreFields(PackerConfig{},
-		"Cwd", // Cwd will change for every os type
+		"Cwd",     // Cwd will change for every os type
+		"HCPVars", // HCPVars will not be filled-in during parsing
 	),
 	cmpopts.IgnoreFields(packerregistry.Iteration{},
 		"Fingerprint", // Fingerprint will change everytime
