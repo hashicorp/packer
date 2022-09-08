@@ -41,3 +41,5 @@ local "supersecret" {
   sensitive = true
   expression = "secretvar"
 }
+
+build {}
