@@ -17,3 +17,5 @@ data "null" "baz" {
 data "null" "bang" {
   input = "${data.null.baz.output}-with-marshmallows"
 }
+
+build {}

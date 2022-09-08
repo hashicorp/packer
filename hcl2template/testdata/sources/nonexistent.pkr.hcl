@@ -2,3 +2,5 @@
 source "nonexistent" "ubuntu-1204" {
     foo = "bar"
 }
+
+build {}

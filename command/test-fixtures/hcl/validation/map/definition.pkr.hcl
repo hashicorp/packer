@@ -16,4 +16,10 @@ variable "image_metadata" {
   }
 }
 
-build {}
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.test"]
+}
