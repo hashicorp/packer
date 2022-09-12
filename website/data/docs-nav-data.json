@@ -804,10 +804,6 @@
     ]
   },
   {
-    "title": "External Plugins",
-    "href": "/plugins"
-  },
-  {
     "divider": true
   },
   {
@@ -822,14 +818,14 @@
     "divider": true
   },
   {
-    "title": "Packer Plugins",
+    "title": "Plugins",
     "routes": [
       {
-        "title": "Overview",
+        "title": "External Plugins",
         "path": "plugins"
       },
       {
-        "title": "Extending Packer",
+        "title": "Developing Plugins",
         "routes": [
           {
             "title": "Overview",
