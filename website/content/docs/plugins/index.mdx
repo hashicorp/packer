@@ -12,20 +12,17 @@ Packer plugins perform tasks during each build.
 
 During a `packer build`, the process list shows `packer-` prefixed applications. One of those applications is the Packer binary, and the rest are plugins. Packer launches one plugin process for each component in the build.
 
-The set of builders, provisioners, and post-processors bundled with the Packer binary function as plugins that Packer finds and runs automatically. You can also define a list of external plugins in your template. These external plugins are separate, standalone applications that extend Packer functionality without modifying the core source code.
+The set of builders, provisioners, and post-processors bundled with the Packer binary function as plugins that Packer finds and runs automatically. You can also define a list of external plugins in your template for Packer to start and communiate with throughout the build. These external plugins are separate, standalone applications that extend Packer functionality without modifying the core source code.
 
 ## External Plugins
 
-Refer to the following resources:
-- [External Plugins](/plugins): Documentation for available packer plugins
-- [Install Plugins](/plugins/install-plugins): Add external plugins to your packer template
+Refer to [External Plugins](/plugins) to review the documentation for available packer plugins. Refer to [Install Plugins](/docs/plugins/install-plugins) for details about adding external plugins to your Packer template.
 
 
 ## Develop Plugins
 
-Packer plugins can add new components to Packer, such as builders, provisioners, post-processors, and data sources. Refer to the following resources. Refer to [Development Overview](/docs/plugins/creation) to get started.
+Packer plugins can add new components to Packer, such as builders, provisioners, post-processors, and data sources. Refer to [Development Overview](/docs/plugins/creation) to get started.
 
 ## HCP Packer Support
 
-If you want your plugin to support HCP Packer, refer to the [HCP
-support](/docs/plugins/hcp-support) page.
+Refer to [HCP Support](/docs/plugins/hcp-support) to details about updating a plugin to support HCP Packer.

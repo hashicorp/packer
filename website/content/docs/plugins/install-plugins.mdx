@@ -4,15 +4,19 @@ description: |
 page_title: Install Plugins
 ---
 
-## Installing Plugins
+# Install Plugins
 
-Currently, you do not need to install plugins for builder, provisioner, or
-post-processor components documented on the Packer website; these components
+You do not need to install plugins for builder, provisioner, or
+post-processor components documented on the Packer website. These components
 ship with the Packer core and Packer automatically knows how to find and launch
-them. These instructions are for installing custom components that are not
+them. These instructions explain how to install custom components that are not
 bundled with the Packer core.
 
-The below tabs reference "multi-component" and "single-component" plugins. If
+Refer to [External Plugins](/plugins) for a list of available plugins and their documentation.
+
+## Installation Guide
+
+The tabs reference "multi-component" and "single-component" plugins. If
 you are not sure what kind of plugin you are trying to install, the easiest way
 to find out is to check the name. If the name starts with `packer-plugin-`, then
 it is a multi-component plugin. If the name starts with a prefix that actually
@@ -29,7 +33,7 @@ types will keep on being detected but Packer cannot install them automatically.
 If a plugin you use has not been upgraded to use the multi-component plugin
 architecture, contact your maintainer to request an upgrade.
 
-### Create a required_plugins block
+## Create a required_plugins block
 
 1. Add a
    [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
@@ -68,7 +72,7 @@ Each plugin has two identifiers:
 - A unique **local name**, which is used everywhere else in a Packer
   configuration.
 
-### Local Names
+## Local Names
 
 Local names allow you to access the components of a plugin and must be unique
 per configuration.
