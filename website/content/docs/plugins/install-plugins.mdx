@@ -4,24 +4,20 @@ description: |
 page_title: Install Plugins
 ---
 
-# Install Plugins
+# Installing Plugins
 
 You do not need to install plugins for builder, provisioner, or
 post-processor components documented on the Packer website. These components
-ship with the Packer core and Packer automatically knows how to find and launch
-them. These instructions explain how to install custom components that are not
-bundled with the Packer core.
+ship with the Packer core, and Packer automatically knows how to find and launch
+them. These instructions explain how to install custom external plugins that are not bundled with the Packer binary.
 
 Refer to [External Plugins](/plugins) for a list of available plugins and their documentation.
 
-## Installation Guide
+## Installation Guides
 
-The tabs reference "multi-component" and "single-component" plugins. If
-you are not sure what kind of plugin you are trying to install, the easiest way
-to find out is to check the name. If the name starts with `packer-plugin-`, then
-it is a multi-component plugin. If the name starts with a prefix that actually
-says the component type (e.g. `packer-provisioner-` or `packer-builder`), then
-it is a single-component plugin.
+Choose the tab that corresponds to the type of plugin you want to install. If you are not sure, check the plugin's name.
+- Multi-component plugin names have the prefix `packer-plugin-`
+- Single-component plugin names have a prefix containing the component type, like `packer-provisioner-` or `packer-builder`.
 
 <Tabs>
 <Tab heading="Packer init (recommended from Packer v1.7.0)">
