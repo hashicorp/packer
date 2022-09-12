@@ -821,8 +821,12 @@
     "title": "Plugins",
     "routes": [
       {
-        "title": "External Plugins",
+        "title": "Overview",
         "path": "plugins"
+      },
+      {
+        "title": "Install Plugins",
+        "path": "plugins/install-plugins"
       },
       {
         "title": "Developing Plugins",
