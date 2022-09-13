@@ -12,10 +12,10 @@ Packer plugins are separate, standalone applications that perform tasks during e
 
 During a `packer build`, the process list shows `packer-` prefixed applications. One of those applications is the Packer binary, and the rest are plugins. Packer launches one plugin process for each component in the build.
 
-The set of builders, provisioners, and post-processors bundled with the Packer binary function as plugins that Packer finds and runs automatically. You can also define a list of external plugins in your template for Packer to run and communicate with throughout the build. These external plugins extend Packer functionality without modifying the core source code.
+The Packer binary has a set of built-in plugins that it can find and run automatically. You can also define a list of external plugins in your template for Packer to run and communicate with throughout the build. These external plugins extend Packer functionality without modifying the core source code.
 
 Refer to the following plugin documentation:
-- [External Plugins](/plugins) to review the documentation for available Packer plugins
-- [Installing Plugins](/docs/plugins/install-plugins) to add external plugins to your Packer template and install the binaries
-- [Developing Plugins](/docs/plugins/creation) to get started creating custom external plugins
-- [HCP Support](/docs/plugins/hcp-support) to update a plugin to support HCP Packer
+- **Built-in Plugins:** Use [builders](/docs/builders) to create machines and images, [data sources](/docs/datasources) to fetch data, [provisioners](/docs/provisioners) to install and configure machine images, and [post-processors](/docs/post-processors) to perform additional tasks after provisioning
+- **External Plugins:** Review the documentation for [available external plugins](/plugins) not included with the Packer binary
+- **Installing Plugins:** [Installation Guides](/docs/plugins/install-plugins) to add external plugins to your Packer template and install the binaries
+- **Developing Plugins:** Get started [creating custom external plugins](/docs/plugins/creation)
