@@ -9,14 +9,12 @@ page_title: HCP Packer Support
 ~> **Note:** HCP Packer is under active development, and we suggest plugin maintainers to keep up with the SDK changes
 for more on HCP Packer support.
 
-~> **Note:** If you're looking to develop a new plugin, please refer first to the [developing
-plugins](/docs/plugins/creation#developing-plugins) page.
+This page explains how to update a custom plugin so that it can publish image metadata to the [HCP Packer registry](https://cloud.hashicorp.com/docs/packer). Refer to [Custom Builders](/docs/plugins/creation/custom-builders) and [Custom Post-Processors](/docs/plugins/creation/custom-post-processors) for details about creating an external Packer plugin.
 
-HCP Packer support allows for the management of image metadata that can be stored in a HCP Packer registry.
-Before pushing metadata to the HCP Packer registry, Packer will use the [`par.artifact.metadata` key](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants)
-to query a builder artifact for the Image metadata that a particular component would like to have stored in the registry.
+Before pushing metadata to the HCP Packer registry, Packer uses the [`par.artifact.metadata` key](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants)
+to query a builder artifact for the image metadata that a particular component would like to have stored in the registry.
 
-For details and usage examples on management of image metadata, see the [Documentation](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image).
+For details and examples of how to manage image metadata, refer to the [HCP Packer GitHub documentation](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image).
 
 ## Builder Artifact
 
