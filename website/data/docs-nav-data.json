@@ -850,12 +850,12 @@
           {
             "title": "Custom Data Sources",
             "path": "plugins/creation/custom-datasources"
+          },
+          {
+            "title": "HCP Packer Support",
+            "path": "plugins/creation/hcp-support"
           }
         ]
-      },
-      {
-        "title": "HCP Packer Support",
-        "path": "plugins/hcp-support"
       }
     ]
   },
