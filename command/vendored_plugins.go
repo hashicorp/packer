@@ -49,8 +49,6 @@ import (
 	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
 	oneandonebuilder "github.com/hashicorp/packer-plugin-oneandone/builder/oneandone"
 	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
-	oracleclassicbuilder "github.com/hashicorp/packer-plugin-oracle/builder/classic"
-	oracleocibuilder "github.com/hashicorp/packer-plugin-oracle/builder/oci"
 	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	profitbricksbuilder "github.com/hashicorp/packer-plugin-profitbricks/builder/profitbricks"
@@ -115,8 +113,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"ncloud":              new(ncloudbuilder.Builder),
 	"oneandone":           new(oneandonebuilder.Builder),
 	"openstack":           new(openstackbuilder.Builder),
-	"oracle-classic":      new(oracleclassicbuilder.Builder),
-	"oracle-oci":          new(oracleocibuilder.Builder),
 	"profitbricks":        new(profitbricksbuilder.Builder),
 	"proxmox":             new(proxmoxiso.Builder),
 	"proxmox-iso":         new(proxmoxiso.Builder),

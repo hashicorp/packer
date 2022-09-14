@@ -80,7 +80,6 @@ require (
 	github.com/hashicorp/packer-plugin-ncloud v1.0.3
 	github.com/hashicorp/packer-plugin-oneandone v1.0.1
 	github.com/hashicorp/packer-plugin-openstack v1.0.1
-	github.com/hashicorp/packer-plugin-oracle v1.0.2
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.2
 	github.com/hashicorp/packer-plugin-proxmox v1.0.8
@@ -184,7 +183,6 @@ require (
 	github.com/hashicorp/go-getter/s3/v2 v2.1.0 // indirect
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
-	github.com/hashicorp/go-oracle-terraform v0.17.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.0 // indirect
 	github.com/hashicorp/go-rootcerts v1.0.2 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
@@ -224,7 +222,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/oracle/oci-go-sdk/v36 v36.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
