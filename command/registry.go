@@ -47,12 +47,24 @@ func TrySetupHCP(cfg packer.Handler) hcl.Diagnostics {
 func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
+	if env.IsHCPDisabled() {
+		return nil
+	}
+
 	hasHCP := false
 
 	for _, build := range pc.Builds {
 		if build.HCPPackerRegistry != nil {
 			hasHCP = true
 		}
+	}
+
+	if env.HasPackerRegistryBucket() {
+		hasHCP = true
+	}
+
+	if !hasHCP {
+		return nil
 	}
 
 	if hasHCP && len(pc.Builds) > 1 {
@@ -64,14 +76,6 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 				" block(s). If this " + buildLabel + " is not meant for the Packer registry please " +
 				"clear any HCP_PACKER_* environment variables."),
 		})
-		return diags
-	}
-
-	if env.IsPAREnabled() {
-		hasHCP = true
-	}
-
-	if !hasHCP {
 		return diags
 	}
 
@@ -109,6 +113,14 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		for _, source := range build.Sources {
 			pc.Bucket.RegisterBuildForComponent(source.String())
 		}
+	}
+
+	if pc.Bucket.Slug == "" {
+		return append(diags, &hcl.Diagnostic{
+			Summary:  "bucket name cannot be empty",
+			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
+			Severity: hcl.DiagError,
+		})
 	}
 
 	vals, diags := pc.Datasources.Values()
@@ -254,7 +266,11 @@ func iterValueToDSOutput(iterVal map[string]cty.Value) iterds.DatasourceOutput {
 }
 
 func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
-	if !env.IsPAREnabled() {
+	if env.IsHCPDisabled() {
+		return nil
+	}
+
+	if !env.HasPackerRegistryBucket() {
 		return nil
 	}
 
@@ -275,6 +291,14 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		})
 	}
 	core.Bucket.LoadDefaultSettingsFromEnv()
+
+	if core.Bucket.Slug == "" {
+		return append(diags, &hcl.Diagnostic{
+			Summary:  "bucket name cannot be empty",
+			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable",
+			Severity: hcl.DiagError,
+		})
+	}
 
 	for _, b := range core.Template.Builders {
 		// Get all builds slated within config ignoring any only or exclude flags.

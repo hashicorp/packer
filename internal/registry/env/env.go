@@ -6,18 +6,23 @@ import (
 )
 
 func HasClientID() bool {
-	_, ok := os.LookupEnv(HCPClientID)
-	return ok
+	return hasEnvVar(HCPClientID)
 }
 
 func HasClientSecret() bool {
-	_, ok := os.LookupEnv(HCPClientSecret)
-	return ok
+	return hasEnvVar(HCPClientSecret)
 }
 
 func HasPackerRegistryBucket() bool {
-	_, ok := os.LookupEnv(HCPPackerBucket)
-	return ok
+	return hasEnvVar(HCPPackerBucket)
+}
+
+func hasEnvVar(varName string) bool {
+	val, ok := os.LookupEnv(varName)
+	if !ok {
+		return false
+	}
+	return val != ""
 }
 
 func HasHCPCredentials() bool {
@@ -35,7 +40,7 @@ func HasHCPCredentials() bool {
 	return true
 }
 
-func IsPAREnabled() bool {
-	val, ok := os.LookupEnv(HCPPackerRegistry)
-	return ok && strings.ToLower(val) != "off" && val != "0"
+func IsHCPDisabled() bool {
+	hcp, ok := os.LookupEnv(HCPPackerRegistry)
+	return ok && strings.ToLower(hcp) == "off" || hcp == "0"
 }

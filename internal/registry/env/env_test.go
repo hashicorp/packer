@@ -1,50 +1,46 @@
 package env
 
 import (
-	"os"
 	"testing"
 )
 
-func Test_IsPAREnabled(t *testing.T) {
+func Test_IsHCPDisabled(t *testing.T) {
 	tcs := []struct {
-		name   string
-		value  string
-		output bool
+		name           string
+		registry_value string
+		output         bool
 	}{
 		{
-			name:   "set with 1",
-			value:  "1",
-			output: true,
+			name:           "nothing set",
+			registry_value: "",
+			output:         false,
 		},
 		{
-			name:   "set with ON",
-			value:  "ON",
-			output: true,
+			name:           "registry set with 1",
+			registry_value: "1",
+			output:         false,
 		},
 		{
-			name:   "set with 0",
-			value:  "0",
-			output: false,
+			name:           "registry set with 0",
+			registry_value: "0",
+			output:         true,
 		},
 		{
-			name:   "set with OFF",
-			value:  "OFF",
-			output: false,
+			name:           "registry set with OFF",
+			registry_value: "OFF",
+			output:         true,
 		},
 		{
-			name:   "unset",
-			value:  "",
-			output: false,
+			name:           "registry set with off",
+			registry_value: "off",
+			output:         true,
 		},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.value != "" {
-				_ = os.Setenv(HCPPackerRegistry, tc.value)
-				defer os.Unsetenv(HCPPackerRegistry)
-			}
-			out := IsPAREnabled()
+			t.Setenv(HCPPackerRegistry, tc.registry_value)
+			out := IsHCPDisabled()
 			if out != tc.output {
 				t.Fatalf("unexpected output: %t", out)
 			}
