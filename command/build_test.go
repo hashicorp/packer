@@ -484,6 +484,7 @@ func TestBuild(t *testing.T) {
 	for _, tt := range tc {
 		t.Run(tt.name, func(t *testing.T) {
 			defer tt.cleanup(t)
+			t.Logf("Running build on %s", tt.args)
 			run(t, tt.args, tt.expectedCode)
 			tt.fileCheck.verify(t, "")
 		})
@@ -765,7 +766,7 @@ func TestBuildExceptFileCommaFlags(t *testing.T) {
 	}
 }
 
-func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
+func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string, expectReturn int) {
 	c := &BuildCommand{
 		Meta: TestMetaFile(t),
 	}
@@ -776,7 +777,7 @@ func testHCLOnlyExceptFlags(t *testing.T, args, present, notPresent []string) {
 	finalArgs = append(finalArgs, args...)
 	finalArgs = append(finalArgs, testFixture("hcl-only-except"))
 
-	if code := c.Run(finalArgs); code != 0 {
+	if code := c.Run(finalArgs); code != expectReturn {
 		fatalCommand(t, c.Meta)
 	}
 
@@ -867,60 +868,70 @@ func TestHCL2PostProcessorForceFlag(t *testing.T) {
 
 func TestBuildCommand_HCLOnlyExceptOptions(t *testing.T) {
 	tests := []struct {
-		args       []string
-		present    []string
-		notPresent []string
+		args         []string
+		present      []string
+		notPresent   []string
+		expectReturn int
 	}{
 		{
 			[]string{"-only=chocolate"},
 			[]string{},
 			[]string{"chocolate.txt", "vanilla.txt", "cherry.txt"},
+			1,
 		},
 		{
 			[]string{"-only=*chocolate*"},
 			[]string{"chocolate.txt"},
 			[]string{"vanilla.txt", "cherry.txt"},
+			0,
 		},
 		{
 			[]string{"-except=*chocolate*"},
 			[]string{"vanilla.txt", "cherry.txt"},
 			[]string{"chocolate.txt"},
+			0,
 		},
 		{
 			[]string{"-except=*ch*"},
 			[]string{"vanilla.txt"},
 			[]string{"chocolate.txt", "cherry.txt"},
+			0,
 		},
 		{
 			[]string{"-only=*chocolate*", "-only=*vanilla*"},
 			[]string{"chocolate.txt", "vanilla.txt"},
 			[]string{"cherry.txt"},
+			0,
 		},
 		{
 			[]string{"-except=*chocolate*", "-except=*vanilla*"},
 			[]string{"cherry.txt"},
 			[]string{"chocolate.txt", "vanilla.txt"},
+			0,
 		},
 		{
 			[]string{"-only=my_build.file.chocolate"},
 			[]string{"chocolate.txt"},
 			[]string{"vanilla.txt", "cherry.txt"},
+			0,
 		},
 		{
 			[]string{"-except=my_build.file.chocolate"},
 			[]string{"vanilla.txt", "cherry.txt"},
 			[]string{"chocolate.txt"},
+			0,
 		},
 		{
 			[]string{"-only=file.cherry"},
 			[]string{"cherry.txt"},
 			[]string{"vanilla.txt", "chocolate.txt"},
+			0,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s", tt.args), func(t *testing.T) {
-			testHCLOnlyExceptFlags(t, tt.args, tt.present, tt.notPresent)
+			testHCLOnlyExceptFlags(t, tt.args, tt.present, tt.notPresent, tt.expectReturn)
 		})
 	}
 }

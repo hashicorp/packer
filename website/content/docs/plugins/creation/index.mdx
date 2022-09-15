@@ -148,8 +148,7 @@ Next, build your plugin as you would any other Go application. The resulting
 binary is the plugin that can be installed using
 [standard installation procedures](/docs/plugins#installing-plugins).
 
-The specifics of how to implement each type of interface are covered in the
-relevant subsections available in the navigation to the left.
+This documentation explains how to implement each type of plugin interface: builders, data sources, provisioners, and post-processors.
 
 ~> **Lock your dependencies!** Using `go mod` is highly recommended since
 the Packer codebase will continue to improve, potentially breaking APIs along
@@ -235,15 +234,15 @@ To register a plugin follow one of the following setups
 
 Documentation for a plugin is maintained within the `docs` directory and served on GitHub.
 
-To include plugin docs on Packer.io a global pre-hook has been added to the main scaffolding [.goreleaser.yml](https://github.com/hashicorp/packer-plugin-scaffolding/blob/42e5b0b1e575879b0477cb6d4291e027f4d92f85/.goreleaser.yml#L10) file, that if uncommented will generate and include a docs.zip file as part of the plugin release.
+To include plugin docs on the website, a global pre-hook has been added to the main scaffolding [.goreleaser.yml](https://github.com/hashicorp/packer-plugin-scaffolding/blob/42e5b0b1e575879b0477cb6d4291e027f4d92f85/.goreleaser.yml#L10) file, that if uncommented will generate and include a docs.zip file as part of the plugin release.
 
-The `docs.zip` file will contain all of the `.mdx` files under the plugins root `docs/` directory that can be consumed remotely by Packer.io.
+The `docs.zip` file contains all of the `.mdx` files under the plugins root `docs/` directory that the website can consume remotely.
 
 </Tab>
 
 <Tab heading="Manually generating docs.zip">
 
-The documentation structure needed for Packer.io can be generated manually, by creating a zip file called `docs.zip` of the docs directory and included in the plugin release.
+You can generate the required documentation structure manually by creating a zip file called `docs.zip` of the docs directory and including that zip file in the plugin release.
 
 ```/bin/bash
 [[ -d docs/ ]] && zip -r docs.zip docs/

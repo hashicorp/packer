@@ -580,6 +580,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	cfg.force = opts.Force
 	cfg.onError = opts.OnError
 
+	if len(cfg.Builds) == 0 {
+		return res, append(diags, &hcl.Diagnostic{
+			Summary:  "Missing build block",
+			Detail:   "A build block with one or more sources is required for executing a build.",
+			Severity: hcl.DiagError,
+		})
+	}
+
 	for _, build := range cfg.Builds {
 		for _, srcUsage := range build.Sources {
 			src, found := cfg.Sources[srcUsage.SourceRef]

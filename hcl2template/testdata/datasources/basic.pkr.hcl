@@ -85,3 +85,5 @@ data "amazon-ami" "test" {
     ]
   }
 }
+
+build {}

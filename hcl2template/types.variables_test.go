@@ -24,7 +24,10 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "variables"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
 					"image_name": &Variable{
 						Name:   "image_name",
@@ -275,7 +278,10 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/complicated", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 "testdata/variables/complicated",
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: "testdata/variables/complicated",
 				InputVariables: Variables{
 					"name_prefix": &Variable{
 						Name:   "name_prefix",
@@ -345,6 +351,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "variables"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name: "foo",
@@ -366,7 +375,10 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/empty.pkr.hcl", nil, []string{"testdata/variables/set-foo-too-wee.hcl"}},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "variables"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "variables"),
 			},
 			true, false,
 			[]packersdk.Build{},
@@ -468,6 +480,9 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "variables", "validation"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
 				InputVariables: Variables{
 					"image_id": &Variable{
 						Values: []VariableAssignment{
