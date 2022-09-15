@@ -311,7 +311,6 @@ github.com/go-git/go-git/v5 v5.4.2/go.mod h1:gQ1kArt6d+n+BGd+/B/I74HwRTLhth2+zti
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/go-ini/ini v1.62.0 h1:7VJT/ZXjzqSrvtraFp4ONq80hTcRQth1c9ZnQ3uNQvU=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-ldap/ldap/v3 v3.1.3/go.mod h1:3rbOH3jRS2u6jg2rJnKAMLE/xQyCKIveG2Sa/Cohzb8=
@@ -618,8 +617,6 @@ github.com/hashicorp/go-multierror v1.0.0/go.mod h1:dHtQlpGsu+cZNNAkkCN/P3hoUDHh
 github.com/hashicorp/go-multierror v1.1.0/go.mod h1:spPvp8C1qA32ftKqdAHm4hHTbPw+vmowP0z+KUhOZdA=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
-github.com/hashicorp/go-oracle-terraform v0.17.0 h1:gFiaeKf9MXLobhv7uqzPuDFULL6ymJpw1NJCXwSOgJ4=
-github.com/hashicorp/go-oracle-terraform v0.17.0/go.mod h1:09jT3Y/OIsjTjQ2+3bkVNPDKqWcGIYYvjB2BEKVUdvc=
 github.com/hashicorp/go-plugin v1.0.1/go.mod h1:++UyYGoz3o5w9ZzAdZxtQKrWWP+iqPBn3cQptSMzBuY=
 github.com/hashicorp/go-retryablehttp v0.5.3/go.mod h1:9B5zBasrRhHXnJnui7y6sL7es7NDiJgTc6Er0maI1Xs=
 github.com/hashicorp/go-retryablehttp v0.6.2/go.mod h1:gEx6HMUGxYYhJScX7W1Il64m6cc2C1mDaW3NQ9sY1FY=
@@ -699,8 +696,6 @@ github.com/hashicorp/packer-plugin-oneandone v1.0.1 h1:6rnqSWSve4XB+im1MYfgdGnyD
 github.com/hashicorp/packer-plugin-oneandone v1.0.1/go.mod h1:9alSvlih9aE4Pebnnw7CmfmOyKKjnAxbxXZN9yFCCsE=
 github.com/hashicorp/packer-plugin-openstack v1.0.1 h1:R4Iw0Vx/o14e2GRbKypwsR1B21z6CkaISX+KqwtLuTo=
 github.com/hashicorp/packer-plugin-openstack v1.0.1/go.mod h1:i5qn9aUabJM9mjhpXS81hFSuDjJYA2kOi0vLlo3VGsE=
-github.com/hashicorp/packer-plugin-oracle v1.0.2 h1:9hGXPgrtovhqIKFtvE6gPNDDVZ/WzYw/CqgZmAKdP6w=
-github.com/hashicorp/packer-plugin-oracle v1.0.2/go.mod h1:FUG3IN2d6BDH1hKbeTu6qwpzJSbMe6wa3WNYBE6eoFQ=
 github.com/hashicorp/packer-plugin-parallels v1.0.3 h1:smypphUCEj3arCdlvbNtZvGC1ujsUSRtN1MBvZHt/w8=
 github.com/hashicorp/packer-plugin-parallels v1.0.3/go.mod h1:Q842nvosVmP5FnYozk8ZZj93HGIan19jHTxGeteBCb0=
 github.com/hashicorp/packer-plugin-profitbricks v1.0.2 h1:wAlTRm1A39T9hferxFtKaLCDmlsqA9cU7dTQtMLcvKQ=
@@ -928,8 +923,6 @@ github.com/opencontainers/runc v0.0.0-20190115041553-12f6a991201f/go.mod h1:qT5X
 github.com/opencontainers/runc v0.1.1/go.mod h1:qT5XzbpPznkRYVz/mWwUaVBUv2rmF59PVA73FjuZG0U=
 github.com/opencontainers/runtime-spec v0.1.2-0.20190507144316-5b71a03e2700/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
 github.com/opentracing/opentracing-go v1.1.0/go.mod h1:UkNAQd3GIcIGf0SeVgPpRdFStlNbqXla1AfSYxPUl2o=
-github.com/oracle/oci-go-sdk/v36 v36.2.0 h1:oBaN/FnBDy3ohMyVZ/rKfekYxnyksG2KK0YAhT5HSnk=
-github.com/oracle/oci-go-sdk/v36 v36.2.0/go.mod h1:t8Y/M3Lh8X4BOJhtThJKe1skRTg7qom7oWyHiNjo4RM=
 github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db h1:9uViuKtx1jrlXLBW/pMnhOfzn3iSEdLase/But/IZRU=
 github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db/go.mod h1:f6Izs6JvFTdnRbziASagjZ2vmf55NSIkC/weStxCHqk=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
@@ -1620,7 +1613,6 @@ gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2/go.mod h1:Xk6kEKp8OKb+X14hQBKW
 gopkg.in/ini.v1 v1.42.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
 gopkg.in/ini.v1 v1.62.0 h1:duBzk771uxoUuOlyRLkHsygud9+5lrlGjdFBb4mSKDU=
 gopkg.in/ini.v1 v1.62.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
-gopkg.in/jarcoal/httpmock.v1 v1.0.0-20181117152235-275e9df93516 h1:H6trpavCIuipdInWrab8l34Mf+GGVfphniHostMdMaQ=
 gopkg.in/resty.v1 v1.12.0/go.mod h1:mDo4pnntr5jdWRML875a/NmxYqAlA73dVijT2AXvQQo=
 gopkg.in/square/go-jose.v2 v2.3.1/go.mod h1:M9dMgbHiYLoDGQrXy7OpJDJWiKiU//h+vD76mk0e1AI=
 gopkg.in/square/go-jose.v2 v2.5.1/go.mod h1:M9dMgbHiYLoDGQrXy7OpJDJWiKiU//h+vD76mk0e1AI=
