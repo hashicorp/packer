@@ -830,7 +830,7 @@
       },
       {
         "title": "External Plugins",
-        "href": "/packer/plugins"
+        "href": "/plugins"
       },
       {
         "title": "Developing Plugins",
