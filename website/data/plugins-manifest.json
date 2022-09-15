@@ -4,14 +4,14 @@
     "path": "oneandone",
     "repo": "hashicorp/packer-plugin-oneandone",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Alibaba Cloud",
     "path": "alicloud",
     "repo": "hashicorp/packer-plugin-alicloud",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.4"
   },
   {
     "title": "Anka",
@@ -19,26 +19,26 @@
     "repo": "veertuinc/packer-plugin-veertu-anka",
     "pluginTier": "community",
     "source_branch": "master",
-    "version": "latest"
+    "version": "v2.3.2"
   },
   {
     "title": "Ansible",
     "path": "ansible",
     "repo": "hashicorp/packer-plugin-ansible",
-    "version": "latest"
+    "version": "v1.0.3"
   },
   {
     "title": "Amazon EC2",
     "path": "amazon",
     "repo": "hashicorp/packer-plugin-amazon",
-    "version": "latest",
+    "version": "v1.1.4",
     "isHcpPackerReady": true
   },
   {
     "title": "Azure",
     "path": "azure",
     "repo": "hashicorp/packer-plugin-azure",
-    "version": "latest",
+    "version": "v1.3.1",
     "isHcpPackerReady": true
   },
   {
@@ -46,7 +46,7 @@
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
     "pluginTier": "community",
-    "version": "latest",
+    "version": "v1.0.2",
     "archived": true
   },
   {
@@ -54,14 +54,14 @@
     "path": "cloudstack",
     "repo": "hashicorp/packer-plugin-cloudstack",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.2"
   },
   {
     "title": "Converge",
     "path": "converge",
     "repo": "hashicorp/packer-plugin-converge",
     "pluginTier": "community",
-    "version": "latest",
+    "version": "v1.0.1",
     "archived": true
   },
   {
@@ -69,35 +69,35 @@
     "path": "digitalocean",
     "repo": "digitalocean/packer-plugin-digitalocean",
     "pluginTier": "verified",
-    "version": "latest",
+    "version": "v1.1.1",
     "isHcpPackerReady": true
   },
   {
     "title": "Docker",
     "path": "docker",
     "repo": "hashicorp/packer-plugin-docker",
-    "version": "latest",
+    "version": "v1.0.8",
     "isHcpPackerReady": true
   },
   {
     "title": "Git",
     "path": "git",
     "repo": "ethanmdavidson/packer-plugin-git",
-    "version": "latest",
+    "version": "v0.3.2",
     "sourceBranch": "main"
   },
   {
     "title": "Google Cloud Platform",
     "path": "googlecompute",
     "repo": "hashicorp/packer-plugin-googlecompute",
-    "version": "latest",
+    "version": "v1.0.15",
     "isHcpPackerReady": true
   },
   {
     "title": "Gridscale",
     "path": "gridscale",
     "repo": "gridscale/packer-plugin-gridscale",
-    "version": "latest",
+    "version": "v0.0.2",
     "pluginTier": "verified",
     "isHcpPackerReady": false
   },
@@ -105,28 +105,28 @@
     "title": "HashiCups",
     "path": "hashicups",
     "repo": "hashicorp/packer-plugin-hashicups",
-    "version": "latest",
+    "version": "v1.0.1",
     "isHcpPackerReady": false
   },
   {
     "title": "Hetzner Cloud",
     "path": "hetzner-cloud",
     "repo": "hashicorp/packer-plugin-hcloud",
-    "version": "latest",
+    "version": "v1.0.5",
     "pluginTier": "community"
   },
   {
     "title": "HyperOne",
     "path": "hyperone",
     "repo": "hashicorp/packer-plugin-hyperone",
-    "version": "latest",
+    "version": "v1.0.1",
     "pluginTier": "community"
   },
   {
     "title": "Hyper-V",
     "path": "hyperv",
     "repo": "hashicorp/packer-plugin-hyperv",
-    "version": "latest",
+    "version": "v1.0.4",
     "pluginTier": "community"
   },
   {
@@ -134,7 +134,7 @@
     "path": "inspec",
     "repo": "hashicorp/packer-plugin-inspec",
     "pluginTier": "community",
-    "version": "latest",
+    "version": "v1.0.0",
     "archived": true
   },
   {
@@ -142,21 +142,21 @@
     "path": "jdcloud",
     "repo": "hashicorp/packer-plugin-jdcloud",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Kamatera",
     "path": "kamatera",
     "repo": "kamatera/packer-plugin-kamatera",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v0.5.5"
   },
   {
     "title": "Linode",
     "path": "linode",
     "repo": "hashicorp/packer-plugin-linode",
     "pluginTier": "community",
-    "version": "latest",
+    "version": "v1.0.3",
     "isHcpPackerReady": true
   },
   {
@@ -164,49 +164,49 @@
     "path": "libvirt",
     "repo": "thomasklein94/packer-plugin-libvirt",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v0.3.4"
   },
   {
     "title": "LXC",
     "path": "lxc",
     "repo": "hashicorp/packer-plugin-lxc",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.2"
   },
   {
     "title": "LXD",
     "path": "lxd",
     "repo": "hashicorp/packer-plugin-lxd",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Mondoo",
     "path": "mondoo",
     "repo": "mondoohq/packer-plugin-mondoo",
     "pluginTier": "verified",
-    "version": "latest"
+    "version": "v0.5.1"
   },
   {
     "title": "Naver Cloud",
     "path": "ncloud",
     "repo": "hashicorp/packer-plugin-ncloud",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.3"
   },
   {
     "title": "OpenStack",
     "path": "openstack",
     "repo": "hashicorp/packer-plugin-openstack",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.1"
   },
   {
     "title": "Oracle",
     "path": "oracle",
     "repo": "hashicorp/packer-plugin-oracle",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.3"
   },
   {
     "title": "Outscale",
@@ -219,27 +219,27 @@
     "title": "Parallels",
     "path": "parallels",
     "repo": "hashicorp/packer-plugin-parallels",
-    "version": "latest"
+    "version": "v1.0.3"
   },
   {
     "title": "Profitbricks",
     "path": "profitbricks",
     "repo": "hashicorp/packer-plugin-profitbricks",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.2"
   },
   {
     "title": "Proxmox",
     "path": "proxmox",
     "repo": "hashicorp/packer-plugin-proxmox",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.8"
   },
   {
     "title": "Puppet",
     "path": "puppet",
     "repo": "hashicorp/packer-plugin-puppet",
-    "version": "latest",
+    "version": "v1.0.1",
     "pluginTier": "community",
     "archived": true
   },
@@ -247,14 +247,14 @@
     "title": "QEMU",
     "path": "qemu",
     "repo": "hashicorp/packer-plugin-qemu",
-    "version": "latest"
+    "version": "v1.0.5"
   },
   {
     "title": "Salt",
     "path": "salt",
     "repo": "hashicorp/packer-plugin-salt",
     "pluginTier": "community",
-    "version": "latest",
+    "version": "v1.0.0",
     "archived": true
   },
   {
@@ -262,41 +262,41 @@
     "path": "scaleway",
     "repo": "scaleway/packer-plugin-scaleway",
     "pluginTier": "verified",
-    "version": "latest"
+    "version": "v1.0.6"
   },
   {
     "title": "SSH Key",
     "path": "sshkey",
     "repo": "ivoronin/packer-plugin-sshkey",
     "pluginTier": "community",
-    "version": "v1.0.1"
+    "version": "v1.0.3"
   },
   {
     "title": "Tencent Cloud",
     "path": "tencentcloud",
     "repo": "hashicorp/packer-plugin-tencentcloud",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.5"
   },
   {
     "title": "Triton",
     "path": "triton",
     "repo": "hashicorp/packer-plugin-triton",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v1.0.2"
   },
   {
     "title": "UCloud",
     "path": "ucloud",
     "repo": "hashicorp/packer-plugin-ucloud",
-    "version": "latest",
+    "version": "v1.0.1",
     "pluginTier": "community"
   },
   {
     "title": "UpCloud",
     "path": "upcloud",
     "repo": "UpCloudLtd/packer-plugin-upcloud",
-    "version": "latest",
+    "version": "v1.5.1",
     "pluginTier": "verified",
     "sourceBranch": "master",
     "isHcpPackerReady": true
@@ -306,39 +306,39 @@
     "path": "vagrant",
     "repo": "hashicorp/packer-plugin-vagrant",
     "pluginTier": "official",
-    "version": "latest"
+    "version": "v1.0.3"
   },
   {
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
-    "version": "latest"
+    "version": "v1.0.4"
   },
   {
     "title": "VMware vSphere",
     "path": "vsphere",
     "repo": "hashicorp/packer-plugin-vsphere",
-    "version": "latest",
+    "version": "v1.0.8",
     "isHcpPackerReady": true
   },
   {
     "title": "VMware",
     "path": "vmware",
     "repo": "hashicorp/packer-plugin-vmware",
-    "version": "latest"
+    "version": "v1.0.7"
   },
   {
     "title": "Vultr",
     "path": "vultr",
     "repo": "vultr/packer-plugin-vultr",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "v2.4.5"
   },
   {
     "title": "Yandex",
     "path": "yandex",
     "repo": "hashicorp/packer-plugin-yandex",
-    "version": "latest",
+    "version": "v1.1.2",
     "pluginTier": "community"
   }
 ]
