@@ -16,7 +16,10 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/basic.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "datasources"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
 						Type: "amazon-ami",
@@ -36,7 +39,10 @@ func TestParse_datasource(t *testing.T) {
 			parseTestArgs{"testdata/datasources/recursive.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "datasources"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "datasources"),
 				Datasources: Datasources{
 					{
 						Type: "null",

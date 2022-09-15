@@ -86,3 +86,5 @@ source "virtualbox-iso" "ubuntu-1204" {
         ]
     }
 }
+
+build {}

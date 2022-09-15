@@ -186,6 +186,16 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
 
+	if len(builds) == 0 {
+		return writeDiags(c.Ui, nil, hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Summary:  "No builds to run",
+				Detail:   "a build command cannot run without at least one build to process",
+				Severity: hcl.DiagError,
+			},
+		})
+	}
+
 	// Get the start of the build command
 	buildCommandStart := time.Now()
 
