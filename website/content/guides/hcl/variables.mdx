@@ -190,9 +190,9 @@ $ packer build -var-file="variables.pkrvars.hcl" .
 ```
 
 Packer will automatically load any var file that matches the name
-`*.auto.pkrvars.hcl`, without the need to pass the file via the command line.
-If we rename the above variable definitions file from `variables.pkrvars.hcl` to
-`variables.auto.pkrvars.hcl`, then we can run our build simply by calling
+`*.auto.pkr.hcl`, without the need to pass the file via the command line.
+If we rename the above variable definitions file from `variables.pkr.hcl` to
+`variables.auto.pkr.hcl`, then we can run our build simply by calling
 
 ```shell-session
 $ packer build .
