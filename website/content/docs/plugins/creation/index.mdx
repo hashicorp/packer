@@ -6,27 +6,19 @@ description: |
 page_title: Extending
 ---
 
-# Extending Packer
+# Developing Plugins
 
-Packer is designed to be extensible, and supports plugins that allow you to
-create and use custom builders, provisioners, post-processors, and data sources.
-To learn more about developing these different types of components, please
-choose a link from the sidebar. To learn more about the general plugin
-architecture, stay on this page.
+Packer is extensible and supports plugins that let you
+create and use custom builders, provisioners, post-processors, and data sources. This page explains how to develop Packer plugins. Before you begin, we recommend reviewing the Packer documentation and the instructions for [installing external plugins](/docs/plugins/install-plugins).
 
-## Developing Plugins
+~> **Warning** This is an advanced topic. You should have strong knowledge of Packer before you start writing plugins.
 
-This page will document how you can develop your own Packer plugins. Prior to
-reading this, you should be comfortable with Packer and know the
-basics of [how plugins work from a user standpoint](/docs/plugins).
+## Language Requirements
 
-Packer plugins must be written in [Go](https://go.dev/), so you should also
-be familiar with the language.
+You must write Packer plugins in [Go](https://go.dev/).
 
-~> **Warning!** This is an advanced topic. If you're new to Packer, we
-recommend getting a bit more comfortable before you dive into writing plugins.
 
-### Plugin System Architecture
+## Plugin System Architecture
 
 A Packer plugin is just a Go binary. Instead of loading plugins directly into a
 running application, Packer runs each plugin as a _separate application_.
@@ -34,7 +26,7 @@ The multiple separate Packer plugin processes communicate with the Core using
 an RPC defined in the packer-plugin SDK. The Packer core itself is responsible
 launching and cleaning up the plugin processes.
 
-### Plugin Development Basics
+## Plugin Development Basics
 
 The components that can be created and used in a Packer plugin are builders,
 provisioners, post-processors, and data sources.
@@ -163,7 +155,7 @@ the Packer codebase will continue to improve, potentially breaking APIs along
 the way until there is a stable release. By locking your dependencies, your
 plugins will continue to work with the version of Packer you lock to.
 
-### Logging and Debugging
+## Logging and Debugging
 
 Plugins can use the standard Go `log` package to log. Anything logged using
 this will be available in the Packer log files automatically. The Packer log is
@@ -222,7 +214,7 @@ Here's what you need to create releases using GitHub Actions:
    to install a plugin using `packer init`, see the
    [init docs](/docs/commands/init).
 
-### Registering Plugin Documentation
+## Registering Plugin Documentation
 
 ~> Note: Registering a remote plugin's plugin documentation requires the use of [Packer's plugin docs configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
 
@@ -277,7 +269,7 @@ If a plugin maintainer wishes to only include a specific version of released doc
 
 The `"sourceBranch"` key in the above configuration ensures potential contributors can link back to source files in the plugin repository from the Packer docs site. If a `"sourceBranch"` value is not present, it will default to `"main"`.
 
-#### Testing Plugin Documentation
+### Testing Plugin Documentation
 
 Before publishing the `docs.zip` file, you might want to preview your documentation changes.
 We provide a mechanism that allows to preview how the docs will look like within
@@ -304,9 +296,9 @@ Follow the next steps to get the Packer website running and preview the document
   In the website README, follow the steps to [run the website with node](https://github.com/hashicorp/packer/tree/main/website#with-node).
 - Once the website is up and running, the plugin documentation should be available in `http://localhost:3000/docs`.
 
-### Plugin Development Tips and FAQs
+## Plugin Development Tips and FAQs
 
-#### Working Examples
+### Working Examples
 
 Here's a non-exhaustive list of Packer plugins that you can check out:
 
@@ -316,7 +308,7 @@ Here's a non-exhaustive list of Packer plugins that you can check out:
 
 Looking at their code will give you good examples.
 
-#### Naming Conventions
+### Naming Conventions
 
 It is standard practice to name the resulting plugin application in the format
 of `packer-plugin-NAME`. For example, if you're building a new builder for
@@ -324,7 +316,7 @@ CustomCloud, it would be standard practice to name the resulting plugin
 `packer-plugin-customcloud`. This naming convention helps users identify the
 scope of a plugin.
 
-#### Testing Plugins
+### Testing Plugins
 
 Making your unpublished plugin available to Packer is possible by either:
 
@@ -337,7 +329,7 @@ builder or source without needing to have a `required_plugin` block.
 
 This is extremely useful during development.
 
-#### Distributing Plugins
+### Distributing Plugins
 
 We recommend that you use a tool like the GoReleaser in order to cross-compile
 your plugin for every platform that Packer supports, since Go applications are
