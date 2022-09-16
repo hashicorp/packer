@@ -4,22 +4,10 @@ description: |
 page_title: Packer plugins
 ---
 
-# Packer plugins
+# External Packer Plugins
 
-Packer Plugins allow new functionality to be added to Packer without modifying
-the core source code. Packer plugins are able to add new components to Packer,
-such as builders, provisioners, post-processors, and data sources.
+External Packer plugins are standalone applications that extend Packer functionality without modifying the core source code. Plugins can add new components to Packer, such as builders, provisioners, post-processors, and data sources. Refer to [Packer Plugins](/docs/plugins) for details about installing and developing external plugins.
 
-This page documents how to use plugins.
-
-If you're interested in developing plugins, see the [developing
-plugins](/docs/plugins/creation#developing-plugins) page.
-
-On the left hand side of this page, you can find the available Packer plugins,
-not all of them are 'official'.
-
-@include "plugins/how-plugins-work.mdx"
+This section contains the documentation for available external Packer plugins.
 
 @include "plugins/plugin-tiers-and-namespaces.mdx"
-
-@include "plugins/installing-plugins.mdx"
