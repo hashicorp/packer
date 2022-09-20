@@ -24,7 +24,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.13.0
 	github.com/hashicorp/hcp-sdk-go v0.20.1-0.20220726131832-34fbcf69a746
 	github.com/hashicorp/packer-plugin-amazon v1.1.2
-	github.com/hashicorp/packer-plugin-sdk v0.3.1
+	github.com/hashicorp/packer-plugin-sdk v0.3.2
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/klauspost/pgzip v1.2.5
