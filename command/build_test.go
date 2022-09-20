@@ -1112,3 +1112,63 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 		})
 	}
 }
+
+// TestBuildCmd aims to test the build command, with output validation
+func TestBuildCmd(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []string
+		expectedCode int
+		outputCheck  func(string, string) error
+	}{
+		{
+			name: "hcl - no build block error",
+			args: []string{
+				testFixture("hcl", "no_build.pkr.hcl"),
+			},
+			expectedCode: 1,
+			outputCheck: func(_, err string) error {
+				if !strings.Contains(err, "Error: Missing build block") {
+					return fmt.Errorf("expected 'Error: Missing build block' in output, did not find it")
+				}
+
+				nbErrs := strings.Count(err, "Error: ")
+				if nbErrs != 1 {
+					return fmt.Errorf(
+						"error: too many errors in stdout for build block, expected 1, got %d",
+						nbErrs)
+				}
+
+				return nil
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &BuildCommand{
+				Meta: TestMetaFile(t),
+			}
+
+			exitCode := c.Run(tt.args)
+			if exitCode != tt.expectedCode {
+				t.Errorf("process exit code mismatch: expected %d, got %d",
+					tt.expectedCode,
+					exitCode)
+			}
+
+			out, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
+			err := tt.outputCheck(out, stderr)
+			if err != nil {
+				if len(out) != 0 {
+					t.Logf("command stdout: %q", out)
+				}
+
+				if len(stderr) != 0 {
+					t.Logf("command stderr: %q", stderr)
+				}
+				t.Error(err.Error())
+			}
+		})
+	}
+}
