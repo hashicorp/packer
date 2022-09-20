@@ -18,7 +18,7 @@
     "path": "anka",
     "repo": "veertuinc/packer-plugin-veertu-anka",
     "pluginTier": "community",
-    "source_branch": "master",
+    "sourceBranch": "master",
     "version": "latest"
   },
   {
