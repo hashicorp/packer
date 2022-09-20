@@ -128,6 +128,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// here, something could have gone wrong but we still want to run valid
 	// builds.
 	ret = writeDiags(c.Ui, nil, diags)
+	if len(builds) == 0 && ret != 0 {
+		return ret
+	}
 
 	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
