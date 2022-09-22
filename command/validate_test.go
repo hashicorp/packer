@@ -137,7 +137,7 @@ func TestValidateCommandBadVersion(t *testing.T) {
 		t.Errorf("Expected exit code 1")
 	}
 
-	stdout, stderr := outputCommand(t, c.Meta)
+	stdout, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
 	expected := `Error: 
 
 This template requires Packer version 101.0.0 or higher; using 100.0.0
