@@ -192,8 +192,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if len(builds) == 0 {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "No builds to run",
-				Detail:   "a build command cannot run without at least one build to process",
+				Summary: "No builds to run",
+				Detail: "A build command cannot run without at least one build to process. " +
+					"If the only or except flags have been specified at run time check that" +
+					" at least one build is selected for execution.",
 				Severity: hcl.DiagError,
 			},
 		})
