@@ -65,7 +65,7 @@ jobs:
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: actions-ecosystem/action-create-comment@v1.0.0
+        uses: actions-ecosystem/action-create-comment@v1.0.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
