@@ -22,13 +22,6 @@ func fatalCommand(t *testing.T, m Meta) {
 		err.String())
 }
 
-func outputCommand(t *testing.T, m Meta) (string, string) {
-	ui := m.Ui.(*packersdk.BasicUi)
-	out := ui.Writer.(*bytes.Buffer)
-	err := ui.ErrorWriter.(*bytes.Buffer)
-	return out.String(), err.String()
-}
-
 func testFixtureContent(n ...string) string {
 	path := filepath.Join(append([]string{fixturesDir}, n...)...)
 	b, err := ioutil.ReadFile(path)
