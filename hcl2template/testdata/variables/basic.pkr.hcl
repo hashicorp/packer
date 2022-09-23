@@ -42,4 +42,10 @@ local "supersecret" {
   expression = "secretvar"
 }
 
-build {}
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+}
