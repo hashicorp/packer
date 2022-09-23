@@ -87,4 +87,10 @@ source "virtualbox-iso" "ubuntu-1204" {
     }
 }
 
-build {}
+source "null" "test" {
+    communicator = "none"
+}
+
+build {
+    sources = ["null.test"]
+}

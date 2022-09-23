@@ -86,4 +86,10 @@ data "amazon-ami" "test" {
   }
 }
 
-build {}
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+}

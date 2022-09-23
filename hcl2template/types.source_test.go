@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/builder/null"
+	"github.com/hashicorp/packer/packer"
 )
 
 func TestParse_source(t *testing.T) {
@@ -17,7 +19,16 @@ func TestParse_source(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Builds: Builds{
-					&BuildBlock{},
+					&BuildBlock{
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: SourceRef{
+									Type: "null",
+									Name: "test",
+								},
+							},
+						},
+					},
 				},
 				Basedir: filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
@@ -28,10 +39,25 @@ func TestParse_source(t *testing.T) {
 						Type: "virtualbox-iso",
 						Name: "ubuntu-1204",
 					},
+					{
+						Type: "null",
+						Name: "test",
+					}: {
+						Type: "null",
+						Name: "test",
+					},
 				},
 			},
 			false, false,
-			[]packersdk.Build{},
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+				},
+			},
 			false,
 		},
 		{"untyped source",
@@ -61,15 +87,13 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Builds: Builds{
-					&BuildBlock{},
-				},
-				Basedir: filepath.Join("testdata", "sources"),
+				Builds:                  nil,
+				Basedir:                 filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{Type: "nonexistent", Name: "ubuntu-1204"}: {Type: "nonexistent", Name: "ubuntu-1204"},
 				},
 			},
-			false, false,
+			true, true,
 			[]packersdk.Build{},
 			false,
 		},

@@ -18,4 +18,10 @@ data "null" "bang" {
   input = "${data.null.baz.output}-with-marshmallows"
 }
 
-build {}
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+}

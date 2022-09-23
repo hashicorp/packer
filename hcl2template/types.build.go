@@ -110,7 +110,16 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		"name": cty.StringVal(b.Name),
 	})
 
+	// We rely on `hadSource` to determine which error to proc.
+	//
+	// If a source block is referenced in the build block, but isn't valid, we
+	// cannot rely on the `build.Sources' since it's only populated when a valid
+	// source is processed.
+	hadSource := false
+
 	for _, buildFrom := range b.FromSources {
+		hadSource = true
+
 		ref := sourceRefFromString(buildFrom)
 
 		if ref == NoSource ||
@@ -156,6 +165,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			build.HCPPackerRegistry = hcpPackerRegistry
 		case sourceLabel:
+			hadSource = true
 			ref, moreDiags := p.decodeBuildSource(block)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
@@ -214,6 +224,15 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				build.PostProcessorsLists = append(build.PostProcessorsLists, postProcessors)
 			}
 		}
+	}
+
+	if !hadSource {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "missing source reference",
+			Detail:   "a build block must reference at least one source to be built",
+			Severity: hcl.DiagError,
+			Subject:  block.DefRange.Ptr(),
+		})
 	}
 
 	return build, diags

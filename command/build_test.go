@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -1167,6 +1168,31 @@ func TestBuildCmd(t *testing.T) {
 				if nbErrs != 0 {
 					return fmt.Errorf("error: expected build to succeed without errors, got %d",
 						nbErrs)
+				}
+				return nil
+			},
+		},
+		{
+			name: "hcl - build block without source",
+			args: []string{
+				testFixture("hcl", "build_no_source.pkr.hcl"),
+			},
+			expectedCode: 1,
+			outputCheck: func(_, err string) error {
+				if !strings.Contains(err, "Error: missing source reference") {
+					return fmt.Errorf("expected 'Error: missing source reference' in output, did not find it")
+				}
+
+				nbErrs := strings.Count(err, "Error: ")
+				if nbErrs != 1 {
+					return fmt.Errorf(
+						"error: too many errors in stderr for build, expected 1, got %d",
+						nbErrs)
+				}
+
+				logRegex := regexp.MustCompile("on.*build_no_source.pkr.hcl line 1")
+				if !logRegex.MatchString(err) {
+					return fmt.Errorf("error: missing context for error message")
 				}
 
 				return nil
