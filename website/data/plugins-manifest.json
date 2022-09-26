@@ -42,6 +42,13 @@
     "isHcpPackerReady": true
   },
   {
+    "title": "Baidu Cloud",
+    "path": "baiducloud",
+    "repo": "wylzabc/packer-plugin-baiducloud",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Chef",
     "path": "chef",
     "repo": "hashicorp/packer-plugin-chef",
