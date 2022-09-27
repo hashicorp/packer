@@ -1141,6 +1141,37 @@ func TestBuildCmd(t *testing.T) {
 				return nil
 			},
 		},
+		{
+			name: "hcl - undefined var set in pkrvars",
+			args: []string{
+				testFixture("hcl", "variables", "ref_non_existing"),
+			},
+			expectedCode: 0,
+			outputCheck: func(out, err string) error {
+				if !strings.Contains(out, "Warning: Undefined variable") {
+					return fmt.Errorf("expected 'Warning: Undefined variable' in output, did not find it")
+				}
+
+				nbWarns := strings.Count(out, "Warning: ")
+				if nbWarns != 1 {
+					return fmt.Errorf(
+						"error: too many warnings in build output, expected 1, got %d",
+						nbWarns)
+				}
+
+				if !strings.Contains(out, "variable \"testvar\" {") {
+					return fmt.Errorf("missing definition example for undefined variable")
+				}
+
+				nbErrs := strings.Count(err, "Error: ")
+				if nbErrs != 0 {
+					return fmt.Errorf("error: expected build to succeed without errors, got %d",
+						nbErrs)
+				}
+
+				return nil
+			},
+		},
 	}
 
 	for _, tt := range tests {
