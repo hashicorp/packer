@@ -666,11 +666,14 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: sev,
 					Summary:  "Undefined variable",
-					Detail: fmt.Sprintf("A %q variable was set but was "+
-						"not found in known variables. To declare "+
-						"variable %q, place this block in one of your "+
-						".pkr files, such as variables.pkr.hcl",
-						name, name),
+					Detail: fmt.Sprintf("A %[1]q variable was set but was "+
+						"not declared as an input variable. To declare "+
+						"variable %[1]q, place this block in one of your "+
+						".pkr.hcl files, such as variables.pkr.hcl\n\n"+
+						"variable %[1]q {\n"+
+						"  type = string\n"+
+						"}",
+						name),
 					Context: attr.Range.Ptr(),
 				})
 				continue
