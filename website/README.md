@@ -49,7 +49,7 @@ The Docker image is pre-built with all the website dependencies installed, which
 
 ### With Node
 
-If your local development environment has a supported version (v10.0.0+) of [node installed](https://nodejs.org/en/) you can run:
+If your local development environment has a supported version (v16+) of [node installed](https://nodejs.org/en/) you can run:
 
 - `npm install`
 - `npm start`
@@ -78,7 +78,6 @@ This file can be standard Markdown and also supports [YAML frontmatter](https://
 title: 'My Title'
 description: "A thorough, yet succinct description of the page's contents"
 ---
-
 ```
 
 The significant keys in the YAML frontmatter are:
