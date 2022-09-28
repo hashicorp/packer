@@ -94,6 +94,12 @@ configuration file. None of these are required, since all have defaults.
   and the [`packer init`](/docs/commands/init) command to install plugins; if
   you are using both, the `required_plugin` config will take precedence.
 
+### HCP Packer Configuration
+
+You can configure both legacy JSON and HCL2 Packer templates to publish image metadata to an active HCP Packer registry. The HCP Packer registry helps you track information about machine images, clearly designate which images are appropriate for test and production environments, and query the right images to use in both Packer and Terraform configurations.
+
+For complete configuration details and examples, refer to [Packer Template Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/template-configuration) in the HCP Packer documentation.
+
 ## Full list of Environment Variables usable for Packer
 
 Packer uses a variety of environmental variables. A listing and description of
