@@ -320,6 +320,16 @@ module.exports = [
     destination: 'https://learn.hashicorp.com/tutorials/packer/hcl2-upgrade',
     permanent: true,
   },
+  {
+    source: '/intro',
+    destination: '/docs/intro',
+    permanent: true,
+  },
+  {
+    source: '/intro/:path',
+    destination: '/docs/intro/:path*',
+    permanent: true,
+  },
   // disallow '.html' or '/index.html' in favor of cleaner, simpler paths
   { source: '/:path*/index', destination: '/:path*', permanent: true },
   { source: '/:path*.html', destination: '/:path*', permanent: true },
