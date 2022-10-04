@@ -63,6 +63,10 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		hasHCP = true
 	}
 
+	if env.IsHCPExplicitelyEnabled() {
+		hasHCP = true
+	}
+
 	if !hasHCP {
 		return nil
 	}
@@ -270,7 +274,7 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		return nil
 	}
 
-	if !env.HasPackerRegistryBucket() {
+	if !env.HasPackerRegistryBucket() && !env.IsHCPExplicitelyEnabled() {
 		return nil
 	}
 
