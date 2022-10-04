@@ -400,6 +400,9 @@ func TestRegistrySetup(t *testing.T) {
 		},
 	}
 
+	t.Setenv("HCP_CLIENT_ID", "test")
+	t.Setenv("HCP_CLIENT_SECRET", "test")
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			runRegistryTest(t, tt)
