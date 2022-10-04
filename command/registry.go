@@ -80,7 +80,6 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 				" block(s). If this " + buildLabel + " is not meant for the Packer registry please " +
 				"clear any HCP_PACKER_* environment variables."),
 		})
-		return diags
 	}
 
 	var err error
@@ -94,8 +93,6 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 			Detail:   fmt.Sprintf("%s", err),
 			Severity: hcl.DiagError,
 		})
-
-		return diags
 	}
 
 	pc.Bucket.LoadDefaultSettingsFromEnv()
@@ -119,17 +116,28 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		}
 	}
 
+	if !env.HasHCPCredentials() {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary: "HCP authentication information required",
+			Detail: fmt.Sprintf("The client authentication requires both %s and %s environment "+
+				"variables to be set for authenticating with HCP.",
+				env.HCPClientID,
+				env.HCPClientSecret),
+			Severity: hcl.DiagError,
+		})
+	}
+
 	if pc.Bucket.Slug == "" {
-		return append(diags, &hcl.Diagnostic{
+		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "bucket name cannot be empty",
 			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
 			Severity: hcl.DiagError,
 		})
 	}
 
-	vals, diags := pc.Datasources.Values()
-	if diags != nil {
-		return diags
+	vals, dsDiags := pc.Datasources.Values()
+	if dsDiags != nil {
+		diags = append(diags, dsDiags...)
 	}
 
 	imageDS, imageOK := vals[hcpImageDatasourceType]
@@ -137,7 +145,7 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 
 	// If we don't have any image or iteration defined, we can return directly
 	if !imageOK && !iterOK {
-		return nil
+		return diags
 	}
 
 	iterations := map[string]iterds.DatasourceOutput{}
@@ -280,6 +288,14 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 
 	var diags hcl.Diagnostics
 
+	if !env.HasHCPCredentials() {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "missing authentication information",
+			Detail:   fmt.Sprintf("the client authentication requires both %s and %s environment variables to be set", env.HCPClientID, env.HCPClientSecret),
+			Severity: hcl.DiagError,
+		})
+	}
+
 	var err error
 
 	core := cfg.Core
@@ -288,7 +304,7 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		TemplateBaseDir: filepath.Dir(core.Template.Path),
 	})
 	if err != nil {
-		return append(diags, &hcl.Diagnostic{
+		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "bucket creation failure",
 			Detail:   fmt.Sprintf("failed to create Bucket: %s", err),
 			Severity: hcl.DiagError,
@@ -297,7 +313,7 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 	core.Bucket.LoadDefaultSettingsFromEnv()
 
 	if core.Bucket.Slug == "" {
-		return append(diags, &hcl.Diagnostic{
+		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "bucket name cannot be empty",
 			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable",
 			Severity: hcl.DiagError,
@@ -309,5 +325,5 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		core.Bucket.RegisterBuildForComponent(b.Name)
 	}
 
-	return nil
+	return diags
 }
