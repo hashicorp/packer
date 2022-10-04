@@ -44,3 +44,9 @@ func IsHCPDisabled() bool {
 	hcp, ok := os.LookupEnv(HCPPackerRegistry)
 	return ok && strings.ToLower(hcp) == "off" || hcp == "0"
 }
+
+// IsHCPExplicitelyEnabled returns true if the client enabled HCP_PACKER_REGISTRY explicitely, i.e. it is defined and not 0 or off
+func IsHCPExplicitelyEnabled() bool {
+	hcp, ok := os.LookupEnv(HCPPackerRegistry)
+	return ok && strings.ToLower(hcp) != "off" && hcp != "0"
+}
