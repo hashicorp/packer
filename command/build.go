@@ -108,8 +108,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		if err := ArtifactMetadataPublisher.Initialize(buildCtx); err != nil {
 			diags := hcl.Diagnostics{
 				&hcl.Diagnostic{
-					Summary:  "HCP Packer Registry iteration initialization failed",
-					Detail:   fmt.Sprintf("Failed to initialize iteration for %q\n %s", ArtifactMetadataPublisher.Slug, err),
+					Summary: "Failed to get HCP Packer Registry iteration",
+					Detail: fmt.Sprintf("Packer could not create an iteration or "+
+						"link the build to an existing iteration. Contact HCP Packer "+
+						"support for further assistance.\nError: %s", err),
 					Severity: hcl.DiagError,
 				},
 			}
@@ -142,8 +144,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		if err := ArtifactMetadataPublisher.PopulateIteration(buildCtx); err != nil {
 			diags := hcl.Diagnostics{
 				&hcl.Diagnostic{
-					Summary:  "HCP Packer Registry build initialization failed",
-					Detail:   fmt.Sprintf("Failed to initialize build for %q\n %s", ArtifactMetadataPublisher.Slug, err),
+					Summary: "Failed to register builds to the HCP Packer registry iteration",
+					Detail: fmt.Sprintf("Packer could not register builds within your "+
+						"configuration to the iteration. Contact HCP Packer support "+
+						"for further assistance.\nError: %s", err),
 					Severity: hcl.DiagError,
 				},
 			}
