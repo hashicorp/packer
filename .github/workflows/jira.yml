@@ -21,6 +21,15 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
+      - name: Search
+        if: github.event.action == 'labeled'
+        id: search
+        uses: tomhjp/gh-action-jira-search@v0.2.1
+        with:
+          # cf[10089] is Issue Link (use JIRA API to retrieve)
+          jql: 'project = "HPR" AND cf[10089] = "${{ github.event.issue.html_url }}"'
+
+
       - name: Set type
         id: set-ticket-type
         run: |
@@ -51,7 +60,7 @@ jobs:
 
       - name: Create ticket
         id: create-ticket
-        if: github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
+        if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
         uses: atlassian/gajira-create@v2.0.1
         with:
           project: HPR
