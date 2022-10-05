@@ -14,7 +14,7 @@ jobs:
       issues: write  # for actions-ecosystem/action-remove-labels to remove issue labels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3.1.0
       - uses: actions-ecosystem/action-remove-labels@v1
         with:
           github_token: "${{ secrets.GITHUB_TOKEN }}"
