@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
@@ -95,24 +96,32 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		})
 	}
 
-	pc.Bucket.LoadDefaultSettingsFromEnv()
+	// Configure HCP Packer Registry destination
+	bucketSlug := os.Getenv(env.HCPPackerBucket)
 
-	for _, build := range pc.Builds {
-		build.HCPPackerRegistry.WriteToBucketConfig(pc.Bucket)
+	if pc.Bucket != nil {
+		pc.Bucket.LoadDefaultSettingsFromEnv()
 
-		// If at this point the bucket.Slug is still empty,
-		// last try is to use the build.Name if present
-		if pc.Bucket.Slug == "" && build.Name != "" {
-			pc.Bucket.Slug = build.Name
-		}
+		pc.Bucket.Slug = bucketSlug
 
-		// If the description is empty, use the one from the build block
-		if pc.Bucket.Description == "" {
-			pc.Bucket.Description = build.Description
-		}
+		for _, build := range pc.Builds {
+			build.HCPPackerRegistry.WriteToBucketConfig(pc.Bucket)
+			bucketSlug = pc.Bucket.Slug
 
-		for _, source := range build.Sources {
-			pc.Bucket.RegisterBuildForComponent(source.String())
+			// If at this point the bucket.Slug is still empty,
+			// last try is to use the build.Name if present
+			if bucketSlug == "" && build.Name != "" {
+				bucketSlug = build.Name
+			}
+
+			// If the description is empty, use the one from the build block
+			if pc.Bucket.Description == "" {
+				pc.Bucket.Description = build.Description
+			}
+
+			for _, source := range build.Sources {
+				pc.Bucket.RegisterBuildForComponent(source.String())
+			}
 		}
 	}
 
@@ -127,12 +136,16 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		})
 	}
 
-	if pc.Bucket.Slug == "" {
+	if bucketSlug == "" {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "bucket name cannot be empty",
 			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
 			Severity: hcl.DiagError,
 		})
+	}
+
+	if pc.Bucket != nil {
+		pc.Bucket.Slug = bucketSlug
 	}
 
 	vals, dsDiags := pc.Datasources.Values()
@@ -310,9 +323,11 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 			Severity: hcl.DiagError,
 		})
 	}
-	core.Bucket.LoadDefaultSettingsFromEnv()
 
-	if core.Bucket.Slug == "" {
+	// Configure HCP Packer Registry destination
+	bucketSlug := os.Getenv(env.HCPPackerBucket)
+
+	if bucketSlug == "" {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "bucket name cannot be empty",
 			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable",
@@ -320,9 +335,14 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		})
 	}
 
-	for _, b := range core.Template.Builders {
-		// Get all builds slated within config ignoring any only or exclude flags.
-		core.Bucket.RegisterBuildForComponent(b.Name)
+	if core.Bucket != nil {
+		core.Bucket.Slug = bucketSlug
+		core.Bucket.LoadDefaultSettingsFromEnv()
+
+		for _, b := range core.Template.Builders {
+			// Get all builds slated within config ignoring any only or exclude flags.
+			core.Bucket.RegisterBuildForComponent(b.Name)
+		}
 	}
 
 	return diags

@@ -264,11 +264,6 @@ func (b *Bucket) UpdateLabelsForBuild(componentType string, data map[string]stri
 
 // Load defaults from environment variables
 func (b *Bucket) LoadDefaultSettingsFromEnv() {
-	// Configure HCP Packer Registry destination
-	if b.Slug == "" {
-		b.Slug = os.Getenv(env.HCPPackerBucket)
-	}
-
 	// Set some iteration values. For Packer RunUUID should always be set.
 	// Creating an iteration differently? Let's not overwrite a UUID that might be set.
 	if b.Iteration.RunUUID == "" {
