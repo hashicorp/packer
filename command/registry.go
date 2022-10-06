@@ -16,6 +16,15 @@ import (
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
+type HCPConfigMode int
+
+const (
+	// HCPConfigMode types
+	HCPConfigUnset HCPConfigMode = iota
+	HCPConfigEnabled
+	HCPEnvEnabled
+)
+
 const (
 	// Known HCP Packer Image Datasource, whose id is the SourceImageId for some build.
 	hcpImageDatasourceType     string = "hcp-packer-image"
@@ -23,8 +32,8 @@ const (
 	buildLabel                 string = "build"
 )
 
-// TrySetupHCP attempts to setup the HCP-related structures if HCP is enabled
-// for the command
+// TrySetupHCP attempts to configure the HCP-related structures if
+// Packer has been configured to publish to a HCP Packer registry.
 func TrySetupHCP(cfg packer.Handler) hcl.Diagnostics {
 	switch cfg := cfg.(type) {
 	case *hcl2template.PackerConfig:
@@ -37,7 +46,7 @@ func TrySetupHCP(cfg packer.Handler) hcl.Diagnostics {
 		&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "unknown Handler type",
-			Detail: "SetupRegistry called with an unknown Handler. " +
+			Detail: "TrySetupHCP called with an unknown Handler. " +
 				"This is a Packer bug and should be brought to the attention " +
 				"of the Packer team, please consider opening an issue for this.",
 		},
@@ -45,33 +54,32 @@ func TrySetupHCP(cfg packer.Handler) hcl.Diagnostics {
 }
 
 func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics {
-	var diags hcl.Diagnostics
 
+	// HCP_PACKER_REGISTRY is explicitly turned off
 	if env.IsHCPDisabled() {
 		return nil
 	}
 
-	hasHCP := false
+	mode := HCPConfigUnset
 
+	// TODO move into ConfigCheck
 	for _, build := range pc.Builds {
 		if build.HCPPackerRegistry != nil {
-			hasHCP = true
+			mode = HCPConfigEnabled
 		}
 	}
 
-	if env.HasPackerRegistryBucket() {
-		hasHCP = true
+	// HCP_PACKER_BUCKET_NAME is set or  HCP_PACKER_REGISTRY not toggled off
+	if mode == HCPConfigUnset && (env.HasPackerRegistryBucket() || env.IsHCPExplicitelyEnabled()) {
+		mode = HCPEnvEnabled
 	}
 
-	if env.IsHCPExplicitelyEnabled() {
-		hasHCP = true
-	}
-
-	if !hasHCP {
+	if mode == HCPConfigUnset {
 		return nil
 	}
 
-	if hasHCP && len(pc.Builds) > 1 {
+	var diags hcl.Diagnostics
+	if len(pc.Builds) > 1 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Multiple " + buildLabel + " blocks",
@@ -80,61 +88,42 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 				" block(s). If this " + buildLabel + " is not meant for the Packer registry please " +
 				"clear any HCP_PACKER_* environment variables."),
 		})
+
+		return diags
 	}
 
-	var err error
-	pc.Bucket, err = registry.NewBucketWithIteration(registry.IterationOptions{
-		TemplateBaseDir: pc.Basedir,
-	})
+	WithHCLBucketConfigurtationOpts := func(bb *hcl2template.BuildBlock) func(*registry.Bucket) {
+		return func(bucket *registry.Bucket) {
+			bb.HCPPackerRegistry.WriteToBucketConfig(bucket)
+			// If at this point the bucket.Slug is still empty,
+			// last try is to use the build.Name if present
+			if bucket.Slug == "" && bb.Name != "" {
+				bucket.Slug = bb.Name
+			}
 
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
-			Detail:   fmt.Sprintf("%s", err),
-			Severity: hcl.DiagError,
-		})
-	}
-
-	pc.Bucket.LoadDefaultSettingsFromEnv()
-
-	for _, build := range pc.Builds {
-		build.HCPPackerRegistry.WriteToBucketConfig(pc.Bucket)
-
-		// If at this point the bucket.Slug is still empty,
-		// last try is to use the build.Name if present
-		if pc.Bucket.Slug == "" && build.Name != "" {
-			pc.Bucket.Slug = build.Name
-		}
-
-		// If the description is empty, use the one from the build block
-		if pc.Bucket.Description == "" {
-			pc.Bucket.Description = build.Description
-		}
-
-		for _, source := range build.Sources {
-			pc.Bucket.RegisterBuildForComponent(source.String())
+			// If the description is empty, use the one from the build block
+			if bucket.Description == "" && bb.Description != "" {
+				bucket.Description = bb.Description
+			}
 		}
 	}
 
-	if !env.HasHCPCredentials() {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: "HCP authentication information required",
-			Detail: fmt.Sprintf("The client authentication requires both %s and %s environment "+
-				"variables to be set for authenticating with HCP.",
-				env.HCPClientID,
-				env.HCPClientSecret),
-			Severity: hcl.DiagError,
-		})
+	build := pc.Builds[0]
+	pc.Bucket, diags = createConfiguredBucket(
+		pc.Basedir,
+		WithPackerEnvConfigurationOpts,
+		WithHCLBucketConfigurtationOpts(build),
+	)
+
+	if diags.HasErrors() {
+		return diags
 	}
 
-	if pc.Bucket.Slug == "" {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "bucket name cannot be empty",
-			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
-			Severity: hcl.DiagError,
-		})
+	for _, source := range build.Sources {
+		pc.Bucket.RegisterBuildForComponent(source.String())
 	}
 
+	/// Lets Move this
 	vals, dsDiags := pc.Datasources.Values()
 	if dsDiags != nil {
 		diags = append(diags, dsDiags...)
@@ -150,6 +139,7 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 
 	iterations := map[string]iterds.DatasourceOutput{}
 
+	var err error
 	if iterOK {
 		hcpData := map[string]cty.Value{}
 		err = gocty.FromCtyValue(iterDS, &hcpData)
@@ -211,6 +201,90 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 
 	return diags
 }
+
+func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
+	if env.IsHCPDisabled() {
+		return nil
+	}
+
+	if !env.HasPackerRegistryBucket() && !env.IsHCPExplicitelyEnabled() {
+		return nil
+	}
+
+	core := cfg.Core
+	bucket, diags := createConfiguredBucket(
+		filepath.Dir(core.Template.Path),
+		WithPackerEnvConfigurationOpts,
+	)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	core.Bucket = bucket
+	for _, b := range core.Template.Builders {
+		// Get all builds slated within config ignoring any only or exclude flags.
+		core.Bucket.RegisterBuildForComponent(b.Name)
+	}
+
+	return diags
+}
+
+func createConfiguredBucket(templateDir string, opts ...func(*registry.Bucket)) (*registry.Bucket, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+
+	if !env.HasHCPCredentials() {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary: "HCP authentication information required",
+			Detail: fmt.Sprintf("The client authentication requires both %s and %s environment "+
+				"variables to be set for authenticating with HCP.",
+				env.HCPClientID,
+				env.HCPClientSecret),
+			Severity: hcl.DiagError,
+		})
+	}
+
+	bucket, err := registry.NewBucketWithIteration(registry.IterationOptions{
+		TemplateBaseDir: templateDir,
+	})
+
+	// This error needs to be reworded.
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
+			Detail:   fmt.Sprintf("%s", err),
+			Severity: hcl.DiagError,
+		})
+
+		return nil, diags
+	}
+
+	for _, opt := range opts {
+		opt(bucket)
+	}
+
+	if bucket.Slug == "" {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "bucket name cannot be empty",
+			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
+			Severity: hcl.DiagError,
+		})
+
+		return nil, diags
+	}
+
+	return bucket, diags
+}
+
+func WithPackerEnvConfigurationOpts(pc *registry.Bucket) {
+	// Add default values for Packer settings configured via EnvVars.
+	// TODO look to break this up to be more explicit on what is loaded here.
+	pc.LoadDefaultSettingsFromEnv()
+}
+
+// load handler
+// validate HCP Mode is on
+// Validate we have all the bits to connect
+// Build a connected client
 
 func imageValueToDSOutput(imageVal map[string]cty.Value) imgds.DatasourceOutput {
 	dso := imgds.DatasourceOutput{}
@@ -275,55 +349,4 @@ func iterValueToDSOutput(iterVal map[string]cty.Value) iterds.DatasourceOutput {
 		}
 	}
 	return dso
-}
-
-func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
-	if env.IsHCPDisabled() {
-		return nil
-	}
-
-	if !env.HasPackerRegistryBucket() && !env.IsHCPExplicitelyEnabled() {
-		return nil
-	}
-
-	var diags hcl.Diagnostics
-
-	if !env.HasHCPCredentials() {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "missing authentication information",
-			Detail:   fmt.Sprintf("the client authentication requires both %s and %s environment variables to be set", env.HCPClientID, env.HCPClientSecret),
-			Severity: hcl.DiagError,
-		})
-	}
-
-	var err error
-
-	core := cfg.Core
-
-	core.Bucket, err = registry.NewBucketWithIteration(registry.IterationOptions{
-		TemplateBaseDir: filepath.Dir(core.Template.Path),
-	})
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "bucket creation failure",
-			Detail:   fmt.Sprintf("failed to create Bucket: %s", err),
-			Severity: hcl.DiagError,
-		})
-	}
-	core.Bucket.LoadDefaultSettingsFromEnv()
-
-	if core.Bucket.Slug == "" {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "bucket name cannot be empty",
-			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable",
-			Severity: hcl.DiagError,
-		})
-	}
-
-	for _, b := range core.Template.Builders {
-		// Get all builds slated within config ignoring any only or exclude flags.
-		core.Bucket.RegisterBuildForComponent(b.Name)
-	}
-
-	return diags
 }
