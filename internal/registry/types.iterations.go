@@ -8,6 +8,7 @@ import (
 
 	git "github.com/go-git/go-git/v5"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
+	"github.com/hashicorp/packer/internal/registry/env"
 )
 
 type Iteration struct {
@@ -32,7 +33,7 @@ func NewIteration(opts IterationOptions) (*Iteration, error) {
 
 	// By default we try to load a Fingerprint from the environment variable.
 	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
-	i.Fingerprint = os.Getenv("HCP_PACKER_BUILD_FINGERPRINT")
+	i.Fingerprint = os.Getenv(env.HCPPackerBuildFingerprint)
 
 	// get a Git SHA
 	if i.Fingerprint != "" {
