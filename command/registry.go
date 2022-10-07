@@ -19,7 +19,8 @@ import (
 type HCPConfigMode int
 
 const (
-	// HCPConfigMode types
+	// HCPConfigMode types specify the mode in which HCP configuration
+	// is defined for a given Packer build execution.
 	HCPConfigUnset HCPConfigMode = iota
 	HCPConfigEnabled
 	HCPEnvEnabled
@@ -62,7 +63,6 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 
 	mode := HCPConfigUnset
 
-	// TODO move into ConfigCheck
 	for _, build := range pc.Builds {
 		if build.HCPPackerRegistry != nil {
 			mode = HCPConfigEnabled
@@ -92,8 +92,8 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		return diags
 	}
 
-	WithHCLBucketConfigurtationOpts := func(bb *hcl2template.BuildBlock) func(*registry.Bucket) {
-		return func(bucket *registry.Bucket) {
+	withHCLBucketConfigurtation := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
+		return func(bucket *registry.Bucket) hcl.Diagnostics {
 			bb.HCPPackerRegistry.WriteToBucketConfig(bucket)
 			// If at this point the bucket.Slug is still empty,
 			// last try is to use the build.Name if present
@@ -105,14 +105,22 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 			if bucket.Description == "" && bb.Description != "" {
 				bucket.Description = bb.Description
 			}
+			return nil
 		}
+	}
+
+	// Capture Datasource configuration data
+	vals, dsDiags := pc.Datasources.Values()
+	if dsDiags != nil {
+		diags = append(diags, dsDiags...)
 	}
 
 	build := pc.Builds[0]
 	pc.Bucket, diags = createConfiguredBucket(
 		pc.Basedir,
-		WithPackerEnvConfigurationOpts,
-		WithHCLBucketConfigurtationOpts(build),
+		withPackerEnvConfiguration,
+		withHCLBucketConfigurtation(build),
+		withDatasourceConfiguration(vals),
 	)
 
 	if diags.HasErrors() {
@@ -121,82 +129,6 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 
 	for _, source := range build.Sources {
 		pc.Bucket.RegisterBuildForComponent(source.String())
-	}
-
-	/// Lets Move this
-	vals, dsDiags := pc.Datasources.Values()
-	if dsDiags != nil {
-		diags = append(diags, dsDiags...)
-	}
-
-	imageDS, imageOK := vals[hcpImageDatasourceType]
-	iterDS, iterOK := vals[hcpIterationDatasourceType]
-
-	// If we don't have any image or iteration defined, we can return directly
-	if !imageOK && !iterOK {
-		return diags
-	}
-
-	iterations := map[string]iterds.DatasourceOutput{}
-
-	var err error
-	if iterOK {
-		hcpData := map[string]cty.Value{}
-		err = gocty.FromCtyValue(iterDS, &hcpData)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Invalid HCP datasources",
-				Detail:   fmt.Sprintf("Failed to decode hcp_packer_iteration datasources: %s", err),
-			})
-			return diags
-		}
-
-		for k, v := range hcpData {
-			iterVals := v.AsValueMap()
-			dso := iterValueToDSOutput(iterVals)
-			iterations[k] = dso
-		}
-	}
-
-	images := map[string]imgds.DatasourceOutput{}
-
-	if imageOK {
-		hcpData := map[string]cty.Value{}
-		err = gocty.FromCtyValue(imageDS, &hcpData)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  "Invalid HCP datasources",
-				Detail:   fmt.Sprintf("Failed to decode hcp_packer_image datasources: %s", err),
-			})
-			return diags
-		}
-
-		for k, v := range hcpData {
-			imageVals := v.AsValueMap()
-			dso := imageValueToDSOutput(imageVals)
-			images[k] = dso
-		}
-	}
-
-	for _, img := range images {
-		sourceIteration := registry.ParentIteration{}
-
-		sourceIteration.IterationID = img.IterationID
-
-		if img.ChannelID != "" {
-			sourceIteration.ChannelID = img.ChannelID
-		} else {
-			for _, it := range iterations {
-				if it.ID == img.IterationID {
-					sourceIteration.ChannelID = it.ChannelID
-					break
-				}
-			}
-		}
-
-		pc.Bucket.SourceImagesToParentIterations[img.ID] = sourceIteration
 	}
 
 	return diags
@@ -211,25 +143,30 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 		return nil
 	}
 
-	core := cfg.Core
 	bucket, diags := createConfiguredBucket(
-		filepath.Dir(core.Template.Path),
-		WithPackerEnvConfigurationOpts,
+		filepath.Dir(cfg.Core.Template.Path),
+		withPackerEnvConfiguration,
 	)
+
 	if diags.HasErrors() {
 		return diags
 	}
 
-	core.Bucket = bucket
-	for _, b := range core.Template.Builders {
+	cfg.Core.Bucket = bucket
+	for _, b := range cfg.Core.Template.Builders {
 		// Get all builds slated within config ignoring any only or exclude flags.
-		core.Bucket.RegisterBuildForComponent(b.Name)
+		cfg.Core.Bucket.RegisterBuildForComponent(b.Name)
 	}
 
 	return diags
 }
 
-func createConfiguredBucket(templateDir string, opts ...func(*registry.Bucket)) (*registry.Bucket, hcl.Diagnostics) {
+type bucketConfigurationOpts func(*registry.Bucket) hcl.Diagnostics
+
+// createConfiguredBucket returns a bucket that can be used for connecting to the HCP Packer registry.
+// Configuration for the bucket is obtained from the base iteration setting and any addition configuration
+// options passed in as opts. All errors during configuration are collected and returned as Diagnostics.
+func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts) (*registry.Bucket, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	if !env.HasHCPCredentials() {
@@ -259,7 +196,9 @@ func createConfiguredBucket(templateDir string, opts ...func(*registry.Bucket)) 
 	}
 
 	for _, opt := range opts {
-		opt(bucket)
+		if optDiags := opt(bucket); optDiags.HasErrors() {
+			diags = append(diags, optDiags...)
+		}
 	}
 
 	if bucket.Slug == "" {
@@ -275,16 +214,13 @@ func createConfiguredBucket(templateDir string, opts ...func(*registry.Bucket)) 
 	return bucket, diags
 }
 
-func WithPackerEnvConfigurationOpts(pc *registry.Bucket) {
+func withPackerEnvConfiguration(bucket *registry.Bucket) hcl.Diagnostics {
 	// Add default values for Packer settings configured via EnvVars.
 	// TODO look to break this up to be more explicit on what is loaded here.
-	pc.LoadDefaultSettingsFromEnv()
-}
+	bucket.LoadDefaultSettingsFromEnv()
 
-// load handler
-// validate HCP Mode is on
-// Validate we have all the bits to connect
-// Build a connected client
+	return nil
+}
 
 func imageValueToDSOutput(imageVal map[string]cty.Value) imgds.DatasourceOutput {
 	dso := imgds.DatasourceOutput{}
@@ -349,4 +285,81 @@ func iterValueToDSOutput(iterVal map[string]cty.Value) iterds.DatasourceOutput {
 		}
 	}
 	return dso
+}
+
+func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationOpts {
+	return func(bucket *registry.Bucket) hcl.Diagnostics {
+		var diags hcl.Diagnostics
+
+		imageDS, imageOK := vals[hcpImageDatasourceType]
+		iterDS, iterOK := vals[hcpIterationDatasourceType]
+
+		if !imageOK && !iterOK {
+			return nil
+		}
+
+		iterations := map[string]iterds.DatasourceOutput{}
+
+		var err error
+		if iterOK {
+			hcpData := map[string]cty.Value{}
+			err = gocty.FromCtyValue(iterDS, &hcpData)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid HCP datasources",
+					Detail:   fmt.Sprintf("Failed to decode hcp_packer_iteration datasources: %s", err),
+				})
+				return diags
+			}
+
+			for k, v := range hcpData {
+				iterVals := v.AsValueMap()
+				dso := iterValueToDSOutput(iterVals)
+				iterations[k] = dso
+			}
+		}
+
+		images := map[string]imgds.DatasourceOutput{}
+
+		if imageOK {
+			hcpData := map[string]cty.Value{}
+			err = gocty.FromCtyValue(imageDS, &hcpData)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid HCP datasources",
+					Detail:   fmt.Sprintf("Failed to decode hcp_packer_image datasources: %s", err),
+				})
+				return diags
+			}
+
+			for k, v := range hcpData {
+				imageVals := v.AsValueMap()
+				dso := imageValueToDSOutput(imageVals)
+				images[k] = dso
+			}
+		}
+
+		for _, img := range images {
+			sourceIteration := registry.ParentIteration{}
+
+			sourceIteration.IterationID = img.IterationID
+
+			if img.ChannelID != "" {
+				sourceIteration.ChannelID = img.ChannelID
+			} else {
+				for _, it := range iterations {
+					if it.ID == img.IterationID {
+						sourceIteration.ChannelID = it.ChannelID
+						break
+					}
+				}
+			}
+
+			bucket.SourceImagesToParentIterations[img.ID] = sourceIteration
+		}
+
+		return diags
+	}
 }
