@@ -98,7 +98,7 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 		return diags
 	}
 
-	withHCLBucketConfigurtation := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
+	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
 		return func(bucket *registry.Bucket) hcl.Diagnostics {
 			bb.HCPPackerRegistry.WriteToBucketConfig(bucket)
 			// If at this point the bucket.Slug is still empty,
@@ -125,7 +125,7 @@ func setupRegistryForPackerConfig(pc *hcl2template.PackerConfig) hcl.Diagnostics
 	pc.Bucket, diags = createConfiguredBucket(
 		pc.Basedir,
 		withPackerEnvConfiguration,
-		withHCLBucketConfigurtation(build),
+		withHCLBucketConfiguration(build),
 		withDatasourceConfiguration(vals),
 	)
 
