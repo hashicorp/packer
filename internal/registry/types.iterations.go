@@ -26,7 +26,7 @@ type IterationOptions struct {
 }
 
 // NewIteration returns a pointer to an Iteration that can be used for storing Packer build details needed by PAR.
-func NewIteration(opts IterationOptions) (*Iteration, error) {
+func NewIteration() *Iteration {
 	i := Iteration{
 		expectedBuilds: make([]string, 0),
 	}
@@ -35,17 +35,26 @@ func NewIteration(opts IterationOptions) (*Iteration, error) {
 	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
 	i.Fingerprint = os.Getenv(env.HCPPackerBuildFingerprint)
 
-	// get a Git SHA
+	return &i
+}
+
+// Initialize prepares the iteration to be used with an active HCP Packer registry bucket.
+func (i *Iteration) Initialize(opts IterationOptions) error {
+	if i == nil {
+		return errors.New("Unexpected call to initialize for a nil Iteration")
+	}
+
 	if i.Fingerprint != "" {
-		return &i, nil
+		return nil
 	}
 
 	fp, err := GetGitFingerprint(opts)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	i.Fingerprint = fp
-	return &i, nil
+
+	return nil
 }
 
 // GetGitFingerprint returns the HEAD commit for some template dir defined in opt.TemplateBaseDir.

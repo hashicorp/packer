@@ -8,7 +8,7 @@ import (
 	git "github.com/go-git/go-git/v5"
 )
 
-func TestNewIteration(t *testing.T) {
+func TestIteration_Initialize(t *testing.T) {
 	var tc = []struct {
 		name          string
 		fingerprint   string
@@ -74,15 +74,16 @@ func TestNewIteration(t *testing.T) {
 				tt.setupFn(t)
 			}
 
-			i, err := NewIteration(tt.opts)
+			i := NewIteration()
+			err := i.Initialize(tt.opts)
 			if tt.errorExpected {
 				t.Logf("%v", err)
 				if err == nil {
 					t.Errorf("expected %q to result in an error, but it return no error", tt.name)
 				}
 
-				if i != nil {
-					t.Errorf("expected %q to result in an error with no iteration, but got %v", tt.name, i)
+				if i.Fingerprint != "" {
+					t.Errorf("expected %q to result in an error with an empty iteration fingerprint, but got %q", tt.name, i.Fingerprint)
 				}
 				return
 			}

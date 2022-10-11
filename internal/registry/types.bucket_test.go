@@ -12,10 +12,7 @@ func createInitialTestBucket(t testing.TB) *Bucket {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "no-fingerprint-here")
 
 	t.Helper()
-	bucket, err := NewBucketWithIteration(IterationOptions{})
-	if err != nil {
-		t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
-	}
+	bucket := NewBucketWithIteration()
 
 	mockService := NewMockPackerClientService()
 	mockService.TrackCalledServiceMethods = false
@@ -285,7 +282,8 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			mockService.IterationAlreadyExist = true
 			mockService.BuildAlreadyDone = tt.buildCompleted
 
-			bucket, err := NewBucketWithIteration(IterationOptions{})
+			bucket := NewBucketWithIteration()
+			err := bucket.Iteration.Initialize(IterationOptions{})
 			if err != nil {
 				t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
 			}

@@ -39,20 +39,15 @@ type ParentIteration struct {
 
 // NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
 // images to the HCP Packer registry.
-func NewBucketWithIteration(opts IterationOptions) (*Bucket, error) {
+func NewBucketWithIteration() *Bucket {
 	b := Bucket{
 		BucketLabels:                   make(map[string]string),
 		BuildLabels:                    make(map[string]string),
 		SourceImagesToParentIterations: make(map[string]ParentIteration),
 	}
+	b.Iteration = NewIteration()
 
-	i, err := NewIteration(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	b.Iteration = i
-	return &b, nil
+	return &b
 }
 
 func (b *Bucket) Validate() error {
