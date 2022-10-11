@@ -180,20 +180,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	bucket, err := registry.NewBucketWithIteration(registry.IterationOptions{
-		TemplateBaseDir: templateDir,
-	})
-
-	// This error needs to be reworded.
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unable to create a valid bucket object for HCP Packer Registry",
-			Detail:   fmt.Sprintf("%s", err),
-			Severity: hcl.DiagError,
-		})
-
-		return nil, diags
-	}
+	bucket := registry.NewBucketWithIteration()
 
 	for _, opt := range opts {
 		if optDiags := opt(bucket); optDiags.HasErrors() {
@@ -207,10 +194,19 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
 			Severity: hcl.DiagError,
 		})
-
-		return nil, diags
 	}
 
+	err := bucket.Iteration.Initialize(registry.IterationOptions{
+		TemplateBaseDir: templateDir,
+	})
+
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  "Iteration initialization failed",
+			Detail:   fmt.Sprintf("Initialization of the iteration failed with %s", err),
+			Severity: hcl.DiagError,
+		})
+	}
 	return bucket, diags
 }
 

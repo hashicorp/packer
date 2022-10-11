@@ -18,8 +18,8 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -73,12 +73,11 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 
 	err = b.Initialize(context.TODO())
@@ -129,8 +128,8 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -201,8 +200,8 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -245,12 +244,11 @@ func TestUpdateBuildStatus(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
@@ -300,8 +298,8 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 		},
 	}
 
-	var err error
-	b.Iteration, err = NewIteration(IterationOptions{})
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
