@@ -16,13 +16,16 @@ import (
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
+// HCPConfigMode types specify the mode in which HCP configuration
+// is defined for a given Packer build execution.
 type HCPConfigMode int
 
 const (
-	// HCPConfigMode types specify the mode in which HCP configuration
-	// is defined for a given Packer build execution.
+	// HCPConfigUnset mode is set when no HCP configuration has been found for the Packer execution.
 	HCPConfigUnset HCPConfigMode = iota
+	// HCPConfigEnabled mode is set when the HCP configuration is codified in the template.
 	HCPConfigEnabled
+	// HCPEnvEnabled mode is set when the HCP configuration is read from environment variables.
 	HCPEnvEnabled
 )
 
