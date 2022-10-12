@@ -31,10 +31,6 @@ func NewIteration() *Iteration {
 		expectedBuilds: make([]string, 0),
 	}
 
-	// By default we try to load a Fingerprint from the environment variable.
-	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
-	i.Fingerprint = os.Getenv(env.HCPPackerBuildFingerprint)
-
 	return &i
 }
 
@@ -43,6 +39,10 @@ func (i *Iteration) Initialize(opts IterationOptions) error {
 	if i == nil {
 		return errors.New("Unexpected call to initialize for a nil Iteration")
 	}
+
+	// By default we try to load a Fingerprint from the environment variable.
+	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
+	i.Fingerprint = os.Getenv(env.HCPPackerBuildFingerprint)
 
 	if i.Fingerprint != "" {
 		return nil
