@@ -13,6 +13,11 @@ func createInitialTestBucket(t testing.TB) *Bucket {
 
 	t.Helper()
 	bucket := NewBucketWithIteration()
+	err := bucket.Iteration.Initialize(IterationOptions{})
+	if err != nil {
+		t.Errorf("failed to initialize Bucket: %s", err)
+		return nil
+	}
 
 	mockService := NewMockPackerClientService()
 	mockService.TrackCalledServiceMethods = false
