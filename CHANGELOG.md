@@ -1,21 +1,36 @@
 ## 1.8.4 (Upcoming)
+### NOTES:
+* The Oracle builder and post-processor are no longer vendored with Packer core,
+     users of the Oracle plugin should use `packer init` to install the latest
+     version of the plugin. See the [Oracle Plugin
+     Documentation](https://github.com/hashicorp/packer-plugin-oracle) for more
+     information. [GH-11983](https://github.com/hashicorp/packer/pull/11983)
+
+### FEATURES:
+* provisioner/powershell: Add `use_pwsh` configuration argument to support pwsh
+     in powershell
+     provisioner.[GH-11950](https://github.com/hashicorp/packer/pull/11950)
+
+### PLUGINS:
+* builder/oracle: Remove Oracle plugin from the list of vendored
+     plugins.[GH-11983](https://github.com/hashicorp/packer/pull/11983)
 
 ### IMPROVEMENTS:
 
+* Bump github.com/hashicorp/packer-plugin-sdk from 0.3.1 to
+     0.3.2.[GH-11981](https://github.com/hashicorp/packer/pull/11981)
 * Bump Go to 1.18 [GH-11927](https://github.com/hashicorp/packer/pull/11927)
+* core: Add ppc64le to binary releases for
+     Linux.[GH-11966](https://github.com/hashicorp/packer/pull/11966)
 
 ### BUG FIXES:
+* core: Bump golang.org/x/sys to address
+     CVE-2022-29526.[GH-11953](https://github.com/hashicorp/packer/pull/11953)
+* core: Bump golang.org/x/text to
+     v0.3.8.[GH-12047](https://github.com/hashicorp/packer/pull/12047)
+* core: Update dependency to resolve
+     GO-2022-0969.[GH-12009](https://github.com/hashicorp/packer/pull/12009)
 
-### NOTES:
-* **Supported Architectures**: In Packer 1.8.0 support for the following
-     architectures `ppc64le, mips, mips64, mipsle, mipsle64, s390x` were removed
-     from the Packer releases page. Packer, along with the HashiCorp maintained
-     Packer plugins, were updated to release binaries for the HashiCorp
-     supported architectures arm, arm64, 386, and amd64. A full list of
-     supported platforms can be found on the [Packer Downloads](https://www.packer.io/downloads) page.
-    [GH-11564](https://github.com/hashicorp/packer/pull/11564)
-    [GH-11601](https://github.com/hashicorp/packer/pull/11601)
-    [GH-11603](https://github.com/hashicorp/packer/pull/11603)
 
 ## 1.8.3 (August 2, 2022)
 
