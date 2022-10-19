@@ -232,7 +232,7 @@ availability_zone_names = [
 ]
 ```
 
-~> **Warning**: Unlike legacy JSON templates the input variables within a variable definitions file must be declared 
+~> **Important**: Unlike legacy JSON templates the input variables within a variable definitions file must be declared 
 via a variables block within a standard HCL2 template file `*.pkr.hcl` before it can be assigned a value. 
 Failure to do so will result in an unknown variable error during Packer's runtime.
 
@@ -253,7 +253,7 @@ with the root object properties corresponding to variable names:
 }
 ```
 
-~> **Warning**: Unlike legacy JSON templates the input variables within a variable definitions file must be declared 
+~> **Important**: Unlike legacy JSON templates the input variables within a variable definitions file must be declared 
 via a variables block within a standard HCL2 template file `*.pkr.hcl` before it can be assigned a value. 
 Failure to do so will result in an unknown variable error during Packer's runtime.
 
