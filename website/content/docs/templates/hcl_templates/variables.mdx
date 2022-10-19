@@ -79,33 +79,29 @@ name for the variable, which must be unique among all variables in the same
 build. This name is used to assign a value to the variable from outside and to
 reference the variable's value from within the build.
 
-The `variable` block can optionally include a `type` argument to specify what
-value types are accepted for the variable, as described in the following
-section.
 
-The `variable` declaration can also include a `default` argument. If present,
+## Arguments
+
+Terraform CLI defines the following optional arguments for variable declarations:
+
+* [`default`][inpage-default] - A default value which then makes the variable optional.
+* [`type`][inpage-type] - This argument specifies what value types are accepted for the variable.
+* [`description`][inpage-description] - This specifies the input variable's documentation.
+* [`validation`][inpage-validation] - A block to define validation rules, usually in addition to type constraints.
+
+### Default values
+
+[inpage-default]: #default-values
+
+The variable declaration can also include a `default` argument. If present,
 the variable is considered to be _optional_ and the default value will be used
-if no value is set when calling the build or running Packer. The `default`
+if no value is set when calling the module or running Terraform. The `default`
 argument requires a literal value and cannot reference other objects in the
 configuration.
 
-## Using Input Variable Values
-
-Within the build that declared a variable, its value can be accessed from
-within [expressions](/docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
-matches the label given in the declaration block:
-
-```hcl
-source "googlecompute" "debian"  {
-    zone = var.gcp_zone
-    tags = var.gcp_debian_tags
-}
-```
-
-The value assigned to a variable can be accessed only from expressions within
-the folder where it was declared.
 
 ## Type Constraints
+[inpage-type]: #type-constraints
 
 The `type` argument in a `variable` block allows you to restrict the [type of
 value](/docs/templates/hcl_templates/expressions#types-and-values) that will be accepted as the value
@@ -148,6 +144,8 @@ as a string.
 
 ## Input Variable Documentation
 
+[inpage-description]: #input-variable-documentation
+
 Because the input variables of a build are part of its user interface, you can
 briefly describe the purpose of each variable using the optional `description`
 argument:
@@ -165,11 +163,28 @@ documentation about the build, and so it should be written from the perspective
 of the user of the build rather than its maintainer. For commentary for build
 maintainers, use comments.
 
+`@include 'from-1.5/variables/custom-validation.mdx'`
+
+## Using Input Variable Values
+
+Within the build that declared a variable, its value can be accessed from
+within [expressions](/docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
+matches the label given in the declaration block:
+
+```hcl
+source "googlecompute" "debian"  {
+    zone = var.gcp_zone
+    tags = var.gcp_debian_tags
+}
+```
+
+The value assigned to a variable can be accessed only from expressions within
+the folder where it was declared.
+
+
 `@include 'from-1.5/variables/assignment.mdx'`
 
 The following sections describe these options in more detail.
-
-`@include 'from-1.5/variables/custom-validation.mdx'`
 
 ### Variables on the Command Line
 
