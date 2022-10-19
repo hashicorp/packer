@@ -88,6 +88,9 @@ Terraform CLI defines the following optional arguments for variable declarations
 * [`type`][inpage-type] - This argument specifies what value types are accepted for the variable.
 * [`description`][inpage-description] - This specifies the input variable's documentation.
 * [`validation`][inpage-validation] - A block to define validation rules, usually in addition to type constraints.
+* [`sensitive`][inpage-sensitive] -  This causes string-values from that variable will be obfuscated from Packer's output.
+
+
 
 ## Default values
 
@@ -164,6 +167,9 @@ of the user of the build rather than its maintainer. For commentary for build
 maintainers, use comments.
 
 `@include 'from-1.5/variables/custom-validation.mdx'`
+
+`@include 'from-1.5/variables/sensitive.mdx'`
+
 
 ## Using Input Variable Values
 
@@ -333,4 +339,3 @@ other variables: the last value found overrides the previous values.
 |     `-var bar=yz` argument     | error, "bar undeclared" |  error, "bar undeclared"  |
 |    `export PKR_VAR_bar=yz`     |            -            |             -             |
 
-`@include 'from-1.5/variables/sensitive.mdx'`
