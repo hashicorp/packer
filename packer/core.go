@@ -293,6 +293,24 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnost
 	return builds, diags
 }
 
+// HCPName is a helper to get a curated HCP name for a legacy JSON builder.
+//
+// In order to make the naming scheme between HCL2 and JSON more consistent,
+// we implement a similar kind of logic on both template types.
+//
+// This means that when for HCL2 templates we have a build name formed of
+// the source type and the source name, we will do the name here for JSON.
+func HCPName(builder *template.Builder) string {
+	// By default, if the name is unspecified, it will be assigned the type
+	//
+	// No need to repeat ourselves here, so we can keep the current behaviour
+	if builder.Name == builder.Type {
+		return builder.Name
+	}
+
+	return fmt.Sprintf("%s.%s", builder.Type, builder.Name)
+}
+
 // Build returns the Build object for the given name.
 func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Setup the builder
@@ -319,6 +337,10 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// rawName is the uninterpolated name that we use for various lookups
 	rawName := configBuilder.Name
+
+	// hcpName is the name we use for HCP, i.e. a concatenation of type+name
+	// if both are specified.
+	hcpName := HCPName(configBuilder)
 
 	// Setup the provisioners for this build
 	provisioners := make([]CoreBuildProvisioner, 0, len(c.Template.Provisioners))
@@ -379,7 +401,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 			if c.Bucket != nil {
 				postProcessor = &RegistryPostProcessor{
-					BuilderType:               n,
+					BuilderType:               hcpName,
 					ArtifactMetadataPublisher: c.Bucket,
 					PostProcessor:             postProcessor,
 				}
@@ -405,7 +427,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		postProcessors = append(postProcessors, []CoreBuildPostProcessor{
 			{
 				PostProcessor: &RegistryPostProcessor{
-					BuilderType:               n,
+					BuilderType:               hcpName,
 					ArtifactMetadataPublisher: c.Bucket,
 				},
 			},
@@ -416,7 +438,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	if c.Bucket != nil {
 		builder = &RegistryBuilder{
-			Name:                      n,
+			Name:                      hcpName,
 			ArtifactMetadataPublisher: c.Bucket,
 			Builder:                   builder,
 		}
