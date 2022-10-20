@@ -109,11 +109,11 @@ Here is a full list of the available functions for reference.
 
   For builder-specific builder variables, please also refer to the builder docs:
 
-  - Amazon EC2: [chroot](/docs/builders/amazon/chroot#build-shared-information-variables),
-    [EBS Volume](/docs/builders/amazon/ebsvolume#build-shared-information-variables),
-    [EBS](/docs/builders/amazon/ebs#build-shared-information-variables),
-    [EBS Surrogate](/docs/builders/amazon/ebssurrogate#build-shared-information-variables),
-    [Instance](/docs/builders/amazon/instance#build-shared-information-variables).
+  - Amazon EC2: [chroot](/plugins/builders/amazon/chroot#build-shared-information-variables),
+    [EBS Volume](/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
+    [EBS](/plugins/builders/amazon/ebs#build-shared-information-variables),
+    [EBS Surrogate](/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
+    [Instance](/plugins/builders/amazon/instance#build-shared-information-variables).
 
   This engine is in beta; please report any issues or requests on the Packer
   issue tracker on GitHub.
@@ -274,17 +274,16 @@ of how you'd declare a variable using the isotime function.
 You can try and modify the following examples in a packer template or in
 `packer console` to get an idea of how to set different timestamps:
 
-| Input                                      | Output                       |
-| ------------------------------------------ | -----------                  |
-| ``"packer-{{isotime `2006-01-02`}}"``          | "packer-2021-05-17"          |
-| ``"packer-{{isotime `Jan-_2-15:04:05.000`}}"`` | "packer-May-17-23:40:16.786" |
-| ``"packer-{{isotime `3:04PM`}}"``              | "packer-11:40PM"             |
-| ``"{{ isotime }}"``                            | "June 7, 7:22:43pm 2014"     |
-| ``"{{isotime `2006-01-02`}}"``                 | "2014-06-07"                 |
-| ``"{{isotime `Mon 1504`}}"``                   | "Sat 1922"                   |
-| ``"{{isotime `02-Jan-06 03\_04\_05`}}"``       | "07-Jun-2014 07\_22\_43"     |
-| ``"{{isotime `Hour15Year200603`}}"``           | "Hour19Year201407"           |
-
+| Input                                            | Output                       |
+| ------------------------------------------------ | ---------------------------- |
+| `` "packer-{{isotime `2006-01-02`}}" ``          | "packer-2021-05-17"          |
+| `` "packer-{{isotime `Jan-_2-15:04:05.000`}}" `` | "packer-May-17-23:40:16.786" |
+| `` "packer-{{isotime `3:04PM`}}" ``              | "packer-11:40PM"             |
+| `"{{ isotime }}"`                                | "June 7, 7:22:43pm 2014"     |
+| `` "{{isotime `2006-01-02`}}" ``                 | "2014-06-07"                 |
+| `` "{{isotime `Mon 1504`}}" ``                   | "Sat 1922"                   |
+| `` "{{isotime `02-Jan-06 03\_04\_05`}}" ``       | "07-Jun-2014 07_22_43"       |
+| `` "{{isotime `Hour15Year200603`}}" ``           | "Hour19Year201407"           |
 
 Formatting for the function `isotime` uses the magic reference date **Mon Jan 2
 15:04:05 -0700 MST 2006**, which breaks down to the following:
