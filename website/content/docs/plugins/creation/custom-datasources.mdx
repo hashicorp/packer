@@ -7,7 +7,7 @@ page_title: Custom Data Sources - Extending
 
 # Custom Data Sources
 
-Packer data sources let Packer fetch data to use within the configuration, including information defined outside of Packer. For example, the [amazon-ami data source](/docs/datasources/amazon/ami), outputs the data from an Amazon AMI.
+Packer data sources let Packer fetch data to use within the configuration, including information defined outside of Packer. For example, the [amazon-ami data source](/plugins/datasources/amazon/ami), outputs the data from an Amazon AMI.
 
 Data Source plugins implement the `packersdk.Datasource` interface and are registered within a plugin Set
 with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
@@ -17,6 +17,7 @@ with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
 ## Before You Begin
 
 We recommend reviewing the following resources before you begin development:
+
 - [Developing Plugins - Overview](/docs/plugins/creation)
 - The [Go](https://go.dev/) language. You must write custom plugins in Go, so this guide assumes you are familiar with the language.
 
