@@ -107,7 +107,7 @@ const (
 # Read the documentation for data blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon AMI Data Source here:
-# https://www.packer.io/docs/datasources/amazon/ami`
+# https://www.packer.io/plugins/datasources/amazon/ami`
 
 	amazonSecretsManagerDataHeader = `
 # The amazon-secretsmanager data block is generated from your aws_secretsmanager template function; a data
