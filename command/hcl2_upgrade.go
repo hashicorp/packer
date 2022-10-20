@@ -115,7 +115,7 @@ const (
 # Read the documentation for data blocks here:
 # https://www.packer.io/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon Secrets Manager Data Source here:
-# https://www.packer.io/docs/datasources/amazon/secretsmanager`
+# https://www.packer.io/plugins/datasources/amazon/secretsmanager`
 )
 
 var (
