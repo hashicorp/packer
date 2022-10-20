@@ -158,7 +158,7 @@ func setupRegistryForPackerCore(cfg *CoreWrapper) hcl.Diagnostics {
 	cfg.Core.Bucket = bucket
 	for _, b := range cfg.Core.Template.Builders {
 		// Get all builds slated within config ignoring any only or exclude flags.
-		cfg.Core.Bucket.RegisterBuildForComponent(b.Name)
+		cfg.Core.Bucket.RegisterBuildForComponent(packer.HCPName(b))
 	}
 
 	return diags
