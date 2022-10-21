@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	texttemplate "text/template"
+	"text/template/parse"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -282,6 +283,55 @@ func fallbackReturn(err error, s []byte) []byte {
 	return append([]byte(fmt.Sprintf("\n# could not parse template for following block: %q\n", err)), s...)
 }
 
+// reTemplate writes a new template to `out` and escapes all unknown variables
+// so that we don't interpret them later on when interpreting the template
+func reTemplate(nd parse.Node, out io.Writer, funcs texttemplate.FuncMap) error {
+	switch node := nd.(type) {
+	case *parse.ActionNode:
+		// Leave pipes as-is
+		if len(node.Pipe.Cmds) > 1 {
+			fmt.Fprintf(out, "%s", node.String())
+			return nil
+		}
+
+		cmd := node.Pipe.Cmds[0]
+		args := cmd.Args
+		if len(args) > 1 {
+			// Function calls with parameters are left aside
+			fmt.Fprintf(out, "%s", node.String())
+			return nil
+		}
+
+		_, ok := funcs[args[0].String()]
+		if ok {
+			// Known functions left as-is
+			fmt.Fprintf(out, "%s", node.String())
+			return nil
+		}
+
+		// Escape anything that isn't in the func map
+		fmt.Fprintf(out, "{{ \"{{\" }} %s {{ \"}}\" }}", cmd.String())
+
+	// TODO maybe node.Pipe.Decls? Though in Packer templates they're not
+	// supported officially so they can be left aside for now
+	case *parse.ListNode:
+		for _, child := range node.Nodes {
+			err := reTemplate(child, out, funcs)
+			if err != nil {
+				return err
+			}
+		}
+	case *parse.TextNode:
+		_, err := fmt.Fprintf(out, "%s", node.Text)
+		if err != nil {
+			return err
+		}
+	default:
+		return fmt.Errorf("unhandled node type %s", reflect.TypeOf(nd))
+	}
+	return nil
+}
+
 // transposeTemplatingCalls executes parts of blocks as go template files and replaces
 // their result with their hcl2 variant. If something goes wrong the template
 // containing the go template string is returned.
@@ -467,10 +517,18 @@ func transposeTemplatingCalls(s []byte) []byte {
 		}
 	}
 
+	retempl := &bytes.Buffer{}
+	if err := reTemplate(tpl.Root, retempl, funcMap); err != nil {
+		return fallbackReturn(err, s)
+	}
+
+	tpl, err = texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(retempl.String())
+
 	str := &bytes.Buffer{}
-	// PASSTHROUGHS is a map of variable-specific golang text template fields
-	// that should remain in the text template format.
-	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
+
+	if err := tpl.Execute(str, nil); err != nil {
 		return fallbackReturn(err, s)
 	}
 
@@ -548,10 +606,17 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 		}
 	}
 
+	retempl := &bytes.Buffer{}
+	if err := reTemplate(tpl.Root, retempl, funcMap); err != nil {
+		return isLocal, fallbackReturn(err, s)
+	}
+
+	tpl, err = texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(retempl.String())
+
 	str := &bytes.Buffer{}
-	// PASSTHROUGHS is a map of variable-specific golang text template fields
-	// that should remain in the text template format.
-	if err := tpl.Execute(str, PASSTHROUGHS); err != nil {
+	if err := tpl.Execute(str, nil); err != nil {
 		return isLocal, fallbackReturn(err, s)
 	}
 
@@ -1196,111 +1261,6 @@ func (p *PostProcessorParser) Write(out *bytes.Buffer) {
 	if len(p.out) > 0 {
 		out.Write(p.out)
 	}
-}
-
-var PASSTHROUGHS = map[string]string{"NVME_Present": "{{ .NVME_Present }}",
-	"Usb_Present":                "{{ .Usb_Present }}",
-	"Serial_Type":                "{{ .Serial_Type }}",
-	"MapKey":                     "{{ .MapKey }}",
-	"HostAlias":                  "{{ .HostAlias }}",
-	"BoxName":                    "{{ .BoxName }}",
-	"Port":                       "{{ .Port }}",
-	"Header":                     "{{ .Header }}",
-	"HTTPIP":                     "{{ .HTTPIP }}",
-	"Host":                       "{{ .Host }}",
-	"PACKER_TEST_TEMP":           "{{ .PACKER_TEST_TEMP }}",
-	"SCSI_diskAdapterType":       "{{ .SCSI_diskAdapterType }}",
-	"VHDBlockSizeBytes":          "{{ .VHDBlockSizeBytes }}",
-	"Parallel_Auto":              "{{ .Parallel_Auto }}",
-	"KTyp":                       "{{ .KTyp }}",
-	"MemorySize":                 "{{ .MemorySize }}",
-	"APIURL":                     "{{ .APIURL }}",
-	"SourcePath":                 "{{ .SourcePath }}",
-	"CDROMType":                  "{{ .CDROMType }}",
-	"Parallel_Present":           "{{ .Parallel_Present }}",
-	"HTTPPort":                   "{{ .HTTPPort }}",
-	"BuildName":                  "{{ .BuildName }}",
-	"Network_Device":             "{{ .Network_Device }}",
-	"Flavor":                     "{{ .Flavor }}",
-	"Image":                      "{{ .Image }}",
-	"Os":                         "{{ .Os }}",
-	"Network_Type":               "{{ .Network_Type }}",
-	"SourceOMIName":              "{{ .SourceOMIName }}",
-	"Serial_Yield":               "{{ .Serial_Yield }}",
-	"SourceAMI":                  "{{ .SourceAMI }}",
-	"SSHHostPort":                "{{ .SSHHostPort }}",
-	"Vars":                       "{{ .Vars }}",
-	"Slice":                      "{{ .Slice }}",
-	"Version":                    "{{ .Version }}",
-	"Parallel_Bidirectional":     "{{ .Parallel_Bidirectional }}",
-	"Serial_Auto":                "{{ .Serial_Auto }}",
-	"VHDX":                       "{{ .VHDX }}",
-	"WinRMPassword":              "{{ .WinRMPassword }}",
-	"DefaultOrganizationID":      "{{ .DefaultOrganizationID }}",
-	"HTTPDir":                    "{{ .HTTPDir }}",
-	"HTTPContent":                "{{ .HTTPContent }}",
-	"SegmentPath":                "{{ .SegmentPath }}",
-	"NewVHDSizeBytes":            "{{ .NewVHDSizeBytes }}",
-	"CTyp":                       "{{ .CTyp }}",
-	"VMName":                     "{{ .VMName }}",
-	"Serial_Present":             "{{ .Serial_Present }}",
-	"Varname":                    "{{ .Varname }}",
-	"DiskNumber":                 "{{ .DiskNumber }}",
-	"SecondID":                   "{{ .SecondID }}",
-	"Typ":                        "{{ .Typ }}",
-	"SourceAMIName":              "{{ .SourceAMIName }}",
-	"ActiveProfile":              "{{ .ActiveProfile }}",
-	"Primitive":                  "{{ .Primitive }}",
-	"Elem":                       "{{ .Elem }}",
-	"Network_Adapter":            "{{ .Network_Adapter }}",
-	"Minor":                      "{{ .Minor }}",
-	"ProjectName":                "{{ .ProjectName }}",
-	"Generation":                 "{{ .Generation }}",
-	"User":                       "{{ .User }}",
-	"Size":                       "{{ .Size }}",
-	"Parallel_Filename":          "{{ .Parallel_Filename }}",
-	"ID":                         "{{ .ID }}",
-	"FastpathLen":                "{{ .FastpathLen }}",
-	"Tag":                        "{{ .Tag }}",
-	"Serial_Endpoint":            "{{ .Serial_Endpoint }}",
-	"GuestOS":                    "{{ .GuestOS }}",
-	"Major":                      "{{ .Major }}",
-	"Serial_Filename":            "{{ .Serial_Filename }}",
-	"Name":                       "{{ .Name }}",
-	"SourceOMI":                  "{{ .SourceOMI }}",
-	"SCSI_Present":               "{{ .SCSI_Present }}",
-	"CpuCount":                   "{{ .CpuCount }}",
-	"DefaultProjectID":           "{{ .DefaultProjectID }}",
-	"CDROMType_PrimarySecondary": "{{ .CDROMType_PrimarySecondary }}",
-	"Arch":                       "{{ .Arch }}",
-	"ImageFile":                  "{{ .ImageFile }}",
-	"SATA_Present":               "{{ .SATA_Present }}",
-	"Serial_Host":                "{{ .Serial_Host }}",
-	"BuildRegion":                "{{ .BuildRegion }}",
-	"Id":                         "{{ .Id }}",
-	"SyncedFolder":               "{{ .SyncedFolder }}",
-	"Network_Name":               "{{ .Network_Name }}",
-	"AccountID":                  "{{ .AccountID }}",
-	"OPTION":                     "{{ .OPTION }}",
-	"Type":                       "{{ .Type }}",
-	"CustomVagrantfile":          "{{ .CustomVagrantfile }}",
-	"SendTelemetry":              "{{ .SendTelemetry }}",
-	"DiskType":                   "{{ .DiskType }}",
-	"Password":                   "{{ .Password }}",
-	"HardDrivePath":              "{{ .HardDrivePath }}",
-	"ISOPath":                    "{{ .ISOPath }}",
-	"Insecure":                   "{{ .Insecure }}",
-	"Region":                     "{{ .Region }}",
-	"SecretKey":                  "{{ .SecretKey }}",
-	"DefaultRegion":              "{{ .DefaultRegion }}",
-	"MemoryStartupBytes":         "{{ .MemoryStartupBytes }}",
-	"SwitchName":                 "{{ .SwitchName }}",
-	"Path":                       "{{ .Path }}",
-	"Username":                   "{{ .Username }}",
-	"OutputDir":                  "{{ .OutputDir }}",
-	"DiskName":                   "{{ .DiskName }}",
-	"ProviderVagrantfile":        "{{ .ProviderVagrantfile }}",
-	"Sound_Present":              "{{ .Sound_Present }}",
 }
 
 func fixQuoting(old string) string {
