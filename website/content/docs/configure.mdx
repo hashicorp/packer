@@ -35,7 +35,7 @@ Packer can optionally read a JSON file for the end user to set core settings.
 The config file of Packer will be looked up on the following paths:
 
 | Unix                             | Windows                          |
-| -------------------------------  | -------------------------------- |
+| -------------------------------- | -------------------------------- |
 | `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                |
 | `PACKER_HOME_DIR/.packerconfig`  | `PACKER_HOME_DIR/packer.config/` |
 | `${XDG_CONFIG_HOME}/packer`      |                                  |
@@ -89,7 +89,7 @@ configuration file. None of these are required, since all have defaults.
 - `builders`, `commands`, `post-processors`, and `provisioners` are objects
   that are used to install plugins. The details of how exactly these are set is
   covered in more detail in the [installing plugins documentation
-  page](/docs/extending/plugins). It is instead recommended to use [HCL2
+  page](/docs/plugins/install-plugins). It is instead recommended to use [HCL2
   `required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
   and the [`packer init`](/docs/commands/init) command to install plugins; if
   you are using both, the `required_plugin` config will take precedence.
@@ -116,11 +116,11 @@ each can be found below:
 
 - `PACKER_LOG` - Setting this to any value other than "" (empty string) or
   "0" will enable the logger. See the [debugging
-  page](/docs/other/debugging).
+  page](/docs/debugging).
 
 - `PACKER_LOG_PATH` - The location of the log file. Note: `PACKER_LOG` must
   be set for any logging to occur. See the [debugging
-  page](/docs/other/debugging).
+  page](/docs/debugging).
 
 - `PACKER_NO_COLOR` - Setting this to any value will disable color in the
   terminal.
