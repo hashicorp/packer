@@ -30,6 +30,8 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "escaping", flags: []string{}},
 		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
 		{folder: "nonexistent", flags: []string{}, exitCode: 1, exitEarly: true},
+		{folder: "placeholders", flags: []string{}, exitCode: 0},
+		{folder: "ami_test", flags: []string{}, exitCode: 0},
 	}
 
 	for _, tc := range tc {

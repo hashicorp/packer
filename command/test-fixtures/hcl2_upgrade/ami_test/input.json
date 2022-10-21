@@ -1,0 +1,21 @@
+{
+  "builders": [{
+    "type": "amazon-ebs",
+    "tags": {
+      "SourceAMIName" : "{{ .SourceAMIName }}",
+      "SourceAMI" : "{{ .SourceAMI }}",
+      "SourceAMICreationDate" : "{{ .SourceAMICreationDate }}",
+      "SourceAMIOwner" : "{{ .SourceAMIOwner }}",
+      "SourceAMIOwnerName" : "{{ .SourceAMIOwnerName }}",
+      "SourceAMITags": "{{ .SourceAMITags.TagName }}"
+    },
+    "run_tags": {
+      "SourceAMIName" : "{{.SourceAMIName}}",
+      "SourceAMI" : "{{.SourceAMI}}",
+      "SourceAMICreationDate" : "{{.SourceAMICreationDate}}",
+      "SourceAMIOwner" : "{{.SourceAMIOwner}}",
+      "SourceAMIOwnerName" : "{{.SourceAMIOwnerName}}",
+      "SourceAMITags": "{{ .SourceAMITags.TagName }}"
+    }
+  }]
+}

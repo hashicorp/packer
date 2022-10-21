@@ -1,0 +1,13 @@
+{
+	"variables": {
+		"test": "{{ .Something }}",
+		"envtest": "{{ env \"Something\"}}"
+	},
+	"builders": [
+		{
+			"type": "null",
+			"communicator": "none",
+			"other_prop": "{{ .Else }}"
+		}
+	]
+}
