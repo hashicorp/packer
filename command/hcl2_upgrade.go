@@ -155,7 +155,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 
 	hdl, ret := c.GetConfigFromJSON(&cla.MetaArgs)
 	if ret != 0 {
-		c.Ui.Error(fmt.Sprintf("Failed to get config from JSON"))
+		c.Ui.Error("Failed to get config from JSON")
 		return 1
 	}
 
@@ -425,16 +425,16 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return fmt.Sprintf("${data.%s}", a)
 		},
 		"template_dir": func() string {
-			return fmt.Sprintf("${path.root}")
+			return "${path.root}"
 		},
 		"pwd": func() string {
-			return fmt.Sprintf("${path.cwd}")
+			return "${path.cwd}"
 		},
 		"packer_version": func() string {
-			return fmt.Sprintf("${packer.version}")
+			return "${packer.version}"
 		},
 		"uuid": func() string {
-			return fmt.Sprintf("${uuidv4()}")
+			return "${uuidv4()}"
 		},
 		"lower": func(a string) (string, error) {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
@@ -487,10 +487,10 @@ func transposeTemplatingCalls(s []byte) []byte {
 			return fmt.Sprintf("{{ clean_resource_name `%s` }}", a), nil
 		},
 		"build_name": func() string {
-			return fmt.Sprintf("${build.name}")
+			return "${build.name}"
 		},
 		"build_type": func() string {
-			return fmt.Sprintf("${build.type}")
+			return "${build.type}"
 		},
 	}
 
