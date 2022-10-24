@@ -1,5 +1,26 @@
 [
   {
+    "title": "What is Packer?",
+    "routes": [
+      {
+        "title": "Overview",
+        "path": "intro"
+      },
+      {
+        "title": "Why Use Packer?",
+        "path": "intro/why"
+      },
+      {
+        "title": "Use Cases",
+        "path": "intro/use-cases"
+      }
+    ]
+  },
+  {
+    "title": "HCP Packer",
+    "path": "hcp"
+  },
+  {
     "divider": true
   },
   {
@@ -873,9 +894,5 @@
   {
     "title": "Debugging",
     "path": "debugging"
-  },
-  {
-    "title": "HCP Packer",
-    "href": "https://cloud.hashicorp.com/docs/packer"
   }
 ]
