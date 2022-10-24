@@ -13,11 +13,11 @@ The HCP Packer registry stores metadata about your images, including when they w
 You can use HCP Packer with both JSON and HCL2 templates. If you are using JSON templates, we recommend getting started with 
 the [HCP Packer environment variables](#hcp-packer-environment-variables) and then migrating to HCL when possible. 
 
-This page summarizes the methods you can use to connect JSON and HCL2 templates to the HCP Packer registry. It also provides a full list of HCP Packer environment variables. Refer to the [Packer Template Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/template-configuration) page in the HCP Packer documentation for full configuration details and examples.
+This page summarizes the methods you can use to connect JSON and HCL2 templates to the HCP Packer registry. It also provides a full list of HCP Packer environment variables. Refer to the [Packer Template Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration) page in the HCP Packer documentation for full configuration details and examples.
 
 ### HCP Packer Environment Variables
 
-The following environment variables let you configure Packer to push image metadata to an active registry without changing your template. You can use environment variables with both JSON and HCL2 templates. Refer to [Basic Configuration With Environment Variables](https://cloud.hashicorp.com/docs/packer/store-image-metadata/template-configuration#basic-configuration-with-environment-variables) in the HCP Packer documentation for complete instructions and examples. 
+The following environment variables let you configure Packer to push image metadata to an active registry without changing your template. You can use environment variables with both JSON and HCL2 templates. Refer to [Basic Configuration With Environment Variables](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration#basic-configuration-with-environment-variables) in the HCP Packer documentation for complete instructions and examples. 
 
 You must set the following environment variables to enable Packer to push metadata to a registry.
 
@@ -39,6 +39,6 @@ The only metadata that Packer can infer from a template with the basic configura
 
 The `hcp_packer_registry` block is only available for HCL2 Packer templates. There is no [`PACKER_CONFIG`](docs/configure#packer-s-config-file) equivalent for JSON.
 
-Refer to [`hcp_packer_registry`](docs/templates/hcl_templates/blocks/build/hcp_packer_registry) for a full list of configuration arguments. Refer to [Custom Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/template-configuration#custom-configuration) in the HCP Packer documentation for information and examples about how to customize image metadata.
+Refer to [`hcp_packer_registry`](docs/templates/hcl_templates/blocks/build/hcp_packer_registry) for a full list of configuration arguments. Refer to [Custom Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration#custom-configuration) in the HCP Packer documentation for information and examples about how to customize image metadata.
 
 
