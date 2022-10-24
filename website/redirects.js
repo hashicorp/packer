@@ -19,8 +19,8 @@ module.exports = [
   /*
   Example redirect:
   {
-    source: '/waypoint/docs/internal-docs/my-page',
-    destination: '/waypoint/docs/internals/my-page',
+    source: '/packer/docs/internal-docs/my-page',
+    destination: '/packer/docs/internals/my-page',
     permanent: true,
   },
   */
