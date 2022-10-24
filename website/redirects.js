@@ -8,5 +8,20 @@
  * For destinations with fragments, use an absolute URL.
  *
  * Playground for testing url pattern matching: https://npm.runkit.com/path-to-regexp
+ *
+ * Note that redirects defined in a product's redirects file are applied to
+ * the developer.hashicorp.com domain, which is where the documentation content
+ * is rendered. Redirect sources should be prefixed with the product slug
+ * to ensure they are scoped to the product's section. Any redirects that are
+ * not prefixed with a product slug will be ignored.
  */
-module.exports = []
+module.exports = [
+  /*
+  Example redirect:
+  {
+    source: '/waypoint/docs/internal-docs/my-page',
+    destination: '/waypoint/docs/internals/my-page',
+    permanent: true,
+  },
+  */
+]
