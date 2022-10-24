@@ -6,7 +6,7 @@
 .DEFAULT_GOAL := website
 
 # Set the preview mode for the website shell to "developer" or "io"
-PREVIEW_MODE ?= io
+PREVIEW_MODE ?= developer
 REPO ?= packer
 
 # Enable setting alternate docker tool, e.g. 'make DOCKER_CMD=podman'
