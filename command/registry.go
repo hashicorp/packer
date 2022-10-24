@@ -193,8 +193,12 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 
 	if bucket.Slug == "" {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "bucket name cannot be empty",
-			Detail:   "empty bucket name, please set it with the HCP_PACKER_BUCKET_NAME environment variable, or in a `hcp_packer_registry` block",
+			Summary: "Image bucket name required",
+			Detail: "You must provide an image bucket name for HCP Packer builds. " +
+				"You can set the HCP_PACKER_BUCKET_NAME environment variable. " +
+				"For HCL2 templates, the registry either uses the name of your " +
+				"template's build block, or you can set the bucket_name argument " +
+				"in an hcp_packer_registry block.",
 			Severity: hcl.DiagError,
 		})
 	}
@@ -205,8 +209,9 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Iteration initialization failed",
-			Detail:   fmt.Sprintf("Initialization of the iteration failed with %s", err),
+			Summary: "Iteration initialization failed",
+			Detail: fmt.Sprintf("Initialization of the iteration failed with "+
+				"the following error message: %s", err),
 			Severity: hcl.DiagError,
 		})
 	}

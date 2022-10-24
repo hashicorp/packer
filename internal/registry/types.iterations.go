@@ -65,10 +65,10 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("Packer was unable to load a git sha. "+
-			"If your Packer template is not in a git repo, please add a unique "+
-			"template fingerprint using the env var HCP_PACKER_BUILD_FINGERPRINT. "+
-			"Error: %s", err)
+		return "", fmt.Errorf("Packer could not read the fingerprint from git." +
+			"\n\nIf your Packer template is not within a git managed directory, " +
+			"you can set the HCP_PACKER_BUILD_FINGERPRINT environment variable. " +
+			"The fingerprint must be less than 32 characters and can contain letters and numbers.")
 	}
 
 	// The config can be used to retrieve user identity. for example,
@@ -81,9 +81,14 @@ func GetGitFingerprint(opts IterationOptions) (string, error) {
 	// }
 	ref, err := r.Head()
 	if err != nil {
-		return "", fmt.Errorf("Packer encountered an issue reading the git info for the path %q.\n"+
-			"If your Packer template is not in a git repo, please add a unique "+
-			"template fingerprint using the env var HCP_PACKER_BUILD_FINGERPRINT. "+
+		// If we get there, we're in a Git dir, but HEAD cannot be read.
+		//
+		// This may happen when there's no commit in the git dir.
+		return "", fmt.Errorf("Packer could not read a git SHA in directory %q.\n"+
+			"This may happen if your template is in a git repository without any "+
+			"commits. You can either add a commit in this directory, or set the "+
+			"HCP_PACKER_BUILD_FINGERPRINT environment variable. The fingerprint "+
+			"must be less than 32 characters and can contain letters and numbers.\n"+
 			"Error: %s", opts.TemplateBaseDir, err)
 	}
 

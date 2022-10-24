@@ -1,6 +1,8 @@
 package hcl2template
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/hcl/v2"
 	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
@@ -25,8 +27,10 @@ func (cfg *PackerConfig) ConfiguredArtifactMetadataPublisher() (*packerregistry.
 	if err != nil {
 		return nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "Invalid HCP Packer Registry configuration",
-				Detail:   err.Error(),
+				Summary: "Invalid HCP Packer configuration",
+				Detail: fmt.Sprintf("Packer could not validate the provided "+
+					"HCP Packer registry configuration. Check the error message for details "+
+					"or contact HCP Packer support for further assistance.\nError: %s", err),
 				Severity: hcl.DiagError,
 			},
 		}
