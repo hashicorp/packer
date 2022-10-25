@@ -45,7 +45,7 @@ LABEL name="Packer" \
 ENV HASHICORP_RELEASES=https://releases.hashicorp.com
 
 RUN set -eux && \
-    apk add --no-cache git bash wget openssl gnupg && \
+    apk add --no-cache git bash wget openssl gnupg xorriso && \
     gpg --keyserver keyserver.ubuntu.com --recv-keys C874011F0AB405110D02105534365D9472D7468F && \
     mkdir -p /tmp/build && \
     cd /tmp/build && \
@@ -95,7 +95,7 @@ LABEL name="Packer" \
       summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
       description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
 
-RUN apk add --no-cache git bash wget openssl gnupg
+RUN apk add --no-cache git bash wget openssl gnupg xorriso
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
 
