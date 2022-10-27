@@ -27,10 +27,6 @@ func HasExec() bool {
 	switch runtime.GOOS {
 	case "js":
 		return false
-	case "darwin":
-		if runtime.GOARCH == "arm64" {
-			return false
-		}
 	}
 	return true
 }
