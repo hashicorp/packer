@@ -9,24 +9,28 @@
      https://developer.hashicorp.com/packer. Users are encouraged to visit the
      developer documentation portal for access to all Packer related
      documentation; including integrations with HCP Packer.
+
 * The Oracle builder and post-processor are no longer vendored with Packer
      core. Users of the Oracle plugin should use `packer init` to install the
      latest version of the plugin. See the [Oracle Plugin
      Documentation](https://github.com/hashicorp/packer-plugin-oracle) for more
      information. [GH-11983](https://github.com/hashicorp/packer/pull/11983)
-* HCP environment variables: the behaviour of some HCP-specific environment
-     variables, especially `HCP_PACKER_REGISTRY`, has changed slightly.
-     For JSON templates, this was mandatory in order to enable HCP integration.
-     In this release, this can still be used, but is now optional, and may be
-     used to disable HCP on any template. Now for enabling HCP on a JSON
-     template, you may set only `HCP_PACKER_BUCKET_NAME`, and HCP will be
-     enabled for your template.
-     For HCL templates, nothing needs to be changed, but now
-     `HCP_PACKER_REGISTRY` can be set to either `off` or `0` to effectively
-     disable HCP on a template that defines an `hcp_packer_registry` block.
-     This can be useful for testing that a template works as intended prior to
-     pushing metadata to HCP.
 
+* HCP Packer environment variables: The behaviour of some HCP Packer-specific
+     environment variables has changed slightly. Refer to [HCP Packer](https://developer.hashicorp.com/packer/docs/hcp)
+     in the Packer documentation for a full list of HCP Packer environment variables.
+    - For JSON templates, the `HCP_PACKER_REGISTRY` environment variable was
+     previously required to enable the HCP Packer integration. In this release,
+     the environment variable is now optional, and can be used for disabling the
+     publishing of metadata for any HCP Packer enabled configuration template.
+    - For HCL2 templates, the `HCP_PACKER_REGISTRY` environment variable can be used
+     to disable publishing to a HCP Packer registry even if the template defines a
+     `hcp_packer_registry` block. This can be useful for testing that a template
+     works as intended prior to pushing metadata to HCP Packer.
+    - For JSON and HCL2 templates, setting the `HCP_PACKER_BUCKET_NAME` environment
+     variable along with the required HCP Packer credentials will enable
+     publishing to a HCP Packer registry. This lets you push image metadata to
+     the HCP Packer registry without making any changes to your Packer template.
 
 ### FEATURES:
 
