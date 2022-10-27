@@ -125,6 +125,7 @@ func getBareComponentFinder() packer.ComponentFinder {
 				"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 				"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
 				"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
+				"azure-arm":  func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
 			},
 			Provisioners: packer.MapOfProvisioner{
 				"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },

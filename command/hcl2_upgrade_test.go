@@ -32,6 +32,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "nonexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 		{folder: "placeholders", flags: []string{}, exitCode: 0},
 		{folder: "ami_test", flags: []string{}, exitCode: 0},
+		{folder: "azure_shg", flags: []string{}, exitCode: 0},
 	}
 
 	for _, tc := range tc {
