@@ -1,0 +1,8 @@
+{
+  "builders": [{
+    "type": "azure-arm",
+    "shared_image_gallery": {
+        "gallery_name": "web_app"
+    }
+  }]
+}

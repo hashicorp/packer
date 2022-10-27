@@ -637,7 +637,7 @@ func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 		case map[string]interface{}:
 			var mostComplexElem interface{}
 			for _, randomElem := range value {
-				if k == "linux_options" || k == "network_interface" {
+				if k == "linux_options" || k == "network_interface" || k == "shared_image_gallery" {
 					break
 				}
 				// HACK: we take the most complex element of that map because
