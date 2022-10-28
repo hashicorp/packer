@@ -1,4 +1,4 @@
-## 1.8.4 (Upcoming)
+## 1.8.4 (October 28 2022)
 
 ### NOTES:
 
