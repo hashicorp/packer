@@ -18,8 +18,8 @@
      Documentation](https://github.com/hashicorp/packer-plugin-oracle) for more
      information. [GH-11983](https://github.com/hashicorp/packer/pull/11983)
 
-* HCP Packer environment variables: The behaviour of some HCP Packer-specific
-     environment variables has changed slightly. Refer to [HCP Packer](https://developer.hashicorp.com/packer/docs/hcp)
+* HCP Packer environment variables: The behavior of some HCP Packer-specific
+     environment variables have changed slightly. Refer to [HCP Packer](https://developer.hashicorp.com/packer/docs/hcp)
      in the Packer documentation for a full list of HCP Packer environment variables. [GH-12059](https://github.com/hashicorp/packer/pull/12059)
     - For JSON templates, the `HCP_PACKER_REGISTRY` environment variable was
      previously required to enable the HCP Packer integration. In this release,
