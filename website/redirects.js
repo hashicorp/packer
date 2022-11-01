@@ -24,4 +24,31 @@ module.exports = [
     permanent: true,
   },
   */
+  /**
+   * BEGIN EMPTY PAGE REDIRECTS
+   * These redirects ensure some empty placeholder pages, dating back to when
+   * "Overview" pages were a requirement, cannot be visited.
+   *
+   * These redirects can likely be removed once we have content API "pruning"
+   * in place. That is, assuming the page at https://developer.hashicorp.com/packer/docs/templates/hcl_templates/functions/conversion
+   * is still empty, the content API response from the content URL for that page
+   * (https://content.hashicorp.com/api/content/packer/doc/latest/docs/templates/hcl_templates/functions/conversion)
+   * should be a 404. Asana task for this "don't return content for empty" work:
+   * https://app.asana.com/0/1100423001970639/1202110665886351/f
+   */
+  /*
+  packer/docs/templates/hcl_templates/functions/collection
+  packer/docs/templates/hcl_templates/functions/contextual
+  packer/docs/templates/hcl_templates/functions/conversion
+  packer/docs/templates/hcl_templates/functions/crypto
+  packer/docs/templates/hcl_templates/functions/encoding
+  packer/docs/templates/hcl_templates/functions/file
+  packer/docs/templates/hcl_templates/functions/ipnet
+  packer/docs/templates/hcl_templates/functions/numeric
+  packer/docs/templates/hcl_templates/functions/string
+  packer/docs/templates/hcl templates/functions/uuid
+  */
+  /**
+   * END EMPTY PAGE REDIRECTS
+   */
 ]
