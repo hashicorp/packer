@@ -24,4 +24,69 @@ module.exports = [
     permanent: true,
   },
   */
+  /**
+   * BEGIN EMPTY PAGE REDIRECTS
+   * These redirects ensure some empty placeholder pages, dating back to when
+   * "Overview" pages were a requirement, cannot be visited.
+   *
+   * These redirects can likely be removed once we have content API "pruning"
+   * in place. That is, assuming the page at https://developer.hashicorp.com/packer/docs/templates/hcl_templates/functions/conversion
+   * is still empty, the content API response from the content URL for that page
+   * (https://content.hashicorp.com/api/content/packer/doc/latest/docs/templates/hcl_templates/functions/conversion)
+   * should be a 404. Asana task for this "don't return content for empty" work:
+   * https://app.asana.com/0/1100423001970639/1202110665886351/f
+   */
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/collection',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/contextual',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/conversion',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/crypto',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/encoding',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/file',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/ipnet',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/numeric',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/string',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/templates/hcl_templates/functions/uuid',
+    destination: '/packer/docs/templates/hcl_templates/functions',
+    permanent: true,
+  },
+  /**
+   * END EMPTY PAGE REDIRECTS
+   */
 ]
