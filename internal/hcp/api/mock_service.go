@@ -1,4 +1,4 @@
-package registry
+package api
 
 import (
 	"errors"

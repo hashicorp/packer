@@ -1,4 +1,5 @@
-package registry
+// Package api provides access to the HCP Packer Registry API.
+package api
 
 import (
 	"fmt"
@@ -8,7 +9,7 @@ import (
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
-	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/hashicorp/packer/internal/hcp/env"
 	"github.com/hashicorp/packer/version"
 )
 

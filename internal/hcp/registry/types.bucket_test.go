@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/internal/hcp/api"
 )
 
 func createInitialTestBucket(t testing.TB) *Bucket {
@@ -19,10 +20,10 @@ func createInitialTestBucket(t testing.TB) *Bucket {
 		return nil
 	}
 
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.TrackCalledServiceMethods = false
 	bucket.Slug = "TestBucket"
-	bucket.client = &Client{
+	bucket.client = &api.Client{
 		Packer: mockService,
 	}
 
@@ -164,7 +165,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	secondComponent := "happycloud.image2"
 	bucket.RegisterBuildForComponent(secondComponent)
 
-	err := bucket.PopulateIteration(context.TODO())
+	err := bucket.populateIteration(context.TODO())
 	checkError(t, err)
 
 	err = bucket.UpdateLabelsForBuild(firstComponent, map[string]string{
@@ -282,7 +283,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 
 			t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "test-run-"+strconv.Itoa(i))
 
-			mockService := NewMockPackerClientService()
+			mockService := api.NewMockPackerClientService()
 			mockService.BucketAlreadyExist = true
 			mockService.IterationAlreadyExist = true
 			mockService.BuildAlreadyDone = tt.buildCompleted
@@ -294,7 +295,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			}
 
 			bucket.Slug = "TestBucket"
-			bucket.client = &Client{
+			bucket.client = &api.Client{
 				Packer: mockService,
 			}
 			for k, v := range tt.bucketBuildLabels {
@@ -307,7 +308,7 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			mockService.ExistingBuilds = append(mockService.ExistingBuilds, componentName)
 			mockService.ExistingBuildLabels = tt.buildLabels
 
-			err = bucket.PopulateIteration(context.TODO())
+			err = bucket.populateIteration(context.TODO())
 			checkError(t, err)
 
 			if mockService.CreateBuildCalled {

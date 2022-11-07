@@ -8,11 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
-)
-
-const (
-	HCPClientID     string = "HCP_CLIENT_ID"
-	HCPClientSecret string = "HCP_CLIENT_SECRET"
+	"github.com/hashicorp/packer/internal/hcp/env"
 )
 
 //go:embed test-fixtures/template.pkr.hcl
@@ -31,8 +27,8 @@ var testDatasourceBasic string
 // as defined above.
 
 func TestAccDatasource_HCPPackerIteration(t *testing.T) {
-	if os.Getenv(HCPClientID) == "" && os.Getenv(HCPClientSecret) == "" {
-		t.Skip(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", HCPClientID, HCPClientSecret))
+	if os.Getenv(env.HCPClientID) == "" && os.Getenv(env.HCPClientSecret) == "" {
+		t.Skipf(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", env.HCPClientID, env.HCPClientSecret))
 		return
 	}
 

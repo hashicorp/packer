@@ -1,11 +1,12 @@
-package hcp
+package registry
 
 import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer/internal/registry"
-	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/internal/hcp/env"
+	"github.com/hashicorp/packer/packer"
 )
 
 // HCPConfigMode types specify the mode in which HCP configuration
@@ -21,12 +22,38 @@ const (
 	HCPEnvEnabled
 )
 
-type bucketConfigurationOpts func(*registry.Bucket) hcl.Diagnostics
+type bucketConfigurationOpts func(*Bucket) hcl.Diagnostics
+
+// IsHCPEnabled returns true if HCP integration is enabled for a build
+func IsHCPEnabled(cfg packer.Handler) bool {
+	// HCP_PACKER_REGISTRY is explicitly turned off
+	if env.IsHCPDisabled() {
+		return false
+	}
+
+	mode := HCPConfigUnset
+
+	switch config := cfg.(type) {
+	case *hcl2template.PackerConfig:
+		for _, build := range config.Builds {
+			if build.HCPPackerRegistry != nil {
+				mode = HCPConfigEnabled
+			}
+		}
+	}
+
+	// HCP_PACKER_BUCKET_NAME is set or HCP_PACKER_REGISTRY not toggled off
+	if mode == HCPConfigUnset && (env.HasPackerRegistryBucket() || env.IsHCPExplicitelyEnabled()) {
+		mode = HCPEnvEnabled
+	}
+
+	return mode != HCPConfigUnset
+}
 
 // createConfiguredBucket returns a bucket that can be used for connecting to the HCP Packer registry.
 // Configuration for the bucket is obtained from the base iteration setting and any addition configuration
 // options passed in as opts. All errors during configuration are collected and returned as Diagnostics.
-func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts) (*registry.Bucket, hcl.Diagnostics) {
+func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts) (*Bucket, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	if !env.HasHCPCredentials() {
@@ -40,7 +67,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	bucket := registry.NewBucketWithIteration()
+	bucket := NewBucketWithIteration()
 
 	for _, opt := range opts {
 		if optDiags := opt(bucket); optDiags.HasErrors() {
@@ -60,7 +87,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	err := bucket.Iteration.Initialize(registry.IterationOptions{
+	err := bucket.Iteration.Initialize(IterationOptions{
 		TemplateBaseDir: templateDir,
 	})
 
@@ -75,7 +102,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 	return bucket, diags
 }
 
-func withPackerEnvConfiguration(bucket *registry.Bucket) hcl.Diagnostics {
+func withPackerEnvConfiguration(bucket *Bucket) hcl.Diagnostics {
 	// Add default values for Packer settings configured via EnvVars.
 	// TODO look to break this up to be more explicit on what is loaded here.
 	bucket.LoadDefaultSettingsFromEnv()

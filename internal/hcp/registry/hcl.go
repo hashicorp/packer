@@ -1,4 +1,4 @@
-package hcp
+package registry
 
 import (
 	"context"
@@ -6,19 +6,17 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
-	imgds "github.com/hashicorp/packer/datasource/hcp-packer-image"
-	iterds "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/internal/registry"
-	"github.com/hashicorp/packer/internal/registry/env"
+	hcppackerimagedatasource "github.com/hashicorp/packer/internal/hcp/datasource/hcp-packer-image"
+	hcppackeriterationdatasource "github.com/hashicorp/packer/internal/hcp/datasource/hcp-packer-iteration"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
-// hclOrchestrator is a HCP handler made for handling HCL configurations
-type hclOrchestrator struct {
+// HCLMetadataRegistry is a HCP handler made for handling HCL configurations
+type HCLMetadataRegistry struct {
 	configuration *hcl2template.PackerConfig
-	bucket        *registry.Bucket
+	bucket        *Bucket
 }
 
 const (
@@ -29,13 +27,13 @@ const (
 )
 
 // PopulateIteration creates the metadata on HCP for a build
-func (h *hclOrchestrator) PopulateIteration(ctx context.Context) error {
+func (h *HCLMetadataRegistry) PopulateIteration(ctx context.Context) error {
 	err := h.bucket.Initialize(ctx)
 	if err != nil {
 		return err
 	}
 
-	err = h.bucket.PopulateIteration(ctx)
+	err = h.bucket.populateIteration(ctx)
 	if err != nil {
 		return err
 	}
@@ -47,44 +45,22 @@ func (h *hclOrchestrator) PopulateIteration(ctx context.Context) error {
 	return nil
 }
 
-// BuildStart is invoked when one build for the configuration is starting to be processed
-func (h *hclOrchestrator) BuildStart(ctx context.Context, buildName string) error {
-	return h.bucket.BuildStart(ctx, buildName)
+// StartBuild is invoked when one build for the configuration is starting to be processed
+func (h *HCLMetadataRegistry) StartBuild(ctx context.Context, buildName string) error {
+	return h.bucket.startBuild(ctx, buildName)
 }
 
-// BuildDone is invoked when one build for the configuration has finished
-func (h *hclOrchestrator) BuildDone(
+// CompleteBuild is invoked when one build for the configuration has finished
+func (h *HCLMetadataRegistry) CompleteBuild(
 	ctx context.Context,
 	buildName string,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.BuildDone(ctx, buildName, artifacts, buildErr)
+	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
 }
 
-func newHCLOrchestrator(config *hcl2template.PackerConfig) (Orchestrator, hcl.Diagnostics) {
-	// HCP_PACKER_REGISTRY is explicitly turned off
-	if env.IsHCPDisabled() {
-		return newNoopHandler(), nil
-	}
-
-	mode := HCPConfigUnset
-
-	for _, build := range config.Builds {
-		if build.HCPPackerRegistry != nil {
-			mode = HCPConfigEnabled
-		}
-	}
-
-	// HCP_PACKER_BUCKET_NAME is set or HCP_PACKER_REGISTRY not toggled off
-	if mode == HCPConfigUnset && (env.HasPackerRegistryBucket() || env.IsHCPExplicitelyEnabled()) {
-		mode = HCPEnvEnabled
-	}
-
-	if mode == HCPConfigUnset {
-		return newNoopHandler(), nil
-	}
-
+func NewHCLMetadataRegistry(config *hcl2template.PackerConfig) (*HCLMetadataRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	if len(config.Builds) > 1 {
 		diags = append(diags, &hcl.Diagnostic{
@@ -100,8 +76,8 @@ func newHCLOrchestrator(config *hcl2template.PackerConfig) (Orchestrator, hcl.Di
 	}
 
 	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
-		return func(bucket *registry.Bucket) hcl.Diagnostics {
-			bb.HCPPackerRegistry.WriteToBucketConfig(bucket)
+		return func(bucket *Bucket) hcl.Diagnostics {
+			bucket.ReadFromHCLBuildBlock(bb)
 			// If at this point the bucket.Slug is still empty,
 			// last try is to use the build.Name if present
 			if bucket.Slug == "" && bb.Name != "" {
@@ -141,14 +117,14 @@ func newHCLOrchestrator(config *hcl2template.PackerConfig) (Orchestrator, hcl.Di
 		bucket.RegisterBuildForComponent(source.String())
 	}
 
-	return &hclOrchestrator{
+	return &HCLMetadataRegistry{
 		configuration: config,
 		bucket:        bucket,
 	}, nil
 }
 
-func imageValueToDSOutput(imageVal map[string]cty.Value) imgds.DatasourceOutput {
-	dso := imgds.DatasourceOutput{}
+func imageValueToDSOutput(imageVal map[string]cty.Value) hcppackerimagedatasource.DatasourceOutput {
+	dso := hcppackerimagedatasource.DatasourceOutput{}
 	for k, v := range imageVal {
 		switch k {
 		case "id":
@@ -182,8 +158,8 @@ func imageValueToDSOutput(imageVal map[string]cty.Value) imgds.DatasourceOutput 
 	return dso
 }
 
-func iterValueToDSOutput(iterVal map[string]cty.Value) iterds.DatasourceOutput {
-	dso := iterds.DatasourceOutput{}
+func iterValueToDSOutput(iterVal map[string]cty.Value) hcppackeriterationdatasource.DatasourceOutput {
+	dso := hcppackeriterationdatasource.DatasourceOutput{}
 	for k, v := range iterVal {
 		switch k {
 		case "author_id":
@@ -213,7 +189,7 @@ func iterValueToDSOutput(iterVal map[string]cty.Value) iterds.DatasourceOutput {
 }
 
 func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationOpts {
-	return func(bucket *registry.Bucket) hcl.Diagnostics {
+	return func(bucket *Bucket) hcl.Diagnostics {
 		var diags hcl.Diagnostics
 
 		imageDS, imageOK := vals[hcpImageDatasourceType]
@@ -223,7 +199,7 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 			return nil
 		}
 
-		iterations := map[string]iterds.DatasourceOutput{}
+		iterations := map[string]hcppackeriterationdatasource.DatasourceOutput{}
 
 		var err error
 		if iterOK {
@@ -245,7 +221,7 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 			}
 		}
 
-		images := map[string]imgds.DatasourceOutput{}
+		images := map[string]hcppackerimagedatasource.DatasourceOutput{}
 
 		if imageOK {
 			hcpData := map[string]cty.Value{}
@@ -267,7 +243,7 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 		}
 
 		for _, img := range images {
-			sourceIteration := registry.ParentIteration{}
+			sourceIteration := ParentIteration{}
 
 			sourceIteration.IterationID = img.IterationID
 

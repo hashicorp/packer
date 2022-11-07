@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	packerregistry "github.com/hashicorp/packer/internal/registry"
 )
 
 type HCPPackerRegistryBlock struct {
@@ -19,20 +18,6 @@ type HCPPackerRegistryBlock struct {
 	BuildLabels map[string]string
 
 	HCL2Ref
-}
-
-func (b *HCPPackerRegistryBlock) WriteToBucketConfig(bucket *packerregistry.Bucket) {
-	if b == nil {
-		return
-	}
-	bucket.Description = b.Description
-	bucket.BucketLabels = b.BucketLabels
-	bucket.BuildLabels = b.BuildLabels
-	// If there's already a Slug this was set from env variable.
-	// In Packer, env variable overrides config values so we keep it that way for consistency.
-	if bucket.Slug == "" && b.Slug != "" {
-		bucket.Slug = b.Slug
-	}
 }
 
 func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPackerRegistryBlock, hcl.Diagnostics) {

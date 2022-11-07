@@ -1,3 +1,4 @@
+// Package env provides HCP Packer environment variables.
 package env
 
 import (

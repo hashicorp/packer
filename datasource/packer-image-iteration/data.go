@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	packerregistry "github.com/hashicorp/packer/internal/registry"
+	hcpapi "github.com/hashicorp/packer/internal/hcp/api"
 )
 
 // Type for Packer datasource has been renamed temporarily to prevent it from being
@@ -136,7 +136,7 @@ func (d *DeactivatedDatasource) OutputSpec() hcldec.ObjectSpec {
 func (d *DeactivatedDatasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
 
-	cli, err := packerregistry.NewClient()
+	cli, err := hcpapi.NewClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}

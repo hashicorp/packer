@@ -5,15 +5,16 @@ import (
 	"testing"
 
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
+	"github.com/hashicorp/packer/internal/hcp/api"
 )
 
 func TestInitialize_NewBucketNewIteration(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -47,7 +48,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("expected an iteration to created but it didn't")
 	}
 
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -63,12 +64,12 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -101,7 +102,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("expected an iteration to created but it didn't")
 	}
 
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -117,13 +118,13 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -141,7 +142,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -170,7 +171,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 		t.Errorf("expected an iteration to created but it didn't")
 	}
 
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -187,7 +188,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 
 func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
 	mockService.IterationCompleted = true
@@ -195,7 +196,7 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -233,13 +234,13 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 
 func TestUpdateBuildStatus(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -256,7 +257,7 @@ func TestUpdateBuildStatus(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -287,13 +288,13 @@ func TestUpdateBuildStatus(t *testing.T) {
 
 func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 	mockService.IterationAlreadyExist = true
 
 	b := &Bucket{
 		Slug: "TestBucket",
-		client: &Client{
+		client: &api.Client{
 			Packer: mockService,
 		},
 	}
@@ -311,7 +312,7 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.PopulateIteration(context.TODO())
+	err = b.populateIteration(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
