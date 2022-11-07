@@ -14,7 +14,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/internal/hcp"
+	"github.com/hashicorp/packer/internal/hcp/registry"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/sync/semaphore"
 
@@ -90,13 +90,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	hcpHandler, diags := hcp.GetOrchestrator(packerStarter)
+	hcpRegistry, diags := registry.New(packerStarter)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
 
-	err := hcpHandler.PopulateIteration(buildCtx)
+	err := hcpRegistry.PopulateIteration(buildCtx)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
@@ -219,14 +219,24 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			defer limitParallel.Release(1)
 
-			err := hcpHandler.BuildStart(buildCtx, hcpMap[name])
+			err := hcpRegistry.StartBuild(buildCtx, hcpMap[name])
+			// Seems odd to require this error check here. Now that it is an error we can just exit with diag
 			if err != nil {
-				if errors.As(err, &hcp.BuildDone{}) {
-					ui.Say(fmt.Sprintf(
-						"skipping HCP-enabled build %q: already done.",
-						name))
+				// If the build is already done, we skip without a warning
+				if errors.As(err, &registry.ErrBuildAlreadyDone{}) {
+					ui.Say(fmt.Sprintf("skipping already done build %q", name))
 					return
 				}
+				writeDiags(c.Ui, nil, hcl.Diagnostics{
+					&hcl.Diagnostic{
+						Summary: fmt.Sprintf(
+							"hcp: failed to start build %q",
+							name),
+						Severity: hcl.DiagError,
+						Detail:   err.Error(),
+					},
+				})
+				return
 			}
 
 			log.Printf("Starting build run: %s", name)
@@ -237,7 +247,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			buildDuration := buildEnd.Sub(buildStart)
 			fmtBuildDuration := durafmt.Parse(buildDuration).LimitFirstN(2)
 
-			runArtifacts, hcperr := hcpHandler.BuildDone(
+			runArtifacts, hcperr := hcpRegistry.CompleteBuild(
 				buildCtx,
 				hcpMap[name],
 				runArtifacts,

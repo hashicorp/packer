@@ -1,4 +1,4 @@
-package registry
+package api
 
 import (
 	"context"
@@ -55,7 +55,7 @@ func (client *Client) UpsertBucket(
 	// Create bucket if exist we continue as is, eventually we want to treat
 	// this like an upsert
 	_, err := client.CreateBucket(ctx, bucketSlug, bucketDescription, bucketLabels)
-	if err != nil && !checkErrorCode(err, codes.AlreadyExists) {
+	if err != nil && !CheckErrorCode(err, codes.AlreadyExists) {
 		return err
 	}
 

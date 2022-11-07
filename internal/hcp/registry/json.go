@@ -1,4 +1,4 @@
-package hcp
+package registry
 
 import (
 	"context"
@@ -6,23 +6,16 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/internal/registry"
-	"github.com/hashicorp/packer/internal/registry/env"
 	"github.com/hashicorp/packer/packer"
 )
 
-// jsonOrchestrator is a HCP handler made to process legacy JSON templates
-type jsonOrchestrator struct {
+// JSONMetadataRegistry is a HCP handler made to process legacy JSON templates
+type JSONMetadataRegistry struct {
 	configuration *packer.Core
-	bucket        *registry.Bucket
+	bucket        *Bucket
 }
 
-func newJSONOrchestrator(config *packer.Core) (Orchestrator, hcl.Diagnostics) {
-	if env.IsHCPDisabled() ||
-		(!env.HasPackerRegistryBucket() && !env.IsHCPExplicitelyEnabled()) {
-		return newNoopHandler(), nil
-	}
-
+func NewJSONMetadataRegistry(config *packer.Core) (*JSONMetadataRegistry, hcl.Diagnostics) {
 	bucket, diags := createConfiguredBucket(
 		filepath.Dir(config.Template.Path),
 		withPackerEnvConfiguration,
@@ -37,14 +30,14 @@ func newJSONOrchestrator(config *packer.Core) (Orchestrator, hcl.Diagnostics) {
 		bucket.RegisterBuildForComponent(packer.HCPName(b))
 	}
 
-	return &jsonOrchestrator{
+	return &JSONMetadataRegistry{
 		configuration: config,
 		bucket:        bucket,
 	}, nil
 }
 
 // PopulateIteration creates the metadata on HCP for a build
-func (h *jsonOrchestrator) PopulateIteration(ctx context.Context) error {
+func (h *JSONMetadataRegistry) PopulateIteration(ctx context.Context) error {
 	for _, b := range h.configuration.Template.Builders {
 		// Get all builds slated within config ignoring any only or exclude flags.
 		h.bucket.RegisterBuildForComponent(b.Name)
@@ -59,7 +52,7 @@ func (h *jsonOrchestrator) PopulateIteration(ctx context.Context) error {
 		return err
 	}
 
-	err = h.bucket.PopulateIteration(ctx)
+	err = h.bucket.populateIteration(ctx)
 	if err != nil {
 		return err
 	}
@@ -67,17 +60,17 @@ func (h *jsonOrchestrator) PopulateIteration(ctx context.Context) error {
 	return nil
 }
 
-// BuildStart is invoked when one build for the configuration is starting to be processed
-func (h *jsonOrchestrator) BuildStart(ctx context.Context, buildName string) error {
-	return h.bucket.BuildStart(ctx, buildName)
+// StartBuild is invoked when one build for the configuration is starting to be processed
+func (h *JSONMetadataRegistry) StartBuild(ctx context.Context, buildName string) error {
+	return h.bucket.startBuild(ctx, buildName)
 }
 
-// BuildDone is invoked when one build for the configuration has finished
-func (h *jsonOrchestrator) BuildDone(
+// CompleteBuild is invoked when one build for the configuration has finished
+func (h *JSONMetadataRegistry) CompleteBuild(
 	ctx context.Context,
 	buildName string,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.BuildDone(ctx, buildName, artifacts, buildErr)
+	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
 }

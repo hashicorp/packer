@@ -8,7 +8,7 @@ import (
 
 	git "github.com/go-git/go-git/v5"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
-	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/hashicorp/packer/internal/hcp/env"
 )
 
 type Iteration struct {

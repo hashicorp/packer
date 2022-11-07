@@ -13,7 +13,9 @@ import (
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
-	"github.com/hashicorp/packer/internal/registry/env"
+	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/internal/hcp/api"
+	"github.com/hashicorp/packer/internal/hcp/env"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 )
@@ -32,7 +34,7 @@ type Bucket struct {
 	SourceImagesToParentIterations map[string]ParentIteration
 	RunningBuilds                  map[string]chan struct{}
 	Iteration                      *Iteration
-	client                         *Client
+	client                         *api.Client
 }
 
 type ParentIteration struct {
@@ -61,6 +63,27 @@ func (b *Bucket) Validate() error {
 	return nil
 }
 
+// ReadFromHCLBuildBlock reads the information for initialising a Bucket from a HCL2 build block
+func (b *Bucket) ReadFromHCLBuildBlock(hcpBlock *hcl2template.BuildBlock) {
+	if b == nil {
+		return
+	}
+	b.Description = hcpBlock.Description
+
+	hcp := hcpBlock.HCPPackerRegistry
+	if hcp == nil {
+		return
+	}
+
+	b.BucketLabels = hcp.BucketLabels
+	b.BuildLabels = hcp.BuildLabels
+	// If there's already a Slug this was set from env variable.
+	// In Packer, env variable overrides config values so we keep it that way for consistency.
+	if b.Slug == "" && hcp.Slug != "" {
+		b.Slug = hcp.Slug
+	}
+}
+
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (b *Bucket) connect() error {
@@ -68,7 +91,7 @@ func (b *Bucket) connect() error {
 		return nil
 	}
 
-	registryClient, err := NewClient()
+	registryClient, err := api.NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
 	}
@@ -186,10 +209,10 @@ func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status mode
 	return nil
 }
 
-// CompleteBuild should be called to set a build on the HCP Packer registry to DONE.
+// markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
 // Upon a successful call markBuildComplete will publish all images created by the named build,
 // and set the registry build to done. A build with no images can not be set to DONE.
-func (b *Bucket) CompleteBuild(ctx context.Context, name string) error {
+func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
 	buildToUpdate, err := b.Iteration.Build(name)
 	if err != nil {
 		return err
@@ -297,8 +320,8 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 
 func (b *Bucket) initializeIteration(ctx context.Context) error {
 	// load existing iteration using fingerprint.
-	iteration, err := b.client.GetIteration(ctx, b.Slug, GetIteration_byFingerprint(b.Iteration.Fingerprint))
-	if checkErrorCode(err, codes.Aborted) {
+	iteration, err := b.client.GetIteration(ctx, b.Slug, api.GetIteration_byFingerprint(b.Iteration.Fingerprint))
+	if api.CheckErrorCode(err, codes.Aborted) {
 		// probably means Iteration doesn't exist need a way to check the error
 		iteration, err = b.createIteration()
 	}
@@ -325,11 +348,11 @@ func (b *Bucket) initializeIteration(ctx context.Context) error {
 	return nil
 }
 
-// PopulateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
 // If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
 // that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
 // All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
-func (b *Bucket) PopulateIteration(ctx context.Context) error {
+func (b *Bucket) populateIteration(ctx context.Context) error {
 	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
 	existingBuilds, err := b.client.ListBuilds(ctx, b.Slug, b.Iteration.ID)
@@ -387,7 +410,7 @@ func (b *Bucket) PopulateIteration(ctx context.Context) error {
 			log.Printf("[TRACE] registering build with iteration for %q.", name)
 			err := b.CreateInitialBuildForIteration(ctx, name)
 
-			if checkErrorCode(err, codes.AlreadyExists) {
+			if api.CheckErrorCode(err, codes.AlreadyExists) {
 				log.Printf("[TRACE] build %s already exists in Packer registry, continuing...", name)
 				return
 			}
@@ -473,9 +496,11 @@ func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), erro
 	}, nil
 }
 
-func (b *Bucket) BuildStart(ctx context.Context, buildName string) error {
+func (b *Bucket) startBuild(ctx context.Context, buildName string) error {
 	if !b.IsExpectingBuildForComponent(buildName) {
-		return fmt.Errorf("already done")
+		return &ErrBuildAlreadyDone{
+			Message: "build is already done",
+		}
 	}
 
 	err := b.UpdateBuildStatus(ctx, buildName, models.HashicorpCloudPackerBuildStatusRUNNING)
@@ -515,7 +540,7 @@ func (b *Bucket) BuildStart(ctx context.Context, buildName string) error {
 	return nil
 }
 
-func (b *Bucket) BuildDone(
+func (b *Bucket) completeBuild(
 	ctx context.Context,
 	buildName string,
 	artifacts []packer.Artifact,
@@ -568,7 +593,7 @@ func (b *Bucket) BuildDone(
 		}
 	}
 
-	parErr := b.CompleteBuild(ctx, buildName)
+	parErr := b.markBuildComplete(ctx, buildName)
 	if parErr != nil {
 		return artifacts, fmt.Errorf(
 			"failed to update Packer registry with image artifacts for %q: %s",
@@ -576,7 +601,7 @@ func (b *Bucket) BuildDone(
 			parErr)
 	}
 
-	return append(artifacts, &RegistryArtifact{
+	return append(artifacts, &registryArtifact{
 		BuildName:   buildName,
 		BucketSlug:  b.Slug,
 		IterationID: b.Iteration.ID,

@@ -17,7 +17,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
-	packerregistry "github.com/hashicorp/packer/internal/registry"
+	hcpapi "github.com/hashicorp/packer/internal/hcp/api"
 )
 
 type Datasource struct {
@@ -139,7 +139,7 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 func (d *Datasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
 
-	cli, err := packerregistry.NewClient()
+	cli, err := hcpapi.NewClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}
@@ -150,7 +150,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
 			d.config.Bucket, cli.ProjectID, cli.OrganizationID, d.config.IterationID)
 
-		iter, err := cli.GetIteration(ctx, d.config.Bucket, packerregistry.GetIteration_byID(d.config.IterationID))
+		iter, err := cli.GetIteration(ctx, d.config.Bucket, hcpapi.GetIteration_byID(d.config.IterationID))
 		if err != nil {
 			return cty.NullVal(cty.EmptyObject), fmt.Errorf(
 				"error retrieving image iteration from HCP Packer registry: %s",
