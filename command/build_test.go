@@ -1149,19 +1149,11 @@ func TestBuildCmd(t *testing.T) {
 			},
 			expectedCode: 0,
 			outputCheck: func(out, err string) error {
-				if !strings.Contains(out, "Warning: Undefined variable") {
-					return fmt.Errorf("expected 'Warning: Undefined variable' in output, did not find it")
-				}
-
 				nbWarns := strings.Count(out, "Warning: ")
-				if nbWarns != 1 {
+				if nbWarns != 0 {
 					return fmt.Errorf(
-						"error: too many warnings in build output, expected 1, got %d",
+						"error: too many warnings in build output, expected 0, got %d",
 						nbWarns)
-				}
-
-				if !strings.Contains(out, "variable \"testvar\" {") {
-					return fmt.Errorf("missing definition example for undefined variable")
 				}
 
 				nbErrs := strings.Count(err, "Error: ")

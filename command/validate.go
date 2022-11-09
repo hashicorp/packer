@@ -45,6 +45,8 @@ func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 }
 
 func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
+	cla.StrictValidation = cla.WarnOnUndeclared
+
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
 		return 1
@@ -59,6 +61,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	diags := packerStarter.Initialize(packer.InitializeOptions{
 		SkipDatasourcesExecution: true,
 	})
+
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -95,12 +98,13 @@ Usage: packer validate [options] TEMPLATE
 
 Options:
 
-  -syntax-only           Only check syntax. Do not verify config of the template.
-  -except=foo,bar,baz    Validate all builds other than these.
-  -machine-readable      Produce machine-readable output.
-  -only=foo,bar,baz      Validate only these builds.
-  -var 'key=value'       Variable for templates, can be used multiple times.
-  -var-file=path         JSON or HCL2 file containing user variables.
+  -syntax-only                  Only check syntax. Do not verify config of the template.
+  -except=foo,bar,baz           Validate all builds other than these.
+  -machine-readable             Produce machine-readable output.
+  -only=foo,bar,baz             Validate only these builds.
+  -var 'key=value'              Variable for templates, can be used multiple times.
+  -var-file=path                JSON or HCL2 file containing user variables.
+  -warn-on-undeclared=false     Disable warnings for JSON or HCL2  files containing undeclared variables. (Default true)
 `
 
 	return strings.TrimSpace(helpText)

@@ -60,9 +60,11 @@ type Parser struct {
 
 	CorePackerVersionString string
 
-	*hclparse.Parser
-
 	PluginConfig *packer.PluginConfig
+
+	ValidationOptions
+
+	*hclparse.Parser
 }
 
 const (
@@ -138,6 +140,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		Cwd:                     wd,
 		CorePackerVersionString: p.CorePackerVersionString,
 		HCPVars:                 map[string]cty.Value{},
+		ValidationOptions:       p.ValidationOptions,
 		parser:                  p,
 		files:                   files,
 	}

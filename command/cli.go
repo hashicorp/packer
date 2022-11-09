@@ -58,7 +58,7 @@ func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 	fs.Var(&ma.ConfigType, "config-type", "set to 'hcl2' to run in hcl2 mode when no file is passed.")
 }
 
-// MetaArgs defines commonalities between all comands
+// MetaArgs defines commonalities between all commands
 type MetaArgs struct {
 	// TODO(azr): in the future, I want to allow passing multiple path to
 	// merge HCL confs together; but this will probably need an RFC first.
@@ -67,7 +67,8 @@ type MetaArgs struct {
 	Vars         map[string]string
 	VarFiles     []string
 	// set to "hcl2" to force hcl2 mode
-	ConfigType configType
+	ConfigType       configType
+	StrictValidation bool
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
@@ -88,9 +89,10 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 // BuildArgs represents a parsed cli line for a `packer build`
 type BuildArgs struct {
 	MetaArgs
-	Color, Debug, Force, TimestampUi, MachineReadable bool
-	ParallelBuilds                                    int64
-	OnError                                           string
+	Debug, Force                        bool
+	Color, TimestampUi, MachineReadable bool
+	ParallelBuilds                      int64
+	OnError                             string
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
@@ -129,6 +131,7 @@ type FixArgs struct {
 
 func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
+	flags.BoolVar(&va.WarnOnUndeclared, "warn-on-undeclared", true, "show warnings for pkrvars definition files containing undeclared variables")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -136,7 +139,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 // ValidateArgs represents a parsed cli line for a `packer validate`
 type ValidateArgs struct {
 	MetaArgs
-	SyntaxOnly bool
+	SyntaxOnly, WarnOnUndeclared bool
 }
 
 func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {
