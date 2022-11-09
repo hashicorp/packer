@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template"
-	hcppackerimagedatasource "github.com/hashicorp/packer/internal/hcp/datasource/hcp-packer-image"
-	hcppackeriterationdatasource "github.com/hashicorp/packer/internal/hcp/datasource/hcp-packer-iteration"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
@@ -123,69 +121,44 @@ func NewHCLMetadataRegistry(config *hcl2template.PackerConfig) (*HCLMetadataRegi
 	}, nil
 }
 
-func imageValueToDSOutput(imageVal map[string]cty.Value) hcppackerimagedatasource.DatasourceOutput {
-	dso := hcppackerimagedatasource.DatasourceOutput{}
+type hcpImage struct {
+	ID          string
+	ChannelID   string
+	IterationID string
+}
+
+func imageValueToDSOutput(imageVal map[string]cty.Value) hcpImage {
+	image := hcpImage{}
 	for k, v := range imageVal {
 		switch k {
 		case "id":
-			dso.ID = v.AsString()
-		case "region":
-			dso.Region = v.AsString()
-		case "labels":
-			labels := map[string]string{}
-			lbls := v.AsValueMap()
-			for k, v := range lbls {
-				labels[k] = v.AsString()
-			}
-			dso.Labels = labels
-		case "packer_run_uuid":
-			dso.PackerRunUUID = v.AsString()
+			image.ID = v.AsString()
 		case "channel_id":
-			dso.ChannelID = v.AsString()
+			image.ChannelID = v.AsString()
 		case "iteration_id":
-			dso.IterationID = v.AsString()
-		case "build_id":
-			dso.BuildID = v.AsString()
-		case "created_at":
-			dso.CreatedAt = v.AsString()
-		case "component_type":
-			dso.ComponentType = v.AsString()
-		case "cloud_provider":
-			dso.CloudProvider = v.AsString()
+			image.IterationID = v.AsString()
 		}
 	}
 
-	return dso
+	return image
 }
 
-func iterValueToDSOutput(iterVal map[string]cty.Value) hcppackeriterationdatasource.DatasourceOutput {
-	dso := hcppackeriterationdatasource.DatasourceOutput{}
+type hcpIteration struct {
+	ID        string
+	ChannelID string
+}
+
+func iterValueToDSOutput(iterVal map[string]cty.Value) hcpIteration {
+	iter := hcpIteration{}
 	for k, v := range iterVal {
 		switch k {
-		case "author_id":
-			dso.AuthorID = v.AsString()
-		case "bucket_name":
-			dso.BucketName = v.AsString()
-		case "complete":
-			// For all intents and purposes, cty.Value.True() acts
-			// like a AsBool() would.
-			dso.Complete = v.True()
-		case "created_at":
-			dso.CreatedAt = v.AsString()
-		case "fingerprint":
-			dso.Fingerprint = v.AsString()
 		case "id":
-			dso.ID = v.AsString()
-		case "incremental_version":
-			// Maybe when cty provides a good way to AsInt() a cty.Value
-			// we can consider implementing this.
-		case "updated_at":
-			dso.UpdatedAt = v.AsString()
+			iter.ID = v.AsString()
 		case "channel_id":
-			dso.ChannelID = v.AsString()
+			iter.ChannelID = v.AsString()
 		}
 	}
-	return dso
+	return iter
 }
 
 func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationOpts {
@@ -199,7 +172,7 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 			return nil
 		}
 
-		iterations := map[string]hcppackeriterationdatasource.DatasourceOutput{}
+		iterations := map[string]hcpIteration{}
 
 		var err error
 		if iterOK {
@@ -216,12 +189,12 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 
 			for k, v := range hcpData {
 				iterVals := v.AsValueMap()
-				dso := iterValueToDSOutput(iterVals)
-				iterations[k] = dso
+				iter := iterValueToDSOutput(iterVals)
+				iterations[k] = iter
 			}
 		}
 
-		images := map[string]hcppackerimagedatasource.DatasourceOutput{}
+		images := map[string]hcpImage{}
 
 		if imageOK {
 			hcpData := map[string]cty.Value{}
@@ -237,8 +210,8 @@ func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationO
 
 			for k, v := range hcpData {
 				imageVals := v.AsValueMap()
-				dso := imageValueToDSOutput(imageVals)
-				images[k] = dso
+				img := imageValueToDSOutput(imageVals)
+				images[k] = img
 			}
 		}
 
