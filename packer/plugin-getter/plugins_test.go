@@ -676,7 +676,11 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 	case "releases":
 		toEncode = g.Releases
 	case "sha256":
-		toEncode = g.ChecksumFileEntries[options.version.String()]
+		enc, ok := g.ChecksumFileEntries[options.version.String()]
+		if !ok {
+			return nil, fmt.Errorf("No checksum available for version %q", options.version.String())
+		}
+		toEncode = enc
 	case "zip":
 		acc := options.PluginRequirement.Identifier.Hostname + "/" +
 			options.PluginRequirement.Identifier.RealRelativePath() + "/" +
