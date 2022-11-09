@@ -520,7 +520,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					err := fmt.Errorf("could not get %s checksum file for %s version %s. Is the file present on the release and correctly named ? %w", checksummer.Type, pr.Identifier, version, err)
 					errs = multierror.Append(errs, err)
 					log.Printf("[TRACE] %s", err)
-					return nil, errs
+					continue
 				}
 				entries, err := ParseChecksumFileEntries(checksumFile)
 				_ = checksumFile.Close()
@@ -737,6 +737,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		err := fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 		errs = multierror.Append(errs, err)
 	}
+
+	errs = multierror.Append(errs, fmt.Errorf("could not install any compatible version of plugin %q", pr.Identifier))
 
 	return nil, errs
 }
