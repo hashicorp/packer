@@ -541,6 +541,56 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				Version:    "v2.10.1",
 			}, false},
 
+		{"upgrade-with-one-missing-checksum-file",
+			// here we have something locally and test that a newer version will
+			// be installed.
+			fields{"amazon", ">= v2"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+							{Version: "v1.2.4"},
+							{Version: "v1.2.5"},
+							{Version: "v2.0.0"},
+							{Version: "v2.1.0"},
+							{Version: "v2.10.0"},
+							{Version: "v2.10.1"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_v2.10.0_x6.1_linux_amd64.zip",
+								Checksum: "825fc931ae0cb151df0c56be41a17a9136c4d1f1ee73ddb8ed6baa17cef31afa",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.0_x6.1_linux_amd64.zip": zipFile(map[string]string{
+								"packer-plugin-amazon_v2.10.0_x6.1_linux_amd64": "v2.10.0_x6.1_linux_amd64",
+							}),
+						},
+					},
+				},
+				[]string{
+					pluginFolderWrongChecksums,
+					pluginFolderOne,
+					pluginFolderTwo,
+				},
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "linux", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			&Installation{
+				BinaryPath: "testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.0_x6.1_linux_amd64",
+				Version:    "v2.10.0",
+			}, false},
+
 		{"wrong-zip-checksum",
 			// here we have something locally and test that a newer version with
 			// a wrong checksum will not be installed and error.
