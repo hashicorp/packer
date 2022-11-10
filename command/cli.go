@@ -136,6 +136,7 @@ type FixArgs struct {
 func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
 	flags.BoolVar(&va.NoWarnUndeclaredVar, "no-warn-undeclared-var", false, "Ignore warnings for variable files containing undeclared variables.")
+	flags.BoolVar(&va.EvaluateDatasources, "evaluate-datasources", false, "evaluate datasources for validation (HCL2 only, may incur costs)")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -144,6 +145,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 type ValidateArgs struct {
 	MetaArgs
 	SyntaxOnly, NoWarnUndeclaredVar bool
+	EvaluateDatasources             bool
 }
 
 func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {
