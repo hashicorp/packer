@@ -31,6 +31,14 @@ Errors validating build 'vmware'. 1 error(s) occurred:
 - `-syntax-only` - Only the syntax of the template is checked. The
   configuration is not validated.
 
+- `-evaluate-datasources` - Evaluate all data sources when validating a template.
+  This is only valid on HCL2 templates, since JSON templates do not feature
+  datasources, this option will be ignored.
+
+  ~> **Warning:** Data sources may rely on external services for fetching data,
+  which can incur some costs at validation if the services being contacted are
+  billing per operation.
+
 - `-except=foo,bar,baz` - Validates all the builds except those with the
   comma-separated names. In legacy JSON templates, build names default to the
   types of their builders (e.g. `docker` or

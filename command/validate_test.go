@@ -11,8 +11,9 @@ import (
 
 func TestValidateCommand(t *testing.T) {
 	tt := []struct {
-		path     string
-		exitCode int
+		path      string
+		exitCode  int
+		extraArgs []string
 	}{
 		{path: filepath.Join(testFixture("validate"), "build.json")},
 		{path: filepath.Join(testFixture("validate"), "build.pkr.hcl")},
@@ -39,6 +40,11 @@ func TestValidateCommand(t *testing.T) {
 
 		// datasource could be unknown at that moment
 		{path: filepath.Join(testFixture("hcl", "data-source-validation.pkr.hcl")), exitCode: 0},
+
+		// datasource unknown at validation-time without datasource evaluation -> fail on provisioner
+		{path: filepath.Join(testFixture("hcl", "local-ds-validate.pkr.hcl")), exitCode: 1},
+		// datasource unknown at validation-time with datasource evaluation -> success
+		{path: filepath.Join(testFixture("hcl", "local-ds-validate.pkr.hcl")), exitCode: 0, extraArgs: []string{"--evaluate-datasources"}},
 	}
 
 	for _, tc := range tt {
@@ -47,7 +53,8 @@ func TestValidateCommand(t *testing.T) {
 				Meta: TestMetaFile(t),
 			}
 			tc := tc
-			args := []string{tc.path}
+			args := tc.extraArgs
+			args = append(args, tc.path)
 			if code := c.Run(args); code != tc.exitCode {
 				fatalCommand(t, c.Meta)
 			}
