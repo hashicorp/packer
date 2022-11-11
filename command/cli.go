@@ -86,6 +86,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
 	flags.Var(flagOnError, "on-error", "")
 
+	flags.BoolVar(&ba.MetaArgs.WarnOnUndeclaredVar, "warn-on-undeclared-var", false, "Show warnings for variable files containing undeclared variables.")
 	ba.MetaArgs.AddFlagSets(flags)
 }
 
