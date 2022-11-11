@@ -67,8 +67,11 @@ type MetaArgs struct {
 	Vars         map[string]string
 	VarFiles     []string
 	// set to "hcl2" to force hcl2 mode
-	ConfigType       configType
-	StrictValidation bool
+	ConfigType configType
+
+	// WarnOnUndeclared does not have a common default, as the default varies per sub-command usage.
+	// Refer to individual command FlagSets for usage.
+	WarnOnUndeclaredVar bool
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
@@ -131,7 +134,7 @@ type FixArgs struct {
 
 func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
-	flags.BoolVar(&va.WarnOnUndeclared, "warn-on-undeclared", true, "show warnings for pkrvars definition files containing undeclared variables")
+	flags.BoolVar(&va.NoWarnUndeclaredVar, "no-warn-undeclared-var", false, "Ignore warnings for variable files containing undeclared variables.")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -139,7 +142,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 // ValidateArgs represents a parsed cli line for a `packer validate`
 type ValidateArgs struct {
 	MetaArgs
-	SyntaxOnly, WarnOnUndeclared bool
+	SyntaxOnly, NoWarnUndeclaredVar bool
 }
 
 func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {

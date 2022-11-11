@@ -859,7 +859,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "undefined but set value - pkrvar file - strict mode",
 			variables: Variables{},
 			validationOptions: ValidationOptions{
-				Strict: true,
+				WarnOnUndeclaredVar: true,
 			},
 			args: args{
 				hclFiles: []string{`undefined_string="value"`},

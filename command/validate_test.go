@@ -250,12 +250,12 @@ func TestValidateCommand_VarFilesWarnOnUndeclared(t *testing.T) {
 		varfile  string
 		exitCode int
 	}{
-		{name: "warn-on-undeclared=true with unused variable in var-file definition",
+		{name: "default warning with unused variable in HCL var-file definition",
 			path:     filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "basic.pkr.hcl"),
 			varfile:  filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "undeclared.pkrvars.hcl"),
 			exitCode: 0,
 		},
-		{name: "warn-on-undeclared=true with unused variable in var-file definition",
+		{name: "default warning with unused variable in JSON var-file definition",
 			path:     filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "basic.pkr.hcl"),
 			varfile:  filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "undeclared.json"),
 			exitCode: 0,
@@ -302,12 +302,12 @@ func TestValidateCommand_VarFilesDisableWarnOnUndeclared(t *testing.T) {
 		varfile  string
 		exitCode int
 	}{
-		{name: "warn-on-undeclared=false with unused variable in var-file definition",
+		{name: "no-warn-undeclared-var with unused variable in HCL var-file definition",
 			path:     filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "basic.pkr.hcl"),
 			varfile:  filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "undeclared.pkrvars.hcl"),
 			exitCode: 0,
 		},
-		{name: "warn-on-undeclared=false with unused variable in JSON var-file definition",
+		{name: "no-warn-undeclared-var with unused variable in JSON var-file definition",
 			path:     filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "basic.pkr.hcl"),
 			varfile:  filepath.Join(testFixture(filepath.Join("validate", "var-file-tests")), "undeclared.json"),
 			exitCode: 0,
@@ -319,7 +319,7 @@ func TestValidateCommand_VarFilesDisableWarnOnUndeclared(t *testing.T) {
 				Meta: TestMetaFile(t),
 			}
 			tc := tc
-			args := []string{"-warn-on-undeclared=false", "-var-file", tc.varfile, tc.path}
+			args := []string{"-no-warn-undeclared-var", "-var-file", tc.varfile, tc.path}
 			if code := c.Run(args); code != tc.exitCode {
 				fatalCommand(t, c.Meta)
 			}

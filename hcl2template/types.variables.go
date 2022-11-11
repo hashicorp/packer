@@ -659,7 +659,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		for name, attr := range attrs {
 			variable, found := variables[name]
 			if !found {
-				if cfg.ValidationOptions.Strict == false {
+				if !cfg.ValidationOptions.WarnOnUndeclaredVar {
 					continue
 				}
 

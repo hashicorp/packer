@@ -68,7 +68,7 @@ type PackerConfig struct {
 }
 
 type ValidationOptions struct {
-	Strict bool
+	WarnOnUndeclaredVar bool
 }
 
 const (

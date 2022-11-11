@@ -45,7 +45,11 @@ func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 }
 
 func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
-	cla.StrictValidation = cla.WarnOnUndeclared
+	// By default we want to inform users of undeclared variables when validating but not during build time.
+	cla.MetaArgs.WarnOnUndeclaredVar = true
+	if cla.NoWarnUndeclaredVar {
+		cla.MetaArgs.WarnOnUndeclaredVar = false
+	}
 
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
@@ -61,7 +65,6 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	diags := packerStarter.Initialize(packer.InitializeOptions{
 		SkipDatasourcesExecution: true,
 	})
-
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -100,11 +103,11 @@ Options:
 
   -syntax-only                  Only check syntax. Do not verify config of the template.
   -except=foo,bar,baz           Validate all builds other than these.
-  -machine-readable             Produce machine-readable output.
   -only=foo,bar,baz             Validate only these builds.
+  -machine-readable             Produce machine-readable output.
   -var 'key=value'              Variable for templates, can be used multiple times.
-  -var-file=path                JSON or HCL2 file containing user variables.
-  -warn-on-undeclared=false     Disable warnings for JSON or HCL2  files containing undeclared variables. (Default true)
+  -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
+  -no-warn-undeclared-var       Disable warnings for user variable files containing undeclared variables.
 `
 
 	return strings.TrimSpace(helpText)

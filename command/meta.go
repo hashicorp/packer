@@ -137,7 +137,7 @@ func (m *Meta) GetConfigFromHCL(cla *MetaArgs) (*hcl2template.PackerConfig, int)
 		Parser:                  hclparse.NewParser(),
 		PluginConfig:            m.CoreConfig.Components.PluginConfig,
 		ValidationOptions: hcl2template.ValidationOptions{
-			Strict: cla.StrictValidation,
+			WarnOnUndeclaredVar: cla.WarnOnUndeclaredVar,
 		},
 	}
 	cfg, diags := parser.Parse(cla.Path, cla.VarFiles, cla.Vars)
