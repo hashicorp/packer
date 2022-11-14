@@ -476,7 +476,7 @@ func TestParse_variables(t *testing.T) {
 				},
 				Basedir: filepath.Join("testdata", "variables"),
 			},
-			true, false,
+			false, false,
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
@@ -850,7 +850,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 			},
 
 			// output
-			wantDiags:         true,
+			wantDiags:         false,
 			wantDiagsHasError: false,
 			wantVariables:     Variables{},
 			wantValues:        map[string]cty.Value{},
@@ -859,7 +859,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 		{name: "undefined but set value - pkrvar file - strict mode",
 			variables: Variables{},
 			validationOptions: ValidationOptions{
-				Strict: true,
+				WarnOnUndeclaredVar: true,
 			},
 			args: args{
 				hclFiles: []string{`undefined_string="value"`},
@@ -867,7 +867,7 @@ func TestVariables_collectVariableValues(t *testing.T) {
 
 			// output
 			wantDiags:         true,
-			wantDiagsHasError: true,
+			wantDiagsHasError: false,
 			wantVariables:     Variables{},
 			wantValues:        map[string]cty.Value{},
 		},
