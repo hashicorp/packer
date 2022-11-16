@@ -58,3 +58,11 @@ artifacts that are created will be outputted at the end of the build.
   multiple times. This is useful for setting version numbers for your build.
 
 - `-var-file` - Set template variables from a file.
+
+- `-warn-on-undeclared-var` - Setting this flag will yield a warning for each assignment within
+  a variable definitions file (*.pkrvars.hcl | *.pkrvars.json) that does not have an accompanying
+  variable block. This can occur when using a var-file that contains a large amount of unused variables
+  for a given HCL2 template. For HCL2 template builds defining a value for a variable in a var-file is
+  not enough on its own for Packer to function, as there also needs to be a variable block definition in
+  the template files `pkr.hcl` for the variable. By default `packer build` will not warn when a var-file
+  contains one or more undeclared variables.

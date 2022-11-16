@@ -47,6 +47,15 @@ Errors validating build 'vmware'. 1 error(s) occurred:
   source block's "name" label, unless an in-build source definition adds the
   "name" configuration option.
 
+- `-no-warn-on-undeclared-var` - Silence warnings when the a variable definition
+  file contains variable assignments for undeclared variables. This can occur
+  when using a var-file that contains a large amount of unused variables for a
+  given HCL2 template. For HCL2 template defining a value for a variable in a
+  var-file is not enough on its own for Packer to function, as there also needs
+  to be a variable block definition in the template files `pkr.hcl` for the
+  variable. By default `packer validate` will warn when a var-file contains one
+  or more undeclared variables.
+
 - `-only=foo,bar,baz` - Only validate the builds with the given comma-separated
   names. In legacy JSON templates, build names default to the
   types of their builders (e.g. `docker` or
