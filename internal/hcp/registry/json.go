@@ -38,11 +38,6 @@ func NewJSONMetadataRegistry(config *packer.Core) (*JSONMetadataRegistry, hcl.Di
 
 // PopulateIteration creates the metadata on HCP for a build
 func (h *JSONMetadataRegistry) PopulateIteration(ctx context.Context) error {
-	for _, b := range h.configuration.Template.Builders {
-		// Get all builds slated within config ignoring any only or exclude flags.
-		h.bucket.RegisterBuildForComponent(b.Name)
-	}
-
 	err := h.bucket.Validate()
 	if err != nil {
 		return err
