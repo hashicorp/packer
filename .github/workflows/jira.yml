@@ -61,7 +61,7 @@ jobs:
       - name: Create ticket
         id: create-ticket
         if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: atlassian/gajira-create@v2.0.1
+        uses: atlassian/gajira-create@v3.0.0
         with:
           project: HPR
           issuetype: "${{ steps.set-ticket-type.outputs.type }}"
