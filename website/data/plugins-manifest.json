@@ -279,6 +279,13 @@
     "version": "v1.0.1"
   },
   {
+    "title": "Tart",
+    "path": "tart",
+    "repo": "cirruslabs/packer-plugin-tart",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "Tencent Cloud",
     "path": "tencentcloud",
     "repo": "hashicorp/packer-plugin-tencentcloud",
