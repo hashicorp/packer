@@ -27,7 +27,7 @@ func NewBuildFromCloudPackerBuild(src *models.HashicorpCloudPackerBuild) (*Build
 		ComponentType: src.ComponentType,
 		CloudProvider: src.CloudProvider,
 		RunUUID:       src.PackerRunUUID,
-		Status:        src.Status,
+		Status:        *src.Status,
 		Labels:        src.Labels,
 	}
 
