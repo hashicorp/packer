@@ -22,11 +22,11 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/hcl/v2 v2.14.1
-	github.com/hashicorp/hcp-sdk-go v0.20.1-0.20220726131832-34fbcf69a746
+	github.com/hashicorp/hcp-sdk-go v0.28.0
 	github.com/hashicorp/packer-plugin-amazon v1.1.5
 	github.com/hashicorp/packer-plugin-sdk v0.3.2
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
-	github.com/klauspost/compress v1.13.5 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/klauspost/pgzip v1.2.5
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -34,7 +34,7 @@ require (
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/go-fs v0.0.0-20180402235330-b7b9ca407fff // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/mapstructure v1.4.1
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10
 	github.com/zclconf/go-cty v1.10.0
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167 // indirect
+	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
 	golang.org/x/net v0.0.0-20220920183852-bf014ff85ad5
 	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
@@ -133,7 +133,7 @@ require (
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
+	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/aws/aws-sdk-go v1.42.29 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
@@ -153,16 +153,15 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/analysis v0.20.0 // indirect
-	github.com/go-openapi/errors v0.19.9 // indirect
+	github.com/go-openapi/errors v0.20.3 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/loads v0.20.2 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
-	github.com/go-openapi/strfmt v0.20.0 // indirect
+	github.com/go-openapi/strfmt v0.21.3 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect
 	github.com/go-openapi/validate v0.20.2 // indirect
 	github.com/go-resty/resty/v2 v2.6.0 // indirect
-	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
@@ -216,6 +215,7 @@ require (
 	github.com/matryer/is v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-vnc v0.0.0-20150629162542-723ed9867aed // indirect
@@ -225,6 +225,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
+	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -233,6 +234,7 @@ require (
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.366 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.366 // indirect
@@ -246,7 +248,7 @@ require (
 	github.com/yandex-cloud/go-genproto v0.0.0-20211202135052-789603780fb2 // indirect
 	github.com/yandex-cloud/go-sdk v0.0.0-20211206101223-7c4e7926bf53 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	go.mongodb.org/mongo-driver v1.5.1 // indirect
+	go.mongodb.org/mongo-driver v1.11.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/mobile v0.0.0-20210901025245-1fde1d6c3ca1 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
