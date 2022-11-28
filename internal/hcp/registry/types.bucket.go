@@ -338,6 +338,13 @@ func (b *Bucket) initializeIteration(ctx context.Context, templateType models.Ha
 		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
 	}
 
+	if iteration.TemplateType != nil &&
+		*iteration.TemplateType != models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET &&
+		*iteration.TemplateType != templateType {
+		return fmt.Errorf("This iteration was initially created with a %[2]s template. Changing from %[2]s to %[1]s is not supported.",
+			templateType, *iteration.TemplateType)
+	}
+
 	log.Println("[TRACE] a valid iteration was retrieved with the id", iteration.ID)
 	b.Iteration.ID = iteration.ID
 
