@@ -106,7 +106,7 @@ func (b *Bucket) connect() error {
 //
 // b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
 // TODO ensure initialize can only be called once
-func (b *Bucket) Initialize(ctx context.Context) error {
+func (b *Bucket) Initialize(ctx context.Context, templateType models.HashicorpCloudPackerIterationTemplateType) error {
 
 	if err := b.connect(); err != nil {
 		return err
@@ -119,7 +119,7 @@ func (b *Bucket) Initialize(ctx context.Context) error {
 		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
 	}
 
-	return b.initializeIteration(ctx)
+	return b.initializeIteration(ctx, templateType)
 }
 
 func (b *Bucket) RegisterBuildForComponent(sourceName string) {
@@ -302,10 +302,14 @@ func (b *Bucket) LoadDefaultSettingsFromEnv() {
 // createIteration creates an empty iteration for a give bucket on the HCP Packer registry.
 // The iteration can then be stored locally and used for tracking build status and images for a running
 // Packer build.
-func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error) {
+func (b *Bucket) createIteration(templateType models.HashicorpCloudPackerIterationTemplateType) (*models.HashicorpCloudPackerIteration, error) {
 	ctx := context.Background()
 
-	createIterationResp, err := b.client.CreateIteration(ctx, b.Slug, b.Iteration.Fingerprint)
+	if templateType == models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET {
+		return nil, fmt.Errorf("packer error: template type should not be unset when creating an iteration. This is a Packer internal bug which should be reported to the development team for a fix.")
+	}
+
+	createIterationResp, err := b.client.CreateIteration(ctx, b.Slug, b.Iteration.Fingerprint, templateType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
@@ -318,12 +322,12 @@ func (b *Bucket) createIteration() (*models.HashicorpCloudPackerIteration, error
 	return createIterationResp.Payload.Iteration, nil
 }
 
-func (b *Bucket) initializeIteration(ctx context.Context) error {
+func (b *Bucket) initializeIteration(ctx context.Context, templateType models.HashicorpCloudPackerIterationTemplateType) error {
 	// load existing iteration using fingerprint.
 	iteration, err := b.client.GetIteration(ctx, b.Slug, api.GetIteration_byFingerprint(b.Iteration.Fingerprint))
 	if api.CheckErrorCode(err, codes.Aborted) {
 		// probably means Iteration doesn't exist need a way to check the error
-		iteration, err = b.createIteration()
+		iteration, err = b.createIteration(templateType)
 	}
 
 	if err != nil {

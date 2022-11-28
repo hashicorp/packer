@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/zclconf/go-cty/cty"
@@ -26,7 +27,7 @@ const (
 
 // PopulateIteration creates the metadata on HCP for a build
 func (h *HCLMetadataRegistry) PopulateIteration(ctx context.Context) error {
-	err := h.bucket.Initialize(ctx)
+	err := h.bucket.Initialize(ctx, models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		return err
 	}

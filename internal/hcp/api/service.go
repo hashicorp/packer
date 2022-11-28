@@ -80,6 +80,7 @@ func (client *Client) CreateIteration(
 	ctx context.Context,
 	bucketSlug,
 	fingerprint string,
+	templateType models.HashicorpCloudPackerIterationTemplateType,
 ) (*packer_service.PackerServiceCreateIterationOK, error) {
 
 	params := packer_service.NewPackerServiceCreateIterationParamsWithContext(ctx)
@@ -88,6 +89,7 @@ func (client *Client) CreateIteration(
 	params.BucketSlug = bucketSlug
 	params.Body = packer_service.PackerServiceCreateIterationBody{
 		Fingerprint:  fingerprint,
+		TemplateType: templateType.Pointer(),
 	}
 
 	return client.Packer.PackerServiceCreateIteration(params, nil)
