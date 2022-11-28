@@ -27,7 +27,7 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -59,7 +59,32 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 	if ok := b.Iteration.HasBuild("happycloud.image"); !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
 	}
+}
 
+func TestInitialize_UnsetTemplateTypeError(t *testing.T) {
+	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testunsettemplate")
+	mockService := api.NewMockPackerClientService()
+	mockService.BucketAlreadyExist = true
+
+	b := &Bucket{
+		Slug: "TestBucket",
+		client: &api.Client{
+			Packer: mockService,
+		},
+	}
+
+	b.Iteration = NewIteration()
+	err := b.Iteration.Initialize(IterationOptions{})
+	if err != nil {
+		t.Errorf("unexpected failure: %v", err)
+	}
+
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET)
+	if err == nil {
+		t.Fatalf("unexpected success")
+	}
+
+	t.Logf("iteration creating failed as expected: %s", err)
 }
 
 func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
@@ -81,7 +106,7 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 	}
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -138,7 +163,7 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -210,7 +235,7 @@ func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err == nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -253,7 +278,7 @@ func TestUpdateBuildStatus(t *testing.T) {
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -308,7 +333,7 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO())
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}

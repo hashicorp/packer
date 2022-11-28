@@ -98,7 +98,8 @@ func (svc *MockPackerClientService) PackerServiceCreateIteration(params *packerS
 	}
 	payload := &models.HashicorpCloudPackerCreateIterationResponse{
 		Iteration: &models.HashicorpCloudPackerIteration{
-			ID: "iteration-id",
+			ID:           "iteration-id",
+			TemplateType: params.Body.TemplateType,
 		},
 	}
 
@@ -131,8 +132,9 @@ func (svc *MockPackerClientService) PackerServiceGetIteration(params *packerSvc.
 
 	payload := &models.HashicorpCloudPackerGetIterationResponse{
 		Iteration: &models.HashicorpCloudPackerIteration{
-			ID:     "iteration-id",
-			Builds: make([]*models.HashicorpCloudPackerBuild, 0),
+			ID:           "iteration-id",
+			Builds:       make([]*models.HashicorpCloudPackerBuild, 0),
+			TemplateType: models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET.Pointer(),
 		},
 	}
 

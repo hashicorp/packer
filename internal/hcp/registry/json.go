@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
 )
@@ -42,7 +43,7 @@ func (h *JSONMetadataRegistry) PopulateIteration(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = h.bucket.Initialize(ctx)
+	err = h.bucket.Initialize(ctx, models.HashicorpCloudPackerIterationTemplateTypeJSON)
 	if err != nil {
 		return err
 	}
