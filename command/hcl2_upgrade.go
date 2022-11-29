@@ -623,6 +623,40 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 	return isLocal, str.Bytes()
 }
 
+// referencedUserVariables executes parts of blocks as go template files finding user variables referenced
+// within the template. This function should be called once to extract those variables referenced via the {{user `...`}}
+// template function. The resulting map will contain variables defined in the JSON variables property, and some that
+// are declared via var-files; to avoid duplicates the results of this function should be reconciled against tpl.Variables.
+func referencedUserVariables(s []byte) map[string]*template.Variable {
+	userVars := make([]string, 0)
+	funcMap := texttemplate.FuncMap{
+		"user": func(in string) string {
+			userVars = append(userVars, in)
+			return ""
+		},
+	}
+
+	tpl, err := texttemplate.New("hcl2_upgrade").
+		Funcs(funcMap).
+		Parse(string(s))
+	if err != nil {
+		return nil
+	}
+
+	if err := tpl.Execute(&bytes.Buffer{}, nil); err != nil {
+		return nil
+	}
+
+	vars := make(map[string]*template.Variable)
+	for _, v := range userVars {
+		vars[v] = &template.Variable{
+			Key:      v,
+			Required: true,
+		}
+	}
+	return vars
+}
+
 func jsonBodyToHCL2Body(out *hclwrite.Body, kvs map[string]interface{}) {
 	ks := []string{}
 	for k := range kvs {
@@ -836,6 +870,17 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 		p.localsOut = []byte{}
 	}
 
+	// JSON supports variable declaration via var-files.
+	// User variables that might be defined in a var-file
+	// but not in the actual JSON template should be accounted for.
+	userVars := referencedUserVariables(tpl.RawContents)
+	for name, variable := range userVars {
+		if _, ok := tpl.Variables[name]; ok {
+			continue
+		}
+		tpl.Variables[name] = variable
+	}
+
 	variables := []*template.Variable{}
 	{
 		// sort variables to avoid map's randomness
@@ -852,7 +897,8 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 		// field with the "Default" value from the JSON variable.
 
 		// Interpolate Jsonval first as an hcl variable to determine if it is
-		// a local.
+		// a local. Variables referencing some form of variable expression must be defined as a local in HCL2,
+		// as variables in HCL2 must have a known value at parsing time.
 		isLocal, _ := variableTransposeTemplatingCalls([]byte(variable.Default))
 		sensitive := false
 		if isSensitiveVariable(variable.Key, tpl.SensitiveVariables) {
