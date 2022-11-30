@@ -33,16 +33,23 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       product-version: ${{ steps.set-product-version.outputs.product-version }}
+      base-product-version: ${{ steps.set-product-version.outputs.base-product-version }}
+      product-date: ${{ steps.get-product-version.outputs.product-date }}
       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
+      set-ld-flags: ${{ steps.set-product-versions.outputs.ldflags }}
     steps:
       - uses: actions/checkout@v3
       - name: set product version
         id: set-product-version
         uses: hashicorp/actions-set-product-version@v1
+      - name: set-ld-flags
+        id: set-ld-flags
+        run: |
+          T="github.com/hashicorp/packer/version"
+          echo "::set-output name=ldflags::-X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata=""
 
   generate-metadata-file:
-    needs:
-      - set-product-version
+    needs: set-product-version
     runs-on: ubuntu-latest
     outputs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
@@ -60,7 +67,7 @@ jobs:
         with:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
-
+  
   build-other:
     needs:
       - set-product-version
@@ -85,16 +92,12 @@ jobs:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go }}
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
-          CGO_ENABLED: CGO_ENABLED=0
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
         uses: hashicorp/actions-go-build@v0.1.7
         with:
           product_name: ${{ env.REPO_NAME }}
@@ -104,12 +107,8 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -o "$BIN_PATH" -trimpath \
-            -ldflags "
-              -X github.com/hashicorp/packer/version.Version=$PRODUCT_VERSION 
-              -X github.com/hashicorp/packer/version.GitCommit=$PRODUCT_REVISION 
-              -X github.com/hashicorp/packer/version.BuildDate=$PRODUCT_REVISION_TIME
-            "     
+            go build -ldflags="$LDFLAGS" -o "$BIN_PATH" -trimpath -buildvcs=false    
+      
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
@@ -134,16 +133,12 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go }}
       - name: Go Build
         env:
-          CGO_ENABLED: CGO_ENABLED=0
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
         uses: hashicorp/actions-go-build@v0.1.7
         with:
           product_name: ${{ env.REPO_NAME }}
@@ -153,12 +148,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -o "$BIN_PATH" -trimpath \
-            -ldflags "
-              -X github.com/hashicorp/packer/version.Version=$PRODUCT_VERSION 
-              -X github.com/hashicorp/packer/version.GitCommit=$PRODUCT_REVISION 
-              -X github.com/hashicorp/packer/version.BuildDate=$PRODUCT_REVISION_TIME
-            "
+            go build -ldflags="$LDFLAGS" -o "$BIN_PATH" -trimpath -buildvcs=false
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
@@ -207,16 +197,12 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go }}
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
-          CGO_ENABLED: CGO_ENABLED=0
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
         uses: hashicorp/actions-go-build@v0.1.7
         with:
           product_name: ${{ env.REPO_NAME }}
@@ -226,12 +212,8 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -o "$BIN_PATH" -trimpath \
-            -ldflags "
-              -X github.com/hashicorp/packer/version.Version=$PRODUCT_VERSION 
-              -X github.com/hashicorp/packer/version.GitCommit=$PRODUCT_REVISION 
-              -X github.com/hashicorp/packer/version.BuildDate=$PRODUCT_REVISION_TIME
-            "
+            go build -ldflags="$LD_FLAGS" -tags netcgo -o "$BIN_PATH" -trimpath -buildvcs=false
+      
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
