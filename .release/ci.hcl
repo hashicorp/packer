@@ -267,7 +267,7 @@ event "post-publish-website" {
   }
 }
 
-event "bump-version-patch" {
+event "bump-version" {
   depends = ["post-publish-website"]
   action "bump-version" {
     organization = "hashicorp"
@@ -281,7 +281,7 @@ event "bump-version-patch" {
 }
 
 event "update-ironbank" {
-  depends = ["bump-version-patch"]
+  depends = ["bump-version"]
   action "update-ironbank" {
     organization = "hashicorp"
     repository = "crt-workflows-common"

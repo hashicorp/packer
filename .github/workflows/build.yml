@@ -36,7 +36,7 @@ jobs:
       base-product-version: ${{ steps.set-product-version.outputs.base-product-version }}
       product-date: ${{ steps.get-product-version.outputs.product-date }}
       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
-      set-ld-flags: ${{ steps.set-product-versions.outputs.ldflags }}
+      set-ld-flags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}
     steps:
       - uses: actions/checkout@v3
       - name: set product version
@@ -46,12 +46,13 @@ jobs:
         id: set-ld-flags
         run: |
           T="github.com/hashicorp/packer/version"
-          echo "::set-output name=ldflags::-X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata="
-      - name: get product version
-        id: get-product-version
+          echo "::set-output name=set-ld-flags::-X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata="
+      - name: validate outputs
         run: |
-          make version
-          echo "::set-output name=product-version::$(make version)"
+          echo "Product Version: ${{ steps.set-product-version.outputs.product-version }}"
+          echo "Base Product Version: ${{ steps.set-product-version.outputs.base-product-version }}"
+          echo "Prerelease Version: ${{ steps.set-product-version.outputs.prerelease-product-version }}"
+          echo "ldflags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}"
 
   generate-metadata-file:
     needs: set-product-version
@@ -93,10 +94,12 @@ jobs:
       fail-fast: true
 
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+
     env:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
     steps:
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -112,12 +115,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -ldflags="$LDFLAGS" -o "$BIN_PATH" -trimpath -buildvcs=false    
-      
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false    
 
   build-linux:
     needs:
@@ -138,6 +136,7 @@ jobs:
       GO111MODULE: on
 
     steps:
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -153,11 +152,8 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -ldflags="$LDFLAGS" -o "$BIN_PATH" -trimpath -buildvcs=false
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false
+
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
@@ -202,6 +198,7 @@ jobs:
       GO111MODULE: on
 
     steps:
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -217,12 +214,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            go build -ldflags="$LD_FLAGS" -tags netcgo -o "$BIN_PATH" -trimpath -buildvcs=false
-      
-      - uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.set-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -tags netcgo -trimpath -buildvcs=false
 
   build-docker:
     name: Docker light ${{ matrix.arch }} build
