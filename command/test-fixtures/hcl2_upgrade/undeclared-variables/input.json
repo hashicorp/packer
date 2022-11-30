@@ -1,0 +1,18 @@
+{
+    "variables": {
+        "foo": "bar"
+    }, 
+    "builders": [
+        {
+        "type": "null",
+        "communicator": "{{ user `communicator_type` }}"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "script": "{{user `scriptpath`}}"
+        }
+    ]
+}
+

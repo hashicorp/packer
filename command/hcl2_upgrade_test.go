@@ -24,15 +24,16 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "source-name", flags: []string{"-with-annotations"}},
 		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}},
 		{folder: "aws-access-config", flags: []string{}},
-		{folder: "variables-only", flags: []string{}},
-		{folder: "variables-with-variables", flags: []string{}},
-		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "escaping", flags: []string{}},
 		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
 		{folder: "nonexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 		{folder: "placeholders", flags: []string{}, exitCode: 0},
 		{folder: "ami_test", flags: []string{}, exitCode: 0},
 		{folder: "azure_shg", flags: []string{}, exitCode: 0},
+		{folder: "variables-only", flags: []string{}},
+		{folder: "variables-with-variables", flags: []string{}},
+		{folder: "complete-variables-with-template-engine", flags: []string{}},
+		{folder: "undeclared-variables", flags: []string{}, exitCode: 0},
 	}
 
 	for _, tc := range tc {
