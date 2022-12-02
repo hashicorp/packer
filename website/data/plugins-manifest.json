@@ -195,6 +195,13 @@
     "version": "latest"
   },
   {
+    "title": "Nutanix",
+    "path": "nutanix",
+    "repo": "nutanix-cloud-native/packer-plugin-nutanix",
+    "version": "latest",
+    "sourceBranch": "main"
+  },
+  {
     "title": "OpenStack",
     "path": "openstack",
     "repo": "hashicorp/packer-plugin-openstack",
