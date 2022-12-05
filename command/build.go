@@ -107,7 +107,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		})
 	}
 
-	builds, hcpMap, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
+	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
 		Debug:   cla.Debug,
@@ -219,7 +219,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			defer limitParallel.Release(1)
 
-			err := hcpRegistry.StartBuild(buildCtx, hcpMap[name])
+			err := hcpRegistry.StartBuild(buildCtx, b)
 			// Seems odd to require this error check here. Now that it is an error we can just exit with diag
 			if err != nil {
 				// If the build is already done, we skip without a warning
@@ -249,7 +249,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			runArtifacts, hcperr := hcpRegistry.CompleteBuild(
 				buildCtx,
-				hcpMap[name],
+				b,
 				runArtifacts,
 				err)
 			if hcperr != nil {
