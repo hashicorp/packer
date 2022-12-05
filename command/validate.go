@@ -70,7 +70,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	_, _, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
+	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:   cla.Only,
 		Except: cla.Except,
 	})
