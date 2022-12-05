@@ -1,0 +1,37 @@
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "none"
+    },
+    {
+      "type": "null",
+      "name": "packer",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": ["echo packer provisioner {{build_name}} and {{build_type}}"],
+      "only": ["packer"]
+    },
+    {
+      "type": "shell-local",
+      "inline": ["echo null provisioner {{build_name}} and {{build_type}}"],
+      "except": ["packer"]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "shell-local",
+      "inline": ["echo packer post-processor {{build_name}} and {{build_type}}"],
+      "only": ["packer"]
+    },
+    {
+      "type": "shell-local",
+      "inline": ["echo null post-processor {{build_name}} and {{build_type}}"],
+      "except": ["packer"]
+    }
+  ]
+}

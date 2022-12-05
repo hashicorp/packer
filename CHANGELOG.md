@@ -11,6 +11,14 @@
      display the proper filename and line number where the unknown reference
      resides. [GH-12167](https://github.com/hashicorp/packer/pull/12167)
 
+### NOTES:
+* core: Users will see some changes in how names are displayed during a Packer
+     build for JSON templates. Previously only the builder type or the builder
+     name, if it was set, would be displayed. Now for named builders
+     (`"name":"mybuilder"`) the builder'ss type and name will be displayed (i.e
+     "<type>.mybuilder". This does not impact the behavior of options such as
+     only or except, they will continue to work as they did before.)
+
 ## 1.8.5 (December 12, 2022)
 
 ### NOTES:
