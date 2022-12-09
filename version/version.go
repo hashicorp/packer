@@ -1,9 +1,6 @@
 package version
 
 import (
-	_ "embed"
-	"strings"
-
 	"github.com/hashicorp/go-version"
 	pluginVersion "github.com/hashicorp/packer-plugin-sdk/version"
 )
@@ -25,7 +22,8 @@ var (
 	//go:embed VERSION
 	fullVersion string
 
-	Version, VersionPrerelease, _ = strings.Cut(fullVersion, "-")
+	Version           = "0.0.0"
+	VersionPrerelease = "dev"
 
 	VersionMetadata = ""
 )
