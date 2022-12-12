@@ -1,5 +1,71 @@
 ## 1.8.5 (Upcoming)
 
+### NOTES:
+* data/packer-image-iteration has been removed. This was an undocumented and
+     unusable data source that was built for experimentation but not released. It
+     should not affect users in any way but is being mentioned for visibility
+     purposes.
+     [GH-12111](https://github.com/hashicorp/packer/pull/12111)
+
+### FEATURES:
+* core: Metadata for capturing template types such as JSON or HCL2 has been added to the
+     HCP Packer registry metadata. Upon running a `packer build` the type of
+     template used during execution will be sent along to the registry as
+     additional build metadata.[GH-12132](https://github.com/hashicorp/packer/pull/12132)
+
+### PLUGINS:
+The following external plugins have been updated and pinned to address open
+    issues. Please see their respective changelogs for details on plugin
+    specific bug fixes and improvements.
+
+* alicloud@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.5)
+* amazon@v1.1.6 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.1.6)
+* proxmox@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.1.0)
+* vsphere@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.7)
+* qemu@v1.0.8 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.8)
+
+### IMPROVEMENTS:
+* cmd/hcl2_upgrade: Generate variable block for all referenced user input
+     variables. [GH-12136](https://github.com/hashicorp/packer/pull/12136)
+* cmd/validate: Add support for the `-evaluate-datasources` flag to evaluate
+     the data sources from a template during validation time.
+     [GH-12106](https://github.com/hashicorp/packer/pull/12106)
+     [GH-12152](https://github.com/hashicorp/packer/pull/12152)
+* core/hcl2: Variable definition files containing undeclared variables within
+     an HCL2 template will no longer warn during build execution. Warnings will
+     be displayed to a user during template validation, which can be disabled by
+     passing the `-no-warn-undeclared-var` flag to the validate command.
+     [GH-12104](https://github.com/hashicorp/packer/pull/12104)
+     [GH-12109](https://github.com/hashicorp/packer/pull/12109)
+* core: Docker images have been updated to include the `xorriso` package for
+     supporting the creation of ISO files.[GH-12081](https://github.com/hashicorp/packer/pull/12081)
+* core: Split HCP Packer publishing components into a separate internal-only
+     module. [GH-11](https://github.com/hashicorp/packer/pull/11967)
+     [GH-12116](https://github.com/hashicorp/packer/pull/12116)
+
+### BUG FIXES:
+* cmd/init: The init command will try to fallback to the next available version
+     for a plugin, if the most recent version is not available or has a missing
+     checksum file. This should prevent Packer from trying to install versions
+     that have a GitHub tag but no actual assets.
+     [GH-12103](https://github.com/hashicorp/packer/pull/12103)
+* cmd/plugins: The `plugins install` sub-command will try to fallback to the
+     next available version for a plugin, if the most recent version is not
+     available or has a missing checksum file. This should prevent Packer from
+     trying to install versions that have a GitHub tag but no actual assets.
+     [GH-12103](https://github.com/hashicorp/packer/pull/12103)
+* core: Bump Go version to 1.18.9 to address vulnerability GO-2022-1144, which
+     concerns the net/http and golang.org/x/net
+     packages.[GH-12153](https://github.com/hashicorp/packer/pull/12153)
+     [GH-12158](https://github.com/hashicorp/packer/pull/12158)
+* core: Fix the registration of deleted input artifacts in HCP Packer when
+     setting `keep_input_artifacts` to
+     false.[GH-11462](https://github.com/hashicorp/packer/pull/11967)
+* core: Using different template types when building a HCP Packer
+     image iteration will now trigger a runtime build error due to the 
+     mixing of template types.
+     [GH-12132](https://github.com/hashicorp/packer/pull/12132)
+
 ## 1.8.4 (October 28 2022)
 
 ### NOTES:
