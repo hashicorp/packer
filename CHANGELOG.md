@@ -1,4 +1,4 @@
-## 1.8.5 (Upcoming)
+## 1.8.5 (December 12, 2022)
 
 ### NOTES:
 * data/packer-image-iteration has been removed. This was an undocumented and
