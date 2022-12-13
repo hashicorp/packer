@@ -21,7 +21,7 @@ The following external plugins have been updated and pinned to address open
 * alicloud@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.5)
 * amazon@v1.1.6 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.1.6)
 * proxmox@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.1.0)
-* vsphere@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.7)
+* vsphere@v1.1.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.1.1)
 * qemu@v1.0.8 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.8)
 
 ### IMPROVEMENTS:
