@@ -4,7 +4,11 @@
 
 name: "Go Validate"
 
-on: [ workflow_dispatch, push ]
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
 
 permissions:
   contents: read

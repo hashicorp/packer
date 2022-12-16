@@ -5,7 +5,11 @@
 
 name: "Go Test"
 
-on: [ workflow_dispatch, push ]
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
 
 env:
   PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
