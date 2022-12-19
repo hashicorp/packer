@@ -3,6 +3,15 @@
 ### IMPROVEMENTS:
 * bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
      [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+* hcp: iteration fingerprints used to be computed from the Git SHA of the repository
+       where the template is located when running packer build. This changes with this
+       release, and now fingerprints are automatically generated as a ULID. This implies
+       that continuing an existing iteration will require users to define the
+       fingerprint in the environment manually in order to adopt this behaviour,
+       otherwise, by default, a new iteration will be created. This does not impact
+       workflows where the fingerprint was defined through the
+       HCP_PACKER_ITERATION_FINGERPRINT environment variable, and these builds will work
+       exactly as they did before.
 
 ### BUG FIXES: 
 * core/hcl2: Templates with build blocks referencing an unknown source block

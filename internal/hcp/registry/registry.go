@@ -12,15 +12,15 @@ import (
 
 // Registry is an entity capable to orchestrate a Packer build and upload metadata to HCP
 type Registry interface {
-	//Configure(packer.Handler)
 	PopulateIteration(context.Context) error
 	StartBuild(context.Context, sdkpacker.Build) error
 	CompleteBuild(ctx context.Context, build sdkpacker.Build, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
+	IterationStatusSummary()
 }
 
 // New instanciates the appropriate registry for the Packer configuration template type.
 // A nullRegistry is returned for non-HCP Packer registry enabled templates.
-func New(cfg packer.Handler) (Registry, hcl.Diagnostics) {
+func New(cfg packer.Handler, ui sdkpacker.Ui) (Registry, hcl.Diagnostics) {
 	if !IsHCPEnabled(cfg) {
 		return &nullRegistry{}, nil
 	}
@@ -28,9 +28,9 @@ func New(cfg packer.Handler) (Registry, hcl.Diagnostics) {
 	switch config := cfg.(type) {
 	case *hcl2template.PackerConfig:
 		// Maybe rename to what it represents....
-		return NewHCLMetadataRegistry(config)
+		return NewHCLMetadataRegistry(config, ui)
 	case *packer.Core:
-		return NewJSONMetadataRegistry(config)
+		return NewJSONMetadataRegistry(config, ui)
 	}
 
 	return nil, hcl.Diagnostics{

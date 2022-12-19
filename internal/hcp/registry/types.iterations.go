@@ -3,12 +3,17 @@ package registry
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
+	"strings"
 	"sync"
+	"time"
 
-	git "github.com/go-git/go-git/v5"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
+	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/internal/hcp/env"
+	"github.com/oklog/ulid"
 )
 
 type Iteration struct {
@@ -34,66 +39,26 @@ func NewIteration() *Iteration {
 }
 
 // Initialize prepares the iteration to be used with an active HCP Packer registry bucket.
-func (i *Iteration) Initialize(opts IterationOptions) error {
+func (i *Iteration) Initialize() error {
 	if i == nil {
 		return errors.New("Unexpected call to initialize for a nil Iteration")
 	}
 
 	// By default we try to load a Fingerprint from the environment variable.
-	// If no variable is defined we should try to load a fingerprint from Git, or other VCS.
+	// If no variable is defined we generate a new fingerprint.
 	i.Fingerprint = os.Getenv(env.HCPPackerBuildFingerprint)
 
 	if i.Fingerprint != "" {
 		return nil
 	}
 
-	fp, err := GetGitFingerprint(opts)
+	fp, err := ulid.New(ulid.Now(), ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0))
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to generate a fingerprint: %s", err)
 	}
-	i.Fingerprint = fp
+	i.Fingerprint = fp.String()
 
 	return nil
-}
-
-// GetGitFingerprint returns the HEAD commit for some template dir defined in opt.TemplateBaseDir.
-// If the base directory is not under version control an error is returned.
-func GetGitFingerprint(opts IterationOptions) (string, error) {
-	r, err := git.PlainOpenWithOptions(opts.TemplateBaseDir, &git.PlainOpenOptions{
-		DetectDotGit: true,
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("Packer could not read the fingerprint from git." +
-			"\n\nIf your Packer template is not within a git managed directory, " +
-			"you can set the HCP_PACKER_BUILD_FINGERPRINT environment variable. " +
-			"The fingerprint must be less than 32 characters and can contain letters and numbers.")
-	}
-
-	// The config can be used to retrieve user identity. for example,
-	// c.User.Email. Leaving in but commented because I'm not sure we care
-	// about this identity right now. - Megan
-	//
-	// c, err := r.ConfigScoped(config.GlobalScope)
-	// if err != nil {
-	//      return "", fmt.Errorf("Error setting git scope", err)
-	// }
-	ref, err := r.Head()
-	if err != nil {
-		// If we get there, we're in a Git dir, but HEAD cannot be read.
-		//
-		// This may happen when there's no commit in the git dir.
-		return "", fmt.Errorf("Packer could not read a git SHA in directory %q.\n"+
-			"This may happen if your template is in a git repository without any "+
-			"commits. You can either add a commit in this directory, or set the "+
-			"HCP_PACKER_BUILD_FINGERPRINT environment variable. The fingerprint "+
-			"must be less than 32 characters and can contain letters and numbers.\n"+
-			"Error: %s", opts.TemplateBaseDir, err)
-	}
-
-	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
-
-	return ref.Hash().String(), nil
 }
 
 //StoreBuild stores a build for buildName to an active iteration.
@@ -150,4 +115,60 @@ func (i *Iteration) AddLabelsToBuild(buildName string, data map[string]string) e
 
 	i.StoreBuild(buildName, build)
 	return nil
+}
+
+// AddSHAToBuildLabels adds the Git SHA for the current iteration (if set) as a label for all the builds of the iteration
+func (i *Iteration) AddSHAToBuildLabels(sha string) {
+	i.builds.Range(func(_, v any) bool {
+		b, ok := v.(*Build)
+		if !ok {
+			return true
+		}
+
+		b.MergeLabels(map[string]string{
+			"git_sha": sha,
+		})
+
+		return true
+	})
+}
+
+// RemainingBuilds returns the list of builds that are not in a DONE status
+func (i *Iteration) RemainingBuilds() []*Build {
+	var todo []*Build
+
+	i.builds.Range(func(k, v any) bool {
+		build, ok := v.(*Build)
+		if !ok {
+			// Unlikely since the builds map contains only Build instances
+			return true
+		}
+
+		if build.Status != models.HashicorpCloudPackerBuildStatusDONE {
+			todo = append(todo, build)
+		}
+		return true
+	})
+
+	return todo
+}
+
+func (i *Iteration) iterationStatusSummary(ui sdkpacker.Ui) {
+	rem := i.RemainingBuilds()
+	if rem == nil {
+		return
+	}
+
+	buf := &strings.Builder{}
+
+	buf.WriteString(fmt.Sprintf(
+		"\nIteration %q is not complete, the following builds are not done:\n\n",
+		i.Fingerprint))
+	for _, b := range rem {
+		buf.WriteString(fmt.Sprintf("* %q: %s\n", b.ComponentType, b.Status))
+	}
+	buf.WriteString("\nYou may resume work on this iteration in further Packer builds by defining the following variable in your environment:\n")
+	buf.WriteString(fmt.Sprintf("HCP_PACKER_BUILD_FINGERPRINT=%q", i.Fingerprint))
+
+	ui.Say(buf.String())
 }

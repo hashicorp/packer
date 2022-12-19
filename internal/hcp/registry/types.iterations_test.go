@@ -12,7 +12,6 @@ func TestIteration_Initialize(t *testing.T) {
 	var tc = []struct {
 		name          string
 		fingerprint   string
-		opts          IterationOptions
 		setupFn       func(t *testing.T)
 		errorExpected bool
 	}{
@@ -26,9 +25,6 @@ func TestIteration_Initialize(t *testing.T) {
 		{
 			name:        "using git fingerprint",
 			fingerprint: "4ec004e18e977a5b8a3a28f4b24279b6993d7e7c",
-			opts: IterationOptions{
-				TemplateBaseDir: tempdir("4ec004e18e"),
-			},
 			setupFn: func(t *testing.T) {
 				//nolint:errcheck
 				git.PlainClone(tempdir("4ec004e18e"), false, &git.CloneOptions{
@@ -37,6 +33,8 @@ func TestIteration_Initialize(t *testing.T) {
 					Depth: 1,
 				})
 
+				t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "4ec004e18e977a5b8a3a28f4b24279b6993d7e7c")
+
 				t.Cleanup(func() {
 					//nolint:errcheck
 					os.RemoveAll(tempdir("4ec004e18e"))
@@ -44,26 +42,7 @@ func TestIteration_Initialize(t *testing.T) {
 			},
 		},
 		{
-			name: "using empty git directory",
-			opts: IterationOptions{
-				TemplateBaseDir: tempdir("empty-init"),
-			},
-			setupFn: func(t *testing.T) {
-				//nolint:errcheck
-				git.PlainInit(tempdir("empty-init"), false)
-				t.Cleanup(func() {
-					//nolint:errcheck
-					os.RemoveAll(tempdir("empty-init"))
-				})
-			},
-			errorExpected: true,
-		},
-		{
 			name: "using no fingerprint in clean directory",
-			opts: IterationOptions{
-				TemplateBaseDir: "/dev/null",
-			},
-			errorExpected: true,
 		},
 	}
 
@@ -75,7 +54,7 @@ func TestIteration_Initialize(t *testing.T) {
 			}
 
 			i := NewIteration()
-			err := i.Initialize(tt.opts)
+			err := i.Initialize()
 			if tt.errorExpected {
 				t.Logf("%v", err)
 				if err == nil {
@@ -92,7 +71,7 @@ func TestIteration_Initialize(t *testing.T) {
 				t.Errorf("expected %q to return with no error, but it %v", tt.name, err)
 			}
 
-			if i.Fingerprint != tt.fingerprint {
+			if tt.fingerprint != "" && i.Fingerprint != tt.fingerprint {
 				t.Errorf("%q failed to load the expected fingerprint %q, but got %q", tt.name, tt.fingerprint, i.Fingerprint)
 			}
 
