@@ -25,3 +25,5 @@ func (r nullRegistry) CompleteBuild(
 ) ([]sdkpacker.Artifact, error) {
 	return artifacts, nil
 }
+
+func (r nullRegistry) IterationStatusSummary() {}

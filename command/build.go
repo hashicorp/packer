@@ -90,11 +90,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	hcpRegistry, diags := registry.New(packerStarter)
+	hcpRegistry, diags := registry.New(packerStarter, c.Ui)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
+
+	defer hcpRegistry.IterationStatusSummary()
 
 	err := hcpRegistry.PopulateIteration(buildCtx)
 	if err != nil {

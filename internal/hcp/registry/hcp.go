@@ -3,6 +3,7 @@ package registry
 import (
 	"fmt"
 
+	git "github.com/go-git/go-git/v5"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/internal/hcp/env"
@@ -87,9 +88,15 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	err := bucket.Iteration.Initialize(IterationOptions{
-		TemplateBaseDir: templateDir,
-	})
+	err := bucket.Iteration.Initialize()
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to initialize iteration",
+			Detail: fmt.Sprintf("The iteration failed to be initialized for bucket %q: %s",
+				bucket.Slug, err),
+		})
+	}
 
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
@@ -108,4 +115,36 @@ func withPackerEnvConfiguration(bucket *Bucket) hcl.Diagnostics {
 	bucket.LoadDefaultSettingsFromEnv()
 
 	return nil
+}
+
+// getGitSHA returns the HEAD commit for some template dir defined in baseDir.
+// If the base directory is not under version control an error is returned.
+func getGitSHA(baseDir string) (string, error) {
+	r, err := git.PlainOpenWithOptions(baseDir, &git.PlainOpenOptions{
+		DetectDotGit: true,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("Packer could not read the fingerprint from git.")
+	}
+
+	// The config can be used to retrieve user identity. for example,
+	// c.User.Email. Leaving in but commented because I'm not sure we care
+	// about this identity right now. - Megan
+	//
+	// c, err := r.ConfigScoped(config.GlobalScope)
+	// if err != nil {
+	//      return "", fmt.Errorf("Error setting git scope", err)
+	// }
+	ref, err := r.Head()
+	if err != nil {
+		// If we get there, we're in a Git dir, but HEAD cannot be read.
+		//
+		// This may happen when there's no commit in the git dir.
+		return "", fmt.Errorf("Packer could not read a git SHA in directory %q: %s", baseDir, err)
+	}
+
+	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
+
+	return ref.Hash().String(), nil
 }

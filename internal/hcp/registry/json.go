@@ -3,6 +3,7 @@ package registry
 import (
 	"context"
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
@@ -15,9 +16,10 @@ import (
 type JSONMetadataRegistry struct {
 	configuration *packer.Core
 	bucket        *Bucket
+	ui            sdkpacker.Ui
 }
 
-func NewJSONMetadataRegistry(config *packer.Core) (*JSONMetadataRegistry, hcl.Diagnostics) {
+func NewJSONMetadataRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONMetadataRegistry, hcl.Diagnostics) {
 	bucket, diags := createConfiguredBucket(
 		filepath.Dir(config.Template.Path),
 		withPackerEnvConfiguration,
@@ -41,9 +43,12 @@ func NewJSONMetadataRegistry(config *packer.Core) (*JSONMetadataRegistry, hcl.Di
 		bucket.RegisterBuildForComponent(buildName)
 	}
 
+	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Iteration.Fingerprint))
+
 	return &JSONMetadataRegistry{
 		configuration: config,
 		bucket:        bucket,
+		ui:            ui,
 	}, nil
 }
 
@@ -63,6 +68,13 @@ func (h *JSONMetadataRegistry) PopulateIteration(ctx context.Context) error {
 		return err
 	}
 
+	sha, err := getGitSHA(h.configuration.Template.Path)
+	if err != nil {
+		log.Printf("failed to get GIT SHA from environment, won't set as build labels")
+	} else {
+		h.bucket.Iteration.AddSHAToBuildLabels(sha)
+	}
+
 	return nil
 }
 
@@ -79,4 +91,9 @@ func (h *JSONMetadataRegistry) CompleteBuild(
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
 	return h.bucket.completeBuild(ctx, build.Name(), artifacts, buildErr)
+}
+
+// IterationStatusSummary prints a status report in the UI if the iteration is not yet done
+func (h *JSONMetadataRegistry) IterationStatusSummary() {
+	h.bucket.Iteration.iterationStatusSummary(h.ui)
 }
