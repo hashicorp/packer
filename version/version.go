@@ -19,8 +19,6 @@ var (
 	// A pre-release marker for the version can also be specified (e.g -dev). If this is omitted
 	// then it means that it is a final release. Otherwise, this is a pre-release
 	// such as "dev" (in development), "beta", "rc1", etc.
-	//go:embed VERSION
-	fullVersion string
 
 	Version           = "0.0.0"
 	VersionPrerelease = "dev"
