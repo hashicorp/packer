@@ -16,7 +16,6 @@ type Iteration struct {
 	AncestorSlug   string
 	Fingerprint    string
 	RunUUID        string
-	Labels         map[string]string
 	builds         sync.Map
 	expectedBuilds []string
 }
