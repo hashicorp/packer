@@ -238,7 +238,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	select {
 	case <-ctx.Done():
 		log.Println("Build was cancelled. Skipping post-processors.")
-		return nil, nil
+		return nil, ctx.Err()
 	default:
 	}
 
