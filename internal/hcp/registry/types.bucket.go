@@ -569,7 +569,11 @@ func (b *Bucket) completeBuild(
 	}
 
 	if buildErr != nil {
-		err := b.UpdateBuildStatus(ctx, buildName, models.HashicorpCloudPackerBuildStatusFAILED)
+		status := models.HashicorpCloudPackerBuildStatusFAILED
+		if ctx.Err() != nil {
+			status = models.HashicorpCloudPackerBuildStatusCANCELLED
+		}
+		err := b.UpdateBuildStatus(context.Background(), buildName, status)
 		if err != nil {
 			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
 		}
