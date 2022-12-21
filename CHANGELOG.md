@@ -1,5 +1,15 @@
 ## 1.8.6 (Upcoming)
 
+### IMPROVEMENTS:
+* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
+     [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+
+### BUG FIXES: 
+* core/hcl2: Templates with build blocks referencing an unknown source block
+     would display an empty string for the template filename at line 0, which made
+     it difficult to identify the broken build block. Packer has been updated to
+     display the proper filename and line number where the unknown reference
+     resides. [GH-12167](https://github.com/hashicorp/packer/pull/12167)
 
 ## 1.8.5 (December 12, 2022)
 
