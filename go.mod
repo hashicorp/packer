@@ -1,5 +1,7 @@
 module github.com/hashicorp/packer
 
+go 1.18
+
 require (
 	cloud.google.com/go v0.104.0 // indirect
 	github.com/biogo/hts v1.4.3
@@ -125,7 +127,7 @@ require (
 	github.com/Telmate/proxmox-api-go v0.0.0-20220107223401-b9c909d83a3b // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.108 // indirect
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible // indirect
 	github.com/antihax/optional v1.0.0 // indirect
 	github.com/apache/cloudstack-go/v2 v2.12.0 // indirect
@@ -227,6 +229,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
@@ -257,11 +260,11 @@ require (
 	google.golang.org/genproto v0.0.0-20220920201722-2b89144ce006 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
-	gopkg.in/ini.v1 v1.62.0 // indirect
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.18
+replace github.com/hashicorp/packer-plugin-sdk => github.com/inloco/packer-plugin-sdk v0.3.2-incognia.3
