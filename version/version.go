@@ -20,7 +20,7 @@ var (
 	// then it means that it is a final release. Otherwise, this is a pre-release
 	// such as "dev" (in development), "beta", "rc1", etc.
 
-	Version           = ""
+	Version           = "1.8.5"
 	VersionPrerelease = "dev"
 
 	VersionMetadata = ""
