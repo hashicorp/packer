@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:    
       - name: Login
-        uses: atlassian/gajira-login@v2.0.0
+        uses: atlassian/gajira-login@v3.0.1
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -61,7 +61,7 @@ jobs:
       - name: Create ticket
         id: create-ticket
         if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: atlassian/gajira-create@v2.0.1
+        uses: atlassian/gajira-create@v3.0.1
         with:
           project: HPR
           issuetype: "${{ steps.set-ticket-type.outputs.type }}"

@@ -20,7 +20,7 @@ func (client *Client) CreateBucket(
 	createBktParams := packer_service.NewPackerServiceCreateBucketParams()
 	createBktParams.LocationOrganizationID = client.OrganizationID
 	createBktParams.LocationProjectID = client.ProjectID
-	createBktParams.Body = &models.HashicorpCloudPackerCreateBucketRequest{
+	createBktParams.Body = packer_service.PackerServiceCreateBucketBody{
 		BucketSlug:  bucketSlug,
 		Description: bucketDescription,
 		Labels:      bucketLabels,
@@ -67,8 +67,7 @@ func (client *Client) UpsertBucket(
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
-	params.Body = &models.HashicorpCloudPackerUpdateBucketRequest{
-		BucketSlug:  bucketSlug,
+	params.Body = packer_service.PackerServiceUpdateBucketBody{
 		Description: bucketDescription,
 		Labels:      bucketLabels,
 	}
@@ -81,15 +80,16 @@ func (client *Client) CreateIteration(
 	ctx context.Context,
 	bucketSlug,
 	fingerprint string,
+	templateType models.HashicorpCloudPackerIterationTemplateType,
 ) (*packer_service.PackerServiceCreateIterationOK, error) {
 
 	params := packer_service.NewPackerServiceCreateIterationParamsWithContext(ctx)
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
-	params.Body = &models.HashicorpCloudPackerCreateIterationRequest{
-		Fingerprint: fingerprint,
-		BucketSlug:  bucketSlug,
+	params.Body = packer_service.PackerServiceCreateIterationBody{
+		Fingerprint:  fingerprint,
+		TemplateType: templateType.Pointer(),
 	}
 
 	return client.Packer.PackerServiceCreateIteration(params, nil)
@@ -148,14 +148,12 @@ func (client *Client) CreateBuild(
 	params.LocationProjectID = client.ProjectID
 	params.BucketSlug = bucketSlug
 	params.IterationID = iterationID
-	params.Body = &models.HashicorpCloudPackerCreateBuildRequest{
-		BucketSlug:  bucketSlug,
-		IterationID: iterationID,
+	params.Body = packer_service.PackerServiceCreateBuildBody{
 		Fingerprint: fingerprint,
 		Build: &models.HashicorpCloudPackerBuildCreateBody{
 			ComponentType: componentType,
 			PackerRunUUID: runUUID,
-			Status:        status,
+			Status:        status.Pointer(),
 		},
 	}
 
@@ -204,13 +202,12 @@ func (client *Client) UpdateBuild(
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 
-	params.Body = &models.HashicorpCloudPackerUpdateBuildRequest{
-		BuildID: buildID,
+	params.Body = packer_service.PackerServiceUpdateBuildBody{
 		Updates: &models.HashicorpCloudPackerBuildUpdates{
 			Images:            images,
 			PackerRunUUID:     runUUID,
 			Labels:            labels,
-			Status:            status,
+			Status:            status.Pointer(),
 			CloudProvider:     cloudProvider,
 			SourceImageID:     sourceImageID,
 			SourceIterationID: sourceIterationID,

@@ -1113,6 +1113,137 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 	}
 }
 
+// TestProvisionerOnlyExcept checks that only/except blocks in provisioners/post-processors behave as expected
+func TestProvisionerAndPostProcessorOnlyExcept(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []string
+		expectedCode int
+		outputCheck  func(string, string) error
+	}{
+		{
+			"json - only named build",
+			[]string{
+				"-only", "packer",
+				testFixture("provisioners", "provisioner-only-except.json"),
+			},
+			0,
+			func(out, _ string) error {
+				if !strings.Contains(out, "packer provisioner packer and null") {
+					return fmt.Errorf("missing expected provisioner output")
+				}
+
+				if !strings.Contains(out, "packer post-processor packer and null") {
+					return fmt.Errorf("missing expected post-processor output")
+				}
+
+				if strings.Contains(out, "null post-processor") || strings.Contains(out, "null provisioner") {
+					return fmt.Errorf("found traces of unnamed provisioner/post-processor, should not")
+				}
+
+				return nil
+			},
+		},
+		{
+			"json - only unnamed build",
+			[]string{
+				"-only", "null",
+				testFixture("provisioners", "provisioner-only-except.json"),
+			},
+			0,
+			func(out, _ string) error {
+				if !strings.Contains(out, "null provisioner null and null") {
+					return fmt.Errorf("missing expected provisioner output")
+				}
+
+				if !strings.Contains(out, "null post-processor null and null") {
+					return fmt.Errorf("missing expected post-processor output")
+				}
+
+				if strings.Contains(out, "packer post-processor") || strings.Contains(out, "packer provisioner") {
+					return fmt.Errorf("found traces of named provisioner/post-processor, should not")
+				}
+
+				return nil
+			},
+		},
+		{
+			"hcl - only one source build",
+			[]string{
+				"-only", "null.packer",
+				testFixture("provisioners", "provisioner-only-except.pkr.hcl"),
+			},
+			0,
+			func(out, _ string) error {
+				if !strings.Contains(out, "packer provisioner packer and null") {
+					return fmt.Errorf("missing expected provisioner output")
+				}
+
+				if !strings.Contains(out, "packer post-processor packer and null") {
+					return fmt.Errorf("missing expected post-processor output")
+				}
+
+				if strings.Contains(out, "other post-processor") || strings.Contains(out, "other provisioner") {
+					return fmt.Errorf("found traces of other provisioner/post-processor, should not")
+				}
+
+				return nil
+			},
+		},
+		{
+			"hcl - only other build",
+			[]string{
+				"-only", "null.other",
+				testFixture("provisioners", "provisioner-only-except.pkr.hcl"),
+			},
+			0,
+			func(out, _ string) error {
+				if !strings.Contains(out, "other provisioner other and null") {
+					return fmt.Errorf("missing expected provisioner output")
+				}
+
+				if !strings.Contains(out, "other post-processor other and null") {
+					return fmt.Errorf("missing expected post-processor output")
+				}
+
+				if strings.Contains(out, "packer post-processor") || strings.Contains(out, "packer provisioner") {
+					return fmt.Errorf("found traces of \"packer\" source provisioner/post-processor, should not")
+				}
+
+				return nil
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &BuildCommand{
+				Meta: TestMetaFile(t),
+			}
+
+			exitCode := c.Run(tt.args)
+			if exitCode != tt.expectedCode {
+				t.Errorf("process exit code mismatch: expected %d, got %d",
+					tt.expectedCode,
+					exitCode)
+			}
+
+			out, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
+			err := tt.outputCheck(out, stderr)
+			if err != nil {
+				if len(out) != 0 {
+					t.Logf("command stdout: %q", out)
+				}
+
+				if len(stderr) != 0 {
+					t.Logf("command stderr: %q", stderr)
+				}
+				t.Error(err.Error())
+			}
+		})
+	}
+}
+
 // TestBuildCmd aims to test the build command, with output validation
 func TestBuildCmd(t *testing.T) {
 	tests := []struct {

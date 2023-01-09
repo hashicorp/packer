@@ -195,6 +195,13 @@
     "version": "latest"
   },
   {
+    "title": "Nutanix",
+    "path": "nutanix",
+    "repo": "nutanix-cloud-native/packer-plugin-nutanix",
+    "version": "latest",
+    "sourceBranch": "main"
+  },
+  {
     "title": "OpenStack",
     "path": "openstack",
     "repo": "hashicorp/packer-plugin-openstack",
@@ -270,6 +277,13 @@
     "repo": "ivoronin/packer-plugin-sshkey",
     "pluginTier": "community",
     "version": "v1.0.1"
+  },
+  {
+    "title": "Tart",
+    "path": "tart",
+    "repo": "cirruslabs/packer-plugin-tart",
+    "pluginTier": "community",
+    "version": "latest"
   },
   {
     "title": "Tencent Cloud",

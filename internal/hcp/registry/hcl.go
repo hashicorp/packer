@@ -5,8 +5,10 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template"
+	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
@@ -26,7 +28,7 @@ const (
 
 // PopulateIteration creates the metadata on HCP for a build
 func (h *HCLMetadataRegistry) PopulateIteration(ctx context.Context) error {
-	err := h.bucket.Initialize(ctx)
+	err := h.bucket.Initialize(ctx, models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		return err
 	}
@@ -44,18 +46,28 @@ func (h *HCLMetadataRegistry) PopulateIteration(ctx context.Context) error {
 }
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
-func (h *HCLMetadataRegistry) StartBuild(ctx context.Context, buildName string) error {
-	return h.bucket.startBuild(ctx, buildName)
+func (h *HCLMetadataRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
+	name := build.Name()
+	cb, ok := build.(*packer.CoreBuild)
+	if ok {
+		name = cb.Type
+	}
+	return h.bucket.startBuild(ctx, name)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
 func (h *HCLMetadataRegistry) CompleteBuild(
 	ctx context.Context,
-	buildName string,
+	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
+	name := build.Name()
+	cb, ok := build.(*packer.CoreBuild)
+	if ok {
+		name = cb.Type
+	}
+	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
 func NewHCLMetadataRegistry(config *hcl2template.PackerConfig) (*HCLMetadataRegistry, hcl.Diagnostics) {
