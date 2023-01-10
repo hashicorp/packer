@@ -679,15 +679,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 				continue
 			}
 
-			if build.ErrorCleanupProvisionerBlock != nil {
-				if !build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
-					errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
-					diags = append(diags, moreDiags...)
-					if moreDiags.HasErrors() {
-						continue
-					}
-					pcb.CleanupProvisioner = errorCleanupProv
+			if build.ErrorCleanupProvisionerBlock != nil &&
+				!build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
+				errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
+				diags = append(diags, moreDiags...)
+				if moreDiags.HasErrors() {
+					continue
 				}
+				pcb.CleanupProvisioner = errorCleanupProv
 			}
 
 			pcb.Builder = builder
