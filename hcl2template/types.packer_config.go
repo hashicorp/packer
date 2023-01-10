@@ -514,7 +514,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext, exceptMatches *int) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := [][]packer.CoreBuildPostProcessor{}
 	for _, blocks := range blocksList {
@@ -533,6 +533,7 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			for _, exceptGlob := range cfg.except {
 				if exceptGlob.Match(name) {
 					exclude = true
+					*exceptMatches = *exceptMatches + 1
 					break
 				}
 			}
@@ -673,7 +674,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			if moreDiags.HasErrors() {
 				continue
 			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables))
+			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables), &opts.ExceptMatches)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
