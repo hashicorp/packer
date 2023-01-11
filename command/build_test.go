@@ -1321,6 +1321,27 @@ func TestBuildCmd(t *testing.T) {
 				return nil
 			},
 		},
+		{
+			name: "hcl - exclude post-processor, expect no warning",
+			args: []string{
+				"-except", "manifest",
+				testFixture("hcl", "test_except_manifest.pkr.hcl"),
+			},
+			expectedCode: 0,
+			outputCheck: func(out, err string) error {
+				for _, stream := range []string{out, err} {
+					if strings.Contains(stream, "Warning: an 'except' option was passed, but did not match any build") {
+						return fmt.Errorf("Unexpected warning for build no match with except")
+					}
+
+					if strings.Contains(stream, "Running post-processor:") {
+						return fmt.Errorf("Should not run post-processors, but found one")
+					}
+				}
+
+				return nil
+			},
+		},
 	}
 
 	for _, tt := range tests {
