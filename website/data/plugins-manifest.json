@@ -338,6 +338,13 @@
     "version": "latest"
   },
   {
+    "title": "Volcengine",
+    "path": "volcengine",
+    "repo": "volcengine/packer-plugin-volcengine",
+    "pluginTier": "community",
+    "version": "latest"
+  },
+  {
     "title": "VMware vSphere",
     "path": "vsphere",
     "repo": "hashicorp/packer-plugin-vsphere",
