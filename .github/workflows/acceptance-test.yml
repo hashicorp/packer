@@ -37,6 +37,8 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
+      # Packer GH Token for API Rate Limiting
+      PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
