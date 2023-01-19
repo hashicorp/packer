@@ -10,7 +10,6 @@ on: [ workflow_dispatch, push, workflow_call ]
 
 env:
   REPO_NAME: "packer"
-  GO_TAGS: ""
 
 permissions:
   contents: read
@@ -21,7 +20,7 @@ jobs:
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: 'Determine Go version'
         id: get-go-version
         # We use .go-version as our source of truth for current Go
@@ -30,58 +29,55 @@ jobs:
           echo "Building with Go $(cat .go-version)"
           echo "::set-output name=go-version::$(cat .go-version)"
 
-  get-product-version:
+  set-product-version:
     runs-on: ubuntu-latest
     outputs:
-      product-version: ${{ steps.get-product-version.outputs.product-version }}
+      product-version: ${{ steps.set-product-version.outputs.product-version }}
+      base-product-version: ${{ steps.set-product-version.outputs.base-product-version }}
+      product-date: ${{ steps.get-product-version.outputs.product-date }}
+      product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
+      set-ld-flags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}
     steps:
-      - uses: actions/checkout@v2
-      - name: get product version
-        id: get-product-version
+      - uses: actions/checkout@v3
+      - name: set product version
+        id: set-product-version
+        uses: hashicorp/actions-set-product-version@v1
+      - name: set-ld-flags
+        id: set-ld-flags
         run: |
-          make version
-          echo "::set-output name=product-version::$(make version)"
+          T="github.com/hashicorp/packer/version"
+          echo "::set-output name=set-ld-flags::-X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata="
+      - name: validate outputs
+        run: |
+          echo "Product Version: ${{ steps.set-product-version.outputs.product-version }}"
+          echo "Base Product Version: ${{ steps.set-product-version.outputs.base-product-version }}"
+          echo "Prerelease Version: ${{ steps.set-product-version.outputs.prerelease-product-version }}"
+          echo "ldflags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}"
 
   generate-metadata-file:
-    needs:
-      - get-product-version
+    needs: set-product-version
     runs-on: ubuntu-latest
     outputs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
     steps:
       - name: 'Checkout directory'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Generate metadata file
         id: generate-metadata-file
         uses: hashicorp/actions-generate-metadata@main
         with:
-          version: ${{ needs.get-product-version.outputs.product-version }}
+          version: ${{ needs.set-product-version.outputs.product-version }}
           product: ${{ env.REPO_NAME }}
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
-
-  set-ld-flags:
-    needs: get-product-version
-    runs-on: ubuntu-latest
-    outputs:
-      ldflags: ${{ steps.generate-ld-flags.outputs.ldflags }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: 'Generate ld flags'
-        id: generate-ld-flags
-        run: |
-          project="$(go list -m)"
-          sha="$(git rev-parse HEAD)"
-          echo "::set-output name=ldflags::"-s -w -X \'$project/version.GitCommit=$sha\'""
-
+  
   build-other:
     needs:
-      - get-product-version
+      - set-product-version
       - get-go-version
-      - set-ld-flags
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -98,36 +94,33 @@ jobs:
       fail-fast: true
 
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
+
     env:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
-      LD_FLAGS: ${{ needs.set-ld-flags.outputs.ldflags }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          mkdir -p dist out
-          unset GOPATH;
-          go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
-      - uses: actions/upload-artifact@v2
+          PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
+          PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
+        uses: hashicorp/actions-go-build@v0.1.7
         with:
-          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          product_name: ${{ env.REPO_NAME }}
+          product_version: ${{ needs.set-product-version.outputs.product-version }}
+          go_version: ${{ matrix.go }}
+          os: ${{ matrix.goos }}
+          arch: ${{ matrix.goarch }}
+          reproducible: report
+          instructions: |-
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false    
 
   build-linux:
     needs:
-      - get-product-version
+      - set-product-version
       - get-go-version
-      - set-ld-flags
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -141,28 +134,25 @@ jobs:
     env:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
-      LD_FLAGS: ${{ needs.set-ld-flags.outputs.ldflags }}
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          mkdir -p dist out
-          unset GOPATH;
-          go build -v -tags "${{ env.GO_TAGS }}" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
-      - uses: actions/upload-artifact@v2
+          PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
+          PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
+        uses: hashicorp/actions-go-build@v0.1.7
         with:
-          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          product_name: ${{ env.REPO_NAME }}
+          product_version: ${{ needs.set-product-version.outputs.product-version }}
+          go_version: ${{ matrix.go }}
+          os: ${{ matrix.goos }}
+          arch: ${{ matrix.goarch }}
+          reproducible: report
+          instructions: |-
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false
 
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
@@ -170,7 +160,7 @@ jobs:
           name: ${{ env.REPO_NAME }}
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
           arch: ${{ matrix.goarch }}
-          version: ${{ needs.get-product-version.outputs.product-version }}
+          version: ${{ needs.set-product-version.outputs.product-version }}
           maintainer: "HashiCorp"
           homepage: "https://www.packer.io/docs"
           license: "MPL-2.0"
@@ -181,20 +171,19 @@ jobs:
         run: |
           echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
           echo "DEB_PACKAGE=$(basename out/*.deb)" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.RPM_PACKAGE }}
           path: out/${{ env.RPM_PACKAGE }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ env.DEB_PACKAGE }}
           path: out/${{ env.DEB_PACKAGE }}
 
   build-darwin:
     needs:
-      - get-product-version
+      - set-product-version
       - get-go-version
-      - set-ld-flags
     runs-on: macos-latest
     strategy:
       matrix:
@@ -207,42 +196,39 @@ jobs:
     env:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
-      LD_FLAGS: ${{ needs.set-ld-flags.outputs.ldflags }}
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
       - name: Go Build
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          mkdir -p dist out
-          unset GOPATH;
-          go build -v -tags "${{ env.GO_TAGS }} netcgo" -ldflags "${{ env.LD_FLAGS }}" -o dist/ .
-          zip -r -j out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip dist/
-      - uses: actions/upload-artifact@v2
+          PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
+          PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
+          LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
+          CGO_ENABLED: "0"
+        uses: hashicorp/actions-go-build@v0.1.7
         with:
-          name: ${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          path: out/${{ env.REPO_NAME }}_${{ needs.get-product-version.outputs.product-version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          product_name: ${{ env.REPO_NAME }}
+          product_version: ${{ needs.set-product-version.outputs.product-version }}
+          go_version: ${{ matrix.go }}
+          os: ${{ matrix.goos }}
+          arch: ${{ matrix.goarch }}
+          reproducible: report
+          instructions: |-
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -tags netcgo -trimpath -buildvcs=false
 
   build-docker:
     name: Docker light ${{ matrix.arch }} build
     needs:
-      - get-product-version
+      - set-product-version
       - build-linux
     runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [ "arm", "arm64", "386", "amd64" ]
     env:
-      version: ${{ needs.get-product-version.outputs.product-version }}
+      version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v1
         with:
