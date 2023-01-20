@@ -1,7 +1,7 @@
 Plugins will usually be located in the
-[PACKER_HOME_DIR](/docs/configure#packer-s-home-directory).
+[PACKER_HOME_DIR](/packer/docs/configure#packer-s-home-directory).
 
-* [`packer init`](/docs/commands/init) will install plugins in the **last** directory
+* [`packer init`](/packer/docs/commands/init) will install plugins in the **last** directory
 in the following numbered list.
 
 * During the initialization of Packer, any plugin required in the
@@ -13,7 +13,7 @@ found version matching `required_plugins` will be taken into consideration.
 1. The directory where `packer` is, or the executable directory.
 1. The current working directory. (`"."`)
 1. The `PACKER_HOME_DIR/plugins` directory. `PACKER_HOME_DIR` refers to *[Packer's home
-directory](/docs/configure#packer-s-home-directory)*, if it could be found.
+directory](/packer/docs/configure#packer-s-home-directory)*, if it could be found.
 1. The director(y/ies) under the `PACKER_PLUGIN_PATH` env var, if `PACKER_PLUGIN_PATH`
 is set.
 

@@ -66,8 +66,8 @@ Here is the list of available build variables:
 For backwards compatibility, `WinRMPassword` is also available through this
 engine, though it is no different than using the more general `Password`.
 
-All build variables are valid to use with any of the [HCL2 functions](/docs/templates/hcl_templates/functions).
-Example of using [upper](/docs/templates/hcl_templates/functions/string/upper) to upper case the build ID:
+All build variables are valid to use with any of the [HCL2 functions](/packer/docs/templates/hcl_templates/functions).
+Example of using [upper](/packer/docs/templates/hcl_templates/functions/string/upper) to upper case the build ID:
 
 ```hcl
   post-processor "shell-local" {
@@ -77,11 +77,11 @@ Example of using [upper](/docs/templates/hcl_templates/functions/string/upper) t
 
 For builder-specific builder variables, please also refer to the builder docs:
 
-- Amazon EC2: [chroot](/plugins/builders/amazon/chroot#build-shared-information-variables),
-  [EBS Volume](/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
-  [EBS](/plugins/builders/amazon/ebs#build-shared-information-variables),
-  [EBS Surrogate](/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
-  [Instance](/plugins/builders/amazon/instance#build-shared-information-variables).
+- Amazon EC2: [chroot](/packer/plugins/builders/amazon/chroot#build-shared-information-variables),
+  [EBS Volume](/packer/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
+  [EBS](/packer/plugins/builders/amazon/ebs#build-shared-information-variables),
+  [EBS Surrogate](/packer/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
+  [Instance](/packer/plugins/builders/amazon/instance#build-shared-information-variables).
 
 The HCL2 Special Build Variables is in beta; please report any issues or requests on the Packer
 issue tracker on GitHub.

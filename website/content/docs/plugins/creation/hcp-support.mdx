@@ -9,7 +9,7 @@ page_title: HCP Packer Support
 ~> **Note:** HCP Packer is under active development, and we suggest plugin maintainers to keep up with the SDK changes
 for more on HCP Packer support.
 
-This page explains how to update a custom plugin so that it can publish image metadata to the [HCP Packer registry](https://cloud.hashicorp.com/docs/packer). Refer to [Custom Builders](/docs/plugins/creation/custom-builders) and [Custom Post-Processors](/docs/plugins/creation/custom-post-processors) for details about creating an external Packer plugin.
+This page explains how to update a custom plugin so that it can publish image metadata to the [HCP Packer registry](/hcp/docs/packer). Refer to [Custom Builders](/packer/docs/plugins/creation/custom-builders) and [Custom Post-Processors](/packer/docs/plugins/creation/custom-post-processors) for details about creating an external Packer plugin.
 
 Before pushing metadata to the HCP Packer registry, Packer uses the [`par.artifact.metadata` key](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image#pkg-constants)
 to query a builder artifact for the image metadata that a particular component would like to have stored in the registry.
@@ -111,5 +111,5 @@ The following plugins currently support HCP Packer and are great references for 
 ## HCP Packer
 
 To get to know HCP Packer, visit the
-[HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the
-[Get Started with HCP Packer tutorials](https://learn.hashicorp.com/collections/packer/hcp-get-started).
+[HCP Packer documentation](/hcp/docs/packer) or try the
+[Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).

@@ -89,16 +89,16 @@ configuration file. None of these are required, since all have defaults.
 - `builders`, `commands`, `post-processors`, and `provisioners` are objects
   that are used to install plugins. The details of how exactly these are set is
   covered in more detail in the [installing plugins documentation
-  page](/docs/plugins/install-plugins). It is instead recommended to use [HCL2
-  `required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-  and the [`packer init`](/docs/commands/init) command to install plugins; if
+  page](/packer/docs/plugins/install-plugins). It is instead recommended to use [HCL2
+  `required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+  and the [`packer init`](/packer/docs/commands/init) command to install plugins; if
   you are using both, the `required_plugin` config will take precedence.
 
 ### HCP Packer Configuration
 
 You can configure both legacy JSON and HCL2 Packer templates to publish image metadata to an active HCP Packer registry. The HCP Packer registry helps you track information about machine images, clearly designate which images are appropriate for test and production environments, and query the right images to use in both Packer and Terraform configurations.
 
-For complete configuration details and examples, refer to [Packer Template Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/template-configuration) in the HCP Packer documentation.
+For complete configuration details and examples, refer to [Packer Template Configuration](/hcp/docs/packer/store-image-metadata/template-configuration) in the HCP Packer documentation.
 
 ## Full list of Environment Variables usable for Packer
 
@@ -122,11 +122,11 @@ each can be found below:
 
 - `PACKER_LOG` - Setting this to any value other than "" (empty string) or
   "0" will enable the logger. See the [debugging
-  page](/docs/debugging).
+  page](/packer/docs/debugging).
 
 - `PACKER_LOG_PATH` - The location of the log file. Note: `PACKER_LOG` must
   be set for any logging to occur. See the [debugging
-  page](/docs/debugging).
+  page](/packer/docs/debugging).
 
 - `PACKER_NO_COLOR` - Setting this to any value will disable color in the
   terminal.

@@ -124,11 +124,11 @@ Optional parameters:
   ["cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"]
   ```
 
-  This is treated as a [template engine](/docs/templates/legacy_json_templates/engine).
+  This is treated as a [template engine](/packer/docs/templates/legacy_json_templates/engine).
   There are several available variables: `Script`, which is the path to the
   script to run, and `Vars`, which is the list of `environment_vars`, if
   configured. In addition, you may access any of the variables stored in the
-  generated data using the [build](/docs/templates/legacy_json_templates/engine) template
+  generated data using the [build](/packer/docs/templates/legacy_json_templates/engine) template
   function. If you choose to set this option, make sure that the first
   element in the array is the shell program you want to use (for example,
   "sh" or "/usr/local/bin/zsh" or even "powershell.exe" although anything
@@ -164,7 +164,7 @@ Optional parameters:
   shell-local, since the shell-local post-processor merely passes forward the
   artifact it receives. If your shell-local post-processor produces a file or
   files which you would like to have replace the input artifact, you may
-  overwrite the input artifact using the [artifice](/docs/post-processors/artifice)
+  overwrite the input artifact using the [artifice](/packer/docs/post-processors/artifice)
   post-processor after your shell-local processor has run.
 
 - `only_on` (array of strings) - This is an array of [runtime operating
@@ -285,7 +285,7 @@ In addition to being able to specify custom environmental variables using the
 commonly useful environmental variables:
 
 - `PACKER_BUILD_NAME` is set to the [name of the
-  build](/docs/templates/legacy_json_templates/builders#named-builds) that Packer is running.
+  build](/packer/docs/templates/legacy_json_templates/builders#named-builds) that Packer is running.
   This is most useful when Packer is making multiple builds and you want to
   distinguish them slightly from a common provisioning script.
 
@@ -310,7 +310,7 @@ run twice. If you have 3 builders, it will run 3 times, once for each builder.
 ### Interacting with Build Artifacts
 
 In order to interact with build artifacts, you may want to use the [manifest
-post-processor](/docs/post-processors/manifest). This will write the list
+post-processor](/packer/docs/post-processors/manifest). This will write the list
 of files produced by a `builder` to a json file after each `builder` is run.
 
 For example, if you wanted to package a file from the file builder into a

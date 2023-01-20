@@ -7,7 +7,7 @@ page_title: Custom Data Sources - Extending
 
 # Custom Data Sources
 
-Packer data sources let Packer fetch data to use within the configuration, including information defined outside of Packer. For example, the [amazon-ami data source](/plugins/datasources/amazon/ami), outputs the data from an Amazon AMI.
+Packer data sources let Packer fetch data to use within the configuration, including information defined outside of Packer. For example, the [amazon-ami data source](/packer/plugins/datasources/amazon/ami), outputs the data from an Amazon AMI.
 
 Data Source plugins implement the `packersdk.Datasource` interface and are registered within a plugin Set
 with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
@@ -18,7 +18,7 @@ with `set.RegisterDatasource(...)` function and served using the `set.Run()`.
 
 We recommend reviewing the following resources before you begin development:
 
-- [Developing Plugins - Overview](/docs/plugins/creation)
+- [Developing Plugins - Overview](/packer/docs/plugins/creation)
 - The [Go](https://go.dev/) language. You must write custom plugins in Go, so this guide assumes you are familiar with the language.
 
 ## The Interface
@@ -42,11 +42,11 @@ type Datasource interface {
 This method returns a hcldec.ObjectSpec, which is a spec necessary for using
 HCL2 templates with Packer. For information on how to use and implement this
 function, check our
-[object spec docs](/guides/hcl/component-object-spec)
+[object spec docs](/packer/guides/hcl/component-object-spec)
 
 ### The "OutputSpec" Method
 
-This method returns a [hcldec.ObjectSpec](/guides/hcl/component-object-spec) of the data source output.
+This method returns a [hcldec.ObjectSpec](/packer/guides/hcl/component-object-spec) of the data source output.
 The object spec can be generated using the command [`packer-sdc mapstructure-to-hcl2`](https://github.com/hashicorp/packer-plugin-sdk/tree/main/cmd/packer-sdc)
 just like the configuration spec for the `ConfigSpec` method.
 

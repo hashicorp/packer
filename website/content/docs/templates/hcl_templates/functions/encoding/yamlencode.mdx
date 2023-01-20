@@ -12,7 +12,7 @@ description: The yamlencode function encodes a given value as a YAML string.
 result format may change in future versions of Packer, based on feedback.
 Do not use `yamldecode` to construct a value for any resource argument where
 changes to the result would be disruptive. To get a consistent string
-representation of a value use [`jsonencode`](/docs/templates/hcl_templates/functions/encoding/jsonencode) instead; its
+representation of a value use [`jsonencode`](/packer/docs/templates/hcl_templates/functions/encoding/jsonencode) instead; its
 results are also valid YAML because YAML is a JSON superset.
 
 <!--
@@ -26,7 +26,7 @@ results are also valid YAML because YAML is a JSON superset.
 -->
 
 This function maps
-[Packer language values](/docs/templates/hcl_templates/expressions#types-and-values)
+[Packer language values](/packer/docs/templates/hcl_templates/expressions#types-and-values)
 to YAML tags in the following way:
 
 | Packer type   | YAML type            |
@@ -74,12 +74,12 @@ mean that this is rarely a problem in practice.
 
 `yamlencode` always uses YAML's "block style" for mappings and sequences, unless
 the mapping or sequence is empty. To generate flow-style YAML, use
-[`jsonencode`](/docs/templates/hcl_templates/functions/encoding/jsonencode) instead: YAML flow-style is a superset
+[`jsonencode`](/packer/docs/templates/hcl_templates/functions/encoding/jsonencode) instead: YAML flow-style is a superset
 of JSON syntax.
 
 ## Related Functions
 
-- [`jsonencode`](/docs/templates/hcl_templates/functions/encoding/jsonencode) is a similar operation using JSON instead
+- [`jsonencode`](/packer/docs/templates/hcl_templates/functions/encoding/jsonencode) is a similar operation using JSON instead
   of YAML.
-- [`yamldecode`](/docs/templates/hcl_templates/functions/encoding/yamldecode) performs the opposite operation, _decoding_
+- [`yamldecode`](/packer/docs/templates/hcl_templates/functions/encoding/yamldecode) performs the opposite operation, _decoding_
   a YAML string to obtain its represented value.

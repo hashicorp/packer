@@ -10,7 +10,7 @@ description: |-
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
 Most Packer configurations are written in [the native HCL
-syntax](/docs/templates/hcl_templates/syntax), which is designed to be easy for humans to read and
+syntax](/packer/docs/templates/hcl_templates/syntax), which is designed to be easy for humans to read and
 update.
 
 Packer also supports an alternative syntax that is JSON-compatible. This
@@ -96,7 +96,7 @@ different (see [block-type-specific exceptions](#block-type-specific-exceptions)
   correspond either to argument names or to nested block type names.
 
 - Where a property corresponds to an argument that accepts
-  [arbitrary expressions](/docs/templates/hcl_templates/expressions) in the native syntax, the
+  [arbitrary expressions](/packer/docs/templates/hcl_templates/expressions) in the native syntax, the
   property value is mapped to an expression as described under
   [_Expression Mapping_](#expression-mapping) below. For arguments that
   do _not_ accept arbitrary expressions, the interpretation of the property
@@ -113,20 +113,20 @@ different (see [block-type-specific exceptions](#block-type-specific-exceptions)
 ## Expression Mapping
 
 Since JSON grammar is not able to represent all of the Packer language
-[expression syntax](/docs/templates/hcl_templates/expressions), JSON values interpreted as expressions
+[expression syntax](/packer/docs/templates/hcl_templates/expressions), JSON values interpreted as expressions
 are mapped as follows:
 
 | JSON    | Packer Language Interpretation                                                                                                   |
 | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Boolean | A literal `bool` value.                                                                                                          |
 | Number  | A literal `number` value.                                                                                                        |
-| String  | Parsed as a [string template](/docs/templates/hcl_templates/expressions#string-templates) and then evaluated as described below. |
+| String  | Parsed as a [string template](/packer/docs/templates/hcl_templates/expressions#string-templates) and then evaluated as described below. |
 | Object  | Each property value is mapped per this table, producing an `object(...)` value with suitable attribute types.                    |
 | Array   | Each element is mapped per this table, producing a `tuple(...)` value with suitable element types.                               |
 | Null    | A literal `null`.                                                                                                                |
 
 When a JSON string is encountered in a location where arbitrary expressions are
-expected, its value is first parsed as a [string template](/docs/templates/hcl_templates/expressions#string-templates)
+expected, its value is first parsed as a [string template](/packer/docs/templates/hcl_templates/expressions#string-templates)
 and then it is evaluated to produce the final result.
 
 If the given template consists _only_ of a single interpolation sequence,

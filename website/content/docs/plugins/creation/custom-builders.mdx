@@ -8,9 +8,9 @@ page_title: Custom Builders - Extending
 # Custom Builders
 
 Packer builders are responsible for creating a virtual machine, setting the virtual machine up for provisioning, and then turning that provisioned virtual machine into a machine image. We officially maintain and distribute several builders, including builders to create images on Amazon EC2, VMware, Google
-Compute Engine, and many more. Refer to the [Builders](/docs/builders) documentation for details.
+Compute Engine, and many more. Refer to the [Builders](/packer/docs/builders) documentation for details.
 
-This page explains how to use the Packer plugin interface to write custom builders. If you want your builder to support HashiCorp Cloud Platform (HCP) Packer, you should also review the [HCP Packer Support](/docs/plugins/creation/hcp-support) documentation.
+This page explains how to use the Packer plugin interface to write custom builders. If you want your builder to support HashiCorp Cloud Platform (HCP) Packer, you should also review the [HCP Packer Support](/packer/docs/plugins/creation/hcp-support) documentation.
 
 ~> **Warning:** This is an advanced topic that requires strong knowledge of Packer and Packer plugins.
 
@@ -18,7 +18,7 @@ This page explains how to use the Packer plugin interface to write custom builde
 
 We recommend reviewing the following resources before you begin development:
 
-- [Developing Plugins - Overview](/docs/plugins/creation)
+- [Developing Plugins - Overview](/packer/docs/plugins/creation)
 - The [Go](https://go.dev/) language. You must write custom plugins in Go, so this guide assumes you are familiar with the language.
 
 ## The Interface
@@ -39,7 +39,7 @@ type Builder interface {
 This method returns a hcldec.ObjectSpec, which is a spec necessary for using
 HCL2 templates with Packer. For information on how to use and implement this
 function, check our
-[object spec docs](/guides/hcl/component-object-spec)
+[object spec docs](/packer/guides/hcl/component-object-spec)
 
 ### The "Prepare" Method
 
@@ -204,8 +204,8 @@ but it is recommended to avoid using them if you can.
 
 Packer JSON makes it possible to provide custom template engine variables to be
 shared with provisioners and post-processors using the `build` function.
-JSON template `build` docs are [here](/docs/templates/legacy_json_templates/engine#build)
-and HCL template build docs are [here](/docs/templates/hcl_templates/contextual-variables#build-variables).
+JSON template `build` docs are [here](/packer/docs/templates/legacy_json_templates/engine#build)
+and HCL template build docs are [here](/packer/docs/templates/hcl_templates/contextual-variables#build-variables).
 
 As of Packer v1.5.0, builder Prepare() methods return a list of custom variables
 which we call `generated data`. We use that list of variables to generate a
@@ -306,5 +306,5 @@ order to make it available to the Packer core as a plugin. We have created a
 [scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/builder/scaffolding/builder.go)
 repo to give you an idea of the relationship between the builder
 implementation and the server implementation within a repository, and then read
-[basics of how Plugins work](/docs/plugins/install-plugins), which breaks down all the
+[basics of how Plugins work](/packer/docs/plugins/install-plugins), which breaks down all the
 server details.

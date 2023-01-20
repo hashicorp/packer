@@ -20,7 +20,7 @@ Packer is being run - in other words, shell-local will run the shell script on
 your build server, or your desktop, etc., rather than the remote/guest machine
 being provisioned by Packer.
 
-The [remote shell](/docs/provisioners/shell) provisioner executes shell
+The [remote shell](/packer/docs/provisioners/shell) provisioner executes shell
 scripts on a remote machine.
 
 ## Basic Example
@@ -128,7 +128,7 @@ Optional parameters:
 - `execute_command` (array of strings) - The command used to execute the
   script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
   on Unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on Windows. This is
-  treated as a [template engine](/docs/templates/legacy_json_templates/engine). There are two
+  treated as a [template engine](/packer/docs/templates/legacy_json_templates/engine). There are two
   available variables: `Script`, which is the path to the script to run, and
   `Vars`, which is the list of `environment_vars`, if configured.
 
