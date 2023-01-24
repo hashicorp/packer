@@ -77,6 +77,11 @@ jobs:
         if: steps.create_prerelease.outcome == 'success'
         run: |
           echo "prerelease_id=${{ steps.create_prerelease.outputs.id }}" >> $GITHUB_ENV
+      - name: Sleep before retry
+        id: sleep_before_retry
+        if: steps.create_prerelease.outcome == 'failure'
+        run : sleep 30m
+        shell: bash
       - name: Retry failed nightly GitHub prerelease
         id: create_prerelease_retry
         if: steps.create_prerelease.outcome == 'failure'
