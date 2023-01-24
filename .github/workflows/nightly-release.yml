@@ -61,6 +61,7 @@ jobs:
       # If a release with this name already exists, it will overwrite the existing data
       - name: Create a nightly GitHub prerelease
         id: create_prerelease
+        continue-on-error: true
         uses: ncipollo/release-action@v1
         with:
           name: nightly
@@ -72,12 +73,34 @@ jobs:
           removeArtifacts: true
           draft: false
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Store GitHub Release ID
+        if: steps.create_prerelease.outcome == 'success'
+        run: |
+          echo "prerelease_id=${{ steps.create_prerelease.outputs.id }}" >> $GITHUB_ENV
+      - name: Retry failed nightly GitHub prerelease
+        id: create_prerelease_retry
+        if: steps.create_prerelease.outcome == 'failure'
+        uses: ncipollo/release-action@v1
+        with:
+          name: nightly
+          artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
+          tag: nightly
+          bodyFile: ".github/workflows/nightly-release-readme.md"
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true
+          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Store Updated GitHub Release ID 
+        if: steps.create_prerelease_retry.outcome == 'success'
+        run: |
+          echo "prerelease_id=${{ steps.create_prerelease_retry.outputs.id }}" >> $GITHUB_ENV
       - name: Publish nightly GitHub prerelease
         uses: eregon/publish-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_id: ${{ steps.create_prerelease.outputs.id }}
+          release_id: ${{ env.prerelease_id }}
   # Send a slack notification if either job defined above fails
   slack-notify:
     permissions:
