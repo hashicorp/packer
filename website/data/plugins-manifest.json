@@ -219,7 +219,7 @@
     "title": "Outscale",
     "path": "outscale",
     "repo": "outscale/packer-plugin-outscale",
-    "version": "v1.0.2",
+    "version": "latest",
     "pluginTier": "verified"
   },
   {
