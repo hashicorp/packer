@@ -213,7 +213,8 @@
     "path": "oracle",
     "repo": "hashicorp/packer-plugin-oracle",
     "pluginTier": "community",
-    "version": "latest"
+    "version": "latest",
+    "isHcpPackerReady": true
   },
   {
     "title": "Outscale",
