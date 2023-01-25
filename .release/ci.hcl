@@ -9,7 +9,8 @@ project "packer" {
     organization = "hashicorp"
     repository = "packer"
     release_branches = [
-        "main", 
+        "main",
+        "test-prepare"
     ]
   }
 }
