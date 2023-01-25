@@ -79,7 +79,7 @@ var LegacyStrftimeFunc = function.New(&function.Spec{
 // LegacyIsotimeFunc returns a string representation of the current date and
 // time using the given format string. The format string follows golang's
 // datetime formatting. See
-// https://www.packer.io/docs/templates/legacy_json_templates/engine#isotime-function-format-reference
+// /packer/docs/templates/legacy_json_templates/engine#isotime-function-format-reference
 // for more details.
 //
 // This function has been provided to create backwards compatability with

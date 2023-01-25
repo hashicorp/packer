@@ -242,7 +242,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "No version constraint was set",
-					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraints for docs",
+					Detail:   "The version field must be specified as a string. Ex: `version = \">= 1.2.0, < 2.0.0\". See /packer/docs/templates/hcl_templates/blocks/packer#version-constraints for docs",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 				continue
@@ -256,7 +256,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid version constraint",
-					Detail:   "Version must be specified as a string. See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
+					Detail:   "Version must be specified as a string. See /packer/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 				continue
@@ -270,7 +270,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 					Severity: hcl.DiagError,
 					Summary:  "Invalid version constraint",
 					Detail: "This string does not use correct version constraint syntax. " +
-						"See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.\n" +
+						"See /packer/docs/templates/hcl_templates/blocks/packer#version-constraint-syntax for docs.\n" +
 						err.Error(),
 					Subject: attr.Expr.Range().Ptr(),
 				})
@@ -283,7 +283,7 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "No source was set",
-					Detail:   "The source field must be specified as a string. Ex: `source = \"coolcloud\". See https://www.packer.io/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements for docs",
+					Detail:   "The source field must be specified as a string. Ex: `source = \"coolcloud\". See /packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements for docs",
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 				continue

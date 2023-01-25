@@ -110,7 +110,7 @@ func (c *PluginsRequiredCommand) RunContext(buildCtx context.Context, cla *Plugi
 		c.Ui.Message(`
 No plugins requirement found, make sure you reference a Packer config
 containing a packer.required_plugins block. See
-https://www.packer.io/docs/templates/hcl_templates/blocks/packer
+/packer/docs/templates/hcl_templates/blocks/packer
 for more info.`)
 	}
 

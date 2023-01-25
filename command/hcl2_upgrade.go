@@ -80,43 +80,43 @@ const (
 # All generated input variables will be of 'string' type as this is how Packer JSON
 # views them; you can change their type later on. Read the variables type
 # constraints documentation
-# https://www.packer.io/docs/templates/hcl_templates/variables#type-constraints for more info.`
+# /packer/docs/templates/hcl_templates/variables#type-constraints for more info.`
 	localsVarHeader = `
 # All locals variables are generated from variables that uses expressions
 # that are not allowed in HCL2 variables.
 # Read the documentation for locals blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/locals`
+# /packer/docs/templates/hcl_templates/blocks/locals`
 	packerBlockHeader = `
-# See https://www.packer.io/docs/templates/hcl_templates/blocks/packer for more info
+# See /packer/docs/templates/hcl_templates/blocks/packer for more info
 `
 
 	sourcesHeader = `
 # source blocks are generated from your builders; a source can be referenced in
 # build blocks. A build block runs provisioner and post-processors on a
 # source. Read the documentation for source blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/source`
+# /packer/docs/templates/hcl_templates/blocks/source`
 
 	buildHeader = `
 # a build block invokes sources and runs provisioning steps on them. The
 # documentation for build blocks can be found here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/build
+# /packer/docs/templates/hcl_templates/blocks/build
 `
 
 	amazonAmiDataHeader = `
 # The amazon-ami data block is generated from your amazon builder source_ami_filter; a data
 # from this block can be referenced in source and locals blocks.
 # Read the documentation for data blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/data
+# /packer/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon AMI Data Source here:
-# https://www.packer.io/plugins/datasources/amazon/ami`
+# /packer/plugins/datasources/amazon/ami`
 
 	amazonSecretsManagerDataHeader = `
 # The amazon-secretsmanager data block is generated from your aws_secretsmanager template function; a data
 # from this block can be referenced in source and locals blocks.
 # Read the documentation for data blocks here:
-# https://www.packer.io/docs/templates/hcl_templates/blocks/data
+# /packer/docs/templates/hcl_templates/blocks/data
 # Read the documentation for the Amazon Secrets Manager Data Source here:
-# https://www.packer.io/plugins/datasources/amazon/secretsmanager`
+# /packer/plugins/datasources/amazon/secretsmanager`
 )
 
 var (
@@ -440,7 +440,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"lower",
 				"`lower(var.example)`",
-				"https://www.packer.io/docs/templates/hcl_templates/functions/string/lower",
+				"/packer/docs/templates/hcl_templates/functions/string/lower",
 			})
 			return fmt.Sprintf("{{ lower `%s` }}", a), nil
 		},
@@ -448,7 +448,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"upper",
 				"`upper(var.example)`",
-				"https://www.packer.io/docs/templates/hcl_templates/functions/string/upper",
+				"/packer/docs/templates/hcl_templates/functions/string/upper",
 			})
 			return fmt.Sprintf("{{ upper `%s` }}", a), nil
 		},
@@ -456,7 +456,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"split",
 				"`split(separator, string)`",
-				"https://www.packer.io/docs/templates/hcl_templates/functions/string/split",
+				"/packer/docs/templates/hcl_templates/functions/string/split",
 			})
 			return fmt.Sprintf("{{ split `%s` `%s` %d }}", a, b, n), nil
 		},
@@ -464,7 +464,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
-				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
+				"/packer/docs/templates/hcl_templates/functions/string/replace or /packer/docs/templates/hcl_templates/functions/string/regex_replace",
 			})
 			return fmt.Sprintf("{{ replace `%s` `%s` `%s` %d }}", a, b, c, n), nil
 		},
@@ -472,7 +472,7 @@ func transposeTemplatingCalls(s []byte) []byte {
 			funcErrors = multierror.Append(funcErrors, UnhandleableArgumentError{
 				"replace_all",
 				"`replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
-				"https://www.packer.io/docs/templates/hcl_templates/functions/string/replace or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
+				"/packer/docs/templates/hcl_templates/functions/string/replace or /packer/docs/templates/hcl_templates/functions/string/regex_replace",
 			})
 			return fmt.Sprintf("{{ replace_all `%s` `%s` `%s` }}", a, b, c), nil
 		},
@@ -481,8 +481,8 @@ func transposeTemplatingCalls(s []byte) []byte {
 				"clean_resource_name",
 				"use custom validation rules, `replace(string, substring, replacement)` or `regex_replace(string, substring, replacement)`",
 				"https://packer.io/docs/templates/hcl_templates/variables#custom-validation-rules" +
-					" , https://www.packer.io/docs/templates/hcl_templates/functions/string/replace" +
-					" or https://www.packer.io/docs/templates/hcl_templates/functions/string/regex_replace",
+					" , /packer/docs/templates/hcl_templates/functions/string/replace" +
+					" or /packer/docs/templates/hcl_templates/functions/string/regex_replace",
 			})
 			return fmt.Sprintf("{{ clean_resource_name `%s` }}", a), nil
 		},
@@ -553,7 +553,7 @@ func variableTransposeTemplatingCalls(s []byte) (isLocal bool, body []byte) {
 
 	// Make locals from variables using valid template engine,
 	// expect the ones using only 'env'
-	// ref: https://www.packer.io/docs/templates/legacy_json_templates/engine#template-engine
+	// ref: /packer/docs/templates/legacy_json_templates/engine#template-engine
 	funcMap := texttemplate.FuncMap{
 		"aws_secretsmanager": setIsLocal,
 		"timestamp":          setIsLocal,

@@ -343,7 +343,7 @@ type Getter interface {
 	//    See
 	//    https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.goreleaser.yml
 	//    and
-	//    https://www.packer.io/docs/plugins/creation#plugin-development-basics
+	//    /packer/docs/plugins/creation#plugin-development-basics
 	//    to learn how to create and automate your releases and for docs on
 	//    plugin development basics.
 	//
