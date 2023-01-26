@@ -1,0 +1,68 @@
+Parameters common to all provisioners:
+
+- `pause_before` (duration) - Sleep for duration before execution.
+
+- `max_retries` (int) - Max times the provisioner will retry in case of failure. Defaults to zero (0). Zero means an error will not be retried.
+
+- `only` (array of string) - Only run the provisioner for listed builder(s)
+  by name.
+
+- `override` (object) - Override the builder with different settings for a
+  specific builder, eg :
+
+  In HCL2:
+
+  ```hcl
+  source "null" "example1" {
+    communicator = "none"
+  }
+
+  source "null" "example2" {
+    communicator = "none"
+  }
+
+  build {
+    sources = ["source.null.example1", "source.null.example2"]
+    provisioner "shell-local" {
+      inline = ["echo not overridden"]
+      override = {
+        example1 = {
+          inline = ["echo yes overridden"]
+        }
+      }
+    }
+  }
+  ```
+
+  In JSON:
+
+  ```json
+  {
+    "builders": [
+      {
+        "type": "null",
+        "name": "example1",
+        "communicator": "none"
+      },
+      {
+        "type": "null",
+        "name": "example2",
+        "communicator": "none"
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "shell-local",
+        "inline": ["echo not overridden"],
+        "override": {
+          "example1": {
+            "inline": ["echo yes overridden"]
+          }
+        }
+      }
+    ]
+  }
+  ```
+
+- `timeout` (duration) - If the provisioner takes more than for example
+  `1h10m1s` or `10m` to finish, the provisioner will timeout and fail.
