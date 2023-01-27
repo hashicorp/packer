@@ -1,7 +1,10 @@
 name: Legacy Link Format Checker
 
-# TODO REVERT HASH CHANGE BEFORE MERGING (just for testing workflow fixes)
-on: [push]
+on:
+  push:
+    paths:
+      - "website/content/**/*.mdx"
+      - "website/data/*-nav-data.json"
 
 jobs:
   check-links:
