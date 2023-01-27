@@ -25,9 +25,9 @@ verify it later.
 
 After computes checksum for artifacts, you can use new artifacts with other
 post-processors like
-[artifice](/docs/post-processors/artifice),
-[compress](/docs/post-processors/compress),
-[docker-push](/plugins/post-processors/docker/docker-push), or
+[artifice](/packer/docs/post-processors/artifice),
+[compress](/packer/docs/post-processors/compress),
+[docker-push](/packer/plugins/post-processors/docker/docker-push), or
 a third-party post-processor.
 
 ## Basic example
@@ -74,7 +74,7 @@ Optional parameters:
   `packer_{{.BuildName}}_{{.BuilderType}}_{{.ChecksumType}}.checksum`. For
   example, if you had a builder named `database`, you might see the file
   written as `packer_database_docker_md5.checksum`. This is treated as a
-  [template engine](/docs/templates/legacy_json_templates/engine). Therefore, you
+  [template engine](/packer/docs/templates/legacy_json_templates/engine). Therefore, you
   may use user variables and template functions in this field.
   The following special variables are also available to use in the output
   template:

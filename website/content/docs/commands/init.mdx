@@ -7,12 +7,12 @@ page_title: packer init - Commands
 # `init` Command
 
 -> **Note:** Packer init does not work with legacy JSON templates. You can
-upgrade your JSON config files to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
+upgrade your JSON config files to HCL using the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) command.
 
 -> **Note:** Packer init will only work with multi-component plugins -- that is
 plugins that are named `packer-plugin-*`. To install a single-component plugin --
 that is `packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
-have to [install the plugin manually](/docs/plugins#installing-plugins).
+have to [install the plugin manually](/packer/docs/plugins#installing-plugins).
 
 The `packer init` command is used to download Packer plugin binaries. This is
 the first command that should be executed when working with a new or existing
@@ -36,7 +36,7 @@ for the ones that are missing.
 
 `packer init -upgrade` will try to get the latest versions for all plugins.
 
-Import a plugin using the [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+Import a plugin using the [`required_plugin`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
 block :
 
 ```hcl
@@ -61,11 +61,11 @@ is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the v
 Packer init will install the latest found version matching the version selection
 in the `required_plugins` section. Make sure to set a correct [version
 constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints). The
+string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints). The
 plugins will be installed in the [Plugin
-Directory](/docs/configure#packer-s-plugin-directory).
+Directory](/packer/docs/configure#packer-s-plugin-directory).
 
-See [Installing Plugins](/docs/plugins#installing-plugins) for more information on how plugin installation works.
+See [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
 ### Implicit required plugin
 

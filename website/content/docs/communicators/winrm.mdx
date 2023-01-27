@@ -28,7 +28,7 @@ refer to each builder's documentation for more information on how to supply the
 winrm configuration script.
 
 If you are unfamiliar with how to use an autounattend file, take a look at our
-[quick guides](/guides/automatic-operating-system-installs); knowing
+[quick guides](/packer/guides/automatic-operating-system-installs); knowing
 how to automatically initalize your operating system is critical for being able
 to successfully use Packer to build from an iso.
 
@@ -182,10 +182,10 @@ provisioning step to make sure your image is secure.
 
 Most clouds allow you to provide a configuration script that runs when the
 instance is launched. In AWS, this is the
-[user_data_file](/plugins/builders/amazon/ebs#user_data_file). In Google
+[user_data_file](/packer/plugins/builders/amazon/ebs#user_data_file). In Google
 Cloud, this is provided using the `windows-startup-script-cmd`
-[metadata](/plugins/builders/googlecompute#metadata) tag.
-[Example](/plugins/builders/googlecompute#windows-example)
+[metadata](/packer/plugins/builders/googlecompute#metadata) tag.
+[Example](/packer/plugins/builders/googlecompute#windows-example)
 
 Essentially, these files are powershell or cmd scripts that configure winrm,
 without having to be wrapped in an Autounattend. Provide the script in the

@@ -59,7 +59,7 @@ Here is a full list of the available functions for reference.
   each function will behave.
 
 - `env` - Returns environment variables. See example in [using home
-  variable](/docs/templates/legacy_json_templates/user-variables#using-home-variable)
+  variable](/packer/docs/templates/legacy_json_templates/user-variables#using-home-variable)
 - `build` - This engine will allow you to access, from provisioners and post-processors, special variables that
   provide connection information and basic instance state information.
   Usage example:
@@ -109,11 +109,11 @@ Here is a full list of the available functions for reference.
 
   For builder-specific builder variables, please also refer to the builder docs:
 
-  - Amazon EC2: [chroot](/plugins/builders/amazon/chroot#build-shared-information-variables),
-    [EBS Volume](/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
-    [EBS](/plugins/builders/amazon/ebs#build-shared-information-variables),
-    [EBS Surrogate](/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
-    [Instance](/plugins/builders/amazon/instance#build-shared-information-variables).
+  - Amazon EC2: [chroot](/packer/plugins/builders/amazon/chroot#build-shared-information-variables),
+    [EBS Volume](/packer/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
+    [EBS](/packer/plugins/builders/amazon/ebs#build-shared-information-variables),
+    [EBS Surrogate](/packer/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
+    [Instance](/packer/plugins/builders/amazon/instance#build-shared-information-variables).
 
   This engine is in beta; please report any issues or requests on the Packer
   issue tracker on GitHub.
@@ -121,7 +121,7 @@ Here is a full list of the available functions for reference.
 - `isotime [FORMAT]` - UTC time, which can be
   [formatted](https://pkg.go.dev/time#example_Time_Format). See more
   examples below in [the `isotime` format
-  reference](/docs/templates/legacy_json_templates/engine#isotime-function-format-reference).
+  reference](/packer/docs/templates/legacy_json_templates/engine#isotime-function-format-reference).
   `strftime FORMAT` - UTC time, formated using the ISO C standard format
   `FORMAT`. See
   [jehiah/go-strftime](https://github.com/jehiah/go-strftime) for a list
@@ -209,9 +209,9 @@ Template variables are special variables automatically set by Packer at build
 time. Some builders, provisioners and other components have template variables
 that are available only for that component. Template variables are recognizable
 because they're prefixed by a period, such as `{{ .Name }}`. For example, when
-using the [`shell`](/plugins/builders/vmware/iso) builder template variables
+using the [`shell`](/packer/plugins/builders/vmware/iso) builder template variables
 are available to customize the
-[`execute_command`](/docs/provisioners/shell#execute_command) parameter
+[`execute_command`](/packer/docs/provisioners/shell#execute_command) parameter
 used to determine how Packer will run the shell command.
 
 ```json
@@ -231,7 +231,7 @@ the list of the environment variables and the path to the script to be executed
 respectively.
 
 -> **Note:** In addition to template variables, you can specify your own
-user variables. See the [user variable](/docs/templates/legacy_json_templates/user-variables)
+user variables. See the [user variable](/packer/docs/templates/legacy_json_templates/user-variables)
 documentation for more information on user variables.
 
 # isotime Function Format Reference

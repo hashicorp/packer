@@ -32,7 +32,7 @@ type Config struct {
 	// Don't write the `build_time` field from the output.
 	StripTime bool `mapstructure:"strip_time"`
 	// Arbitrary data to add to the manifest. This is a [template
-	// engine](https://packer.io/docs/templates/legacy_json_templates/engine.html). Therefore, you
+	// engine](/packer/docs/templates/legacy_json_templates/engine). Therefore, you
 	// may use user variables and template functions in this field.
 	CustomData map[string]string `mapstructure:"custom_data"`
 	ctx        interpolate.Context

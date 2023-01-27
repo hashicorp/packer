@@ -28,9 +28,9 @@ Indirectly-nested lists, such as those in maps, are _not_ flattened.
 ## Flattening nested structures for `for_each`
 
 The
-[resource `for_each`](https://www.terraform.io/docs/configuration/resources.html#for_each-multiple-resource-instances-defined-by-a-map-or-set-of-strings)
+[resource `for_each`](/terraform/docs/configuration/resources#for_each-multiple-resource-instances-defined-by-a-map-or-set-of-strings)
 and
-[`dynamic` block](/docs/templates/hcl_templates/expressions#dynamic-blocks)
+[`dynamic` block](/packer/docs/templates/hcl_templates/expressions#dynamic-blocks)
 language features both require a collection value that has one element for
 each repetition.
 
@@ -103,6 +103,6 @@ the associations between the subnets and their containing networks.
 
 ## Related Functions
 
-- [`setproduct`](/docs/templates/hcl_templates/functions/collection/setproduct) finds all of the combinations of multiple
+- [`setproduct`](/packer/docs/templates/hcl_templates/functions/collection/setproduct) finds all of the combinations of multiple
   lists or sets of values, which can also be useful when preparing collections
   for use with `for_each` constructs.

@@ -13,7 +13,7 @@ Communicators are the mechanism Packer uses to upload files, execute scripts,
 etc. with the machine being created.
 
 Communicators are configured within the
-[builder](/docs/templates/legacy_json_templates/builders) section.
+[builder](/packer/docs/templates/legacy_json_templates/builders) section.
 
 All communicators have the following options:
 
@@ -32,7 +32,7 @@ the Packer template.
 However, if you are building from a brand-new and unconfigured operating system
 image, you will almost always have to perform some extra work to configure SSH
 on the guest machine. For most operating system distributions, this work will
-be performed by a [boot_command](/plugins/builders/vmware/iso#boot-configuration) that references a file which
+be performed by a [boot_command](/packer/plugins/builders/vmware/iso#boot-configuration) that references a file which
 provides answers to the normally-interactive questions you get asked when
 installing an operating system. The name of this file varies by operating
 system; some common examples are the "preseed" file required by Debian, the
@@ -49,4 +49,4 @@ system is critical for being able to successfully use Packer.
 ## Communicator-Specific Options
 
 For more details on how to use each communicator, visit the
-[communicators](/docs/communicators) page.
+[communicators](/packer/docs/communicators) page.

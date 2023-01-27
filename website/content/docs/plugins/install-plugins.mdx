@@ -11,7 +11,7 @@ Packer plugins are separate, standalone applications that perform tasks during e
 You do not need to install the builder, provisioner, or
 post-processor components that ship with the Packer binary. Packer automatically knows how to find and launch these built-in plugins.
 
-This page explains how to install custom external plugins. Refer to [External Plugins](/plugins) for a list of available plugins and their documentation.
+This page explains how to install custom external plugins. Refer to [External Plugins](/packer/plugins) for a list of available plugins and their documentation.
 
 ## Installation Guides
 
@@ -32,10 +32,10 @@ architecture, contact your maintainer to request an upgrade.
 ## Create a required_plugins block
 
 1. Add a
-   [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-   block to your [packer block](/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
+   [`required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+   block to your [packer block](/packer/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
    particular plugin can be installed. Make sure to set a valid [version
-   constraint string](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+   constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints).
 
 Here is an example `required_plugins` block:
 
@@ -54,7 +54,7 @@ packer {
 }
 ```
 
-2. Run [`packer init`](/docs/commands/init) from your project directory (the
+2. Run [`packer init`](/packer/docs/commands/init) from your project directory (the
    directory containing your Packer templates) to install all missing plugin
    binaries. Given the above example, Packer will try to look for a GitHub
    repository owned by user or organization `azr` named
@@ -171,7 +171,7 @@ will avoid conflicting with other plugins for other tools, like Terraform.
 </Tab>
 <Tab heading="manually (multi-component plugin)">
 
--> The [`packer plugins`](/docs/commands/plugins) command allows to install plugins without going through
+-> The [`packer plugins`](/packer/docs/commands/plugins) command allows to install plugins without going through
 `init`. For manual installation of plugin binaries, without the `packer plugins` command, please continue reading.
 
 The easiest way to manually install a plugin is to name it correctly, then place

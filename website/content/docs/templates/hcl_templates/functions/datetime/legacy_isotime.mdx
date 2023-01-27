@@ -9,13 +9,13 @@ description: |-
 
 The `legacy_isotime` function returns the current date and time using the given format string.
 The format string follows Go's datetime formatting. See
-[isotime-function-format-reference](/docs/templates/legacy_json_templates/engine#isotime-function-format-reference)
+[isotime-function-format-reference](/packer/docs/templates/legacy_json_templates/engine#isotime-function-format-reference)
 for more details.
 
 This function has been provided to create backwards compatibility with
 Packer's legacy JSON templates. However, we recommend that you upgrade your
-HCL Packer template to use [`timestamp`](/docs/templates/hcl_templates/functions/datetime/timestamp)
-and [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) together as soon as is convenient.
+HCL Packer template to use [`timestamp`](/packer/docs/templates/hcl_templates/functions/datetime/timestamp)
+and [`formatdate`](/packer/docs/templates/hcl_templates/functions/datetime/formatdate) together as soon as is convenient.
 
 -> **Note:** If you are using a large number of builders, provisioners
 or post-processors, the isotime may be slightly different for each one
@@ -33,9 +33,9 @@ your plugins.
 
 ## Related Functions
 
-- [`format`](/docs/templates/hcl_templates/functions/string/format) is a more general formatting function for arbitrary
+- [`format`](/packer/docs/templates/hcl_templates/functions/string/format) is a more general formatting function for arbitrary
 data.
-- [`timestamp`](/docs/templates/hcl_templates/functions/datetime/timestamp) returns the current date and time in a format
+- [`timestamp`](/packer/docs/templates/hcl_templates/functions/datetime/timestamp) returns the current date and time in a format
 suitable for input to `formatdate`.
-- [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
+- [`formatdate`](/packer/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
   other date and time formats.
