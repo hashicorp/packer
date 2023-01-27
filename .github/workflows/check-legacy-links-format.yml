@@ -1,14 +1,12 @@
 name: Legacy Link Format Checker
 
-on:
-  push:
-    paths:
-      - "website/content/**/*.mdx"
-      - "website/data/*-nav-data.json"
+# TODO REVERT HASH CHANGE BEFORE MERGING (just for testing workflow fixes)
+on: [push]
 
 jobs:
   check-links:
-    uses: hashicorp/dev-portal/.github/workflows/docs-content-check-legacy-links-format.yml@475289345d312552b745224b46895f51cc5fc490
+    # TODO REVERT HASH CHANGE BEFORE MERGING (just for testing workflow fixes)
+    uses: hashicorp/dev-portal/.github/workflows/docs-content-check-legacy-links-format.yml@amb.fix-script-arg-parsing
     with:
       repo-owner: "hashicorp"
       repo-name: "packer"
