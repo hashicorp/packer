@@ -64,23 +64,23 @@ func (b *Bucket) Validate() error {
 }
 
 // ReadFromHCLBuildBlock reads the information for initialising a Bucket from a HCL2 build block
-func (b *Bucket) ReadFromHCLBuildBlock(hcpBlock *hcl2template.BuildBlock) {
+func (b *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
 	if b == nil {
 		return
 	}
-	b.Description = hcpBlock.Description
 
-	hcp := hcpBlock.HCPPackerRegistry
-	if hcp == nil {
+	registryBlock := build.HCPPackerRegistry
+	if registryBlock == nil {
 		return
 	}
 
-	b.BucketLabels = hcp.BucketLabels
-	b.BuildLabels = hcp.BuildLabels
+	b.Description = registryBlock.Description
+	b.BucketLabels = registryBlock.BucketLabels
+	b.BuildLabels = registryBlock.BuildLabels
 	// If there's already a Slug this was set from env variable.
 	// In Packer, env variable overrides config values so we keep it that way for consistency.
-	if b.Slug == "" && hcp.Slug != "" {
-		b.Slug = hcp.Slug
+	if b.Slug == "" && registryBlock.Slug != "" {
+		b.Slug = registryBlock.Slug
 	}
 }
 
