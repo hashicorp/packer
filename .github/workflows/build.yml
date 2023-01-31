@@ -106,7 +106,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.7
+        uses: hashicorp/actions-go-build@v0.1.9
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -143,7 +143,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.7
+        uses: hashicorp/actions-go-build@v0.1.9
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -205,7 +205,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.7
+        uses: hashicorp/actions-go-build@v0.1.9
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
