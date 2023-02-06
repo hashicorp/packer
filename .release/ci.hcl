@@ -10,6 +10,7 @@ project "packer" {
     repository = "packer"
     release_branches = [
         "main", 
+        "release/**"
     ]
   }
 }
