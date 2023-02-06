@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/internal/hcp/api"
 )
 
@@ -331,6 +332,54 @@ func TestBucket_PopulateIteration(t *testing.T) {
 			diff := cmp.Diff(build.Labels, bucket.BuildLabels)
 			if (diff == "") != tt.noDiffExpected {
 				t.Errorf("expected the build to have bucket build labels but there is no diff: %q", diff)
+			}
+		})
+	}
+}
+
+func TestReadFromHCLBuildBlock(t *testing.T) {
+	tc := []struct {
+		desc           string
+		buildBlock     *hcl2template.BuildBlock
+		expectedBucket *Bucket
+	}{
+		{
+			desc: "configure bucket using only hcp_packer_registry block",
+			buildBlock: &hcl2template.BuildBlock{
+				HCPPackerRegistry: &hcl2template.HCPPackerRegistryBlock{
+					Slug:        "hcp_packer_registry-block-test",
+					Description: "description from hcp_packer_registry block",
+					BucketLabels: map[string]string{
+						"org": "test",
+					},
+					BuildLabels: map[string]string{
+						"version":   "1.7.0",
+						"based_off": "alpine",
+					},
+				},
+			},
+			expectedBucket: &Bucket{
+				Slug:        "hcp_packer_registry-block-test",
+				Description: "description from hcp_packer_registry block",
+				BucketLabels: map[string]string{
+					"org": "test",
+				},
+				BuildLabels: map[string]string{
+					"version":   "1.7.0",
+					"based_off": "alpine",
+				},
+			},
+		},
+	}
+	for _, tt := range tc {
+		tt := tt
+		t.Run(tt.desc, func(t *testing.T) {
+			bucket := &Bucket{}
+			bucket.ReadFromHCLBuildBlock(tt.buildBlock)
+
+			diff := cmp.Diff(bucket, tt.expectedBucket, cmp.AllowUnexported(Bucket{}))
+			if diff != "" {
+				t.Errorf("expected the build to to have contents of hcp_packer_registry block but it does not: %v", diff)
 			}
 		})
 	}

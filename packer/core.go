@@ -268,10 +268,9 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 
 // This is used for json templates to launch the build plugins.
 // They will be prepared via b.Prepare() later.
-func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]string, hcl.Diagnostics) {
+func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []packersdk.Build{}
-	hcpTranslationMap := map[string]string{}
 	diags := hcl.Diagnostics{}
 	for _, n := range buildNames {
 		b, err := c.Build(n)
@@ -283,8 +282,6 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]s
 			})
 			continue
 		}
-
-		hcpTranslationMap[n] = HCPName(c.builds[n])
 
 		// Now that build plugin has been launched, call Prepare()
 		log.Printf("Preparing build: %s", b.Name())
@@ -315,25 +312,7 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]s
 			}
 		}
 	}
-	return builds, hcpTranslationMap, diags
-}
-
-// HCPName is a helper to get a curated HCP name for a legacy JSON builder.
-//
-// In order to make the naming scheme between HCL2 and JSON more consistent,
-// we implement a similar kind of logic on both template types.
-//
-// This means that when for HCL2 templates we have a build name formed of
-// the source type and the source name, we will do the name here for JSON.
-func HCPName(builder *template.Builder) string {
-	// By default, if the name is unspecified, it will be assigned the type
-	//
-	// No need to repeat ourselves here, so we can keep the current behaviour
-	if builder.Name == builder.Type {
-		return builder.Name
-	}
-
-	return fmt.Sprintf("%s.%s", builder.Type, builder.Name)
+	return builds, diags
 }
 
 // Build returns the Build object for the given name.
@@ -441,8 +420,8 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
-	return &CoreBuild{
-		Type:               n,
+	cb := &CoreBuild{
+		Type:               configBuilder.Name,
 		Builder:            builder,
 		BuilderConfig:      configBuilder.Config,
 		BuilderType:        configBuilder.Type,
@@ -451,7 +430,13 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		CleanupProvisioner: cleanupProvisioner,
 		TemplatePath:       c.Template.Path,
 		Variables:          c.variables,
-	}, nil
+	}
+
+	if configBuilder.Type != configBuilder.Name {
+		cb.BuildName = configBuilder.Type
+	}
+
+	return cb, nil
 }
 
 // Context returns an interpolation context.

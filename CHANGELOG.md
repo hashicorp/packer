@@ -1,3 +1,24 @@
+## 1.8.6 (Upcoming)
+
+### IMPROVEMENTS:
+* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
+     [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+
+### BUG FIXES: 
+* core/hcl2: Templates with build blocks referencing an unknown source block
+     would display an empty string for the template filename at line 0, which made
+     it difficult to identify the broken build block. Packer has been updated to
+     display the proper filename and line number where the unknown reference
+     resides. [GH-12167](https://github.com/hashicorp/packer/pull/12167)
+
+### NOTES:
+* core: Users will see some changes in how names are displayed during a Packer
+     build for JSON templates. Previously only the builder type or the builder
+     name, if it was set, would be displayed. Now for named builders
+     (`"name":"mybuilder"`) the builder'ss type and name will be displayed (i.e
+     "<type>.mybuilder". This does not impact the behavior of options such as
+     only or except, they will continue to work as they did before.)
+
 ## 1.8.5 (December 12, 2022)
 
 ### NOTES:
@@ -21,7 +42,7 @@ The following external plugins have been updated and pinned to address open
 * alicloud@v1.0.5 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.5)
 * amazon@v1.1.6 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.1.6)
 * proxmox@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.1.0)
-* vsphere@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.0.7)
+* vsphere@v1.1.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-vsphere/releases/tag/v1.1.1)
 * qemu@v1.0.8 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.8)
 
 ### IMPROVEMENTS:
