@@ -10,6 +10,9 @@
      it difficult to identify the broken build block. Packer has been updated to
      display the proper filename and line number where the unknown reference
      resides. [GH-12167](https://github.com/hashicorp/packer/pull/12167)
+* core: Linux packages now have vendor label and set the default label to HashiCorp.
+        This fix is implemented for any future releases, but will not be 
+        updated for historical releases.
 
 ### NOTES:
 * core: Users will see some changes in how names are displayed during a Packer
