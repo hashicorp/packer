@@ -6,7 +6,13 @@
 
 name: build
 
-on: [ workflow_dispatch, push, workflow_call ]
+on: 
+  workflow_dispatch: 
+  workflow_call:
+  push:
+    branches:
+      - main
+      - release/**
 
 env:
   REPO_NAME: "packer"
