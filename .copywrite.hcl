@@ -8,6 +8,7 @@ project {
     "**/test-fixtures/**",
     "examples/**",
     "hcl2template/fixtures/**",
+    "command/plugin.go",
     "website/**" # candidates for copyright are coming from external sources, so we should not handle those in Packer
   ]
 }
