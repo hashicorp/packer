@@ -1,0 +1,6 @@
+{
+  "version_tag":      "1.0.0",
+  "ssh_host":         "localhost",
+  "ssh_username":     "packer",
+  "ssh_password":     "packer"
+}
