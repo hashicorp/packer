@@ -870,6 +870,9 @@ func (p *VariableParser) Parse(tpl *template.Template) error {
 		p.localsOut = []byte{}
 	}
 
+	if len(tpl.Variables) == 0 {
+		tpl.Variables = make(map[string]*template.Variable)
+	}
 	// JSON supports variable declaration via var-files.
 	// User variables that might be defined in a var-file
 	// but not in the actual JSON template should be accounted for.
