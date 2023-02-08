@@ -34,6 +34,7 @@ func Test_hcl2_upgrade(t *testing.T) {
 		{folder: "variables-with-variables", flags: []string{}},
 		{folder: "complete-variables-with-template-engine", flags: []string{}},
 		{folder: "undeclared-variables", flags: []string{}, exitCode: 0},
+		{folder: "varfile-with-no-variables-block", flags: []string{}, exitCode: 0},
 	}
 
 	for _, tc := range tc {
