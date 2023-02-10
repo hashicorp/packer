@@ -1,18 +1,4 @@
-## 1.8.6 (Upcoming)
-
-### IMPROVEMENTS:
-* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
-     [GH-12163](https://github.com/hashicorp/packer/pull/12163)
-
-### BUG FIXES: 
-* core/hcl2: Templates with build blocks referencing an unknown source block
-     would display an empty string for the template filename at line 0, which made
-     it difficult to identify the broken build block. Packer has been updated to
-     display the proper filename and line number where the unknown reference
-     resides. [GH-12167](https://github.com/hashicorp/packer/pull/12167)
-* core: Linux packages now have vendor label and set the default label to HashiCorp.
-        This fix is implemented for any future releases, but will not be 
-        updated for historical releases.
+## 1.8.6 (Unreleased)
 
 ### NOTES:
 * core: Users will see some changes in how names are displayed during a Packer
@@ -21,6 +7,26 @@
      (`"name":"mybuilder"`) the builder'ss type and name will be displayed (i.e
      "<type>.mybuilder". This does not impact the behavior of options such as
      only or except, they will continue to work as they did before.)
+
+### IMPROVEMENTS:
+* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
+     [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+* core/hcl2: Packer will no longer warn on excluded post-processors when using
+     `-only/exlude` filters for running select builds.
+     [GH-12187](https://github.com/hashicorp/packer/pull/12187)
+
+### BUG FIXES: 
+* cmd/hcl2_upgrade: Fix crash when variables block is undefined.
+     [GH-12250](https://github.com/hashicorp/packer/pull/12250)
+* core/hcl2: Templates with build blocks referencing an unknown source block
+     would display an empty string for the template filename at line 0, which
+     made it difficult to identify the broken build block. Packer has been
+     updated to display the proper filename and line number where the unknown
+     reference resides.
+     [GH-12167](https://github.com/hashicorp/packer/pull/12167)
+* core: Linux packages now have vendor label and set the default label to
+     HashiCorp. This fix is implemented for any future releases, but will not be
+     updated for historical releases.
 
 ## 1.8.5 (December 12, 2022)
 
