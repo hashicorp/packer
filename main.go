@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -123,6 +124,52 @@ func realMain() int {
 	return 0
 }
 
+func extractChdirOption(args []string) (string, []string, error) {
+	if len(args) == 0 {
+		return "", args, nil
+	}
+
+	const argName = "-chdir"
+	const argPrefix = argName + "="
+	var argValue string
+	var argPos int
+
+	for i, arg := range args {
+		if !strings.HasPrefix(arg, "-") {
+			// Because the chdir option is a subcommand-agnostic one, we require
+			// it to appear before any subcommand argument, so if we find a
+			// non-option before we find -chdir then we are finished.
+			break
+		}
+		if arg == argName || arg == argPrefix {
+			return "", args, fmt.Errorf("must include an equals sign followed by a directory path, like -chdir=example")
+		}
+		if strings.HasPrefix(arg, argPrefix) {
+			argPos = i
+			argValue = arg[len(argPrefix):]
+		}
+	}
+
+	// When we fall out here, we'll have populated argValue with a non-empty
+	// string if the -chdir=... option was present and valid, or left it
+	// empty if it wasn't present.
+	if argValue == "" {
+		return "", args, nil
+	}
+
+	// If we did find the option then we'll need to produce a new args that
+	// doesn't include it anymore.
+	if argPos == 0 {
+		// Easy case: we can just slice off the front
+		return argValue, args[1:], nil
+	}
+	// Otherwise we need to construct a new array and copy to it.
+	newArgs := make([]string, len(args)-1)
+	copy(newArgs, args[:argPos])
+	copy(newArgs[argPos:], args[argPos+1:])
+	return argValue, newArgs, nil
+}
+
 // wrappedMain is called only when we're wrapped by panicwrap and
 // returns the exit status to exit with.
 func wrappedMain() int {
@@ -188,9 +235,27 @@ func wrappedMain() int {
 	}
 	log.Printf("[INFO] Setting cache directory: %s", cacheDir)
 
+	// Below is same as terraform's chdir setup
+	// https://github.com/hashicorp/terraform/blob/main/main.go
+	// The arguments can begin with a -chdir option to ask Terraform to switch
+	// to a different working directory for the rest of its work. If that
+	// option is present then extractChdirOption returns a trimmed args with that option removed.
+	overrideWd, args, err := extractChdirOption(os.Args[1:])
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "%s Invalid -chdir option: \n\n%s\n", ErrorPrefix, err)
+		return 1
+	}
+	if overrideWd != "" {
+		err := os.Chdir(overrideWd)
+		if err != nil {
+			fmt.Fprintf(os.Stdout, "%s Error handling -chdir option: \n\n%s\n", ErrorPrefix, err)
+			return 1
+		}
+	}
+
 	// Determine if we're in machine-readable mode by mucking around with
 	// the arguments...
-	args, machineReadable := extractMachineReadable(os.Args[1:])
+	args, machineReadable := extractMachineReadable(args)
 
 	defer packer.CleanupClients()
 
