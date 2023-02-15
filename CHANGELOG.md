@@ -1,16 +1,20 @@
-## 1.8.6 (Unreleased)
+## 1.8.6 (February 15, 2023)
 
 ### NOTES:
 * core: Users will see some changes in how names are displayed during a Packer
      build for JSON templates. Previously only the builder type or the builder
      name, if it was set, would be displayed. Now for named builders
-     (`"name":"mybuilder"`) the builder'ss type and name will be displayed (i.e
+     (`"name":"mybuilder"`) the builder's type and name will be displayed (i.e
      "<type>.mybuilder". This does not impact the behavior of options such as
      only or except, they will continue to work as they did before.)
 
 ### IMPROVEMENTS:
-* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
+* Bump bundled plugins to latest available version.
+     [GH-12271](https://github.com/hashicorp/packer/pull/12271)
+* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0
      [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+* Bump github.com/hashicorp/hcp-sdk-go from 0.33.0 to 0.34.0 
+     [GH-12262](https://github.com/hashicorp/packer/pull/12262)
 * core/hcl2: Packer will no longer warn on excluded post-processors when using
      `-only/exlude` filters for running select builds.
      [GH-12187](https://github.com/hashicorp/packer/pull/12187)
