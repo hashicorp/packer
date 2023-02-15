@@ -1,4 +1,5 @@
 ## 1.9.0 (Unreleased)
+
 ### NOTES:
 * **Breaking Change**: Iteration fingerprints used to be computed from the Git SHA of the
      repository where the template is located when running packer build. This
@@ -18,19 +19,37 @@
      already specified in the environment.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
 
-## 1.8.6 (Unreleased)
+## 1.8.6 (February 15, 2023)
 
 ### NOTES:
 * core: Users will see some changes in how names are displayed during a Packer
      build for JSON templates. Previously only the builder type or the builder
      name, if it was set, would be displayed. Now for named builders
-     (`"name":"mybuilder"`) the builder'ss type and name will be displayed (i.e
+     (`"name":"mybuilder"`) the builder's type and name will be displayed (i.e
      "<type>.mybuilder". This does not impact the behavior of options such as
      only or except, they will continue to work as they did before.)
 
+### PLUGINS:
+The following external plugins have been updated and pinned to address open
+    issues. Please see their respective changelogs for details on plugin
+    specific bug fixes and improvements.
+
+* alicloud@v1.0.7 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-alicloud/releases/tag/v1.0.7)
+* amazon@v1.2.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-amazon/releases/tag/v1.2.1)
+* azure@v1.4.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-azure/releases/tag/v1.4.0)
+* googlecompute@v1.1.0 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-googlecompute/releases/tag/v1.1.0)
+* proxmox@v1.1.1 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-proxmox/releases/tag/v1.1.1)
+* tencentcloud@v1.0.6 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-tencentcloud/releases/tag/v1.0.6)
+* qemu@v1.0.9 - [CHANGELOG](https://github.com/hashicorp/packer-plugin-qemu/releases/tag/v1.0.9)
+
+
 ### IMPROVEMENTS:
-* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0.
+* Bump bundled plugins to latest available version.
+     [GH-12271](https://github.com/hashicorp/packer/pull/12271)
+* bump github.com/hashicorp/hcp-sdk-go from 0.28.0 to 0.29.0
      [GH-12163](https://github.com/hashicorp/packer/pull/12163)
+* Bump github.com/hashicorp/hcp-sdk-go from 0.33.0 to 0.34.0
+     [GH-12262](https://github.com/hashicorp/packer/pull/12262)
 * core/hcl2: Packer will no longer warn on excluded post-processors when using
      `-only/exlude` filters for running select builds.
      [GH-12187](https://github.com/hashicorp/packer/pull/12187)
