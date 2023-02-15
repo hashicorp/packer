@@ -23,7 +23,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/hashicorp/hcp-sdk-go v0.34.0
-	github.com/hashicorp/packer-plugin-amazon v1.1.6
+	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.3.4
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.6 // indirect
@@ -61,14 +61,14 @@ require (
 
 require (
 	github.com/digitalocean/packer-plugin-digitalocean v1.1.1
-	github.com/hashicorp/packer-plugin-alicloud v1.0.5
+	github.com/hashicorp/packer-plugin-alicloud v1.0.7
 	github.com/hashicorp/packer-plugin-ansible v1.0.3
-	github.com/hashicorp/packer-plugin-azure v1.3.1
+	github.com/hashicorp/packer-plugin-azure v1.4.0
 	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.2
 	github.com/hashicorp/packer-plugin-converge v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.8
-	github.com/hashicorp/packer-plugin-googlecompute v1.0.16
+	github.com/hashicorp/packer-plugin-googlecompute v1.1.0
 	github.com/hashicorp/packer-plugin-hcloud v1.0.5
 	github.com/hashicorp/packer-plugin-hyperone v1.0.1
 	github.com/hashicorp/packer-plugin-hyperv v1.0.4
@@ -82,11 +82,11 @@ require (
 	github.com/hashicorp/packer-plugin-openstack v1.0.1
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
 	github.com/hashicorp/packer-plugin-profitbricks v1.0.2
-	github.com/hashicorp/packer-plugin-proxmox v1.1.0
+	github.com/hashicorp/packer-plugin-proxmox v1.1.1
 	github.com/hashicorp/packer-plugin-puppet v1.0.1
-	github.com/hashicorp/packer-plugin-qemu v1.0.8
+	github.com/hashicorp/packer-plugin-qemu v1.0.9
 	github.com/hashicorp/packer-plugin-salt v1.0.0
-	github.com/hashicorp/packer-plugin-tencentcloud v1.0.5
+	github.com/hashicorp/packer-plugin-tencentcloud v1.0.6
 	github.com/hashicorp/packer-plugin-triton v1.0.2
 	github.com/hashicorp/packer-plugin-ucloud v1.0.1
 	github.com/hashicorp/packer-plugin-vagrant v1.0.3
@@ -122,7 +122,7 @@ require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
-	github.com/Telmate/proxmox-api-go v0.0.0-20220107223401-b9c909d83a3b // indirect
+	github.com/Telmate/proxmox-api-go v0.0.0-20221209160129-bb95d9a81e7a // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
