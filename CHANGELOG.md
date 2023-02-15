@@ -66,6 +66,10 @@ The following external plugins have been updated and pinned to address open
 * core: Linux packages now have vendor label and set the default label to
      HashiCorp. This fix is implemented for any future releases, but will not be
      updated for historical releases.
+* core/hcp: The bucket's description was not properly set in the bucket
+     object sent to HCP Packer leaving all newly created buckets with an empty
+     description. [GH-12235]
+     [GH-12235](https://github.com/hashicorp/packer/pull/12235)
 
 ## 1.8.5 (December 12, 2022)
 
