@@ -199,6 +199,7 @@
     "path": "nutanix",
     "repo": "nutanix-cloud-native/packer-plugin-nutanix",
     "version": "latest",
+    "pluginTier": "verified",
     "sourceBranch": "main"
   },
   {
