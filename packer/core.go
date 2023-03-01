@@ -421,7 +421,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
 	cb := &CoreBuild{
-		Type:               configBuilder.Name,
+		Type:               n,
 		Builder:            builder,
 		BuilderConfig:      configBuilder.Config,
 		BuilderType:        configBuilder.Type,
@@ -432,6 +432,8 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		Variables:          c.variables,
 	}
 
+	//configBuilder.Name is left uninterpolated so we must check against
+	// the interpolated name.
 	if configBuilder.Type != configBuilder.Name {
 		cb.BuildName = configBuilder.Type
 	}
