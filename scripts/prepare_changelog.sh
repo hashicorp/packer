@@ -1,4 +1,7 @@
 #!/bin/zsh
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 
 LAST_RELEASE=$1
 DO_PR_CHECK=1

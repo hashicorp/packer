@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // Package hcl2template defines code to parse hcl2 template files.
 //
 // In order to configure a packer builder,provisioner, and post processor.
