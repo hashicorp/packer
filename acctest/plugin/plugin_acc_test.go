@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // plugin_acc_test.go should contain acceptance tests for features related to
 // installing, discovering and running plugins.
 package plugin

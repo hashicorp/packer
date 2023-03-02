@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 package fix
 
 // PP is a convenient way to interact with the post-processors within a fixer

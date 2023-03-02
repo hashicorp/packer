@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 //go:build darwin || dragonfly || freebsd || (linux && !appengine) || netbsd || openbsd
 // +build darwin dragonfly freebsd linux,!appengine netbsd openbsd
 

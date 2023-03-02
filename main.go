@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
