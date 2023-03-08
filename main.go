@@ -147,6 +147,7 @@ func extractChdirOption(args []string) (string, []string, error) {
 		if strings.HasPrefix(arg, argPrefix) {
 			argPos = i
 			argValue = arg[len(argPrefix):]
+            break
 		}
 	}
 
