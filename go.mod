@@ -24,7 +24,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.14.1
 	github.com/hashicorp/hcp-sdk-go v0.36.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
-	github.com/hashicorp/packer-plugin-sdk v0.3.4
+	github.com/hashicorp/packer-plugin-sdk v0.4.0
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/klauspost/pgzip v1.2.5
@@ -47,14 +47,14 @@ require (
 	github.com/zclconf/go-cty v1.10.0
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4
-	golang.org/x/net v0.7.0
+	golang.org/x/mod v0.8.0
+	golang.org/x/net v0.8.0
 	golang.org/x/oauth2 v0.1.0
 	golang.org/x/sync v0.1.0
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
-	golang.org/x/tools v0.1.12
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/tools v0.6.0
 	google.golang.org/api v0.101.0 // indirect
 	google.golang.org/grpc v1.50.1
 )
