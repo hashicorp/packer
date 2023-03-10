@@ -21,7 +21,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.6.0
-	github.com/hashicorp/hcl/v2 v2.14.1
+	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/hashicorp/hcp-sdk-go v0.36.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.4.0
@@ -44,7 +44,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.1
 	github.com/ulikunitz/xz v0.5.10
-	github.com/zclconf/go-cty v1.10.0
+	github.com/zclconf/go-cty v1.12.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/mod v0.8.0
