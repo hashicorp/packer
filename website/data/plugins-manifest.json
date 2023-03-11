@@ -80,6 +80,13 @@
     "isHcpPackerReady": true
   },
   {
+    "title": "External",
+    "path": "external",
+    "repo": "joomcode/packer-plugin-external",
+    "version": "latest",
+    "sourceBranch": "main"
+  },
+  {
     "title": "Git",
     "path": "git",
     "repo": "ethanmdavidson/packer-plugin-git",
