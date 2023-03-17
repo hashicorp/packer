@@ -12,6 +12,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func boolPointer(tf bool) *bool {
@@ -35,7 +36,7 @@ func testBuild() *CoreBuild {
 		},
 		PostProcessors: [][]CoreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", make(map[string]interface{}), boolPointer(true)},
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
 			},
 		},
 		Variables: make(map[string]string),
@@ -305,7 +306,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -330,10 +331,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
 		},
 	}
 
@@ -358,12 +359,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
 		},
 	}
 
@@ -389,7 +390,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
@@ -417,7 +418,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false),
 			},
 		},
 	}
@@ -444,7 +445,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", make(map[string]interface{}), nil,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), nil,
 			},
 		},
 	}

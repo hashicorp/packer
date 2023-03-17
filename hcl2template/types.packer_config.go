@@ -362,7 +362,10 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 			continue
 		}
 
+		dsOpts, _ := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
+		sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", dsOpts)
 		realValue, err := datasource.Execute()
+		sp.End(err)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
 				Summary:  err.Error(),
@@ -444,7 +447,10 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 		return dependencies, diags, shouldContinue
 	}
 
+	opts, _ := decodeHCL2Spec(ds.block.Body, cfg.EvalContext(DatasourceContext, nil), datasource)
+	sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", opts)
 	realValue, err := datasource.Execute()
+	sp.End(err)
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  err.Error(),
@@ -489,6 +495,8 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		return packer.CoreBuildProvisioner{}, diags
 	}
 
+	flatProvisionerCfg, _ := decodeHCL2Spec(pb.HCL2Ref.Rest, ectx, provisioner)
+
 	// If we're pausing, we wrap the provisioner in a special pauser.
 	if pb.PauseBefore != 0 {
 		provisioner = &packer.PausedProvisioner{
@@ -512,6 +520,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		PType:       pb.PType,
 		PName:       pb.PName,
 		Provisioner: provisioner,
+		HCLConfig:   flatProvisionerCfg,
 	}, diags
 }
 
@@ -550,10 +559,13 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 				continue
 			}
 
+			flatPostProcessorCfg, moreDiags := decodeHCL2Spec(ppb.HCL2Ref.Rest, ectx, postProcessor)
+
 			pps = append(pps, packer.CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,
 				PName:             ppb.PName,
 				PType:             ppb.PType,
+				HCLConfig:         flatPostProcessorCfg,
 				KeepInputArtifact: ppb.KeepInputArtifact,
 			})
 		}
@@ -655,6 +667,9 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			if moreDiags.HasErrors() {
 				continue
 			}
+
+			decoded, _ := decodeHCL2Spec(srcUsage.Body, cfg.EvalContext(BuildContext, nil), builder)
+			pcb.HCLConfig = decoded
 
 			// If the builder has provided a list of to-be-generated variables that
 			// should be made accessible to provisioners, pass that list into
