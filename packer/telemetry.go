@@ -2,6 +2,7 @@ package packer
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	checkpoint "github.com/hashicorp/go-checkpoint"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	packerVersion "github.com/hashicorp/packer/version"
+	"github.com/zclconf/go-cty/cty"
 )
 
 const TelemetryVersion string = "beta/packer/5"
@@ -154,22 +156,66 @@ func flattenConfigKeys(options interface{}) []string {
 	var flatten func(string, interface{}) []string
 
 	flatten = func(prefix string, options interface{}) (strOpts []string) {
-		if m, ok := options.(map[string]interface{}); ok {
-			for k, v := range m {
-				if prefix != "" {
-					k = prefix + "/" + k
-				}
-				if n, ok := v.(map[string]interface{}); ok {
-					strOpts = append(strOpts, flatten(k, n)...)
-				} else {
-					strOpts = append(strOpts, k)
-				}
-			}
+		switch opt := options.(type) {
+		case map[string]interface{}:
+			return flattenJSON(prefix, options)
+		case cty.Value:
+			return flattenHCL(prefix, opt)
+		default:
+			return nil
 		}
-		return
 	}
 
 	flattened := flatten("", options)
 	sort.Strings(flattened)
 	return flattened
+}
+
+func flattenJSON(prefix string, options interface{}) (strOpts []string) {
+	if m, ok := options.(map[string]interface{}); ok {
+		for k, v := range m {
+			if prefix != "" {
+				k = prefix + "/" + k
+			}
+			if n, ok := v.(map[string]interface{}); ok {
+				strOpts = append(strOpts, flattenJSON(k, n)...)
+			} else {
+				strOpts = append(strOpts, k)
+			}
+		}
+	}
+	return
+}
+
+func flattenHCL(prefix string, v cty.Value) (args []string) {
+	if v.IsNull() {
+		return []string{}
+	}
+	t := v.Type()
+	switch {
+	case t.IsObjectType(), t.IsMapType():
+		if !v.IsKnown() {
+			return []string{}
+		}
+		it := v.ElementIterator()
+		for it.Next() {
+			key, val := it.Element()
+			keyStr := key.AsString()
+
+			if val.IsNull() {
+				continue
+			}
+
+			if prefix != "" {
+				keyStr = fmt.Sprintf("%s/%s", prefix, keyStr)
+			}
+
+			if val.Type().IsObjectType() || val.Type().IsMapType() {
+				args = append(args, flattenHCL(keyStr, val)...)
+			} else {
+				args = append(args, keyStr)
+			}
+		}
+	}
+	return args
 }
