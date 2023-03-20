@@ -15,22 +15,32 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-const TelemetryVersion string = "beta/packer/5"
+type PackerTemplateType string
+
+const (
+	UnknownTemplate PackerTemplateType = "Unknown"
+	HCL2Template    PackerTemplateType = "HCL2"
+	JSONTemplate    PackerTemplateType = "JSON"
+)
+
+const TelemetryVersion string = "beta/packer/6"
 const TelemetryPanicVersion string = "beta/packer_panic/4"
 
 var CheckpointReporter *CheckpointTelemetry
 
 type PackerReport struct {
-	Spans    []*TelemetrySpan `json:"spans"`
-	ExitCode int              `json:"exit_code"`
-	Error    string           `json:"error"`
-	Command  string           `json:"command"`
+	Spans        []*TelemetrySpan   `json:"spans"`
+	ExitCode     int                `json:"exit_code"`
+	Error        string             `json:"error"`
+	Command      string             `json:"command"`
+	TemplateType PackerTemplateType `json:"template_type"`
 }
 
 type CheckpointTelemetry struct {
 	spans         []*TelemetrySpan
 	signatureFile string
 	startTime     time.Time
+	templateType  PackerTemplateType
 }
 
 func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
@@ -54,6 +64,7 @@ func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
 	return &CheckpointTelemetry{
 		signatureFile: signatureFile,
 		startTime:     time.Now().UTC(),
+		templateType:  UnknownTemplate,
 	}
 }
 
@@ -105,6 +116,15 @@ func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options interface
 	return ts
 }
 
+// SetTemplateType registers the template type being processed for a Packer command
+func (c *CheckpointTelemetry) SetTemplateType(t PackerTemplateType) {
+	if c == nil {
+		return
+	}
+
+	c.templateType = t
+}
+
 func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) error {
 	if c == nil {
 		return nil
@@ -121,6 +141,8 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	if err != nil {
 		extra.Error = err.Error()
 	}
+
+	extra.TemplateType = c.templateType
 	params.Payload = extra
 	// b, _ := json.MarshalIndent(params, "", "    ")
 	// log.Println(string(b))
