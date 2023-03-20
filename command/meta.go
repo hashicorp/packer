@@ -120,9 +120,11 @@ func (m *Meta) GetConfig(cla *MetaArgs) (packer.Handler, int) {
 
 	switch cfgType {
 	case ConfigTypeHCL2:
+		packer.CheckpointReporter.SetTemplateType(packer.HCL2Template)
 		// TODO(azr): allow to pass a slice of files here.
 		return m.GetConfigFromHCL(cla)
 	default:
+		packer.CheckpointReporter.SetTemplateType(packer.JSONTemplate)
 		// TODO: uncomment once we've polished HCL a bit more.
 		// c.Ui.Say(`Legacy JSON Configuration Will Be Used.
 		// The template will be parsed in the legacy configuration style. This style
