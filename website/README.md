@@ -103,7 +103,7 @@ There is currently a small bug with new page creation - if you create a new page
 
 ### Markdown Enhancements
 
-There are several custom markdown plugins that are available by default that enhance [standard markdown](https://commonmark.org/) to fit our use cases. This set of plugins introduces a couple instances of custom syntax, and a couple specific pitfalls that are not present by default with markdown, detailed below:
+There are several custom Markdown plugins that are available by default that enhance [standard markdown](https://commonmark.org/) to fit our use cases. This set of plugins introduces a couple instances of custom syntax, and a couple specific pitfalls that are not present by default with markdown, detailed below:
 
 - > **Warning**: We are deprecating the current [paragraph alerts](https://github.com/hashicorp/remark-plugins/tree/master/plugins/paragraph-custom-alerts#paragraph-custom-alerts), in favor of the newer [MDX Inline Alert](#inline-alerts) components. The legacy paragraph alerts are represented by the symbols `~>`, `->`, `=>`, or `!>`.
 - If you see `@include '/some/path.mdx'`, this is a [markdown include](https://github.com/hashicorp/remark-plugins/tree/master/plugins/include-markdown#include-markdown-plugin). It's worth noting as well that all includes resolve from `website/content/partials` by default, and that changes to partials will not live-reload the website.
@@ -237,7 +237,7 @@ Now let's look at inline usage, here's an example:
 
 ![Enterprise Alert Component - Inline](https://p176.p0.n0.cdn.getcloudapp.com/items/L1upYLEJ/Screen%20Shot%202020-06-11%20at%206.07.50%20PM.png?v=013ba439263de8292befbc851d31dd78)
 
-And here's how it could be used in your markdown document:
+And here's how it could be used in your Markdown document:
 
 ```mdx
 ### Some Enterprise Feature <EnterpriseAlert inline />
@@ -265,7 +265,7 @@ When using fenced code blocks, the recommendation is to tag the code block with 
 ```
 ````
 
-Check out the [supported languages list](https://prismjs.com/#supported-languages) for the syntax highlighter we use if you want to double check the language name.
+Check out the [supported languages list](https://prismjs.com/#supported-languages) for the syntax highlighter we use if you want to double-check the language name.
 
 It is also worth noting specifically that if you are using a code block that is an example of a terminal command, the correct language tag is `shell-session`. For example:
 
