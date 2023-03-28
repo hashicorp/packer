@@ -74,7 +74,6 @@ require (
 	github.com/hashicorp/packer-plugin-hyperv v1.0.4
 	github.com/hashicorp/packer-plugin-inspec v1.0.0
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.1
-	github.com/hashicorp/packer-plugin-linode v1.0.3
 	github.com/hashicorp/packer-plugin-lxc v1.0.2
 	github.com/hashicorp/packer-plugin-lxd v1.0.1
 	github.com/hashicorp/packer-plugin-ncloud v1.0.3
@@ -163,7 +162,6 @@ require (
 	github.com/go-openapi/strfmt v0.21.3 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-openapi/validate v0.22.1 // indirect
-	github.com/go-resty/resty/v2 v2.6.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
@@ -211,7 +209,6 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
-	github.com/linode/linodego v0.30.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/matryer/is v1.4.0 // indirect
