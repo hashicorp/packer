@@ -161,8 +161,8 @@
   {
     "title": "Linode",
     "path": "linode",
-    "repo": "hashicorp/packer-plugin-linode",
-    "pluginTier": "community",
+    "repo": "linode/packer-plugin-linode",
+    "pluginTier": "verified",
     "version": "latest",
     "isHcpPackerReady": true
   },
