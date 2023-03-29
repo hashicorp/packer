@@ -41,7 +41,7 @@ jobs:
       PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - name: IAM Assume Role
