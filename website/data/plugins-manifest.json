@@ -230,6 +230,7 @@
     "repo": "outscale/packer-plugin-outscale",
     "version": "latest",
     "pluginTier": "verified"
+    "isHcpPackerReady": true
   },
   {
     "title": "Parallels",
