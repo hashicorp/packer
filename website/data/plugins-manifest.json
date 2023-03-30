@@ -229,7 +229,7 @@
     "path": "outscale",
     "repo": "outscale/packer-plugin-outscale",
     "version": "latest",
-    "pluginTier": "verified"
+    "pluginTier": "verified",
     "isHcpPackerReady": true
   },
   {
