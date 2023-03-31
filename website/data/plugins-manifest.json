@@ -310,7 +310,7 @@
   {
     "title": "UCloud",
     "path": "ucloud",
-    "repo": "hashicorp/packer-plugin-ucloud",
+    "repo": "ucloud/packer-plugin-ucloud",
     "version": "latest",
     "pluginTier": "community"
   },

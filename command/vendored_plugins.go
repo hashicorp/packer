@@ -60,8 +60,6 @@ import (
 	saltmasterlessprovisioner "github.com/hashicorp/packer-plugin-salt/provisioner/salt-masterless"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
-	uclouduhostbuilder "github.com/hashicorp/packer-plugin-ucloud/builder/ucloud/uhost"
-	ucloudimportpostprocessor "github.com/hashicorp/packer-plugin-ucloud/post-processor/ucloud-import"
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
 	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
@@ -122,7 +120,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"qemu":                new(qemubuilder.Builder),
 	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
 	"triton":              new(tritonbuilder.Builder),
-	"ucloud-uhost":        new(uclouduhostbuilder.Builder),
 	"vagrant":             new(vagrantbuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
@@ -161,7 +158,6 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"docker-tag":           new(dockertagpostprocessor.PostProcessor),
 	"googlecompute-export": new(googlecomputeexportpostprocessor.PostProcessor),
 	"googlecompute-import": new(googlecomputeimportpostprocessor.PostProcessor),
-	"ucloud-import":        new(ucloudimportpostprocessor.PostProcessor),
 	"vagrant":              new(vagrantpostprocessor.PostProcessor),
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
