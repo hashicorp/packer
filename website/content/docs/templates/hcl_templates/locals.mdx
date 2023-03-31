@@ -13,7 +13,7 @@ There are two kinds of variables in HCL Packer templates: Input variables,
 sometimes simply called "variables", and Local variables, also known as
 "locals". Input variables may have defaults, but those defaults can be
 overridden using command line options, environment variables, or variable
-definitions files. Local variables cannot be overridden.
+definitions files. Local variables can not be overridden.
 
 This page is about local variables. To learn about input variables, see the
 [input variables](/packer/docs/templates/hcl_templates/variables) page.
@@ -50,7 +50,7 @@ locals {
   name_prefix         = "${var.name_prefix != "" ? var.name_prefix : local.default_name_prefix}"
 }
 
-# Local variables can be interpolated elsewhere using the "local." prefix.
+# Local variables can be referenced using the "local." prefix.
 source "virtualbox-iso" "example" {
   output = "${local.name_prefix}-files"
   # ...
