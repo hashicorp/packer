@@ -569,8 +569,6 @@ github.com/hashicorp/packer-plugin-tencentcloud v1.0.6 h1:h7thXtVaXZhrF5L+bMcdMk
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.6/go.mod h1:J7RslhmI+X7EdAVOtEp59X7L3L5VGyZNwiXxDyIpYpI=
 github.com/hashicorp/packer-plugin-triton v1.0.2 h1:Yla93I7Jl/WXCuCRWYYR0J8/57X4puGLZ07wBn+QS9w=
 github.com/hashicorp/packer-plugin-triton v1.0.2/go.mod h1:4eeTOUPYYD1B9iNF0FMqfVczqhTRuL9bXn3AqJa2N9Y=
-github.com/hashicorp/packer-plugin-ucloud v1.0.1 h1:zHNRpIwXZLGZymj7Jf752Hs0lhywJFiEF1jbCAP0bd0=
-github.com/hashicorp/packer-plugin-ucloud v1.0.1/go.mod h1:Blwxt0UxAdXQWZJntwlGkFQ/C1ftxi7L6WSB3namT1U=
 github.com/hashicorp/packer-plugin-vagrant v1.0.3 h1:IUfEdYuAjSjGsgJI2rnZ1qEo5rI0UWoueJ+yq9ysx4M=
 github.com/hashicorp/packer-plugin-vagrant v1.0.3/go.mod h1:Ymg8LJrT8N2Dclu91G3ZhXpE67jL7hfbtyDVKeNsKTc=
 github.com/hashicorp/packer-plugin-virtualbox v1.0.4 h1:mceFO34yhBU4BUMmCcQAB6KQ98GPjBIXTG3eS22RmZM=
@@ -647,7 +645,6 @@ github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgo
 github.com/klauspost/pgzip v1.2.5 h1:qnWYvvKqedOF2ulHpMG72XQol4ILEJ8k2wwRl/Km8oE=
 github.com/klauspost/pgzip v1.2.5/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQKQE9RUs=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
-github.com/konsorten/go-windows-terminal-sequences v1.0.2 h1:DB17ag19krx9CFsz4o3enTrPXyIXCl+2iCXH/aMAp9s=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kortschak/utter v0.0.0-20190412033250-50fe362e6560/go.mod h1:oDr41C7kH9wvAikWyFhr6UFr8R7nelpmCF5XR5rL7I8=
 github.com/kr/fs v0.1.0 h1:Jskdu9ieNAYnjxsi0LbQp1ulIKZV1LAFgK1tWhpZgl8=
@@ -845,10 +842,8 @@ github.com/shirou/gopsutil v3.21.11+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMT
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
 github.com/sirupsen/logrus v1.0.4-0.20170822132746-89742aefa4b2/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
-github.com/sirupsen/logrus v1.3.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.1/go.mod h1:ni0Sbl8bgC9z8RoU9G6nDWqqs/fq4eDPysMBDgk/93Q=
-github.com/sirupsen/logrus v1.4.2 h1:SPIRibHv4MatM3XXNO2BJeFLZwZ2LvZgfQ5+UNI2im4=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 h1:JIAuq3EEf9cgbU6AtGPK4CTG3Zf6CKMNqf0MHTggAUA=
 github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966/go.mod h1:sUM3LWHvSMaG192sy56D9F7CNvL7jUJVXoqM1QKLnog=
@@ -900,10 +895,6 @@ github.com/tklauser/numcpus v0.4.0 h1:E53Dm1HjH1/R2/aoCtXtPgzmElmn51aOkhCFSuZq//
 github.com/tklauser/numcpus v0.4.0/go.mod h1:1+UI3pD8NW14VMwdgJNJ1ESk2UnwhAnz5hMwiKKqXCQ=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
-github.com/ucloud/ucloud-sdk-go v0.20.2 h1:ZNB38C7oZ2imCHEC79mVFvVT+ASkbryriOkZ+q2E0XI=
-github.com/ucloud/ucloud-sdk-go v0.20.2/go.mod h1:dyLmFHmUfgb4RZKYQP9IArlvQ2pxzFthfhwxRzOEPIw=
-github.com/ufilesdk-dev/ufile-gosdk v1.0.1 h1:TNtFN3vO8ghuxLKBwQqSELllHYP4rggvXCox8JtVV0Y=
-github.com/ufilesdk-dev/ufile-gosdk v1.0.1/go.mod h1:R5FMQxkQ+QK/9Vz+jfnJP4rZIktYrRcWmuAnbOSkROI=
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/ugorji/go v1.2.6/go.mod h1:anCg0y61KIhDlPZmnH+so+RQbysYVyDko0IMgJv0Nn0=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
