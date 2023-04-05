@@ -88,7 +88,6 @@ require (
 	github.com/hashicorp/packer-plugin-salt v1.0.0
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.6
 	github.com/hashicorp/packer-plugin-triton v1.0.2
-	github.com/hashicorp/packer-plugin-ucloud v1.0.1
 	github.com/hashicorp/packer-plugin-vagrant v1.0.3
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.4
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
@@ -209,7 +208,6 @@ require (
 	github.com/joyent/triton-go v1.8.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/linode/linodego v0.30.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -236,15 +234,12 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.366 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.366 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
-	github.com/ucloud/ucloud-sdk-go v0.20.2 // indirect
-	github.com/ufilesdk-dev/ufile-gosdk v1.0.1 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/vmware/govmomi v0.29.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
