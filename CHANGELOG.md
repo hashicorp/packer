@@ -19,6 +19,58 @@
      already specified in the environment.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
 
+## 1.8.7 (Upcoming)
+
+### NOTES:
+
+* packer-plugin-linode: The Linode plugin has been handed over to the Linode
+     team. New releases for this plugin are available at
+     https://github.com/linode/packer-plugin-linode. This plugin is is no longer
+     being bundled in the Packer binary release. Existing references to the
+     plugin will continue to work but users are advised to update the
+     required_plugins block to use the new plugin source address.
+     [GH-12329](https://github.com/hashicorp/packer/pull/12329)
+    ```
+     required_plugins {
+       linode = {
+         source  =  "github.com/linode/linode"
+         version = ">=1.0.5"
+        }
+    }
+    ```
+* packer-plugin-ucloud: The UCloud plugin has been handed over to the UCloud
+     team. New releases for this plugin are available at
+     https://github.com/ucloud/packer-plugin-ucloud. This plugin is is no longer
+     being bundled in the Packer binary release. Existing references to the
+     plugin will continue to work but users are advised to update the
+     required_plugins block to use the new plugin source address.
+     [GH-12335](https://github.com/hashicorp/packer/pull/12335)
+    ```
+     required_plugins {
+        ucloud = {
+         source  =  "github.com/ucloud/ucloud"
+         version = ">=1.0.8"
+        }
+    }
+    ```
+
+### Plugins
+* Migrate external Linode plugin to linode/packer-plugin-linode.
+     [GH-12329](https://github.com/hashicorp/packer/pull/12329)
+* Migrate external UCloud plugin to ucloud/packer-plugin-ucloud.
+     [GH-12335](https://github.com/hashicorp/packer/pull/12335)
+
+### BUG FIXES
+* Bump github.com/hashicorp/hcp-sdk-go to 0.36.0.
+     [GH-12292](https://github.com/hashicorp/packer/pull/12292)
+* Bump github.com/hashicorp/packer-plugin-sdk to 0.4.0 to address CVE-2023-0475, CVE-2022-41723.
+     [GH-12306](https://github.com/hashicorp/packer/pull/12306)
+* cmd/hcl2_upgrade: Fix crash when variables block is undefined in legacy JSON
+     templates. [GH-12257](https://github.com/hashicorp/packer/pull/12257)
+* Fix regression introduced in 1.8.6, where configurations with custom builder
+     names , via the name attribute, but would display the name to STDOUT with
+     uninterpolated variable values.
+     [GH-12290](https://github.com/hashicorp/packer/pull/12290)
 ## 1.8.6 (February 15, 2023)
 
 ### NOTES:
