@@ -6,10 +6,4 @@ updates:
     interval: daily
   allow:
     - dependency-name: "github.com/hashicorp/packer-plugin-sdk"
-    - dependency-name: "github.com/hashicorp/hcl/v2"
-    - dependency-name: "github.com/zclconf/go-cty"
     - dependency-name: "github.com/hashicorp/hcp-sdk-go"
-- package-ecosystem: github-actions
-  directory: /
-  schedule:
-    interval: daily
