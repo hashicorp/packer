@@ -85,6 +85,7 @@ Usage: packer console [options] [TEMPLATE]
 Options:
   -var 'key=value'       Variable for templates, can be used multiple times.
   -var-file=path         JSON or HCL2 file containing user variables.
+  -config-type           Set to 'hcl2' to run in HCL2 mode when no file is passed. Defaults to json.
 `
 
 	return strings.TrimSpace(helpText)
