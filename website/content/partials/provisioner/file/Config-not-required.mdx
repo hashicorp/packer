@@ -18,4 +18,9 @@
   the Packer run, but realize that there are situations where this may be
   unavoidable.
 
+- `excludes` ([]string) - A list of files or directories to exclude from the upload. This is
+  useful if you have a directory with many files and you only want to
+  upload a few of them. This only works if you are uploading a directory
+  and not a single file.
+
 <!-- End of code generated from the comments of the Config struct in provisioner/file/provisioner.go; -->

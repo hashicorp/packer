@@ -24,6 +24,7 @@ type FlatConfig struct {
 	Destination         *string           `mapstructure:"destination" required:"true" cty:"destination" hcl:"destination"`
 	Direction           *string           `mapstructure:"direction" required:"false" cty:"direction" hcl:"direction"`
 	Generated           *bool             `mapstructure:"generated" required:"false" cty:"generated" hcl:"generated"`
+	Excludes            []string          `mapstructure:"excludes" required:"false" cty:"excludes" hcl:"excludes"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -52,6 +53,7 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"destination":                &hcldec.AttrSpec{Name: "destination", Type: cty.String, Required: false},
 		"direction":                  &hcldec.AttrSpec{Name: "direction", Type: cty.String, Required: false},
 		"generated":                  &hcldec.AttrSpec{Name: "generated", Type: cty.Bool, Required: false},
+		"excludes":                   &hcldec.AttrSpec{Name: "excludes", Type: cty.List(cty.String), Required: false},
 	}
 	return s
 }
