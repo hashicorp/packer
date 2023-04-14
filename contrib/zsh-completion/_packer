@@ -38,7 +38,7 @@ _packer () {
   )
 
   local -a fix_arguments && fix_arguments=(
-    '(-)*:files:_files -g "*pkr.{hcl,json}"'
+    '(-)*:files:_files -g "*.json"'
   )
 
   local -a fmt_arguments && fmt_arguments=(
