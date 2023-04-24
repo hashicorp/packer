@@ -1,0 +1,158 @@
+---
+description: |
+  This section highlights the differences between JSON and HCL2 templates and explains the parallels between the specifications.
+page_title: JSON to HCL
+---
+
+# Packer templates
+
+Packer uses templates to orchestrate builds for one or more images.
+In [legacy JSON templates](/packer/docs/templates/legacy_json_templates), you would declare a series of builders, provisioners and post-processors to build images.
+In [HCL2 templates](/packer/docs/templates/hcl_templates), things are different, as the configuration language allows you to specify builders through sources, and weave them in build blocks.
+
+This document aims to explain the parallels between the two configuration template types, and what you
+should expect when moving a template away from JSON to HCL2.
+
+In addition to this document, you may find the `packer hcl2_upgrade` command useful when converting your existing JSON templates to HCL2.
+Refer to the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) page for more information on its usage.
+
+## Builders
+
+Builders are components that are specialized for a platform.
+Their role is to set the stage for the steps that will let you build the final image from your configuration template.
+
+### JSON
+
+In JSON, the `builders` attribute declares how a builder will be invoked to build an image.
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "name": "test",
+      "communicator": "none"
+    }
+  ]
+}
+```
+
+### HCL2
+
+In HCL2, builders are declared through a `source` block. Sources on their own are not enough, and must be invoked in a `build` block.
+The `build` block serves as a container for all the steps (i.e. `source`, `provisioners` and `post-processors`) to go from a blank image to a finished one.
+
+```hcl
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+}
+```
+
+## Provisioners
+
+Provisioners are components that modify the state of the machine image you are building.
+They can be used for installing packages, writing data to the remote file system, or executing remote commands.
+They can be defined in both JSON or HCL templates.
+
+### JSON
+
+In a JSON template, provisioners are declared at the top-level of the template as an array of sequentially
+invoked components to provision the image you are building. They apply to all the builders defined in the template.
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "name": "test",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": ["echo test"]
+    }
+  ]
+}
+```
+
+### HCL2
+
+In HCL2, provisioners are declared in the `build` block, and apply only to the sources invoked as
+part of this build block.
+This lets you declare multiple build blocks, each with its own set of provisioners, which will
+result in multiple different builds executed in parallel.
+
+```hcl
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+
+  provisioner "shell-local" {
+    inline = ["echo test"]
+  }
+}
+```
+
+## Post-processors
+
+Post-processors are components that are invoked after the image was produced. Their
+role is to consume an artifact produced by a builder, or another post-processor, and
+build a new artifact from that.
+
+### JSON
+
+As with provisioners, in JSON templates, post-processors are sequentially invoked after a
+build finished provisioning, and are declared in the template under "post-processors".
+
+```json
+{
+  "builders": [
+    {
+      "type": "null",
+      "name": "test",
+      "communicator": "none"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": ["echo test"]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest"
+    }
+  ]
+}
+```
+
+### HCL2
+
+In HCL2, much like provisioners, they are also part of the `build` block, and similar rules
+apply as with provisioners.
+
+```hcl
+source "null" "test" {
+  communicator = "none"
+}
+
+build {
+  sources = ["null.test"]
+
+  provisioner "shell-local" {
+    inline = ["echo test"]
+  }
+
+  post-processor "manifest" {}
+}
+```
