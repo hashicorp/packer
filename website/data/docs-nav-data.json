@@ -101,6 +101,10 @@
         "path": "templates"
       },
       {
+        "title": "JSON to HCL2",
+        "path": "templates/json_to_hcl"
+      },
+      {
         "title": "HCL Templates",
         "routes": [
           {
