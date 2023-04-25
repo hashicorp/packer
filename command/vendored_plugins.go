@@ -7,8 +7,6 @@ import (
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init, until packer v1.8.0
 
-	digitaloceanbuilder "github.com/digitalocean/packer-plugin-digitalocean/builder/digitalocean"
-	digitaloceanimportpostprocessor "github.com/digitalocean/packer-plugin-digitalocean/post-processor/digitalocean-import"
 	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
 	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
@@ -96,7 +94,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"azure-chroot":        new(azurechrootbuilder.Builder),
 	"azure-dtl":           new(azuredtlbuilder.Builder),
 	"cloudstack":          new(cloudstackbuilder.Builder),
-	"digitalocean":        new(digitaloceanbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
 	"hcloud":              new(hcloudbuilder.Builder),
@@ -149,7 +146,6 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(anazibimportpostprocessor.PostProcessor),
-	"digitalocean-import":  new(digitaloceanimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
 	"docker-save":          new(dockersavepostprocessor.PostProcessor),
