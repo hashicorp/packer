@@ -14,16 +14,31 @@ permissions:
   contents: read
 
 jobs:
+  get-go-version:
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.get-go-version.outputs.go-version }}
+    steps:
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
+      - name: 'Determine Go version'
+        id: get-go-version
+        run: |
+          echo "Found Go $(cat .go-version)"
+          echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
   check-mod-tidy:
+    needs:
+      - get-go-version
     runs-on: ubuntu-latest
     name: Go Mod Tidy
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3 # v3.5.0
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
-          go-version: '1.18'
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: go mod tidy
   check-lint:
+    needs:
+      - get-go-version
     runs-on: ubuntu-latest
     name: Lint
     steps:
@@ -32,26 +47,30 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
-          go-version: '1.18'
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: echo "$GITHUB_SHA"
       - run: git fetch --all
       - run: echo $(git merge-base origin/main $GITHUB_SHA)
       - run: make ci-lint
   check-fmt:
+    needs:
+      - get-go-version
     runs-on: ubuntu-latest
     name: Fmt check
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
-          go-version: '1.18'
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: make fmt-check
   check-generate:
+    needs:
+      - get-go-version
     runs-on: ubuntu-latest
     name: Generate check
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
       - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
-          go-version: '1.18'
+          go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: make generate-check
