@@ -18,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Go Mod Tidy
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: go mod tidy
@@ -27,10 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: echo "$GITHUB_SHA"
@@ -41,8 +41,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Fmt check
     steps:
-      - uses: actions/checkout@v2      
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: make fmt-check
@@ -50,8 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Generate check
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: make generate-check

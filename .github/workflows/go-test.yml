@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Linux go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: TESTARGS="-coverprofile=coverage.txt  -covermode=atomic" make ci
@@ -31,8 +31,8 @@ jobs:
     runs-on: macos-latest
     name: Darwin go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: go test ./... -coverprofile=coverage.txt  -covermode=atomic
@@ -40,8 +40,8 @@ jobs:
     runs-on: windows-latest
     name: Windows go tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/setup-go@4d34df0c2316fe8122ab82dc22947d607c0c91f9 # v4.0.0
         with:
           go-version: '1.18'
       - run: go test ./... -coverprofile=coverage.txt  -covermode=atomic
