@@ -7,5 +7,4 @@
 //
 // Checkout the files in testdata/complete/ to see what a packer config could
 // look like.
-//
 package hcl2template

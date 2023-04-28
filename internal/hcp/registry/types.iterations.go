@@ -64,12 +64,12 @@ func (i *Iteration) Initialize() error {
 	return nil
 }
 
-//StoreBuild stores a build for buildName to an active iteration.
+// StoreBuild stores a build for buildName to an active iteration.
 func (i *Iteration) StoreBuild(buildName string, build *Build) {
 	i.builds.Store(buildName, build)
 }
 
-//Build gets the store build associated with buildName in the active iteration.
+// Build gets the store build associated with buildName in the active iteration.
 func (i *Iteration) Build(buildName string) (*Build, error) {
 	build, ok := i.builds.Load(buildName)
 	if !ok {
@@ -84,7 +84,7 @@ func (i *Iteration) Build(buildName string) (*Build, error) {
 	return b, nil
 }
 
-//HasBuild checks if iteration has a stored build associated with buildName.
+// HasBuild checks if iteration has a stored build associated with buildName.
 func (i *Iteration) HasBuild(buildName string) bool {
 	_, ok := i.builds.Load(buildName)
 
