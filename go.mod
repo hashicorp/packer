@@ -63,15 +63,12 @@ require (
 	github.com/hashicorp/packer-plugin-alicloud v1.0.7
 	github.com/hashicorp/packer-plugin-ansible v1.0.3
 	github.com/hashicorp/packer-plugin-azure v1.4.0
-	github.com/hashicorp/packer-plugin-chef v1.0.2
 	github.com/hashicorp/packer-plugin-cloudstack v1.0.2
-	github.com/hashicorp/packer-plugin-converge v1.0.1
 	github.com/hashicorp/packer-plugin-docker v1.0.8
 	github.com/hashicorp/packer-plugin-googlecompute v1.1.0
 	github.com/hashicorp/packer-plugin-hcloud v1.0.5
 	github.com/hashicorp/packer-plugin-hyperone v1.0.1
 	github.com/hashicorp/packer-plugin-hyperv v1.0.4
-	github.com/hashicorp/packer-plugin-inspec v1.0.0
 	github.com/hashicorp/packer-plugin-jdcloud v1.0.1
 	github.com/hashicorp/packer-plugin-lxc v1.0.2
 	github.com/hashicorp/packer-plugin-lxd v1.0.1
@@ -79,9 +76,7 @@ require (
 	github.com/hashicorp/packer-plugin-openstack v1.0.1
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
 	github.com/hashicorp/packer-plugin-proxmox v1.1.1
-	github.com/hashicorp/packer-plugin-puppet v1.0.1
 	github.com/hashicorp/packer-plugin-qemu v1.0.9
-	github.com/hashicorp/packer-plugin-salt v1.0.0
 	github.com/hashicorp/packer-plugin-tencentcloud v1.0.6
 	github.com/hashicorp/packer-plugin-triton v1.0.2
 	github.com/hashicorp/packer-plugin-vagrant v1.0.3

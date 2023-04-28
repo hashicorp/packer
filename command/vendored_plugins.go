@@ -26,10 +26,7 @@ import (
 	azurechrootbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/dtl"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer-plugin-azure/provisioner/azure-dtlartifact"
-	chefclientprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-client"
-	chefsoloprovisioner "github.com/hashicorp/packer-plugin-chef/provisioner/chef-solo"
 	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
-	convergeprovisioner "github.com/hashicorp/packer-plugin-converge/provisioner/converge"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -42,7 +39,6 @@ import (
 	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
 	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
 	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
-	inspecprovisioner "github.com/hashicorp/packer-plugin-inspec/provisioner/inspec"
 	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
 	lxcbuilder "github.com/hashicorp/packer-plugin-lxc/builder/lxc"
 	lxdbuilder "github.com/hashicorp/packer-plugin-lxd/builder/lxd"
@@ -52,10 +48,7 @@ import (
 	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
 	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
-	puppetmasterlessprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-masterless"
-	puppetserverprovisioner "github.com/hashicorp/packer-plugin-puppet/provisioner/puppet-server"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
-	saltmasterlessprovisioner "github.com/hashicorp/packer-plugin-salt/provisioner/salt-masterless"
 	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
 	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
@@ -131,13 +124,6 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 	"azure-dtlartifact": new(azuredtlartifactprovisioner.Provisioner),
 	"ansible":           new(ansibleprovisioner.Provisioner),
 	"ansible-local":     new(ansiblelocalprovisioner.Provisioner),
-	"chef-client":       new(chefclientprovisioner.Provisioner),
-	"chef-solo":         new(chefsoloprovisioner.Provisioner),
-	"converge":          new(convergeprovisioner.Provisioner),
-	"inspec":            new(inspecprovisioner.Provisioner),
-	"puppet-masterless": new(puppetmasterlessprovisioner.Provisioner),
-	"puppet-server":     new(puppetserverprovisioner.Provisioner),
-	"salt-masterless":   new(saltmasterlessprovisioner.Provisioner),
 }
 
 // VendoredPostProcessors are post-processor components that were once bundled with the

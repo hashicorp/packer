@@ -515,12 +515,8 @@ github.com/hashicorp/packer-plugin-ansible v1.0.3 h1:XjltQVPYnnZdNyBjwHr1QthR413
 github.com/hashicorp/packer-plugin-ansible v1.0.3/go.mod h1:N4OZtNDq2FSRBknuNU/GSoKtllfxQnHCYYaJUD1p1MA=
 github.com/hashicorp/packer-plugin-azure v1.4.0 h1:rxkcGe5pjjnzddfR5/sBJmg8kb+ko+r2M+Ce7OC8sQ4=
 github.com/hashicorp/packer-plugin-azure v1.4.0/go.mod h1:7j1q0SNPeZr7xRID0c/Hu9QojE41pSlSJwsNB9/rOTI=
-github.com/hashicorp/packer-plugin-chef v1.0.2 h1:hkVhBuglBc5wY4cNfFObW7hzJuT+VdWMAu/gQ9nDNOI=
-github.com/hashicorp/packer-plugin-chef v1.0.2/go.mod h1:RWNaO+NprfeW4mdZDAGaLPJE3hUR8f/poSw1MNTt+NA=
 github.com/hashicorp/packer-plugin-cloudstack v1.0.2 h1:JsT2AuCcZGajbFL0w/sQ5yzoWLwOPyETboDR+Ws0xbo=
 github.com/hashicorp/packer-plugin-cloudstack v1.0.2/go.mod h1:WCX3zX0P6ubg3QoErIFu/b7UwzxVli2WVa82wfbPqa0=
-github.com/hashicorp/packer-plugin-converge v1.0.1 h1:LNjhWQCaPNHSgeKGj/vXwqlEuqz3lA4P7gD7YQ1XsNA=
-github.com/hashicorp/packer-plugin-converge v1.0.1/go.mod h1:iXfr0QvDEOmSIK2ry53KCfztK3QaeQuTo8eHqzWMlVI=
 github.com/hashicorp/packer-plugin-docker v1.0.8 h1:UWPG/pl+1RFsaNQVhEuowCeOZuES6/mqy5R6FTyMeQo=
 github.com/hashicorp/packer-plugin-docker v1.0.8/go.mod h1:4U3gHULbUw3okSqqZgQZD5ptyJKs0S7LfOOt2U3V4Jk=
 github.com/hashicorp/packer-plugin-googlecompute v1.1.0 h1:/cSZCJuRV6osaSa1uOy8cpN+c/uiCbrSsZ8vyNC0slk=
@@ -531,8 +527,6 @@ github.com/hashicorp/packer-plugin-hyperone v1.0.1 h1:rTxnbFE8UDnzWG3prHQZpWmCpF
 github.com/hashicorp/packer-plugin-hyperone v1.0.1/go.mod h1:tT5g5xjFRuFX28w0NhpiwMum/JQDjboJwfa3Zt3ND+Q=
 github.com/hashicorp/packer-plugin-hyperv v1.0.4 h1:SHdo60jfrmeSz+T25Aa2BuSWBioFOWe4hKmp7W6lIUs=
 github.com/hashicorp/packer-plugin-hyperv v1.0.4/go.mod h1:8kHew9yWRaKYojmOMj1FYVlhOrdtiIZX2Z8RM+sHxJE=
-github.com/hashicorp/packer-plugin-inspec v1.0.0 h1:6qRgH90Q+L3HSzo5UvuSozzS4VzU+ckkwJi9pMHYW1M=
-github.com/hashicorp/packer-plugin-inspec v1.0.0/go.mod h1:SsVyBs8b/g1wMC+4HgZQWT01kqxrwprA7dKxHAIRFKw=
 github.com/hashicorp/packer-plugin-jdcloud v1.0.1 h1:qgecywtT8EqGiHdvopC36eBz1lSZs336w7X2q+y+UY0=
 github.com/hashicorp/packer-plugin-jdcloud v1.0.1/go.mod h1:1i/cCievlQE+grHJWUxhwi5nzwSXt9n0WmcHpFVMt5I=
 github.com/hashicorp/packer-plugin-lxc v1.0.2 h1:JvIkbSynft+9JAi1uPEVHesIe02OX2yL9rPj1Ud0kM8=
@@ -547,12 +541,8 @@ github.com/hashicorp/packer-plugin-parallels v1.0.3 h1:smypphUCEj3arCdlvbNtZvGC1
 github.com/hashicorp/packer-plugin-parallels v1.0.3/go.mod h1:Q842nvosVmP5FnYozk8ZZj93HGIan19jHTxGeteBCb0=
 github.com/hashicorp/packer-plugin-proxmox v1.1.1 h1:uBwW7MQN1p3vUha1BVIG3wqWrxa349qWekYyScSvDls=
 github.com/hashicorp/packer-plugin-proxmox v1.1.1/go.mod h1:S83+dabgqpNuKvm7sdNh2ivqx5rpgO6mbJn/iVrrXjk=
-github.com/hashicorp/packer-plugin-puppet v1.0.1 h1:/obGvsyiKiO2hX9TxRTJ7Y+/44K4WqKJlzg4xHAyIoY=
-github.com/hashicorp/packer-plugin-puppet v1.0.1/go.mod h1:avMyKLTT/6SVR/hEgJk92SMziK3nwlNJ00kOYgwIDMk=
 github.com/hashicorp/packer-plugin-qemu v1.0.9 h1:1YKBBzBULYUBWtpAZJTbaLjjZPAdQ63okkpTqMBTnzM=
 github.com/hashicorp/packer-plugin-qemu v1.0.9/go.mod h1:BpWIpVpOoPFV9Ppmzq4DP/S0QNoh1R+7DUCqxHdXc+Y=
-github.com/hashicorp/packer-plugin-salt v1.0.0 h1:bLGdlDG2nLyOzjp/5d2rmZ9XVxDeDUGejOK3wayqEL4=
-github.com/hashicorp/packer-plugin-salt v1.0.0/go.mod h1:onggPITzeB6LPSW8XlSobu8eI6yj3IMUi5cS6vWnL7s=
 github.com/hashicorp/packer-plugin-sdk v0.4.0 h1:UyLYe0y02D9wkOQ3FeeZWyFg2+mx2vLuWRGUL5xt50I=
 github.com/hashicorp/packer-plugin-sdk v0.4.0/go.mod h1:uNhU3pmjM2ejgHYce/g4J+sa5rh81iYQztpGvGa5FOs=
 github.com/hashicorp/packer-plugin-tencentcloud v1.0.6 h1:h7thXtVaXZhrF5L+bMcdMktrcV4RufQvJI41y10dHtE=
