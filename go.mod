@@ -76,10 +76,8 @@ require (
 	github.com/hashicorp/packer-plugin-lxc v1.0.2
 	github.com/hashicorp/packer-plugin-lxd v1.0.1
 	github.com/hashicorp/packer-plugin-ncloud v1.0.3
-	github.com/hashicorp/packer-plugin-oneandone v1.0.1
 	github.com/hashicorp/packer-plugin-openstack v1.0.1
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
-	github.com/hashicorp/packer-plugin-profitbricks v1.0.2
 	github.com/hashicorp/packer-plugin-proxmox v1.1.1
 	github.com/hashicorp/packer-plugin-puppet v1.0.1
 	github.com/hashicorp/packer-plugin-qemu v1.0.9
@@ -99,7 +97,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.1.1 // indirect
 	cloud.google.com/go/iam v0.6.0 // indirect
 	cloud.google.com/go/storage v1.27.0 // indirect
-	github.com/1and1/oneandone-cloudserver-sdk-go v1.0.1 // indirect
 	github.com/Azure/azure-sdk-for-go v64.0.0+incompatible // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.19 // indirect
@@ -225,7 +222,6 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/profitbricks/profitbricks-sdk-go v4.0.2+incompatible // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
