@@ -13,9 +13,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-//MockPackerClientService represents a basic mock of the Cloud Packer Service.
-//Upon calling a service method a boolean is set to true to indicate that a method has been called.
-//To skip the setting of these booleans set TrackCalledServiceMethods to false; defaults to true in NewMockPackerClientService().
+// MockPackerClientService represents a basic mock of the Cloud Packer Service.
+// Upon calling a service method a boolean is set to true to indicate that a method has been called.
+// To skip the setting of these booleans set TrackCalledServiceMethods to false; defaults to true in NewMockPackerClientService().
 type MockPackerClientService struct {
 	CreateBucketCalled, UpdateBucketCalled, BucketAlreadyExist                           bool
 	CreateIterationCalled, GetIterationCalled, IterationAlreadyExist, IterationCompleted bool
@@ -36,9 +36,9 @@ type MockPackerClientService struct {
 	packerSvc.ClientService
 }
 
-//NewMockPackerClientService returns a basic mock of the Cloud Packer Service.
-//Upon calling a service method a boolean is set to true to indicate that a method has been called.
-//To skip the setting of these booleans set TrackCalledServiceMethods to false. By default it is true.
+// NewMockPackerClientService returns a basic mock of the Cloud Packer Service.
+// Upon calling a service method a boolean is set to true to indicate that a method has been called.
+// To skip the setting of these booleans set TrackCalledServiceMethods to false. By default it is true.
 func NewMockPackerClientService() *MockPackerClientService {
 	m := MockPackerClientService{
 		ExistingBuilds:            make([]string, 0),

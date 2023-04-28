@@ -25,7 +25,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
-//FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
+// FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
 const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 
 type Config struct {

@@ -64,11 +64,12 @@ func (b *SourceUseBlock) ctyValues() map[string]cty.Value {
 }
 
 // decodeBuildSource reads a used source block from a build:
-//  build {
-//    source "type.example" {
-//      name = "local_name"
-//    }
-//  }
+//
+//	build {
+//	  source "type.example" {
+//	    name = "local_name"
+//	  }
+//	}
 func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagnostics) {
 	ref := sourceRefFromString(block.Labels[0])
 	out := SourceUseBlock{SourceRef: ref}

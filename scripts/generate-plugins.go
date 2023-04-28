@@ -96,10 +96,10 @@ type plugin struct {
 // makeMap creates a map named Name with type packer.Name that looks something
 // like this:
 //
-// var Builders = map[string]packersdk.Builder{
-// 	"amazon-chroot":   new(chroot.Builder),
-// 	"amazon-ebs":      new(ebs.Builder),
-// 	"amazon-instance": new(instance.Builder),
+//	var Builders = map[string]packersdk.Builder{
+//		"amazon-chroot":   new(chroot.Builder),
+//		"amazon-ebs":      new(ebs.Builder),
+//		"amazon-instance": new(instance.Builder),
 func makeMap(varName, varType string, items []plugin) string {
 	output := ""
 

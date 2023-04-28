@@ -383,8 +383,8 @@ func (e ChecksumFileEntry) Os() string          { return e.os }
 func (e ChecksumFileEntry) Arch() string        { return e.arch }
 
 // a file inside will look like so:
-//  packer-plugin-comment_v0.2.12_x5.0_freebsd_amd64.zip
 //
+//	packer-plugin-comment_v0.2.12_x5.0_freebsd_amd64.zip
 func (e *ChecksumFileEntry) init(req *Requirement) (err error) {
 	filename := e.Filename
 	res := strings.TrimPrefix(filename, req.FilenamePrefix())

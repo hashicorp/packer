@@ -185,7 +185,9 @@ func generateFakePlugins(dirname string, pluginNames []string) (string, []string
 	return dir, plugins, cleanUpFunc, nil
 }
 
-/* generateFakePackerConfigData creates a collection of mock plugins along with a basic packerconfig.
+/*
+	generateFakePackerConfigData creates a collection of mock plugins along with a basic packerconfig.
+
 The return packerConfigData is a valid packerconfig file that can be used for configuring external plugins, cleanUpFunc is a function that should be called for cleaning up any generated mock data.
 This function will only clean up if there is an error, on successful runs the caller
 is responsible for cleaning up the data via cleanUpFunc().
