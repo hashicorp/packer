@@ -762,6 +762,10 @@
       {
         "title": "HTTP",
         "path": "datasources/http"
+      },
+      {
+        "title": "File",
+        "path": "datasources/file"
       }
     ]
   },

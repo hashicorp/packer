@@ -1,0 +1,45 @@
+---
+description: |
+  The File Data Source writes contents to a file so it can be used
+  later during Packer builds
+page_title: File - Data Sources
+---
+
+<BadgesHeader>
+  <PluginBadge type="official" />
+</BadgesHeader>
+
+# File Data Source
+
+Type: `file`
+
+The `file` data source writes the specified contents to a file, creating it in the process if it doesn't exist.
+
+This is particularly useful if you have a file to dynamically generate (with [`templatefile`](/packer/docs/templates/hcl_templates/functions/file/templatefile) for example), and the component you
+rely on only accepts files, and not the generated string.
+Using this data source, you can use those functions and have the output written to a temporary file that you can
+reference in a component afterwards.
+
+Note: being a datasource, the created file is not wiped-out after the build finishes. By default Packer will output
+the file into the system's `TEMPDIR` (typically `/tmp` on UNIX systems, or `` on Windows).
+You can also change this by specifying a `destination` for the data source.
+
+## Basic Example
+
+```hcl
+data "file" "example" {
+  contents    = "this is an example"
+}
+```
+
+## Configuration Reference
+
+### Not Required:
+
+@include 'datasource/file/Config-not-required.mdx'
+
+## Datasource outputs
+
+The outputs for this datasource are as follows:
+
+@include 'datasource/file/DatasourceOutput.mdx'
