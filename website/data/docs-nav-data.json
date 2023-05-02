@@ -112,6 +112,10 @@
             "path": "templates/hcl_templates"
           },
           {
+            "title": "Project Bundles",
+            "path": "templates/hcl_templates/project-bundles"
+          },
+          {
             "title": "Blocks",
             "routes": [
               {

@@ -1,0 +1,258 @@
+---
+page_title: HCL2 Project Bundles
+description: |-
+  Packer templates written in HCL2 may be defined under a single file, or
+  as a series of template partials stored in a single directory.
+  This document aims to explain how Packer works in such cases, and how
+  users may define their templates as a series of partials rather than a
+  single HCL2 template.
+---
+
+# HCL2 Project Bundles
+
+`@include 'from-1.5/beta-hcl2-note.mdx'`
+
+Packer users coming from the Legacy JSON templates may be used to define a series of
+builds from a single template.
+While HCL2 also supports workflows like these, due to the way Packer parses templates
+in HCL2 mode, it also supports splitting the template in multiple files, and
+using them to trigger concurrent builds.
+
+## Project Bundle
+
+A project bundle is a directory containing multiple `.pkr.hcl` or `.pkrvars.hcl` files
+which can be loaded by Packer for building a bundle of images from these partially
+defined templates.
+
+-> **Note:** You cannot mix-in HCL2 and JSON templates, loading templates from a directory is
+only supported on HCL2 templates.
+
+Any supported HCL2 template component may be defined in partial templates.
+For example, you may want to define the variables you are going to use in a file,
+and use them directly from the other partial templates defined in the directory you
+want to build.
+
+To make reasoning about separate builds easier, you may also split your templates into
+multiple files, one per family of builds.
+
+For example, assume we are building multiple images for a specific environment,
+and we want to segregate those builds by OS familiy.
+
+You could partition the bundle like so:
+
+```shell
+.
+└── app
+    ├── common_vars.pkr.hcl
+    ├── defaults.auto.pkrvars.hcl
+    ├── linux_build.pkr.hcl
+    ├── scripts
+    │   └── enable_winrm.ps
+    └── windows_build.pkr.hcl
+```
+
+<Tabs>
+<Tab heading="common_vars.pkr.hcl">
+
+```hcl
+variable "region" {
+  type = string
+  default = "us-east-1"
+}
+
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
+}
+```
+
+</Tab>
+
+<Tab heading="windows_build.pkr.hcl">
+
+```hcl
+variable "windows_user" {
+  type = string
+}
+
+variable "windows_password" {
+  type = string
+}
+
+data "file" "user_data_file" {
+  contents = templatefile("scripts/enable_winrm.ps", {
+    "winrm_user"     = var.windows_user,
+    "winrm_password" = var.windows_password,
+  })
+  destination = "enable_winrm"
+  force = true
+}
+
+source "amazon-ebs" "windows" {
+  region     = var.region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+
+  ami_name       = "windows-app"
+  source_ami     = "ami-00b2c40b15619f518" # Windows server 2016 base x86_64
+  instance_type  = "m3.medium"
+  communicator   = "winrm"
+  winrm_username = var.windows_user
+  winrm_password = var.windows_password
+  user_data_file = data.file.user_data_file.path
+}
+
+build {
+  sources = ["amazon-ebs.windows"]
+
+  provisioner "powershell" {
+    inline = [
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/InitializeInstance.ps1 -Schedule",
+      "C:/ProgramData/Amazon/EC2-Windows/Launch/Scripts/SysprepInstance.ps1 -NoShutdown"
+    ]
+  }
+
+  // Other provisioners/post-processors
+}
+```
+
+</Tab>
+<Tab heading="linux_build.pkr.hcl">
+
+```hcl
+variable "ssh-username" {
+  type = string
+}
+
+source "amazon-ebs" "linux" {
+  region     = var.region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+
+  ami_name      = "linux-app"
+  source_ami    = "ami-06e46074ae430fba6" # Amazon Linux 2023 x86-64
+  instance_type = "t2.micro"
+  communicator  = "ssh"
+  ssh_username  = var.ssh-username
+  ssh_timeout   = "45s"
+}
+
+build {
+  sources = ["amazon-ebs.linux"]
+
+  // Other provisioners/post-processors
+}
+```
+
+</Tab>
+<Tab heading="default.auto.pkrvars.hcl">
+
+```hcl
+windows_user = "Administrator"
+windows_password = "p455WorD!"
+ssh-username = "ec2-user"
+```
+
+</Tab>
+
+<Tab heading="enable_winrm.ps">
+
+```powershell
+<powershell>
+# Set administrator password
+net user ${winrm_user} ${winrm_password}
+wmic useraccount where "name='${winrm_user}'" set PasswordExpires=FALSE
+
+# First, make sure WinRM can't be connected to
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new enable=yes action=block
+
+# Delete any existing WinRM listeners
+winrm delete winrm/config/listener?Address=*+Transport=HTTP  2>$Null
+winrm delete winrm/config/listener?Address=*+Transport=HTTPS 2>$Null
+
+# Disable group policies which block basic authentication and unencrypted login
+
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Client -Name AllowUnencryptedTraffic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowBasic -Value 1
+Set-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WinRM\Service -Name AllowUnencryptedTraffic -Value 1
+
+
+# Create a new WinRM listener and configure
+winrm create winrm/config/listener?Address=*+Transport=HTTP
+winrm set winrm/config/winrs '@{MaxMemoryPerShellMB="0"}'
+winrm set winrm/config '@{MaxTimeoutms="7200000"}'
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service '@{MaxConcurrentOperationsPerUser="12000"}'
+winrm set winrm/config/service/auth '@{Basic="true"}'
+winrm set winrm/config/client/auth '@{Basic="true"}'
+
+# Configure UAC to allow privilege elevation in remote shells
+$Key = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+$Setting = 'LocalAccountTokenFilterPolicy'
+Set-ItemProperty -Path $Key -Name $Setting -Value 1 -Force
+
+# Configure and restart the WinRM Service; Enable the required firewall exception
+Stop-Service -Name WinRM
+Set-Service -Name WinRM -StartupType Automatic
+netsh advfirewall firewall set rule name="Windows Remote Management (HTTP-In)" new action=allow localip=any remoteip=any
+Start-Service -Name WinRM
+</powershell>
+```
+
+</Tab>
+</Tabs>
+
+In this example hierarchy, each file describes the following:
+
+* `windows_build.pkr.hcl`: the build blocks and sources related to Windows, having a separate build block and provisioners/post-processors may make sense since Windows behaves very differently from *NIX OSes
+* `linux_build.pkr.hcl`: the build blocks and sources related to Linux
+* `variables.pkr.hcl`: the variables required to build the images. For example if you are building images on AWS, you can specify variables used in both templates here, along with their default values if relevant.
+* `defaults.pkrvars.hcl`: the default values for the variables defined in `variables.pkr.hcl`.
+* `scripts/enable_winrm.ps`: a simple script to enable winrm and create an Administrator user and password for winrm authentication.
+
+Building the whole bundle at once is done by invoking `packer build` on the whole directory: `packer build app`.
+
+If you want to build the windows or linux builds separately, you can do so by using the `--only` or `--except` flags:
+
+<Tabs>
+
+<Tab heading="build_all">
+
+```shell
+$ packer build \
+    --variable "aws_access_key=AKIAIOSFODNN7EXAMPLE" \
+    --variable "aws_secret_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+    app
+```
+
+</Tab>
+
+<Tab heading="build_linux_only">
+
+```shell
+$ packer build \
+    --variable "aws_access_key=AKIAIOSFODNN7EXAMPLE" \
+    --variable "aws_secret_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+    --only 'amazon-ebs.linux' \
+    app
+```
+
+</Tab>
+
+<Tab heading="build_windows_only">
+
+```shell
+$ packer build \
+    --variable "aws_access_key=AKIAIOSFODNN7EXAMPLE" \
+    --variable "aws_secret_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" \
+    --only 'amazon-ebs.windows' \
+    app
+```
+
+</Tab>
+
+</Tabs>
