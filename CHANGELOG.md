@@ -8,9 +8,16 @@
      users to define the fingerprint in the environment manually in order to
      adopt this behaviour, otherwise, by default, a new iteration will be
      created. This does not impact workflows where the fingerprint was defined
-     through the HCP_PACKER_ITERATION_FINGERPRINT environment variable, and
+     through the `HCP_PACKER_ITERATION_FINGERPRINT` environment variable, and
      these builds will work exactly as they did before.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
+
+### PLUGINS
+* Remove provisioner plugins for Chef, Converge, Puppet, Salt, and Inspec as
+     vendored plugins. These plugins have been previously archived and not
+     updated in release since being archived. These plugins can be installed
+     using `packer init` or with the Packer plugins sub-command `packer plugins install github.com/hashicorp/chef`.
+     [GH-12374](https://github.com/hashicorp/packer/pull/12374)
 
 ### IMPROVEMENTS:
 
@@ -19,16 +26,32 @@
      already specified in the environment.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
 
-## 1.8.7 (Upcoming)
+## 1.8.7 (May 4, 2023)
 
 ### NOTES:
 
+* Vendored plugins within Packer have not been updated. Plugin releases occur on
+     a regular basis to address issues and feature requests. Users are encouraged
+     to use `packer init` for HCL2 templates or `packer plugins install` with
+     legacy JSON templates for installing external plugins. 
+
+* packer-plugin-digitalocean: The Digital Ocean Packer plugin has been handed
+     over to the Digital Ocean team. New releases for this plugin are available
+     at https://github.com/digitalocean/packer-plugin-digitalocean.
+	```
+	required_plugins {
+		digitalocean = {
+		 source =  "github.com/digitalocean/digitalocean"
+		 version = ">=1.0.8"
+		}
+	}
+	```
 * packer-plugin-linode: The Linode plugin has been handed over to the Linode
      team. New releases for this plugin are available at
      https://github.com/linode/packer-plugin-linode. This plugin is is no longer
      being bundled in the Packer binary release. Existing references to the
      plugin will continue to work but users are advised to update the
-     required_plugins block to use the new plugin source address.
+     `required_plugins` block to use the new plugin source address.
      [GH-12329](https://github.com/hashicorp/packer/pull/12329)
     ```
      required_plugins {
@@ -43,7 +66,7 @@
      https://github.com/ucloud/packer-plugin-ucloud. This plugin is is no longer
      being bundled in the Packer binary release. Existing references to the
      plugin will continue to work but users are advised to update the
-     required_plugins block to use the new plugin source address.
+     `required_plugins` block to use the new plugin source address.
      [GH-12335](https://github.com/hashicorp/packer/pull/12335)
     ```
      required_plugins {
@@ -53,24 +76,58 @@
         }
     }
     ```
+* packer-plugin-profitbricks: The Profitbricks plugin has been removed as a
+     bundled plugin in Packer. New releases for this plugin are available at
+     https://github.com/hashicorp/packer-plugin-profitbricks. This plugin is is
+     no longer being bundled in the Packer binary release. Existing references
+     to the plugin will continue to work but users are advised to update the
+     `required_plugins` block to use the new plugin source address.
+     [GH-12385](https://github.com/hashicorp/packer/pull/12385)
+    ```
+     required_plugins {
+        ucloud = {
+         source  =  "github.com/ucloud/ucloud"
+         version = ">=1.0.8"
+        }
+    }
+    ```
 
-### Plugins
+### PLUGINS
+* Add HCP Ready label to Oracle builder components.
+     [GH-12217](https://github.com/hashicorp/packer/pull/12217)
 * Migrate external Linode plugin to linode/packer-plugin-linode.
      [GH-12329](https://github.com/hashicorp/packer/pull/12329)
 * Migrate external UCloud plugin to ucloud/packer-plugin-ucloud.
      [GH-12335](https://github.com/hashicorp/packer/pull/12335)
+* Remove external plugin for Digital Ocean as a vendored plugin.
+     [GH-12376](https://github.com/hashicorp/packer/pull/12376)
+* Remove external plugins for Profitbricks and 1&1 as vendored plugins.
+     [GH-12385](https://github.com/hashicorp/packer/pull/12385)
+
+
+### IMPROVEMENTS
+
+* cmd/console: Add config-type flag to command help.
+     [GH-12360](https://github.com/hashicorp/packer/pull/12360)
+* Enhance zsh completion for the Packer command.
+     [GH-12356](https://github.com/hashicorp/packer/pull/12356),
+     [GH-12366](https://github.com/hashicorp/packer/pull/12366)
 
 ### BUG FIXES
 * Bump github.com/hashicorp/hcp-sdk-go to 0.36.0.
      [GH-12292](https://github.com/hashicorp/packer/pull/12292)
-* Bump github.com/hashicorp/packer-plugin-sdk to 0.4.0 to address CVE-2023-0475, CVE-2022-41723.
+* Bump github.com/hashicorp/packer-plugin-sdk to 0.4.0 to address
+     CVE-2023-0475, CVE-2022-41723.
      [GH-12306](https://github.com/hashicorp/packer/pull/12306)
+* Bump Go module version to 1.20
+     [GH-12380](https://github.com/hashicorp/packer/pull/12380)
 * cmd/hcl2_upgrade: Fix crash when variables block is undefined in legacy JSON
      templates. [GH-12257](https://github.com/hashicorp/packer/pull/12257)
 * Fix regression introduced in 1.8.6, where configurations with custom builder
-     names , via the name attribute, but would display the name to STDOUT with
-     uninterpolated variable values.
+     names, via the name attribute, but would display the name to STDOUT with
+     non-interpolated variable values.
      [GH-12290](https://github.com/hashicorp/packer/pull/12290)
+
 ## 1.8.6 (February 15, 2023)
 
 ### NOTES:
@@ -309,7 +366,7 @@ required_plugins {
     advised to install the latest version of the plugin by running
     `packer plugins install github.com/outscale/outscale`. [GH-11912](https://github.com/hashicorp/packer/pull/11912)
 
-* packer-plugin-outscale:  The Scaleway Packer plugin managed by the Scaleway
+* packer-plugin-scaleway:  The Scaleway Packer plugin managed by the Scaleway
     team, since Packer 1.7.7, has been removed from the Packer binary. Users are
     advised to install the latest version of the plugin by running
     `packer plugins install github.com/scaleway/scaleway`. [GH-11912](https://github.com/hashicorp/packer/pull/11912)
