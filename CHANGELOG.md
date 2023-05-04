@@ -92,16 +92,16 @@
     ```
 
 ### PLUGINS
-* Add HCP Ready label to Oracle builder components.
-     [GH-12217](https://github.com/hashicorp/packer/pull/12217)
-* Migrate external Linode plugin to linode/packer-plugin-linode.
+* core: Migrate external Linode plugin to linode/packer-plugin-linode.
      [GH-12329](https://github.com/hashicorp/packer/pull/12329)
-* Migrate external UCloud plugin to ucloud/packer-plugin-ucloud.
+* core: Migrate external UCloud plugin to ucloud/packer-plugin-ucloud.
      [GH-12335](https://github.com/hashicorp/packer/pull/12335)
-* Remove external plugin for Digital Ocean as a vendored plugin.
+* core: Remove external plugin for Digital Ocean as a vendored plugin.
      [GH-12376](https://github.com/hashicorp/packer/pull/12376)
-* Remove external plugins for Profitbricks and 1&1 as vendored plugins.
+* core: Remove external plugins for Profitbricks and 1&1 as vendored plugins.
      [GH-12385](https://github.com/hashicorp/packer/pull/12385)
+* docs: Add HCP Ready label to Oracle builder components.
+     [GH-12217](https://github.com/hashicorp/packer/pull/12217)
 
 
 ### IMPROVEMENTS
@@ -114,19 +114,20 @@
      [GH-12366](https://github.com/hashicorp/packer/pull/12366)
 
 ### BUG FIXES
-* Bump github.com/hashicorp/hcp-sdk-go to 0.36.0.
+* cmd/hcl2_upgrade: Fix a crash when running the hcl2_upgrade command against a
+     legacy JSON template containing user variables with an undefined variables
+     block. [GH-12257](https://github.com/hashicorp/packer/pull/12257)
+* core: Bump github.com/hashicorp/hcp-sdk-go to 0.36.0.
      [GH-12292](https://github.com/hashicorp/packer/pull/12292)
-* Bump github.com/hashicorp/packer-plugin-sdk to 0.4.0 to address
+* core: Bump github.com/hashicorp/packer-plugin-sdk to 0.4.0 to address
      CVE-2023-0475, CVE-2022-41723.
      [GH-12306](https://github.com/hashicorp/packer/pull/12306)
-* Bump Go module version to 1.20
+* core: Bump Go module version to 1.20
      [GH-12380](https://github.com/hashicorp/packer/pull/12380)
-* cmd/hcl2_upgrade: Fix crash when variables block is undefined in legacy JSON
-     templates. [GH-12257](https://github.com/hashicorp/packer/pull/12257)
-* Fix regression introduced in 1.8.6, where configurations with custom builder
-     names via the name attribute are outputted to STDOUT with uninterpolated 
-     user variables for legacy JSON templates. 
-     [GH-12290](https://github.com/hashicorp/packer/pull/12290)
+* core: Fix regression introduced in 1.8.6, where legacy JSON templates with
+     custom builder names are outputted to STDOUT as uninterpolated user
+     variables. [GH-12290](https://github.com/hashicorp/packer/pull/12290)
+
 
 ## 1.8.6 (February 15, 2023)
 
