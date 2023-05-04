@@ -1,7 +1,6 @@
 ## 1.8.7 (May 4, 2023)
 
 ### NOTES:
-
 * Vendored plugins within Packer have not been updated. Plugin releases occur on
      a regular basis to address issues and feature requests. Users are encouraged
      to use `packer init` for HCL2 templates or `packer plugins install` with
@@ -14,7 +13,7 @@
 	required_plugins {
 		digitalocean = {
 		 source =  "github.com/digitalocean/digitalocean"
-		 version = ">=1.0.8"
+		 version = ">=1.1.1"
 		}
 	}
 	```
@@ -58,8 +57,8 @@
     ```
      required_plugins {
         ucloud = {
-         source  =  "github.com/ucloud/ucloud"
-         version = ">=1.0.8"
+         source  =  "github.com/hashicorp/profitbricks"
+         version = ">=1.0.2"
         }
     }
     ```
@@ -78,9 +77,10 @@
 
 
 ### IMPROVEMENTS
-
 * cmd/console: Add config-type flag to command help.
      [GH-12360](https://github.com/hashicorp/packer/pull/12360)
+* core: Add enhanced support to Packer telemetry for HCL2.
+     [GH-12319](https://github.com/hashicorp/packer/pull/12319)
 * Enhance zsh completion for the Packer command.
      [GH-12356](https://github.com/hashicorp/packer/pull/12356),
      [GH-12366](https://github.com/hashicorp/packer/pull/12366)
@@ -96,8 +96,8 @@
 * cmd/hcl2_upgrade: Fix crash when variables block is undefined in legacy JSON
      templates. [GH-12257](https://github.com/hashicorp/packer/pull/12257)
 * Fix regression introduced in 1.8.6, where configurations with custom builder
-     names, via the name attribute, but would display the name to STDOUT with
-     non-interpolated variable values.
+     names via the name attribute are outputted to STDOUT with uninterpolated 
+     user variables for legacy JSON templates. 
      [GH-12290](https://github.com/hashicorp/packer/pull/12290)
 
 ## 1.8.6 (February 15, 2023)
