@@ -52,7 +52,7 @@ jobs:
         id: set-ld-flags
         run: |
           T="github.com/hashicorp/packer/version"
-          echo "::set-output name=set-ld-flags::-X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata="
+          echo "::set-output name=set-ld-flags::-s -w -X ${T}.GitCommit=${GITHUB_SHA::8} -X ${T}.GitDescribe=${{ steps.set-product-version.outputs.product-version }} -X ${T}.Version=${{ steps.set-product-version.outputs.base-product-version }} -X ${T}.VersionPrerelease=${{ steps.set-product-version.outputs.prerelease-product-version }} -X ${T}.VersionMetadata="
       - name: validate outputs
         run: |
           echo "Product Version: ${{ steps.set-product-version.outputs.product-version }}"
