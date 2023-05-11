@@ -19,7 +19,7 @@ func PluginFolders(dirs ...string) []string {
 	if path, err := os.Executable(); err != nil {
 		log.Printf("[ERR] Error finding executable: %v", err)
 	} else {
-		res = append(res, path)
+		res = append(res, filepath.Dir(path))
 	}
 
 	res = append(res, dirs...)
