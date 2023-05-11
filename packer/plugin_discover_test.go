@@ -24,6 +24,7 @@ func newPluginConfig() PluginConfig {
 	var conf PluginConfig
 	conf.PluginMinPort = 10000
 	conf.PluginMaxPort = 25000
+	conf.KnownPluginFolders = []string{os.TempDir()}
 	return conf
 }
 
