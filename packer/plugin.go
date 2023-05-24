@@ -6,7 +6,6 @@ package packer
 import (
 	"crypto/sha256"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -81,7 +80,7 @@ func (c *PluginConfig) Discover() error {
 	}
 
 	if len(c.KnownPluginFolders) == 0 {
-		return errors.New("no known plugin folders defined")
+		c.KnownPluginFolders = PluginFolders()
 	}
 
 	// TODO after JSON is deprecated remove support for legacy component plugins.
