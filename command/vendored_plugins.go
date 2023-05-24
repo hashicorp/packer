@@ -10,8 +10,6 @@ import (
 	// still vendored with Packer for now. Importing as library instead of
 	// forcing use of packer init.
 
-	alicloudecsbuilder "github.com/hashicorp/packer-plugin-alicloud/builder/ecs"
-	alicloudimportpostprocessor "github.com/hashicorp/packer-plugin-alicloud/post-processor/alicloud-import"
 	amazonchrootbuilder "github.com/hashicorp/packer-plugin-amazon/builder/chroot"
 	amazonebsbuilder "github.com/hashicorp/packer-plugin-amazon/builder/ebs"
 	amazonebssurrogatebuilder "github.com/hashicorp/packer-plugin-amazon/builder/ebssurrogate"
@@ -26,7 +24,6 @@ import (
 	azurechrootbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/chroot"
 	azuredtlbuilder "github.com/hashicorp/packer-plugin-azure/builder/azure/dtl"
 	azuredtlartifactprovisioner "github.com/hashicorp/packer-plugin-azure/provisioner/azure-dtlartifact"
-	cloudstackbuilder "github.com/hashicorp/packer-plugin-cloudstack/builder/cloudstack"
 	dockerbuilder "github.com/hashicorp/packer-plugin-docker/builder/docker"
 	dockerimportpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-import"
 	dockerpushpostprocessor "github.com/hashicorp/packer-plugin-docker/post-processor/docker-push"
@@ -35,22 +32,9 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
-	hcloudbuilder "github.com/hashicorp/packer-plugin-hcloud/builder/hcloud"
-	hyperonebuilder "github.com/hashicorp/packer-plugin-hyperone/builder/hyperone"
-	hypervisobuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/iso"
-	hypervvmcxbuilder "github.com/hashicorp/packer-plugin-hyperv/builder/hyperv/vmcx"
-	jdcloudbuilder "github.com/hashicorp/packer-plugin-jdcloud/builder/jdcloud"
-	lxcbuilder "github.com/hashicorp/packer-plugin-lxc/builder/lxc"
-	lxdbuilder "github.com/hashicorp/packer-plugin-lxd/builder/lxd"
-	ncloudbuilder "github.com/hashicorp/packer-plugin-ncloud/builder/ncloud"
-	openstackbuilder "github.com/hashicorp/packer-plugin-openstack/builder/openstack"
 	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
 	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
-	proxmoxclone "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/clone"
-	proxmoxiso "github.com/hashicorp/packer-plugin-proxmox/builder/proxmox/iso"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
-	tencentcloudcvmbuilder "github.com/hashicorp/packer-plugin-tencentcloud/builder/tencentcloud/cvm"
-	tritonbuilder "github.com/hashicorp/packer-plugin-triton/builder/triton"
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
 	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
 	vagrantcloudpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant-cloud"
@@ -63,9 +47,6 @@ import (
 	vsphereisobuilder "github.com/hashicorp/packer-plugin-vsphere/builder/vsphere/iso"
 	vspherepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere"
 	vspheretemplatepostprocessor "github.com/hashicorp/packer-plugin-vsphere/post-processor/vsphere-template"
-	yandexbuilder "github.com/hashicorp/packer-plugin-yandex/builder/yandex"
-	yandexexportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-export"
-	yandeximportpostprocessor "github.com/hashicorp/packer-plugin-yandex/post-processor/yandex-import"
 )
 
 // VendoredDatasources are datasource components that were once bundled with the
@@ -78,7 +59,6 @@ var VendoredDatasources = map[string]packersdk.Datasource{
 // VendoredBuilders are builder components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredBuilders = map[string]packersdk.Builder{
-	"alicloud-ecs":        new(alicloudecsbuilder.Builder),
 	"amazon-ebs":          new(amazonebsbuilder.Builder),
 	"amazon-chroot":       new(amazonchrootbuilder.Builder),
 	"amazon-ebssurrogate": new(amazonebssurrogatebuilder.Builder),
@@ -87,26 +67,11 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"azure-arm":           new(azurearmbuilder.Builder),
 	"azure-chroot":        new(azurechrootbuilder.Builder),
 	"azure-dtl":           new(azuredtlbuilder.Builder),
-	"cloudstack":          new(cloudstackbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
-	"hcloud":              new(hcloudbuilder.Builder),
-	"hyperv-iso":          new(hypervisobuilder.Builder),
-	"hyperv-vmcx":         new(hypervvmcxbuilder.Builder),
-	"hyperone":            new(hyperonebuilder.Builder),
-	"jdcloud":             new(jdcloudbuilder.Builder),
-	"lxc":                 new(lxcbuilder.Builder),
-	"lxd":                 new(lxdbuilder.Builder),
-	"ncloud":              new(ncloudbuilder.Builder),
-	"openstack":           new(openstackbuilder.Builder),
-	"proxmox":             new(proxmoxiso.Builder),
-	"proxmox-iso":         new(proxmoxiso.Builder),
-	"proxmox-clone":       new(proxmoxclone.Builder),
 	"parallels-iso":       new(parallelsisobuilder.Builder),
 	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
-	"tencentcloud-cvm":    new(tencentcloudcvmbuilder.Builder),
-	"triton":              new(tritonbuilder.Builder),
 	"vagrant":             new(vagrantbuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
 	"vsphere-iso":         new(vsphereisobuilder.Builder),
@@ -115,7 +80,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"virtualbox-vm":       new(virtualboxvmbuilder.Builder),
 	"vmware-iso":          new(vmwareisobuilder.Builder),
 	"vmware-vmx":          new(vmwarevmxbuilder.Builder),
-	"yandex":              new(yandexbuilder.Builder),
 }
 
 // VendoredProvisioners are provisioner components that were once bundled with the
@@ -129,7 +93,6 @@ var VendoredProvisioners = map[string]packersdk.Provisioner{
 // VendoredPostProcessors are post-processor components that were once bundled with the
 // Packer core, but are now being imported from their counterpart plugin repos
 var VendoredPostProcessors = map[string]packersdk.PostProcessor{
-	"alicloud-import":      new(alicloudimportpostprocessor.PostProcessor),
 	"amazon-import":        new(anazibimportpostprocessor.PostProcessor),
 	"docker-import":        new(dockerimportpostprocessor.PostProcessor),
 	"docker-push":          new(dockerpushpostprocessor.PostProcessor),
@@ -141,8 +104,6 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
-	"yandex-export":        new(yandexexportpostprocessor.PostProcessor),
-	"yandex-import":        new(yandeximportpostprocessor.PostProcessor),
 }
 
 // Upon init lets load up any plugins that were vendored manually into the default
