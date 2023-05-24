@@ -16,6 +16,11 @@ import (
 func PluginFolders(dirs ...string) []string {
 	res := []string{}
 
+	if packerPluginPath := os.Getenv("PACKER_PLUGIN_PATH"); packerPluginPath != "" {
+		res = append(res, strings.Split(packerPluginPath, string(os.PathListSeparator))...)
+		return res
+	}
+
 	if path, err := os.Executable(); err != nil {
 		log.Printf("[ERR] Error finding executable: %v", err)
 	} else {
@@ -28,10 +33,6 @@ func PluginFolders(dirs ...string) []string {
 		log.Printf("[ERR] Error loading config directory: %v", err)
 	} else {
 		res = append(res, filepath.Join(cd, "plugins"))
-	}
-
-	if packerPluginPath := os.Getenv("PACKER_PLUGIN_PATH"); packerPluginPath != "" {
-		res = append(res, strings.Split(packerPluginPath, string(os.PathListSeparator))...)
 	}
 
 	return res
