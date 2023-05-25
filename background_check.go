@@ -9,7 +9,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/shirou/gopsutil/process"
+	"github.com/shirou/gopsutil/v3/process"
 )
 
 func checkProcess(currentPID int) (bool, error) {
