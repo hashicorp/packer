@@ -35,21 +35,21 @@ jobs:
         run: |
           # Questions are not tracked in JIRA at this time.
           if [[ "${{ contains(github.event.issue.labels.*.name, 'question') }}" == "true" ]]; then
-            echo "::set-output name=type::Invalid"
+            echo "type=Invalid" >> $GITHUB_OUTPUT
           else
             # Properly labeled GH issues are assigned the standard "GH Issue" type upon creation.
-            echo "::set-output name=type::GH Issue"
+            echo "type=GH Issue" >> $GITHUB_OUTPUT
           fi
 
       - name: Set labels
         id: set-ticket-labels 
         run: |
           if [[ "${{ contains(github.event.issue.labels.*.name, 'bug') }}" == "true" ]]; then
-            echo "::set-output name=labels::[\"bug\"]"
+            echo "labels=[\"bug\"]" >> $GITHUB_OUTPUT
           elif [[ "${{ contains(github.event.issue.labels.*.name, 'enhancement') }}" == "true" ]]; then
-            echo "::set-output name=labels::[\"enhancement\"]"
+            echo "labels=[\"enhancement\"]" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=labels::[]"
+            echo "labels=[]" >> $GITHUB_OUTPUT
           fi
 
       - name: Validate ticket
