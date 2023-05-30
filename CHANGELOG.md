@@ -1,6 +1,7 @@
-## 1.9.0 (Unreleased)
+## 1.9.0 (May 31, 2023)
 
 ### NOTES:
+
 * **Breaking Change**: Iteration fingerprints used to be computed from the Git SHA of the
      repository where the template is located when running packer build. This
      changes with this release, and now fingerprints are automatically generated
@@ -12,12 +13,39 @@
      these builds will work exactly as they did before.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
 
+* **Breaking Change**: Community-maintained plugins bundled with the Packer binary have been removed.
+     These external plugin components are released independently of Packer core and can be installed
+     directly by the user. Users relying on the external plugin components listed below should refer
+     to the `packer plugins` sub-command and, if using HCL2, a `required_plugins` block to define a
+     list of plugins for building a template.
+
 ### PLUGINS
+
 * Remove provisioner plugins for Chef, Converge, Puppet, Salt, and Inspec as
      vendored plugins. These plugins have been previously archived and not
      updated in release since being archived. These plugins can be installed
      using `packer init` or with the Packer plugins sub-command `packer plugins install github.com/hashicorp/chef`.
      [GH-12374](https://github.com/hashicorp/packer/pull/12374)
+
+* The following community plugins won't be bundled with Packer anymore:
+
+    * [Alicloud](https://github.com/hashicorp/packer-plugin-alicloud)
+    * [CloudStack](https://github.com/hashicorp/packer-plugin-cloudstack)
+    * [HCloud](https://github.com/hashicorp/packer-plugin-hcloud)
+    * [HyperOne](https://github.com/hashicorp/packer-plugin-hyperone)
+    * [Hyper-V](https://github.com/hashicorp/packer-plugin-hyperv)
+    * [JDCloud](https://github.com/hashicorp/packer-plugin-jdcloud)
+    * [LXC](https://github.com/hashicorp/packer-plugin-lxc)
+    * [LXD](https://github.com/hashicorp/packer-plugin-lxd)
+    * [NCloud](https://github.com/hashicorp/packer-plugin-ncloud)
+    * [OpenStack](https://github.com/hashicorp/packer-plugin-openstack)
+    * [Proxmox](https://github.com/hashicorp/packer-plugin-proxmox)
+    * [TencentCloud](https://github.com/hashicorp/packer-plugin-tencentcloud)
+    * [Triton](https://github.com/hashicorp/packer-plugin-triton)
+    * [Yandex](https://github.com/hashicorp/packer-plugin-yandex)
+
+Users relying on these external plugin components should refer to the `packer plugins` sub-command and,
+if using HCL2, a `required_plugins` block to define a list of plugins to use for building a template.
 
 ### IMPROVEMENTS:
 
@@ -25,6 +53,14 @@
      instead of a Git SHA, and a new one is always generated, unless one is
      already specified in the environment.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
+
+### BUG FIXES:
+
+* Fix LDFLAGS for release pipelines: Between Packer 1.8.5 and Packer 1.8.7, changes
+    to the LDFLAGS in use for building the binaries for Packer had mistakenly
+    removed some compilation flags, leading to the final binaries not being stripped.
+    This change raised the size of the built binaries by as much as 45%.
+    In this release, we fixed the LDFLAGS during compilation, yielding leaner binaries.
 
 ## 1.8.7 (May 4, 2023)
 
