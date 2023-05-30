@@ -336,6 +336,7 @@
     "title": "VirtualBox",
     "path": "virtualbox",
     "repo": "hashicorp/packer-plugin-virtualbox",
+    "pluginTier": "official",
     "version": "latest"
   },
   {

@@ -59,30 +59,16 @@ require (
 )
 
 require (
-	github.com/hashicorp/packer-plugin-alicloud v1.0.7
 	github.com/hashicorp/packer-plugin-ansible v1.0.3
 	github.com/hashicorp/packer-plugin-azure v1.4.0
-	github.com/hashicorp/packer-plugin-cloudstack v1.0.2
 	github.com/hashicorp/packer-plugin-docker v1.0.8
 	github.com/hashicorp/packer-plugin-googlecompute v1.1.0
-	github.com/hashicorp/packer-plugin-hcloud v1.0.5
-	github.com/hashicorp/packer-plugin-hyperone v1.0.1
-	github.com/hashicorp/packer-plugin-hyperv v1.0.4
-	github.com/hashicorp/packer-plugin-jdcloud v1.0.1
-	github.com/hashicorp/packer-plugin-lxc v1.0.2
-	github.com/hashicorp/packer-plugin-lxd v1.0.1
-	github.com/hashicorp/packer-plugin-ncloud v1.0.3
-	github.com/hashicorp/packer-plugin-openstack v1.0.1
 	github.com/hashicorp/packer-plugin-parallels v1.0.3
-	github.com/hashicorp/packer-plugin-proxmox v1.1.1
 	github.com/hashicorp/packer-plugin-qemu v1.0.9
-	github.com/hashicorp/packer-plugin-tencentcloud v1.0.6
-	github.com/hashicorp/packer-plugin-triton v1.0.2
 	github.com/hashicorp/packer-plugin-vagrant v1.0.3
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.4
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.1.1
-	github.com/hashicorp/packer-plugin-yandex v1.1.2
 	github.com/oklog/ulid v1.3.1
 	github.com/shirou/gopsutil/v3 v3.23.4
 )
@@ -109,15 +95,9 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible // indirect
 	github.com/Microsoft/go-winio v0.4.16 // indirect
-	github.com/NaverCloudPlatform/ncloud-sdk-go-v2 v1.1.7 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
-	github.com/Telmate/proxmox-api-go v0.0.0-20221209160129-bb95d9a81e7a // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1028 // indirect
-	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible // indirect
-	github.com/antihax/optional v1.0.0 // indirect
-	github.com/apache/cloudstack-go/v2 v2.12.0 // indirect
 	github.com/apparentlymart/go-cidr v1.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
@@ -127,7 +107,6 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar v1.1.5 // indirect
-	github.com/c2h5oh/datasize v0.0.0-20200825124411-48ed595a09d2 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/chzyer/test v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -137,7 +116,6 @@ require (
 	github.com/dylanmei/iso8601 v0.1.0 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/fatih/color v1.12.0 // indirect
-	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -156,7 +134,6 @@ require (
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.0.1 // indirect
@@ -164,9 +141,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
-	github.com/gophercloud/gophercloud v0.12.0 // indirect
-	github.com/gophercloud/utils v0.0.0-20200508015959-b0167b94122c // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware v1.2.2 // indirect
 	github.com/hashicorp/aws-sdk-go-base v0.7.1 // indirect
 	github.com/hashicorp/consul/api v1.10.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -186,16 +160,11 @@ require (
 	github.com/hashicorp/vault/api v1.1.1 // indirect
 	github.com/hashicorp/vault/sdk v0.2.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20210826001029-26ff87cf9493 // indirect
-	github.com/hetznercloud/hcloud-go v1.25.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
-	github.com/hyperonecom/h1-client-go v0.0.0-20191203060043-b46280e4c4a4 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
-	github.com/jdcloud-api/jdcloud-sdk-go v1.9.1-0.20190605102154-3d81a50ca961 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/joyent/triton-go v1.8.5 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
@@ -211,10 +180,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -224,16 +190,11 @@ require (
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/shoenig/go-m1cpu v0.1.5 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.367 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm v1.0.366 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc v1.0.366 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/ugorji/go/codec v1.2.6 // indirect
 	github.com/vmware/govmomi v0.29.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
-	github.com/yandex-cloud/go-genproto v0.0.0-20211202135052-789603780fb2 // indirect
-	github.com/yandex-cloud/go-sdk v0.0.0-20211206101223-7c4e7926bf53 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.mongodb.org/mongo-driver v1.11.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
@@ -246,7 +207,6 @@ require (
 	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
-	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
