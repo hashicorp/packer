@@ -44,6 +44,8 @@
     * [Triton](https://github.com/hashicorp/packer-plugin-triton)
     * [Yandex](https://github.com/hashicorp/packer-plugin-yandex)
 
+    [GH-12436](https://github.com/hashicorp/packer/pull/12436)
+
 Users relying on these external plugin components should refer to the `packer plugins` sub-command and,
 if using HCL2, a `required_plugins` block to define a list of plugins to use for building a template.
 
@@ -51,7 +53,7 @@ if using HCL2, a `required_plugins` block to define a list of plugins to use for
 
 * core/hcp: Now, fingerprints used by HCP Packer are randomly generated ULIDs
      instead of a Git SHA, and a new one is always generated, unless one is
-     already specified in the environment.
+     specified in the environment.
      [GH-12172](https://github.com/hashicorp/packer/pull/12172)
 
 ### BUG FIXES:
@@ -61,6 +63,9 @@ if using HCL2, a `required_plugins` block to define a list of plugins to use for
     removed some compilation flags, leading to the final binaries not being stripped.
     This change raised the size of the built binaries by as much as 45%.
     In this release, we fixed the LDFLAGS during compilation, yielding leaner binaries.
+
+* Bumped gopsutil to v3. This fixes a macOS intermittent crash reported by the community
+    [GH-12430](https://github.com/hashicorp/packer/issues/12430)
 
 ## 1.8.7 (May 4, 2023)
 
