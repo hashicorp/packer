@@ -1,3 +1,16 @@
+## 1.9.0 (June 1, 2023)
+
+### BUG FIXES:
+
+* On May 16th 2023, HCP introduced multi-project support to the platform.
+    In order to use multiple projects in your organization, you will need to update Packer
+    to version 1.9.1 or above. Starting with 1.9.1, you may specify a project ID to push
+    builds to with the `HCP_PROJECT_ID` environment variable. If no project ID is specified,
+    Packer will pick the project with the oldest creation date. Older versions of Packer are
+    incompatible with multi-project support on HCP, and builds will fail for HCP
+    organizations with multiple projects on versions before 1.9.1.
+    [GH-12453](https://github.com/hashicorp/packer/pull/12453)
+
 ## 1.9.0 (May 31, 2023)
 
 ### NOTES:
