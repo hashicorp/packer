@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+func HasProjectID() bool {
+	return hasEnvVar(HCPProjectID)
+}
+
 func HasClientID() bool {
 	return hasEnvVar(HCPClientID)
 }
