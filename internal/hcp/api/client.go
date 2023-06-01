@@ -62,7 +62,8 @@ func NewClient() (*Client, error) {
 			Err:        err,
 		}
 	}
-	if err := client.loadProjectID(); err != nil {
+
+	if err := client.loadDefaultProjectID(); err != nil {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
 			Err:        err,
@@ -73,6 +74,9 @@ func NewClient() (*Client, error) {
 }
 
 func (c *Client) loadOrganizationID() error {
+	if c.OrganizationID != "" {
+		return nil
+	}
 	// Get the organization ID.
 	listOrgParams := organizationSvc.NewOrganizationServiceListParams()
 	listOrgResp, err := c.Organization.OrganizationServiceList(listOrgParams, nil)
@@ -87,7 +91,10 @@ func (c *Client) loadOrganizationID() error {
 	return nil
 }
 
-func (c *Client) loadProjectID() error {
+func (c *Client) loadDefaultProjectID() error {
+	if c.ProjectID != "" {
+		return nil
+	}
 	// Get the project using the organization ID.
 	listProjParams := projectSvc.NewProjectServiceListParams()
 	listProjParams.ScopeID = &c.OrganizationID
@@ -97,8 +104,13 @@ func (c *Client) loadProjectID() error {
 	if err != nil {
 		return fmt.Errorf("unable to fetch project id: %v", err)
 	}
+	if len(listProjResp.Payload.Projects) == 0 {
+		fmt.Errorf("unable to find HCP project")
+	}
 	if len(listProjResp.Payload.Projects) > 1 {
-		return fmt.Errorf("this version of Packer does not support multiple projects")
+		// TODO log a warning like in the tf provider and default to the oldest project
+		c.ProjectID = listProjResp.Payload.Projects[0].ID
+		return nil
 	}
 	c.ProjectID = listProjResp.Payload.Projects[0].ID
 	return nil
