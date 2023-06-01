@@ -6,10 +6,14 @@ package api
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 	"github.com/hashicorp/packer/internal/hcp/env"
@@ -97,9 +101,54 @@ func (c *Client) loadProjectID() error {
 	if err != nil {
 		return fmt.Errorf("unable to fetch project id: %v", err)
 	}
-	if len(listProjResp.Payload.Projects) > 1 {
-		return fmt.Errorf("this version of Packer does not support multiple projects")
+
+	if env.HasProjectID() {
+		proj, err := findProjectByID(os.Getenv(env.HCPProjectID), listProjResp.Payload.Projects)
+		if err != nil {
+			return err
+		}
+
+		c.ProjectID = proj.ID
+	} else {
+		if len(listProjResp.Payload.Projects) > 1 {
+			log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n" +
+				"To specify which project to use, set the HCP_PROJECT_ID environment variable to the one you want to use.")
+		}
+
+		proj, err := findOldestProject(listProjResp.Payload.Projects)
+		if err != nil {
+			return err
+		}
+
+		c.ProjectID = proj.ID
 	}
-	c.ProjectID = listProjResp.Payload.Projects[0].ID
+
 	return nil
+}
+
+func findOldestProject(projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
+	if len(projs) == 0 {
+		return nil, fmt.Errorf("no project found")
+	}
+
+	proj := projs[0]
+	for i := 1; i < len(projs); i++ {
+		nxtProj := projs[i]
+
+		if time.Time(nxtProj.CreatedAt).Before(time.Time(proj.CreatedAt)) {
+			proj = nxtProj
+		}
+	}
+
+	return proj, nil
+}
+
+func findProjectByID(projID string, projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
+	for _, proj := range projs {
+		if proj.ID == projID {
+			return proj, nil
+		}
+	}
+
+	return nil, fmt.Errorf("No project %q found", projID)
 }
