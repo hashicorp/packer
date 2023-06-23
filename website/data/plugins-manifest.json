@@ -235,8 +235,9 @@
   {
     "title": "Parallels",
     "path": "parallels",
-    "repo": "hashicorp/packer-plugin-parallels",
-    "version": "latest"
+    "repo": "parallels/packer-plugin-parallels",
+    "version": "latest",
+    "pluginTier": "verified"
   },
   {
     "title": "Profitbricks",
