@@ -32,8 +32,6 @@ import (
 	googlecomputebuilder "github.com/hashicorp/packer-plugin-googlecompute/builder/googlecompute"
 	googlecomputeexportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-export"
 	googlecomputeimportpostprocessor "github.com/hashicorp/packer-plugin-googlecompute/post-processor/googlecompute-import"
-	parallelsisobuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/iso"
-	parallelspvmbuilder "github.com/hashicorp/packer-plugin-parallels/builder/parallels/pvm"
 	qemubuilder "github.com/hashicorp/packer-plugin-qemu/builder/qemu"
 	vagrantbuilder "github.com/hashicorp/packer-plugin-vagrant/builder/vagrant"
 	vagrantpostprocessor "github.com/hashicorp/packer-plugin-vagrant/post-processor/vagrant"
@@ -69,8 +67,6 @@ var VendoredBuilders = map[string]packersdk.Builder{
 	"azure-dtl":           new(azuredtlbuilder.Builder),
 	"docker":              new(dockerbuilder.Builder),
 	"googlecompute":       new(googlecomputebuilder.Builder),
-	"parallels-iso":       new(parallelsisobuilder.Builder),
-	"parallels-pvm":       new(parallelspvmbuilder.Builder),
 	"qemu":                new(qemubuilder.Builder),
 	"vagrant":             new(vagrantbuilder.Builder),
 	"vsphere-clone":       new(vsphereclonebuilder.Builder),
