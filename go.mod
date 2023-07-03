@@ -59,11 +59,11 @@ require (
 )
 
 require (
+	github.com/go-openapi/strfmt v0.21.3
 	github.com/hashicorp/packer-plugin-ansible v1.0.3
 	github.com/hashicorp/packer-plugin-azure v1.4.0
 	github.com/hashicorp/packer-plugin-docker v1.0.8
 	github.com/hashicorp/packer-plugin-googlecompute v1.1.0
-	github.com/hashicorp/packer-plugin-parallels v1.0.3
 	github.com/hashicorp/packer-plugin-qemu v1.0.9
 	github.com/hashicorp/packer-plugin-vagrant v1.0.3
 	github.com/hashicorp/packer-plugin-virtualbox v1.0.4
@@ -127,7 +127,6 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/loads v0.21.2 // indirect
 	github.com/go-openapi/spec v0.20.8 // indirect
-	github.com/go-openapi/strfmt v0.21.3 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-openapi/validate v0.22.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect

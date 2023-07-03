@@ -457,8 +457,6 @@ github.com/hashicorp/packer-plugin-docker v1.0.8 h1:UWPG/pl+1RFsaNQVhEuowCeOZuES
 github.com/hashicorp/packer-plugin-docker v1.0.8/go.mod h1:4U3gHULbUw3okSqqZgQZD5ptyJKs0S7LfOOt2U3V4Jk=
 github.com/hashicorp/packer-plugin-googlecompute v1.1.0 h1:/cSZCJuRV6osaSa1uOy8cpN+c/uiCbrSsZ8vyNC0slk=
 github.com/hashicorp/packer-plugin-googlecompute v1.1.0/go.mod h1:k7MhKwEDw9ASP3a1y1syKJFZiZ8pO4oH40HvVgGHzUE=
-github.com/hashicorp/packer-plugin-parallels v1.0.3 h1:smypphUCEj3arCdlvbNtZvGC1ujsUSRtN1MBvZHt/w8=
-github.com/hashicorp/packer-plugin-parallels v1.0.3/go.mod h1:Q842nvosVmP5FnYozk8ZZj93HGIan19jHTxGeteBCb0=
 github.com/hashicorp/packer-plugin-qemu v1.0.9 h1:1YKBBzBULYUBWtpAZJTbaLjjZPAdQ63okkpTqMBTnzM=
 github.com/hashicorp/packer-plugin-qemu v1.0.9/go.mod h1:BpWIpVpOoPFV9Ppmzq4DP/S0QNoh1R+7DUCqxHdXc+Y=
 github.com/hashicorp/packer-plugin-sdk v0.4.0 h1:UyLYe0y02D9wkOQ3FeeZWyFg2+mx2vLuWRGUL5xt50I=
