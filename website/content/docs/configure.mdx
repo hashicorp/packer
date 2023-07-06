@@ -13,69 +13,42 @@ so you generally don't have to worry about it until you want to tweak a
 configuration. If you're just getting started with Packer, don't worry about
 core configuration for now.
 
-## Packer's home directory
+## Packer's config directory
 
-Plugins and core configuration files can exist in the home directory of Packer.
-The home directory of Packer will be the first one of the following env values
-to be set :
+Packer's configuration directory can potentially contain plugins and internal
+Packer files. The Packer config directory will be looked up on the following paths:
 
-| Unix                   | Windows               |
-| ---------------------- | --------------------- |
-| `${PACKER_CONFIG_DIR}` | `%PACKER_CONFIG_DIR%` |
-| `${APPDATA}`           | `%APPDATA%`           |
-| `${HOME}`              | `%HOME%`              |
-| user dir of `${USER}`  | user dir of `${USER}` |
+| Unix                        | Windows                     |
+| --------------------------- | --------------------------- |
+| `${HOME}/.config/packer/`   | `%APPDATA%\packer.d\`       |
 
--> Note: On this page "Packer's home directory" will be referenced as
-`PACKER_HOME_DIR`.
+-> **Note:** On Unix systems, Packer defaults to using the XDG base directory specification. 
+When the environment variable `PACKER_CONFIG_DIR` is unset or empty a default equal to `$HOME/.config/packer` should be used. 
+In all other cases, where there is an existing older style `.packer.d` directory (e.g `$HOME/.packer.d/`)  or PACKER_CONFIG_DIR is not empty
+the older configuration directory will be used. 
 
-## Packer's config file
+Examples:
+
+- On a Unix system, if the `$PACKER_CONFIG_DIR` environment variable is set to
+  `/home/packer`, the config directory will be: `/home/packer/.packer.d/` and
+  other values will not be checked.
+- On a Windows system, if the `PACKER_CONFIG_DIR` environment variable is set to `C:/`,the
+  config directory will be: `C:/packer.d/` and other values will not be checked.
+
+<a id="packer-s-config-file"></a>
+## Packer's config file (deprecated)
 
 Packer can optionally read a JSON file for the end user to set core settings.
 The config file of Packer will be looked up on the following paths:
 
-| Unix                             | Windows                          |
-| -------------------------------- | -------------------------------- |
-| `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                |
-| `PACKER_HOME_DIR/.packerconfig`  | `PACKER_HOME_DIR/packer.config/` |
-| `${XDG_CONFIG_HOME}/packer`      |                                  |
-| `PACKER_HOME_DIR/.config/packer` |                                  |
-
-## Packer's config directory
-
-Packer's configuration directory can potentially contain plugins and internal
-Packer files. The config dir of Packer will be looked up on the following paths:
-
-| Unix                        | Windows                     |
-| --------------------------- | --------------------------- |
-| `PACKER_HOME_DIR/.packer.d` | `PACKER_HOME_DIR/packer.d/` |
-
-Examples:
-
-- On a Unix system, if the `$PACKER_CONFIG_DIR` env var is set to
-  `/home/packer`, the config directory will be: `/home/packer/.packer.d/` and
-  other values will not be checked.
-- On a Unix system, if the `HOME` env var is `/home/azr` or the `USER` env var
-  is `azr`, then the config directory will default to `/home/azr/.packer.d/`.
-- On a Windows system, if the `PACKER_CONFIG_DIR` env var is set to `C:/`,the
-  config directory will be: `C:/packer.d/` and other values will not be checked.
-
-## Packer's plugin directory
-
-@include "plugins/plugin-location.mdx"
+| Unix                             | Windows                           |
+| -------------------------------- | --------------------------------- |
+| `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                 |
+| `${HOME}/.packerconfig`          | `%APPDATA%\packer.config\`        |
 
 The format of the configuration file is basic JSON.
 
-## Packer's cache directory
-
-Packer uses a cache directory to download large files and for logistics around
-large file download. By default, Packer caches things in the current directory,
-under: `./packer_cache/`. This can be changed by setting the `PACKER_CACHE_DIR`
-env var. It is recommended to share the same Packer cache dir across your
-builds if you have multiple builds doing similar things to avoid downloading the
-same ISO twice for example.
-
-## Packer config file configuration Reference
+### Packer config file configuration Reference
 
 Below is the list of all available configuration parameters for the core
 configuration file. None of these are required, since all have defaults.
@@ -94,13 +67,20 @@ configuration file. None of these are required, since all have defaults.
   and the [`packer init`](/packer/docs/commands/init) command to install plugins; if
   you are using both, the `required_plugin` config will take precedence.
 
-### HCP Packer Configuration
+## Packer's plugin directory
 
-You can configure both legacy JSON and HCL2 Packer templates to publish image metadata to an active HCP Packer registry. The HCP Packer registry helps you track information about machine images, clearly designate which images are appropriate for test and production environments, and query the right images to use in both Packer and Terraform configurations.
+@include "plugins/plugin-location.mdx"
 
-For complete configuration details and examples, refer to [Packer Template Configuration](/hcp/docs/packer/store-image-metadata/template-configuration) in the HCP Packer documentation.
+## Packer's cache directory
 
-## Full list of Environment Variables usable for Packer
+Packer uses a cache directory to download large files and for logistics around
+large file download. By default, Packer caches things in the current directory,
+under: `./packer_cache/`. This can be changed by setting the `PACKER_CACHE_DIR`
+env var. It is recommended to share the same Packer cache directory across your
+builds if you have multiple builds doing similar things to avoid downloading the
+same ISO twice for example.
+
+## Environment Variables usable for Packer
 
 Packer uses a variety of environmental variables. A listing and description of
 each can be found below:
