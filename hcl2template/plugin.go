@@ -90,6 +90,11 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 			})
 			continue
 		}
+		// Don't register an error for implicitly required plugins since they're
+		// bundled into Packer.
+		if pluginRequirement.Implicit {
+			continue
+		}
 		if len(sortedInstalls) == 0 {
 			uninstalledPlugins[pluginRequirement.Identifier.String()] = pluginRequirement.VersionConstraints.String()
 			continue
