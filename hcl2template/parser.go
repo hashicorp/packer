@@ -308,19 +308,8 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 }
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	// enable packer to start plugins requested in required_plugins.
-	moreDiags := cfg.detectPluginBinaries()
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return diags
-	}
-
-	moreDiags = cfg.InputVariables.ValidateValues()
-	diags = append(diags, moreDiags...)
-	moreDiags = cfg.LocalVariables.ValidateValues()
-	diags = append(diags, moreDiags...)
+	diags := cfg.InputVariables.ValidateValues()
+	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
