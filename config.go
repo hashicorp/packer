@@ -153,6 +153,7 @@ func (c *config) discoverInternalComponents() error {
 	for builder := range command.Builders {
 		builder := builder
 		if !c.Plugins.Builders.Has(builder) {
+			command.TrackBundledPlugin(fmt.Sprintf("packer-builder-%s", builder))
 			bin := fmt.Sprintf("%s%splugin%spacker-builder-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, builder)
 			c.Plugins.Builders.Set(builder, func() (packersdk.Builder, error) {
@@ -164,6 +165,7 @@ func (c *config) discoverInternalComponents() error {
 	for provisioner := range command.Provisioners {
 		provisioner := provisioner
 		if !c.Plugins.Provisioners.Has(provisioner) {
+			command.TrackBundledPlugin(fmt.Sprintf("packer-provisioner-%s", provisioner))
 			bin := fmt.Sprintf("%s%splugin%spacker-provisioner-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
 			c.Plugins.Provisioners.Set(provisioner, func() (packersdk.Provisioner, error) {
@@ -175,6 +177,7 @@ func (c *config) discoverInternalComponents() error {
 	for postProcessor := range command.PostProcessors {
 		postProcessor := postProcessor
 		if !c.Plugins.PostProcessors.Has(postProcessor) {
+			command.TrackBundledPlugin(fmt.Sprintf("packer-post-processor-%s", postProcessor))
 			bin := fmt.Sprintf("%s%splugin%spacker-post-processor-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
 			c.Plugins.PostProcessors.Set(postProcessor, func() (packersdk.PostProcessor, error) {
@@ -186,6 +189,7 @@ func (c *config) discoverInternalComponents() error {
 	for dataSource := range command.Datasources {
 		dataSource := dataSource
 		if !c.Plugins.DataSources.Has(dataSource) {
+			command.TrackBundledPlugin(fmt.Sprintf("packer-datasource-%s", dataSource))
 			bin := fmt.Sprintf("%s%splugin%spacker-datasource-%s",
 				packerPath, PACKERSPACE, PACKERSPACE, dataSource)
 			c.Plugins.DataSources.Set(dataSource, func() (packersdk.Datasource, error) {

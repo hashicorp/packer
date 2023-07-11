@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
@@ -178,4 +180,177 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 		ret = 1
 	}
 	return core, ret
+}
+
+func (m *Meta) DetectBundledPlugins(handler packer.Handler) hcl.Diagnostics {
+	var plugins []string
+
+	switch h := handler.(type) {
+	case *packer.Core:
+		plugins = m.detectBundledPluginsJSON(h)
+	case *hcl2template.PackerConfig:
+		plugins = m.detectBundledPluginsHCL2(handler.(*hcl2template.PackerConfig))
+	}
+
+	if len(plugins) == 0 {
+		return nil
+	}
+
+	buf := &strings.Builder{}
+	buf.WriteString("This template relies on the use of plugins bundled into the Packer binary.\n")
+	buf.WriteString("The practice of bundling external plugins into Packer will be removed in an upcoming version.\n\n")
+	switch h := handler.(type) {
+	case *packer.Core:
+		buf.WriteString("To remove this warning and ensure builds keep working you can install these external plugins with the 'packer plugins install' command\n\n")
+
+		for _, plugin := range plugins {
+			fmt.Fprintf(buf, "* packer plugins install %s\n", plugin)
+		}
+
+		buf.WriteString("\nAlternatively, if you upgrade your templates to HCL2, you can use 'packer init' with a 'required_plugins' block to automatically install external plugins.\n\n")
+		fmt.Fprintf(buf, "You can try HCL2 by running 'packer hcl2_upgrade %s'", h.Template.Path)
+	case *hcl2template.PackerConfig:
+		buf.WriteString("To remove this warning, add the following section to your template:\n")
+		buf.WriteString(m.fixRequiredPlugins(h))
+		buf.WriteString("\nThen run 'packer init' to manage installation of the plugins")
+	}
+
+	return hcl.Diagnostics{
+		&hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "Bundled plugins used",
+			Detail:   buf.String(),
+		},
+	}
+}
+
+func (m *Meta) detectBundledPluginsJSON(core *packer.Core) []string {
+	bundledPlugins := map[string]struct{}{}
+
+	tmpl := core.Template
+	if tmpl == nil {
+		panic("No template parsed. This is a Packer bug which should be reported, please open an issue on the project's issue tracker.")
+	}
+
+	for _, b := range tmpl.Builders {
+		builderType := fmt.Sprintf("packer-builder-%s", b.Type)
+		if bundledStatus[builderType] {
+			bundledPlugins[builderType] = struct{}{}
+		}
+	}
+
+	for _, p := range tmpl.Provisioners {
+		provisionerType := fmt.Sprintf("packer-provisioner-%s", p.Type)
+		if bundledStatus[provisionerType] {
+			bundledPlugins[provisionerType] = struct{}{}
+		}
+	}
+
+	for _, pps := range tmpl.PostProcessors {
+		for _, pp := range pps {
+			postProcessorType := fmt.Sprintf("packer-post-processor-%s", pp.Type)
+			if bundledStatus[postProcessorType] {
+				bundledPlugins[postProcessorType] = struct{}{}
+			}
+		}
+	}
+
+	return compileBundledPluginList(bundledPlugins)
+}
+
+var knownPluginPrefixes = map[string]string{
+	"amazon":        "github.com/hashicorp/amazon",
+	"ansible":       "github.com/hashicorp/ansible",
+	"azure":         "github.com/hashicorp/azure",
+	"docker":        "github.com/hashicorp/docker",
+	"googlecompute": "github.com/hashicorp/googlecompute",
+	"qemu":          "github.com/hashicorp/qemu",
+	"vagrant":       "github.com/hashicorp/vagrant",
+	"vmware":        "github.com/hashicorp/vmware",
+	"vsphere":       "github.com/hashicorp/vsphere",
+}
+
+func (m *Meta) fixRequiredPlugins(config *hcl2template.PackerConfig) string {
+	plugins := map[string]struct{}{}
+
+	for _, b := range config.Builds {
+		for _, b := range b.Sources {
+			for prefix, plugin := range knownPluginPrefixes {
+				if strings.HasPrefix(b.Type, prefix) {
+					plugins[plugin] = struct{}{}
+				}
+			}
+		}
+
+		for _, p := range b.ProvisionerBlocks {
+			for prefix, plugin := range knownPluginPrefixes {
+				if strings.HasPrefix(p.PType, prefix) {
+					plugins[plugin] = struct{}{}
+				}
+			}
+		}
+
+		for _, pps := range b.PostProcessorsLists {
+			for _, pp := range pps {
+				for prefix, plugin := range knownPluginPrefixes {
+					if strings.HasPrefix(pp.PType, prefix) {
+						plugins[plugin] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+
+	for _, ds := range config.Datasources {
+		for prefix, plugin := range knownPluginPrefixes {
+			if strings.HasPrefix(ds.Type, prefix) {
+				plugins[plugin] = struct{}{}
+			}
+		}
+	}
+
+	retPlugins := make([]string, 0, len(plugins))
+	for plugin := range plugins {
+		retPlugins = append(retPlugins, plugin)
+	}
+
+	return generateRequiredPluginsBlock(retPlugins)
+}
+
+func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []string {
+	bundledPlugins := map[string]struct{}{}
+
+	for _, b := range config.Builds {
+		for _, src := range b.Sources {
+			builderType := fmt.Sprintf("packer-builder-%s", src.Type)
+			if bundledStatus[builderType] {
+				bundledPlugins[builderType] = struct{}{}
+			}
+		}
+
+		for _, p := range b.ProvisionerBlocks {
+			provisionerType := fmt.Sprintf("packer-provisioner-%s", p.PType)
+			if bundledStatus[provisionerType] {
+				bundledPlugins[provisionerType] = struct{}{}
+			}
+		}
+
+		for _, pps := range b.PostProcessorsLists {
+			for _, pp := range pps {
+				postProcessorType := fmt.Sprintf("packer-post-processor-%s", pp.PType)
+				if bundledStatus[postProcessorType] {
+					bundledPlugins[postProcessorType] = struct{}{}
+				}
+			}
+		}
+	}
+
+	for _, ds := range config.Datasources {
+		dsType := fmt.Sprintf("packer-datasource-%s", ds.Type)
+		if bundledStatus[dsType] {
+			bundledPlugins[dsType] = struct{}{}
+		}
+	}
+
+	return compileBundledPluginList(bundledPlugins)
 }

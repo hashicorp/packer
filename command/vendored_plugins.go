@@ -4,6 +4,10 @@
 package command
 
 import (
+	"fmt"
+	"log"
+	"strings"
+
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 
 	// Previously core-bundled components, split into their own plugins but
@@ -100,6 +104,170 @@ var VendoredPostProcessors = map[string]packersdk.PostProcessor{
 	"vagrant-cloud":        new(vagrantcloudpostprocessor.PostProcessor),
 	"vsphere-template":     new(vspheretemplatepostprocessor.PostProcessor),
 	"vsphere":              new(vspherepostprocessor.PostProcessor),
+}
+
+// bundledStatus is used to know if one of the bundled components is loaded from
+// an external plugin, or from the bundled plugins.
+//
+// We keep track of this to produce a warning if a user relies on one
+// such plugin, as they will be removed in a later version of Packer.
+var bundledStatus = map[string]bool{
+	"packer-builder-amazon-ebs":               false,
+	"packer-builder-amazon-chroot":            false,
+	"packer-builder-amazon-ebssurrogate":      false,
+	"packer-builder-amazon-ebsvolume":         false,
+	"packer-builder-amazon-instance":          false,
+	"packer-post-processor-amazon-import":     false,
+	"packer-datasource-amazon-ami":            false,
+	"packer-datasource-amazon-secretsmanager": false,
+
+	"packer-provisioner-ansible":       false,
+	"packer-provisioner-ansible-local": false,
+
+	"packer-provisioner-azure-dtlartifact": false,
+	"packer-builder-azure-arm":             false,
+	"packer-builder-azure-chroot":          false,
+	"packer-builder-azure-dtl":             false,
+
+	"packer-builder-docker":               false,
+	"packer-post-processor-docker-import": false,
+	"packer-post-processor-docker-push":   false,
+	"packer-post-processor-docker-save":   false,
+	"packer-post-processor-docker-tag":    false,
+
+	"packer-builder-googlecompute":               false,
+	"packer-post-processor-googlecompute-export": false,
+	"packer-post-processor-googlecompute-import": false,
+
+	"packer-builder-qemu": false,
+
+	"packer-builder-vagrant":              false,
+	"packer-post-processor-vagrant":       false,
+	"packer-post-processor-vagrant-cloud": false,
+
+	"packer-builder-virtualbox-iso": false,
+	"packer-builder-virtualbox-ovf": false,
+	"packer-builder-virtualbox-vm":  false,
+
+	"packer-builder-vmware-iso": false,
+	"packer-builder-vmware-vmx": false,
+
+	"packer-builder-vsphere-clone":           false,
+	"packer-builder-vsphere-iso":             false,
+	"packer-post-processor-vsphere-template": false,
+	"packer-post-processor-vsphere":          false,
+}
+
+// TrackBundledPlugin marks a component as loaded from Packer's bundled plugins
+// instead of from an externally loaded plugin.
+//
+// NOTE: `pluginName' must be in the format `packer-<type>-<component_name>'
+func TrackBundledPlugin(pluginName string) {
+	_, exists := bundledStatus[pluginName]
+	if !exists {
+		return
+	}
+
+	bundledStatus[pluginName] = true
+}
+
+var componentPluginMap = map[string]string{
+	"packer-builder-amazon-ebs":               "github.com/hashicorp/amazon",
+	"packer-builder-amazon-chroot":            "github.com/hashicorp/amazon",
+	"packer-builder-amazon-ebssurrogate":      "github.com/hashicorp/amazon",
+	"packer-builder-amazon-ebsvolume":         "github.com/hashicorp/amazon",
+	"packer-builder-amazon-instance":          "github.com/hashicorp/amazon",
+	"packer-post-processor-amazon-import":     "github.com/hashicorp/amazon",
+	"packer-datasource-amazon-ami":            "github.com/hashicorp/amazon",
+	"packer-datasource-amazon-secretsmanager": "github.com/hashicorp/amazon",
+
+	"packer-provisioner-ansible":       "github.com/hashicorp/ansible",
+	"packer-provisioner-ansible-local": "github.com/hashicorp/ansible",
+
+	"packer-provisioner-azure-dtlartifact": "github.com/hashicorp/azure",
+	"packer-builder-azure-arm":             "github.com/hashicorp/azure",
+	"packer-builder-azure-chroot":          "github.com/hashicorp/azure",
+	"packer-builder-azure-dtl":             "github.com/hashicorp/azure",
+
+	"packer-builder-docker":               "github.com/hashicorp/docker",
+	"packer-post-processor-docker-import": "github.com/hashicorp/docker",
+	"packer-post-processor-docker-push":   "github.com/hashicorp/docker",
+	"packer-post-processor-docker-save":   "github.com/hashicorp/docker",
+	"packer-post-processor-docker-tag":    "github.com/hashicorp/docker",
+
+	"packer-builder-googlecompute":               "github.com/hashicorp/googlecompute",
+	"packer-post-processor-googlecompute-export": "github.com/hashicorp/googlecompute",
+	"packer-post-processor-googlecompute-import": "github.com/hashicorp/googlecompute",
+
+	"packer-builder-qemu": "github.com/hashicorp/qemu",
+
+	"packer-builder-vagrant":              "github.com/hashicorp/vagrant",
+	"packer-post-processor-vagrant":       "github.com/hashicorp/vagrant",
+	"packer-post-processor-vagrant-cloud": "github.com/hashicorp/vagrant",
+
+	"packer-builder-virtualbox-iso": "github.com/hashicorp/virtualbox",
+	"packer-builder-virtualbox-ovf": "github.com/hashicorp/virtualbox",
+	"packer-builder-virtualbox-vm":  "github.com/hashicorp/virtualbox",
+
+	"packer-builder-vmware-iso": "github.com/hashicorp/vmware",
+	"packer-builder-vmware-vmx": "github.com/hashicorp/vmware",
+
+	"packer-builder-vsphere-clone":           "github.com/hashicorp/vsphere",
+	"packer-builder-vsphere-iso":             "github.com/hashicorp/vsphere",
+	"packer-post-processor-vsphere-template": "github.com/hashicorp/vsphere",
+	"packer-post-processor-vsphere":          "github.com/hashicorp/vsphere",
+}
+
+// compileBundledPluginList returns a list of plugins to import in a config
+//
+// This only works on bundled plugins and serves as a way to inform users that
+// they should not rely on a bundled plugin anymore, but give them recommendations
+// on how to manage those plugins instead.
+func compileBundledPluginList(componentMap map[string]struct{}) []string {
+	plugins := map[string]struct{}{}
+	for component := range componentMap {
+		plugin, ok := componentPluginMap[component]
+		if !ok {
+			log.Printf("Unknown bundled plugin component: %q", component)
+			continue
+		}
+
+		plugins[plugin] = struct{}{}
+	}
+
+	pluginList := make([]string, 0, len(plugins))
+	for plugin := range plugins {
+		pluginList = append(pluginList, plugin)
+	}
+
+	return pluginList
+}
+
+func generateRequiredPluginsBlock(plugins []string) string {
+	if len(plugins) == 0 {
+		return ""
+	}
+
+	buf := &strings.Builder{}
+	buf.WriteString(`
+packer {
+  required_plugins {`)
+
+	for _, plugin := range plugins {
+		pluginName := strings.Replace(plugin, "github.com/hashicorp/", "", 1)
+		fmt.Fprintf(buf, `
+    %s = {
+      source  = %q
+      version = "~> 1"
+    }`, pluginName, plugin)
+	}
+
+	buf.WriteString(`
+  }
+}
+`)
+
+	return buf.String()
 }
 
 // Upon init lets load up any plugins that were vendored manually into the default
