@@ -1,5 +1,11 @@
 packer {
   required_version = ">= 1.6.0"
+  required_plugins {
+    amazon = {
+      source  = "github.com/hashicorp/amazon"
+      version = "~> 1"
+    }
+  }
 }
 
 variable "aws_access_key" {
