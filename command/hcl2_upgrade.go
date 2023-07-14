@@ -797,14 +797,91 @@ type PackerParser struct {
 }
 
 func (p *PackerParser) Parse(tpl *template.Template) error {
-	if tpl.MinVersion != "" {
-		fileContent := hclwrite.NewEmptyFile()
-		body := fileContent.Body()
-		packerBody := body.AppendNewBlock("packer", nil).Body()
-		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
-		p.out = fileContent.Bytes()
+	reqPlugins, err := p.generateRequiredPluginsBlock(tpl)
+	if err != nil {
+		return err
 	}
+
+	if tpl.MinVersion == "" && reqPlugins == nil {
+		return nil
+	}
+
+	fileContent := hclwrite.NewEmptyFile()
+	body := fileContent.Body()
+	packerBody := body.AppendNewBlock("packer", nil).Body()
+
+	if tpl.MinVersion != "" {
+		packerBody.SetAttributeValue("required_version", cty.StringVal(fmt.Sprintf(">= %s", tpl.MinVersion)))
+	}
+
+	if reqPlugins != nil {
+		packerBody.AppendBlock(reqPlugins)
+	}
+
+	p.out = fileContent.Bytes()
+
 	return nil
+}
+
+func gatherPluginsFromTemplate(tpl *template.Template) []string {
+	plugins := map[string]struct{}{}
+
+	for _, b := range tpl.Builders {
+		for prefix, plugin := range knownPluginPrefixes {
+			if strings.HasPrefix(b.Type, prefix) {
+				plugins[plugin] = struct{}{}
+			}
+		}
+	}
+
+	for _, p := range tpl.Provisioners {
+		for prefix, plugin := range knownPluginPrefixes {
+			if strings.HasPrefix(p.Type, prefix) {
+				plugins[plugin] = struct{}{}
+			}
+		}
+	}
+
+	for _, pps := range tpl.PostProcessors {
+		for _, pp := range pps {
+			for prefix, plugin := range knownPluginPrefixes {
+				if strings.HasPrefix(pp.Type, prefix) {
+					plugins[plugin] = struct{}{}
+				}
+			}
+		}
+	}
+
+	if len(plugins) == 0 {
+		return nil
+	}
+
+	retPlugins := make([]string, 0, len(plugins))
+	for plugin := range plugins {
+		retPlugins = append(retPlugins, plugin)
+	}
+
+	sort.Strings(retPlugins)
+
+	return retPlugins
+}
+
+func (p *PackerParser) generateRequiredPluginsBlock(tpl *template.Template) (*hclwrite.Block, error) {
+	plugins := gatherPluginsFromTemplate(tpl)
+	if len(plugins) == 0 {
+		return nil, nil
+	}
+
+	reqPlugins := hclwrite.NewBlock("required_plugins", nil)
+	for _, plugin := range plugins {
+		pluginBlock := cty.ObjectVal(map[string]cty.Value{
+			"source":  cty.StringVal(plugin),
+			"version": cty.StringVal("~> 1"),
+		})
+		reqPlugins.Body().SetAttributeValue(strings.Replace(plugin, "github.com/hashicorp/", "", 1), pluginBlock)
+	}
+
+	return reqPlugins, nil
 }
 
 func (p *PackerParser) Write(out *bytes.Buffer) {
