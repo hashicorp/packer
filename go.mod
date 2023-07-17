@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/hcl/v2 v2.14.1
-	github.com/hashicorp/hcp-sdk-go v0.36.0
+	github.com/hashicorp/hcp-sdk-go v0.51.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.4.0
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
@@ -48,7 +48,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/mod v0.8.0
 	golang.org/x/net v0.8.0
-	golang.org/x/oauth2 v0.1.0
+	golang.org/x/oauth2 v0.6.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
@@ -59,7 +59,6 @@ require (
 )
 
 require (
-	github.com/go-openapi/strfmt v0.21.3
 	github.com/hashicorp/packer-plugin-ansible v1.0.3
 	github.com/hashicorp/packer-plugin-azure v1.4.0
 	github.com/hashicorp/packer-plugin-docker v1.0.8
@@ -74,8 +73,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/compute/metadata v0.1.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.0 // indirect
 	cloud.google.com/go/iam v0.6.0 // indirect
 	cloud.google.com/go/storage v1.27.0 // indirect
 	github.com/Azure/azure-sdk-for-go v64.0.0+incompatible // indirect
@@ -127,6 +125,7 @@ require (
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/loads v0.21.2 // indirect
 	github.com/go-openapi/spec v0.20.8 // indirect
+	github.com/go-openapi/strfmt v0.21.3 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-openapi/validate v0.22.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect

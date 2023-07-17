@@ -7,14 +7,12 @@ package api
 import (
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
-	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
-	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
-	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
+	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/organization_service"
+	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/project_service"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 	"github.com/hashicorp/packer/internal/hcp/env"
 	"github.com/hashicorp/packer/version"
@@ -60,95 +58,181 @@ func NewClient() (*Client, error) {
 		Project:      projectSvc.New(cl, nil),
 	}
 
-	if err := client.loadOrganizationID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
+	if client.ProjectID != "" && client.OrganizationID == "" {
+		getProjParams := projectSvc.NewProjectServiceGetParams()
+		getProjParams.ID = client.ProjectID
+		project, err := RetryProjectServiceGet(client, getProjParams)
+		if err != nil {
+			return nil, fmt.Errorf("unable to fetch project %q: %v", client.ProjectID, err)
 		}
+
+		client.ProjectID = project.Payload.Project.ID
+		client.OrganizationID = project.Payload.Project.Parent.ID
+
 	}
-	if err := client.loadProjectID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
+
+	if client.ProjectID == "" {
+		// For the initial release of the HCP TFP, since only one project was allowed per organization at the time,
+		// the provider handled used the single organization's single project by default, instead of requiring the
+		// user to set it. Once multiple projects are available, this helper issues a warning: when multiple projects exist within the org,
+		// a project ID should be set on the provider or on each resource. Otherwise, the oldest project will be used by default.
+		// This helper will eventually be deprecated after a migration period.
+		project, err := getProjectFromCredentials(client)
+		if err != nil {
+			return nil, fmt.Errorf("unable to get project from credentials: %v", err)
 		}
+
+		client.ProjectID = project.ID
+		client.OrganizationID = project.Parent.ID
 	}
 
 	return client, nil
 }
 
-func (c *Client) loadOrganizationID() error {
-	// Get the organization ID.
-	listOrgParams := organizationSvc.NewOrganizationServiceListParams()
-	listOrgResp, err := c.Organization.OrganizationServiceList(listOrgParams, nil)
-	if err != nil {
-		return fmt.Errorf("unable to fetch organization list: %v", err)
+const (
+	retryCount   = 10
+	retryDelay   = 10
+	counterStart = 1
+)
+
+var errorCodesToRetry = [...]int{502, 503, 504}
+
+// Helper to check what requests to retry based on the response HTTP code
+func shouldRetryErrorCode(errorCode int, errorCodesToRetry []int) bool {
+	for i := range errorCodesToRetry {
+		if errorCodesToRetry[i] == errorCode {
+			return true
+		}
 	}
-	orgLen := len(listOrgResp.Payload.Organizations)
-	if orgLen != 1 {
-		return fmt.Errorf("unexpected number of organizations: expected 1, actual: %v", orgLen)
-	}
-	c.OrganizationID = listOrgResp.Payload.Organizations[0].ID
-	return nil
+	return false
 }
 
-func (c *Client) loadProjectID() error {
+// RetryProjectServiceGet wraps the ProjectServiceGet function in a loop that supports retrying the GET request
+func RetryProjectServiceGet(client *Client, params *projectSvc.ProjectServiceGetParams) (*projectSvc.ProjectServiceGetOK, error) {
+	resp, err := client.Project.ProjectServiceGet(params, nil)
+
+	if err != nil {
+		serviceErr, ok := err.(*projectSvc.ProjectServiceGetDefault)
+		if !ok {
+			return nil, err
+		}
+
+		counter := counterStart
+		for shouldRetryErrorCode(serviceErr.Code(), errorCodesToRetry[:]) && counter < retryCount {
+			resp, err = client.Project.ProjectServiceGet(params, nil)
+			if err == nil {
+				break
+			}
+			// Avoid wasting time if we're not going to retry next loop cycle
+			if (counter + 1) != retryCount {
+				fmt.Printf("Error trying to get configured project. Retrying in %d seconds...", retryDelay*counter)
+				time.Sleep(time.Duration(retryDelay*counter) * time.Second)
+			}
+			counter++
+		}
+	}
+	return resp, err
+}
+
+// RetryOrganizationServiceList wraps the OrganizationServiceList function in a loop that supports retrying the GET request
+func RetryOrganizationServiceList(client *Client, params *organizationSvc.OrganizationServiceListParams) (*organizationSvc.OrganizationServiceListOK, error) {
+	resp, err := client.Organization.OrganizationServiceList(params, nil)
+
+	if err != nil {
+		serviceErr, ok := err.(*organizationSvc.OrganizationServiceListDefault)
+		if !ok {
+			return nil, err
+		}
+		counter := counterStart
+		for shouldRetryErrorCode(serviceErr.Code(), errorCodesToRetry[:]) && counter < retryCount {
+			resp, err = client.Organization.OrganizationServiceList(params, nil)
+			if err == nil {
+				break
+			}
+			// Avoid wasting time if we're not going to retry next loop cycle
+			if (counter + 1) != retryCount {
+				fmt.Printf("Error trying to get list of organizations. Retrying in %d seconds...", retryDelay*counter)
+				time.Sleep(time.Duration(retryDelay*counter) * time.Second)
+			}
+			counter++
+		}
+	}
+	return resp, err
+}
+
+// RetryProjectServiceList wraps the ProjectServiceList function in a loop that supports retrying the GET request
+func RetryProjectServiceList(client *Client, params *projectSvc.ProjectServiceListParams) (*projectSvc.ProjectServiceListOK, error) {
+	resp, err := client.Project.ProjectServiceList(params, nil)
+
+	if err != nil {
+		serviceErr, ok := err.(*projectSvc.ProjectServiceListDefault)
+		if !ok {
+			return nil, err
+		}
+
+		counter := counterStart
+		for shouldRetryErrorCode(serviceErr.Code(), errorCodesToRetry[:]) && counter < retryCount {
+			resp, err = client.Project.ProjectServiceList(params, nil)
+			if err == nil {
+				break
+			}
+			// Avoid wasting time if we're not going to retry next loop cycle
+			if (counter + 1) != retryCount {
+				fmt.Printf("Error trying to get list of projects. Retrying in %d seconds...", retryDelay*counter)
+				time.Sleep(time.Duration(retryDelay*counter) * time.Second)
+			}
+			counter++
+		}
+	}
+	return resp, err
+}
+
+// getProjectFromCredentials uses the configured client credentials to
+// fetch the associated organization and returns that organization's
+// single project.
+func getProjectFromCredentials(client *Client) (project *models.ResourcemanagerProject, err error) {
+	if client.OrganizationID == "" {
+		// Get the organization ID.
+		listOrgParams := organizationSvc.NewOrganizationServiceListParams()
+		listOrgResp, err := RetryOrganizationServiceList(client, listOrgParams)
+		if err != nil {
+			return nil, fmt.Errorf("unable to fetch organization list: %v", err)
+		}
+		orgLen := len(listOrgResp.Payload.Organizations)
+		if orgLen != 1 {
+			return nil, fmt.Errorf("unexpected number of organizations: expected 1, actual: %v", orgLen)
+		}
+		client.OrganizationID = listOrgResp.Payload.Organizations[0].ID
+	}
+
 	// Get the project using the organization ID.
 	listProjParams := projectSvc.NewProjectServiceListParams()
-	listProjParams.ScopeID = &c.OrganizationID
-	scopeType := string(rmmodels.HashicorpCloudResourcemanagerResourceIDResourceTypeORGANIZATION)
+	listProjParams.ScopeID = &client.OrganizationID
+	scopeType := string(models.ResourceIDResourceTypeORGANIZATION)
 	listProjParams.ScopeType = &scopeType
-	listProjResp, err := c.Project.ProjectServiceList(listProjParams, nil)
+	listProjResp, err := RetryProjectServiceList(client, listProjParams)
 	if err != nil {
-		return fmt.Errorf("unable to fetch project id: %v", err)
+		return nil, fmt.Errorf("unable to fetch project id: %v", err)
 	}
-
-	if env.HasProjectID() {
-		proj, err := findProjectByID(os.Getenv(env.HCPProjectID), listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
-	} else {
-		if len(listProjResp.Payload.Projects) > 1 {
-			log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n" +
-				"To specify which project to use, set the HCP_PROJECT_ID environment variable to the one you want to use.")
-		}
-
-		proj, err := findOldestProject(listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
+	if len(listProjResp.Payload.Projects) > 1 {
+		log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n" +
+			"To specify which project to use, set the HCP_PROJECT_ID environment variable to the one you want to use.")
+		return getOldestProject(listProjResp.Payload.Projects), nil
 	}
-
-	return nil
+	project = listProjResp.Payload.Projects[0]
+	return project, nil
 }
 
-func findOldestProject(projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	if len(projs) == 0 {
-		return nil, fmt.Errorf("no project found")
-	}
+// getOldestProject retrieves the oldest project from a list based on its created_at time.
+func getOldestProject(projects []*models.ResourcemanagerProject) (oldestProj *models.ResourcemanagerProject) {
+	oldestTime := time.Now()
 
-	proj := projs[0]
-	for i := 1; i < len(projs); i++ {
-		nxtProj := projs[i]
-
-		if time.Time(nxtProj.CreatedAt).Before(time.Time(proj.CreatedAt)) {
-			proj = nxtProj
+	for _, proj := range projects {
+		projTime := time.Time(proj.CreatedAt)
+		if projTime.Before(oldestTime) {
+			oldestProj = proj
+			oldestTime = projTime
 		}
 	}
-
-	return proj, nil
-}
-
-func findProjectByID(projID string, projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	for _, proj := range projs {
-		if proj.ID == projID {
-			return proj, nil
-		}
-	}
-
-	return nil, fmt.Errorf("No project %q found", projID)
+	return oldestProj
 }
