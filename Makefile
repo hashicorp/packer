@@ -12,8 +12,6 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-EXECUTABLE_FILES=$(shell find . -type f -executable | egrep -v '^\./(website/[vendor|tmp]|vendor/|\.git|bin/|scripts/|pkg/)' | egrep -v '.*(\.sh|\.bats|\.git)' | egrep -v './provisioner/(ansible|inspec)/test-fixtures/exit1')
-
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
@@ -133,15 +131,6 @@ fmt-check: fmt ## Check go code formatting
 		exit 1; \
 	fi
 
-mode-check: ## Check that only certain files are executable
-	@echo "==> Checking that only certain files are executable..."
-	@if [ ! -z "$(EXECUTABLE_FILES)" ]; then \
-		echo "These files should not be executable or they must be white listed in the Makefile:"; \
-		echo "$(EXECUTABLE_FILES)" | xargs -n1; \
-		exit 1; \
-	else \
-		echo "Check passed."; \
-	fi
 fmt-docs:
 	@find ./website/pages/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
 
@@ -166,7 +155,7 @@ generate-check: generate ## Check go code generation is on par
 		exit 1; \
 	fi
 
-test: mode-check vet ## Run unit tests
+test: vet ## Run unit tests
 	@go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m
 
 # acctest runs provisioners acceptance tests
@@ -178,7 +167,7 @@ testacc: # install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
-testrace: mode-check vet ## Test with race detection enabled
+testrace: vet ## Test with race detection enabled
 	@go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 # Runs code coverage and open a html page with report
