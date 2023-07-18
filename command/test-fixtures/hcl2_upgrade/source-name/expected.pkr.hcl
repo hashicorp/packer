@@ -14,6 +14,12 @@
 # See https://www.packer.io/docs/templates/hcl_templates/blocks/packer for more info
 packer {
   required_version = ">= 1.6.0"
+  required_plugins {
+    amazon = {
+      source  = "github.com/hashicorp/amazon"
+      version = "~> 1"
+    }
+  }
 }
 
 # All generated input variables will be of 'string' type as this is how Packer JSON

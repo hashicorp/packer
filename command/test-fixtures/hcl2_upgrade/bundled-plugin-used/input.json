@@ -1,0 +1,11 @@
+{
+	"builders": [{
+		"type": "amazon-ebs"
+	}],
+	"provisioners": [{
+		"type": "ansible-local"
+	}],
+	"post-processors": [{
+		"type": "googlecompute-import"
+	}]
+}
