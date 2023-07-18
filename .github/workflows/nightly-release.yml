@@ -24,7 +24,7 @@ jobs:
     needs: build-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Download built artifacts
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
@@ -38,7 +38,7 @@ jobs:
           echo "BUILD_OUTPUT_LIST=$(cat tmp2.txt | tr '\n' ',' | perl -ple 'chop')" >> $GITHUB_ENV
           rm -rf tmp.txt && rm -rf tmp2.txt
       - name: Advance nightly tag
-        uses: actions/github-script@ffc2c79a5b2490bd33e0a41c1de74b877714d736 # v3
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -62,7 +62,7 @@ jobs:
       - name: Create a nightly GitHub prerelease
         id: create_prerelease
         continue-on-error: true
-        uses: ncipollo/release-action@v1 # TSCCR: no entry for repository "ncipollo/release-action"
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1.12.0
         with:
           name: nightly
           artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
@@ -85,7 +85,7 @@ jobs:
       - name: Retry failed nightly GitHub prerelease
         id: create_prerelease_retry
         if: steps.create_prerelease.outcome == 'failure'
-        uses: ncipollo/release-action@v1 # TSCCR: no entry for repository "ncipollo/release-action"
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # v1.12.0
         with:
           name: nightly
           artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
@@ -101,7 +101,7 @@ jobs:
         run: |
           echo "prerelease_id=${{ steps.create_prerelease_retry.outputs.id }}" >> $GITHUB_ENV
       - name: Publish nightly GitHub prerelease
-        uses: eregon/publish-release@v1 # TSCCR: no entry for repository "eregon/publish-release"
+        uses: eregon/publish-release@46913fa2b3f7edc7345ae3c17f6d1b093a54916d # v1.0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send slack notification on failure
-        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844 # v1.23.0
+        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
         with:
           payload: |
             {
