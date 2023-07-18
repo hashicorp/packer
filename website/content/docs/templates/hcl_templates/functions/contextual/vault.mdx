@@ -49,6 +49,7 @@ local "foo" {
     expression = vault("secrets/hello", "foo")
     sensitive  = true
 }
+```
 
 The `local` block example accesses the Vault path `secrets/foo` and returns the value
 stored at the key `foo`, storing it as the local variable `local.foo`. However, the output of
