@@ -7,6 +7,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -44,39 +45,67 @@ func NewClient() (*Client, error) {
 		}
 	}
 
-	cl, err := httpclient.New(httpclient.Config{
+	hcpClientCfg := httpclient.Config{
 		SourceChannel: fmt.Sprintf("packer/%s", version.PackerVersion.FormattedVersion()),
-	})
+	}
+	if err := hcpClientCfg.Canonicalize(); err != nil {
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        err,
+		}
+	}
+
+	cl, err := httpclient.New(hcpClientCfg)
 	if err != nil {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
 			Err:        err,
 		}
 	}
-
 	client := &Client{
 		Packer:       packerSvc.New(cl, nil),
 		Organization: organizationSvc.New(cl, nil),
 		Project:      projectSvc.New(cl, nil),
 	}
+	//if both HCP_ORGANIZATION_ID and HCP_PROJECT_ID are set via env variables the hcpConfig may have all we need already.
+	if hcpClientCfg.Profile().OrganizationID != "" && hcpClientCfg.Profile().ProjectID != "" {
+		client.OrganizationID = hcpClientCfg.Profile().OrganizationID
+		client.ProjectID = hcpClientCfg.Profile().ProjectID
 
-	if err := client.loadOrganizationID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
-		}
-	}
-	if err := client.loadProjectID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
-		}
+		return client, nil
 	}
 
+	if client.OrganizationID == "" {
+		err := client.loadOrganizationID()
+		if err != nil {
+			return nil, &ClientError{
+				StatusCode: InvalidClientConfig,
+				Err:        err,
+			}
+		}
+	}
+
+	if client.ProjectID == "" {
+		err := client.loadProjectID()
+		if err != nil {
+			return nil, &ClientError{
+				StatusCode: InvalidClientConfig,
+				Err:        err,
+			}
+		}
+	}
 	return client, nil
 }
 
 func (c *Client) loadOrganizationID() error {
+	if c.OrganizationID != "" {
+		return nil
+	}
+
+	if env.HasOrganizationID() {
+		c.OrganizationID = os.Getenv(env.HCPOrganizationID)
+		return nil
+	}
 	// Get the organization ID.
 	listOrgParams := organizationSvc.NewOrganizationServiceListParams()
 	listOrgResp, err := c.Organization.OrganizationServiceList(listOrgParams, nil)
@@ -92,55 +121,62 @@ func (c *Client) loadOrganizationID() error {
 }
 
 func (c *Client) loadProjectID() error {
+	if c.ProjectID != "" {
+		return nil
+	}
+	if env.HasProjectID() {
+		c.ProjectID = os.Getenv(env.HCPProjectID)
+		return nil
+	}
 	// Get the project using the organization ID.
 	listProjParams := projectSvc.NewProjectServiceListParams()
 	listProjParams.ScopeID = &c.OrganizationID
 	scopeType := string(rmmodels.HashicorpCloudResourcemanagerResourceIDResourceTypeORGANIZATION)
 	listProjParams.ScopeType = &scopeType
 	listProjResp, err := c.Project.ProjectServiceList(listProjParams, nil)
+
 	if err != nil {
-		return fmt.Errorf("unable to fetch project id: %v", err)
+		//For permission errors our service principle may not have the perms
+		// to see all projects for an Org; this is the case for project-level service principles.
+		serviceErr, ok := err.(*projectSvc.ProjectServiceListDefault)
+		if !ok {
+			return fmt.Errorf("unable to fetch project list: %v", err)
+		}
+		if serviceErr.Code() == http.StatusForbidden {
+			return fmt.Errorf("unable to fetch project\n\n"+
+				"If the provided credentials are tied to a specific project trying setting the %s environment variable to one you want to use.", env.HCPProjectID)
+		}
 	}
 
-	if env.HasProjectID() {
-		proj, err := findProjectByID(os.Getenv(env.HCPProjectID), listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
-	} else {
-		if len(listProjResp.Payload.Projects) > 1 {
-			log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n" +
-				"To specify which project to use, set the HCP_PROJECT_ID environment variable to the one you want to use.")
-		}
-
-		proj, err := findOldestProject(listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
+	if len(listProjResp.Payload.Projects) > 1 {
+		log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n"+
+			"To specify which project to use, set the %s environment variable to the one you want to use.", env.HCPProjectID)
 	}
 
+	proj, err := getOldestProject(listProjResp.Payload.Projects)
+	if err != nil {
+		return err
+	}
+	c.ProjectID = proj.ID
 	return nil
 }
 
-func findOldestProject(projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	if len(projs) == 0 {
+// getOldestProject retrieves the oldest project from a list based on its created_at time.
+func getOldestProject(projects []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
+	if len(projects) == 0 {
 		return nil, fmt.Errorf("no project found")
 	}
 
-	proj := projs[0]
-	for i := 1; i < len(projs); i++ {
-		nxtProj := projs[i]
-
-		if time.Time(nxtProj.CreatedAt).Before(time.Time(proj.CreatedAt)) {
-			proj = nxtProj
+	oldestTime := time.Now()
+	var oldestProj *models.HashicorpCloudResourcemanagerProject
+	for _, proj := range projects {
+		projTime := time.Time(proj.CreatedAt)
+		if projTime.Before(oldestTime) {
+			oldestProj = proj
+			oldestTime = projTime
 		}
 	}
-
-	return proj, nil
+	return oldestProj, nil
 }
 
 func findProjectByID(projID string, projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
