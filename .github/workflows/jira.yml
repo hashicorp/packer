@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:    
       - name: Login
-        uses: atlassian/gajira-login@45fd029b9f1d6d8926c6f04175aa80c0e42c9026 # v3.0.1
+        uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c # v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -61,7 +61,7 @@ jobs:
       - name: Create ticket
         id: create-ticket
         if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: atlassian/gajira-create@59e177c4f6451399df5b4911c2211104f171e669 # v3.0.1
+        uses: atlassian/gajira-create@1ff0b6bd115a780592b47bfbb63fc4629132e6ec # v3
         with:
           project: HPR
           issuetype: "${{ steps.set-ticket-type.outputs.type }}"
@@ -74,7 +74,7 @@ jobs:
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: actions-ecosystem/action-create-comment@v1.0.0 # TSCCR: no entry for repository "actions-ecosystem/action-create-comment"
+        uses: actions-ecosystem/action-create-comment@v1.0.0  # TSCCR: no entry for repository "actions-ecosystem/action-create-comment"
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           body: |
