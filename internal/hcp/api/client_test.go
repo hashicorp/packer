@@ -94,7 +94,7 @@ func TestFindProjectID(t *testing.T) {
 	}
 }
 
-func TestFindOldestProject(t *testing.T) {
+func TestGetOldestProject(t *testing.T) {
 	testcases := []struct {
 		Name            string
 		ProjectList     []*models.HashicorpCloudResourcemanagerProject
@@ -151,7 +151,7 @@ func TestFindOldestProject(t *testing.T) {
 
 	for _, tt := range testcases {
 		t.Run(tt.Name, func(t *testing.T) {
-			proj, err := findOldestProject(tt.ProjectList)
+			proj, err := getOldestProject(tt.ProjectList)
 			if (err != nil) != tt.ExpectErr {
 				t.Errorf("test findProjectByID, expected %t, got %t",
 					tt.ExpectErr,
