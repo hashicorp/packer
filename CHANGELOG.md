@@ -1,3 +1,5 @@
+## 1.9.3 (Upcoming)
+
 ## 1.9.2 (July 19, 2023)
 
 ### NOTES:
@@ -5,15 +7,13 @@
 * Vendored plugins within Packer have not been updated. Plugin releases occur on
      a regular basis to address issues and feature requests.
      Please note that in an upcoming version of Packer, we will remove the last
-     bundled plugins from Packer.
-     Users are encouraged to use `packer init` for HCL2 templates or
+     bundled plugins from Packer. Users are encouraged to use `packer init` for HCL2 templates or
      `packer plugins install` with legacy JSON templates for installing external
      plugins.
 
 * Packer will now warn when using bundled plugins. This feature will be removed in
     a future version of the tool, so this warning is meant to bring awareness of the
-    upcoming change, and to help users update their environment/templates to be
-    ready for this.
+    upcoming change, and help users update their templates.
     [GH-12495](https://github.com/hashicorp/packer/pull/12495)
 
 ### BUG FIXES:
@@ -37,7 +37,7 @@
 
 * packer-plugin-parallels: The Parallels plugin has been handed over to the Parallels
      team. New releases for this plugin are available at
-     https://github.com/parallels/packer-plugin-parallels. This plugin is is no longer
+     https://github.com/parallels/packer-plugin-parallels. This plugin is no longer
      being bundled in the Packer binary release. Existing references to the
      plugin will continue to work but users are advised to update the
      `required_plugins` block to use the new plugin source address.
@@ -53,8 +53,8 @@
 
 ### IMPROVEMENTS:
 
-* The `hcl2_upgrade` subcommand will now add `required_plugins` to the template
-    generated from JSON for all our officially supported plugins.
+* The `hcl2_upgrade` sub-command will now add `required_plugins` to the template
+    generated from JSON for [official plugins](https://developer.hashicorp.com/packer/plugins#tiers-and-namespaces).
     [GH-12504](https://github.com/hashicorp/packer/pull/12504)
 
 ## 1.9.1 (June 1, 2023)
