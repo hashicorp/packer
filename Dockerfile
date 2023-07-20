@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # ========================================================================
-# 
+#
 # This Dockerfile contains multiple targets.
 # Use 'docker build --target=<name> .' to build one.
 # e.g. `docker build --target=release-light .`
 #
-# All non-dev targets have a PRODUCT_VERSION argument that must be provided 
-# via --build-arg=PRODUCT_VERSION=<version> when building. 
+# All non-dev targets have a PRODUCT_VERSION argument that must be provided
+# via --build-arg=PRODUCT_VERSION=<version> when building.
 # e.g. --build-arg PRODUCT_VERSION=1.11.2
 #
 # For local dev and testing purposes, please build and use the `dev` docker image.
@@ -28,7 +28,7 @@ COPY bin/packer /bin/packer
 ENTRYPOINT ["/bin/packer"]
 
 
-# Official docker image that includes binaries from releases.hashicorp.com. 
+# Official docker image that includes binaries from releases.hashicorp.com.
 # This downloads the release from releases.hashicorp.com and therefore requires that
 # the release is published before building the Docker image.
 FROM docker.mirror.hashicorp.services/alpine:latest as official
@@ -79,7 +79,7 @@ ENTRYPOINT ["/bin/packer"]
 
 
 # Light docker image which can be used to run the binary from a container.
-# This image builds from the locally generated binary in ./bin/, and from CI-built binaries within CI. 
+# This image builds from the locally generated binary in ./bin/, and from CI-built binaries within CI.
 # To generate the local binary, run `make dev`.
 # This image is published to DockerHub under the `light`, `light-$VERSION`, and `latest` tags.
 FROM docker.mirror.hashicorp.services/alpine:latest as release-light
