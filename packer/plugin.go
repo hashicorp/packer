@@ -25,10 +25,18 @@ type PluginConfig struct {
 	KnownPluginFolders []string
 	PluginMinPort      int
 	PluginMaxPort      int
-	Builders           BuilderSet
-	Provisioners       ProvisionerSet
-	PostProcessors     PostProcessorSet
-	DataSources        DatasourceSet
+
+	// BundledPluginsStatus is used to know if one of the bundled components is loaded from
+	// an external plugin, or from the bundled plugins.
+	//
+	// We keep track of this to produce a warning if a user relies on one
+	// such plugin, as they will be removed in a later version of Packer.
+	BundledPluginsStatus map[string]bool
+
+	Builders       BuilderSet
+	Provisioners   ProvisionerSet
+	PostProcessors PostProcessorSet
+	DataSources    DatasourceSet
 
 	// Redirects are only set when a plugin was completely moved out; they allow
 	// telling where a plugin has moved by checking if a known component of this
@@ -421,4 +429,27 @@ func (c *PluginConfig) discoverInstalledComponents(path string) error {
 	}
 
 	return nil
+}
+
+// TrackBundledPlugin marks a component as loaded from Packer's bundled plugins
+// instead of from an externally loaded plugin.
+//
+// NOTE: `pluginName' must be in the format `packer-<type>-<component_name>'
+func (c *PluginConfig) TrackBundledPlugin(pluginName string) {
+	_, exists := c.BundledPluginsStatus[pluginName]
+	if !exists {
+		return
+	}
+
+	c.BundledPluginsStatus[pluginName] = true
+}
+
+// IsBundled returns whether the component belongs to a bundled plugin or not.
+func (c PluginConfig) IsBundled(kind, name string) bool {
+	bundled, ok := c.BundledPluginsStatus[fmt.Sprintf("packer-%s-%s", kind, name)]
+	if !ok {
+		return false
+	}
+
+	return bundled
 }

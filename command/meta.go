@@ -234,14 +234,14 @@ func (m *Meta) detectBundledPluginsJSON(core *packer.Core) []string {
 
 	for _, b := range tmpl.Builders {
 		builderType := fmt.Sprintf("packer-builder-%s", b.Type)
-		if bundledStatus[builderType] {
+		if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[builderType] {
 			bundledPlugins[builderType] = struct{}{}
 		}
 	}
 
 	for _, p := range tmpl.Provisioners {
 		provisionerType := fmt.Sprintf("packer-provisioner-%s", p.Type)
-		if bundledStatus[provisionerType] {
+		if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[provisionerType] {
 			bundledPlugins[provisionerType] = struct{}{}
 		}
 	}
@@ -249,7 +249,7 @@ func (m *Meta) detectBundledPluginsJSON(core *packer.Core) []string {
 	for _, pps := range tmpl.PostProcessors {
 		for _, pp := range pps {
 			postProcessorType := fmt.Sprintf("packer-post-processor-%s", pp.Type)
-			if bundledStatus[postProcessorType] {
+			if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[postProcessorType] {
 				bundledPlugins[postProcessorType] = struct{}{}
 			}
 		}
@@ -323,14 +323,14 @@ func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []str
 	for _, b := range config.Builds {
 		for _, src := range b.Sources {
 			builderType := fmt.Sprintf("packer-builder-%s", src.Type)
-			if bundledStatus[builderType] {
+			if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[builderType] {
 				bundledPlugins[builderType] = struct{}{}
 			}
 		}
 
 		for _, p := range b.ProvisionerBlocks {
 			provisionerType := fmt.Sprintf("packer-provisioner-%s", p.PType)
-			if bundledStatus[provisionerType] {
+			if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[provisionerType] {
 				bundledPlugins[provisionerType] = struct{}{}
 			}
 		}
@@ -338,7 +338,7 @@ func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []str
 		for _, pps := range b.PostProcessorsLists {
 			for _, pp := range pps {
 				postProcessorType := fmt.Sprintf("packer-post-processor-%s", pp.PType)
-				if bundledStatus[postProcessorType] {
+				if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[postProcessorType] {
 					bundledPlugins[postProcessorType] = struct{}{}
 				}
 			}
@@ -347,7 +347,7 @@ func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []str
 
 	for _, ds := range config.Datasources {
 		dsType := fmt.Sprintf("packer-datasource-%s", ds.Type)
-		if bundledStatus[dsType] {
+		if m.CoreConfig.Components.PluginConfig.BundledPluginsStatus[dsType] {
 			bundledPlugins[dsType] = struct{}{}
 		}
 	}

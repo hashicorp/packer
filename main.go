@@ -326,6 +326,53 @@ func loadConfig() (*config, error) {
 		PluginMaxPort:      25000,
 		KnownPluginFolders: packer.PluginFolders("."),
 
+		BundledPluginsStatus: map[string]bool{
+			"packer-builder-amazon-ebs":               false,
+			"packer-builder-amazon-chroot":            false,
+			"packer-builder-amazon-ebssurrogate":      false,
+			"packer-builder-amazon-ebsvolume":         false,
+			"packer-builder-amazon-instance":          false,
+			"packer-post-processor-amazon-import":     false,
+			"packer-datasource-amazon-ami":            false,
+			"packer-datasource-amazon-secretsmanager": false,
+
+			"packer-provisioner-ansible":       false,
+			"packer-provisioner-ansible-local": false,
+
+			"packer-provisioner-azure-dtlartifact": false,
+			"packer-builder-azure-arm":             false,
+			"packer-builder-azure-chroot":          false,
+			"packer-builder-azure-dtl":             false,
+
+			"packer-builder-docker":               false,
+			"packer-post-processor-docker-import": false,
+			"packer-post-processor-docker-push":   false,
+			"packer-post-processor-docker-save":   false,
+			"packer-post-processor-docker-tag":    false,
+
+			"packer-builder-googlecompute":               false,
+			"packer-post-processor-googlecompute-export": false,
+			"packer-post-processor-googlecompute-import": false,
+
+			"packer-builder-qemu": false,
+
+			"packer-builder-vagrant":              false,
+			"packer-post-processor-vagrant":       false,
+			"packer-post-processor-vagrant-cloud": false,
+
+			"packer-builder-virtualbox-iso": false,
+			"packer-builder-virtualbox-ovf": false,
+			"packer-builder-virtualbox-vm":  false,
+
+			"packer-builder-vmware-iso": false,
+			"packer-builder-vmware-vmx": false,
+
+			"packer-builder-vsphere-clone":           false,
+			"packer-builder-vsphere-iso":             false,
+			"packer-post-processor-vsphere-template": false,
+			"packer-post-processor-vsphere":          false,
+		},
+
 		// BuilderRedirects
 		BuilderRedirects: map[string]string{
 
