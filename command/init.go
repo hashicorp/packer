@@ -103,6 +103,14 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		Ui:    c.Ui,
 	}
 
+	type requiredPlugin struct {
+		pluginType    string
+		pluginSource  string
+		pluginVersion string
+	}
+
+	var implicitlyRequiredPlugins []requiredPlugin
+
 	for _, pluginRequirement := range reqs {
 		// Get installed plugins that match requirement
 
@@ -134,6 +142,12 @@ plugin. Unfortunately, this failed :
 					pluginRequirement.Identifier,
 					pluginRequirement.Identifier.Type,
 					err)
+
+				implicitlyRequiredPlugins = append(implicitlyRequiredPlugins, requiredPlugin{
+					pluginType:    pluginRequirement.Identifier.Type,
+					pluginSource:  pluginRequirement.Identifier.String(),
+					pluginVersion: "~> 1",
+				})
 				c.Ui.Say(msg)
 			} else {
 				c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
@@ -146,28 +160,12 @@ plugin. Unfortunately, this failed :
 				msg := fmt.Sprintf("Installed implicitly required plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
 				ui.Say(msg)
 
-				warn := fmt.Sprintf(`
-Warning, at least one component used in your config file(s) has moved out of 
-Packer into the %[2]q plugin and is now being implicitly required. 
-For more details on implicitly required plugins see https://packer.io/docs/commands/init#implicit-required-plugin
+				implicitlyRequiredPlugins = append(implicitlyRequiredPlugins, requiredPlugin{
+					pluginType:    pluginRequirement.Identifier.Type,
+					pluginSource:  pluginRequirement.Identifier.String(),
+					pluginVersion: newInstall.Version,
+				})
 
-To avoid any backward incompatible changes with your
-config file you may want to lock the plugin version by pasting the following to your config:
-
-packer {
-  required_plugins {
-    %[1]s = {
-      source  = "%[2]s"
-      version = "~> %[3]s"
-    }
-  }
-}
-`,
-					pluginRequirement.Identifier.Type,
-					pluginRequirement.Identifier,
-					newInstall.Version,
-				)
-				ui.Error(warn)
 				continue
 			}
 			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
@@ -175,6 +173,37 @@ packer {
 
 		}
 	}
+
+	if len(implicitlyRequiredPlugins) > 0 {
+		msg := &strings.Builder{}
+		fmt.Fprintf(msg, `
+Warning, at least one component used in your config file(s) has moved out of Packer and is now being implicitly required.
+For more details on implicitly required plugins see https://packer.io/docs/commands/init#implicit-required-plugin
+
+To avoid any backward incompatible changes with your
+config file you may want to lock the plugin version by pasting the following to your config:
+
+packer {
+  required_plugins {
+`)
+		for _, pl := range implicitlyRequiredPlugins {
+			fmt.Fprintf(msg, `
+    %q = {
+      source = %q
+      version = %q
+    }
+`,
+				pl.pluginType,
+				pl.pluginSource,
+				pl.pluginVersion)
+		}
+
+		msg.WriteString(`
+  }
+}`)
+		ui.Error(msg.String())
+	}
+
 	return ret
 }
 
