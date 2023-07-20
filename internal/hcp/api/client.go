@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
@@ -67,7 +68,12 @@ func NewClient() (*Client, error) {
 		Organization: organizationSvc.New(cl, nil),
 		Project:      projectSvc.New(cl, nil),
 	}
-	//if both HCP_ORGANIZATION_ID and HCP_PROJECT_ID are set via env variables the hcpConfig may have all we need already.
+	// A client.Config.hcpConfig is set when calling Canonicalize on basic HCP httpclient, as on line 52.
+	// If a user sets HCP_* env. variables they will be loaded into the client via the SDK and used for any client calls.
+	// For HCP_ORGANIZATION_ID and HCP_PROJECT_ID if they are both set via env. variables the call to hcpClientCfg.Connicalize()
+	// will automatically loaded them using the FromEnv configOption.
+	//
+	// If both values are set we should have all that we need to continue so we can returned the configured client.
 	if hcpClientCfg.Profile().OrganizationID != "" && hcpClientCfg.Profile().ProjectID != "" {
 		client.OrganizationID = hcpClientCfg.Profile().OrganizationID
 		client.ProjectID = hcpClientCfg.Profile().ProjectID
@@ -94,14 +100,11 @@ func NewClient() (*Client, error) {
 			}
 		}
 	}
+
 	return client, nil
 }
 
 func (c *Client) loadOrganizationID() error {
-	if c.OrganizationID != "" {
-		return nil
-	}
-
 	if env.HasOrganizationID() {
 		c.OrganizationID = os.Getenv(env.HCPOrganizationID)
 		return nil
@@ -121,11 +124,12 @@ func (c *Client) loadOrganizationID() error {
 }
 
 func (c *Client) loadProjectID() error {
-	if c.ProjectID != "" {
-		return nil
-	}
 	if env.HasProjectID() {
 		c.ProjectID = os.Getenv(env.HCPProjectID)
+		err := c.ValidateRegistryForProject()
+		if err != nil {
+			return fmt.Errorf("project validation for id %q responded in error: %v", c.ProjectID, err)
+		}
 		return nil
 	}
 	// Get the project using the organization ID.
@@ -136,15 +140,15 @@ func (c *Client) loadProjectID() error {
 	listProjResp, err := c.Project.ProjectServiceList(listProjParams, nil)
 
 	if err != nil {
-		//For permission errors our service principle may not have the perms
-		// to see all projects for an Org; this is the case for project-level service principles.
+		//For permission errors, our service principal may not have the ability
+		// to see all projects for an Org; this is the case for project-level service principals.
 		serviceErr, ok := err.(*projectSvc.ProjectServiceListDefault)
 		if !ok {
 			return fmt.Errorf("unable to fetch project list: %v", err)
 		}
 		if serviceErr.Code() == http.StatusForbidden {
 			return fmt.Errorf("unable to fetch project\n\n"+
-				"If the provided credentials are tied to a specific project trying setting the %s environment variable to one you want to use.", env.HCPProjectID)
+				"If the provided credentials are tied to a specific project try setting the %s environment variable to one you want to use.", env.HCPProjectID)
 		}
 	}
 
@@ -179,12 +183,22 @@ func getOldestProject(projects []*models.HashicorpCloudResourcemanagerProject) (
 	return oldestProj, nil
 }
 
-func findProjectByID(projID string, projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	for _, proj := range projs {
-		if proj.ID == projID {
-			return proj, nil
-		}
+// ValidateRegistryForProject validates that there is an active registry associated to the configured organization and project ids.
+// A successful validation will result in a nil response. All other response represent an invalid registry error request or a registry not found error.
+func (client *Client) ValidateRegistryForProject() error {
+	params := packer_service.NewPackerServiceGetRegistryParams()
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
+
+	resp, err := client.Packer.PackerServiceGetRegistry(params, nil)
+	if err != nil {
+		return err
 	}
 
-	return nil, fmt.Errorf("No project %q found", projID)
+	if resp.GetPayload().Registry == nil {
+		return fmt.Errorf("No active HCP Packer registry was found for the organization %q and project %q", client.OrganizationID, client.ProjectID)
+	}
+
+	return nil
+
 }
