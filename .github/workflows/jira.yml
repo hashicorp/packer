@@ -11,7 +11,7 @@ jobs:
   sync:
     name: Sync to JIRA
     permissions:
-      issues: write # for actions-ecosytem/action-create-comment
+      issues: write # for actions/github-script to create comments
     runs-on: ubuntu-latest
     steps:    
       - name: Login
@@ -74,13 +74,17 @@ jobs:
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: actions-ecosystem/action-create-comment@v1.0.0  # TSCCR: no entry for repository "actions-ecosystem/action-create-comment"
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            This issue has been synced to JIRA for planning.
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: |
+                This issue has been synced to JIRA for planning.
 
-            JIRA ID: [${{ steps.create-ticket.outputs.issue }}](https://hashicorp.atlassian.net/browse/${{steps.create-ticket.outputs.issue}})
+                JIRA ID: [${{ steps.create-ticket.outputs.issue }}](https://hashicorp.atlassian.net/browse/${{steps.create-ticket.outputs.issue}})
 
 
 
