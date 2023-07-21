@@ -104,6 +104,24 @@ COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
 
 ENTRYPOINT ["/bin/packer"]
 
+# Full docker image which can be used to run the binary from a container.
+# This image is essentially the same as the `release-light` one, but embeds
+# the official plugins in it.
+FROM release-light as release-full
+
+# Install the latest version of the official plugins
+RUN /bin/packer plugins install "github.com/hashicorp/amazon" && \
+    /bin/packer plugins install "github.com/hashicorp/ansible" && \
+    /bin/packer plugins install "github.com/hashicorp/azure" && \
+    /bin/packer plugins install "github.com/hashicorp/docker" && \
+    /bin/packer plugins install "github.com/hashicorp/googlecompute" && \
+    /bin/packer plugins install "github.com/hashicorp/qemu" && \
+    /bin/packer plugins install "github.com/hashicorp/vagrant" && \
+    /bin/packer plugins install "github.com/hashicorp/virtualbox" && \
+    /bin/packer plugins install "github.com/hashicorp/vmware" && \
+    /bin/packer plugins install "github.com/hashicorp/vsphere"
+
+ENTRYPOINT ["/bin/packer"]
 
 # Set default target to 'dev'.
 FROM dev
