@@ -34,7 +34,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: |
+              body: `
                 Hi 👋 thanks for reaching out.
 
                 For general questions we recommend reaching out to the [community forum](https://discuss.hashicorp.com/c/packer) for greater visibility.
@@ -42,7 +42,7 @@ jobs:
                 We'll mark this issue as needs-reply to help inform maintainers that this question is awaiting a response.
                 If no activity is taken on this question within 30 days it will be automatically closed.
 
-                If you find the forum to be more helpful or if you've found the answer to your question elsewhere please feel free to post a response and close the issue.
+                If you find the forum to be more helpful or if you've found the answer to your question elsewhere please feel free to post a response and close the issue.`
       - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
           script: |
