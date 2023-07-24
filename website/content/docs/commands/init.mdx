@@ -19,6 +19,26 @@ the first command that should be executed when working with a new or existing
 template. This command is always safe to run multiple times. Though subsequent
 runs may give errors, this command will never delete anything.
 
+You should invoke `packer init` on either an HCL2 template, or a directory that contains
+at least a valid HCL2 template, and eventually other related dependencies like varfiles
+for example.
+
+Example:
+
+```sh
+$ ls .
+template.pkr.hcl varfile.pkrvars.pkr.hcl
+
+$ packer init template.pkr.hcl # You can invoke packer init on a single template in this case
+                               # This works if the template is self-contained, but may fail if
+                               # the template is meant to be built as a bundle of partials.
+
+$ packer init .                # Alternatively, you can invoke packer init on a directory instead,
+                               # which behaves the same in a configuration like this one, but if
+                               # the target is a collection ofHCL2 templates, this is the
+                               # preferred way to invoke it.
+```
+
 Packer does not currently have the notion of a state like Terraform has. In other words,
 currently `packer init` is only in charge of installing Packer plugins.
 
