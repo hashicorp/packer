@@ -196,6 +196,8 @@ func (m *Meta) DetectBundledPlugins(handler packer.Handler) hcl.Diagnostics {
 		return nil
 	}
 
+	packer.CheckpointReporter.SetBundledUsage()
+
 	buf := &strings.Builder{}
 	buf.WriteString("This template relies on the use of plugins bundled into the Packer binary.\n")
 	buf.WriteString("The practice of bundling external plugins into Packer will be removed in an upcoming version.\n\n")
