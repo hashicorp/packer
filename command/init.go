@@ -180,7 +180,7 @@ packer {
 
 func (*InitCommand) Help() string {
 	helpText := `
-Usage: packer init [options] [config.pkr.hcl|folder/]
+Usage: packer init [options] TEMPLATE
 
   Install all the missing plugins required in a Packer config. Note that Packer
   does not have a state.
