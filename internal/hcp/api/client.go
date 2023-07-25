@@ -7,9 +7,11 @@ package api
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
@@ -44,32 +46,58 @@ func NewClient() (*Client, error) {
 		}
 	}
 
-	cl, err := httpclient.New(httpclient.Config{
+	hcpClientCfg := httpclient.Config{
 		SourceChannel: fmt.Sprintf("packer/%s", version.PackerVersion.FormattedVersion()),
-	})
+	}
+	if err := hcpClientCfg.Canonicalize(); err != nil {
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        err,
+		}
+	}
+
+	cl, err := httpclient.New(hcpClientCfg)
 	if err != nil {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
 			Err:        err,
 		}
 	}
-
 	client := &Client{
 		Packer:       packerSvc.New(cl, nil),
 		Organization: organizationSvc.New(cl, nil),
 		Project:      projectSvc.New(cl, nil),
 	}
+	// A client.Config.hcpConfig is set when calling Canonicalize on basic HCP httpclient, as on line 52.
+	// If a user sets HCP_* env. variables they will be loaded into the client via the SDK and used for any client calls.
+	// For HCP_ORGANIZATION_ID and HCP_PROJECT_ID if they are both set via env. variables the call to hcpClientCfg.Connicalize()
+	// will automatically loaded them using the FromEnv configOption.
+	//
+	// If both values are set we should have all that we need to continue so we can returned the configured client.
+	if hcpClientCfg.Profile().OrganizationID != "" && hcpClientCfg.Profile().ProjectID != "" {
+		client.OrganizationID = hcpClientCfg.Profile().OrganizationID
+		client.ProjectID = hcpClientCfg.Profile().ProjectID
 
-	if err := client.loadOrganizationID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
+		return client, nil
+	}
+
+	if client.OrganizationID == "" {
+		err := client.loadOrganizationID()
+		if err != nil {
+			return nil, &ClientError{
+				StatusCode: InvalidClientConfig,
+				Err:        err,
+			}
 		}
 	}
-	if err := client.loadProjectID(); err != nil {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        err,
+
+	if client.ProjectID == "" {
+		err := client.loadProjectID()
+		if err != nil {
+			return nil, &ClientError{
+				StatusCode: InvalidClientConfig,
+				Err:        err,
+			}
 		}
 	}
 
@@ -77,6 +105,10 @@ func NewClient() (*Client, error) {
 }
 
 func (c *Client) loadOrganizationID() error {
+	if env.HasOrganizationID() {
+		c.OrganizationID = os.Getenv(env.HCPOrganizationID)
+		return nil
+	}
 	// Get the organization ID.
 	listOrgParams := organizationSvc.NewOrganizationServiceListParams()
 	listOrgResp, err := c.Organization.OrganizationServiceList(listOrgParams, nil)
@@ -92,63 +124,81 @@ func (c *Client) loadOrganizationID() error {
 }
 
 func (c *Client) loadProjectID() error {
+	if env.HasProjectID() {
+		c.ProjectID = os.Getenv(env.HCPProjectID)
+		err := c.ValidateRegistryForProject()
+		if err != nil {
+			return fmt.Errorf("project validation for id %q responded in error: %v", c.ProjectID, err)
+		}
+		return nil
+	}
 	// Get the project using the organization ID.
 	listProjParams := projectSvc.NewProjectServiceListParams()
 	listProjParams.ScopeID = &c.OrganizationID
 	scopeType := string(rmmodels.HashicorpCloudResourcemanagerResourceIDResourceTypeORGANIZATION)
 	listProjParams.ScopeType = &scopeType
 	listProjResp, err := c.Project.ProjectServiceList(listProjParams, nil)
+
 	if err != nil {
-		return fmt.Errorf("unable to fetch project id: %v", err)
+		//For permission errors, our service principal may not have the ability
+		// to see all projects for an Org; this is the case for project-level service principals.
+		serviceErr, ok := err.(*projectSvc.ProjectServiceListDefault)
+		if !ok {
+			return fmt.Errorf("unable to fetch project list: %v", err)
+		}
+		if serviceErr.Code() == http.StatusForbidden {
+			return fmt.Errorf("unable to fetch project\n\n"+
+				"If the provided credentials are tied to a specific project try setting the %s environment variable to one you want to use.", env.HCPProjectID)
+		}
 	}
 
-	if env.HasProjectID() {
-		proj, err := findProjectByID(os.Getenv(env.HCPProjectID), listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
-	} else {
-		if len(listProjResp.Payload.Projects) > 1 {
-			log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n" +
-				"To specify which project to use, set the HCP_PROJECT_ID environment variable to the one you want to use.")
-		}
-
-		proj, err := findOldestProject(listProjResp.Payload.Projects)
-		if err != nil {
-			return err
-		}
-
-		c.ProjectID = proj.ID
+	if len(listProjResp.Payload.Projects) > 1 {
+		log.Printf("[WARNING] Multiple HCP projects found, will pick the oldest one by default\n"+
+			"To specify which project to use, set the %s environment variable to the one you want to use.", env.HCPProjectID)
 	}
 
+	proj, err := getOldestProject(listProjResp.Payload.Projects)
+	if err != nil {
+		return err
+	}
+	c.ProjectID = proj.ID
 	return nil
 }
 
-func findOldestProject(projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	if len(projs) == 0 {
+// getOldestProject retrieves the oldest project from a list based on its created_at time.
+func getOldestProject(projects []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
+	if len(projects) == 0 {
 		return nil, fmt.Errorf("no project found")
 	}
 
-	proj := projs[0]
-	for i := 1; i < len(projs); i++ {
-		nxtProj := projs[i]
-
-		if time.Time(nxtProj.CreatedAt).Before(time.Time(proj.CreatedAt)) {
-			proj = nxtProj
+	oldestTime := time.Now()
+	var oldestProj *models.HashicorpCloudResourcemanagerProject
+	for _, proj := range projects {
+		projTime := time.Time(proj.CreatedAt)
+		if projTime.Before(oldestTime) {
+			oldestProj = proj
+			oldestTime = projTime
 		}
 	}
-
-	return proj, nil
+	return oldestProj, nil
 }
 
-func findProjectByID(projID string, projs []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
-	for _, proj := range projs {
-		if proj.ID == projID {
-			return proj, nil
-		}
+// ValidateRegistryForProject validates that there is an active registry associated to the configured organization and project ids.
+// A successful validation will result in a nil response. All other response represent an invalid registry error request or a registry not found error.
+func (client *Client) ValidateRegistryForProject() error {
+	params := packer_service.NewPackerServiceGetRegistryParams()
+	params.LocationOrganizationID = client.OrganizationID
+	params.LocationProjectID = client.ProjectID
+
+	resp, err := client.Packer.PackerServiceGetRegistry(params, nil)
+	if err != nil {
+		return err
 	}
 
-	return nil, fmt.Errorf("No project %q found", projID)
+	if resp.GetPayload().Registry == nil {
+		return fmt.Errorf("No active HCP Packer registry was found for the organization %q and project %q", client.OrganizationID, client.ProjectID)
+	}
+
+	return nil
+
 }

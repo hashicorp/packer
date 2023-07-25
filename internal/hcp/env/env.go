@@ -13,6 +13,10 @@ func HasProjectID() bool {
 	return hasEnvVar(HCPProjectID)
 }
 
+func HasOrganizationID() bool {
+	return hasEnvVar(HCPOrganizationID)
+}
+
 func HasClientID() bool {
 	return hasEnvVar(HCPClientID)
 }
