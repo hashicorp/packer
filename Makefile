@@ -71,41 +71,22 @@ dev: ## Build and install a development build
 # Docker build variables and targets
 REGISTRY_NAME?=docker.io/hashicorp
 IMAGE_NAME=packer
-VERSION?=1.7.10
-IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
-IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(shell git rev-parse --short HEAD)
+IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(GIT_COMMIT)
 
-docker: docker-official
-docker-light: docker-official
-
-# Builds from the releases.hashicorp.com official binary
-docker-official:
-	docker build \
-		--tag $(IMAGE_TAG) \
-		--tag hashicorp/packer:latest \
-		--target=official \
-		--build-arg VERSION=$(VERSION) \
-		.
-
-# Builds multiarch from the releases.hashicorp.com official binary
-docker-multiarch-official:
-	docker buildx build \
-		--tag $(IMAGE_TAG) \
-		--tag hashicorp/packer:latest \
-		--target=official \
-		--build-arg VERSION=$(VERSION) \
-		--platform linux/amd64,linux/arm64 \
-		.
+docker: docker-dev
 
 # Builds from the locally generated binary in ./bin/
 # To generate the local binary, run `make dev`
-docker-dev: export GOOS=linux
-docker-dev: export GOARCH=amd64
-docker-dev: dev
+docker-dev:
+	@GOOS=linux \
+	GOARCH=amd64 \
+	CGO_ENABLED=0 \
+	go build -ldflags '$(GOLDFLAGS)' -o bin/packer .
 	@docker build \
 		--tag $(IMAGE_TAG_DEV) \
 		--target=dev \
 		.
+	@rm -f bin/packer # Clean up the Linux/amd64 binary to avoid conficts on other OS/archs
 
 lint: install-lint-deps ## Lint Go code
 	@if [ ! -z  $(PKG_NAME) ]; then \
