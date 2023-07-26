@@ -38,6 +38,14 @@
     "isHcpPackerReady": false
   },
   {
+    "title": "IPSW",
+    "path": "ipsw",
+    "repo": "torarnv/packer-plugin-ipsw",
+    "version": "latest",
+    "sourceBranch": "main",
+    "pluginTier": "community"
+  },
+  {
     "title": "Kamatera",
     "path": "kamatera",
     "repo": "kamatera/packer-plugin-kamatera",
