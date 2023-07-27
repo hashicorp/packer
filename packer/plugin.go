@@ -20,6 +20,11 @@ import (
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
+var defaultChecksummer = plugingetter.Checksummer{
+	Type: "sha256",
+	Hash: sha256.New(),
+}
+
 // PluginConfig helps load and use packer plugins
 type PluginConfig struct {
 	KnownPluginFolders []string
@@ -227,6 +232,14 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 			continue
 		}
 
+		if strings.Contains(strings.ToUpper(file), defaultChecksummer.FileExt()) {
+			log.Printf(
+				"[TRACE] Ignoring plugin match %s, which looks to be a checksum file",
+				match)
+			continue
+
+		}
+
 		// If the filename has a ".", trim up to there
 		if idx := strings.Index(file, ".exe"); idx >= 0 {
 			file = file[:idx]
@@ -383,7 +396,7 @@ func (c *PluginConfig) discoverInstalledComponents(path string) error {
 		APIVersionMajor: pluginsdk.APIVersionMajor,
 		APIVersionMinor: pluginsdk.APIVersionMinor,
 		Checksummers: []plugingetter.Checksummer{
-			{Type: "sha256", Hash: sha256.New()},
+			defaultChecksummer,
 		},
 	}
 
