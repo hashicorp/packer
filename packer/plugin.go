@@ -239,7 +239,11 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
 		log.Printf("[INFO] Discovered potential plugin: %s = %s", pluginName, match)
-		res[pluginName] = match
+		pluginPath, err := filepath.Abs(match)
+		if err != nil {
+			pluginPath = match
+		}
+		res[pluginName] = pluginPath
 	}
 
 	return res, nil
