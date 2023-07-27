@@ -68,9 +68,7 @@ jobs:
           summary: "${{ github.event.repository.name }}: ${{ github.event.issue.title }}"
           description: "${{ github.event.issue.body }}\n\n_Created from GitHub by ${{ github.actor }}._"
           # The field customfield_10089 refers to the Issue Link field in JIRA. 
-          fields: '{ "customfield_10089": "${{ github.event.issue.html_url }}", 
-                   "components": [{ "name": "OSS" }],
-                   "labels": ${{ steps.set-ticket-labels.outputs.labels }} }'
+          fields: '{ "customfield_10089": "${{ github.event.issue.html_url }}", "components": [{ "name": "OSS" }], "labels": ${{ steps.set-ticket-labels.outputs.labels }} }'
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
@@ -83,8 +81,6 @@ jobs:
               repo: context.repo.repo,
               body: `
                 This issue has been synced to JIRA for planning.
-
                 JIRA ID: [${{ steps.create-ticket.outputs.issue }}](https://hashicorp.atlassian.net/browse/${{steps.create-ticket.outputs.issue}})`
-
-
+            })
 
