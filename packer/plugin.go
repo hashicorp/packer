@@ -85,7 +85,8 @@ func (c *PluginConfig) Discover() error {
 	}
 
 	if len(c.KnownPluginFolders) == 0 {
-		c.KnownPluginFolders = PluginFolders()
+		//PluginFolders should match the call in github.com/hahicorp/packer/main.go#loadConfig
+		c.KnownPluginFolders = PluginFolders(".")
 	}
 
 	// TODO after JSON is deprecated remove support for legacy component plugins.
