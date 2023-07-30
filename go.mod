@@ -38,7 +38,7 @@ require (
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
 	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
-	github.com/pierrec/lz4 v2.6.1+incompatible
+	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/sftp v1.13.2 // indirect
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.8.2
@@ -70,6 +70,7 @@ require (
 	github.com/hashicorp/packer-plugin-vmware v1.0.7
 	github.com/hashicorp/packer-plugin-vsphere v1.1.1
 	github.com/oklog/ulid v1.3.1
+	github.com/pierrec/lz4/v4 v4.1.18
 	github.com/shirou/gopsutil/v3 v3.23.4
 )
 

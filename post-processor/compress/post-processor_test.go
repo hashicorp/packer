@@ -18,7 +18,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/builder/file"
-	"github.com/pierrec/lz4"
+	"github.com/pierrec/lz4/v4"
 )
 
 func TestDetectFilename(t *testing.T) {
