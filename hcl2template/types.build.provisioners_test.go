@@ -39,7 +39,7 @@ func TestPackerConfig_ParseProvisionerBlock(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			cfg := PackerConfig{parser: getBasicParser()}
-			f, diags := cfg.parser.ParseHCLFile(test.inputFile)
+			f, diags := cfg.Parser.ParseHCLFile(test.inputFile)
 			if diags.HasErrors() {
 				t.Errorf("failed to parse input file %s", test.inputFile)
 				for _, d := range diags {
@@ -52,7 +52,7 @@ func TestPackerConfig_ParseProvisionerBlock(t *testing.T) {
 				Column: 1,
 				Byte:   0,
 			})
-			_, diags = cfg.parser.decodeProvisioner(provBlock, nil)
+			_, diags = cfg.Parser.decodeProvisioner(provBlock, nil)
 
 			if !diags.HasErrors() {
 				if !test.expectError {

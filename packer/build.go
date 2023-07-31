@@ -65,7 +65,7 @@ type CoreBuildPostProcessor struct {
 	HCLConfig cty.Value
 	// config is JSON-specific, the configuration for the post-processor
 	// deserialised directly from the JSON template
-	config            map[string]interface{}
+	Config            map[string]interface{}
 	KeepInputArtifact *bool
 }
 
@@ -82,7 +82,7 @@ type CoreBuildProvisioner struct {
 	HCLConfig cty.Value
 	// config is JSON-specific, and is the configuration of the
 	// provisioner, with overrides
-	config []interface{}
+	Config []interface{}
 }
 
 // Returns the name of the build.
@@ -145,8 +145,8 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 
 	// Prepare the provisioners
 	for _, coreProv := range b.Provisioners {
-		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
-		copy(configs, coreProv.config)
+		configs := make([]interface{}, len(coreProv.Config), len(coreProv.Config)+1)
+		copy(configs, coreProv.Config)
 		configs = append(configs, packerConfig)
 		configs = append(configs, generatedPlaceholderMap)
 
@@ -157,8 +157,8 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 
 	// Prepare the on-error-cleanup provisioner
 	if b.CleanupProvisioner.PType != "" {
-		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+1)
-		copy(configs, b.CleanupProvisioner.config)
+		configs := make([]interface{}, len(b.CleanupProvisioner.Config), len(b.CleanupProvisioner.Config)+1)
+		copy(configs, b.CleanupProvisioner.Config)
 		configs = append(configs, packerConfig)
 		configs = append(configs, generatedPlaceholderMap)
 		err = b.CleanupProvisioner.Provisioner.Prepare(configs...)
@@ -170,7 +170,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	// Prepare the post-processors
 	for _, ppSeq := range b.PostProcessors {
 		for _, corePP := range ppSeq {
-			err = corePP.PostProcessor.Configure(corePP.config, packerConfig, generatedPlaceholderMap)
+			err = corePP.PostProcessor.Configure(corePP.Config, packerConfig, generatedPlaceholderMap)
 			if err != nil {
 				return
 			}
@@ -198,8 +198,8 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 		hookedProvisioners := make([]*HookedProvisioner, len(b.Provisioners))
 		for i, p := range b.Provisioners {
 			var pConfig interface{}
-			if len(p.config) > 0 {
-				pConfig = p.config[0]
+			if len(p.Config) > 0 {
+				pConfig = p.Config[0]
 			} else {
 				pConfig = p.HCLConfig
 			}
@@ -230,7 +230,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	if b.CleanupProvisioner.PType != "" {
 		hookedCleanupProvisioner := &HookedProvisioner{
 			b.CleanupProvisioner.Provisioner,
-			b.CleanupProvisioner.config,
+			b.CleanupProvisioner.Config,
 			b.CleanupProvisioner.PType,
 		}
 		hooks[packersdk.HookCleanupProvision] = []packersdk.Hook{&ProvisionHook{
@@ -292,8 +292,8 @@ PostProcessorRunSeqLoop:
 				builderUi.Say(fmt.Sprintf("Running post-processor: %s (type %s)", corePP.PName, corePP.PType))
 			}
 			var ts *TelemetrySpan
-			if corePP.config != nil {
-				ts = CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
+			if corePP.Config != nil {
+				ts = CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.Config)
 			} else {
 				ts = CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.HCLConfig)
 			}

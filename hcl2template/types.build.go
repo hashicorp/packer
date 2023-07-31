@@ -13,36 +13,36 @@ import (
 )
 
 const (
-	buildFromLabel = "from"
+	BuildFromLabel = "from"
 
-	buildSourceLabel = "source"
+	BuildSourceLabel = "source"
 
-	buildProvisionerLabel = "provisioner"
+	BuildProvisionerLabel = "provisioner"
 
-	buildErrorCleanupProvisionerLabel = "error-cleanup-provisioner"
+	BuildErrorCleanupProvisionerLabel = "error-cleanup-provisioner"
 
-	buildPostProcessorLabel = "post-processor"
+	BuildPostProcessorLabel = "post-processor"
 
-	buildPostProcessorsLabel = "post-processors"
+	BuildPostProcessorsLabel = "post-processors"
 
-	buildHCPPackerRegistryLabel = "hcp_packer_registry"
+	BuildHCPPackerRegistryLabel = "hcp_packer_registry"
 )
 
 var buildSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
-		{Type: buildFromLabel, LabelNames: []string{"type"}},
-		{Type: sourceLabel, LabelNames: []string{"reference"}},
-		{Type: buildProvisionerLabel, LabelNames: []string{"type"}},
-		{Type: buildErrorCleanupProvisionerLabel, LabelNames: []string{"type"}},
-		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
-		{Type: buildPostProcessorsLabel, LabelNames: []string{}},
-		{Type: buildHCPPackerRegistryLabel},
+		{Type: BuildFromLabel, LabelNames: []string{"type"}},
+		{Type: BuildSourceLabel, LabelNames: []string{"reference"}},
+		{Type: BuildProvisionerLabel, LabelNames: []string{"type"}},
+		{Type: BuildErrorCleanupProvisionerLabel, LabelNames: []string{"type"}},
+		{Type: BuildPostProcessorLabel, LabelNames: []string{"type"}},
+		{Type: BuildPostProcessorsLabel, LabelNames: []string{}},
+		{Type: BuildHCPPackerRegistryLabel},
 	},
 }
 
 var postProcessorsSchema = &hcl.BodySchema{
 	Blocks: []hcl.BlockHeaderSchema{
-		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
+		{Type: BuildPostProcessorLabel, LabelNames: []string{"type"}},
 	},
 }
 
@@ -113,7 +113,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 	// Expose build.name during parsing of pps and provisioners
 	ectx := cfg.EvalContext(BuildContext, nil)
-	ectx.Variables[buildAccessor] = cty.ObjectVal(map[string]cty.Value{
+	ectx.Variables[BuildAccessor] = cty.ObjectVal(map[string]cty.Value{
 		"name": cty.StringVal(b.Name),
 	})
 
@@ -131,11 +131,11 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 
 		if ref == NoSource ||
 			!hclsyntax.ValidIdentifier(ref.Type) ||
-			!hclsyntax.ValidIdentifier(ref.Name) {
+			!hclsyntax.ValidIdentifier(ref.SourceName) {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  "Invalid " + sourceLabel + " reference",
-				Detail: "A " + sourceLabel + " type is made of three parts that are" +
+				Summary:  "Invalid " + SourceLabel + " reference",
+				Detail: "A " + SourceLabel + " type is made of three parts that are" +
 					"split by a dot `.`; each part must start with a letter and " +
 					"may contain only letters, digits, underscores, and dashes." +
 					"A valid source reference looks like: `source.type.name`",
@@ -156,11 +156,11 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	}
 	for _, block := range content.Blocks {
 		switch block.Type {
-		case buildHCPPackerRegistryLabel:
+		case BuildHCPPackerRegistryLabel:
 			if build.HCPPackerRegistry != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
-					Summary:  fmt.Sprintf("Only one " + buildHCPPackerRegistryLabel + " is allowed"),
+					Summary:  fmt.Sprintf("Only one " + BuildHCPPackerRegistryLabel + " is allowed"),
 					Subject:  block.DefRange.Ptr(),
 				})
 				continue
@@ -171,7 +171,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				continue
 			}
 			build.HCPPackerRegistry = hcpPackerRegistry
-		case sourceLabel:
+		case SourceLabel:
 			hadSource = true
 			ref, moreDiags := p.decodeBuildSource(block)
 			diags = append(diags, moreDiags...)
@@ -179,18 +179,18 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				continue
 			}
 			build.Sources = append(build.Sources, ref)
-		case buildProvisionerLabel:
+		case BuildProvisionerLabel:
 			p, moreDiags := p.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 			build.ProvisionerBlocks = append(build.ProvisionerBlocks, p)
-		case buildErrorCleanupProvisionerLabel:
+		case BuildErrorCleanupProvisionerLabel:
 			if build.ErrorCleanupProvisionerBlock != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
-					Summary:  fmt.Sprintf("Only one " + buildErrorCleanupProvisionerLabel + " is allowed"),
+					Summary:  fmt.Sprintf("Only one " + BuildErrorCleanupProvisionerLabel + " is allowed"),
 					Subject:  block.DefRange.Ptr(),
 				})
 				continue
@@ -201,14 +201,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				continue
 			}
 			build.ErrorCleanupProvisionerBlock = p
-		case buildPostProcessorLabel:
+		case BuildPostProcessorLabel:
 			pp, moreDiags := p.decodePostProcessor(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 			build.PostProcessorsLists = append(build.PostProcessorsLists, []*PostProcessorBlock{pp})
-		case buildPostProcessorsLabel:
+		case BuildPostProcessorsLabel:
 
 			content, moreDiags := block.Body.Content(postProcessorsSchema)
 			diags = append(diags, moreDiags...)

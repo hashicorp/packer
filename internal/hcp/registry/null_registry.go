@@ -12,6 +12,10 @@ import (
 // nullRegistry is a special handler that does nothing
 type nullRegistry struct{}
 
+func NewNullRegistry() *nullRegistry {
+	return &nullRegistry{}
+}
+
 func (r nullRegistry) PopulateIteration(context.Context) error {
 	return nil
 }

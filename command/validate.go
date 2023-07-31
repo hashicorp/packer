@@ -71,9 +71,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	diags = packerStarter.Initialize(packer.InitializeOptions{
-		SkipDatasourcesExecution: !cla.EvaluateDatasources,
-	})
+	diags = packerStarter.Initialize()
 	bundledDiags := c.DetectBundledPlugins(packerStarter)
 	diags = append(bundledDiags, diags...)
 	ret = writeDiags(c.Ui, nil, diags)
@@ -81,10 +79,16 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cla.Only,
-		Except: cla.Except,
-	})
+	scheduler := NewSequentialScheduler(packerStarter).
+		withContext(ctx).
+		withSkipDatasourceExecution().
+		withUi(c.Meta.Ui)
+
+	diags = scheduler.Run()
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
 
 	fixerDiags := packerStarter.FixConfig(packer.FixConfigOptions{
 		Mode: packer.Diff,

@@ -28,7 +28,7 @@ func TestCoreConfig(t *testing.T) *CoreConfig {
 
 func TestCore(t *testing.T, c *CoreConfig) *Core {
 	core := NewCore(c)
-	err := core.Initialize(InitializeOptions{})
+	err := core.Initialize()
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

@@ -10,32 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template/repl"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 )
-
-func warningErrorsToDiags(block *hcl.Block, warnings []string, err error) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	for _, warning := range warnings {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  warning,
-			Subject:  &block.DefRange,
-			Severity: hcl.DiagWarning,
-		})
-	}
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  err.Error(),
-			Subject:  &block.DefRange,
-			Severity: hcl.DiagError,
-		})
-	}
-	return diags
-}
 
 func isDir(name string) (bool, error) {
 	s, err := os.Stat(name)
@@ -97,25 +76,6 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 	}
 
 	return hclFiles, jsonFiles, diags
-}
-
-// Convert -only and -except globs to glob.Glob instances.
-func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl.Diagnostics) {
-	var globs []glob.Glob
-	var diags hcl.Diagnostics
-
-	for _, pattern := range patterns {
-		g, err := glob.Compile(pattern)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  fmt.Sprintf("Invalid -%s pattern %s: %s", optionName, pattern, err),
-				Severity: hcl.DiagError,
-			})
-		}
-		globs = append(globs, g)
-	}
-
-	return globs, diags
 }
 
 func PrintableCtyValue(v cty.Value) string {

@@ -19,8 +19,8 @@ type DatasourceBlock struct {
 	Type string
 	Name string
 
-	value cty.Value
-	block *hcl.Block
+	Value cty.Value
+	Block *hcl.Block
 }
 
 type DatasourceRef struct {
@@ -43,10 +43,10 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	valuesMap := map[string]map[string]cty.Value{}
 
 	for ref, datasource := range *ds {
-		if datasource.value == (cty.Value{}) {
+		if datasource.Value == (cty.Value{}) {
 			diags = append(diags, &hcl.Diagnostic{
 				Summary:  fmt.Sprintf("empty value"),
-				Subject:  &datasource.block.DefRange,
+				Subject:  &datasource.Block.DefRange,
 				Severity: hcl.DiagError,
 			})
 			continue
@@ -55,7 +55,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 		if inner == nil {
 			inner = map[string]cty.Value{}
 		}
-		inner[ref.Name] = datasource.value
+		inner[ref.Name] = datasource.Value
 		res[ref.Type] = cty.MapVal(inner)
 
 		// Keeps values of different datasources from same type
@@ -65,13 +65,13 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	return res, diags
 }
 
-func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef, secondaryEvaluation bool) (packersdk.Datasource, hcl.Diagnostics) {
+func (cfg *PackerConfig) StartDatasource(dataSourceStore packer.DatasourceStore, ref DatasourceRef, secondaryEvaluation bool) (packersdk.Datasource, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	block := cfg.Datasources[ref].block
+	block := cfg.Datasources[ref].Block
 
 	if dataSourceStore == nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + dataSourceLabel + " type " + ref.Type,
+			Summary:  "Unknown " + DataSourceLabel + " type " + ref.Type,
 			Subject:  block.LabelRanges[0].Ptr(),
 			Detail:   fmt.Sprintf("packer does not currently know any data source."),
 			Severity: hcl.DiagError,
@@ -81,7 +81,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 
 	if !dataSourceStore.Has(ref.Type) {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  "Unknown " + dataSourceLabel + " type " + ref.Type,
+			Summary:  "Unknown " + DataSourceLabel + " type " + ref.Type,
 			Subject:  block.LabelRanges[0].Ptr(),
 			Detail:   fmt.Sprintf("known data sources: %v", dataSourceStore.List()),
 			Severity: hcl.DiagError,
@@ -108,7 +108,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 	var decoded cty.Value
 	var moreDiags hcl.Diagnostics
 	body := block.Body
-	decoded, moreDiags = decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
+	decoded, moreDiags = DecodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
 
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
@@ -136,7 +136,7 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagno
 	r := &DatasourceBlock{
 		Type:  block.Labels[0],
 		Name:  block.Labels[1],
-		block: block,
+		Block: block,
 	}
 
 	if !hclsyntax.ValidIdentifier(r.Type) {

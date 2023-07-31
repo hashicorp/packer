@@ -19,9 +19,9 @@ import (
 // This permits using "${build.ID}" values for example.
 type HCL2PostProcessor struct {
 	PostProcessor      packersdk.PostProcessor
-	postProcessorBlock *PostProcessorBlock
-	evalContext        *hcl.EvalContext
-	builderVariables   map[string]string
+	PostProcessorBlock *PostProcessorBlock
+	EvalContext        *hcl.EvalContext
+	BuilderVariables   map[string]string
 }
 
 func (p *HCL2PostProcessor) ConfigSpec() hcldec.ObjectSpec {
@@ -30,12 +30,12 @@ func (p *HCL2PostProcessor) ConfigSpec() hcldec.ObjectSpec {
 
 func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error {
 	var diags hcl.Diagnostics
-	ectx := p.evalContext
+	ectx := p.EvalContext
 	if len(buildVars) > 0 {
-		ectx = p.evalContext.NewChild()
+		ectx = p.EvalContext.NewChild()
 		buildValues := map[string]cty.Value{}
-		if !p.evalContext.Variables[buildAccessor].IsNull() {
-			buildValues = p.evalContext.Variables[buildAccessor].AsValueMap()
+		if !p.EvalContext.Variables[BuildAccessor].IsNull() {
+			buildValues = p.EvalContext.Variables[BuildAccessor].AsValueMap()
 		}
 		for k, v := range buildVars {
 			val, err := ConvertPluginConfigValueToHCLValue(v)
@@ -46,11 +46,11 @@ func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error 
 			buildValues[k] = val
 		}
 		ectx.Variables = map[string]cty.Value{
-			buildAccessor: cty.ObjectVal(buildValues),
+			BuildAccessor: cty.ObjectVal(buildValues),
 		}
 	}
 
-	flatPostProcessorCfg, moreDiags := decodeHCL2Spec(p.postProcessorBlock.HCL2Ref.Rest, ectx, p.PostProcessor)
+	flatPostProcessorCfg, moreDiags := DecodeHCL2Spec(p.PostProcessorBlock.HCL2Ref.Rest, ectx, p.PostProcessor)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return diags
@@ -62,7 +62,7 @@ func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error 
 	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
 	flatPostProcessorCfg = hcl2shim.WriteUnknownPlaceholderValues(flatPostProcessorCfg)
 
-	return p.PostProcessor.Configure(p.builderVariables, flatPostProcessorCfg)
+	return p.PostProcessor.Configure(p.BuilderVariables, flatPostProcessorCfg)
 }
 
 func (p *HCL2PostProcessor) Configure(args ...interface{}) error {

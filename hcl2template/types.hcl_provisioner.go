@@ -19,10 +19,10 @@ import (
 // This permits using "${build.ID}" values for example.
 type HCL2Provisioner struct {
 	Provisioner      packersdk.Provisioner
-	provisionerBlock *ProvisionerBlock
-	evalContext      *hcl.EvalContext
-	builderVariables map[string]string
-	override         map[string]interface{}
+	ProvisionerBlock *ProvisionerBlock
+	EvalContext      *hcl.EvalContext
+	BuilderVariables map[string]string
+	Override         map[string]interface{}
 }
 
 func (p *HCL2Provisioner) ConfigSpec() hcldec.ObjectSpec {
@@ -31,12 +31,12 @@ func (p *HCL2Provisioner) ConfigSpec() hcldec.ObjectSpec {
 
 func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 	var diags hcl.Diagnostics
-	ectx := p.evalContext
+	ectx := p.EvalContext
 	if len(buildVars) > 0 {
-		ectx = p.evalContext.NewChild()
+		ectx = p.EvalContext.NewChild()
 		buildValues := map[string]cty.Value{}
-		if !p.evalContext.Variables[buildAccessor].IsNull() {
-			buildValues = p.evalContext.Variables[buildAccessor].AsValueMap()
+		if !p.EvalContext.Variables[BuildAccessor].IsNull() {
+			buildValues = p.EvalContext.Variables[BuildAccessor].AsValueMap()
 		}
 		for k, v := range buildVars {
 			val, err := ConvertPluginConfigValueToHCLValue(v)
@@ -47,11 +47,11 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 			buildValues[k] = val
 		}
 		ectx.Variables = map[string]cty.Value{
-			buildAccessor: cty.ObjectVal(buildValues),
+			BuildAccessor: cty.ObjectVal(buildValues),
 		}
 	}
 
-	flatProvisionerCfg, moreDiags := decodeHCL2Spec(p.provisionerBlock.HCL2Ref.Rest, ectx, p.Provisioner)
+	flatProvisionerCfg, moreDiags := DecodeHCL2Spec(p.ProvisionerBlock.HCL2Ref.Rest, ectx, p.Provisioner)
 	diags = append(diags, moreDiags...)
 	if diags.HasErrors() {
 		return diags
@@ -63,7 +63,7 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 	// We don't do this before so we can validate if variable types matches correctly on decodeHCL2Spec.
 	flatProvisionerCfg = hcl2shim.WriteUnknownPlaceholderValues(flatProvisionerCfg)
 
-	return p.Provisioner.Prepare(p.builderVariables, flatProvisionerCfg, p.override)
+	return p.Provisioner.Prepare(p.BuilderVariables, flatProvisionerCfg, p.Override)
 }
 
 func (p *HCL2Provisioner) Prepare(args ...interface{}) error {

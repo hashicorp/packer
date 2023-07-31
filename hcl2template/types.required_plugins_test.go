@@ -343,7 +343,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := tt.cfg
-			file, diags := cfg.parser.ParseHCL([]byte(tt.requirePlugins), "required_plugins.pkr.hcl")
+			file, diags := cfg.Parser.ParseHCL([]byte(tt.requirePlugins), "required_plugins.pkr.hcl")
 			if len(diags) > 0 {
 				t.Fatal(diags)
 			}
@@ -351,7 +351,7 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 				t.Fatal(diags)
 			}
 
-			rest, diags := cfg.parser.ParseHCL([]byte(tt.restOfTemplate), "rest.pkr.hcl")
+			rest, diags := cfg.Parser.ParseHCL([]byte(tt.restOfTemplate), "rest.pkr.hcl")
 			if len(diags) > 0 {
 				t.Fatal(diags)
 			}

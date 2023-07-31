@@ -163,7 +163,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	core := hdl.(*packer.Core)
-	if err := core.Initialize(packer.InitializeOptions{}); err != nil {
+	if err := core.Initialize(); err != nil {
 		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
 	}
 	tpl := core.Template

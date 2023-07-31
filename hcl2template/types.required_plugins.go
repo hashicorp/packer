@@ -21,7 +21,7 @@ func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics
 
 	for _, block := range content.Blocks {
 		switch block.Type {
-		case packerLabel:
+		case PackerLabel:
 			content, contentDiags := block.Body.Content(packerBlockSchema)
 			diags = append(diags, contentDiags...)
 
@@ -61,27 +61,27 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Di
 	for _, block := range content.Blocks {
 
 		switch block.Type {
-		case sourceLabel:
+		case SourceLabel:
 			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Builder, block)...)
-		case dataSourceLabel:
+		case DataSourceLabel:
 			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Datasource, block)...)
-		case buildLabel:
+		case BuildLabel:
 			content, _, moreDiags := block.Body.PartialContent(buildSchema)
 			diags = append(diags, moreDiags...)
 			for _, block := range content.Blocks {
 
 				switch block.Type {
-				case buildProvisionerLabel:
+				case BuildProvisionerLabel:
 					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Provisioner, block)...)
-				case buildPostProcessorLabel:
+				case BuildPostProcessorLabel:
 					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
-				case buildPostProcessorsLabel:
+				case BuildPostProcessorsLabel:
 					content, _, moreDiags := block.Body.PartialContent(postProcessorsSchema)
 					diags = append(diags, moreDiags...)
 					for _, block := range content.Blocks {
 
 						switch block.Type {
-						case buildPostProcessorLabel:
+						case BuildPostProcessorLabel:
 							diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
 						}
 					}
@@ -103,10 +103,10 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 	componentName := block.Labels[0]
 
 	store := map[ComponentKind]packer.BasicStore{
-		Builder:       cfg.parser.PluginConfig.Builders,
-		PostProcessor: cfg.parser.PluginConfig.PostProcessors,
-		Provisioner:   cfg.parser.PluginConfig.Provisioners,
-		Datasource:    cfg.parser.PluginConfig.DataSources,
+		Builder:       cfg.Parser.PluginConfig.Builders,
+		PostProcessor: cfg.Parser.PluginConfig.PostProcessors,
+		Provisioner:   cfg.Parser.PluginConfig.Provisioners,
+		Datasource:    cfg.Parser.PluginConfig.DataSources,
 	}[k]
 	if store.Has(componentName) {
 		// If any core or pre-loaded plugin defines the `happycloud-uploader`
@@ -116,10 +116,10 @@ func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, blo
 	}
 
 	redirect := map[ComponentKind]map[string]string{
-		Builder:       cfg.parser.PluginConfig.BuilderRedirects,
-		PostProcessor: cfg.parser.PluginConfig.PostProcessorRedirects,
-		Provisioner:   cfg.parser.PluginConfig.ProvisionerRedirects,
-		Datasource:    cfg.parser.PluginConfig.DatasourceRedirects,
+		Builder:       cfg.Parser.PluginConfig.BuilderRedirects,
+		PostProcessor: cfg.Parser.PluginConfig.PostProcessorRedirects,
+		Provisioner:   cfg.Parser.PluginConfig.ProvisionerRedirects,
+		Datasource:    cfg.Parser.PluginConfig.DatasourceRedirects,
 	}[k][componentName]
 
 	if redirect == "" {

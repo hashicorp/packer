@@ -5,12 +5,10 @@ package hcl2template
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -74,7 +72,7 @@ type ProvisionerBlock struct {
 }
 
 func (p *ProvisionerBlock) String() string {
-	return fmt.Sprintf(buildProvisionerLabel+"-block %q %q", p.PType, p.PName)
+	return fmt.Sprintf(BuildProvisionerLabel+"-block %q %q", p.PType, p.PName)
 }
 
 func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*ProvisionerBlock, hcl.Diagnostics) {
@@ -164,50 +162,4 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*Pr
 	}
 
 	return provisioner, diags
-}
-
-func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *ProvisionerBlock, ectx *hcl.EvalContext) (packersdk.Provisioner, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-
-	provisioner, err := cfg.parser.PluginConfig.Provisioners.Start(pb.PType)
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf("failed loading %s", pb.PType),
-			Subject:  pb.HCL2Ref.LabelsRanges[0].Ptr(),
-			Detail:   err.Error(),
-		})
-		return nil, diags
-	}
-
-	builderVars := source.builderVariables()
-	builderVars["packer_core_version"] = cfg.CorePackerVersionString
-	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
-	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
-	builderVars["packer_on_error"] = cfg.onError
-
-	hclProvisioner := &HCL2Provisioner{
-		Provisioner:      provisioner,
-		provisionerBlock: pb,
-		evalContext:      ectx,
-		builderVariables: builderVars,
-	}
-
-	if pb.Override != nil {
-		if override, ok := pb.Override[source.name()]; ok {
-			hclProvisioner.override = override.(map[string]interface{})
-		}
-	}
-
-	err = hclProvisioner.HCL2Prepare(nil)
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf("Failed preparing %s", pb),
-			Detail:   err.Error(),
-			Subject:  pb.HCL2Ref.DefRange.Ptr(),
-		})
-		return nil, diags
-	}
-	return hclProvisioner, diags
 }

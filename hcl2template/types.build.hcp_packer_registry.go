@@ -45,7 +45,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 	if len(b.Description) > 255 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf(buildHCPPackerRegistryLabel + ".description should have a maximum length of 255 characters"),
+			Summary:  fmt.Sprintf(BuildHCPPackerRegistryLabel + ".description should have a maximum length of 255 characters"),
 			Subject:  block.DefRange.Ptr(),
 		})
 		return nil, diags
@@ -57,7 +57,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 	if len(b.Labels) > 0 && len(b.BucketLabels) > 0 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  fmt.Sprintf("%s.labels and %[1]s.bucket_labels are mutually exclusive; please use the recommended argument %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
+			Summary:  fmt.Sprintf("%s.labels and %[1]s.bucket_labels are mutually exclusive; please use the recommended argument %[1]s.bucket_labels", BuildHCPPackerRegistryLabel),
 			Subject:  block.DefRange.Ptr(),
 		})
 		return nil, diags
@@ -66,7 +66,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 	if len(b.Labels) > 0 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
-			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in the next minor release; please use %[1]s.bucket_labels", buildHCPPackerRegistryLabel),
+			Summary:  fmt.Sprintf("the argument %s.labels has been deprecated and will be removed in the next minor release; please use %[1]s.bucket_labels", BuildHCPPackerRegistryLabel),
 		})
 
 		b.BucketLabels = b.Labels

@@ -17,7 +17,7 @@ func sourceRefFromString(in string) SourceRef {
 		args = args[1:]
 	}
 	return SourceRef{
-		Type: args[0],
-		Name: args[1],
+		Type:       args[0],
+		SourceName: args[1],
 	}
 }
