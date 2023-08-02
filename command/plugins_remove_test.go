@@ -1,6 +1,8 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
+//go:build amd64 && (darwin || windows || linux)
+
 package command
 
 import (
