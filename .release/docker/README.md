@@ -1,6 +1,6 @@
 # Packer Docker Container
 
-The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com. 
+The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release`, is built in CI and makes use of CI-built binaries. The `official` docker image is built using the official binaries from releases.hashicorp.com.
 
 ## Build
 
@@ -17,14 +17,14 @@ development or release modes:
 This repository automatically builds containers for using the
 [`packer`](https://packer.io) command line program. It contains two distinct
 varieties of build, an `official` version, aka `light`, which just contains the binary.
-It also contains a `dev` version, aka `full`, which compiles the binary from source 
+It also contains a `dev` version, aka `full`, which compiles the binary from source
 inside the container before exposing it for use.
 
 ##### `official`
 
 The `official` version of this container will copy the current stable version of
 the binary, taken from releases.hashicorp.com, into the container. It will also
-set it for use as the default entrypoint. This will be the best option for most uses, 
+set it for use as the default entrypoint. This will be the best option for most uses,
 especially if you are just looking to run the binary from a container. This image
 is tagged as both `official` and `light`.
 The `latest` tag on DockerHub also points to this version.
@@ -64,8 +64,8 @@ docker run \
 
 ~> **Note**: packer init is available from Packer v1.7.0 and later
 
-The command will mount the working directory (`pwd`) to `workspace`, which is the working directory (`-w`) inside the container. 
-Any plugin installed with `packer init` will be installed under the directory specified under the `PACKER_PLUGIN_PATH` environment variable. `PACKER_PLUGIN_PATH` must be set to a path inside the volume mount so that plugins can become available at `packer build`. 
+The command will mount the working directory (`pwd`) to `workspace`, which is the working directory (`-w`) inside the container.
+Any plugin installed with `packer init` will be installed under the directory specified under the `PACKER_PLUGIN_PATH` environment variable. `PACKER_PLUGIN_PATH` must be set to a path inside the volume mount so that plugins can become available at `packer build`.
 
 Running `packer build`
 ```shell
