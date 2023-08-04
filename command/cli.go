@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/packer/command/enumflag"
 	kvflag "github.com/hashicorp/packer/command/flag-kv"
 	sliceflag "github.com/hashicorp/packer/command/flag-slice"
+	"github.com/hashicorp/packer/command/schedulers"
 )
 
 //go:generate enumer -type configType -trimprefix ConfigType -transform snake
@@ -102,6 +103,22 @@ type BuildArgs struct {
 	OnError                             string
 }
 
+func (ba BuildArgs) ToSchedulerOptions() schedulers.SchedulerOptions {
+	opts := schedulers.SchedulerOptions{
+		Only:            ba.Only,
+		Except:          ba.Except,
+		Debug:           ba.Debug,
+		Force:           ba.Force,
+		Color:           ba.Color,
+		TimestampUi:     ba.TimestampUi,
+		MachineReadable: ba.MachineReadable,
+		ParallelBuilds:  ba.ParallelBuilds,
+		OnError:         ba.OnError,
+	}
+
+	return opts
+}
+
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
 
@@ -149,6 +166,15 @@ type ValidateArgs struct {
 	MetaArgs
 	SyntaxOnly, NoWarnUndeclaredVar bool
 	EvaluateDatasources             bool
+}
+
+func (va ValidateArgs) ToSchedulerOptions() schedulers.SchedulerOptions {
+	opts := schedulers.SchedulerOptions{
+		Only:   va.Only,
+		Except: va.Except,
+	}
+
+	return opts
 }
 
 func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {

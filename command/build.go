@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/command/schedulers"
 
 	"github.com/posener/complete"
 )
@@ -91,12 +92,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	scheduler := NewSequentialScheduler(packerStarter).
-		withContext(buildCtx).
-		withUi(c.Meta.Ui).
-		withBuildArgs(cla).
-		withBuilds().
-		withHCPRegistry()
+	scheduler := schedulers.NewSequentialScheduler(packerStarter, cla.ToSchedulerOptions()).
+		WithContext(buildCtx).
+		WithUi(c.Meta.Ui).
+		WithBuilds().
+		WithHCPRegistry()
 
 	diags = scheduler.Run()
 

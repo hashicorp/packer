@@ -7,6 +7,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/hashicorp/packer/command/schedulers"
 	"github.com/hashicorp/packer/packer"
 
 	"github.com/posener/complete"
@@ -79,10 +80,10 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	scheduler := NewSequentialScheduler(packerStarter).
-		withContext(ctx).
-		withSkipDatasourceExecution().
-		withUi(c.Meta.Ui)
+	scheduler := schedulers.NewSequentialScheduler(packerStarter, cla.ToSchedulerOptions()).
+		WithContext(ctx).
+		WithSkipDatasourceExecution().
+		WithUi(c.Meta.Ui)
 
 	diags = scheduler.Run()
 	ret = writeDiags(c.Ui, nil, diags)

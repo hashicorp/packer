@@ -1,4 +1,4 @@
-package command
+package schedulers
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ import (
 )
 
 type SequentialScheduler struct {
-	Ui                       packersdk.Ui
+	ui                       packersdk.Ui
 	handler                  packer.Handler
 	skipDatasourcesExecution bool
 	RunBuilds                bool
@@ -42,98 +42,39 @@ type SequentialScheduler struct {
 
 	useHCP      bool
 	hcpRegistry registry.Registry
-	opts        MetaOptions
+
+	options SchedulerOptions
 }
 
-type MetaOptions struct {
-	// Common
-	Path                string
-	Only, Except        []string
-	Vars                map[string]string
-	VarFiles            []string
-	ConfigType          configType
-	WarnOnUndeclaredVar bool
-
-	// Build-specific
-	Debug, Force                        bool
-	Color, TimestampUi, MachineReadable bool
-	ParallelBuilds                      int64
-	OnError                             string
-}
-
-func (mo *MetaOptions) fillOptsFromMetaArgs(args MetaArgs) {
-	mo.Path = args.Path
-	mo.Only = args.Only
-	mo.Except = args.Except
-	mo.VarFiles = args.VarFiles
-	mo.Vars = args.Vars
-	mo.ConfigType = args.ConfigType
-	mo.WarnOnUndeclaredVar = args.WarnOnUndeclaredVar
-}
-
-func (mo *MetaOptions) fillOptsFromBuildArgs(args BuildArgs) {
-	mo.fillOptsFromMetaArgs(args.MetaArgs)
-
-	mo.Debug = args.Debug
-	mo.Force = args.Force
-	mo.Color = args.Color
-	mo.TimestampUi = args.TimestampUi
-	mo.MachineReadable = args.MachineReadable
-	mo.ParallelBuilds = args.ParallelBuilds
-	mo.OnError = args.OnError
-}
-
-func (mo MetaOptions) toPackerBuildOpts() packer.GetBuildsOptions {
-	return packer.GetBuildsOptions{
-		Only:    mo.Only,
-		Except:  mo.Except,
-		Debug:   mo.Debug,
-		Force:   mo.Force,
-		OnError: mo.OnError,
-	}
-}
-
-func NewOptsFromBuildArgs(buildArgs BuildArgs) MetaOptions {
-	opts := &MetaOptions{}
-
-	opts.fillOptsFromBuildArgs(buildArgs)
-
-	return *opts
-}
-
-func NewSequentialScheduler(h packer.Handler) *SequentialScheduler {
+func NewSequentialScheduler(h packer.Handler, opts SchedulerOptions) *SequentialScheduler {
 	return &SequentialScheduler{
 		handler: h,
+		options: opts,
 	}
 }
 
-func (s *SequentialScheduler) withBuilds() *SequentialScheduler {
+func (s *SequentialScheduler) WithBuilds() *SequentialScheduler {
 	s.RunBuilds = true
 	return s
 }
 
-func (s *SequentialScheduler) withBuildArgs(args *BuildArgs) *SequentialScheduler {
-	s.opts = NewOptsFromBuildArgs(*args)
-	return s
-}
-
-func (s *SequentialScheduler) withHCPRegistry() *SequentialScheduler {
+func (s *SequentialScheduler) WithHCPRegistry() *SequentialScheduler {
 	s.useHCP = true
 	return s
 }
 
-func (s *SequentialScheduler) withSkipDatasourceExecution() *SequentialScheduler {
+func (s *SequentialScheduler) WithSkipDatasourceExecution() *SequentialScheduler {
 	s.skipDatasourcesExecution = true
 	return s
 }
 
-func (s *SequentialScheduler) withContext(ctx context.Context) *SequentialScheduler {
+func (s *SequentialScheduler) WithContext(ctx context.Context) *SequentialScheduler {
 	s.context = ctx
 	return s
 }
 
-func (s *SequentialScheduler) withUi(ui packersdk.Ui) *SequentialScheduler {
-	s.Ui = ui
+func (s *SequentialScheduler) WithUi(ui packersdk.Ui) *SequentialScheduler {
+	s.ui = ui
 	return s
 }
 
@@ -156,7 +97,7 @@ func (s *SequentialScheduler) Run() hcl.Diagnostics {
 	}
 
 	if s.useHCP {
-		s.hcpRegistry, diags = registry.New(s.handler, s.Ui)
+		s.hcpRegistry, diags = registry.New(s.handler, s.ui)
 		if diags.HasErrors() {
 			return diags
 		}
@@ -313,10 +254,8 @@ func initializeBlocks(cfg *hcl2template.PackerConfig) hcl.Diagnostics {
 }
 
 func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostics {
-	cla := s.opts
-
-	if cla.Debug {
-		s.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
+	if s.options.Debug {
+		s.ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
 
 	// Compile all the UIs for the builds
@@ -329,10 +268,10 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 	}
 	buildUis := make(map[packersdk.Build]packersdk.Ui)
 	for i := range builds {
-		ui := s.Ui
-		if cla.Color {
+		ui := s.ui
+		if s.options.Color {
 			// Only set up UI colors if -machine-readable isn't set.
-			if _, ok := s.Ui.(*packer.MachineReadableUi); !ok {
+			if _, ok := s.ui.(*packer.MachineReadableUi); !ok {
 				ui = &packer.ColoredUi{
 					Color: colors[i%len(colors)],
 					Ui:    ui,
@@ -340,12 +279,12 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 				ui.Say(fmt.Sprintf("%s: output will be in this color.", builds[i].Name()))
 				if i+1 == len(builds) {
 					// Add a newline between the color output and the actual output
-					s.Ui.Say("")
+					s.ui.Say("")
 				}
 			}
 		}
 		// Now add timestamps if requested
-		if cla.TimestampUi {
+		if s.options.TimestampUi {
 			ui = &packer.TimestampedUi{
 				Ui: ui,
 			}
@@ -353,9 +292,9 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 
 		buildUis[builds[i]] = ui
 	}
-	log.Printf("Build debug mode: %v", cla.Debug)
-	log.Printf("Force build: %v", cla.Force)
-	log.Printf("On error: %v", cla.OnError)
+	log.Printf("Build debug mode: %v", s.options.Debug)
+	log.Printf("Force build: %v", s.options.Force)
+	log.Printf("On error: %v", s.options.OnError)
 
 	if len(builds) == 0 {
 		return hcl.Diagnostics{
@@ -368,6 +307,8 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 			},
 		}
 	}
+
+	var diags hcl.Diagnostics
 
 	// Get the start of the build command
 	buildCommandStart := time.Now()
@@ -383,7 +324,7 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 		sync.RWMutex
 		m map[string]error
 	}{m: make(map[string]error)}
-	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
+	limitParallel := semaphore.NewWeighted(s.options.ParallelBuilds)
 	for i := range builds {
 		if err := s.context.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -420,14 +361,12 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 					ui.Say(fmt.Sprintf("skipping already done build %q", name))
 					return
 				}
-				writeDiags(s.Ui, nil, hcl.Diagnostics{
-					&hcl.Diagnostic{
-						Summary: fmt.Sprintf(
-							"hcp: failed to start build %q",
-							name),
-						Severity: hcl.DiagError,
-						Detail:   err.Error(),
-					},
+				diags = append(diags, &hcl.Diagnostic{
+					Summary: fmt.Sprintf(
+						"hcp: failed to start build %q",
+						name),
+					Severity: hcl.DiagError,
+					Detail:   err.Error(),
 				})
 				return
 			}
@@ -446,14 +385,12 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 				runArtifacts,
 				err)
 			if hcperr != nil {
-				writeDiags(s.Ui, nil, hcl.Diagnostics{
-					&hcl.Diagnostic{
-						Summary: fmt.Sprintf(
-							"failed to complete HCP-enabled build %q",
-							name),
-						Severity: hcl.DiagError,
-						Detail:   hcperr.Error(),
-					},
+				diags = append(diags, &hcl.Diagnostic{
+					Summary: fmt.Sprintf(
+						"failed to complete HCP-enabled build %q",
+						name),
+					Severity: hcl.DiagError,
+					Detail:   hcperr.Error(),
 				})
 			}
 
@@ -472,12 +409,12 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 			}
 		}()
 
-		if cla.Debug {
+		if s.options.Debug {
 			log.Printf("Debug enabled, so waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
 
-		if cla.ParallelBuilds == 1 {
+		if s.options.ParallelBuilds == 1 {
 			log.Printf("Parallelization disabled, waiting for build to finish: %s", b.Name())
 			wg.Wait()
 		}
@@ -492,7 +429,7 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 	buildCommandEnd := time.Now()
 	buildCommandDuration := buildCommandEnd.Sub(buildCommandStart)
 	fmtBuildCommandDuration := durafmt.Parse(buildCommandDuration).LimitFirstN(2)
-	s.Ui.Say(fmt.Sprintf("\n==> Wait completed after %s", fmtBuildCommandDuration))
+	s.ui.Say(fmt.Sprintf("\n==> Wait completed after %s", fmtBuildCommandDuration))
 
 	if err := s.context.Err(); err != nil {
 		return hcl.Diagnostics{
@@ -505,29 +442,29 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 	}
 
 	if len(errs.m) > 0 {
-		s.Ui.Machine("error-count", strconv.FormatInt(int64(len(errs.m)), 10))
+		s.ui.Machine("error-count", strconv.FormatInt(int64(len(errs.m)), 10))
 
-		s.Ui.Error("\n==> Some builds didn't complete successfully and had errors:")
+		s.ui.Error("\n==> Some builds didn't complete successfully and had errors:")
 		for name, err := range errs.m {
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
-				Ui:     s.Ui,
+				Ui:     s.ui,
 			}
 
 			ui.Machine("error", err.Error())
 
-			s.Ui.Error(fmt.Sprintf("--> %s: %s", name, err))
+			s.ui.Error(fmt.Sprintf("--> %s: %s", name, err))
 		}
 	}
 
 	if len(artifacts.m) > 0 {
-		s.Ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
+		s.ui.Say("\n==> Builds finished. The artifacts of successful builds are:")
 		for name, buildArtifacts := range artifacts.m {
 			// Create a UI for the machine readable stuff to be targeted
 			ui := &packer.TargetedUI{
 				Target: name,
-				Ui:     s.Ui,
+				Ui:     s.ui,
 			}
 
 			// Machine-readable helpful
@@ -562,16 +499,16 @@ func (s *SequentialScheduler) runBuilds(builds []packersdk.Build) hcl.Diagnostic
 				}
 
 				ui.Machine("artifact", iStr, "end")
-				s.Ui.Say(message.String())
+				s.ui.Say(message.String())
 
 			}
 
 		}
 	} else {
-		s.Ui.Say("\n==> Builds finished but no artifacts were created.")
+		s.ui.Say("\n==> Builds finished but no artifacts were created.")
 	}
 
-	return nil
+	return diags
 }
 
 func (s *SequentialScheduler) EvaluateVariables() hcl.Diagnostics {
@@ -597,9 +534,9 @@ This is likely a Packer bug, please report this so the team can take a look at i
 func (s *SequentialScheduler) GetBuilds() ([]packersdk.Build, hcl.Diagnostics) {
 	switch s.handler.(type) {
 	case *packer.Core:
-		return s.jsonGetBuilds(s.opts.toPackerBuildOpts())
+		return s.jsonGetBuilds(s.options.toPackerBuildOpts())
 	case *hcl2template.PackerConfig:
-		return s.hcl2GetBuilds(s.opts.toPackerBuildOpts())
+		return s.hcl2GetBuilds(s.options.toPackerBuildOpts())
 	}
 
 	return nil, hcl.Diagnostics{
