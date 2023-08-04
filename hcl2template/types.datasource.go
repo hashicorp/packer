@@ -108,7 +108,7 @@ func (cfg *PackerConfig) StartDatasource(dataSourceStore packer.DatasourceStore,
 	var decoded cty.Value
 	var moreDiags hcl.Diagnostics
 	body := block.Body
-	decoded, moreDiags = DecodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
+	decoded, moreDiags = DecodeHCL2Spec(body, cfg.EvalContext(nil), datasource)
 
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {

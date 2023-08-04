@@ -94,7 +94,7 @@ const (
 // EvalContext returns the *hcl.EvalContext that will be passed to an hcl
 // decoder in order to tell what is the actual value of a var or a local and
 // the list of defined functions.
-func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.Value) *hcl.EvalContext {
+func (cfg *PackerConfig) EvalContext(variables map[string]cty.Value) *hcl.EvalContext {
 	inputVariables := cfg.InputVariables.Values()
 	localVariables := cfg.LocalVariables.Values()
 	ectx := &hcl.EvalContext{
@@ -131,11 +131,8 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 	// order.
 	// For now, don't add DataSources if there's a NilContext, which gets
 	// used with packer console.
-	switch ctx {
-	case LocalContext, BuildContext, DatasourceContext:
-		datasourceVariables, _ := cfg.Datasources.Values()
-		ectx.Variables[DataAccessor] = cty.ObjectVal(datasourceVariables)
-	}
+	datasourceVariables, _ := cfg.Datasources.Values()
+	ectx.Variables[DataAccessor] = cty.ObjectVal(datasourceVariables)
 
 	for k, v := range variables {
 		ectx.Variables[k] = v
@@ -343,7 +340,7 @@ func (p *PackerConfig) handleEval(line string) (out string, exit bool, diags hcl
 		return "", false, diags
 	}
 
-	val, valueDiags := expr.Value(p.EvalContext(NilContext, nil))
+	val, valueDiags := expr.Value(p.EvalContext(nil))
 	diags = append(diags, valueDiags...)
 	if valueDiags.HasErrors() {
 		return "", false, diags

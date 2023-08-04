@@ -98,7 +98,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	}
 
 	body := block.Body
-	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
+	diags := gohcl.DecodeBody(body, cfg.EvalContext(nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
@@ -112,7 +112,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	build.HCL2Ref.DefRange = block.DefRange
 
 	// Expose build.name during parsing of pps and provisioners
-	ectx := cfg.EvalContext(BuildContext, nil)
+	ectx := cfg.EvalContext(nil)
 	ectx.Variables[BuildAccessor] = cty.ObjectVal(map[string]cty.Value{
 		"name": cty.StringVal(b.Name),
 	})

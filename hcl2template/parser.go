@@ -305,7 +305,7 @@ func (p *Parser) ParseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	body := f.Body
-	body = dynblock.Expand(body, cfg.EvalContext(DatasourceContext, nil))
+	body = dynblock.Expand(body, cfg.EvalContext(nil))
 	content, moreDiags := body.Content(configSchema)
 	diags = append(diags, moreDiags...)
 
