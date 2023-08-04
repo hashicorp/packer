@@ -222,7 +222,7 @@ jobs:
           instructions: |-
             go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -tags netcgo -trimpath -buildvcs=false
 
-  build-docker:
+  build-docker-light:
     name: Docker light ${{ matrix.arch }} build
     needs:
       - set-product-version
@@ -251,3 +251,31 @@ jobs:
           dev_tags: |
             docker.io/hashicorppreview/${{ env.REPO_NAME }}:${{ env.version }}
             docker.io/hashicorppreview/${{ env.REPO_NAME }}:${{ env.version }}-${{ github.sha }}
+
+  build-docker-full:
+    name: Docker full ${{ matrix.arch }} build
+    needs:
+      - set-product-version
+      - build-linux
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [ "arm", "arm64", "386", "amd64" ]
+    env:
+      version: ${{ needs.set-product-version.outputs.product-version }}
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - name: Docker Build (Action)
+        uses: hashicorp/actions-docker-build@v1
+        with:
+          version: ${{ env.version }}
+          target: release-full
+          arch: ${{ matrix.arch }}
+          tags: |
+            docker.io/hashicorp/${{ env.REPO_NAME }}:full
+            docker.io/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:full
+            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
+          dev_tags: |
+            docker.io/hashicorppreview/${{ env.REPO_NAME }}:full-${{ env.version }}
+            docker.io/hashicorppreview/${{ env.REPO_NAME }}:full-${{ env.version }}-${{ github.sha }}
