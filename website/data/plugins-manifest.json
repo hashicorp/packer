@@ -373,5 +373,12 @@
     "repo": "hashicorp/packer-plugin-yandex",
     "version": "latest",
     "pluginTier": "community"
+  },
+  {
+    "title": "Ksyun",
+    "path": "ksyun",
+    "repo": "kingsoftcloud/packer-plugin-ksyun",
+    "pluginTier": "community",
+    "version": "latest"
   }
 ]
