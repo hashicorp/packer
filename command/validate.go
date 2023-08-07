@@ -7,7 +7,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/command/schedulers"
+	sequential "github.com/hashicorp/packer/command/schedulers/sequential"
 	"github.com/hashicorp/packer/packer"
 
 	"github.com/posener/complete"
@@ -80,7 +80,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	scheduler := schedulers.NewSequentialScheduler(packerStarter, cla.ToSchedulerOptions()).
+	scheduler := sequential.NewSequentialScheduler(packerStarter, cla.ToSchedulerOptions()).
 		WithContext(ctx).
 		WithSkipDatasourceExecution().
 		WithUi(c.Meta.Ui)

@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/packer/command/enumflag"
 	kvflag "github.com/hashicorp/packer/command/flag-kv"
 	sliceflag "github.com/hashicorp/packer/command/flag-slice"
-	"github.com/hashicorp/packer/command/schedulers"
+	"github.com/hashicorp/packer/command/schedulers/opts"
 )
 
 //go:generate enumer -type configType -trimprefix ConfigType -transform snake
@@ -103,8 +103,8 @@ type BuildArgs struct {
 	OnError                             string
 }
 
-func (ba BuildArgs) ToSchedulerOptions() schedulers.SchedulerOptions {
-	opts := schedulers.SchedulerOptions{
+func (ba BuildArgs) ToSchedulerOptions() opts.SchedulerOptions {
+	opts := opts.SchedulerOptions{
 		Only:            ba.Only,
 		Except:          ba.Except,
 		Debug:           ba.Debug,
@@ -168,8 +168,8 @@ type ValidateArgs struct {
 	EvaluateDatasources             bool
 }
 
-func (va ValidateArgs) ToSchedulerOptions() schedulers.SchedulerOptions {
-	opts := schedulers.SchedulerOptions{
+func (va ValidateArgs) ToSchedulerOptions() opts.SchedulerOptions {
+	opts := opts.SchedulerOptions{
 		Only:   va.Only,
 		Except: va.Except,
 	}
