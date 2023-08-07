@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gobwas/glob"
 	hcl "github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
@@ -58,13 +57,6 @@ type PackerConfig struct {
 
 	Parser *Parser
 	Files  []*hcl.File
-
-	// Fields passed as command line flags
-	Except  []glob.Glob
-	Only    []glob.Glob
-	Force   bool
-	Debug   bool
-	OnError string
 }
 
 type ValidationOptions struct {

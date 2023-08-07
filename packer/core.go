@@ -30,9 +30,6 @@ type Core struct {
 	Builds     map[string]*template.Builder
 	Version    string
 	Secrets    []string
-
-	Except []string
-	Only   []string
 }
 
 // CoreConfig is the structure for initializing a new Core. Once a CoreConfig
@@ -43,10 +40,6 @@ type CoreConfig struct {
 	Variables          map[string]string
 	SensitiveVariables []string
 	Version            string
-
-	// These are set by command-line flags
-	Except []string
-	Only   []string
 }
 
 // The function type used to lookup Builder implementations.
@@ -121,8 +114,6 @@ func NewCore(c *CoreConfig) *Core {
 		Components: c.Components,
 		Variables:  c.Variables,
 		Version:    c.Version,
-		Only:       c.Only,
-		Except:     c.Except,
 	}
 	return core
 }

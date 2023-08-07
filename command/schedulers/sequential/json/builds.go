@@ -93,8 +93,6 @@ func (s *JSONSequentialScheduler) BuildNames() []string {
 
 	sort.Strings(only)
 	sort.Strings(except)
-	s.config.Except = except
-	s.config.Only = only
 
 	r := make([]string, 0, len(s.config.Builds))
 	for n := range s.config.Builds {
@@ -237,7 +235,7 @@ func (s *JSONSequentialScheduler) Build(n string) (packersdk.Build, error) {
 			}
 			// -except skips post-processor & build
 			foundExcept := false
-			for _, except := range s.config.Except {
+			for _, except := range s.opts.Except {
 				if except != "" && except == rawP.Name {
 					foundExcept = true
 				}

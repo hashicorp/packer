@@ -233,9 +233,9 @@ func (s *HCLSequentialScheduler) startProvisioner(source hcl2template.SourceUseB
 
 	builderVars := source.BuilderVariables()
 	builderVars["packer_core_version"] = s.config.CorePackerVersionString
-	builderVars["packer_debug"] = strconv.FormatBool(s.config.Debug)
-	builderVars["packer_force"] = strconv.FormatBool(s.config.Force)
-	builderVars["packer_on_error"] = s.config.OnError
+	builderVars["packer_debug"] = strconv.FormatBool(s.opts.Debug)
+	builderVars["packer_force"] = strconv.FormatBool(s.opts.Force)
+	builderVars["packer_on_error"] = s.opts.OnError
 
 	hclProvisioner := &hcl2template.HCL2Provisioner{
 		Provisioner:      provisioner,
@@ -363,7 +363,8 @@ func (s *HCLSequentialScheduler) getCoreBuildPostProcessors(source hcl2template.
 			}
 			// -except
 			exclude := false
-			for _, exceptGlob := range s.config.Except {
+			exceptGlobs, _ := convertFilterOption(s.opts.Except, "except")
+			for _, exceptGlob := range exceptGlobs {
 				if exceptGlob.Match(name) {
 					exclude = true
 					*exceptMatches = *exceptMatches + 1
@@ -448,7 +449,6 @@ func (s *HCLSequentialScheduler) GetBuilds() ([]packersdk.Build, hcl.Diagnostics
 				if diags.HasErrors() {
 					return nil, diags
 				}
-				s.config.Only = onlyGlobs
 				include := false
 				for _, onlyGlob := range onlyGlobs {
 					if onlyGlob.Match(buildName) {
@@ -468,7 +468,6 @@ func (s *HCLSequentialScheduler) GetBuilds() ([]packersdk.Build, hcl.Diagnostics
 				if diags.HasErrors() {
 					return nil, diags
 				}
-				s.config.Except = exceptGlobs
 				exclude := false
 				for _, exceptGlob := range exceptGlobs {
 					if exceptGlob.Match(buildName) {
