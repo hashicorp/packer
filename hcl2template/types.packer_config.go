@@ -123,8 +123,6 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 
 	iterID, ok := cfg.HCPVars["iterationID"]
 	if ok {
-		log.Printf("iterationID set: %q", iterID)
-
 		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
 			"version":     cty.StringVal(cfg.CorePackerVersionString),
 			"iterationID": iterID,
