@@ -74,7 +74,6 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 	// a plugin requirement that matches them all
 	pluginRequirement := plugingetter.Requirement{
 		Identifier: plugin,
-		Implicit:   false,
 	}
 
 	if len(args) > 1 {

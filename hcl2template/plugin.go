@@ -45,7 +45,6 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 				Accessor:           name,
 				Identifier:         block.Type,
 				VersionConstraints: block.Requirement.Required,
-				Implicit:           block.PluginDependencyReason == PluginDependencyImplicit,
 			})
 			uniq[name] = block
 		}

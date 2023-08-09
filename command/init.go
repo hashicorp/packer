@@ -124,55 +124,13 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			Getters:                   getters,
 		})
 		if err != nil {
-			if pluginRequirement.Implicit {
-				msg := fmt.Sprintf(`
-Warning! At least one component used in your config file(s) has moved out of 
-Packer into the %q plugin.
-For that reason, Packer init tried to install the latest version of the %s 
-plugin. Unfortunately, this failed :
-%s`,
-					pluginRequirement.Identifier,
-					pluginRequirement.Identifier.Type,
-					err)
-				c.Ui.Say(msg)
-			} else {
-				c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
-				c.Ui.Error(err.Error())
-				ret = 1
-			}
+			c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
+			c.Ui.Error(err.Error())
+			ret = 1
 		}
 		if newInstall != nil {
-			if pluginRequirement.Implicit {
-				msg := fmt.Sprintf("Installed implicitly required plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
-				ui.Say(msg)
-
-				warn := fmt.Sprintf(`
-Warning, at least one component used in your config file(s) has moved out of 
-Packer into the %[2]q plugin and is now being implicitly required. 
-For more details on implicitly required plugins see https://packer.io/docs/commands/init#implicit-required-plugin
-
-To avoid any backward incompatible changes with your
-config file you may want to lock the plugin version by pasting the following to your config:
-
-packer {
-  required_plugins {
-    %[1]s = {
-      source  = "%[2]s"
-      version = "~> %[3]s"
-    }
-  }
-}
-`,
-					pluginRequirement.Identifier.Type,
-					pluginRequirement.Identifier,
-					newInstall.Version,
-				)
-				ui.Error(warn)
-				continue
-			}
 			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
 			ui.Say(msg)
-
 		}
 	}
 	return ret
