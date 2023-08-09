@@ -87,18 +87,6 @@ Directory](/packer/docs/configure#packer-s-plugin-directory).
 
 See [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
-### Implicit required plugin
-
-This is part of a set of breaking changes made to decouple Packer releases from
-plugin releases. To make the transition easier, we will tag components of these
-plugins as "moved out". If one of the components of a moved out plugin is used
-in a config file, but there is no mention of that plugin in the
-"required_plugin" block, then Packer init will automatically download and
-install that plugin. Packer will then display a warning and suggest that you
-add the plugin to your required_plugin block. We recommend you use the
-required_plugin block even if you are only using official plugins, because it
-allows you to set the plugin version to avoid surprises in the future.
-
 ## Options
 
 - `-upgrade` - On top of installing missing plugins, update installed plugins to

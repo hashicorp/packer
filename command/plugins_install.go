@@ -77,7 +77,6 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args []stri
 	// a plugin requirement that matches them all
 	pluginRequirement := plugingetter.Requirement{
 		Identifier: plugin,
-		Implicit:   false,
 	}
 
 	if len(args) > 1 {

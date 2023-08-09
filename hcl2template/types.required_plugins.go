@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template/addrs"
-	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -44,127 +43,6 @@ func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics
 	return diags
 }
 
-func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlocks(f *hcl.File) hcl.Diagnostics {
-	// when a plugin is used but not available it should be 'implicitly
-	// required'. Here we read common configuration blocks to try to guess
-	// plugin usages.
-
-	// decodeRequiredPluginsBlock needs to be called before
-	// decodeImplicitRequiredPluginsBlocks; otherwise all required plugins will
-	// be implicitly required too.
-
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-
-		switch block.Type {
-		case sourceLabel:
-			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Builder, block)...)
-		case dataSourceLabel:
-			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Datasource, block)...)
-		case buildLabel:
-			content, _, moreDiags := block.Body.PartialContent(buildSchema)
-			diags = append(diags, moreDiags...)
-			for _, block := range content.Blocks {
-
-				switch block.Type {
-				case buildProvisionerLabel:
-					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(Provisioner, block)...)
-				case buildPostProcessorLabel:
-					diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
-				case buildPostProcessorsLabel:
-					content, _, moreDiags := block.Body.PartialContent(postProcessorsSchema)
-					diags = append(diags, moreDiags...)
-					for _, block := range content.Blocks {
-
-						switch block.Type {
-						case buildPostProcessorLabel:
-							diags = append(diags, cfg.decodeImplicitRequiredPluginsBlock(PostProcessor, block)...)
-						}
-					}
-				}
-			}
-
-		}
-	}
-	return diags
-}
-
-func (cfg *PackerConfig) decodeImplicitRequiredPluginsBlock(k ComponentKind, block *hcl.Block) hcl.Diagnostics {
-	if len(block.Labels) == 0 {
-		// malformed block ? Let's not panic :)
-		return nil
-	}
-	// Currently all block types are `type "component-kind" ["name"] {`
-	// this makes this simple.
-	componentName := block.Labels[0]
-
-	store := map[ComponentKind]packer.BasicStore{
-		Builder:       cfg.parser.PluginConfig.Builders,
-		PostProcessor: cfg.parser.PluginConfig.PostProcessors,
-		Provisioner:   cfg.parser.PluginConfig.Provisioners,
-		Datasource:    cfg.parser.PluginConfig.DataSources,
-	}[k]
-	if store.Has(componentName) {
-		// If any core or pre-loaded plugin defines the `happycloud-uploader`
-		// pp, skip. This happens for core and manually installed plugins, as
-		// they will be listed in the PluginConfig before parsing any HCL.
-		return nil
-	}
-
-	redirect := map[ComponentKind]map[string]string{
-		Builder:       cfg.parser.PluginConfig.BuilderRedirects,
-		PostProcessor: cfg.parser.PluginConfig.PostProcessorRedirects,
-		Provisioner:   cfg.parser.PluginConfig.ProvisionerRedirects,
-		Datasource:    cfg.parser.PluginConfig.DatasourceRedirects,
-	}[k][componentName]
-
-	if redirect == "" {
-		// no known redirect for this component
-		return nil
-	}
-
-	redirectAddr, diags := addrs.ParsePluginSourceString(redirect)
-	if diags.HasErrors() {
-		// This should never happen, since the map is manually filled.
-		return diags
-	}
-
-	for _, req := range cfg.Packer.RequiredPlugins {
-		if _, found := req.RequiredPlugins[redirectAddr.Type]; found {
-			// This could happen if a plugin was forked. For example, I forked
-			// the github.com/hashicorp/happycloud plugin into
-			// github.com/azr/happycloud that is required in my config file; and
-			// am using the `happycloud-uploader` pp component from it. In that
-			// case - and to avoid miss-requires - we won't implicitly import
-			// any other `happycloud` plugin.
-			return nil
-		}
-	}
-
-	cfg.implicitlyRequirePlugin(redirectAddr)
-	return nil
-}
-
-func (cfg *PackerConfig) implicitlyRequirePlugin(plugin *addrs.Plugin) {
-	cfg.Packer.RequiredPlugins = append(cfg.Packer.RequiredPlugins, &RequiredPlugins{
-		RequiredPlugins: map[string]*RequiredPlugin{
-			plugin.Type: {
-				Name:   plugin.Type,
-				Source: plugin.String(),
-				Type:   plugin,
-				Requirement: VersionConstraint{
-					Required: nil, // means latest
-				},
-				PluginDependencyReason: PluginDependencyImplicit,
-			},
-		},
-	})
-}
-
 // RequiredPlugin represents a declaration of a dependency on a particular
 // Plugin version or source.
 type RequiredPlugin struct {
@@ -177,23 +55,7 @@ type RequiredPlugin struct {
 	Type        *addrs.Plugin
 	Requirement VersionConstraint
 	DeclRange   hcl.Range
-	PluginDependencyReason
 }
-
-// PluginDependencyReason is an enumeration of reasons why a dependency might be
-// present.
-type PluginDependencyReason int
-
-const (
-	// PluginDependencyExplicit means that there is an explicit
-	// "required_plugin" block in the configuration.
-	PluginDependencyExplicit PluginDependencyReason = iota
-
-	// PluginDependencyImplicit means that there is no explicit
-	// "required_plugin" block but there is at least one resource that uses this
-	// plugin.
-	PluginDependencyImplicit
-)
 
 type RequiredPlugins struct {
 	RequiredPlugins map[string]*RequiredPlugin

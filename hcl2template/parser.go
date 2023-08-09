@@ -163,27 +163,13 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		return cfg, diags
 	}
 
-	// Decode required_plugins blocks and create implicit required_plugins
-	// blocks. Implicit required_plugins blocks happen when a builder or another
-	// plugin cannot be found, for example if one uses :
-	//  source "amazon-ebs" "example" { ... }
-	// And no `amazon-ebs` builder can be found. This will then be the
-	// equivalent of having :
-	//  packer {
-	//    required_plugins {
-	//      amazon = {
-	//        version = "latest"
-	//        source  = "github.com/hashicorp/amazon"
-	//    }
-	//  }
+	// Decode required_plugins blocks.
+	//
 	// Note: using `latest` ( or actually an empty string ) in a config file
 	// does not work and packer will ask you to pick a version
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeRequiredPluginsBlock(file)...)
-		}
-		for _, file := range files {
-			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlocks(file)...)
 		}
 	}
 
