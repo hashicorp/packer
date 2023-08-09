@@ -34,23 +34,6 @@ type PluginConfig struct {
 	Provisioners       ProvisionerSet
 	PostProcessors     PostProcessorSet
 	DataSources        DatasourceSet
-
-	// Redirects are only set when a plugin was completely moved out; they allow
-	// telling where a plugin has moved by checking if a known component of this
-	// plugin is used. For example implicitly require the
-	// github.com/hashicorp/amazon plugin if it was moved out and the
-	// "amazon-ebs" plugin is used, but not found.
-	//
-	// Redirects will be bypassed if the redirected components are already found
-	// in their corresponding sets (Builders, Provisioners, PostProcessors,
-	// DataSources). That is, for example, if you manually put a single
-	// component plugin in the plugins folder.
-	//
-	// Example BuilderRedirects: "amazon-ebs" => "github.com/hashicorp/amazon"
-	BuilderRedirects       map[string]string
-	DatasourceRedirects    map[string]string
-	ProvisionerRedirects   map[string]string
-	PostProcessorRedirects map[string]string
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
