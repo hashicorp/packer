@@ -325,7 +325,6 @@ func loadConfig() (*config, error) {
 		PluginMinPort:      10000,
 		PluginMaxPort:      25000,
 		KnownPluginFolders: packer.PluginFolders("."),
-
 		// BuilderRedirects
 		BuilderRedirects: map[string]string{
 
@@ -391,7 +390,13 @@ func loadConfig() (*config, error) {
 			//"vsphere":          "github.com/hashicorp/vsphere",
 			//"vsphere-template": "github.com/hashicorp/vsphere",
 		},
+		PluginComponents: map[string]packer.PluginSpec{},
 	}
+	bundledPlugins := GetBundledPluginVersions()
+	for pn, ps := range bundledPlugins {
+		config.Plugins.PluginComponents[pn] = ps
+	}
+
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err
 	}

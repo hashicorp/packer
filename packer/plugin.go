@@ -25,6 +25,20 @@ var defaultChecksummer = plugingetter.Checksummer{
 	Hash: sha256.New(),
 }
 
+type PluginSpec struct {
+	Name    string
+	Path    string
+	Version string
+}
+
+func (ps PluginSpec) String() string {
+	return fmt.Sprintf(`
+Plugin: %s
+Path: %s
+Version: %s`,
+		ps.Name, ps.Path, ps.Version)
+}
+
 // PluginConfig helps load and use packer plugins
 type PluginConfig struct {
 	KnownPluginFolders []string
@@ -51,6 +65,50 @@ type PluginConfig struct {
 	DatasourceRedirects    map[string]string
 	ProvisionerRedirects   map[string]string
 	PostProcessorRedirects map[string]string
+	PluginComponents       map[string]PluginSpec
+}
+
+// GetSpecForComponent returns a pluginspec if the component requested exists in the loaded plugin specs
+//
+// If it does not, the returned boolean will be false.
+func (c PluginConfig) GetSpecForPlugin(name string) (PluginSpec, bool) {
+	names := getPartsFromComponent(name)
+
+	for _, name := range names {
+		pc, ok := c.PluginComponents[name]
+		if ok {
+			return pc, true
+		}
+	}
+
+	return PluginSpec{}, false
+}
+
+// getPartsFromComponent splits the plugin on '-' and returns a list of potential names
+// starting from the longest, and ending on the shortest.
+//
+// Ex:
+// ```go
+//
+//	getPartsFromComponent("plugin-name-component-name") => [
+//		"plugin-name-component-name",
+//		"plugin-name-component",
+//		"plugin-name",
+//		"plugin",
+//	]
+//
+// ```
+func getPartsFromComponent(name string) []string {
+	rets := []string{}
+
+	parts := strings.Split(name, "-")
+
+	for len(parts) > 0 {
+		rets = append(rets, strings.Join(parts, "-"))
+		parts = parts[:len(parts)-1]
+	}
+
+	return rets
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -280,6 +338,12 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		return err
 	}
 
+	pluginSpec := PluginSpec{
+		Name:    pluginName,
+		Path:    pluginPath,
+		Version: desc.Version,
+	}
+
 	pluginPrefix := pluginName + "-"
 
 	for _, builderName := range desc.Builders {
@@ -339,6 +403,12 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
 	}
+
+	if c.PluginComponents == nil {
+		c.PluginComponents = map[string]PluginSpec{}
+	}
+
+	c.PluginComponents[pluginName] = pluginSpec
 
 	return nil
 }
