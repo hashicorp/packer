@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: BUSL-1.1
 
 // component_acc_test.go should contain acceptance tests for plugin components
 // to make sure all component types can be discovered and started.
