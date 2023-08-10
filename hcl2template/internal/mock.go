@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: BUSL-1.1
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type MockConfig,NestedMockConfig,MockTag
 
