@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: BUSL-1.1
 
 //go:generate enumer -transform snake -trimprefix ExecutionPolicy -type ExecutionPolicy
 
