@@ -252,6 +252,16 @@ func wrappedMain() int {
 		Ui: ui,
 	}
 
+	//versionCLIHelper shortcuts "--version" and "-v" to just show the version
+	versionCLIHelper := &cli.CLI{
+		Args:    args,
+		Version: version.Version,
+	}
+	if versionCLIHelper.IsVersion() && versionCLIHelper.Version != "" {
+		// by default version flags ignore all other args so there is no need to persist the original args.
+		args = []string{"version"}
+	}
+
 	cli := &cli.CLI{
 		Args:         args,
 		Autocomplete: true,
