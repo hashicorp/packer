@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
@@ -129,6 +130,47 @@ func (cfg *PackerConfig) StartDatasource(dataSourceStore packer.DatasourceStore,
 		})
 	}
 	return datasource, diags
+}
+
+func (cfg *PackerConfig) ExecuteDatasource(ref DatasourceRef, skipExecution bool) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	ds := cfg.Datasources[ref]
+
+	datasource, startDiags := cfg.StartDatasource(cfg.Parser.PluginConfig.DataSources, ref, false)
+	diags = append(diags, startDiags...)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	// If we run validate, we want to boot the datasource binary, but we don't
+	// want to actually execute it, so we replace the value with a placeholder
+	// and immediately return.
+	if skipExecution {
+		placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
+		ds.Value = placeholderValue
+		cfg.Datasources[ref] = ds
+		return diags
+	}
+
+	dsOpts, _ := DecodeHCL2Spec(ds.Block.Body, cfg.EvalContext(nil), datasource)
+	sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", dsOpts)
+	realValue, err := datasource.Execute()
+	sp.End(err)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  err.Error(),
+			Subject:  &cfg.Datasources[ref].Block.DefRange,
+			Severity: hcl.DiagError,
+			Context:  &ds.Block.DefRange,
+		})
+		return diags
+	}
+
+	ds.Value = realValue
+	cfg.Datasources[ref] = ds
+
+	return diags
 }
 
 func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagnostics) {

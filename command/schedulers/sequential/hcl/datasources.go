@@ -4,9 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -62,40 +60,13 @@ func (s *HCLSequentialScheduler) evaluateDatasources() hcl.Diagnostics {
 			continue
 		}
 
-		datasource, startDiags := s.config.StartDatasource(s.config.Parser.PluginConfig.DataSources, ref, false)
-		diags = append(diags, startDiags...)
-		if diags.HasErrors() {
-			continue
-		}
-
-		if s.opts.SkipDatasourcesExecution {
-			placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
-			ds.Value = placeholderValue
-			s.config.Datasources[ref] = ds
-			continue
-		}
-
-		dsOpts, _ := hcl2template.DecodeHCL2Spec(body, s.config.EvalContext(nil), datasource)
-		sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", dsOpts)
-		realValue, err := datasource.Execute()
-		sp.End(err)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Subject:  &s.config.Datasources[ref].Block.DefRange,
-				Severity: hcl.DiagError,
-			})
-			continue
-		}
-
-		ds.Value = realValue
-		s.config.Datasources[ref] = ds
+		diags = append(diags, s.config.ExecuteDatasource(ref, s.opts.SkipDatasourcesExecution)...)
 	}
 
 	// Now that most of our data sources have been started and executed, we can
 	// try to execute the ones that depend on other data sources.
 	for ref := range dependencies {
-		_, moreDiags, _ := s.recursivelyEvaluateDatasources(ref, dependencies, 0)
+		_, moreDiags := s.recursivelyEvaluateDatasources(ref, dependencies, 0)
 		// Deduplicate diagnostics to prevent recursion messes.
 		cleanedDiags := map[string]*hcl.Diagnostic{}
 		for _, diag := range moreDiags {
@@ -114,10 +85,9 @@ func (s *HCLSequentialScheduler) recursivelyEvaluateDatasources(
 	ref hcl2template.DatasourceRef,
 	dependencies map[hcl2template.DatasourceRef][]hcl2template.DatasourceRef,
 	depth int,
-) (map[hcl2template.DatasourceRef][]hcl2template.DatasourceRef, hcl.Diagnostics, bool) {
+) (map[hcl2template.DatasourceRef][]hcl2template.DatasourceRef, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	var moreDiags hcl.Diagnostics
-	shouldContinue := true
 
 	if depth > 10 {
 		// Add a comment about recursion.
@@ -129,10 +99,9 @@ func (s *HCLSequentialScheduler) recursivelyEvaluateDatasources(
 				"other data sources, or your data sources have a cyclic " +
 				"dependency. Please simplify your config to continue. ",
 		})
-		return dependencies, diags, false
+		return dependencies, diags
 	}
 
-	ds := s.config.Datasources[ref]
 	// Make sure everything ref depends on has already been evaluated.
 	for _, dep := range dependencies[ref] {
 		if _, ok := dependencies[dep]; ok {
@@ -140,46 +109,18 @@ func (s *HCLSequentialScheduler) recursivelyEvaluateDatasources(
 			// If this dependency is not in the map, it means we've already
 			// launched and executed this datasource. Otherwise, it means
 			// we still need to run it. RECURSION TIME!!
-			dependencies, moreDiags, shouldContinue = s.recursivelyEvaluateDatasources(dep, dependencies, depth)
+			dependencies, moreDiags = s.recursivelyEvaluateDatasources(dep, dependencies, depth)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				diags = append(diags, moreDiags...)
-				return dependencies, diags, shouldContinue
+				return dependencies, diags
 			}
 		}
 	}
-	// If we've gotten here, then it means ref doesn't seem to have any further
-	// dependencies we need to evaluate first. Evaluate it, with the cfg's full
-	// data source context.
-	datasource, startDiags := s.config.StartDatasource(s.config.Parser.PluginConfig.DataSources, ref, true)
-	if startDiags.HasErrors() {
-		diags = append(diags, startDiags...)
-		return dependencies, diags, shouldContinue
-	}
 
-	if s.opts.SkipDatasourcesExecution {
-		placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
-		ds.Value = placeholderValue
-		s.config.Datasources[ref] = ds
-		return dependencies, diags, shouldContinue
-	}
+	diags = append(diags, s.config.ExecuteDatasource(ref, s.opts.SkipDatasourcesExecution)...)
 
-	opts, _ := hcl2template.DecodeHCL2Spec(ds.Block.Body, s.config.EvalContext(nil), datasource)
-	sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", opts)
-	realValue, err := datasource.Execute()
-	sp.End(err)
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  err.Error(),
-			Subject:  &s.config.Datasources[ref].Block.DefRange,
-			Severity: hcl.DiagError,
-		})
-		return dependencies, diags, shouldContinue
-	}
-
-	ds.Value = realValue
-	s.config.Datasources[ref] = ds
 	// remove ref from the dependencies map.
 	delete(dependencies, ref)
-	return dependencies, diags, shouldContinue
+	return dependencies, diags
 }
