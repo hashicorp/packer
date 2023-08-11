@@ -169,7 +169,7 @@ jobs:
           version: ${{ needs.set-product-version.outputs.product-version }}
           maintainer: "HashiCorp"
           homepage: "https://www.packer.io/docs"
-          license: "MPL-2.0"
+          license: "BUSL-1.1"
           binary: "dist/${{ env.REPO_NAME }}"
           deb_depends: "openssl"
           rpm_depends: "openssl"
