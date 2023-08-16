@@ -35,6 +35,12 @@ You can set these additional environment variables to control how metadata is pu
 
 - `HCP_PACKER_REGISTRY`    -  When set, Packer does not push image metadata to HCP Packer from an otherwise configured template. Allowed values are [0|OFF].
 
+- `HCP_ORGANIZATION_ID` - The ID of the HCP organization linked to your service principal. This is environment variable is not required and available for the sole purpose of keeping parity with the HCP SDK authentication options. Its use may change in a future release.  
+
+- `HCP_PROJECT_ID`  - The ID of the HCP project to use. This is useful if your service principal has access to multiple projects, as by default Packer will pick the one created first as target.
+
+-> **Note**: The HCP_PROJECT_ID environment variable must be set if you're authenticating with a project-level service principal, otherwise Packer will attempt to get the list of projects for an organization and error due to a lack of permissions for a project-level service principal. This is supported starting with Packer 1.9.3; older versions of Packer do not support using project-level service principals.
+
 ### HCP Packer Registry Block
 
 The only metadata that Packer can infer from a template with the basic configuration are the build name and build fingerprint. For HCL2 templates, we recommend adding the `hcp_packer_registry` block to your template so that you can customize the metadata that Packer sends to the registry. 
