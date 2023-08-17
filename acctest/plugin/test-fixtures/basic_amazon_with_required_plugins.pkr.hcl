@@ -12,7 +12,7 @@ source "amazon-ebs" "basic-test" {
   instance_type = "m3.medium"
   source_ami = "ami-76b2a71e"
   ssh_username = "ubuntu"
-  ami_name = "packer-plugin-bundled-amazon-ebs-test"
+  ami_name = "packer-plugin-external-amazon-ebs-test"
 }
 
 build {
