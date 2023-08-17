@@ -8,7 +8,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -257,7 +259,9 @@ func (m *Meta) detectBundledPluginsJSON(core *packer.Core) []string {
 		}
 	}
 
-	return compileBundledPluginList(bundledPlugins)
+	bundledPluginList := compileBundledPluginList(bundledPlugins)
+
+	return bundledPluginList
 }
 
 var knownPluginPrefixes = map[string]string{
@@ -354,5 +358,110 @@ func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []str
 		}
 	}
 
-	return compileBundledPluginList(bundledPlugins)
+	bundledPluginList := compileBundledPluginList(bundledPlugins)
+
+	return bundledPluginList
+}
+
+func (m *Meta) LogPluginUsage(handler packer.Handler) {
+	switch h := handler.(type) {
+	case *packer.Core:
+		m.logPluginUsageJSON(h)
+	case *hcl2template.PackerConfig:
+		m.logPluginUsageHCL2(handler.(*hcl2template.PackerConfig))
+	}
+}
+
+func (m *Meta) logPluginUsageJSON(c *packer.Core) {
+	usedPlugins := map[string]packer.PluginSpec{}
+
+	tmpl := c.Template
+	if tmpl == nil {
+		panic("No template parsed. This is a Packer bug which should be reported, please open an issue on the project's issue tracker.")
+	}
+
+	for _, b := range tmpl.Builders {
+		// Check since internal components are not registered as components
+		ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(b.Type)
+		if ok {
+			usedPlugins[ps.Name] = ps
+		}
+	}
+
+	for _, p := range tmpl.Provisioners {
+		// Check since internal components are not registered as components
+		ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(p.Type)
+		if ok {
+			usedPlugins[ps.Name] = ps
+		}
+	}
+
+	for _, pps := range tmpl.PostProcessors {
+		for _, pp := range pps {
+			// Check since internal components are not registered as components
+			ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(pp.Type)
+			if ok {
+				usedPlugins[ps.Name] = ps
+			}
+		}
+	}
+
+	logPlugins(usedPlugins)
+}
+
+func (m *Meta) logPluginUsageHCL2(config *hcl2template.PackerConfig) {
+	usedPlugins := map[string]packer.PluginSpec{}
+
+	for _, b := range config.Builds {
+		for _, src := range b.Sources {
+			ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(src.Type)
+			if ok {
+				usedPlugins[ps.Name] = ps
+			}
+		}
+
+		for _, p := range b.ProvisionerBlocks {
+			ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(p.PType)
+			if ok {
+				usedPlugins[ps.Name] = ps
+			}
+		}
+
+		for _, pps := range b.PostProcessorsLists {
+			for _, pp := range pps {
+				ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(pp.PType)
+				if ok {
+					usedPlugins[ps.Name] = ps
+				}
+			}
+		}
+	}
+
+	for _, ds := range config.Datasources {
+		ps, ok := m.CoreConfig.Components.PluginConfig.GetSpecForPlugin(ds.Type)
+		if ok {
+			usedPlugins[ps.Name] = ps
+		}
+	}
+
+	logPlugins(usedPlugins)
+}
+
+func logPlugins(usedPlugins map[string]packer.PluginSpec) {
+	// Could happen if no plugin is loaded and we only rely on internal components
+	if len(usedPlugins) == 0 {
+		return
+	}
+
+	pluginNames := make([]string, 0, len(usedPlugins))
+	for pn := range usedPlugins {
+		pluginNames = append(pluginNames, pn)
+	}
+	sort.Strings(pluginNames)
+
+	log.Printf("[INFO] - Used plugins")
+	for _, pn := range pluginNames {
+		ps := usedPlugins[pn]
+		log.Printf(fmt.Sprintf("*\t%s - %s: %s", ps.Name, ps.Version, ps.Path))
+	}
 }

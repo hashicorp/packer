@@ -101,6 +101,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
+	c.LogPluginUsage(packerStarter)
+
 	hcpRegistry, diags := registry.New(packerStarter, c.Ui)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
