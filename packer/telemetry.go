@@ -132,6 +132,9 @@ func (c *CheckpointTelemetry) SetTemplateType(t PackerTemplateType) {
 
 // SetBundledUsage marks the template as using bundled plugins
 func (c *CheckpointTelemetry) SetBundledUsage() {
+	if c == nil {
+		return
+	}
 	c.useBundled = true
 }
 
