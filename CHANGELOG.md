@@ -1,4 +1,13 @@
-## 1.9.4 (Upcoming)
+## 1.9.4 (August 18, 2023)
+
+### BUG FIXES:
+
+* core: When invoking Packer with the CHECKPOINT_DISABLE environment variable the telemetry
+    reporter is left uninitialized in order to disable telemetry reporting.
+    Any method calls on the nil reporter is expected to check if the reporter is active or in
+    NOOP mode. The SetBundledUsage function, introduced in Packer 1.9.2, failed to perform a nil
+    check before attempting to modify an attribute, causing Packer to fail when telemetry is
+    disabled. This release fixes this issue by introducing such a check.
 
 ## 1.9.3 (August 17, 2023)
 
