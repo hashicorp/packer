@@ -5,7 +5,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
@@ -313,27 +312,17 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 		// with the datasources in its context.
 		dependencies[ref] = []DatasourceRef{}
 
-		block := ds.block
-		body := block.Body
-		attrs, _ := body.JustAttributes()
-
-		skipFirstEval := false
-		for _, attr := range attrs {
-			vars := attr.Expr.Variables()
-			for _, v := range vars {
-				// check whether the variable is a data source
-				if v.RootName() == "data" {
-					// construct, backwards, the data source type and name we
-					// need to evaluate before this one can be evaluated.
-					dependsOn := DatasourceRef{
-						Type: v[1].(hcl.TraverseAttr).Name,
-						Name: v[2].(hcl.TraverseAttr).Name,
-					}
-					log.Printf("The data source %#v depends on datasource %#v", ref, dependsOn)
-					dependencies[ref] = append(dependencies[ref], dependsOn)
-					skipFirstEval = true
-				}
+		// Note: when looking at the expressions, we only need to care about
+		// attributes, as HCL2 expressions are not allowed in a block's labels.
+		vars := GetVarsByType(ds.block, "data")
+		for _, v := range vars {
+			// construct, backwards, the data source type and name we
+			// need to evaluate before this one can be evaluated.
+			dependsOn := DatasourceRef{
+				Type: v[1].(hcl.TraverseAttr).Name,
+				Name: v[2].(hcl.TraverseAttr).Name,
 			}
+			dependencies[ref] = append(dependencies[ref], dependsOn)
 		}
 	}
 
