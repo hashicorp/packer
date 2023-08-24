@@ -368,6 +368,7 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 				"sources. Either your data source depends on more than ten " +
 				"other data sources, or your data sources have a cyclic " +
 				"dependency. Please simplify your config to continue. ",
+			Subject: &(cfg.Datasources[ref]).block.DefRange,
 		})
 		return dependencies, diags
 	}
