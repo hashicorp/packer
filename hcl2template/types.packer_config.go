@@ -361,6 +361,8 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 	var diags hcl.Diagnostics
 	var moreDiags hcl.Diagnostics
 
+	ds := cfg.Datasources[ref]
+
 	if depth > 10 {
 		// Add a comment about recursion.
 		diags = append(diags, &hcl.Diagnostic{
@@ -370,11 +372,11 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 				"sources. Either your data source depends on more than ten " +
 				"other data sources, or your data sources have a cyclic " +
 				"dependency. Please simplify your config to continue. ",
+			Subject: &ds.block.DefRange,
 		})
 		return dependencies, diags
 	}
 
-	ds := cfg.Datasources[ref]
 	// Make sure everything ref depends on has already been evaluated.
 	for _, dep := range dependencies[ref] {
 		if _, ok := dependencies[dep]; ok {
