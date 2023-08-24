@@ -311,8 +311,8 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 		// source in any of its input expressions. If so, skip evaluating it for
 		// now, and add it to a list of datasources to evaluate again, later,
 		// with the datasources in its context.
-		// This is essentially creating a very primitive DAG just for data
-		// source interdependencies.
+		dependencies[ref] = []DatasourceRef{}
+
 		block := ds.block
 		body := block.Body
 		attrs, _ := body.JustAttributes()
@@ -330,51 +330,11 @@ func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics
 						Name: v[2].(hcl.TraverseAttr).Name,
 					}
 					log.Printf("The data source %#v depends on datasource %#v", ref, dependsOn)
-					if dependencies[ref] != nil {
-						dependencies[ref] = append(dependencies[ref], dependsOn)
-					} else {
-						dependencies[ref] = []DatasourceRef{dependsOn}
-					}
+					dependencies[ref] = append(dependencies[ref], dependsOn)
 					skipFirstEval = true
 				}
 			}
 		}
-
-		// Now we have a list of data sources that depend on other data sources.
-		// Don't evaluate these; only evaluate data sources that we didn't
-		// mark  as having dependencies.
-		if skipFirstEval {
-			continue
-		}
-
-		datasource, startDiags := cfg.startDatasource(cfg.parser.PluginConfig.DataSources, ref, false)
-		diags = append(diags, startDiags...)
-		if diags.HasErrors() {
-			continue
-		}
-
-		if skipExecution {
-			placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
-			ds.value = placeholderValue
-			cfg.Datasources[ref] = ds
-			continue
-		}
-
-		dsOpts, _ := decodeHCL2Spec(body, cfg.EvalContext(DatasourceContext, nil), datasource)
-		sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", dsOpts)
-		realValue, err := datasource.Execute()
-		sp.End(err)
-		if err != nil {
-			diags = append(diags, &hcl.Diagnostic{
-				Summary:  err.Error(),
-				Subject:  &cfg.Datasources[ref].block.DefRange,
-				Severity: hcl.DiagError,
-			})
-			continue
-		}
-
-		ds.value = realValue
-		cfg.Datasources[ref] = ds
 	}
 
 	// Now that most of our data sources have been started and executed, we can
