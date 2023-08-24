@@ -90,8 +90,10 @@ func TestParse_source(t *testing.T) {
 			parseTestArgs{"testdata/sources/nonexistent.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Builds:                  nil,
-				Basedir:                 filepath.Join("testdata", "sources"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "sources"),
 				Sources: map[SourceRef]SourceBlock{
 					{Type: "nonexistent", Name: "ubuntu-1204"}: {Type: "nonexistent", Name: "ubuntu-1204"},
 				},

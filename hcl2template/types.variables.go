@@ -278,35 +278,6 @@ var localBlockSchema = &hcl.BodySchema{
 	},
 }
 
-func decodeLocalBlock(block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
-	name := block.Labels[0]
-
-	content, diags := block.Body.Content(localBlockSchema)
-	if !hclsyntax.ValidIdentifier(name) {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid local name",
-			Detail:   badIdentifierDetail,
-			Subject:  &block.LabelRanges[0],
-		})
-	}
-
-	l := &LocalBlock{
-		Name: name,
-	}
-
-	if attr, exists := content.Attributes["sensitive"]; exists {
-		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
-		diags = append(diags, valDiags...)
-	}
-
-	if def, ok := content.Attributes["expression"]; ok {
-		l.Expr = def.Expr
-	}
-
-	return l, diags
-}
-
 // decodeVariableBlock decodes a "variable" block
 // ectx is passed only in the evaluation of the default value.
 func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.EvalContext) hcl.Diagnostics {

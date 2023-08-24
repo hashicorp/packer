@@ -52,7 +52,7 @@ func TestPackerConfig_ParseProvisionerBlock(t *testing.T) {
 				Column: 1,
 				Byte:   0,
 			})
-			_, diags = cfg.parser.decodeProvisioner(provBlock, nil)
+			_, diags = cfg.decodeProvisioner(provBlock, nil)
 
 			if !diags.HasErrors() {
 				if !test.expectError {
