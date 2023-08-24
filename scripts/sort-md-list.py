@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: MPL-2.0
 
 """
 sort-md-list.py sorts markdown lists

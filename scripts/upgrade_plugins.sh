@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: MPL-2.0
 
 
 ## This script is to be run before a Packer release in order to update

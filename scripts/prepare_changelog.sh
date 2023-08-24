@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: BUSL-1.1
+# SPDX-License-Identifier: MPL-2.0
 
 
 LAST_RELEASE=$1

@@ -186,15 +186,6 @@ if using HCL2, a `required_plugins` block to define a list of plugins to use for
 * Bumped gopsutil to v3. This fixes a macOS intermittent crash reported by the community
     [GH-12430](https://github.com/hashicorp/packer/issues/12430)
 
-### HCP Packer -- Multi project support advisory
-
-If using HCP Packer to store metadata on your builds, please be aware that Packer
-does not support this feature yet, and as such, having multiple projects in your
-organization will make it impossible to use HCP Packer in this release.
-
-We are actively working on supporting this feature, which will be available in a
-subsequent release.
-
 ## 1.8.7 (May 4, 2023)
 
 ### NOTES:
