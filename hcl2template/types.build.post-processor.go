@@ -26,7 +26,7 @@ func (p *PostProcessorBlock) String() string {
 	return fmt.Sprintf(buildPostProcessorLabel+"-block %q %q", p.PType, p.PName)
 }
 
-func (p *Parser) decodePostProcessor(block *hcl.Block, ectx *hcl.EvalContext) (*PostProcessorBlock, hcl.Diagnostics) {
+func (cfg *PackerConfig) decodePostProcessor(block *hcl.Block, ectx *hcl.EvalContext) (*PostProcessorBlock, hcl.Diagnostics) {
 	var b struct {
 		Name              string   `hcl:"name,optional"`
 		Only              []string `hcl:"only,optional"`

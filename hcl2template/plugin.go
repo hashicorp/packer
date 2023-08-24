@@ -128,6 +128,14 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
+		// Since the build's contents may not have been dynamically
+		// expanded when we first loaded the config from the template
+		// file, we decode it now.
+		diags = append(diags, build.finalizeDecode(cfg)...)
+		if diags.HasErrors() {
+			continue
+		}
+
 		for i := range build.Sources {
 			// here we grab a pointer to the source usage because we will set
 			// its body.
@@ -155,6 +163,13 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 					Detail:   detail,
 				})
+				continue
+			}
+
+			// Before attempting to use the body for merging, we
+			// finalise its decoding if necessary.
+			diags = append(diags, sourceDefinition.finalizeDecodeSource(cfg)...)
+			if diags.HasErrors() {
 				continue
 			}
 

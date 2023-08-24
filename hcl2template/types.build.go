@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
@@ -59,6 +60,12 @@ type BuildBlock struct {
 	// Name is a string representing the named build to show in the logs
 	Name string
 
+	// Block is the raw hcl block lifted from the HCL file
+	block *hcl.Block
+	// ready marks whether or not there's any decoding left to do before
+	// using the data from the build block.
+	ready bool
+
 	// A description of what this build does, it could be used in a inspect
 	// call for example.
 	Description string
@@ -87,9 +94,18 @@ type BuildBlock struct {
 
 type Builds []*BuildBlock
 
-// decodeBuildConfig is called when a 'build' block has been detected. It will
-// load the references to the contents of the build block.
-func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildBlock, hcl.Diagnostics) {
+// finalizeDecode finalises decoding the build block.
+//
+// This is only called after we've finished evaluating the dependencies for the
+// build, and will expand the dynamic block for it, if any were present at first.
+func (build *BuildBlock) finalizeDecode(cfg *PackerConfig) hcl.Diagnostics {
+	// If the build is already populated, we don't attempt to do anything here.
+	if build.ready {
+		return nil
+	}
+
+	build.ready = true
+
 	var b struct {
 		Name        string   `hcl:"name,optional"`
 		Description string   `hcl:"description,optional"`
@@ -97,25 +113,30 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		Config      hcl.Body `hcl:",remain"`
 	}
 
-	body := block.Body
-	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
-	if diags.HasErrors() {
-		return nil, diags
-	}
+	var diags hcl.Diagnostics
 
-	build := &BuildBlock{
-		HCL2Ref: newHCL2Ref(block, b.Config),
-	}
+	body := build.block.Body
+	// At this point we can discard this decode's diags since it has already
+	// been sucessfully done once during the initial pre-decoding phase (at
+	// parsing-time)
+	_ = gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
 
+	// Here we'll replace the base contents from what we re-extracted at the
+	// time, as some things may be derived from other components through expressions
+	// or interpolation.
 	build.Name = b.Name
 	build.Description = b.Description
-	build.HCL2Ref.DefRange = block.DefRange
+	build.HCL2Ref = newHCL2Ref(build.block, b.Config)
 
-	// Expose build.name during parsing of pps and provisioners
 	ectx := cfg.EvalContext(BuildContext, nil)
-	ectx.Variables[buildAccessor] = cty.ObjectVal(map[string]cty.Value{
-		"name": cty.StringVal(b.Name),
-	})
+	// Expand dynamics: we wrap the config in a dynblock and request the final
+	// content. If something cannot be expanded for some reason here (invalid
+	// reference, unknown values, etc.), this will fail, as it should.
+	dyn := dynblock.Expand(b.Config, ectx)
+	content, expandDiags := dyn.Content(buildSchema)
+	if expandDiags.HasErrors() {
+		return append(diags, expandDiags...)
+	}
 
 	// We rely on `hadSource` to determine which error to proc.
 	//
@@ -123,6 +144,11 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	// cannot rely on the `build.Sources' since it's only populated when a valid
 	// source is processed.
 	hadSource := false
+
+	// Expose build.name during parsing of pps and provisioners
+	ectx.Variables[buildAccessor] = cty.ObjectVal(map[string]cty.Value{
+		"name": cty.StringVal(b.Name),
+	})
 
 	for _, buildFrom := range b.FromSources {
 		hadSource = true
@@ -135,11 +161,11 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Invalid " + sourceLabel + " reference",
-				Detail: "A " + sourceLabel + " type is made of three parts that are" +
+				Detail: "A " + sourceLabel + " type is made of two or three parts that are" +
 					"split by a dot `.`; each part must start with a letter and " +
 					"may contain only letters, digits, underscores, and dashes." +
 					"A valid source reference looks like: `source.type.name`",
-				Subject: block.DefRange.Ptr(),
+				Subject: build.block.DefRange.Ptr(),
 			})
 			continue
 		}
@@ -148,12 +174,6 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 		build.Sources = append(build.Sources, SourceUseBlock{SourceRef: ref})
 	}
 
-	body = b.Config
-	content, moreDiags := body.Content(buildSchema)
-	diags = append(diags, moreDiags...)
-	if diags.HasErrors() {
-		return nil, diags
-	}
 	for _, block := range content.Blocks {
 		switch block.Type {
 		case buildHCPPackerRegistryLabel:
@@ -165,7 +185,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				})
 				continue
 			}
-			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block, cfg)
+			hcpPackerRegistry, moreDiags := cfg.decodeHCPRegistry(block)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -173,14 +193,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			build.HCPPackerRegistry = hcpPackerRegistry
 		case sourceLabel:
 			hadSource = true
-			ref, moreDiags := p.decodeBuildSource(block)
+			ref, moreDiags := cfg.decodeBuildSource(block)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 			build.Sources = append(build.Sources, ref)
 		case buildProvisionerLabel:
-			p, moreDiags := p.decodeProvisioner(block, ectx)
+			p, moreDiags := cfg.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -195,14 +215,14 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 				})
 				continue
 			}
-			p, moreDiags := p.decodeProvisioner(block, ectx)
+			p, moreDiags := cfg.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
 			build.ErrorCleanupProvisionerBlock = p
 		case buildPostProcessorLabel:
-			pp, moreDiags := p.decodePostProcessor(block, ectx)
+			pp, moreDiags := cfg.decodePostProcessor(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
@@ -219,7 +239,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			errored := false
 			postProcessors := []*PostProcessorBlock{}
 			for _, block := range content.Blocks {
-				pp, moreDiags := p.decodePostProcessor(block, ectx)
+				pp, moreDiags := cfg.decodePostProcessor(block, ectx)
 				diags = append(diags, moreDiags...)
 				if moreDiags.HasErrors() {
 					errored = true
@@ -238,9 +258,9 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			Summary:  "missing source reference",
 			Detail:   "a build block must reference at least one source to be built",
 			Severity: hcl.DiagError,
-			Subject:  block.DefRange.Ptr(),
+			Subject:  build.block.DefRange.Ptr(),
 		})
 	}
 
-	return build, diags
+	return diags
 }

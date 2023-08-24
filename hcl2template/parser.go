@@ -11,10 +11,14 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
+	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/function"
 )
 
 const (
@@ -163,33 +167,8 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		return cfg, diags
 	}
 
-	// Decode required_plugins blocks.
-	//
-	// Note: using `latest` ( or actually an empty string ) in a config file
-	// does not work and packer will ask you to pick a version
-	{
-		for _, file := range files {
-			diags = append(diags, cfg.decodeRequiredPluginsBlock(file)...)
-		}
-	}
-
-	// Decode variable blocks so that they are available later on. Here locals
-	// can use input variables so we decode input variables first.
-	{
-		for _, file := range files {
-			diags = append(diags, cfg.decodeInputVariables(file)...)
-		}
-
-		for _, file := range files {
-			morediags := p.decodeDatasources(file, cfg)
-			diags = append(diags, morediags...)
-		}
-
-		for _, file := range files {
-			moreLocals, morediags := parseLocalVariableBlocks(file)
-			diags = append(diags, morediags...)
-			cfg.LocalBlocks = append(cfg.LocalBlocks, moreLocals...)
-		}
+	for _, file := range files {
+		diags = append(diags, cfg.decodeFile(file)...)
 	}
 
 	// parse var files
@@ -293,112 +272,311 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 	}
 }
 
-func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
-	diags := cfg.InputVariables.ValidateValues()
-	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
-	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
-	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
-	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
-
-	filterVarsFromLogs(cfg.InputVariables)
-	filterVarsFromLogs(cfg.LocalVariables)
-
-	// parse the actual content // rest
-	for _, file := range cfg.files {
-		diags = append(diags, cfg.parser.parseConfig(file, cfg)...)
-	}
-
-	diags = append(diags, cfg.initializeBlocks()...)
-
-	return diags
-}
-
-// parseConfig looks in the found blocks for everything that is not a variable
-// block.
-func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+// decodeFile attempts to decode the configuration from a HCL file, and starts
+// populating the config from it.
+func (cfg *PackerConfig) decodeFile(file *hcl.File) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	body := f.Body
-	body = dynblock.Expand(body, cfg.EvalContext(DatasourceContext, nil))
-	content, moreDiags := body.Content(configSchema)
+	content, moreDiags := file.Body.Content(configSchema)
 	diags = append(diags, moreDiags...)
+	// If basic parsing failed, we should not continue
+	if diags.HasErrors() {
+		return diags
+	}
 
 	for _, block := range content.Blocks {
-		switch block.Type {
-		case sourceLabel:
-			source, moreDiags := p.decodeSource(block)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-
-			ref := source.Ref()
-			if existing, found := cfg.Sources[ref]; found {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate " + sourceLabel + " block",
-					Detail: fmt.Sprintf("This "+sourceLabel+" block has the "+
-						"same builder type and name as a previous block declared "+
-						"at %s. Each "+sourceLabel+" must have a unique name per builder type.",
-						existing.block.DefRange.Ptr()),
-					Subject: source.block.DefRange.Ptr(),
-				})
-				continue
-			}
-
-			if cfg.Sources == nil {
-				cfg.Sources = map[SourceRef]SourceBlock{}
-			}
-			cfg.Sources[ref] = source
-
-		case buildLabel:
-			build, moreDiags := p.decodeBuildConfig(block, cfg)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-
-			cfg.Builds = append(cfg.Builds, build)
-		}
+		diags = append(diags, cfg.decodeBlock(block)...)
 	}
 
 	return diags
 }
 
-func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
+func (cfg *PackerConfig) decodeBlock(block *hcl.Block) hcl.Diagnostics {
+	switch block.Type {
+	case packerLabel:
+		return cfg.decodePackerBlock(block)
+	case dataSourceLabel:
+		return cfg.decodeDatasource(block)
+	case variableLabel:
+		return cfg.decodeVariableBlock(block)
+	case variablesLabel:
+		return cfg.decodeVariablesBlock(block)
+	case localLabel:
+		return cfg.decodeLocalBlock(block)
+	case localsLabel:
+		return cfg.decodeLocalsBlock(block)
+	// NOTE: Both build and source blocks can be dynamically expanded.
+	//
+	// This means that while at this time we can already get some information
+	// about them, we may not be able to decode their final form at this time
+	// and we can only do so when their dependencies are evaluated.
+	case buildLabel:
+		return cfg.decodeBuildBlock(block)
+	case sourceLabel:
+		return cfg.decodeSourceBlock(block)
+	}
+
+	return hcl.Diagnostics{
+		&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid block type",
+			Detail:   fmt.Sprintf("The block %q is not a valid top-level block", block.Type),
+			Subject:  &block.DefRange,
+		},
+	}
+}
+
+func (cfg *PackerConfig) decodePackerBlock(block *hcl.Block) hcl.Diagnostics {
 	var diags hcl.Diagnostics
+	content, contentDiags := block.Body.Content(packerBlockSchema)
+	diags = append(diags, contentDiags...)
 
-	body := file.Body
-	content, moreDiags := body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case dataSourceLabel:
-			datasource, moreDiags := p.decodeDataBlock(block)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			ref := datasource.Ref()
-			if existing, found := cfg.Datasources[ref]; found {
-				diags = append(diags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Duplicate " + dataSourceLabel + " block",
-					Detail: fmt.Sprintf("This "+dataSourceLabel+" block has the "+
-						"same data type and name as a previous block declared "+
-						"at %s. Each "+dataSourceLabel+" must have a unique name per builder type.",
-						existing.block.DefRange.Ptr()),
-					Subject: datasource.block.DefRange.Ptr(),
-				})
-				continue
-			}
-			if cfg.Datasources == nil {
-				cfg.Datasources = Datasources{}
-			}
-			cfg.Datasources[ref] = *datasource
+	// We ignore "packer_version"" here because
+	// sniffCoreVersionRequirements already dealt with that
+	for _, innerBlock := range content.Blocks {
+		switch innerBlock.Type {
+		case "required_plugins":
+			reqs, reqsDiags := decodeRequiredPluginsBlock(innerBlock)
+			diags = append(diags, reqsDiags...)
+			cfg.Packer.RequiredPlugins = append(cfg.Packer.RequiredPlugins, reqs)
+		default:
+			continue
 		}
+
 	}
 
 	return diags
+}
+
+func (cfg *PackerConfig) decodeDatasource(block *hcl.Block) hcl.Diagnostics {
+	datasource, diags := cfg.decodeDataBlock(block)
+	if diags.HasErrors() {
+		return diags
+	}
+	ref := datasource.Ref()
+	if existing, found := cfg.Datasources[ref]; found {
+		return append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Duplicate " + dataSourceLabel + " block",
+			Detail: fmt.Sprintf("This "+dataSourceLabel+" block has the "+
+				"same data type and name as a previous block declared "+
+				"at %s. Each "+dataSourceLabel+" must have a unique name per builder type.",
+				existing.block.DefRange.Ptr()),
+			Subject: datasource.block.DefRange.Ptr(),
+		})
+	}
+	if cfg.Datasources == nil {
+		cfg.Datasources = Datasources{}
+	}
+	cfg.Datasources[ref] = *datasource
+
+	return diags
+}
+
+func (cfg *PackerConfig) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	r := &DatasourceBlock{
+		Type:  block.Labels[0],
+		Name:  block.Labels[1],
+		block: block,
+	}
+
+	if !hclsyntax.ValidIdentifier(r.Type) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid data source name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[0],
+		})
+	}
+	if !hclsyntax.ValidIdentifier(r.Name) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid data resource name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[1],
+		})
+	}
+
+	return r, diags
+}
+
+func (cfg *PackerConfig) decodeLocalBlock(block *hcl.Block) hcl.Diagnostics {
+	name := block.Labels[0]
+
+	content, diags := block.Body.Content(localBlockSchema)
+	if !hclsyntax.ValidIdentifier(name) {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid local name",
+			Detail:   badIdentifierDetail,
+			Subject:  &block.LabelRanges[0],
+		})
+	}
+
+	l := &LocalBlock{
+		Name: name,
+	}
+
+	if attr, exists := content.Attributes["sensitive"]; exists {
+		valDiags := gohcl.DecodeExpression(attr.Expr, nil, &l.Sensitive)
+		diags = append(diags, valDiags...)
+	}
+
+	if def, ok := content.Attributes["expression"]; ok {
+		l.Expr = def.Expr
+	}
+
+	cfg.LocalBlocks = append(cfg.LocalBlocks, l)
+
+	return diags
+}
+
+func (cfg *PackerConfig) decodeLocalsBlock(block *hcl.Block) hcl.Diagnostics {
+	attrs, diags := block.Body.JustAttributes()
+
+	for name, attr := range attrs {
+		cfg.LocalBlocks = append(cfg.LocalBlocks, &LocalBlock{
+			Name: name,
+			Expr: attr.Expr,
+		})
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) decodeVariableBlock(block *hcl.Block) hcl.Diagnostics {
+	// for input variables we allow to use env in the default value section.
+	ectx := &hcl.EvalContext{
+		Functions: map[string]function.Function{
+			"env": pkrfunction.EnvFunc,
+		},
+	}
+
+	return cfg.InputVariables.decodeVariableBlock(block, ectx)
+}
+
+func (cfg *PackerConfig) decodeVariablesBlock(block *hcl.Block) hcl.Diagnostics {
+	// for input variables we allow to use env in the default value section.
+	ectx := &hcl.EvalContext{
+		Functions: map[string]function.Function{
+			"env": pkrfunction.EnvFunc,
+		},
+	}
+
+	var diags hcl.Diagnostics
+
+	attrs, moreDiags := block.Body.JustAttributes()
+	diags = append(diags, moreDiags...)
+	for key, attr := range attrs {
+		moreDiags = cfg.InputVariables.decodeVariable(key, attr, ectx)
+		diags = append(diags, moreDiags...)
+	}
+
+	return diags
+}
+
+// decodeBuildBlock shallowly decodes a build block from the config.
+//
+// The final decoding step (which requires an up-to-date context) will be done
+// when we need it.
+func (cfg *PackerConfig) decodeBuildBlock(block *hcl.Block) hcl.Diagnostics {
+	build := &BuildBlock{
+		block: block,
+	}
+
+	cfg.Builds = append(cfg.Builds, build)
+
+	return nil
+}
+
+func (cfg *PackerConfig) decodeSourceBlock(block *hcl.Block) hcl.Diagnostics {
+	source, diags := cfg.decodeSource(block)
+	if diags.HasErrors() {
+		return diags
+	}
+
+	if cfg.Sources == nil {
+		cfg.Sources = map[SourceRef]SourceBlock{}
+	}
+
+	ref := source.Ref()
+	if existing, found := cfg.Sources[ref]; found {
+		return append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Duplicate " + sourceLabel + " block",
+			Detail: fmt.Sprintf("This "+sourceLabel+" block has the "+
+				"same builder type and name as a previous block declared "+
+				"at %s. Each "+sourceLabel+" must have a unique name per builder type.",
+				existing.block.DefRange.Ptr()),
+			Subject: source.block.DefRange.Ptr(),
+		})
+	}
+
+	cfg.Sources[ref] = source
+
+	return diags
+}
+
+// decodeBuildSource reads a used source block from a build:
+//
+//	build {
+//	  source "type.example" {
+//	    name = "local_name"
+//	  }
+//	}
+func (cfg *PackerConfig) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagnostics) {
+	ref := sourceRefFromString(block.Labels[0])
+	out := SourceUseBlock{SourceRef: ref}
+	var b struct {
+		Name string   `hcl:"name,optional"`
+		Rest hcl.Body `hcl:",remain"`
+	}
+	diags := gohcl.DecodeBody(block.Body, nil, &b)
+	if diags.HasErrors() {
+		return out, diags
+	}
+	out.LocalName = b.Name
+	out.Body = b.Rest
+	return out, nil
+}
+
+func (source *SourceBlock) finalizeDecodeSource(cfg *PackerConfig) hcl.Diagnostics {
+	if source.Ready {
+		return nil
+	}
+
+	source.Ready = true
+	dyn := dynblock.Expand(source.block.Body, cfg.EvalContext(DatasourceContext, nil))
+	// Expand without a base schema since nothing is known in advance for a
+	// source, but we still want to expand dynamic blocks if any
+	_, rem, diags := dyn.PartialContent(&hcl.BodySchema{})
+
+	// Only try to expand once, regardless of whether the source succeeded
+	// to expand dynamic data or not.
+	source.Ready = true
+	if diags.HasErrors() {
+		return diags
+	}
+
+	source.block = &hcl.Block{
+		Labels: []string{
+			source.Type,
+			source.Name,
+		},
+		Body: rem,
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
+	source := SourceBlock{
+		Type:  block.Labels[0],
+		Name:  block.Labels[1],
+		block: block,
+	}
+	var diags hcl.Diagnostics
+
+	return source, diags
 }

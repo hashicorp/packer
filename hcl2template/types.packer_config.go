@@ -178,40 +178,6 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	return diags
 }
 
-// parseLocalVariableBlocks looks in the AST for 'local' and 'locals' blocks and
-// returns them all.
-func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	var locals []*LocalBlock
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case localLabel:
-			block, moreDiags := decodeLocalBlock(block)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				return locals, diags
-			}
-			locals = append(locals, block)
-		case localsLabel:
-			attrs, moreDiags := block.Body.JustAttributes()
-			diags = append(diags, moreDiags...)
-			for name, attr := range attrs {
-				locals = append(locals, &LocalBlock{
-					Name: name,
-					Expr: attr.Expr,
-				})
-			}
-		}
-	}
-
-	return locals, diags
-}
-
 func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -831,4 +797,19 @@ func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
 	ui.Say(p.printVariables())
 	ui.Say(p.printBuilds())
 	return 0
+}
+
+func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
+	diags := cfg.InputVariables.ValidateValues()
+	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
+	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
+	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
+	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
+
+	filterVarsFromLogs(cfg.InputVariables)
+	filterVarsFromLogs(cfg.LocalVariables)
+
+	diags = append(diags, cfg.initializeBlocks()...)
+
+	return diags
 }
