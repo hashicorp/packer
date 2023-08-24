@@ -186,3 +186,23 @@ func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
 	}
 	return buildValue, nil
 }
+
+func GetVarsByType(block *hcl.Block, topLevelLabels ...string) []hcl.Traversal {
+	attributes, _ := block.Body.JustAttributes()
+
+	var vars []hcl.Traversal
+
+	for _, attr := range attributes {
+		for _, variable := range attr.Expr.Variables() {
+			rootLabel := variable.RootName()
+			for _, label := range topLevelLabels {
+				if label == rootLabel {
+					vars = append(vars, variable)
+					break
+				}
+			}
+		}
+	}
+
+	return vars
+}
