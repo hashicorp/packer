@@ -23,7 +23,7 @@ type HCPPackerRegistryBlock struct {
 	HCL2Ref
 }
 
-func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
+func (cfg *PackerConfig) decodeHCPRegistry(block *hcl.Block) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
 	par := &HCPPackerRegistryBlock{}
 	body := block.Body
 

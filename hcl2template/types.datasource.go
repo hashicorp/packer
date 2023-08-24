@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/hashicorp/packer/packer"
@@ -129,32 +128,4 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 		})
 	}
 	return datasource, diags
-}
-
-func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-	r := &DatasourceBlock{
-		Type:  block.Labels[0],
-		Name:  block.Labels[1],
-		block: block,
-	}
-
-	if !hclsyntax.ValidIdentifier(r.Type) {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid data source name",
-			Detail:   badIdentifierDetail,
-			Subject:  &block.LabelRanges[0],
-		})
-	}
-	if !hclsyntax.ValidIdentifier(r.Name) {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid data resource name",
-			Detail:   badIdentifierDetail,
-			Subject:  &block.LabelRanges[1],
-		})
-	}
-
-	return r, diags
 }

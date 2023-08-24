@@ -248,7 +248,10 @@ func TestParse_variables(t *testing.T) {
 			parseTestArgs{"testdata/variables/unset_used_string_variable.pkr.hcl", nil, nil},
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
-				Basedir:                 filepath.Join("testdata", "variables"),
+				Builds: Builds{
+					&BuildBlock{},
+				},
+				Basedir: filepath.Join("testdata", "variables"),
 				InputVariables: Variables{
 					"foo": &Variable{
 						Name: "foo",

@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/gohcl"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
@@ -22,6 +21,10 @@ type SourceBlock struct {
 	Type string
 	// Given name; if any
 	Name string
+
+	// ready signals that the source block is ready for use, i.e. it does not
+	// need some dynamic expansion before being used.
+	Ready bool
 
 	block *hcl.Block
 
@@ -64,40 +67,6 @@ func (b *SourceUseBlock) ctyValues() map[string]cty.Value {
 		"type": cty.StringVal(b.Type),
 		"name": cty.StringVal(b.name()),
 	}
-}
-
-// decodeBuildSource reads a used source block from a build:
-//
-//	build {
-//	  source "type.example" {
-//	    name = "local_name"
-//	  }
-//	}
-func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagnostics) {
-	ref := sourceRefFromString(block.Labels[0])
-	out := SourceUseBlock{SourceRef: ref}
-	var b struct {
-		Name string   `hcl:"name,optional"`
-		Rest hcl.Body `hcl:",remain"`
-	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
-	if diags.HasErrors() {
-		return out, diags
-	}
-	out.LocalName = b.Name
-	out.Body = b.Rest
-	return out, nil
-}
-
-func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
-	source := SourceBlock{
-		Type:  block.Labels[0],
-		Name:  block.Labels[1],
-		block: block,
-	}
-	var diags hcl.Diagnostics
-
-	return source, diags
 }
 
 func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalContext) (packersdk.Builder, hcl.Diagnostics, []string) {
