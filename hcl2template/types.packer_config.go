@@ -381,7 +381,7 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 	// If we've gotten here, then it means ref doesn't seem to have any further
 	// dependencies we need to evaluate first. Evaluate it, with the cfg's full
 	// data source context.
-	datasource, startDiags := cfg.startDatasource(cfg.parser.PluginConfig.DataSources, ref, true)
+	datasource, startDiags := cfg.startDatasource(ds)
 	if startDiags.HasErrors() {
 		diags = append(diags, startDiags...)
 		return dependencies, diags
