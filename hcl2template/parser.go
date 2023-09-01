@@ -370,6 +370,8 @@ func (cfg *PackerConfig) decodeDatasource(block *hcl.Block) hcl.Diagnostics {
 	}
 	cfg.Datasources[ref] = datasource
 
+	datasource.getDependencies()
+
 	return diags
 }
 

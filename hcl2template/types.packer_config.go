@@ -10,7 +10,6 @@ import (
 
 	"github.com/gobwas/glob"
 	hcl "github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
@@ -262,122 +261,6 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics 
 	}
 
 	return diags
-}
-
-func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	dependencies := map[DatasourceRef][]DatasourceRef{}
-	for ref, ds := range cfg.Datasources {
-		if ds.value != (cty.Value{}) {
-			continue
-		}
-		// Pre-examine body of this data source to see if it uses another data
-		// source in any of its input expressions. If so, skip evaluating it for
-		// now, and add it to a list of datasources to evaluate again, later,
-		// with the datasources in its context.
-		dependencies[ref] = []DatasourceRef{}
-
-		// Note: when looking at the expressions, we only need to care about
-		// attributes, as HCL2 expressions are not allowed in a block's labels.
-		vars := GetVarsByType(ds.block, "data")
-		for _, v := range vars {
-			// construct, backwards, the data source type and name we
-			// need to evaluate before this one can be evaluated.
-			dependsOn := DatasourceRef{
-				Type: v[1].(hcl.TraverseAttr).Name,
-				Name: v[2].(hcl.TraverseAttr).Name,
-			}
-			dependencies[ref] = append(dependencies[ref], dependsOn)
-		}
-	}
-
-	// Now that most of our data sources have been started and executed, we can
-	// try to execute the ones that depend on other data sources.
-	for ref := range dependencies {
-		_, moreDiags := cfg.recursivelyEvaluateDatasources(ref, dependencies, skipExecution, 0)
-		// Deduplicate diagnostics to prevent recursion messes.
-		cleanedDiags := map[string]*hcl.Diagnostic{}
-		for _, diag := range moreDiags {
-			cleanedDiags[diag.Summary] = diag
-		}
-
-		for _, diag := range cleanedDiags {
-			diags = append(diags, diag)
-		}
-	}
-
-	return diags
-}
-
-func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, dependencies map[DatasourceRef][]DatasourceRef, skipExecution bool, depth int) (map[DatasourceRef][]DatasourceRef, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-	var moreDiags hcl.Diagnostics
-
-	if depth > 10 {
-		// Add a comment about recursion.
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Max datasource recursion depth exceeded.",
-			Detail: "An error occured while recursively evaluating data " +
-				"sources. Either your data source depends on more than ten " +
-				"other data sources, or your data sources have a cyclic " +
-				"dependency. Please simplify your config to continue. ",
-			Subject: &(cfg.Datasources[ref]).block.DefRange,
-		})
-		return dependencies, diags
-	}
-
-	ds := cfg.Datasources[ref]
-	// Make sure everything ref depends on has already been evaluated.
-	for _, dep := range dependencies[ref] {
-		if _, ok := dependencies[dep]; ok {
-			depth += 1
-			// If this dependency is not in the map, it means we've already
-			// launched and executed this datasource. Otherwise, it means
-			// we still need to run it. RECURSION TIME!!
-			dependencies, moreDiags = cfg.recursivelyEvaluateDatasources(dep, dependencies, skipExecution, depth)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				diags = append(diags, moreDiags...)
-				return dependencies, diags
-			}
-		}
-	}
-	// If we've gotten here, then it means ref doesn't seem to have any further
-	// dependencies we need to evaluate first. Evaluate it, with the cfg's full
-	// data source context.
-	datasource, startDiags := cfg.startDatasource(ds)
-	if startDiags.HasErrors() {
-		diags = append(diags, startDiags...)
-		return dependencies, diags
-	}
-
-	if skipExecution {
-		placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
-		ds.value = placeholderValue
-		cfg.Datasources[ref] = ds
-		return dependencies, diags
-	}
-
-	opts, _ := decodeHCL2Spec(ds.block.Body, cfg.EvalContext(DatasourceContext, nil), datasource)
-	sp := packer.CheckpointReporter.AddSpan(ref.Type, "datasource", opts)
-	realValue, err := datasource.Execute()
-	sp.End(err)
-	if err != nil {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary:  err.Error(),
-			Subject:  &cfg.Datasources[ref].block.DefRange,
-			Severity: hcl.DiagError,
-		})
-		return dependencies, diags
-	}
-
-	ds.value = realValue
-	cfg.Datasources[ref] = ds
-	// remove ref from the dependencies map.
-	delete(dependencies, ref)
-	return dependencies, diags
 }
 
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
@@ -799,7 +682,7 @@ func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
 	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
-	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
+	diags = append(diags, cfg.executeDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
