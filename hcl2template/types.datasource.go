@@ -26,7 +26,7 @@ type DatasourceRef struct {
 	Name string
 }
 
-type Datasources map[DatasourceRef]DatasourceBlock
+type Datasources map[DatasourceRef]*DatasourceBlock
 
 func (data *DatasourceBlock) Ref() DatasourceRef {
 	return DatasourceRef{

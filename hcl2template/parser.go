@@ -368,7 +368,7 @@ func (cfg *PackerConfig) decodeDatasource(block *hcl.Block) hcl.Diagnostics {
 	if cfg.Datasources == nil {
 		cfg.Datasources = Datasources{}
 	}
-	cfg.Datasources[ref] = *datasource
+	cfg.Datasources[ref] = datasource
 
 	return diags
 }
