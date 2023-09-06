@@ -208,6 +208,10 @@ func GetVarsByType(block *hcl.Block, topLevelLabels ...string) []hcl.Traversal {
 		}
 	}
 
+	return filterTraversalsByRootType(travs, topLevelLabels...)
+}
+
+func filterTraversalsByRootType(travs []hcl.Traversal, topLevelLabels ...string) []hcl.Traversal {
 	var rets []hcl.Traversal
 	for _, t := range travs {
 		varRootname := t.RootName()
