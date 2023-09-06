@@ -616,14 +616,14 @@ func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
-	diags = append(diags, cfg.executeDatasources(opts.SkipDatasourcesExecution)...)
-	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
-	diags = append(diags, cfg.evaluateLocalVariables()...)
+	diags = diags.Extend(checkForDuplicateLocalDefinition(cfg.LocalBlocks))
+	diags = diags.Extend(cfg.executeDatasources(opts.SkipDatasourcesExecution))
+	diags = diags.Extend(cfg.evaluateLocalVariables())
 
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
 
-	diags = append(diags, cfg.initializeBlocks()...)
+	diags = diags.Extend(cfg.initializeBlocks())
 
 	return diags
 }
