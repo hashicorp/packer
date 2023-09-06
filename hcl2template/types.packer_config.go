@@ -616,7 +616,6 @@ func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
-	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
 	diags = append(diags, cfg.executeDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables()...)
