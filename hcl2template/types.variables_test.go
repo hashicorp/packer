@@ -396,7 +396,6 @@ func TestParse_variables(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "variables"),
-				LocalVariables:          Variables{},
 			},
 			true, true,
 			[]packersdk.Build{},

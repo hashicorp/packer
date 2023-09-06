@@ -177,49 +177,6 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	return diags
 }
 
-func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	for _, local := range locals {
-		diags = append(diags, c.evaluateLocalVariable(local)...)
-	}
-
-	return diags
-}
-
-func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	if len(locals) == 0 {
-		return diags
-	}
-
-	if c.LocalVariables == nil {
-		c.LocalVariables = Variables{}
-	}
-
-	for foundSomething := true; foundSomething; {
-		foundSomething = false
-		for i := 0; i < len(locals); {
-			local := locals[i]
-			moreDiags := c.evaluateLocalVariable(local)
-			if moreDiags.HasErrors() {
-				i++
-				continue
-			}
-			foundSomething = true
-			locals = append(locals[:i], locals[i+1:]...)
-		}
-	}
-
-	if len(locals) != 0 {
-		// get errors from remaining variables
-		return c.evaluateAllLocalVariables(locals)
-	}
-
-	return diags
-}
-
 func checkForDuplicateLocalDefinition(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
@@ -238,28 +195,6 @@ func checkForDuplicateLocalDefinition(locals []*LocalBlock) hcl.Diagnostics {
 		}
 		names[local.Name] = struct{}{}
 	}
-	return diags
-}
-
-func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return diags
-	}
-	c.LocalVariables[local.Name] = &Variable{
-		Name:      local.Name,
-		Sensitive: local.Sensitive,
-		Values: []VariableAssignment{{
-			Value: value,
-			Expr:  local.Expr,
-			From:  "default",
-		}},
-		Type: value.Type(),
-	}
-
 	return diags
 }
 
@@ -684,7 +619,7 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	diags = append(diags, cfg.LocalVariables.ValidateValues()...)
 	diags = append(diags, cfg.executeDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
-	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
+	diags = append(diags, cfg.evaluateLocalVariables()...)
 
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
