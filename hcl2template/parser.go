@@ -428,6 +428,7 @@ func (cfg *PackerConfig) decodeLocalBlock(block *hcl.Block) hcl.Diagnostics {
 	if def, ok := content.Attributes["expression"]; ok {
 		l.Expr = def.Expr
 	}
+	l.getDependencies()
 
 	cfg.LocalBlocks = append(cfg.LocalBlocks, l)
 
@@ -438,10 +439,12 @@ func (cfg *PackerConfig) decodeLocalsBlock(block *hcl.Block) hcl.Diagnostics {
 	attrs, diags := block.Body.JustAttributes()
 
 	for name, attr := range attrs {
-		cfg.LocalBlocks = append(cfg.LocalBlocks, &LocalBlock{
+		l := &LocalBlock{
 			Name: name,
 			Expr: attr.Expr,
-		})
+		}
+		l.getDependencies()
+		cfg.LocalBlocks = append(cfg.LocalBlocks, l)
 	}
 
 	return diags

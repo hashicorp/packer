@@ -30,6 +30,154 @@ type LocalBlock struct {
 	// When Sensitive is set to true Packer will try its best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
+	// dependencies is the list of dependencies for the variable.
+	//
+	// We only focus on other local variables, since with the current
+	// scheduling model, datasources are necessarily all executed at the
+	// time we attempt to evaluate the value of the expression
+	dependencies []string
+	// evaluated keeps track of whether the variable has been evaluated or not
+	//
+	// This is tracked as an argument here since otherwise we don't
+	// necessarily know with certainty if the variable was evaluated or not, as
+	// its value gets added to config.LocalVariables only if it succeeded.
+	evaluated bool
+}
+
+func (local *LocalBlock) getDependencies() {
+	var dependencies []string
+
+	// In borderline cases (read invalid template), the expression may not
+	// be part of the parsed HCL template. While this is invalid, and caught
+	// during validation, the validation happens later in the process, so
+	// calling this on a local block without an expression crashes if we
+	// continue here.
+	// To avoid that, we simply return immediately if there's no expression
+	// in the block.
+	expr := local.Expr
+	if expr == nil {
+		return
+	}
+
+	// Note: when looking at the expressions, we only need to care about
+	// attributes, as HCL2 expressions are not allowed in a block's labels.
+	locals := filterTraversalsByRootType(expr.Variables(), "local")
+	for _, local := range locals {
+		// If for some reason one reference is incomplete, trying to
+		// access the next step in the traversal will crash after.
+		//
+		// To avoid this problem, we ignore local variable references
+		// without at least 2 parts in the traversal.
+		if len(local) < 2 {
+			continue
+		}
+		dependencies = append(dependencies, local[1].(hcl.TraverseAttr).Name)
+	}
+
+	local.dependencies = dependencies
+}
+
+const varNotReadyForEval = "Local variable not ready for evaluation"
+
+func (local *LocalBlock) Evaluate(config *PackerConfig) hcl.Diagnostics {
+	// No need to re-evaluate if already done
+	if local.evaluated {
+		return nil
+	}
+
+	var diags hcl.Diagnostics
+
+	// Is dependencies have not been evaluated yet, we don't need to try yet
+	// as the expression will error when we attmpt to.
+	for _, dep := range local.dependencies {
+		// LocalVariables contains the list
+		if config.LocalVariables[dep] == nil {
+			return append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  varNotReadyForEval,
+				Detail:   "Local variable local.%s is not ready yet to be evaluated as its dependencies are not ready yet.",
+			})
+		}
+	}
+
+	value, moreDiags := local.Expr.Value(config.EvalContext(LocalContext, nil))
+	diags = append(diags, moreDiags...)
+	// We always set this to true after attempting to evaluate the value
+	// as otherwise we don't have a good way to guess if the block needs
+	// ulterior evaluation.
+	local.evaluated = true
+
+	if moreDiags.HasErrors() {
+		return diags
+	}
+
+	if config.LocalVariables == nil {
+		config.LocalVariables = Variables{}
+	}
+
+	config.LocalVariables[local.Name] = &Variable{
+		Name:      local.Name,
+		Sensitive: local.Sensitive,
+		Values: []VariableAssignment{{
+			Value: value,
+			Expr:  local.Expr,
+			From:  "default",
+		}},
+		Type: value.Type(),
+	}
+
+	return diags
+}
+
+func (c PackerConfig) localVariablesEvaluationDone() bool {
+	for _, loc := range c.LocalBlocks {
+		if !loc.evaluated {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (c *PackerConfig) evaluateLocalVariables() hcl.Diagnostics {
+	if len(c.LocalBlocks) == 0 {
+		return nil
+	}
+
+	// If we're done evaluating variables, we can leave immediately
+	if c.localVariablesEvaluationDone() {
+		return nil
+	}
+
+	var diags hcl.Diagnostics
+
+	found := false
+	for _, loc := range c.LocalBlocks {
+		if loc.evaluated {
+			continue
+		}
+
+		evalDiags := loc.Evaluate(c)
+		// If there's a not ready for eval error, we continue iterating
+		// on the other variable blocks, until we reach a point where
+		// we can evaluate it.
+		if evalDiags.HasErrors() &&
+			evalDiags[0].Summary == varNotReadyForEval {
+			continue
+		}
+
+		found = true
+	}
+
+	if !found {
+		return append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to evaluate local variables",
+			Detail:   "Packer couldn't evaluate any more variables, and some are pending. This likely means your configuration has a dependency cycle in the local variables, that needs to be corrected before building the template.",
+		})
+	}
+
+	return diags.Extend(c.evaluateLocalVariables())
 }
 
 // VariableAssignment represents a way a variable was set: the expression
