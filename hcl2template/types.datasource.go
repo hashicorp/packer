@@ -58,13 +58,13 @@ func (ds *DatasourceBlock) getDependencies() {
 	ds.dependencies = dependencies
 }
 
-const notReadyDataSourceError = "Dependencies not ready"
+const NotReadyDataSourceError = "Dependencies not ready"
 
 // executed returns whether or not the datasource was executed
 //
 // Having a non-empty cty.Value object means this was filled-up after the
 // datasource has been executed, so this is what we use for this test.
-func (ds DatasourceBlock) executed() bool {
+func (ds DatasourceBlock) Executed() bool {
 	return ds.value != cty.Value{}
 }
 
@@ -89,7 +89,7 @@ func (ds *DatasourceBlock) Execute(cfg *PackerConfig, skipExecution bool) hcl.Di
 			continue
 		}
 
-		if !dep.executed() {
+		if !dep.Executed() {
 			ok = false
 		}
 	}
@@ -97,7 +97,7 @@ func (ds *DatasourceBlock) Execute(cfg *PackerConfig, skipExecution bool) hcl.Di
 	if !ok {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
-			Summary:  notReadyDataSourceError,
+			Summary:  NotReadyDataSourceError,
 			Detail:   "At least one dependency for the datasource is not executed already",
 			Subject:  &ds.block.DefRange,
 		})
@@ -234,7 +234,7 @@ func (cfg *PackerConfig) startDatasource(ds DatasourceBlock) (packersdk.Datasour
 // datasourcesDone checks whether all the datasources have been executed or not
 func (cfg *PackerConfig) datasourcesDone() bool {
 	for _, ds := range cfg.Datasources {
-		if !ds.executed() {
+		if !ds.Executed() {
 			return false
 		}
 	}
@@ -253,13 +253,13 @@ func (cfg *PackerConfig) executeDatasources(skipExecution bool) hcl.Diagnostics 
 	foundSomething := false
 outerDSEval:
 	for _, ds := range cfg.Datasources {
-		if ds.executed() {
+		if ds.Executed() {
 			continue
 		}
 
 		diags := ds.Execute(cfg, skipExecution)
 		for _, diag := range diags {
-			if diag.Summary == notReadyDataSourceError {
+			if diag.Summary == NotReadyDataSourceError {
 				// If we have a not ready error in the
 				// datasource list, we should attempt to run the
 				// rest, and eventually settle if we cannot move

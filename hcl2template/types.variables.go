@@ -77,7 +77,11 @@ func (local *LocalBlock) getDependencies() {
 	local.dependencies = dependencies
 }
 
-const varNotReadyForEval = "Local variable not ready for evaluation"
+const VarNotReadyForEval = "Local variable not ready for evaluation"
+
+func (local LocalBlock) Evaluated() bool {
+	return local.evaluated
+}
 
 func (local *LocalBlock) Evaluate(config *PackerConfig) hcl.Diagnostics {
 	// No need to re-evaluate if already done
@@ -94,7 +98,7 @@ func (local *LocalBlock) Evaluate(config *PackerConfig) hcl.Diagnostics {
 		if config.LocalVariables[dep] == nil {
 			return append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
-				Summary:  varNotReadyForEval,
+				Summary:  VarNotReadyForEval,
 				Detail:   "Local variable local.%s is not ready yet to be evaluated as its dependencies are not ready yet.",
 			})
 		}
@@ -162,7 +166,7 @@ func (c *PackerConfig) evaluateLocalVariables() hcl.Diagnostics {
 		// on the other variable blocks, until we reach a point where
 		// we can evaluate it.
 		if evalDiags.HasErrors() &&
-			evalDiags[0].Summary == varNotReadyForEval {
+			evalDiags[0].Summary == VarNotReadyForEval {
 			continue
 		}
 
