@@ -61,11 +61,18 @@ type PackerConfig struct {
 	files  []*hcl.File
 
 	// Fields passed as command line flags
-	except  []glob.Glob
-	only    []glob.Glob
 	force   bool
 	debug   bool
 	onError string
+
+	// except/only are options to filter builds and post-processors
+	//
+	// if an option is specified but unused, we print a warning, stating
+	// which option is specified, but unused
+	except     map[string]glob.Glob
+	only       map[string]glob.Glob
+	exceptUses map[string]bool
+	onlyUses   map[string]bool
 }
 
 type ValidationOptions struct {
@@ -273,9 +280,10 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			}
 			// -except
 			exclude := false
-			for _, exceptGlob := range cfg.except {
+			for p, exceptGlob := range cfg.except {
 				if exceptGlob.Match(name) {
 					exclude = true
+					cfg.exceptUses[p] = true
 					break
 				}
 			}
@@ -307,6 +315,50 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 	return res, diags
 }
 
+func (cfg *PackerConfig) prepareGlobUsage() {
+	if cfg.onlyUses == nil {
+		cfg.onlyUses = map[string]bool{}
+	}
+	for only := range cfg.only {
+		cfg.onlyUses[only] = false
+	}
+
+	if cfg.exceptUses == nil {
+		cfg.exceptUses = map[string]bool{}
+	}
+	for except := range cfg.except {
+		cfg.exceptUses[except] = false
+	}
+}
+
+func (cfg *PackerConfig) reportUnusedFilters(buildNames []string) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	onlyUnused := getUnusedFilters(cfg.onlyUses)
+	if onlyUnused != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "Unused --only filters specified",
+			Detail: fmt.Sprintf(
+				"Some --only options were specified in the command-line, but weren't used to get builds from the template: %v\n"+
+					"List of available builds: %v", onlyUnused, buildNames),
+		})
+	}
+
+	exceptUnused := getUnusedFilters(cfg.exceptUses)
+	if exceptUnused != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "Unused --except filters specified",
+			Detail: fmt.Sprintf(
+				"Some --except options were specified in the command-line, but weren't used to filter out builds or post-processors from the template: %v\n"+
+					"List of available builds: %v", exceptUnused, buildNames),
+		})
+	}
+
+	return diags
+}
+
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	var allBuilds []packersdk.Build
 	var diags hcl.Diagnostics
@@ -327,6 +379,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	diags = diags.Extend(convertDiags)
 	cfg.force = opts.Force
 	cfg.onError = opts.OnError
+
+	cfg.prepareGlobUsage()
 
 	for _, build := range cfg.Builds {
 		cbs, cbDiags := build.ToCoreBuilds(cfg)
@@ -353,6 +407,17 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 			allBuilds = append(allBuilds, cb)
 		}
 	}
+
+	buildNames := []string{}
+	for _, cb := range allBuilds {
+		buildNames = append(buildNames, cb.Name())
+	}
+
+	diags = diags.Extend(
+		cfg.reportUnusedFilters(
+			buildNames,
+		),
+	)
 
 	return allBuilds, diags
 }

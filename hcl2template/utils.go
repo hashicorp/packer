@@ -100,8 +100,8 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 }
 
 // Convert -only and -except globs to glob.Glob instances.
-func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl.Diagnostics) {
-	var globs []glob.Glob
+func convertFilterOption(patterns []string, optionName string) (map[string]glob.Glob, hcl.Diagnostics) {
+	globs := map[string]glob.Glob{}
 	var diags hcl.Diagnostics
 
 	for _, pattern := range patterns {
@@ -112,10 +112,22 @@ func convertFilterOption(patterns []string, optionName string) ([]glob.Glob, hcl
 				Severity: hcl.DiagError,
 			})
 		}
-		globs = append(globs, g)
+		globs[pattern] = g
 	}
 
 	return globs, diags
+}
+
+func getUnusedFilters(filterUsed map[string]bool) []string {
+	var unused []string
+
+	for p, ok := range filterUsed {
+		if !ok {
+			unused = append(unused, p)
+		}
+	}
+
+	return unused
 }
 
 func PrintableCtyValue(v cty.Value) string {
