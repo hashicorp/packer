@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
@@ -128,95 +127,7 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	for _, build := range cfg.Builds {
-		// Since the build's contents may not have been dynamically
-		// expanded when we first loaded the config from the template
-		// file, we decode it now.
-		diags = append(diags, build.finalizeDecode(cfg)...)
-		if diags.HasErrors() {
-			continue
-		}
-
-		for i := range build.Sources {
-			// here we grab a pointer to the source usage because we will set
-			// its body.
-			srcUsage := &(build.Sources[i])
-			if !cfg.parser.PluginConfig.Builders.Has(srcUsage.Type) {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + buildSourceLabel + " type " + srcUsage.Type,
-					Subject:  &build.HCL2Ref.DefRange,
-					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
-					Severity: hcl.DiagError,
-				})
-				continue
-			}
-
-			sourceDefinition, found := cfg.Sources[srcUsage.SourceRef]
-			if !found {
-				availableSrcs := listAvailableSourceNames(cfg.Sources)
-				detail := fmt.Sprintf("Known: %v", availableSrcs)
-				if sugg := didyoumean.NameSuggestion(srcUsage.SourceRef.String(), availableSrcs); sugg != "" {
-					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
-				}
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + sourceLabel + " " + srcUsage.SourceRef.String(),
-					Subject:  build.HCL2Ref.DefRange.Ptr(),
-					Severity: hcl.DiagError,
-					Detail:   detail,
-				})
-				continue
-			}
-
-			// Before attempting to use the body for merging, we
-			// finalise its decoding if necessary.
-			diags = append(diags, sourceDefinition.finalizeDecodeSource(cfg)...)
-			if diags.HasErrors() {
-				continue
-			}
-
-			body := sourceDefinition.block.Body
-			if srcUsage.Body != nil {
-				// merge additions into source definition to get a new body.
-				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})
-			}
-
-			srcUsage.Body = body
-		}
-
-		for _, provBlock := range build.ProvisionerBlocks {
-			if !cfg.parser.PluginConfig.Provisioners.Has(provBlock.PType) {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provBlock.PType),
-					Subject:  provBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
-					Severity: hcl.DiagError,
-				})
-			}
-		}
-
-		if build.ErrorCleanupProvisionerBlock != nil {
-			if !cfg.parser.PluginConfig.Provisioners.Has(build.ErrorCleanupProvisionerBlock.PType) {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  fmt.Sprintf("Unknown "+buildErrorCleanupProvisionerLabel+" type %q", build.ErrorCleanupProvisionerBlock.PType),
-					Subject:  build.ErrorCleanupProvisionerBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildErrorCleanupProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
-					Severity: hcl.DiagError,
-				})
-			}
-		}
-
-		for _, ppList := range build.PostProcessorsLists {
-			for _, ppBlock := range ppList {
-				if !cfg.parser.PluginConfig.PostProcessors.Has(ppBlock.PType) {
-					diags = append(diags, &hcl.Diagnostic{
-						Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", ppBlock.PType),
-						Subject:  ppBlock.HCL2Ref.TypeRange.Ptr(),
-						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.PostProcessors.List()),
-						Severity: hcl.DiagError,
-					})
-				}
-			}
-		}
-
+		diags = diags.Extend(build.Initialize(cfg))
 	}
 
 	return diags
