@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -263,4 +264,109 @@ func (build *BuildBlock) finalizeDecode(cfg *PackerConfig) hcl.Diagnostics {
 	}
 
 	return diags
+}
+
+// ToCoreBuilds extracts the core builds from a build block.
+//
+// Since build blocks can have multiple sources, it can lead to multiple builds
+// for each build block.
+func (build BuildBlock) ToCoreBuilds(cfg *PackerConfig) ([]*packer.CoreBuild, hcl.Diagnostics) {
+	var res []*packer.CoreBuild
+	var diags hcl.Diagnostics
+
+	for _, srcUsage := range build.Sources {
+		_, found := cfg.Sources[srcUsage.SourceRef]
+		if !found {
+			diags = append(diags, &hcl.Diagnostic{
+				Summary:  fmt.Sprintf("Unknown %s %s", sourceLabel, srcUsage.String()),
+				Subject:  build.HCL2Ref.DefRange.Ptr(),
+				Severity: hcl.DiagError,
+				Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
+			})
+			continue
+		}
+
+		pcb := &packer.CoreBuild{
+			BuildName: build.Name,
+			Type:      srcUsage.String(),
+		}
+		if !cfg.keepBuild(pcb) {
+			continue
+		}
+
+		builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil))
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			continue
+		}
+
+		decoded, _ := decodeHCL2Spec(srcUsage.Body, cfg.EvalContext(BuildContext, nil), builder)
+		pcb.HCLConfig = decoded
+
+		// If the builder has provided a list of to-be-generated variables that
+		// should be made accessible to provisioners, pass that list into
+		// the provisioner prepare() so that the provisioner can appropriately
+		// validate user input against what will become available. Otherwise,
+		// only pass the default variables, using the basic placeholder data.
+		unknownBuildValues := map[string]cty.Value{}
+		for _, k := range append(packer.BuilderDataCommonKeys, generatedVars...) {
+			unknownBuildValues[k] = cty.StringVal("<unknown>")
+		}
+		unknownBuildValues["name"] = cty.StringVal(build.Name)
+
+		variables := map[string]cty.Value{
+			sourcesAccessor: cty.ObjectVal(srcUsage.ctyValues()),
+			buildAccessor:   cty.ObjectVal(unknownBuildValues),
+		}
+
+		provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(BuildContext, variables))
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			continue
+		}
+		pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables))
+		diags = append(diags, moreDiags...)
+		if moreDiags.HasErrors() {
+			continue
+		}
+
+		if build.ErrorCleanupProvisionerBlock != nil &&
+			!build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
+			errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			pcb.CleanupProvisioner = errorCleanupProv
+		}
+
+		pcb.Builder = builder
+		pcb.Provisioners = provisioners
+		pcb.PostProcessors = pps
+
+		res = append(res, pcb)
+	}
+
+	return res, diags
+}
+
+func (cfg *PackerConfig) keepBuild(cb *packer.CoreBuild) bool {
+	keep := false
+	for _, onlyGlob := range cfg.only {
+		if onlyGlob.Match(cb.Name()) {
+			keep = true
+			break
+		}
+	}
+	if !keep && len(cfg.only) > 0 {
+		return false
+	}
+
+	for _, exceptGlob := range cfg.except {
+		if exceptGlob.Match(cb.Name()) {
+			return false
+		}
+	}
+
+	return true
 }
