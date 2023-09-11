@@ -182,9 +182,9 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 
 	builderVars := source.builderVariables()
 	builderVars["packer_core_version"] = cfg.CorePackerVersionString
-	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
-	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
-	builderVars["packer_on_error"] = cfg.onError
+	builderVars["packer_debug"] = strconv.FormatBool(cfg.Debug)
+	builderVars["packer_force"] = strconv.FormatBool(cfg.Force)
+	builderVars["packer_on_error"] = cfg.OnError
 
 	hclProvisioner := &HCL2Provisioner{
 		Provisioner:      provisioner,

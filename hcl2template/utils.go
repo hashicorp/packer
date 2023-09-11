@@ -100,7 +100,7 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 }
 
 // Convert -only and -except globs to glob.Glob instances.
-func convertFilterOption(patterns []string, optionName string) (map[string]glob.Glob, hcl.Diagnostics) {
+func ConvertFilterOption(patterns []string, optionName string) (map[string]glob.Glob, hcl.Diagnostics) {
 	globs := map[string]glob.Glob{}
 	var diags hcl.Diagnostics
 

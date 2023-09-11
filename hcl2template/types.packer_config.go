@@ -61,18 +61,18 @@ type PackerConfig struct {
 	files  []*hcl.File
 
 	// Fields passed as command line flags
-	force   bool
-	debug   bool
-	onError string
+	Force   bool
+	Debug   bool
+	OnError string
 
 	// except/only are options to filter builds and post-processors
 	//
 	// if an option is specified but unused, we print a warning, stating
 	// which option is specified, but unused
-	except     map[string]glob.Glob
-	only       map[string]glob.Glob
-	exceptUses map[string]bool
-	onlyUses   map[string]bool
+	Except     map[string]glob.Glob
+	Only       map[string]glob.Glob
+	ExceptUses map[string]bool
+	OnlyUses   map[string]bool
 }
 
 type ValidationOptions struct {
@@ -280,10 +280,10 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			}
 			// -except
 			exclude := false
-			for p, exceptGlob := range cfg.except {
+			for p, exceptGlob := range cfg.Except {
 				if exceptGlob.Match(name) {
 					exclude = true
-					cfg.exceptUses[p] = true
+					cfg.ExceptUses[p] = true
 					break
 				}
 			}
@@ -315,26 +315,26 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 	return res, diags
 }
 
-func (cfg *PackerConfig) prepareGlobUsage() {
-	if cfg.onlyUses == nil {
-		cfg.onlyUses = map[string]bool{}
+func (cfg *PackerConfig) PrepareGlobUsage() {
+	if cfg.OnlyUses == nil {
+		cfg.OnlyUses = map[string]bool{}
 	}
-	for only := range cfg.only {
-		cfg.onlyUses[only] = false
+	for only := range cfg.Only {
+		cfg.OnlyUses[only] = false
 	}
 
-	if cfg.exceptUses == nil {
-		cfg.exceptUses = map[string]bool{}
+	if cfg.ExceptUses == nil {
+		cfg.ExceptUses = map[string]bool{}
 	}
-	for except := range cfg.except {
-		cfg.exceptUses[except] = false
+	for except := range cfg.Except {
+		cfg.ExceptUses[except] = false
 	}
 }
 
-func (cfg *PackerConfig) reportUnusedFilters(buildNames []string) hcl.Diagnostics {
+func (cfg *PackerConfig) ReportUnusedFilters(buildNames []string) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	onlyUnused := getUnusedFilters(cfg.onlyUses)
+	onlyUnused := getUnusedFilters(cfg.OnlyUses)
 	if onlyUnused != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
@@ -345,7 +345,7 @@ func (cfg *PackerConfig) reportUnusedFilters(buildNames []string) hcl.Diagnostic
 		})
 	}
 
-	exceptUnused := getUnusedFilters(cfg.exceptUses)
+	exceptUnused := getUnusedFilters(cfg.ExceptUses)
 	if exceptUnused != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagWarning,
@@ -372,15 +372,15 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	}
 
 	var convertDiags hcl.Diagnostics
-	cfg.debug = opts.Debug
-	cfg.except, convertDiags = convertFilterOption(opts.Except, "except")
+	cfg.Debug = opts.Debug
+	cfg.Except, convertDiags = ConvertFilterOption(opts.Except, "except")
 	diags = diags.Extend(convertDiags)
-	cfg.only, convertDiags = convertFilterOption(opts.Only, "only")
+	cfg.Only, convertDiags = ConvertFilterOption(opts.Only, "only")
 	diags = diags.Extend(convertDiags)
-	cfg.force = opts.Force
-	cfg.onError = opts.OnError
+	cfg.Force = opts.Force
+	cfg.OnError = opts.OnError
 
-	cfg.prepareGlobUsage()
+	cfg.PrepareGlobUsage()
 
 	for _, build := range cfg.Builds {
 		cbs, cbDiags := build.ToCoreBuilds(cfg)
@@ -414,7 +414,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 	}
 
 	diags = diags.Extend(
-		cfg.reportUnusedFilters(
+		cfg.ReportUnusedFilters(
 			buildNames,
 		),
 	)
