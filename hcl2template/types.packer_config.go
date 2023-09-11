@@ -257,7 +257,7 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 
 // getCoreBuildProvisioners takes a list of post processor block, starts
 // according provisioners and sends parsed HCL2 over to it.
-func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext, exceptMatches *int) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
+func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, blocksList [][]*PostProcessorBlock, ectx *hcl.EvalContext) ([][]packer.CoreBuildPostProcessor, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	res := [][]packer.CoreBuildPostProcessor{}
 	for _, blocks := range blocksList {
@@ -276,7 +276,6 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 			for _, exceptGlob := range cfg.except {
 				if exceptGlob.Match(name) {
 					exclude = true
-					*exceptMatches = *exceptMatches + 1
 					break
 				}
 			}
@@ -308,175 +307,54 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 	return res, diags
 }
 
-// GetBuilds returns a list of packer Build based on the HCL2 parsed build
-// blocks. All Builders, Provisioners and Post Processors will be started and
-// configured.
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
-	res := []packersdk.Build{}
+	var allBuilds []packersdk.Build
 	var diags hcl.Diagnostics
-	possibleBuildNames := []string{}
-
-	cfg.debug = opts.Debug
-	cfg.force = opts.Force
-	cfg.onError = opts.OnError
 
 	if len(cfg.Builds) == 0 {
-		return res, append(diags, &hcl.Diagnostic{
+		return nil, append(diags, &hcl.Diagnostic{
 			Summary:  "Missing build block",
 			Detail:   "A build block with one or more sources is required for executing a build.",
 			Severity: hcl.DiagError,
 		})
 	}
 
+	var convertDiags hcl.Diagnostics
+	cfg.debug = opts.Debug
+	cfg.except, convertDiags = convertFilterOption(opts.Except, "except")
+	diags = diags.Extend(convertDiags)
+	cfg.only, convertDiags = convertFilterOption(opts.Only, "only")
+	diags = diags.Extend(convertDiags)
+	cfg.force = opts.Force
+	cfg.onError = opts.OnError
+
 	for _, build := range cfg.Builds {
-		for _, srcUsage := range build.Sources {
-			src, found := cfg.Sources[srcUsage.SourceRef]
-			if !found {
-				diags = append(diags, &hcl.Diagnostic{
-					Summary:  "Unknown " + sourceLabel + " " + srcUsage.String(),
-					Subject:  build.HCL2Ref.DefRange.Ptr(),
-					Severity: hcl.DiagError,
-					Detail:   fmt.Sprintf("Known: %v", cfg.Sources),
-				})
-				continue
-			}
+		cbs, cbDiags := build.ToCoreBuilds(cfg)
+		diags = diags.Extend(cbDiags)
 
-			pcb := &packer.CoreBuild{
-				BuildName: build.Name,
-				Type:      srcUsage.String(),
-			}
+		for _, cb := range cbs {
+			cb.SetDebug(opts.Debug)
+			cb.SetForce(opts.Force)
+			cb.SetOnError(opts.OnError)
 
-			pcb.SetDebug(cfg.debug)
-			pcb.SetForce(cfg.force)
-			pcb.SetOnError(cfg.onError)
-
-			// Apply the -only and -except command-line options to exclude matching builds.
-			buildName := pcb.Name()
-			possibleBuildNames = append(possibleBuildNames, buildName)
-			// -only
-			if len(opts.Only) > 0 {
-				onlyGlobs, diags := convertFilterOption(opts.Only, "only")
-				if diags.HasErrors() {
-					return nil, diags
-				}
-				cfg.only = onlyGlobs
-				include := false
-				for _, onlyGlob := range onlyGlobs {
-					if onlyGlob.Match(buildName) {
-						include = true
-						break
-					}
-				}
-				if !include {
-					continue
-				}
-				opts.OnlyMatches++
-			}
-
-			// -except
-			if len(opts.Except) > 0 {
-				exceptGlobs, diags := convertFilterOption(opts.Except, "except")
-				if diags.HasErrors() {
-					return nil, diags
-				}
-				cfg.except = exceptGlobs
-				exclude := false
-				for _, exceptGlob := range exceptGlobs {
-					if exceptGlob.Match(buildName) {
-						exclude = true
-						break
-					}
-				}
-				if exclude {
-					opts.ExceptMatches++
-					continue
-				}
-			}
-
-			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil))
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-
-			decoded, _ := decodeHCL2Spec(srcUsage.Body, cfg.EvalContext(BuildContext, nil), builder)
-			pcb.HCLConfig = decoded
-
-			// If the builder has provided a list of to-be-generated variables that
-			// should be made accessible to provisioners, pass that list into
-			// the provisioner prepare() so that the provisioner can appropriately
-			// validate user input against what will become available. Otherwise,
-			// only pass the default variables, using the basic placeholder data.
-			unknownBuildValues := map[string]cty.Value{}
-			for _, k := range append(packer.BuilderDataCommonKeys, generatedVars...) {
-				unknownBuildValues[k] = cty.StringVal("<unknown>")
-			}
-			unknownBuildValues["name"] = cty.StringVal(build.Name)
-
-			variables := map[string]cty.Value{
-				sourcesAccessor: cty.ObjectVal(srcUsage.ctyValues()),
-				buildAccessor:   cty.ObjectVal(unknownBuildValues),
-			}
-
-			provisioners, moreDiags := cfg.getCoreBuildProvisioners(srcUsage, build.ProvisionerBlocks, cfg.EvalContext(BuildContext, variables))
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			pps, moreDiags := cfg.getCoreBuildPostProcessors(srcUsage, build.PostProcessorsLists, cfg.EvalContext(BuildContext, variables), &opts.ExceptMatches)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-
-			if build.ErrorCleanupProvisionerBlock != nil &&
-				!build.ErrorCleanupProvisionerBlock.OnlyExcept.Skip(srcUsage.String()) {
-				errorCleanupProv, moreDiags := cfg.getCoreBuildProvisioner(srcUsage, build.ErrorCleanupProvisionerBlock, cfg.EvalContext(BuildContext, variables))
-				diags = append(diags, moreDiags...)
-				if moreDiags.HasErrors() {
-					continue
-				}
-				pcb.CleanupProvisioner = errorCleanupProv
-			}
-
-			pcb.Builder = builder
-			pcb.Provisioners = provisioners
-			pcb.PostProcessors = pps
-			pcb.Prepared = true
+			cb.Prepared = true
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
-			_, err := pcb.Prepare()
+			_, err := cb.Prepare()
 			if err != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
-					Summary:  fmt.Sprintf("Preparing packer core build %s failed", src.Ref().String()),
+					Summary:  fmt.Sprintf("Preparing packer core build %s failed", cb.Name()),
 					Detail:   err.Error(),
-					Subject:  build.HCL2Ref.DefRange.Ptr(),
 				})
-				continue
 			}
 
-			res = append(res, pcb)
+			allBuilds = append(allBuilds, cb)
 		}
 	}
-	if len(opts.Only) > opts.OnlyMatches {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagWarning,
-			Summary:  "an 'only' option was passed, but not all matches were found for the given build.",
-			Detail: fmt.Sprintf("Possible build names: %v.\n"+
-				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
-		})
-	}
-	if len(opts.Except) > opts.ExceptMatches {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagWarning,
-			Summary:  "an 'except' option was passed, but did not match any build.",
-			Detail: fmt.Sprintf("Possible build names: %v.\n"+
-				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
-		})
-	}
-	return res, diags
+
+	return allBuilds, diags
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`
