@@ -352,9 +352,10 @@ func (build BuildBlock) ToCoreBuilds(cfg *PackerConfig) ([]*packer.CoreBuild, hc
 
 func (cfg *PackerConfig) keepBuild(cb *packer.CoreBuild) bool {
 	keep := false
-	for _, onlyGlob := range cfg.only {
+	for p, onlyGlob := range cfg.only {
 		if onlyGlob.Match(cb.Name()) {
 			keep = true
+			cfg.onlyUses[p] = true
 			break
 		}
 	}
@@ -362,8 +363,9 @@ func (cfg *PackerConfig) keepBuild(cb *packer.CoreBuild) bool {
 		return false
 	}
 
-	for _, exceptGlob := range cfg.except {
+	for p, exceptGlob := range cfg.except {
 		if exceptGlob.Match(cb.Name()) {
+			cfg.exceptUses[p] = true
 			return false
 		}
 	}
