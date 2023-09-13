@@ -184,13 +184,13 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	return diags
 }
 
-func checkForDuplicateLocalDefinition(locals []*LocalBlock) hcl.Diagnostics {
+func (cfg *PackerConfig) CheckForDuplicateLocalDefinition() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	// we could sort by name and then check contiguous names to use less memory,
 	// but using a map sounds good enough.
 	names := map[string]struct{}{}
-	for _, local := range locals {
+	for _, local := range cfg.LocalBlocks {
 		if _, found := names[local.Name]; found {
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -559,7 +559,7 @@ func (p *PackerConfig) InspectConfig(opts packer.InspectConfigOptions) int {
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
-	diags = diags.Extend(checkForDuplicateLocalDefinition(cfg.LocalBlocks))
+	diags = diags.Extend(cfg.CheckForDuplicateLocalDefinition())
 	diags = diags.Extend(cfg.executeDatasources(opts.SkipDatasourcesExecution))
 	diags = diags.Extend(cfg.evaluateLocalVariables())
 
