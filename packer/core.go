@@ -31,8 +31,8 @@ type Core struct {
 	Template *template.Template
 
 	components ComponentFinder
-	variables  map[string]string
-	builds     map[string]*template.Builder
+	Variables  map[string]string
+	Builds     map[string]*template.Builder
 	version    string
 	secrets    []string
 
@@ -124,7 +124,7 @@ func NewCore(c *CoreConfig) *Core {
 	core := &Core{
 		Template:   c.Template,
 		components: c.Components,
-		variables:  c.Variables,
+		Variables:  c.Variables,
 		version:    c.Version,
 		only:       c.Only,
 		except:     c.Except,
@@ -164,7 +164,7 @@ func (core *Core) initialize() error {
 
 	// Go through and interpolate all the build names. We should be able
 	// to do this at this point with the variables.
-	core.builds = make(map[string]*template.Builder)
+	core.Builds = make(map[string]*template.Builder)
 	for _, b := range core.Template.Builders {
 		v, err := interpolate.Render(b.Name, core.Context())
 		if err != nil {
@@ -173,7 +173,7 @@ func (core *Core) initialize() error {
 				b.Name, err)
 		}
 
-		core.builds[v] = b
+		core.Builds[v] = b
 	}
 
 	return nil
@@ -197,8 +197,8 @@ func (c *Core) BuildNames(only, except []string) []string {
 	c.except = except
 	c.only = only
 
-	r := make([]string, 0, len(c.builds))
-	for n := range c.builds {
+	r := make([]string, 0, len(c.Builds))
+	for n := range c.Builds {
 		onlyPos := sort.SearchStrings(only, n)
 		foundInOnly := onlyPos < len(only) && only[onlyPos] == n
 		if len(only) > 0 && !foundInOnly {
@@ -327,7 +327,7 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnost
 // Build returns the Build object for the given name.
 func (c *Core) Build(n string) (packersdk.Build, error) {
 	// Setup the builder
-	configBuilder, ok := c.builds[n]
+	configBuilder, ok := c.Builds[n]
 	if !ok {
 		return nil, fmt.Errorf("no such build found: %s", n)
 	}
@@ -438,7 +438,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		Provisioners:       provisioners,
 		CleanupProvisioner: cleanupProvisioner,
 		TemplatePath:       c.Template.Path,
-		Variables:          c.variables,
+		Variables:          c.Variables,
 	}
 
 	//configBuilder.Name is left uninterpolated so we must check against
@@ -454,7 +454,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 func (c *Core) Context() *interpolate.Context {
 	return &interpolate.Context{
 		TemplatePath:            c.Template.Path,
-		UserVariables:           c.variables,
+		UserVariables:           c.Variables,
 		CorePackerVersionString: packerversion.FormattedVersion(),
 	}
 }
@@ -725,7 +725,7 @@ func (c *Core) validate() error {
 	var err error
 	for n, v := range c.Template.Variables {
 		if v.Required {
-			if _, ok := c.variables[n]; !ok {
+			if _, ok := c.Variables[n]; !ok {
 				err = multierror.Append(err, fmt.Errorf(
 					"required variable not set: %s", n))
 			}
@@ -800,7 +800,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 	}
 
 	// overwrite template variables with command-line-read variables
-	for k, v := range c.variables {
+	for k, v := range c.Variables {
 		repeatMap[k] = v
 		allKeys = append(allKeys, k)
 	}
@@ -834,8 +834,8 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 				// We only get here if interpolation has succeeded, so something is
 				// different in this loop than in the last one.
 				changed = true
-				c.variables[kv.Key] = renderedV
-				ctx.UserVariables = c.variables
+				c.Variables[kv.Key] = renderedV
+				ctx.UserVariables = c.Variables
 				// Remove fully-interpolated variables from the map, and flag
 				// variables that still need interpolating for a repeat.
 				done, err := isDoneInterpolating(kv.Value)
@@ -891,8 +891,8 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 }
 
 func (c *Core) init() error {
-	if c.variables == nil {
-		c.variables = make(map[string]string)
+	if c.Variables == nil {
+		c.Variables = make(map[string]string)
 	}
 	// Go through the variables and interpolate the environment and
 	// user variables

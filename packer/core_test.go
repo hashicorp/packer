@@ -164,16 +164,16 @@ func TestCoreBuild_IgnoreTemplateVariables(t *testing.T) {
 	testCoreTemplate(t, config, fixtureDir("build-ignore-template-variable.json"))
 	core := TestCore(t, config)
 
-	if core.variables["http_ip"] != "{{ .HTTPIP }}" {
+	if core.Variables["http_ip"] != "{{ .HTTPIP }}" {
 		t.Fatalf("bad: User variable http_ip={{ .HTTPIP }} should not be interpolated")
 	}
 
-	if core.variables["var"] != "test_{{ .PACKER_TEST_TEMP }}" {
-		t.Fatalf("bad: User variable var should be half interpolated to var=test_{{ .PACKER_TEST_TEMP }} but was var=%s", core.variables["var"])
+	if core.Variables["var"] != "test_{{ .PACKER_TEST_TEMP }}" {
+		t.Fatalf("bad: User variable var should be half interpolated to var=test_{{ .PACKER_TEST_TEMP }} but was var=%s", core.Variables["var"])
 	}
 
-	if core.variables["array_var"] != "us-west-1,us-west-2" {
-		t.Fatalf("bad: User variable array_var should be \"us-west-1,us-west-2\" but was %s", core.variables["var"])
+	if core.Variables["array_var"] != "us-west-1,us-west-2" {
+		t.Fatalf("bad: User variable array_var should be \"us-west-1,us-west-2\" but was %s", core.Variables["var"])
 	}
 
 	build, err := core.Build("test")
@@ -563,7 +563,7 @@ func TestCore_InterpolateUserVars(t *testing.T) {
 
 		}
 		if !tc.Err {
-			for k, v := range ccf.variables {
+			for k, v := range ccf.Variables {
 				if tc.Expected[k] != v {
 					t.Fatalf("Expected %s but got %s", tc.Expected[k], v)
 				}
@@ -631,7 +631,7 @@ func TestCore_InterpolateUserVars_VarFile(t *testing.T) {
 			t.Fatalf("err: %s\n\n%s", tc.File, diags)
 		}
 		if !tc.Err {
-			for k, v := range ccf.variables {
+			for k, v := range ccf.Variables {
 				if tc.Expected[k] != v {
 					t.Fatalf("Expected value %s for key %s but got %s",
 						tc.Expected[k], k, v)
@@ -781,7 +781,7 @@ func TestEnvAndFileVars(t *testing.T) {
 	if diags.HasErrors() {
 		t.Fatalf("err: %s\n\n%s", "complex-recursed-env-user-var-file.json", diags)
 	}
-	for k, v := range ccf.variables {
+	for k, v := range ccf.Variables {
 		if expected[k] != v {
 			t.Fatalf("Expected value %s for key %s but got %s",
 				expected[k], k, v)
