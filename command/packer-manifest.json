@@ -1,0 +1,50 @@
+{
+  "builds": [
+    {
+      "name": "test",
+      "builder_type": "null",
+      "build_time": 1694200646,
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    },
+    {
+      "name": "test",
+      "builder_type": "null",
+      "build_time": 1694200658,
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    },
+    {
+      "name": "test",
+      "builder_type": "null",
+      "build_time": 1694201568,
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    },
+    {
+      "name": "test",
+      "builder_type": "null",
+      "build_time": 1694201578,
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    },
+    {
+      "name": "test",
+      "builder_type": "null",
+      "build_time": 1694201592,
+      "files": null,
+      "artifact_id": "Null",
+      "packer_run_uuid": "",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": ""
+}
