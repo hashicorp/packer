@@ -95,7 +95,7 @@ const (
 // init should be called next to expand dynamic blocks and verify that used
 // things do exist.
 func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
-	var files []*hcl.File
+	files := map[string]*hcl.File{}
 	var diags hcl.Diagnostics
 
 	// parse config files
@@ -118,12 +118,12 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		for _, filename := range hclFiles {
 			f, moreDiags := p.ParseHCLFile(filename)
 			diags = append(diags, moreDiags...)
-			files = append(files, f)
+			files[filename] = f
 		}
 		for _, filename := range jsonFiles {
 			f, moreDiags := p.ParseJSONFile(filename)
 			diags = append(diags, moreDiags...)
-			files = append(files, f)
+			files[filename] = f
 		}
 		if diags.HasErrors() {
 			return nil, diags

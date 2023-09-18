@@ -58,7 +58,7 @@ type PackerConfig struct {
 	HCPVars map[string]cty.Value
 
 	parser *Parser
-	files  []*hcl.File
+	files  map[string]*hcl.File
 
 	// Fields passed as command line flags
 	Force   bool
@@ -357,6 +357,10 @@ func (cfg *PackerConfig) ReportUnusedFilters(buildNames []string) hcl.Diagnostic
 	}
 
 	return diags
+}
+
+func (cfg *PackerConfig) Files() map[string]*hcl.File {
+	return cfg.files
 }
 
 func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
