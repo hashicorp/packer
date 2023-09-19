@@ -149,7 +149,7 @@ func TestValidateCommandBadVersion(t *testing.T) {
 	}
 
 	stdout, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
-	expected := `Error: 
+	expected := `Error: Invalid template
 
 This template requires Packer version 101.0.0 or higher; using 100.0.0
 
@@ -370,8 +370,8 @@ func TestValidateCommand_ShowLineNumForMissing(t *testing.T) {
 			stdout, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
 			expected := fmt.Sprintf(`Error: Unknown source file.cho
 
-  on %s line 6:
-  (source code not available)
+  on %s line 6, in build:
+   6: build {
 
 Known: [file.chocolate]
 

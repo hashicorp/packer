@@ -7,8 +7,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
-
 	"github.com/posener/complete"
 )
 
@@ -54,44 +52,20 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		cla.MetaArgs.WarnOnUndeclaredVar = false
 	}
 
-	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
+	cfg, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
 		return 1
 	}
 
-	// If we're only checking syntax, then we're done already
-	if cla.SyntaxOnly {
-		c.Ui.Say("Syntax-only check passed. Everything looks okay.")
-		return 0
-	}
-
-	diags := packerStarter.DetectPluginBinaries()
+	diags := cfg.DetectPluginBinaries()
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
 	}
 
-	diags = packerStarter.Initialize(packer.InitializeOptions{
-		SkipDatasourcesExecution: !cla.EvaluateDatasources,
-	})
-	bundledDiags := c.DetectBundledPlugins(packerStarter)
-	diags = append(bundledDiags, diags...)
-	ret = writeDiags(c.Ui, nil, diags)
-	if ret != 0 {
-		return ret
-	}
+	sched := NewScheduler(cfg, c.Ui, ctx)
+	ret = sched.Validate(cla)
 
-	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cla.Only,
-		Except: cla.Except,
-	})
-
-	fixerDiags := packerStarter.FixConfig(packer.FixConfigOptions{
-		Mode: packer.Diff,
-	})
-	diags = append(diags, fixerDiags...)
-
-	ret = writeDiags(c.Ui, nil, diags)
 	if ret == 0 {
 		c.Ui.Say("The configuration is valid.")
 	}

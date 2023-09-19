@@ -80,6 +80,29 @@ func (s *SequentialScheduler) prepare(skipDatasourcesExecution bool) hcl.Diagnos
 
 }
 
+func (s *SequentialScheduler) Validate(args *ValidateArgs) int {
+	// If we're only checking syntax, then we're done already
+	if args.SyntaxOnly {
+		s.ui.Say("Syntax-only check passed. Everything looks okay.")
+		return 0
+	}
+
+	diags := s.prepare(!args.EvaluateDatasources)
+	ret := s.WriteDiags(diags)
+	if ret != 0 {
+		return ret
+	}
+
+	_, diags = s.scheduler.FilterBuilds(false, false, "", args.Except, args.Only)
+
+	fixerDiags := s.handler.FixConfig(packer.FixConfigOptions{
+		Mode: packer.Diff,
+	})
+	diags = append(diags, fixerDiags...)
+
+	return s.WriteDiags(diags)
+}
+
 func (s *SequentialScheduler) Build(args *BuildArgs) int {
 	// For builds, we always execute all the datasources
 	diags := s.prepare(false)

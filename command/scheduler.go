@@ -9,6 +9,7 @@ import (
 
 type Scheduler interface {
 	Build(*BuildArgs) int
+	Validate(*ValidateArgs) int
 }
 
 // NewScheduler returns a new scheduler for running commands with.
