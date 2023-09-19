@@ -79,6 +79,16 @@ func (s *SequentialScheduler) prepare(skipDatasourcesExecution bool) hcl.Diagnos
 	return diags
 }
 
+func (s *SequentialScheduler) HCL2Upgrade(args *HCL2UpgradeArgs) int {
+	// No need to execute the datasources in this case, as we rewrite them
+	// in HCL, and there are no datasources in JSON templates.
+	s.prepare(true)
+	// Preparing builds is safe here as well, since we don't risk encountering
+	// any dynamic blocks in JSON templates.
+	s.scheduler.PrepareBuilds()
+	return 0
+}
+
 func (s *SequentialScheduler) Console(args *ConsoleArgs) int {
 	s.prepare(false)
 	return 0

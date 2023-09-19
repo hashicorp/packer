@@ -135,7 +135,7 @@ type BlockParser interface {
 	Write(*bytes.Buffer)
 }
 
-func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs) int {
+func (c *HCL2UpgradeCommand) RunContext(ctx context.Context, cla *HCL2UpgradeArgs) int {
 	var output io.Writer
 	if err := os.MkdirAll(filepath.Dir(cla.OutputFile), 0755); err != nil {
 		c.Ui.Error(fmt.Sprintf("Failed to create output directory: %v", err))
@@ -163,9 +163,7 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	core := hdl.(*packer.Core)
-	if err := core.Initialize(packer.InitializeOptions{}); err != nil {
-		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
-	}
+	NewScheduler(core, c.Ui, ctx).HCL2Upgrade(cla)
 	tpl := core.Template
 
 	// Parse blocks
