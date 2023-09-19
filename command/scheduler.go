@@ -11,6 +11,7 @@ type Scheduler interface {
 	Build(*BuildArgs) int
 	Validate(*ValidateArgs) int
 	Inspect(*InspectArgs) int
+	Console(*ConsoleArgs) int
 }
 
 // NewScheduler returns a new scheduler for running commands with.
