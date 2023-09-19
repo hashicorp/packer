@@ -152,7 +152,7 @@ func (c *Core) Initialize(_ InitializeOptions) hcl.Diagnostics {
 }
 
 func (core *Core) initialize() error {
-	if err := core.validate(); err != nil {
+	if err := core.Validate(); err != nil {
 		return err
 	}
 	if err := core.init(); err != nil {
@@ -692,7 +692,7 @@ func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
 //
 // This will automatically call template.validate() in addition to doing
 // richer semantic checks around variables and so on.
-func (c *Core) validate() error {
+func (c *Core) Validate() error {
 	// First validate the template in general, we can't do anything else
 	// unless the template itself is valid.
 	if err := c.Template.Validate(); err != nil {
