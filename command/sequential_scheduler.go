@@ -77,7 +77,13 @@ func (s *SequentialScheduler) prepare(skipDatasourcesExecution bool) hcl.Diagnos
 	diags = diags.Extend(s.scheduler.PrepareBuilds())
 
 	return diags
+}
 
+func (s *SequentialScheduler) Inspect(args *InspectArgs) int {
+	s.prepare(false)
+	return s.handler.InspectConfig(packer.InspectConfigOptions{
+		Ui: s.ui,
+	})
 }
 
 func (s *SequentialScheduler) Validate(args *ValidateArgs) int {

@@ -7,7 +7,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/hashicorp/packer/packer"
 	"github.com/posener/complete"
 )
 
@@ -48,12 +47,7 @@ func (c *InspectCommand) RunContext(ctx context.Context, cla *InspectArgs) int {
 		return ret
 	}
 
-	// here we ignore init diags to allow unknown variables to be used
-	_ = packerStarter.Initialize(packer.InitializeOptions{})
-
-	return packerStarter.InspectConfig(packer.InspectConfigOptions{
-		Ui: c.Ui,
-	})
+	return NewScheduler(packerStarter, c.Ui, ctx).Inspect(cla)
 }
 
 func (*InspectCommand) Help() string {
