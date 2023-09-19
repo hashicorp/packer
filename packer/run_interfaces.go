@@ -20,13 +20,6 @@ type GetBuildsOptions struct {
 	ExceptMatches, OnlyMatches int
 }
 
-type BuildGetter interface {
-	// GetBuilds return all possible builds for a config. It also starts all
-	// builders.
-	// TODO(azr): rename to builder starter ?
-	GetBuilds(GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics)
-}
-
 type Evaluator interface {
 	// EvaluateExpression is meant to be used in the `packer console` command.
 	// It parses the input string and returns what needs to be displayed. In
@@ -51,12 +44,10 @@ type PluginBinaryDetector interface {
 // run a build we will start the builds and then the core of Packer handles
 // execution.
 type Handler interface {
-	Initialize(InitializeOptions) hcl.Diagnostics
 	// PluginRequirements returns the list of plugin Requirements from the
 	// config file.
 	PluginRequirements() (plugingetter.Requirements, hcl.Diagnostics)
 	Evaluator
-	BuildGetter
 	ConfigFixer
 	ConfigInspector
 	PluginBinaryDetector
