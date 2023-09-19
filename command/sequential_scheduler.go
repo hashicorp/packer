@@ -79,6 +79,11 @@ func (s *SequentialScheduler) prepare(skipDatasourcesExecution bool) hcl.Diagnos
 	return diags
 }
 
+func (s *SequentialScheduler) Console(args *ConsoleArgs) int {
+	s.prepare(false)
+	return 0
+}
+
 func (s *SequentialScheduler) Inspect(args *InspectArgs) int {
 	s.prepare(false)
 	return s.handler.InspectConfig(packer.InspectConfigOptions{
