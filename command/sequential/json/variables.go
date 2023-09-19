@@ -185,6 +185,17 @@ func (s *JSONSequentialScheduler) getEvaluatedVariables() ([]string, error) {
 }
 
 func (s *JSONSequentialScheduler) EvaluateVariables() hcl.Diagnostics {
+	err := s.config.Validate()
+	if err != nil {
+		return hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Invalid template",
+				Detail:   err.Error(),
+			},
+		}
+	}
+
 	secrets, err := s.getEvaluatedVariables()
 
 	if err != nil {
