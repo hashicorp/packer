@@ -12,6 +12,7 @@ type Scheduler interface {
 	Validate(*ValidateArgs) int
 	Inspect(*InspectArgs) int
 	Console(*ConsoleArgs) int
+	HCL2Upgrade(*HCL2UpgradeArgs) int
 }
 
 // NewScheduler returns a new scheduler for running commands with.
