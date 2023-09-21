@@ -67,8 +67,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		ui.Say("Pausing at breakpoint provisioner.")
 	}
 
-	message := fmt.Sprintf(
-		"Press enter to continue.")
+	message := "Press enter to continue."
 
 	var g errgroup.Group
 	result := make(chan string, 1)
