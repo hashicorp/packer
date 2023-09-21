@@ -4,8 +4,6 @@
 package null
 
 import (
-	"fmt"
-
 	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 )
 
@@ -26,7 +24,7 @@ func (*NullArtifact) Id() string {
 }
 
 func (a *NullArtifact) String() string {
-	return fmt.Sprintf("Did not export anything. This is the null builder")
+	return "Did not export anything. This is the null builder"
 }
 
 func (a *NullArtifact) State(name string) interface{} {
