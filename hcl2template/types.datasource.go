@@ -45,7 +45,7 @@ func (ds *Datasources) Values() (map[string]cty.Value, hcl.Diagnostics) {
 	for ref, datasource := range *ds {
 		if datasource.value == (cty.Value{}) {
 			diags = append(diags, &hcl.Diagnostic{
-				Summary:  fmt.Sprintf("empty value"),
+				Summary:  "empty value",
 				Subject:  &datasource.block.DefRange,
 				Severity: hcl.DiagError,
 			})
@@ -73,7 +73,7 @@ func (cfg *PackerConfig) startDatasource(dataSourceStore packer.DatasourceStore,
 		diags = append(diags, &hcl.Diagnostic{
 			Summary:  "Unknown " + dataSourceLabel + " type " + ref.Type,
 			Subject:  block.LabelRanges[0].Ptr(),
-			Detail:   fmt.Sprintf("packer does not currently know any data source."),
+			Detail:   "packer does not currently know any data source.",
 			Severity: hcl.DiagError,
 		})
 		return nil, diags
