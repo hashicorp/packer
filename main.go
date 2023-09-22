@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -65,13 +64,13 @@ func realMain() int {
 		return 1
 	}
 	if logWriter == nil {
-		logWriter = ioutil.Discard
+		logWriter = io.Discard
 	}
 
 	packersdk.LogSecretFilter.SetOutput(logWriter)
 
 	// Disable logging here
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	// We always send logs to a temporary file that we use in case
 	// there is a panic. Otherwise, we delete it.

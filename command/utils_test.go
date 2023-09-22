@@ -4,7 +4,6 @@
 package command
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ func createFiles(dir string, content map[string]string) {
 		if err := os.MkdirAll(filepath.Dir(contentPath), 0777); err != nil {
 			panic(err)
 		}
-		if err := ioutil.WriteFile(contentPath, []byte(content), 0666); err != nil {
+		if err := os.WriteFile(contentPath, []byte(content), 0666); err != nil {
 			panic(err)
 		}
 		log.Printf("created tmp file: %s", contentPath)
@@ -39,7 +38,7 @@ func (c *configDirSingleton) dir(key string) string {
 	if v, exists := c.dirs[key]; exists {
 		return v
 	}
-	c.dirs[key] = mustString(ioutil.TempDir("", "pkr-test-cfg-dir-"+key))
+	c.dirs[key] = mustString(os.MkdirTemp("", "pkr-test-cfg-dir-"+key))
 	return c.dirs[key]
 }
 

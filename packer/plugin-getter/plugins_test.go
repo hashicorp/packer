@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -754,7 +753,7 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 			panic(err)
 		}
 	}()
-	return ioutil.NopCloser(read), nil
+	return io.NopCloser(read), nil
 }
 
 func zipFile(content map[string]string) io.ReadCloser {
@@ -778,7 +777,7 @@ func zipFile(content map[string]string) io.ReadCloser {
 	if err != nil {
 		panic(err)
 	}
-	return ioutil.NopCloser(buff)
+	return io.NopCloser(buff)
 }
 
 var _ Getter = &mockPluginGetter{}
