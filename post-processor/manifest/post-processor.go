@@ -10,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -143,7 +142,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 
 	// Read the current manifest file from disk
 	contents := []byte{}
-	if contents, err = ioutil.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
+	if contents, err = os.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
 		return source, true, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.OutputPath, err)
 	}
 
@@ -167,7 +166,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 
 	// Write JSON to disk
 	if out, err := json.MarshalIndent(manifestFile, "", "  "); err == nil {
-		if err = ioutil.WriteFile(p.config.OutputPath, out, 0664); err != nil {
+		if err = os.WriteFile(p.config.OutputPath, out, 0664); err != nil {
 			return source, true, true, fmt.Errorf("Unable to write %s: %s", p.config.OutputPath, err)
 		}
 	} else {

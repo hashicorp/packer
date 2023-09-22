@@ -6,7 +6,6 @@ package command
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -128,7 +127,7 @@ func TestFmt_Recursive(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tempDirectory := mustString(ioutil.TempDir(testDir, "test-dir-*"))
+			tempDirectory := mustString(os.MkdirTemp(testDir, "test-dir-*"))
 			defer os.RemoveAll(tempDirectory)
 
 			createFiles(tempDirectory, tt.alreadyPresentContent)

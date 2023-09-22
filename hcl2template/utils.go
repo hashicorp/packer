@@ -5,7 +5,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -74,7 +73,7 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 		return nil, nil, diags
 	}
 
-	fileInfos, err := ioutil.ReadDir(filename)
+	fileInfos, err := os.ReadDir(filename)
 	if err != nil {
 		diag := &hcl.Diagnostic{
 			Severity: hcl.DiagError,
