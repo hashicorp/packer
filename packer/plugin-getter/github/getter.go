@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -71,7 +70,7 @@ func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 			}
 		}
 		_, _ = buffer.WriteString("]")
-		return ioutil.NopCloser(buffer), nil
+		return io.NopCloser(buffer), nil
 	}
 }
 
@@ -103,7 +102,7 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	return ioutil.NopCloser(buf), nil
+	return io.NopCloser(buf), nil
 }
 
 // HostSpecificTokenAuthTransport makes sure the http roundtripper only sets an

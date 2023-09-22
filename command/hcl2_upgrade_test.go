@@ -4,7 +4,6 @@
 package command
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -64,8 +63,8 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if tc.exitEarly {
 				return
 			}
-			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
-			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
+			expected := string(mustBytes(os.ReadFile(expectedPath)))
+			actual := string(mustBytes(os.ReadFile(outputPath)))
 
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)

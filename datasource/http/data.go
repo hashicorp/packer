@@ -8,7 +8,7 @@ package http
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime"
 	"net/http"
 	"regexp"
@@ -137,7 +137,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		fmt.Println("If the content is binary data, Packer may not properly handle the contents of the response.")
 	}
 
-	bytes, err := ioutil.ReadAll(resp.Body)
+	bytes, err := io.ReadAll(resp.Body)
 	// TODO: How to make test case for this?
 	if err != nil {
 		fmt.Println("Error processing response body of call")

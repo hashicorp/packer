@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -114,7 +113,7 @@ func NewClient(config *PluginClientConfig) (c *PluginClient) {
 	}
 
 	if config.Stderr == nil {
-		config.Stderr = ioutil.Discard
+		config.Stderr = io.Discard
 	}
 
 	c = &PluginClient{config: config}
