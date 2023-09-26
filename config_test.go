@@ -6,7 +6,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -122,7 +121,7 @@ func TestLoadExternalComponentsFromConfig_onlyProvisioner(t *testing.T) {
 func TestLoadSingleComponent(t *testing.T) {
 
 	// .exe will work everyone for testing purpose, but mostly here to help Window's test runs.
-	tmpFile, err := ioutil.TempFile(".", "packer-builder-*.exe")
+	tmpFile, err := os.CreateTemp(".", "packer-builder-*.exe")
 	if err != nil {
 		t.Fatalf("failed to create test file with error: %s", err)
 	}
@@ -160,7 +159,7 @@ func TestLoadSingleComponent(t *testing.T) {
 }
 
 func generateFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
-	dir, err := ioutil.TempDir("", dirname)
+	dir, err := os.MkdirTemp("", dirname)
 	if err != nil {
 		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
 	}

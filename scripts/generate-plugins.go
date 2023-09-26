@@ -12,7 +12,6 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -142,7 +141,7 @@ func makeImports(builders, provisioners, postProcessors, Datasources []plugin) s
 // listDirectories recursively lists directories under the specified path
 func listDirectories(path string) ([]string, error) {
 	names := []string{}
-	items, err := ioutil.ReadDir(path)
+	items, err := os.ReadDir(path)
 	if err != nil {
 		return names, err
 	}

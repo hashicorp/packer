@@ -6,7 +6,7 @@ package http
 import (
 	_ "embed"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -84,7 +84,7 @@ func TestHttpDataSource(t *testing.T) {
 						}
 						defer logs.Close()
 
-						logsBytes, err := ioutil.ReadAll(logs)
+						logsBytes, err := io.ReadAll(logs)
 						if err != nil {
 							return fmt.Errorf("Unable to read %s", logfile)
 						}

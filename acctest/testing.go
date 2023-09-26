@@ -6,7 +6,7 @@ package acctest
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -182,8 +182,8 @@ func Test(t TestT, c TestCase) {
 	log.Printf("[DEBUG] Running 'test' build")
 	ui := &packersdk.BasicUi{
 		Reader:      os.Stdin,
-		Writer:      ioutil.Discard,
-		ErrorWriter: ioutil.Discard,
+		Writer:      io.Discard,
+		ErrorWriter: io.Discard,
 		PB:          &packersdk.NoopProgressTracker{},
 	}
 	artifacts, err := build.Run(context.Background(), ui)
