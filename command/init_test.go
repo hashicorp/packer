@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -412,5 +413,57 @@ type initTestGoGetPlugin struct {
 func (opts initTestGoGetPlugin) fn(t *testing.T, _ testCaseInit) {
 	if _, err := getter.Get(context.Background(), opts.Dst, opts.Src); err != nil {
 		t.Fatalf("get: %v", err)
+	}
+}
+
+// TestInitCmd aims to test the init command, with output validation
+func TestInitCmd(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []string
+		expectedCode int
+		outputCheck  func(string, string) error
+	}{
+		{
+			name: "Ensure init warns on template without required_plugin blocks",
+			args: []string{
+				testFixture("hcl", "build-var-in-pp.pkr.hcl"),
+			},
+			expectedCode: 0,
+			outputCheck: func(stdout, stderr string) error {
+				if !strings.Contains(stdout, "No plugins requirement found") {
+					return fmt.Errorf("command should warn about plugin requirements not found, but did not")
+				}
+				return nil
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &InitCommand{
+				Meta: TestMetaFile(t),
+			}
+
+			exitCode := c.Run(tt.args)
+			if exitCode != tt.expectedCode {
+				t.Errorf("process exit code mismatch: expected %d, got %d",
+					tt.expectedCode,
+					exitCode)
+			}
+
+			out, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
+			err := tt.outputCheck(out, stderr)
+			if err != nil {
+				if len(out) != 0 {
+					t.Logf("command stdout: %q", out)
+				}
+
+				if len(stderr) != 0 {
+					t.Logf("command stderr: %q", stderr)
+				}
+				t.Error(err.Error())
+			}
+		})
 	}
 }
