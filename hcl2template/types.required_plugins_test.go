@@ -138,7 +138,9 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 			if len(diags) > 0 {
 				t.Fatal(diags)
 			}
-			if diags := cfg.decodeRequiredPluginsBlock(file); len(diags) > 0 {
+
+			diags = cfg.decodeRequiredPluginsBlock(file)
+			if !tt.wantDiags && len(diags) > 0 {
 				t.Fatal(diags)
 			}
 
