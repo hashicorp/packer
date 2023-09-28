@@ -5,6 +5,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
@@ -51,7 +52,10 @@ type RequiredPlugin struct {
 	// for example, "awesomecloud" instead of github.com/awesome/awesomecloud.
 	// This one is left here in case we want to go back to allowing inexplicit
 	// source url definitions.
-	Source      string
+	Source string
+	// Path supersedes every other attribute if specified, and will load the
+	// plugin from the local path specified.
+	Path        string
 	Type        *addrs.Plugin
 	Requirement VersionConstraint
 	DeclRange   hcl.Range
@@ -103,6 +107,42 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 			continue
 
 		case expr.Type().IsObjectType():
+			if expr.Type().HasAttribute("path") {
+				path := expr.GetAttr("path")
+
+				if !path.Type().Equals(cty.String) || path.IsNull() {
+					diags = diags.Append(&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  `Invalid "path" value`,
+						Detail:   `Path must be specified as a string. For example: path = "./packer-plugin-example"`,
+						Subject:  attr.Expr.Range().Ptr(),
+					})
+					break
+				}
+
+				rp.Path = path.AsString()
+
+				_, err := os.Stat(rp.Path)
+				if err != nil {
+					diags = diags.Append(&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Plugin not found",
+						Detail:   fmt.Sprintf("The plugin %q could not be found at path %q: %s", attr.Name, rp.Path, err),
+						Subject:  attr.Expr.Range().Ptr(),
+					})
+				}
+
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagWarning,
+					Summary:  "Loading plugin from local path",
+					Detail: fmt.Sprintf("The plugin %q is loaded from a local path %q. "+
+						"This reduces the portability of the template, and thus should"+
+						" only be used for local testing.", attr.Name, rp.Path),
+				})
+
+				break
+			}
+
 			if !expr.Type().HasAttribute("version") {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -182,18 +222,17 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 
 			attrTypes := expr.Type().AttributeTypes()
 			for name := range attrTypes {
-				if name == "version" || name == "source" {
+				if name == "version" || name == "source" || name == "path" {
 					continue
 				}
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid required_plugins object",
-					Detail:   `required_plugins objects can only contain "version" and "source" attributes.`,
+					Detail:   `required_plugins objects can only contain "version", "source" or "path" attributes.`,
 					Subject:  attr.Expr.Range().Ptr(),
 				})
 				break
 			}
-
 		default:
 			// should not happen
 			diags = append(diags, &hcl.Diagnostic{

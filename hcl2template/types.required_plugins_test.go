@@ -130,6 +130,47 @@ func TestPackerConfig_required_plugin_parse(t *testing.T) {
 					RequiredPlugins: nil,
 				},
 			}},
+		{
+			name: "test-path-nonexistent-plugin",
+			cfg: PackerConfig{
+				parser: getBasicParser(func(p *Parser) {}),
+			},
+			requirePlugins: `
+			packer {
+				required_plugins {
+					unknown = {
+						path = "./invalid"
+					}
+				}
+			}
+			`,
+			restOfTemplate: `
+			source "null" "test" {
+				communicator = "none"
+			}
+			build {
+				sources = ["null.test"]
+			}
+			`,
+			wantDiags: true,
+			wantConfig: PackerConfig{
+				Packer: struct {
+					VersionConstraints []VersionConstraint
+					RequiredPlugins    []*RequiredPlugins
+				}{
+					RequiredPlugins: []*RequiredPlugins{
+						{
+							RequiredPlugins: map[string]*RequiredPlugin{
+								"unknown": {
+									Name: "unknown",
+									Path: "./invalid",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

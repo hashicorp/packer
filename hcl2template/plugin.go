@@ -41,6 +41,10 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 				continue
 			}
 
+			if block.Path != "" {
+				continue
+			}
+
 			reqs = append(reqs, &plugingetter.Requirement{
 				Accessor:           name,
 				Identifier:         block.Type,
@@ -52,6 +56,19 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 	}
 
 	return reqs, diags
+}
+
+func (cfg *PackerConfig) getLocalPlugins() []*RequiredPlugin {
+	reqs := []*RequiredPlugin{}
+	for _, block := range cfg.Packer.RequiredPlugins {
+		for _, reqPlugin := range block.RequiredPlugins {
+			if reqPlugin.Path != "" {
+				reqs = append(reqs, reqPlugin)
+			}
+		}
+	}
+
+	return reqs
 }
 
 func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
@@ -103,6 +120,21 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 				Detail:   err.Error(),
 			})
 			continue
+		}
+	}
+
+	localPlugins := cfg.getLocalPlugins()
+	for _, local := range localPlugins {
+		err := cfg.parser.PluginConfig.DiscoverMultiPlugin(local.Name, local.Path)
+		if err != nil {
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Failed to load required plugin",
+				Detail: fmt.Sprintf("The required plugin %q, failed to be loaded from path %q: %s",
+					local.Name,
+					local.Path,
+					err),
+			})
 		}
 	}
 
