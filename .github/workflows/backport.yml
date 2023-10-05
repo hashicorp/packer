@@ -24,6 +24,7 @@ jobs:
         env:
           BACKPORT_LABEL_REGEXP: "backport/(?P<target>website)"
           BACKPORT_TARGET_TEMPLATE: "stable-{{.target}}"
+          BACKPORT_MERGE_COMMIT: false
           GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
       - name: Backport changes to latest release branch
         run: |
@@ -42,6 +43,7 @@ jobs:
           backport-assistant backport -automerge
         env:
           BACKPORT_LABEL_REGEXP: "backport/(?P<target>website)"
+          BACKPORT_MERGE_COMMIT: false
           GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
       - name: Backport changes to targeted release branch
         run: |
@@ -50,3 +52,4 @@ jobs:
           BACKPORT_LABEL_REGEXP: "backport/(?P<target>\\d+\\.\\d+\\.\\w+)"
           BACKPORT_TARGET_TEMPLATE: "release/{{.target}}"
           GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
+          BACKPORT_MERGE_COMMIT: false
