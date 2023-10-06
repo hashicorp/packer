@@ -37,7 +37,7 @@ func (c *InitCommand) Run(args []string) int {
 
 func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 	var cfg InitArgs
-	flags := c.Meta.FlagSet("init", 0)
+	flags := c.Meta.FlagSet("init")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

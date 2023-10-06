@@ -43,7 +43,7 @@ func (c *BuildCommand) Run(args []string) int {
 
 func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	var cfg BuildArgs
-	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
+	flags := c.Meta.FlagSet("build")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

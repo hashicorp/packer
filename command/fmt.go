@@ -28,7 +28,7 @@ func (c *FormatCommand) Run(args []string) int {
 
 func (c *FormatCommand) ParseArgs(args []string) (*FormatArgs, int) {
 	var cfg FormatArgs
-	flags := c.Meta.FlagSet("format", FlagSetNone)
+	flags := c.Meta.FlagSet("format")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

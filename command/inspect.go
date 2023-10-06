@@ -28,7 +28,7 @@ func (c *InspectCommand) Run(args []string) int {
 
 func (c *InspectCommand) ParseArgs(args []string) (*InspectArgs, int) {
 	var cfg InspectArgs
-	flags := c.Meta.FlagSet("inspect", FlagSetVars)
+	flags := c.Meta.FlagSet("inspect")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
