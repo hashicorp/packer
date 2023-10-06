@@ -65,7 +65,13 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return 0
 	}
 
-	diags := packerStarter.DetectPluginBinaries()
+	diags := packerStarter.DetectPluginBinaries(cla.getIgnoredPluginAccessors())
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
+
+	diags = c.Meta.ProcessOverrides(&cla.MetaArgs)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -120,6 +126,7 @@ Options:
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
   -no-warn-undeclared-var       Disable warnings for user variable files containing undeclared variables.
   -evaluate-datasources         Evaluate data sources during validation (HCL2 only, may incur costs); Defaults to false. 
+  -plugin-override              Force loading a plugin from a binary. Format must be accessor=path (ex: -plugin-override "amazon=./path/to/plugin")
 `
 
 	return strings.TrimSpace(helpText)

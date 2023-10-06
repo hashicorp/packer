@@ -54,7 +54,17 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 	return reqs, diags
 }
 
-func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
+func isIgnored(pluginAccessor string, ignoredAccessors []string) bool {
+	for _, acc := range ignoredAccessors {
+		if acc == pluginAccessor {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (cfg *PackerConfig) DetectPluginBinaries(ignoreAccessors []string) hcl.Diagnostics {
 	opts := plugingetter.ListInstallationsOptions{
 		FromFolders: cfg.parser.PluginConfig.KnownPluginFolders,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
@@ -80,6 +90,12 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 	uninstalledPlugins := map[string]string{}
 
 	for _, pluginRequirement := range pluginReqs {
+		// If the plugin with the accessor is loaded directly, we won't
+		// try to load it from here.
+		if isIgnored(pluginRequirement.Accessor, ignoreAccessors) {
+			continue
+		}
+
 		sortedInstalls, err := pluginRequirement.ListInstallations(opts)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{

@@ -87,7 +87,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags := packerStarter.DetectPluginBinaries()
+	diags := packerStarter.DetectPluginBinaries(cla.getIgnoredPluginAccessors())
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
+
+	diags = c.Meta.ProcessOverrides(&cla.MetaArgs)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -411,6 +417,7 @@ Options:
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask|run-cleanup-provisioner] If the build fails do: clean up (default), abort, ask, or run-cleanup-provisioner.
   -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
+  -plugin-override              Force loading a plugin from a binary. Format must be accessor=path (ex: -plugin-override "amazon=./path/to/plugin")
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.

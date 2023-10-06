@@ -8,7 +8,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -38,6 +40,55 @@ type Meta struct {
 	CoreConfig *packer.CoreConfig
 	Ui         packersdk.Ui
 	Version    string
+}
+
+// markPluginAsNonBundled marks each plugin with the accessor as prefix as not bundled
+//
+// This is required as otherwise we may detect an overridden plugin as bundled,
+// since the marking happens before we try to override them.
+func markPluginAsNonBundled(pluginAccessor string) {
+	compoAcc := regexp.MustCompile(fmt.Sprintf(
+		"^packer-(builder|post-processor|provisioner|datasource)-%s",
+		pluginAccessor))
+	var toMarkAsNonBundled []string
+	for pluginComponent := range bundledStatus {
+		if compoAcc.MatchString(pluginComponent) {
+			toMarkAsNonBundled = append(toMarkAsNonBundled, pluginComponent)
+		}
+	}
+
+	for _, cmp := range toMarkAsNonBundled {
+		bundledStatus[cmp] = false
+	}
+}
+
+// ProcessOverrides takes a list of plugin overrides loaded from the
+// command-line arguments
+//
+// Each override must point to a valid, existing binary, and will be
+// used over any component previously loaded, either automatically, or
+// through the `DetectPluginBinaries` function.
+func (m *Meta) ProcessOverrides(cla *MetaArgs) hcl.Diagnostics {
+	log.Printf("Processing overrides")
+	var diags hcl.Diagnostics
+
+	for accessor, path := range cla.PluginPathOverrides {
+		log.Printf("Loading plugin %q from %q", accessor, path)
+		err := m.CoreConfig.Components.PluginConfig.DiscoverMultiPlugin(accessor, path)
+		if err != nil {
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "failed to locate overridden plugin",
+				Detail:   fmt.Sprintf("The plugin %q could not be loaded from provided path %q", accessor, path),
+			})
+
+			continue
+		}
+
+		markPluginAsNonBundled(accessor)
+	}
+
+	return diags
 }
 
 // Core returns the core for the given template given the configured

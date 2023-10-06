@@ -57,6 +57,7 @@ func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 	fs.Var((*sliceflag.StringFlag)(&ma.Only), "only", "")
 	fs.Var((*sliceflag.StringFlag)(&ma.Except), "except", "")
 	fs.Var((*kvflag.Flag)(&ma.Vars), "var", "")
+	fs.Var((*kvflag.Flag)(&ma.PluginPathOverrides), "plugin-override", "use that to force loading a plugin from a binary. Format must be accessor=path")
 	fs.Var((*kvflag.StringSlice)(&ma.VarFiles), "var-file", "")
 	fs.Var(&ma.ConfigType, "config-type", "set to 'hcl2' to run in hcl2 mode when no file is passed.")
 }
@@ -75,6 +76,32 @@ type MetaArgs struct {
 	// WarnOnUndeclared does not have a common default, as the default varies per sub-command usage.
 	// Refer to individual command FlagSets for usage.
 	WarnOnUndeclaredVar bool
+
+	// PluginPathOverrides is the list of plugins to use instead of the ones
+	// discovered manually.
+	//
+	// Each plugin specified here will have precedence over the plugins
+	// that are loaded normally by Packer.
+	PluginPathOverrides map[string]string
+}
+
+// getIgnoredPluginAccessors returns a list of accessors to not try to install
+//
+// This is mostly useful for commands like validate or build, which load the
+// required plugins, and to not attempt to load/verify them if they are
+// overridden by the command-line args
+func (ma MetaArgs) getIgnoredPluginAccessors() []string {
+	overrides := len(ma.PluginPathOverrides)
+	if overrides == 0 {
+		return nil
+	}
+
+	ret := make([]string, 0, overrides)
+	for acc := range ma.PluginPathOverrides {
+		ret = append(ret, acc)
+	}
+
+	return ret
 }
 
 func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
