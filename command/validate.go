@@ -31,7 +31,7 @@ func (c *ValidateCommand) Run(args []string) int {
 func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 	var cfg ValidateArgs
 
-	flags := c.Meta.FlagSet("validate", FlagSetBuildFilter|FlagSetVars)
+	flags := c.Meta.FlagSet("validate")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

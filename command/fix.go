@@ -36,7 +36,7 @@ func (c *FixCommand) Run(args []string) int {
 
 func (c *FixCommand) ParseArgs(args []string) (*FixArgs, int) {
 	var cfg FixArgs
-	flags := c.Meta.FlagSet("fix", FlagSetNone)
+	flags := c.Meta.FlagSet("fix")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

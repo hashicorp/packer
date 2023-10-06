@@ -22,16 +22,6 @@ import (
 	"github.com/hashicorp/packer/version"
 )
 
-// FlagSetFlags is an enum to define what flags are present in the
-// default FlagSet returned by Meta.FlagSet
-type FlagSetFlags uint
-
-const (
-	FlagSetNone        FlagSetFlags = 0
-	FlagSetBuildFilter FlagSetFlags = 1 << iota
-	FlagSetVars
-)
-
 // Meta contains the meta-options and functionality that nearly every
 // Packer command inherits.
 type Meta struct {
@@ -72,11 +62,8 @@ func (m *Meta) Core(tpl *template.Template, cla *MetaArgs) (*packer.Core, error)
 	return core, nil
 }
 
-// FlagSet returns a FlagSet with the common flags that every
-// command implements. The exact behavior of FlagSet can be configured
-// using the flags as the second parameter, for example to disable
-// build settings on the commands that don't handle builds.
-func (m *Meta) FlagSet(n string, _ FlagSetFlags) *flag.FlagSet {
+// FlagSet returns a FlagSet with Packer SDK Ui support built-in
+func (m *Meta) FlagSet(n string) *flag.FlagSet {
 	f := flag.NewFlagSet(n, flag.ContinueOnError)
 
 	// Create an io.Writer that writes to our Ui properly for errors.
