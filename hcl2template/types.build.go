@@ -67,6 +67,8 @@ type BuildBlock struct {
 	// ready marks whether or not there's any decoding left to do before
 	// using the data from the build block.
 	ready bool
+	// dynamic is set if the block contains a dynamic statement
+	dynamic bool
 
 	// A description of what this build does, it could be used in a inspect
 	// call for example.

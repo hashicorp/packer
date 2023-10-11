@@ -490,6 +490,10 @@ func (cfg *PackerConfig) decodeBuildBlock(block *hcl.Block) hcl.Diagnostics {
 		block: block,
 	}
 
+	if isDynamic(block) {
+		build.dynamic = true
+	}
+
 	cfg.Builds = append(cfg.Builds, build)
 
 	return nil
@@ -581,6 +585,11 @@ func (cfg *PackerConfig) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagno
 		Name:  block.Labels[1],
 		block: block,
 	}
+
+	if isDynamic(block) {
+		source.dynamic = true
+	}
+
 	var diags hcl.Diagnostics
 
 	return source, diags

@@ -28,6 +28,8 @@ type SourceBlock struct {
 
 	block *hcl.Block
 
+	dynamic bool
+
 	// LocalName can be set in a singular source block from a build block, it
 	// allows to give a special name to a build in the logs.
 	LocalName string

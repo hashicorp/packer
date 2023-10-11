@@ -248,3 +248,36 @@ func getVarsByTypeForHCLSyntaxBody(body *hclsyntax.Body) []hcl.Traversal {
 
 	return rets
 }
+
+// isDynamic detects whether a block contains dynamic blocks or not.
+func isDynamic(b *hcl.Block) bool {
+	switch body := b.Body.(type) {
+	// In this case, we can only visit HCL bodies, if this is JSON, there's
+	// no dynamic possible.
+	//
+	// Alternatively, this could be any other hidden hcl.Body
+	// implementation from the library, including a hcl.dynamicBody, but
+	// there's no way to detect it.
+	// This function should always be called on the top-level block which
+	// may contain a dynamic child somewhere, but cannot themselves be a
+	// dynamic block.
+	case *hclsyntax.Body:
+		return recurseHCLBodyIsDynamic(body)
+	}
+
+	return false
+}
+
+func recurseHCLBodyIsDynamic(body *hclsyntax.Body) bool {
+	for _, b := range body.Blocks {
+		if b.Type == "dynamic" {
+			return true
+		}
+
+		if recurseHCLBodyIsDynamic(b.Body) {
+			return true
+		}
+	}
+
+	return false
+}
