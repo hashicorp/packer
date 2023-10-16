@@ -126,6 +126,13 @@
     "pluginTier": "community"
   },
   {
+    "title": "Unikraft",
+    "path": "unikraft",
+    "repo": "unikraft/packer-plugin-unikraft",
+    "version": "latest",
+    "pluginTier": "community"
+  },
+  {
     "title": "UpCloud",
     "path": "upcloud",
     "repo": "UpCloudLtd/packer-plugin-upcloud",
