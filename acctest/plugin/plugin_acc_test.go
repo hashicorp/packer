@@ -15,7 +15,6 @@ import (
 	"regexp"
 	"testing"
 
-	amazonacc "github.com/hashicorp/packer-plugin-amazon/builder/ebs/acceptance"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
 	"github.com/hashicorp/packer/hcl2template/addrs"
@@ -35,13 +34,6 @@ func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 		Name: "amazon-ebs_basic_plugin_init_and_build_test",
 		Setup: func() error {
 			return cleanupPluginInstallation(plugin)
-		},
-		Teardown: func() error {
-			helper := amazonacc.AMIHelper{
-				Region: "us-east-1",
-				Name:   "packer-plugin-amazon-ebs-test",
-			}
-			return helper.CleanUpAmi()
 		},
 		Template: basicAmazonEbsHCL2Template,
 		Type:     "amazon-ebs",
