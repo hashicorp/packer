@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.1"
+      version = "~>1"
       source = "github.com/hashicorp/amazon"
     }
   }
@@ -25,6 +25,7 @@ source "amazon-ebs" "basic-example" {
   communicator  = "ssh"
   instance_type = "t2.micro"
   ssh_username  = "ubuntu"
+  skip_create_ami = true
 }
 
 build {
