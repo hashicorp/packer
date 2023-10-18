@@ -343,3 +343,30 @@ func (m *Meta) detectBundledPluginsHCL2(config *hcl2template.PackerConfig) []str
 
 	return compileBundledPluginList(bundledPlugins)
 }
+
+func generateRequiredPluginsBlock(plugins []string) string {
+	if len(plugins) == 0 {
+		return ""
+	}
+
+	buf := &strings.Builder{}
+	buf.WriteString(`
+packer {
+  required_plugins {`)
+
+	for _, plugin := range plugins {
+		pluginName := strings.Replace(plugin, "github.com/hashicorp/", "", 1)
+		fmt.Fprintf(buf, `
+    %s = {
+      source  = %q
+      version = "~> 1"
+    }`, pluginName, plugin)
+	}
+
+	buf.WriteString(`
+  }
+}
+`)
+
+	return buf.String()
+}
