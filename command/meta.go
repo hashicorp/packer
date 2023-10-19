@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -166,90 +165,4 @@ func (m *Meta) GetConfigFromJSON(cla *MetaArgs) (packer.Handler, int) {
 		ret = 1
 	}
 	return core, ret
-}
-
-var knownPluginPrefixes = map[string]string{
-	"amazon":        "github.com/hashicorp/amazon",
-	"ansible":       "github.com/hashicorp/ansible",
-	"azure":         "github.com/hashicorp/azure",
-	"docker":        "github.com/hashicorp/docker",
-	"googlecompute": "github.com/hashicorp/googlecompute",
-	"qemu":          "github.com/hashicorp/qemu",
-	"vagrant":       "github.com/hashicorp/vagrant",
-	"vmware":        "github.com/hashicorp/vmware",
-	"vsphere":       "github.com/hashicorp/vsphere",
-}
-
-func (m *Meta) fixRequiredPlugins(config *hcl2template.PackerConfig) string {
-	plugins := map[string]struct{}{}
-
-	for _, b := range config.Builds {
-		for _, b := range b.Sources {
-			for prefix, plugin := range knownPluginPrefixes {
-				if strings.HasPrefix(b.Type, prefix) {
-					plugins[plugin] = struct{}{}
-				}
-			}
-		}
-
-		for _, p := range b.ProvisionerBlocks {
-			for prefix, plugin := range knownPluginPrefixes {
-				if strings.HasPrefix(p.PType, prefix) {
-					plugins[plugin] = struct{}{}
-				}
-			}
-		}
-
-		for _, pps := range b.PostProcessorsLists {
-			for _, pp := range pps {
-				for prefix, plugin := range knownPluginPrefixes {
-					if strings.HasPrefix(pp.PType, prefix) {
-						plugins[plugin] = struct{}{}
-					}
-				}
-			}
-		}
-	}
-
-	for _, ds := range config.Datasources {
-		for prefix, plugin := range knownPluginPrefixes {
-			if strings.HasPrefix(ds.Type, prefix) {
-				plugins[plugin] = struct{}{}
-			}
-		}
-	}
-
-	retPlugins := make([]string, 0, len(plugins))
-	for plugin := range plugins {
-		retPlugins = append(retPlugins, plugin)
-	}
-
-	return generateRequiredPluginsBlock(retPlugins)
-}
-
-func generateRequiredPluginsBlock(plugins []string) string {
-	if len(plugins) == 0 {
-		return ""
-	}
-
-	buf := &strings.Builder{}
-	buf.WriteString(`
-packer {
-  required_plugins {`)
-
-	for _, plugin := range plugins {
-		pluginName := strings.Replace(plugin, "github.com/hashicorp/", "", 1)
-		fmt.Fprintf(buf, `
-    %s = {
-      source  = %q
-      version = "~> 1"
-    }`, pluginName, plugin)
-	}
-
-	buf.WriteString(`
-  }
-}
-`)
-
-	return buf.String()
 }
