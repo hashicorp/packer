@@ -1,7 +1,7 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go v0.105.0 // indirect
+	cloud.google.com/go v0.110.8 // indirect
 	github.com/biogo/hts v1.4.3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
@@ -48,14 +48,14 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/mod v0.8.0
 	golang.org/x/net v0.17.0
-	golang.org/x/oauth2 v0.1.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/oauth2 v0.11.0
+	golang.org/x/sync v0.3.0
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.6.0
-	google.golang.org/api v0.101.0 // indirect
-	google.golang.org/grpc v1.50.1
+	google.golang.org/api v0.128.0 // indirect
+	google.golang.org/grpc v1.59.0
 )
 
 require (
@@ -75,10 +75,10 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.12.1 // indirect
-	cloud.google.com/go/compute/metadata v0.1.1 // indirect
-	cloud.google.com/go/iam v0.6.0 // indirect
-	cloud.google.com/go/storage v1.27.0 // indirect
+	cloud.google.com/go/compute v1.23.0 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
+	cloud.google.com/go/iam v1.1.2 // indirect
+	cloud.google.com/go/storage v1.30.1 // indirect
 	github.com/Azure/azure-sdk-for-go v64.0.0+incompatible // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.19 // indirect
@@ -134,13 +134,14 @@ require (
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.0.1 // indirect
+	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
-	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.2.4 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/hashicorp/aws-sdk-go-base v0.7.1 // indirect
 	github.com/hashicorp/consul/api v1.10.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -197,15 +198,17 @@ require (
 	github.com/xanzy/ssh-agent v0.3.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.mongodb.org/mongo-driver v1.11.0 // indirect
-	go.opencensus.io v0.23.0 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.11.1 // indirect
 	go.opentelemetry.io/otel/trace v1.11.1 // indirect
 	golang.org/x/mobile v0.0.0-20210901025245-1fde1d6c3ca1 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/genproto v0.0.0-20231012201019-e917dd12ba7a // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231016165738-49dd2c1f3d0b // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
