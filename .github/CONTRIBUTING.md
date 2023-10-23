@@ -70,7 +70,7 @@ runtime in order to build packer.
 
 1. This project always releases from the latest version of golang.
 [Install go](https://golang.org/doc/install#install) To properly build from
-source, you need to have golang >= v1.18
+source, you need to have golang >= v1.20
 
 ## Setting up Packer for dev
 
