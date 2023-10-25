@@ -50,6 +50,7 @@ Options:
                  installs the plugin where a normal invocation would, but will
 	         not try to download it from a web server, but instead directly
 	         install the binary for Packer to be able to load it later on.
+  - force:       forces installation of a plugin, even if it is already there.
 `
 
 	return strings.TrimSpace(helpText)
@@ -72,10 +73,12 @@ type PluginsInstallArgs struct {
 	PluginName string
 	PluginPath string
 	Version    string
+	Force      bool
 }
 
 func (pa *PluginsInstallArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.StringVar(&pa.PluginPath, "path", "", "install the plugin from a specific path")
+	flags.BoolVar(&pa.Force, "force", false, "force installation of a plugin, even if already installed")
 	pa.MetaArgs.AddFlagSets(flags)
 }
 
@@ -168,6 +171,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 		InFolders:                 opts.FromFolders,
 		BinaryInstallationOptions: opts.BinaryInstallationOptions,
 		Getters:                   getters,
+		Force:                     args.Force,
 	})
 
 	if err != nil {

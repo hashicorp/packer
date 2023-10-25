@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	gversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
@@ -120,16 +121,21 @@ for more info.`)
 			return 1
 		}
 
-		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier, len(installs))
+		if len(installs) > 0 {
+			if !cla.Force && !cla.Upgrade {
+				continue
+			}
 
-		if len(installs) > 0 && cla.Upgrade == false {
-			continue
+			if cla.Force && !cla.Upgrade {
+				pluginRequirement.VersionConstraints, _ = gversion.NewConstraint(fmt.Sprintf("=%s", installs[len(installs)-1].Version))
+			}
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 			InFolders:                 opts.FromFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
+			Force:                     cla.Force,
 		})
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
@@ -163,6 +169,8 @@ Options:
                                version, if there is a new higher one. Note that
                                this still takes into consideration the version
                                constraint of the config.
+  -force                       Forces installation of plugins, even if already
+                               installed.
 `
 
 	return strings.TrimSpace(helpText)

@@ -349,6 +349,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "darwin", ARCH: "amd64",
@@ -385,6 +386,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -430,6 +432,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "darwin", ARCH: "amd64",
@@ -477,6 +480,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -527,6 +531,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -577,6 +582,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "linux", ARCH: "amd64",
@@ -621,6 +627,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					pluginFolderOne,
 					pluginFolderTwo,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -662,6 +669,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 				[]string{
 					pluginFolderWrongChecksums,
 				},
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
