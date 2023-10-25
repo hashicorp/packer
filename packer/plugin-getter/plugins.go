@@ -713,7 +713,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							log.Printf("[WARNING] %v, ignoring", err)
 						}
 
-						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0555); err != nil {
+						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
