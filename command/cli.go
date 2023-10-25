@@ -104,6 +104,7 @@ type BuildArgs struct {
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
+	flags.BoolVar(&ia.Force, "force", false, "force installation of a plugin, even if already installed")
 
 	ia.MetaArgs.AddFlagSets(flags)
 }
@@ -112,6 +113,7 @@ func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 type InitArgs struct {
 	MetaArgs
 	Upgrade bool
+	Force   bool
 }
 
 // PluginsRequiredArgs represents a parsed cli line for a `packer plugins required <path>`
