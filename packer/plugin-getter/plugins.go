@@ -244,6 +244,9 @@ type InstallOptions struct {
 	// folder of this list.
 	InFolders []string
 
+	// Forces installation of the plugin, even if already installed.
+	Force bool
+
 	BinaryInstallationOptions
 }
 
@@ -582,7 +585,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 								log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
 								// if outputFile is there and matches the checksum: do nothing more.
-								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil {
+								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil && !opts.Force {
 									log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier, version, potentialOutputFilename)
 									return nil, nil // success
 								}
