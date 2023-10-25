@@ -6,6 +6,7 @@ package command
 import (
 	"context"
 	"crypto/sha256"
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -94,6 +95,11 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 		if err := os.Remove(installation.BinaryPath); err != nil {
 			c.Ui.Error(err.Error())
 			return 1
+		}
+		shasumFile := fmt.Sprintf("%s_SHA256SUM", installation.BinaryPath)
+		if err := os.Remove(shasumFile); err != nil {
+			c.Ui.Error(fmt.Sprintf("failed to remove %s: %s", shasumFile, err))
+			c.Ui.Error("You may need to remove it manually")
 		}
 		c.Ui.Message(installation.BinaryPath)
 	}

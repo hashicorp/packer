@@ -68,7 +68,6 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 			want:                                    0,
 			dirFiles: map[string][]string{
 				"darwin": {
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe",
@@ -77,7 +76,6 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				"linux": {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
 				},
@@ -86,13 +84,12 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
 				},
 			}[runtime.GOOS],
 			expectedPackerConfigDirHashAfterRemove: map[string]string{
-				"darwin":  "h1:IMsWPgJZzRhn80t78zE45003gFKN6EXq562/wjaCrKE=",
-				"linux":   "h1:Ez7SU1GZLvNGJmoTm9PeFIwHv9fvEgzZAZTMl6874iM=",
-				"windows": "h1:RrXlhy9tG9Bi3c2aOzjx/FLLyVNQolcY+MAr4V1etRI=",
+				"darwin":  "h1:IKDdst8f0nMAS9T9t85fhuvDCe8lYytiZ/vooW1OWeI=",
+				"linux":   "h1:h3t4iDYGbNtouHAJ1vPsE7d8n+6W5K4VlXTxhrQx2DA=",
+				"windows": "h1:NpETtGlu1hVMJe5bflPmyAhnL4iDvoIwA//uWhxtkDU=",
 			}[runtime.GOOS],
 		},
 		{
@@ -118,8 +115,6 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 			want:                                    0,
 			dirFiles: map[string][]string{
 				"darwin": {
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64",
@@ -134,8 +129,6 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe",
@@ -150,14 +143,12 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64",
 					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
-					"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe_SHA256SUM",
 				},
 			}[runtime.GOOS],
 			expectedPackerConfigDirHashAfterRemove: map[string]string{
-				"darwin":  "h1:FBBGQ1SKngN9PvF98awv8TZcKaS+CKzJmQoS7vuSXqY=",
-				"linux":   "h1:F8lN4Q3sv45ig8r1BLOS/wFuQQy6tSfmuIJf3fnbD5k=",
-				"windows": "h1:DOfH6WR1eJNLJcaL8ar8j1xu2WB7Jcn6oG7LGEvNBZI=",
+				"darwin":  "h1:A6wlL62bUD06NF/1ND5E0o4omXhusB2T8N5ZNe2JVbg=",
+				"linux":   "h1:SuTX0k2sknjDrL3PYgR1JajbGcs1qWIV2XvZAYSMsHw=",
+				"windows": "h1:NI8aJVAKdIyCXHuGDj6kTu5++6yvCz4oAswIhkL3wFc=",
 			}[runtime.GOOS],
 		},
 		{
