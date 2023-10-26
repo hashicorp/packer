@@ -104,5 +104,14 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 		c.Ui.Message(installation.BinaryPath)
 	}
 
+	if len(installations) == 0 {
+		errMsg := fmt.Sprintf("No installed plugin found matching the plugin constraints %s", args[0])
+		if len(args) == 2 {
+			errMsg = fmt.Sprintf("%s %s", errMsg, args[1])
+		}
+		c.Ui.Error(errMsg)
+		return 1
+	}
+
 	return 0
 }
