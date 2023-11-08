@@ -15,7 +15,18 @@ is_doc_or_tech_debt_pr(){
         return 1
     fi
     out=$(python3 -m json.tool < pull.json  \
-    | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt" or .labels[].name == "website"] | any')
+        | jq '[.labels[].name == "docs" or .labels[].name == "tech-debt" or .labels[].name == "website" or (.title|contains("Backport"))] | any')
+    grep -q true <<< $out
+    return $?
+}
+is_backport_pr(){
+    if ! (($+commands[jq])); then
+        DO_PR_CHECK=0
+        echo "jq not found"
+        return 1
+    fi
+    out=$(python3 -m json.tool < pull.json  \
+        | jq '(.title|contains("Backport"))')
     grep -q true <<< $out
     return $?
 }
@@ -50,6 +61,10 @@ get_prs(){
 
         if (($DO_PR_CHECK)) && is_doc_or_tech_debt_pr; then
             echo "Skipping PR ${PR_NUM}: labeled as tech debt, docs or website. (waiting a second so we don't get rate-limited...)"
+            continue
+        fi
+        if (($DO_PR_CHECK)) && is_backport_pr; then
+            echo "Skipping PR ${PR_NUM}: titled as backport. (waiting a second so we don't get rate-limited...)"
             continue
         fi
         echo "$(python3 -m json.tool < pull.json | jq -r '.title') - [GH-${PR_NUM}](https://github.com/hashicorp/packer/pull/${PR_NUM})"
