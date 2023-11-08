@@ -1,4 +1,44 @@
-## 1.9.5 (Upcoming)
+## 1.10.0 (Upcoming)
+
+### NOTES:
+This release contains breaking changes for those users who may be relying on
+     Packer bundling plugins for Amazon, Ansibe, Azure, Docker, GoogleCompute,
+     Qemu, Vagrant, VirtualBox, VMmare, and vSphere. As specified in the [recent
+     announcement](https://www.hashicorp.com/blog/announcing-the-removal-of-
+     bundled- plugins-in-hashicorp-packer) the plugins will no longer be shipped
+     alongside Packer. Users are encouraged to use `packer init` or `packer
+     plugins [...]` for managing required plugins needed for executing their
+     builds.[GH-12660](https://github.com/hashicorp/packer/pull/12660)
+
+### PLUGINS:
+
+* Removed all HashiCorp vendored plugins from being bundled into the Packer binary.
+     [GH-12660](https://github.com/hashicorp/packer/pull/12660)
+* packer-plugin-hcloud: The Hetzner Cloud plugin has been handed over to the
+     Hetzner integrations team. New releases for this plugin are available at
+     https://github.com/hetznercloud/packer-plugin-hcloud. Existing references
+     to the plugin will continue to work but users are advised to update the
+     `required_plugins` block to use the new plugin source address.
+    ```
+     required_plugins {
+       parallels = {
+         source  =  "github.com/hetznercloud/hcloud"
+         version =  "~> 1"
+        }
+    }
+    ```
+
+### IMPROVEMENTS:
+* cmd/plugins: install SHA256SUM file with 0644 perms.
+     [GH-12265](https://github.com/hashicorp/packer/pull/12661)
+* cmd/plugins: remove SHA256SUM file on plugin removal.
+     [GH-12267](https://github.com/hashicorp/packer/pull/12667)
+* cmd/plugins: remove will error if it fails to find the plugin being selected
+     for removal. [GH-12269](https://github.com/hashicorp/packer/pull/12669)
+
+### BUG FIXES:
+* Bump Go to 1.20.10 to Address CVE-2023-44487 / CVE-2023-39325.
+     [GH-12261](https://github.com/hashicorp/packer/pull/12661)
 
 ## 1.9.4 (August 18, 2023)
 
