@@ -1,21 +1,29 @@
 ## 1.10.0 (Upcoming)
 
 ### NOTES:
-This release contains breaking changes for those users who may be relying on
-     Packer bundling plugins for Amazon, Ansibe, Azure, Docker, GoogleCompute,
-     Qemu, Vagrant, VirtualBox, VMmare, and vSphere. As specified in the [recent
-     announcement](https://www.hashicorp.com/blog/announcing-the-removal-of-
-     bundled- plugins-in-hashicorp-packer) the plugins will no longer be shipped
-     alongside Packer. Users are encouraged to use `packer init` or `packer
-     plugins [...]` for managing required plugins needed for executing their
-     builds.[GH-12660](https://github.com/hashicorp/packer/pull/12660)
+This release contains breaking changes for those users who may be relying on plugins previously bundled into Packer. 
+As specified in the [Bundled Plugins Removal announcement](https://www.hashicorp.com/blog/announcing-the-removal-of-bundled-plugins-in-hashicorp-packer) HashiCorp maintained plugins 
+will no longer be shipped with Packer. Users are encouraged to use `packer init` or `packer plugins [...]` for managing required plugins needed for executing their
+builds. [GH-12660](https://github.com/hashicorp/packer/pull/12660)
+
+The affected plugins include:
+* packer-plugin-amazon 
+* packer-plugin-ansible 
+* packer-plugin-azure 
+* packer-plugin-docker 
+* packer-plugin-googlcompute 
+* packer-plugin-qemu 
+* packer-plugin-vagrant 
+* packer-plugin-virtualbox 
+* packer-plugin-vmware 
+* packer-plugin-vsphere 
 
 ### PLUGINS:
 
 * Removed all HashiCorp vendored plugins from being bundled into the Packer binary.
-     [GH-12660](https://github.com/hashicorp/packer/pull/12660)
+[GH-12660](https://github.com/hashicorp/packer/pull/12660)
 * packer-plugin-hcloud: The Hetzner Cloud plugin has been handed over to the
-     Hetzner integrations team. New releases for this plugin are available at
+ Hetzner integrations team. New releases for this plugin are available at
      https://github.com/hetznercloud/packer-plugin-hcloud. Existing references
      to the plugin will continue to work but users are advised to update the
      `required_plugins` block to use the new plugin source address.
