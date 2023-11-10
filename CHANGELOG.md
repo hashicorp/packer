@@ -44,8 +44,8 @@ The affected plugins include:
     ```
 
 ### IMPROVEMENTS:
-* cmd/init: warn users running `packer ini` on configuration templates with a
-     missing required_plugins blocks.
+* cmd/init: warn users running `packer init` on configuration templates with a
+     missing `required_plugins` blocks.
      [GH-12638](https://github.com/hashicorp/packer/pull/12638)
 * cmd/plugins: install SHA256SUM file with 0644 perms.
      [GH-12665](https://github.com/hashicorp/packer/pull/12665)
