@@ -28,8 +28,9 @@ get_prs(){
    | while read line
     do
         if grep -q "GH-${line}" CHANGELOG.md; then
-            echo $line
+            continue
         fi
+        echo $line
     done | while read PR_NUM
     do
         out=$(gh pr view ${PR_NUM} --json "title,labels,url" > pull.json)
@@ -48,7 +49,7 @@ get_prs | while read line; do
     if [[ "$line" =~ "bad" ]]; then
         exit 1
     fi
-    echo "Press enter to continue with next entry.."
+    echo "Press enter to continue with next entry."
     vared -ch ok
 done
 
