@@ -18,6 +18,13 @@ The affected plugins include:
 * packer-plugin-vmware 
 * packer-plugin-vsphere 
 
+### SECURITY:
+* Bump Go to 1.20.11  CVE-2023-45283. There have been no reported issues with
+     Packer but we are bumping given its usage of the path/filepath pkg.
+     [GH-12690](https://github.com/hashicorp/packer/pull/12690)
+* Bump Go to 1.20.10 to Address CVE-2023-44487 / CVE-2023-39325.
+     [GH-12661](https://github.com/hashicorp/packer/pull/12661)
+
 ### PLUGINS:
 
 * Removed all HashiCorp vendored plugins from being bundled into the Packer binary.
@@ -37,16 +44,21 @@ The affected plugins include:
     ```
 
 ### IMPROVEMENTS:
+* cmd/init: warn users running `packer ini` on configuration templates with a
+     missing required_plugins blocks.
+     [GH-12638](https://github.com/hashicorp/packer/pull/12638)
 * cmd/plugins: install SHA256SUM file with 0644 perms.
      [GH-12665](https://github.com/hashicorp/packer/pull/12665)
 * cmd/plugins: remove SHA256SUM file on plugin removal.
      [GH-12666](https://github.com/hashicorp/packer/pull/12666)
 * cmd/plugins: remove will error if it fails to find the plugin being selected
      for removal. [GH-12669](https://github.com/hashicorp/packer/pull/12669)
-
-### BUG FIXES:
-* Bump Go to 1.20.10 to Address CVE-2023-44487 / CVE-2023-39325.
-     [GH-12661](https://github.com/hashicorp/packer/pull/12661)
+* core/hcl: rework to remove the recursive execution of data sources with other
+     data source dependencies.
+     [GH-12608](https://github.com/hashicorp/packer/pull/12608)
+* core: Update version output for `packer -v` and `packer --version` to match
+     `packer version`.
+     [GH-12569](https://github.com/hashicorp/packer/pull/12569)
 
 ## 1.9.4 (August 18, 2023)
 
