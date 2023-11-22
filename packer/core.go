@@ -18,6 +18,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
@@ -218,15 +219,33 @@ func (c *Core) BuildNames(only, except []string) []string {
 func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (CoreBuildProvisioner, error) {
 	// Get the provisioner
 	cbp := CoreBuildProvisioner{}
+
+	if !c.components.PluginConfig.Provisioners.Has(rawP.Type) {
+		err := fmt.Errorf(
+			"The provisioner %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+				"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+				"https://developer.hashicorp.com/packer/integrations?filter=%s",
+			rawP.Type,
+			strings.Split(rawP.Type, "-")[0],
+		)
+
+		if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.Builders.List()); sugg != "" {
+			err = fmt.Errorf("Did you mean to use %q?", sugg)
+		}
+
+		return cbp, err
+	}
+
 	provisioner, err := c.components.PluginConfig.Provisioners.Start(rawP.Type)
 	if err != nil {
 		return cbp, fmt.Errorf(
 			"error initializing provisioner '%s': %s",
 			rawP.Type, err)
 	}
+	// Seems unlikely that a provisioner doesn't start successfully without error
 	if provisioner == nil {
 		return cbp, fmt.Errorf(
-			"provisioner type not found: %s", rawP.Type)
+			"provisioner failed to be started and did not error: %s", rawP.Type)
 	}
 
 	// Get the configuration
@@ -335,6 +354,22 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// For reference, the builtin BuilderStore is generated in
 	// packer/config.go in the Discover() func.
 
+	if !c.components.PluginConfig.Builders.Has(configBuilder.Type) {
+		err := fmt.Errorf(
+			"The builder %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+				"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+				"https://developer.hashicorp.com/packer/integrations?filter=%s",
+			configBuilder.Type,
+			strings.Split(configBuilder.Type, "-")[0],
+		)
+
+		if sugg := didyoumean.NameSuggestion(configBuilder.Type, c.components.PluginConfig.Builders.List()); sugg != "" {
+			err = fmt.Errorf("Did you mean to use %q?", sugg)
+		}
+
+		return nil, err
+	}
+
 	// the Start command launches the builder plugin of the given type without
 	// calling Prepare() or passing any build-specific details.
 	builder, err := c.components.PluginConfig.Builders.Start(configBuilder.Type)
@@ -394,6 +429,22 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 			}
 			if foundExcept {
 				break
+			}
+
+			if !c.components.PluginConfig.PostProcessors.Has(rawP.Type) {
+				err := fmt.Errorf(
+					"The post-processor %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					rawP.Type,
+					strings.Split(rawP.Type, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.PostProcessors.List()); sugg != "" {
+					err = fmt.Errorf("Did you mean to use %q?", sugg)
+				}
+
+				return nil, err
 			}
 
 			// Get the post-processor
