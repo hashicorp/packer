@@ -133,10 +133,22 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 			// its body.
 			srcUsage := &(build.Sources[i])
 			if !cfg.parser.PluginConfig.Builders.Has(srcUsage.Type) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildSourceLabel,
+					srcUsage.Type,
+					strings.Split(srcUsage.Type, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(srcUsage.Type, cfg.parser.PluginConfig.Builders.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + buildSourceLabel + " type " + srcUsage.Type,
 					Subject:  &build.HCL2Ref.DefRange,
-					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 				continue
@@ -169,10 +181,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 		for _, provBlock := range build.ProvisionerBlocks {
 			if !cfg.parser.PluginConfig.Provisioners.Has(provBlock.PType) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildProvisionerLabel,
+					provBlock.PType,
+					strings.Split(provBlock.PType, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(provBlock.PType, cfg.parser.PluginConfig.Provisioners.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
+
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provBlock.PType),
 					Subject:  provBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 			}
@@ -180,10 +205,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 		if build.ErrorCleanupProvisionerBlock != nil {
 			if !cfg.parser.PluginConfig.Provisioners.Has(build.ErrorCleanupProvisionerBlock.PType) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildErrorCleanupProvisionerLabel,
+					build.ErrorCleanupProvisionerBlock.PType,
+					strings.Split(build.ErrorCleanupProvisionerBlock.PType, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(build.ErrorCleanupProvisionerBlock.PType, cfg.parser.PluginConfig.Provisioners.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
+
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  fmt.Sprintf("Unknown "+buildErrorCleanupProvisionerLabel+" type %q", build.ErrorCleanupProvisionerBlock.PType),
 					Subject:  build.ErrorCleanupProvisionerBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildErrorCleanupProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 			}
@@ -192,10 +230,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 		for _, ppList := range build.PostProcessorsLists {
 			for _, ppBlock := range ppList {
 				if !cfg.parser.PluginConfig.PostProcessors.Has(ppBlock.PType) {
+					detail := fmt.Sprintf(
+						"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+							"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+							"https://developer.hashicorp.com/packer/integrations?filter=%s",
+						buildPostProcessorLabel,
+						ppBlock.PType,
+						strings.Split(ppBlock.PType, "-")[0],
+					)
+
+					if sugg := didyoumean.NameSuggestion(ppBlock.PType, cfg.parser.PluginConfig.PostProcessors.List()); sugg != "" {
+						detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+					}
+
 					diags = append(diags, &hcl.Diagnostic{
 						Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", ppBlock.PType),
 						Subject:  ppBlock.HCL2Ref.TypeRange.Ptr(),
-						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.PostProcessors.List()),
+						Detail:   detail,
 						Severity: hcl.DiagError,
 					})
 				}
