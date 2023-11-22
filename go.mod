@@ -21,10 +21,10 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/go-version v1.6.0
-	github.com/hashicorp/hcl/v2 v2.14.1
+	github.com/hashicorp/hcl/v2 v2.16.2
 	github.com/hashicorp/hcp-sdk-go v0.74.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
-	github.com/hashicorp/packer-plugin-sdk v0.4.0
+	github.com/hashicorp/packer-plugin-sdk v0.5.1
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/klauspost/pgzip v1.2.5
@@ -43,7 +43,7 @@ require (
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.8.4
 	github.com/ulikunitz/xz v0.5.10
-	github.com/zclconf/go-cty v1.10.0
+	github.com/zclconf/go-cty v1.12.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/mod v0.9.0
