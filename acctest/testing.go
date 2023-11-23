@@ -136,6 +136,9 @@ func Test(t TestT, c TestCase) {
 		Components: packer.ComponentFinder{
 			PluginConfig: &packer.PluginConfig{
 				Builders: TestBuilderSet{
+					BuilderSet: packersdk.MapOfBuilder{
+						"test": func() (packersdk.Builder, error) { return c.Builder, nil },
+					},
 					StartFn: func(n string) (packersdk.Builder, error) {
 						if n == "test" {
 							return c.Builder, nil
