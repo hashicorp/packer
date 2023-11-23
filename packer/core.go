@@ -229,7 +229,7 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			strings.Split(rawP.Type, "-")[0],
 		)
 
-		if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.Builders.List()); sugg != "" {
+		if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.Provisioners.List()); sugg != "" {
 			err = fmt.Errorf("Did you mean to use %q?", sugg)
 		}
 
