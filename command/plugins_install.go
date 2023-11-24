@@ -50,6 +50,7 @@ Options:
                  installs the plugin where a normal invocation would, but will
 	         not try to download it from a web server, but instead directly
 	         install the binary for Packer to be able to load it later on.
+	         This option cannot be specified with a version constraint.
   - force:       forces installation of a plugin, even if it is already there.
 `
 
@@ -103,6 +104,12 @@ func (c *PluginsInstallCommand) ParseArgs(args []string) (*PluginsInstallArgs, i
 
 	if len(args) == 2 {
 		pa.Version = args[1]
+	}
+
+	if pa.Path != "" && pa.Version != "" {
+		c.Ui.Error("Invalid arguments: a version cannot be specified with --path")
+		flags.Usage()
+		return pa, 1
 	}
 
 	pa.PluginName = args[0]
@@ -254,12 +261,6 @@ an issue on our Github repo to signal it.`)
 			Summary:  "Failed to decode plugin describe info",
 			Detail:   fmt.Sprintf("'%s describe' produced information that Packer couldn't decode: %s", args.PluginPath, err),
 		}})
-	}
-
-	// Let's override the plugin's version if we specify it in the options
-	// of the command
-	if args.Version != "" {
-		desc.Version = args.Version
 	}
 
 	pluginBinary, err := os.Open(args.PluginPath)
