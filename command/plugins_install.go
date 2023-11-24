@@ -263,6 +263,14 @@ an issue on our Github repo to signal it.`)
 		}})
 	}
 
+	if strings.Contains(desc.Version, "-") {
+		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid version",
+			Detail:   fmt.Sprintf("Packer can only install plugin releases with this command (ex: 1.0.0), the binary's reported version is %q", desc.Version),
+		}})
+	}
+
 	pluginBinary, err := os.Open(args.PluginPath)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
