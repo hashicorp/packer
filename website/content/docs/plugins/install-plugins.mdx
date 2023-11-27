@@ -19,12 +19,8 @@ This page explains how to install custom external plugins. Refer to [External Pl
 
 ## Installation Guides
 
-Choose the tab that corresponds to the type of plugin you want to install. If you are not sure, check the plugin's name.
-- Multi-component plugin names have the prefix `packer-plugin-`.
-- Single-component plugin names have a prefix containing the component type, like `packer-provisioner-` or `packer-builder`.
-
 <Tabs>
-<Tab heading="Packer init (recommended from Packer v1.7.0)">
+<Tab heading="Packer init (recommended with HCL2 templates)">
 
 -> **Note:** Only _multi-component plugin binaries_ -- plugins named
 packer-plugin-\*, like the `packer-plugin-amazon` -- are expected to work with
@@ -198,72 +194,34 @@ Packer will error if you set the `packer-plugin-` prefix in a `source`. This
 will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
-<Tab heading="manually (multi-component plugin)">
+<Tab heading="Packer plugins install (recommended with legacy JSON templates)">
 
--> The [`packer plugins`](/packer/docs/commands/plugins), available from Packer v1.8.0, command allows 
-you to install plugins without going through `init`. 
+Plugin installation via `packer plugins install` works similar to that of the `packer init` command, with the following
+exceptions no `required_plugins` block required and can be used with both legacy JSON and HCL2 templates.
+
+-> The [`packer plugins`](/packer/docs/commands/plugins), available from Packer v1.8.0, command allows
+you to install plugins without going through `init`.
 
 ```shell
 packer plugins install github.com/hashicorp/vagrant
 ```
 
-## Plugin Installation Workflow
-Plugin installation via `packer plugins install` works similar to that of the `packer init` command, with the following
-exceptions no `required_plugins` block required and can be used with both legacy JSON and HCL2 templates.
-
-* [`packer plugins install`](/packer/docs/commands/plugins) will install plugins in the **last** directory
-in the following numbered list.
-
-1. `PACKER_PLUGINS_PATH` if set will be the sole location for installing plugins. All other 
-plugin directories will be ignored. 
-1. `PACKER_CONFIG_DIR`\plugins on Windows systems, or `PACKER_CONFIG_DIR`/plugins on all other systems.
-
-
-For manual installation of plugin binaries, without the `packer plugins` command, please continue reading.
-
-The easiest way to manually install a plugin is to name it correctly, then place
-it in the proper directory. To name a plugin correctly, make sure the binary is
-named `packer-plugin-NAME`. For example, `packer-plugin-amazon` for a "plugin"
-binary named "amazon". This binary will make one or more components available to
-use. Valid types for plugins are down this page.
-
-The valid types for plugins are:
-
-- `plugin` - A plugin binary that can contain one or more of each Packer component
-  type.
-
-- `builder` - Plugins responsible for building images for a specific
-  platform.
-
-- `post-processor` - A post-processor responsible for taking an artifact from
-  a builder and turning it into something else.
-
-- `provisioner` - A provisioner to install software on images created by a
-  builder.
-
+The command will install the plugin in the `PACKER_CONFIG_DIR` set, or its
+default location, which depends on the OS/environment, as documented in
+[Configuring Packer](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory).
 
 </Tab>
-<Tab heading="manually (single-component plugin)">
+<Tab heading="Manual installation">
 
-The easiest way to manually install a plugin is to name it correctly, then place
-it in the proper directory. To name a plugin correctly, make sure the binary is
-named `packer-COMPONENT-NAME`. For example, `packer-provisioner-comment` for a "plugin"
-binary named "comment". This binary will make a single provisioner named `comment` available to
-use. Valid types for plugins are down this page.
+If you have obtained or built a plugin binary for your OS/Architecture and want to
+use it with Packer, you can install it manually. For Packer to load the plugin,
+it must be named with the convention `packer-plugin-NAME`, and placed in Packer's plugin
+directory, as documented in
+[Configuring Packer](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory).
 
-The valid types for plugins are:
-
-- `plugin` - A plugin binary that can contain one or more of each Packer component
-  type.
-
-- `builder` - Plugins responsible for building images for a specific
-  platform.
-
-- `post-processor` - A post-processor responsible for taking an artifact from
-  a builder and turning it into something else.
-
-- `provisioner` - A provisioner to install software on images created by a
-  builder.
+For example, if your configuration directory is located in `~/.config/packer`,
+you can copy the binary to `~/.config/plugins/packer-plugin-NAME`, and
+Packer will be able to load it afterwards.
 
 </Tab>
 </Tabs>
