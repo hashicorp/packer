@@ -5,6 +5,7 @@ package function
 
 import (
 	"fmt"
+	"math"
 	"testing"
 
 	"github.com/zclconf/go-cty/cty"
@@ -69,11 +70,15 @@ func TestLength(t *testing.T) {
 		},
 		{
 			cty.UnknownVal(cty.List(cty.Bool)),
-			cty.UnknownVal(cty.Number),
+			cty.UnknownVal(cty.Number).Refine().
+				NotNull().
+				NumberRangeLowerBound(cty.Zero, true).
+				NumberRangeUpperBound(cty.NumberIntVal(math.MaxInt), true).
+				NewValue(),
 		},
 		{
 			cty.DynamicVal,
-			cty.UnknownVal(cty.Number),
+			cty.UnknownVal(cty.Number).RefineNotNull(),
 		},
 		{
 			cty.StringVal("hello"),
@@ -118,11 +123,10 @@ func TestLength(t *testing.T) {
 		},
 		{
 			cty.UnknownVal(cty.String),
-			cty.UnknownVal(cty.Number),
-		},
-		{
-			cty.DynamicVal,
-			cty.UnknownVal(cty.Number),
+			cty.UnknownVal(cty.Number).Refine().
+				NotNull().
+				NumberRangeLowerBound(cty.Zero, true).
+				NewValue(),
 		},
 	}
 

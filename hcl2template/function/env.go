@@ -21,7 +21,8 @@ var EnvFunc = function.New(&function.Spec{
 			AllowUnknown: false,
 		},
 	},
-	Type: function.StaticReturnType(cty.String),
+	Type:         function.StaticReturnType(cty.String),
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		key := args[0].AsString()
 		value := os.Getenv(key)
