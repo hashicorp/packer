@@ -149,8 +149,8 @@ various outputs, like error messages.
 * [`packer init`](/packer/docs/commands/init) will install plugins in the **last** directory
 in the following numbered list.
 
-1. `PACKER_PLUGIN_PATH` if set will be the sole location for installing plugins. All other 
-plugin directories will be ignored. 
+1. `PACKER_PLUGIN_PATH` if set will be the sole location for installing plugins. All other
+plugin directories will be ignored.
 1. `PACKER_CONFIG_DIR`\plugins on Windows systems, or `PACKER_CONFIG_DIR`/plugins on all other systems.
 
 * During the initialization of Packer, any plugin required in the
@@ -172,26 +172,6 @@ will be required in order for `packer init` to ensure the plugin being loaded ha
 The SHA256SUM file will be automatically generated when a plugin is installed via `packer init` if the plugin
 was installed manually into `PACKER_CONFIG_DIR/plugins/github.com/azr/happycloud/` then the file
 `PACKER_CONFIG_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64_SHA256SUM` must be generated manually as well.
-
-## Implicit Github urls
-
-Using the following example :
-
-```hcl
-    required_plugins {
-      happycloud = {
-        version = ">= 2.7.0"
-        source = "github.com/azr/happycloud"
-      }
-    }
-```
-
-The plugin getter will look for plugins located at:
-
-- github.com/azr/packer-plugin-happycloud
-
-Packer will error if you set the `packer-plugin-` prefix in a `source`. This
-will avoid conflicting with other plugins for other tools, like Terraform.
 
 </Tab>
 <Tab heading="Packer plugins install (recommended with legacy JSON templates)">
