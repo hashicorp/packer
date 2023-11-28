@@ -104,6 +104,7 @@ var knownPlugins = map[string]string{
 	"googlecompute": "github.com/hashicorp/googlecompute",
 	"qemu":          "github.com/hashicorp/qemu",
 	"vagrant":       "github.com/hashicorp/vagrant",
+	"virtualbox":    "github.com/hashicorp/virtualbox",
 	"vmware":        "github.com/hashicorp/vmware",
 	"vsphere":       "github.com/hashicorp/vsphere",
 }
