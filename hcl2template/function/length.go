@@ -29,6 +29,7 @@ var LengthFunc = function.New(&function.Spec{
 			return cty.Number, errors.New("argument must be a string, a collection type, or a structural type")
 		}
 	},
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		coll := args[0]
 		collTy := args[0].Type()
