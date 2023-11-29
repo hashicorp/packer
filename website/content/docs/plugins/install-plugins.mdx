@@ -8,34 +8,113 @@ page_title: Install Plugins
 
 Packer plugins are separate, standalone applications that perform tasks during each build.
 
-You do not need to install the builder, provisioner, or
-post-processor components that ship with the Packer binary. Packer automatically knows how to find and launch these built-in plugins.
+You do not need to install the components that ship with the Packer binary.
+Packer automatically knows how to find and launch these built-in plugins.
 
 This page explains how to install custom external plugins. Refer to [External Plugins](/packer/plugins) for a list of available plugins and their documentation.
 
-## Plugin Loading Order
+Depending on the template type you're using (HCL2 or legacy JSON), the methods for installing plugins may differ.
 
-@include "plugins/plugin-location.mdx"
+If you're using HCL2, `packer init` is recommended as you can install all your requirements with one
+command, and those requirements are explicitly documented in the template.
+
+`packer plugins install` is also used to automate the installation from a source, and will need to
+be repeated for as many plugins as you need.
+We recommend this for JSON as the template cannot contain the information about the required plugins.
+
+Finally, you can manually install any plugin. This is mostly useful if you're in an environment with
+restricted internet access, or if you're installing non-final versions of plugins.
+
+Refer to the [Installation Guides](#installation-guides) section of this page for information about
+each, including usage examples.
+
+The remainder of this document will serve as documentation on how Packer interacts with plugins.
+We encourage you to read this to get familiar with this process, as it will help you troubleshoot
+your builds if you encounter problems with that.
+
+## Source Addresses
+
+A plugin's source address is its global identifier. It also tells Packer where
+to download it.
+
+Source addresses consist of three parts delimited by slashes (`/`), as
+follows:
+
+`<HOSTNAME>/<NAMESPACE>/<TYPE>`
+
+- **Hostname:** The hostname of the location/service that
+  distributes the plugin. Currently, the only valid "hostname" is github.com,
+  but we plan to eventually support plugins downloaded from other domains.
+
+- **Namespace:** An organizational namespace within the specified host.
+  This often is the organization that publishes the plugin.
+
+- **Type:** A short name for the platform or system the plugin manages. The
+  type is usually the plugin's preferred local name.
+
+For example, the fictional `myawesomecloud` plugin could belong to the
+`hashicorp` namespace on `github.com`, so its `source` could be
+`github.com/hashicorp/myawesomecloud`,
+
+-> Note: the actual _repository_ that myawesomecloud comes from must always have
+the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
+`required_plugins` block omits the redundant `packer-plugin-` repository prefix
+for brevity.
+
+The source address with all three components given explicitly is called the
+plugin's _fully-qualified address_. You will see fully-qualified address in
+various outputs, like error messages.
+
+## Plugin Loading Workflow
+
+At initialization, Packer attempts to discover the plugins installed locally. The
+logic follows what's described in Configuring Packer's
+[plugin directory](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory)
+section.
+
+While Packer is not verbose during this step, you can peek into what it is discovering
+with `PACKER_LOG=1` enabled, where you can find log lines similar to the following:
+
+```shell
+[TRACE] discovering plugins in [...]
+[INFO] Discovered potential plugin: [...]
+```
+
+This logic however is ignored when plugins are defined in `required_plugins` blocks;
+instead, for every plugin required in this way, Packer will only consider them if they're
+installed in Packer's plugin directory, under a directory hierarchy that matches the
+source, with the plugin name respecting a convention.
+
+For example, if we install the `github.com/hashicorp/amazon` plugin in version 1.2.8 through
+either `packer init` or `packer plugins install`, this will yield the following (in a
+Linux x86_64 environment):
+
+```shell
+<packer_plugin_dir>
+└── github.com
+    └── hashicorp
+        └── amazon
+            ├── packer-plugin-amazon_v1.2.8_x5.0_linux_amd64
+            └── packer-plugin-amazon_v1.2.8_x5.0_linux_amd64_SHA256SUM
+```
+
+Both the plugin's binary, and the related SHA256SUM file must be placed alongside
+each other for Packer to consider them for a `required_plugins` constraint.
 
 ## Installation Guides
 
 <Tabs>
 <Tab heading="Packer init (recommended with HCL2 templates)">
 
--> **Note:** Only _multi-component plugin binaries_ -- plugins named
-packer-plugin-\*, like the `packer-plugin-amazon` -- are expected to work with
-Packer init. The legacy `builder`, `post-processor` and `provisioner` plugin
-types will continue to be detected but Packer cannot install them automatically.
-If a plugin you use has not been upgraded to use the multi-component plugin
-architecture, contact your maintainer to request an upgrade.
+In order to use `packer init` for managing installation of your plugins, there are
+two steps required.
 
-## Create a required_plugins block
+First, add a [`required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+block to your [packer block](/packer/docs/templates/hcl_templates/blocks/packer).
 
-1. Add a
-   [`required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-   block to your [packer block](/packer/docs/templates/hcl_templates/blocks/packer). Each block will tell Packer what version(s) of a
-   particular plugin can be installed. Make sure to set a valid [version
-   constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints).
+Each block will tell Packer what version(s) of a particular plugin can be installed.
+Make sure to set a valid
+[version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints).
 
 Here is an example `required_plugins` block:
 
@@ -54,17 +133,18 @@ packer {
 }
 ```
 
-2. Run [`packer init`](/packer/docs/commands/init) from your project directory (the
-   directory containing your Packer templates) to install all missing plugin
-   binaries. Given the above example, Packer will try to look for a GitHub
-   repository owned by user or organization `azr` named
-   `packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
+Once your template contains those `required_plugins`, run
+[`packer init`](/packer/docs/commands/init) to install all missing plugin
+binaries.
+Given the above example, Packer will try to look for a GitHub
+repository owned by user or organization `azr` named
+`packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
 
 ## Names and Addresses
 
 Each plugin has two identifiers:
 
-- A `source` address, which is necessary when requiring a plugin not bundled with the Packer binary.
+- A `source` address, which is where the plugin is downloaded from.
 - A unique **local name**, which is used everywhere else in a Packer configuration.
 
 ## Local Names
@@ -111,80 +191,20 @@ source "foo-ebs" "example" {
 }
 ```
 
-## Source Addresses
-
-A plugin's source address is its global identifier. It also tells Packer where
-to download it.
-
-Source addresses consist of three parts delimited by slashes (`/`), as
-follows:
-
-`<HOSTNAME>/<NAMESPACE>/<TYPE>`
-
-- **Hostname:** The hostname of the location/service that
-  distributes the plugin. Currently, the only valid "hostname" is github.com,
-  but we plan to eventually support plugins downloaded from other domains.
-
-- **Namespace:** An organizational namespace within the specified host.
-  This often is the organization that publishes the plugin.
-
-- **Type:** A short name for the platform or system the plugin manages. The
-  type is usually the plugin's preferred local name.
-
-For example, the fictional `myawesomecloud` plugin could belong to the
-`hashicorp` namespace on `github.com`, so its `source` could be
-`github.com/hashicorp/myawesomecloud`,
-
--> Note: the actual _repository_ that myawesomecloud comes from must always have
-the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
-`required_plugins` block omits the redundant `packer-plugin-` repository prefix
-for brevity.
-
-The source address with all three components given explicitly is called the
-plugin's _fully-qualified address_. You will see fully-qualified address in
-various outputs, like error messages.
-
-## Plugin Installation Workflow
-
-* [`packer init`](/packer/docs/commands/init) will install plugins in the **last** directory
-in the following numbered list.
-
-1. `PACKER_PLUGIN_PATH` if set will be the sole location for installing plugins. All other
-plugin directories will be ignored.
-1. `PACKER_CONFIG_DIR`\plugins on Windows systems, or `PACKER_CONFIG_DIR`/plugins on all other systems.
-
-* During the initialization of Packer, any plugin required in the
-**`required_plugins`** section will be looked up in all entries of the following
-list. **First** plugin found takes precedence. Two binaries of the same plugin
-with two different version will be considered as two different plugins. Highest
-found version matching `required_plugins` will be taken into consideration.
-
-During initialization, on a `darwin_amd64` system, Packer will look-up for the
-following files:
-
-* `PACKER_PLUGIN_PATH/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
-* `PACKER_CONFIG_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64`
-
-The first plugin-name/version files found will take precedence.
-
-For plugins located under the `github.com/azr/happycloud/` directory structure an accompanying SHA256SUM file
-will be required in order for `packer init` to ensure the plugin being loaded has not been tampered with.
-The SHA256SUM file will be automatically generated when a plugin is installed via `packer init` if the plugin
-was installed manually into `PACKER_CONFIG_DIR/plugins/github.com/azr/happycloud/` then the file
-`PACKER_CONFIG_DIR/plugins/github.com/azr/happycloud/packer-plugin-happycloud_*_x5.0_darwin_amd64_SHA256SUM` must be generated manually as well.
-
 </Tab>
 <Tab heading="Packer plugins install (recommended with legacy JSON templates)">
 
-Plugin installation via `packer plugins install` works similar to that of the `packer init` command, with the following
-exceptions no `required_plugins` block required and can be used with both legacy JSON and HCL2 templates.
-
--> The [`packer plugins`](/packer/docs/commands/plugins), available from Packer v1.8.0, command allows
-you to install plugins without going through `init`.
+Plugin installation via `packer plugins install` works similar to that of the `packer init` command, but
+no `required_plugins` block are required, and thus can be used with both legacy JSON and HCL2 templates.
 
 ```shell
 packer plugins install github.com/hashicorp/vagrant
 ```
+
+-> You can only install one plugin per invocation of the command. If you need to install
+   a specific version of a plugin, you can specify a version to install as an optional
+   argument to the command line.
+   e.g.: `packer plugins install "github.com/hashicorp/vagrant" "v1.0.1"`
 
 The command will install the plugin in the `PACKER_CONFIG_DIR` set, or its
 default location, which depends on the OS/environment, as documented in
@@ -202,6 +222,10 @@ directory, as documented in
 For example, if your configuration directory is located in `~/.config/packer`,
 you can copy the binary to `~/.config/plugins/packer-plugin-NAME`, and
 Packer will be able to load it afterwards.
+
+If you have a `required_plugins` for the plugin you're manually installing, make sure
+it respects the constraints described in the [Plugin loading workflow](#plugin-loading-workflow)
+section, otherwise Packer will not be able to load it.
 
 </Tab>
 </Tabs>
