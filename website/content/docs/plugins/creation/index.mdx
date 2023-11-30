@@ -9,7 +9,7 @@ page_title: Extending
 # Developing Plugins
 
 Packer is extensible and supports plugins that let you
-create and use custom builders, provisioners, post-processors, and data sources. This page explains how to develop Packer plugins. Before you begin, we recommend reviewing the Packer documentation and the instructions for [installing external plugins](/packer/docs/plugins/install-plugins).
+create and use custom builders, provisioners, post-processors, and data sources. This page explains how to develop Packer plugins. Before you begin, we recommend reviewing the Packer documentation and the instructions for [installing external plugins](https://developer.hashicorp.com/packer/docs/plugins/install-plugins).
 
 ~> **Warning** This is an advanced topic. You should have strong knowledge of Packer before you start writing plugins.
 
@@ -146,7 +146,7 @@ because the `packer init` command only supports multi-component plugins.
 
 Next, build your plugin as you would any other Go application. The resulting
 binary is the plugin that can be installed using
-[standard installation procedures](/packer/docs/plugins#installing-plugins).
+[standard installation procedures](https://developer.hashicorp.com/packer/docs/plugins#installing-plugins).
 
 This documentation explains how to implement each type of plugin interface: builders, data sources, provisioners, and post-processors.
 
@@ -212,17 +212,17 @@ Here's what you need to create releases using GitHub Actions:
    releaser is working. The tag must be a valid
    [Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
    to install a plugin using `packer init`, see the
-   [init docs](/packer/docs/commands/init).
+   [init docs](https://developer.hashicorp.com/packer/docs/commands/init).
 
 ## Registering Plugins
 
 ~> Note: Registering a remote as an integration requires the use of [Packer's plugin docs configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
 
 `packer init` allows users to require and install remote Packer plugins published to GitHub.
-To help with the discovery of remote Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](/packer/integrations).
+To help with the discovery of remote Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](https://developer.hashicorp.com/packer/integrations).
 
 The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) be added to your plugin repository for configuring the Packer integration pipeline and plugin documentation for rendering 
-on the [Packer Integrations](/packer/integrations) portal.
+on the [Packer Integrations](https://developer.hashicorp.com/packer/integrations) portal.
 
 The following steps are required for registering your plugin as an integration
 
@@ -239,7 +239,7 @@ Please provide all the requested information to help expedite the integration re
 By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation, 
 and, finally, to open an internal pull-request to finalize the integration setup. 
 
-Plugin integrations will be listed as a [Packer Integration](/packer/integrations), with details on how to install and use your the plugin. 
+Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your the plugin. 
 
 Plugin integrations, once deployed, can be updated manually, or automatically upon a new release, by the plugin authors. Changes to the defined documentation structure 
 or parent repository should be communicated to the Packer team to ensure a working integration pipeline. 
