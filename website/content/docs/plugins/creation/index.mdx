@@ -216,23 +216,23 @@ Here's what you need to create releases using GitHub Actions:
 
 ## Registering Plugins
 
-~> Note: Registering a remote as an integration requires the use of [Packer's plugin docs configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
+~> Note: Registering a plugin as an integration requires the use of [Packer's Incofiguration configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
 
-`packer init` allows users to require and install remote Packer plugins published to GitHub.
-To help with the discovery of remote Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](https://developer.hashicorp.com/packer/integrations).
+To help with the discovery of Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](https://developer.hashicorp.com/packer/integrations).
 
-The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) be added to your plugin repository for configuring the Packer integration pipeline and plugin documentation for rendering 
-on the [Packer Integrations](https://developer.hashicorp.com/packer/integrations) portal.
+The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) be added to your plugin repository for configuring the Packer integration pipeline and 
+a specific directory structure for plugin documentation to be render on the [Packer Integrations](https://developer.hashicorp.com/packer/integrations) portal.
 
-The following steps are required for registering your plugin as an integration
+You can execute the following steps to register your plugin as an integration:
 
-1. Update your plugin documentation structure according to the templated defined with the [Packer Plugin Scaffolding template].
-New plugins generated from this template may have the necessary structure in place. If so you can jump to step 4.
+1. Update your plugin documentation structure according to the template defined with the [Packer Plugin Scaffolding template].
+New plugins generated from this template may have the necessary structure in place. If so you can jump to step 3.
 1. For the integrations library, only one top-level README per integration is supported. Any top-level index.mdx files that exist
 within a plugins existing documentation will need to migrate to a top-level README. 
 1. Update your top-level integration README to include a description, plugin installation steps, available components section, and, any, additional sections
 needed to inform users on how to work with your integration. Refer to [Packer scaffolding plugin](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/docs/README.md) for an example. 
 1. Update the top-level README for each of the components within your integration to follow the structure defined in the scaffolding template.
+1. Add the integration configuration file [metadata.hcl](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.web-docs/metadata.hcl) to the plugins `.web-docs` directory.
 1. Open a request for integration issue with the Packer team - [Open Request](https://github.com/hashicorp/packer/issues/new/choose).
 Please provide all the requested information to help expedite the integration request. 
 
