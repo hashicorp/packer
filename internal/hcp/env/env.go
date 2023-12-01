@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // Package env provides HCP Packer environment variables.
 package env
@@ -11,10 +11,6 @@ import (
 
 func HasProjectID() bool {
 	return hasEnvVar(HCPProjectID)
-}
-
-func HasOrganizationID() bool {
-	return hasEnvVar(HCPOrganizationID)
 }
 
 func HasClientID() bool {

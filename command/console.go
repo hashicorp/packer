@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -43,7 +43,7 @@ func (c *ConsoleCommand) Run(args []string) int {
 
 func (c *ConsoleCommand) ParseArgs(args []string) (*ConsoleArgs, int) {
 	var cfg ConsoleArgs
-	flags := c.Meta.FlagSet("console")
+	flags := c.Meta.FlagSet("console", FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

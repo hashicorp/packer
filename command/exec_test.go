@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/hashicorp/packer-plugin-amazon/builder/ebs"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/file"
 	"github.com/hashicorp/packer/builder/null"
@@ -120,8 +121,10 @@ func getBareComponentFinder() packer.ComponentFinder {
 	return packer.ComponentFinder{
 		PluginConfig: &packer.PluginConfig{
 			Builders: packer.MapOfBuilder{
-				"file": func() (packersdk.Builder, error) { return &file.Builder{}, nil },
-				"null": func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+				"file":       func() (packersdk.Builder, error) { return &file.Builder{}, nil },
+				"null":       func() (packersdk.Builder, error) { return &null.Builder{}, nil },
+				"amazon-ebs": func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
+				"azure-arm":  func() (packersdk.Builder, error) { return &ebs.Builder{}, nil },
 			},
 			Provisioners: packer.MapOfProvisioner{
 				"shell-local": func() (packersdk.Provisioner, error) { return &shell_local.Provisioner{}, nil },

@@ -1,10 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
 import (
 	"fmt"
+	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -1008,9 +1009,9 @@ func (fc fileCheck) verify(t *testing.T, dir string) {
 		}
 	}
 	for file, expectedContent := range fc.expectedContent {
-		content, err := os.ReadFile(filepath.Join(dir, file))
+		content, err := ioutil.ReadFile(filepath.Join(dir, file))
 		if err != nil {
-			t.Fatalf("os.ReadFile: %v", err)
+			t.Fatalf("ioutil.ReadFile: %v", err)
 		}
 		if diff := cmp.Diff(expectedContent, string(content)); diff != "" {
 			t.Errorf("content of %s differs: %s", file, diff)

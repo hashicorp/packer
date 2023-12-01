@@ -1,11 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package packer
 
 import (
 	"bytes"
-	"io"
+	"io/ioutil"
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -40,8 +40,8 @@ func TestUi(t *testing.T) packersdk.Ui {
 	var buf bytes.Buffer
 	return &packersdk.BasicUi{
 		Reader:      &buf,
-		Writer:      io.Discard,
-		ErrorWriter: io.Discard,
+		Writer:      ioutil.Discard,
+		ErrorWriter: ioutil.Discard,
 	}
 }
 

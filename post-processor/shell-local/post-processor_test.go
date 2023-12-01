@@ -1,9 +1,10 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package shell_local
 
 import (
+	"io/ioutil"
 	"os"
 	"runtime"
 	"testing"
@@ -94,7 +95,7 @@ func TestPostProcessorPrepare_Script(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := os.CreateTemp("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -162,7 +163,7 @@ func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
 	}
 
 	// Test with both
-	tf, err := os.CreateTemp("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -181,7 +182,7 @@ func TestPostProcessorPrepare_ScriptAndScripts(t *testing.T) {
 	raws := testConfig()
 
 	// Test with both
-	tf, err := os.CreateTemp("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -207,7 +208,7 @@ func TestPostProcessorPrepare_Scripts(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := os.CreateTemp("", "packer")
+	tf, err := ioutil.TempFile("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}

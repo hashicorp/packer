@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc struct-markdown
 //go:generate packer-sdc mapstructure-to-hcl2 -type DatasourceOutput,Config
@@ -8,7 +8,7 @@ package http
 import (
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"regexp"
@@ -137,7 +137,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		fmt.Println("If the content is binary data, Packer may not properly handle the contents of the response.")
 	}
 
-	bytes, err := io.ReadAll(resp.Body)
+	bytes, err := ioutil.ReadAll(resp.Body)
 	// TODO: How to make test case for this?
 	if err != nil {
 		fmt.Println("Error processing response body of call")
