@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // Package api provides access to the HCP Packer Registry API.
 package api
@@ -11,10 +11,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
-	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/organization_service"
-	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/project_service"
-	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/models"
+	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/organization_service"
+	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/client/project_service"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
+	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/preview/2019-12-10/models"
 	"github.com/hashicorp/hcp-sdk-go/httpclient"
 	"github.com/hashicorp/packer/internal/hcp/env"
 	"github.com/hashicorp/packer/version"
@@ -164,13 +166,13 @@ func (c *Client) loadProjectID() error {
 }
 
 // getOldestProject retrieves the oldest project from a list based on its created_at time.
-func getOldestProject(projects []*rmmodels.HashicorpCloudResourcemanagerProject) (*rmmodels.HashicorpCloudResourcemanagerProject, error) {
+func getOldestProject(projects []*models.HashicorpCloudResourcemanagerProject) (*models.HashicorpCloudResourcemanagerProject, error) {
 	if len(projects) == 0 {
 		return nil, fmt.Errorf("no project found")
 	}
 
 	oldestTime := time.Now()
-	var oldestProj *rmmodels.HashicorpCloudResourcemanagerProject
+	var oldestProj *models.HashicorpCloudResourcemanagerProject
 	for _, proj := range projects {
 		projTime := time.Time(proj.CreatedAt)
 		if projTime.Before(oldestTime) {
@@ -184,7 +186,7 @@ func getOldestProject(projects []*rmmodels.HashicorpCloudResourcemanagerProject)
 // ValidateRegistryForProject validates that there is an active registry associated to the configured organization and project ids.
 // A successful validation will result in a nil response. All other response represent an invalid registry error request or a registry not found error.
 func (client *Client) ValidateRegistryForProject() error {
-	params := packerSvc.NewPackerServiceGetRegistryParams()
+	params := packer_service.NewPackerServiceGetRegistryParams()
 	params.LocationOrganizationID = client.OrganizationID
 	params.LocationProjectID = client.ProjectID
 

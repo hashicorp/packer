@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package acctest
 
@@ -136,9 +136,6 @@ func Test(t TestT, c TestCase) {
 		Components: packer.ComponentFinder{
 			PluginConfig: &packer.PluginConfig{
 				Builders: TestBuilderSet{
-					BuilderSet: packersdk.MapOfBuilder{
-						"test": func() (packersdk.Builder, error) { return c.Builder, nil },
-					},
 					StartFn: func(n string) (packersdk.Builder, error) {
 						if n == "test" {
 							return c.Builder, nil

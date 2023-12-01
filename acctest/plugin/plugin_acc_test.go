@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // plugin_acc_test.go should contain acceptance tests for features related to
 // installing, discovering and running plugins.
@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"testing"
 
+	amazonacc "github.com/hashicorp/packer-plugin-amazon/builder/ebs/acceptance"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
 	"github.com/hashicorp/packer/hcl2template/addrs"
@@ -34,6 +35,13 @@ func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 		Name: "amazon-ebs_basic_plugin_init_and_build_test",
 		Setup: func() error {
 			return cleanupPluginInstallation(plugin)
+		},
+		Teardown: func() error {
+			helper := amazonacc.AMIHelper{
+				Region: "us-east-1",
+				Name:   "packer-plugin-amazon-ebs-test",
+			}
+			return helper.CleanUpAmi()
 		},
 		Template: basicAmazonEbsHCL2Template,
 		Type:     "amazon-ebs",

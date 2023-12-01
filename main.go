@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // This is the main package for the `packer` application.
 
@@ -249,16 +249,6 @@ func wrappedMain() int {
 			Version: version.Version,
 		},
 		Ui: ui,
-	}
-
-	//versionCLIHelper shortcuts "--version" and "-v" to just show the version
-	versionCLIHelper := &cli.CLI{
-		Args:    args,
-		Version: version.Version,
-	}
-	if versionCLIHelper.IsVersion() && versionCLIHelper.Version != "" {
-		// by default version flags ignore all other args so there is no need to persist the original args.
-		args = []string{"version"}
 	}
 
 	cli := &cli.CLI{

@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // component_acc_test.go should contain acceptance tests for plugin components
 // to make sure all component types can be discovered and started.
@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"testing"
 
+	amazonacc "github.com/hashicorp/packer-plugin-amazon/builder/ebs/acceptance"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
@@ -30,6 +31,13 @@ func TestAccInitAndBuildBasicAmazonAmiDatasource(t *testing.T) {
 		Name: "amazon-ami_basic_datasource_test",
 		Setup: func() error {
 			return cleanupPluginInstallation(plugin)
+		},
+		Teardown: func() error {
+			helper := amazonacc.AMIHelper{
+				Region: "us-west-2",
+				Name:   "packer-amazon-ami-test",
+			}
+			return helper.CleanUpAmi()
 		},
 		Template: basicAmazonAmiDatasourceHCL2Template,
 		Type:     "amazon-ami",

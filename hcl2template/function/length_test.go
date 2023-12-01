@@ -1,11 +1,10 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package function
 
 import (
 	"fmt"
-	"math"
 	"testing"
 
 	"github.com/zclconf/go-cty/cty"
@@ -70,15 +69,11 @@ func TestLength(t *testing.T) {
 		},
 		{
 			cty.UnknownVal(cty.List(cty.Bool)),
-			cty.UnknownVal(cty.Number).Refine().
-				NotNull().
-				NumberRangeLowerBound(cty.Zero, true).
-				NumberRangeUpperBound(cty.NumberIntVal(math.MaxInt), true).
-				NewValue(),
+			cty.UnknownVal(cty.Number),
 		},
 		{
 			cty.DynamicVal,
-			cty.UnknownVal(cty.Number).RefineNotNull(),
+			cty.UnknownVal(cty.Number),
 		},
 		{
 			cty.StringVal("hello"),
@@ -123,10 +118,11 @@ func TestLength(t *testing.T) {
 		},
 		{
 			cty.UnknownVal(cty.String),
-			cty.UnknownVal(cty.Number).Refine().
-				NotNull().
-				NumberRangeLowerBound(cty.Zero, true).
-				NewValue(),
+			cty.UnknownVal(cty.Number),
+		},
+		{
+			cty.DynamicVal,
+			cty.UnknownVal(cty.Number),
 		},
 	}
 

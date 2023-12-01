@@ -1,12 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
 import (
 	"context"
 	"crypto/sha256"
-	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -96,21 +95,7 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 			c.Ui.Error(err.Error())
 			return 1
 		}
-		shasumFile := fmt.Sprintf("%s_SHA256SUM", installation.BinaryPath)
-		if err := os.Remove(shasumFile); err != nil {
-			c.Ui.Error(fmt.Sprintf("failed to remove %s: %s", shasumFile, err))
-			c.Ui.Error("You may need to remove it manually")
-		}
 		c.Ui.Message(installation.BinaryPath)
-	}
-
-	if len(installations) == 0 {
-		errMsg := fmt.Sprintf("No installed plugin found matching the plugin constraints %s", args[0])
-		if len(args) == 2 {
-			errMsg = fmt.Sprintf("%s %s", errMsg, args[1])
-		}
-		c.Ui.Error(errMsg)
-		return 1
 	}
 
 	return 0

@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 //go:build amd64 && (darwin || windows || linux)
 
@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/mitchellh/cli"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
@@ -108,7 +109,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			expectedPackerConfigDirHashBeforeInstall: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			packerConfigDir:                          cfg.dir("4_pkr_plugins_config"),
 			pluginSourceArgs:                         []string{"github.com/sylviamoss/comment", "v0.2.18", "github.com/sylviamoss/comment", "v0.2.19"},
-			want:                                     1,
+			want:                                     cli.RunResultHelp,
 			dirFiles:                                 nil,
 			expectedPackerConfigDirHashAfterInstall:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},
@@ -119,7 +120,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			expectedPackerConfigDirHashBeforeInstall: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			packerConfigDir:                          cfg.dir("5_pkr_plugins_config"),
 			pluginSourceArgs:                         []string{},
-			want:                                     1,
+			want:                                     cli.RunResultHelp,
 			dirFiles:                                 nil,
 			expectedPackerConfigDirHashAfterInstall:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},

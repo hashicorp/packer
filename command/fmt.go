@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -28,7 +28,7 @@ func (c *FormatCommand) Run(args []string) int {
 
 func (c *FormatCommand) ParseArgs(args []string) (*FormatArgs, int) {
 	var cfg FormatArgs
-	flags := c.Meta.FlagSet("format")
+	flags := c.Meta.FlagSet("format", FlagSetNone)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

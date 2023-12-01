@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -43,7 +43,7 @@ func (c *BuildCommand) Run(args []string) int {
 
 func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	var cfg BuildArgs
-	flags := c.Meta.FlagSet("build")
+	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -94,6 +94,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}
 
 	diags = packerStarter.Initialize(packer.InitializeOptions{})
+	bundledDiags := c.DetectBundledPlugins(packerStarter)
+	diags = append(bundledDiags, diags...)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret

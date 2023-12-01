@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -11,7 +11,6 @@ import (
 	"runtime"
 	"strings"
 
-	gversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
@@ -38,7 +37,7 @@ func (c *InitCommand) Run(args []string) int {
 
 func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 	var cfg InitArgs
-	flags := c.Meta.FlagSet("init")
+	flags := c.Meta.FlagSet("init", 0)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -121,21 +120,16 @@ for more info.`)
 			return 1
 		}
 
-		if len(installs) > 0 {
-			if !cla.Force && !cla.Upgrade {
-				continue
-			}
+		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier, len(installs))
 
-			if cla.Force && !cla.Upgrade {
-				pluginRequirement.VersionConstraints, _ = gversion.NewConstraint(fmt.Sprintf("=%s", installs[len(installs)-1].Version))
-			}
+		if len(installs) > 0 && cla.Upgrade == false {
+			continue
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 			InFolders:                 opts.FromFolders,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
-			Force:                     cla.Force,
 		})
 		if err != nil {
 			c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
@@ -169,8 +163,6 @@ Options:
                                version, if there is a new higher one. Note that
                                this still takes into consideration the version
                                constraint of the config.
-  -force                       Forces reinstallation of plugins, even if already
-                               installed.
 `
 
 	return strings.TrimSpace(helpText)

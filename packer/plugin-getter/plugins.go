@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package plugingetter
 
@@ -177,7 +177,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			res = append(res, &Installation{
+			res.InsertSortedUniq(&Installation{
 				BinaryPath: path,
 				Version:    pluginVersionStr,
 			})
@@ -206,6 +206,22 @@ func (l InstallList) String() string {
 	return v.String()
 }
 
+// InsertSortedUniq inserts the installation in the right spot in the list by
+// comparing the version lexicographically.
+// A Duplicate version will replace any already present version.
+func (l *InstallList) InsertSortedUniq(install *Installation) {
+	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
+	if len(*l) > pos && (*l)[pos].Version == install.Version {
+		// already detected, let's ignore any new foundings, this way any plugin
+		// close to cwd or the packer exec takes precedence; this will be better
+		// for plugin development/tests.
+		return
+	}
+	(*l) = append((*l), nil)
+	copy((*l)[pos+1:], (*l)[pos:])
+	(*l)[pos] = install
+}
+
 // Installation describes a plugin installation
 type Installation struct {
 	// path to where binary is installed, if installed.
@@ -227,9 +243,6 @@ type InstallOptions struct {
 	// Any downloaded binary and checksum file will be put in the last possible
 	// folder of this list.
 	InFolders []string
-
-	// Forces installation of the plugin, even if already installed.
-	Force bool
 
 	BinaryInstallationOptions
 }
@@ -569,7 +582,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 								log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
 								// if outputFile is there and matches the checksum: do nothing more.
-								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil && !opts.Force {
+								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil {
 									log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier, version, potentialOutputFilename)
 									return nil, nil // success
 								}
@@ -700,7 +713,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							log.Printf("[WARNING] %v, ignoring", err)
 						}
 
-						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
+						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0555); err != nil {
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
