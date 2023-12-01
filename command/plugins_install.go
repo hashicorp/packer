@@ -4,6 +4,7 @@
 package command
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -44,12 +46,13 @@ Usage: packer plugins install [OPTIONS...] <plugin> [<version constraint>]
   installed.
 
   Ex: packer plugins install github.com/hashicorp/happycloud v1.2.3
+      packer plugins install --path ./packer-plugin-happycloud "github.com/hashicorp/happycloud"
 
 Options:
   - path <path>: install the plugin from a locally-sourced plugin binary. This
                  installs the plugin where a normal invocation would, but will
-	         not try to download it from a web server, but instead directly
-	         install the binary for Packer to be able to load it later on.
+                 not try to download it from a remote location, and instead
+                 install the binary in the Packer plugins path.
 	         This option cannot be specified with a version constraint.
   - force:       forces installation of a plugin, even if it is already there.
 `
@@ -71,15 +74,15 @@ func (c *PluginsInstallCommand) Run(args []string) int {
 
 type PluginsInstallArgs struct {
 	MetaArgs
-	PluginName string
-	PluginPath string
-	Version    string
-	Force      bool
+	PluginIdentifier string
+	PluginPath       string
+	Version          string
+	Force            bool
 }
 
 func (pa *PluginsInstallArgs) AddFlagSets(flags *flag.FlagSet) {
-	flags.StringVar(&pa.PluginPath, "path", "", "install the plugin from a specific path")
-	flags.BoolVar(&pa.Force, "force", false, "force installation of a plugin, even if already installed")
+	flags.StringVar(&pa.PluginPath, "path", "", "install the binary specified by path as a Packer plugin.")
+	flags.BoolVar(&pa.Force, "force", false, "force installation of the specified plugin, even if already installed.")
 	pa.MetaArgs.AddFlagSets(flags)
 }
 
@@ -107,13 +110,12 @@ func (c *PluginsInstallCommand) ParseArgs(args []string) (*PluginsInstallArgs, i
 	}
 
 	if pa.Path != "" && pa.Version != "" {
-		c.Ui.Error("Invalid arguments: a version cannot be specified with --path")
+		c.Ui.Error("Invalid arguments: a version cannot be specified when using --path to install a local plugin binary")
 		flags.Usage()
 		return pa, 1
 	}
 
-	pa.PluginName = args[0]
-
+	pa.PluginIdentifier = args[0]
 	return pa, 0
 }
 
@@ -130,8 +132,11 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			},
 		},
 	}
+	if runtime.GOOS == "windows" {
+		opts.BinaryInstallationOptions.Ext = ".exe"
+	}
 
-	plugin, diags := addrs.ParsePluginSourceString(args.PluginName)
+	plugin, diags := addrs.ParsePluginSourceString(args.PluginIdentifier)
 	if diags.HasErrors() {
 		c.Ui.Error(diags.Error())
 		return 1
@@ -140,7 +145,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 	// If we did specify a binary to install the plugin from, we ignore
 	// the Github-based getter in favour of installing it directly.
 	if args.PluginPath != "" {
-		return c.InstallFromBinary(args)
+		return c.InstallFromBinary(opts, plugin, args)
 	}
 
 	// a plugin requirement that matches them all
@@ -155,10 +160,6 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			return 1
 		}
 		pluginRequirement.VersionConstraints = constraints
-	}
-
-	if runtime.GOOS == "windows" && opts.Ext == "" {
-		opts.BinaryInstallationOptions.Ext = ".exe"
 	}
 
 	getters := []plugingetter.Getter{
@@ -199,42 +200,29 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 	return 0
 }
 
-func (c *PluginsInstallCommand) InstallFromBinary(args *PluginsInstallArgs) int {
-	pluginDirs := c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders
-
-	if len(pluginDirs) == 0 {
-		c.Ui.Say(`Error: cannot find a place to install the plugin to
-
-In order to install the plugin for later use, Packer needs to know where to
-install them.
-
-This can be specified through the PACKER_CONFIG_DIR environment variable,
-but should be automatically inferred by Packer.
-
-If you see this message, this is likely a Packer bug, please consider opening
-an issue on our Github repo to signal it.`)
-	}
-
-	pluginSlugParts := strings.Split(args.PluginName, "/")
-	if len(pluginSlugParts) != 3 {
-		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid plugin name specifier",
-			Detail:   fmt.Sprintf("The plugin name specified provided (%q) does not conform to the mandated format of <host>/<org>/<plugin-name>.", args.PluginName),
-		}})
-	}
-
+func (c *PluginsInstallCommand) InstallFromBinary(opts plugingetter.ListInstallationsOptions, pluginIdentifier *addrs.Plugin, args *PluginsInstallArgs) int {
 	// As with the other commands, we get the last plugin directory as it
 	// has precedence over the others, and is where we'll install the
 	// plugins to.
-	pluginDir := pluginDirs[len(pluginDirs)-1]
+	pluginDir := opts.FromFolders[len(opts.FromFolders)-1]
+
+	var err error
+
+	args.PluginPath, err = filepath.Abs(args.PluginPath)
+	if err != nil {
+		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to transform path",
+			Detail:   fmt.Sprintf("Failed to transform the given path to an absolute one: %s", err),
+		}})
+	}
 
 	s, err := os.Stat(args.PluginPath)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Unable to find plugin to promote",
-			Detail:   fmt.Sprintf("The plugin %q failed to be opened because of an error: %s", args.PluginName, err),
+			Detail:   fmt.Sprintf("The plugin %q failed to be opened because of an error: %s", args.PluginIdentifier, err),
 		}})
 	}
 
@@ -254,6 +242,7 @@ an issue on our Github repo to signal it.`)
 			Detail:   fmt.Sprintf("Packer failed to run %s describe: %s", args.PluginPath, err),
 		}})
 	}
+
 	var desc plugin.SetDescription
 	if err := json.Unmarshal(describeCmd, &desc); err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
@@ -263,7 +252,15 @@ an issue on our Github repo to signal it.`)
 		}})
 	}
 
-	if strings.Contains(desc.Version, "-") {
+	semver, err := version.NewSemver(desc.Version)
+	if err != nil {
+		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid version",
+			Detail:   fmt.Sprintf("Plugin's reported version (%q) is not semver-compatible: %s", desc.Version, err),
+		}})
+	}
+	if semver.Prerelease() != "" {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid version",
@@ -279,15 +276,9 @@ an issue on our Github repo to signal it.`)
 			Detail:   fmt.Sprintf("Failed to open plugin binary from %q: %s", args.PluginPath, err),
 		}})
 	}
-	defer pluginBinary.Close()
 
-	// We'll install the SHA256SUM file alongside the plugin, based on the
-	// contents of the plugin being passed.
-	//
-	// This will make our loaders happy as they require a valid checksum
-	// for loading plugins installed this way.
-	shasum := sha256.New()
-	_, err = io.Copy(shasum, pluginBinary)
+	pluginContents := bytes.Buffer{}
+	_, err = io.Copy(&pluginContents, pluginBinary)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -295,10 +286,14 @@ an issue on our Github repo to signal it.`)
 			Detail:   fmt.Sprintf("Failed to read plugin binary from %q: %s", args.PluginPath, err),
 		}})
 	}
+	_ = pluginBinary.Close()
 
 	// At this point, we know the provided binary behaves correctly with
 	// describe, so it's very likely to be a plugin, let's install it.
-	installDir := fmt.Sprintf("%s/%s", pluginDir, args.PluginName)
+	installDir := filepath.Join(
+		pluginDir,
+		filepath.Join(pluginIdentifier.Parts()...),
+	)
 	err = os.MkdirAll(installDir, 0755)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
@@ -308,15 +303,17 @@ an issue on our Github repo to signal it.`)
 		}})
 	}
 
-	binaryPath := fmt.Sprintf(
-		"%s/packer-plugin-%s_v%s_%s_%s_%s",
-		installDir,
-		pluginSlugParts[2],
+	outputPrefix := fmt.Sprintf(
+		"packer-plugin-%s_v%s_%s",
+		pluginIdentifier.Type,
 		desc.Version,
 		desc.APIVersion,
-		runtime.GOOS,
-		runtime.GOARCH,
 	)
+	binaryPath := filepath.Join(
+		installDir,
+		outputPrefix+opts.BinaryInstallationOptions.FilenameSuffix(),
+	)
+
 	outputPlugin, err := os.OpenFile(binaryPath, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0755)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
@@ -327,16 +324,7 @@ an issue on our Github repo to signal it.`)
 	}
 	defer outputPlugin.Close()
 
-	_, err = pluginBinary.Seek(0, 0)
-	if err != nil {
-		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Failed to reset plugin's reader",
-			Detail:   fmt.Sprintf("Failed to seek offset 0 while attempting to reset the buffer for the plugin to install: %s", err),
-		}})
-	}
-
-	_, err = io.Copy(outputPlugin, pluginBinary)
+	_, err = outputPlugin.Write(pluginContents.Bytes())
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -344,6 +332,11 @@ an issue on our Github repo to signal it.`)
 			Detail:   fmt.Sprintf("Failed to copy plugin binary from %q to %q: %s", args.PluginPath, binaryPath, err),
 		}})
 	}
+
+	// We'll install the SHA256SUM file alongside the plugin, based on the
+	// contents of the plugin being passed.
+	shasum := sha256.New()
+	_, _ = shasum.Write(pluginContents.Bytes())
 
 	shasumPath := fmt.Sprintf("%s_SHA256SUM", binaryPath)
 	shaFile, err := os.OpenFile(shasumPath, os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0644)
@@ -357,8 +350,7 @@ an issue on our Github repo to signal it.`)
 	defer shaFile.Close()
 
 	fmt.Fprintf(shaFile, "%x", shasum.Sum([]byte{}))
-
-	c.Ui.Say(fmt.Sprintf("Successfully installed plugin %s from %s to %s", args.PluginName, args.PluginPath, binaryPath))
+	c.Ui.Say(fmt.Sprintf("Successfully installed plugin %s from %s to %s", args.PluginIdentifier, args.PluginPath, binaryPath))
 
 	return 0
 }
