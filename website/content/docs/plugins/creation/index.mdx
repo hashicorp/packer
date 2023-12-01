@@ -236,6 +236,33 @@ needed to inform users on how to work with your integration. Refer to [Packer sc
 1. Open a request for integration issue with the Packer team - [Open Request](https://github.com/hashicorp/packer/issues/new/choose).
 Please provide all the requested information to help expedite the integration request. 
 
+#### [Example] Add integration files to existing plugin repository
+
+```shell
+## Update Plugin repository with integration config, workflows, and scripts
+cd packer-plugin-name
+mkdir -p .web-docs/scripts
+
+# Download packer-plugin-scaffolding repo copy files
+curl -L -O https://github.com/hashicorp/packer-plugin-scaffolding/archive/refs/heads/main.zip
+unzip main.zip
+cp packer-plugin-scaffolding-main/.web-docs/metadata.hcl .web-docs/
+cp -r packer-plugin-scaffolding-main/.web-docs/scripts/ .web-docs/scripts/
+cp .github/workflows/notify-integration-release-via-* .github/workflows/
+
+# Remove downloaded scaffolding project
+rm main.zip
+rm -rf packer-plugin-scaffolding-main
+
+# Add the following commands to your plugin GNUmakefile
+generate: install-packer-sdc
+    @go generate ./...
+    @rm -rf .docs
+    @packer-sdc renderdocs -src docs -partials docs-partials/ -dst .docs/
+    @./.web-docs/scripts/compile-to-webdocs.sh "." ".docs" ".web-docs" "<orgname>"
+    @rm -r ".docs"
+```
+
 By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation, 
 and, finally, to open an internal pull-request to finalize the integration setup. 
 
