@@ -49,15 +49,7 @@ danger of colliding dependencies.
 
 - [`github.com/hashicorp/packer-plugin-sdk/plugin`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin) - Contains the code to serve the plugin. This handles all the inter-process communication.
 
-Basic examples of serving your component are shown below. Note that if you
-define a multi-component plugin, you can (but do not need to) add more than one
-component per plugin binary. The multi-component plugin is also compatible with
-download and installation via `packer init`, whereas the single-component plugin
-is not.
-
-<Tabs>
-
-<Tab heading="Multi-component Plugin (recommended) ">
+Basic examples of serving your component are shown below. 
 
 ```go
 // main.go
@@ -106,43 +98,6 @@ the following components available:
 - the `my` builder
 - the `my-foo` post-processor
 - the `my-bar` provisioner
-
-</Tab>
-
-<Tab heading="Single Component Plugin (deprecated)">
-
-```go
-// main.go
-
-import (
-  "github.com/hashicorp/packer-plugin-sdk/plugin"
-)
-
-// Assume this implements the packer.Builder interface
-type Builder struct{}
-
-func main() {
-    server, err := plugin.Server()
-    if err != nil {
-        panic(err)
-    }
-    server.RegisterBuilder(new(Builder))
-    server.Serve()
-}
-```
-
-This `server.Serve()` invocation handles all the details of communicating with
-Packer core and serving your component over RPC. As long as your struct being
-registered implements one of the component interfaces, Packer will now be able
-to launch your plugin and use it.
-
-Please note that single-component plugins exist for backwards-compatability. We
-would rather you register your component using the multi-component method shown
-in the other tab, even if you only have one component in your binary. This is
-because the `packer init` command only supports multi-component plugins.
-
-</Tab>
-</Tabs>
 
 Next, build your plugin as you would any other Go application. The resulting
 binary is the plugin that can be installed using
