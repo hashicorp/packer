@@ -169,7 +169,7 @@ Options:
                                version, if there is a new higher one. Note that
                                this still takes into consideration the version
                                constraint of the config.
-  -force                       Forces installation of plugins, even if already
+  -force                       Forces reinstallation of plugins, even if already
                                installed.
 `
 

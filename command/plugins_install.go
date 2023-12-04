@@ -54,7 +54,7 @@ Options:
                  not try to download it from a remote location, and instead
                  install the binary in the Packer plugins path.
 	         This option cannot be specified with a version constraint.
-  - force:       forces installation of a plugin, even if it is already there.
+  - force:       forces reinstallation of plugins, even if already installed.
 `
 
 	return strings.TrimSpace(helpText)
