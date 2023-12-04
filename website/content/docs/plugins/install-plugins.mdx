@@ -227,5 +227,15 @@ If you have a `required_plugins` for the plugin you're manually installing, make
 it respects the constraints described in the [Plugin loading workflow](#plugin-loading-workflow)
 section, otherwise Packer will not be able to load it.
 
+Starting with v1.10.0 of Packer, you can also use `packer plugins install` with the
+`--path` flag to install a plugin from a binary, following the layout that is required to
+work with `required_plugins` block.
+
+```shell
+packer plugins install --path <path-to-plugin-binary> github.com/hashicorp/vagrant
+```
+
+-> packer plugins install --path only works with release versions of plugins.
+
 </Tab>
 </Tabs>
