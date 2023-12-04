@@ -177,7 +177,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 				continue
 			}
 
-			res.InsertSortedUniq(&Installation{
+			res = append(res, &Installation{
 				BinaryPath: path,
 				Version:    pluginVersionStr,
 			})
@@ -204,22 +204,6 @@ func (l InstallList) String() string {
 	}
 	v.Write([]byte("]"))
 	return v.String()
-}
-
-// InsertSortedUniq inserts the installation in the right spot in the list by
-// comparing the version lexicographically.
-// A Duplicate version will replace any already present version.
-func (l *InstallList) InsertSortedUniq(install *Installation) {
-	pos := sort.Search(len(*l), func(i int) bool { return (*l)[i].Version >= install.Version })
-	if len(*l) > pos && (*l)[pos].Version == install.Version {
-		// already detected, let's ignore any new foundings, this way any plugin
-		// close to cwd or the packer exec takes precedence; this will be better
-		// for plugin development/tests.
-		return
-	}
-	(*l) = append((*l), nil)
-	copy((*l)[pos+1:], (*l)[pos:])
-	(*l)[pos] = install
 }
 
 // Installation describes a plugin installation
