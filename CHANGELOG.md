@@ -1,64 +1,93 @@
 ## 1.10.0 (Upcoming)
 
 ### NOTES:
-This release contains breaking changes for those users who may be relying on plugins previously bundled into Packer. 
-As specified in the [Bundled Plugins Removal announcement](https://www.hashicorp.com/blog/announcing-the-removal-of-bundled-plugins-in-hashicorp-packer) HashiCorp maintained plugins 
-will no longer be shipped with Packer. Users are encouraged to use `packer init` or `packer plugins [...]` for managing required plugins needed for executing their
-builds. [GH-12660](https://github.com/hashicorp/packer/pull/12660)
+This release contains breaking changes for practitioner relying on plugins
+     previously bundled into Packer. As specified in the [Bundled Plugins Removal announcement](https://www.hashicorp.com/blog/announcing-the-removal-of-bundled-plugins-in-hashicorp-packer)
+     HashiCorp maintained plugins will no longer be shipped with Packer. 
+     Users are encouraged to use `packer init` or `packer plugins [...]` when managing required plugins
+     needed for executing their builds.
+     [GH-12660](https://github.com/hashicorp/packer/pull/12660)
 
 The affected plugins include:
-* packer-plugin-amazon 
-* packer-plugin-ansible 
-* packer-plugin-azure 
-* packer-plugin-docker 
-* packer-plugin-googlcompute 
-* packer-plugin-qemu 
-* packer-plugin-vagrant 
-* packer-plugin-virtualbox 
-* packer-plugin-vmware 
-* packer-plugin-vsphere 
+* [packer-plugin-amazon](https://github.com/hashicorp/packer-plugin-amazon) 
+* [packer-plugin-ansible](https://github.com/hashicorp/packer-plugin-ansible) 
+* [packer-plugin-azure](https://github.com/hashicorp/packer-plugin-azure) 
+* [packer-plugin-docker](https://github.com/hashicorp/packer-plugin-docker) 
+* [packer-plugin-googlecompute](https://github.com/hashicorp/packer-plugin-googlecompute) 
+* [packer-plugin-qemu](https://github.com/hashicorp/packer-plugin-qemu) 
+* [packer-plugin-vagrant](https://github.com/hashicorp/packer-plugin-vagrant) 
+* [packer-plugin-virtualbox](https://github.com/hashicorp/packer-plugin-virtualbox) 
+* [packer-plugin-vmware](https://github.com/hashicorp/packer-plugin-vmware) 
+* [packer-plugin-vsphere](https://github.com/hashicorp/packer-plugin-vsphere) 
 
 ### SECURITY:
+* Bump github.com/go-jose/go-jose/v3 to address GO-2023-2334. There have been
+     no reported issues with Packer but we are bumping given that it is a
+     secondary
+     dependency. [GH-12723](https://github.com/hashicorp/packer/pull/12723)
+* Bump Go to 1.20.10 to Address CVE-2023-44487 / CVE-2023-39325.
+     [GH-12661](https://github.com/hashicorp/packer/pull/12661)
 * Bump Go to 1.20.11  CVE-2023-45283. There have been no reported issues with
      Packer but we are bumping given its usage of the path/filepath pkg.
      [GH-12690](https://github.com/hashicorp/packer/pull/12690)
-* Bump Go to 1.20.10 to Address CVE-2023-44487 / CVE-2023-39325.
-     [GH-12661](https://github.com/hashicorp/packer/pull/12661)
+* Bump Packer Plugin SDK to v0.5.2.
+     [GH-12717](https://github.com/hashicorp/packer/pull/12717)
 
 ### PLUGINS:
 
 * Removed all HashiCorp vendored plugins from being bundled into the Packer binary.
-[GH-12660](https://github.com/hashicorp/packer/pull/12660)
+[GH-12660](https://github.com/hashicorp/packer/pull/12660), [GH-12720](https://github.com/hashicorp/packer/pull/12720)
 * packer-plugin-hcloud: The Hetzner Cloud plugin has been handed over to the
  Hetzner integrations team. New releases for this plugin are available at
      https://github.com/hetznercloud/packer-plugin-hcloud. Existing references
      to the plugin will continue to work but users are advised to update the
      `required_plugins` block to use the new plugin source address.
     ```
-     required_plugins {
+    required_plugins {
        parallels = {
          source  =  "github.com/hetznercloud/hcloud"
          version =  "~> 1"
-        }
+       }
     }
     ```
-
 ### IMPROVEMENTS:
-* cmd/init: warn users running `packer init` on configuration templates with a
+* cmd/init: Warn users running `packer init` on configuration templates with a
      missing `required_plugins` blocks.
      [GH-12638](https://github.com/hashicorp/packer/pull/12638)
-* cmd/plugins: install SHA256SUM file with 0644 perms.
+* cmd/plugins: Install SHA256SUM file with 0644 perms.
      [GH-12665](https://github.com/hashicorp/packer/pull/12665)
-* cmd/plugins: remove SHA256SUM file on plugin removal.
+* cmd/plugins: Remove SHA256SUM file on plugin removal.
      [GH-12666](https://github.com/hashicorp/packer/pull/12666)
-* cmd/plugins: remove will error if it fails to find the plugin being selected
+* cmd/plugins: Remove will error if it fails to find the plugin being selected
      for removal. [GH-12669](https://github.com/hashicorp/packer/pull/12669)
-* core/hcl: rework to remove the recursive execution of data sources with other
+* core/hcl2: Remove empty source file reference on unset variable errors.
+     [GH-12712](https://github.com/hashicorp/packer/pull/12712)
+* core/hcl: Improve the recursive execution of data sources with other
      data source dependencies.
      [GH-12608](https://github.com/hashicorp/packer/pull/12608)
+* core: Bump github.com/hashicorp/hcp-sdk-go from 0.73.0 to 0.74.0 -
+     [GH-12704](https://github.com/hashicorp/packer/pull/12704)
+* core: Bump Packer Plugin SDK to v0.5.2.
+     [GH-12717](https://github.com/hashicorp/packer/pull/12717)
+* core: Provide integration link as hint in error message if a plugin component
+     is unknown. [GH-12705](https://github.com/hashicorp/packer/pull/12705)
 * core: Update version output for `packer -v` and `packer --version` to match
      `packer version`.
      [GH-12569](https://github.com/hashicorp/packer/pull/12569)
+* docs: Update plugin installation guides with supported methods for 1.10.0 and
+     above. [GH-12713](https://github.com/hashicorp/packer/pull/12713)
+
+## 1.9.5 (December 4, 2023)
+
+### SECURITY
+
+* Bump github.com/go-jose/go-jose/v3 to address GO-2023-2334.
+     [GH-12723](https://github.com/hashicorp/packer/pull/12723)
+
+### BUG FIXES:
+
+* Add VirtualBox as known plugin prefix to prevent endless bundled plugin warning.
+     [GH-12719](https://github.com/hashicorp/packer/pull/12719)
 
 ## 1.9.4 (August 18, 2023)
 
