@@ -1,4 +1,14 @@
-## 1.9.5 (Upcoming)
+## 1.9.5 (December 4, 2023)
+
+### SECURITY
+
+* Bump github.com/go-jose/go-jose/v3 to address GO-2023-2334.
+     [GH-12723](https://github.com/hashicorp/packer/pull/12723)
+
+### BUG FIXES:
+
+* Add VirtualBox as known plugin prefix to prevent endless bundled plugin warning.
+     [GH-12719](https://github.com/hashicorp/packer/pull/12719)
 
 ## 1.9.4 (August 18, 2023)
 
