@@ -23,13 +23,6 @@
     "sourceBranch": "main"
   },
   {
-    "title": "Git",
-    "path": "git",
-    "repo": "ethanmdavidson/packer-plugin-git",
-    "version": "latest",
-    "sourceBranch": "main"
-  },
-  {
     "title": "Gridscale",
     "path": "gridscale",
     "repo": "gridscale/packer-plugin-gridscale",
@@ -51,14 +44,6 @@
     "repo": "kamatera/packer-plugin-kamatera",
     "pluginTier": "community",
     "version": "latest"
-  },
-  {
-    "title": "Linode",
-    "path": "linode",
-    "repo": "linode/packer-plugin-linode",
-    "pluginTier": "verified",
-    "version": "latest",
-    "isHcpPackerReady": true
   },
   {
     "title": "Libvirt",
@@ -91,31 +76,10 @@
     "isHcpPackerReady": true
   },
   {
-    "title": "Parallels",
-    "path": "parallels",
-    "repo": "parallels/packer-plugin-parallels",
-    "version": "latest",
-    "pluginTier": "verified"
-  },
-  {
     "title": "Scaleway",
     "path": "scaleway",
     "repo": "scaleway/packer-plugin-scaleway",
     "pluginTier": "verified",
-    "version": "latest"
-  },
-  {
-    "title": "SSH Key",
-    "path": "sshkey",
-    "repo": "ivoronin/packer-plugin-sshkey",
-    "pluginTier": "community",
-    "version": "latest"
-  },
-  {
-    "title": "Tart",
-    "path": "tart",
-    "repo": "cirruslabs/packer-plugin-tart",
-    "pluginTier": "community",
     "version": "latest"
   },
   {
