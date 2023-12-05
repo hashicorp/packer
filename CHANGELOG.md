@@ -1,4 +1,6 @@
-## 1.10.0 (Upcoming)
+## 1.10.1 (Upcoming)
+
+## 1.10.0 (December 5, 2023)
 
 ### NOTES:
 This release contains breaking changes for practitioner relying on plugins
@@ -54,6 +56,9 @@ The affected plugins include:
 * cmd/init: Warn users running `packer init` on configuration templates with a
      missing `required_plugins` blocks.
      [GH-12638](https://github.com/hashicorp/packer/pull/12638)
+* cmd/plugins: Add `--path` flag to `packer plugins install` subcommand to
+     support installation of plugins from a local binary rather than from
+     GitHub. [GH-12643](https://github.com/hashicorp/packer/pull/12643)
 * cmd/plugins: Install SHA256SUM file with 0644 perms.
      [GH-12665](https://github.com/hashicorp/packer/pull/12665)
 * cmd/plugins: Remove SHA256SUM file on plugin removal.
@@ -62,8 +67,8 @@ The affected plugins include:
      for removal. [GH-12669](https://github.com/hashicorp/packer/pull/12669)
 * core/hcl2: Remove empty source file reference on unset variable errors.
      [GH-12712](https://github.com/hashicorp/packer/pull/12712)
-* core/hcl: Improve the recursive execution of data sources with other
-     data source dependencies.
+* core/hcl: Improve the recursive execution of data sources with other data
+     source dependencies.
      [GH-12608](https://github.com/hashicorp/packer/pull/12608)
 * core: Bump github.com/hashicorp/hcp-sdk-go from 0.73.0 to 0.74.0 -
      [GH-12704](https://github.com/hashicorp/packer/pull/12704)
@@ -76,6 +81,13 @@ The affected plugins include:
      [GH-12569](https://github.com/hashicorp/packer/pull/12569)
 * docs: Update plugin installation guides with supported methods for 1.10.0 and
      above. [GH-12713](https://github.com/hashicorp/packer/pull/12713)
+
+### BUG FIXES:
+
+* cmd/plugins: Update `packer plugin installed` to show all installed plugin
+     binaries, including any duplicate versions or binaries copied from a
+     different source URI.
+     [GH-12731](https://github.com/hashicorp/packer/pull/12731)
 
 ## 1.9.5 (December 4, 2023)
 
