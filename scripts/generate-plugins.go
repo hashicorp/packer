@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
+// SPDX-License-Identifier: BUSL-1.1
 
 // Generate Plugins is a small program that updates the lists of plugins in
 // command/plugin.go so they will be compiled into the main packer binary.
