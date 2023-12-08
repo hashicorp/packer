@@ -138,6 +138,15 @@ ${GOX:?command not found} \
     -output "pkg/{{.OS}}_{{.Arch}}/packer" \
     .
 
+CGO_ENABLED=1 GOEXPERIMENT=boringcrypto ${GOX:?command not found} \
+    -os="${XC_OS:-$ALL_XC_OS}" \
+    -arch="${XC_ARCH:-$ALL_XC_ARCH}" \
+    -osarch="${SKIPPED_OSARCH}" \
+    -ldflags "${GOLDFLAGS}" \
+    -tags="fips" \
+    -output "pkg/{{.OS}}_{{.Arch}}_fips/packer" \
+    .
+
 # trim GOPATH to first element
 IFS="${PATHSEP}"
 # FIXME: How do you know that the first path of GOPATH is the main GOPATH? Or is the main GOPATH meant to be the first path in GOPATH?

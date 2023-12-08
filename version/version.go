@@ -45,6 +45,10 @@ func FormattedVersion() string {
 var SemVer *version.Version
 
 func init() {
+	if IsFIPS() {
+		Version += "+fips1402"
+	}
+
 	PackerVersion = pluginVersion.InitializePluginVersion(Version, VersionPrerelease)
 	SemVer = PackerVersion.SemVer()
 }
