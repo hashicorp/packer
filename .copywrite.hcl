@@ -1,6 +1,6 @@
 project {
   license = "BUSL-1.1"
-  copyright_year = 2023
+  copyright_year = 2024
   header_ignore = [
     "*.hcl2spec.go", # generated code specs, since they'll be wiped out until we support adding the headers at generation-time
     "hcl2template/testdata/**",
