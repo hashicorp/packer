@@ -93,7 +93,7 @@
     "title": "UpCloud",
     "path": "upcloud",
     "repo": "UpCloudLtd/packer-plugin-upcloud",
-    "version": "latest",
+    "version": "v1.5.2",
     "pluginTier": "verified",
     "sourceBranch": "master",
     "isHcpPackerReady": true
