@@ -90,15 +90,6 @@
     "pluginTier": "community"
   },
   {
-    "title": "UpCloud",
-    "path": "upcloud",
-    "repo": "UpCloudLtd/packer-plugin-upcloud",
-    "version": "v1.5.2",
-    "pluginTier": "verified",
-    "sourceBranch": "master",
-    "isHcpPackerReady": true
-  },
-  {
     "title": "Volcengine",
     "path": "volcengine",
     "repo": "volcengine/packer-plugin-volcengine",
