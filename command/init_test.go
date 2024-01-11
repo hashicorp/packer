@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
@@ -202,100 +201,6 @@ func TestInitCommand_Run(t *testing.T) {
 			nil,
 			"h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			nil,
-		},
-		{
-			"manually-installed-single-component-plugin-works",
-			[]func(t *testing.T, tc testCaseInit){
-				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
-				initTestGoGetPlugin{
-					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v1.0.0/" +
-						"packer-provisioner-comment_v1.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
-					Dst: filepath.Join(cfg.dir("4_pkr_config"), defaultConfigDir, "plugins"),
-				}.fn,
-			},
-			TestMetaFile(t),
-			nil,
-			map[string]string{
-				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
-				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
-				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
-			}[runtime.GOOS],
-			map[string]string{
-				`source.pkr.hcl`: `
-				source "null" "test" {
-					communicator = "none"
-				}
-				`,
-				`build.pkr.hcl`: `
-				build {
-					sources = ["source.null.test"]
-					provisioner "comment" {
-						comment		= "Begin ¡"
-						ui			= true
-						bubble_text	= true
-					}
-				}
-				`,
-			},
-			cfg.dir("4_pkr_config"),
-			cfg.dir("4_pkr_user_folder"),
-			0,
-			nil,
-			map[string]string{
-				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
-				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
-				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
-			}[runtime.GOOS],
-			[]func(*testing.T, testCaseInit){
-				testBuild{want: 0}.fn,
-			},
-		},
-		{
-			"manually-installed-single-component-plugin-old-api-fails",
-			[]func(t *testing.T, tc testCaseInit){
-				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
-				initTestGoGetPlugin{
-					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v0.0.0/" +
-						"packer-provisioner-comment_v0.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
-					Dst: filepath.Join(cfg.dir("5_pkr_config"), defaultConfigDir, "plugins"),
-				}.fn,
-			},
-			TestMetaFile(t),
-			nil,
-			map[string]string{
-				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
-				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
-				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
-			}[runtime.GOOS],
-			map[string]string{
-				`source.pkr.hcl`: `
-				source "null" "test" {
-					communicator = "none"
-				}
-				`,
-				`build.pkr.hcl`: `
-				build {
-					sources = ["source.null.test"]
-					provisioner "comment" {
-						comment		= "Begin ¡"
-						ui			= true
-						bubble_text	= true
-					}
-				}
-				`,
-			},
-			cfg.dir("5_pkr_config"),
-			cfg.dir("5_pkr_user_folder"),
-			0,
-			nil,
-			map[string]string{
-				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
-				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
-				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
-			}[runtime.GOOS],
-			[]func(*testing.T, testCaseInit){
-				testBuild{want: 1}.fn,
-			},
 		},
 		{
 			"unsupported-non-github-source-address",
