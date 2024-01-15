@@ -57,25 +57,25 @@ func TestMultiPlugin_describe(t *testing.T) {
 			expectedBuilderName := mockPluginName + "-" + mockBuilderName
 
 			if !c.Builders.Has(expectedBuilderName) {
-				t.Fatalf("expected to find builder %q", expectedBuilderName)
+				t.Errorf("expected to find builder %q", expectedBuilderName)
 			}
 		}
 		for mockProvisionerName := range plugin.Provisioners {
 			expectedProvisionerName := mockPluginName + "-" + mockProvisionerName
 			if !c.Provisioners.Has(expectedProvisionerName) {
-				t.Fatalf("expected to find builder %q", expectedProvisionerName)
+				t.Errorf("expected to find builder %q", expectedProvisionerName)
 			}
 		}
 		for mockPostProcessorName := range plugin.PostProcessors {
 			expectedPostProcessorName := mockPluginName + "-" + mockPostProcessorName
 			if !c.PostProcessors.Has(expectedPostProcessorName) {
-				t.Fatalf("expected to find post-processor %q", expectedPostProcessorName)
+				t.Errorf("expected to find post-processor %q", expectedPostProcessorName)
 			}
 		}
 		for mockDatasourceName := range plugin.Datasources {
 			expectedDatasourceName := mockPluginName + "-" + mockDatasourceName
 			if !c.DataSources.Has(expectedDatasourceName) {
-				t.Fatalf("expected to find datasource %q", expectedDatasourceName)
+				t.Errorf("expected to find datasource %q", expectedDatasourceName)
 			}
 		}
 	}
@@ -207,40 +207,20 @@ func TestMultiPlugin_defaultName(t *testing.T) {
 	}
 }
 
-// no T.Parallel using os.Chdir
-func TestMultiPlugin_CWD(t *testing.T) {
-	createMockPlugins(t, defaultNameMock)
-	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
-	defer os.RemoveAll(pluginDir)
-	// Unset PACKER_PLUGIN_PATH to test CWD loading
-	os.Unsetenv("PACKER_PLUGIN_PATH")
-	if err := os.Chdir(pluginDir); err != nil {
-		t.Fatalf("failed to change directory to test loading from CWD: %s", err)
-	}
-	c := PluginConfig{}
-	err := c.Discover()
-	if err != nil {
-		t.Fatalf("error discovering plugins; %s ; mocks are %#v", err.Error(), defaultNameMock)
-	}
-	expectedBuilderNames := []string{"foo-bar", "foo-baz", "foo"}
-	for _, mockBuilderName := range expectedBuilderNames {
-		if !c.Builders.Has(mockBuilderName) {
-			t.Fatalf("expected to find builder %q; builders is %#v", mockBuilderName, c.Builders)
-		}
-	}
-}
-
 func TestMultiPlugin_IgnoreChecksumFile(t *testing.T) {
 	createMockPlugins(t, defaultNameMock)
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 
-	csFile, err := generateMockChecksumFile(filepath.Join(pluginDir, "packer-plugin-foo"))
+	fooPluginName := fmt.Sprintf("packer-plugin-foo_v1.0.0_x5.0_%s_%s", runtime.GOOS, runtime.GOARCH)
+	fooPluginPath := filepath.Join(pluginDir, "github.com", "hashicorp", "foo", fooPluginName)
+	csFile, err := generateMockChecksumFile(fooPluginPath)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+
 	// Copy plugin contents into checksum file to validate that it is not only skipped but that it never gets loaded
-	if err := os.Rename(filepath.Join(pluginDir, "packer-plugin-foo"), csFile); err != nil {
+	if err := os.Rename(fooPluginPath, csFile); err != nil {
 		t.Fatalf("failed to rename plugin bin file to checkfum file needed for test: %s", err)
 	}
 
@@ -395,7 +375,13 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 
 		shPath := MustHaveCommand(t, "bash")
 		for name := range plugins {
-			plugin := path.Join(pluginDir, "packer-plugin-"+name)
+			pluginName := fmt.Sprintf("packer-plugin-%s_v1.0.0_x5.0_%s_%s", name, runtime.GOOS, runtime.GOARCH)
+			pluginSubDir := fmt.Sprintf("github.com/hashicorp/%s", name)
+			err := os.MkdirAll(path.Join(pluginDir, pluginSubDir), 0755)
+			if err != nil {
+				t.Fatalf("failed to create plugin hierarchy: %s", err)
+			}
+			plugin := path.Join(pluginDir, pluginSubDir, pluginName)
 			t.Logf("creating fake plugin %s", plugin)
 			fileContent := ""
 			fileContent = fmt.Sprintf("#!%s\n", shPath)
@@ -404,6 +390,10 @@ func createMockPlugins(t *testing.T, plugins map[string]pluginsdk.Set) {
 				" ")
 			if err := os.WriteFile(plugin, []byte(fileContent), os.ModePerm); err != nil {
 				t.Fatalf("failed to create fake plugin binary: %v", err)
+			}
+
+			if _, err := generateMockChecksumFile(plugin); err != nil {
+				t.Fatalf("failed to create fake plugin binary checksum file: %v", err)
 			}
 		}
 	}

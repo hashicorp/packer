@@ -43,7 +43,7 @@ func (c *PluginsInstalledCommand) Run(args []string) int {
 func (c *PluginsInstalledCommand) RunContext(buildCtx context.Context) int {
 
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: []string{c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory},
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:   runtime.GOOS,
 			ARCH: runtime.GOARCH,

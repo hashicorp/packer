@@ -76,7 +76,7 @@ for more info.`)
 	}
 
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: []string{c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory},
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
@@ -132,7 +132,7 @@ for more info.`)
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
-			InFolders:                 opts.FromFolders,
+			PluginDirectory:           opts.PluginDirectory,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
 			Force:                     cla.Force,
