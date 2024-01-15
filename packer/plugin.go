@@ -67,6 +67,10 @@ func (c *PluginConfig) Discover() error {
 		return nil
 	}
 
+	if c.PluginDirectory == "" {
+		c.PluginDirectory, _ = PluginFolder()
+	}
+
 	if err := c.discoverInstalledComponents(c.PluginDirectory); err != nil {
 		return err
 	}
@@ -120,7 +124,6 @@ func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
 		// After the split the plugin name is "baz".
 		pluginName = strings.SplitN(pluginName, "_", 2)[0]
 
-		log.Printf("[INFO] Discovered potential plugin: %s = %s", pluginName, match)
 		pluginPath, err := filepath.Abs(match)
 		if err != nil {
 			pluginPath = match
@@ -284,12 +287,12 @@ func (c *PluginConfig) discoverInstalledComponents(path string) error {
 		for _, checksummer := range binInstallOpts.Checksummers {
 			cs, err := checksummer.GetCacheChecksumOfFile(pluginPath)
 			if err != nil {
-				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", pluginPath, err)
+				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v\n", pluginPath, err)
 				continue
 			}
 
 			if err := checksummer.ChecksumFile(cs, pluginPath); err != nil {
-				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", pluginPath, err)
+				log.Printf("[TRACE] ChecksumFile(%q) failed: %v\n", pluginPath, err)
 				continue
 			}
 			checksumOk = true

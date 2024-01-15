@@ -78,10 +78,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				// empty
 			},
 			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				BinaryInstallationOptions{
 					OS: "windows", ARCH: "amd64",
 					Ext: ".exe",
@@ -119,22 +116,6 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					Version:    "v4.5.8",
 					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_x5.0_windows_amd64.exe"),
 				},
-				{
-					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.9",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp copy", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.9",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp copy", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
-				},
 			},
 		},
 
@@ -144,10 +125,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "darwin", ARCH: "amd64",
@@ -181,10 +159,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -214,10 +189,6 @@ func TestPlugin_ListInstallations(t *testing.T) {
 					Version:    "v1.2.5",
 					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_darwin_amd64"),
 				},
-				{
-					Version:    "v1.2.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.6_x5.1_darwin_amd64"),
-				},
 			},
 		},
 		{
@@ -226,10 +197,7 @@ func TestPlugin_ListInstallations(t *testing.T) {
 				Identifier: "github.com/hashicorp/amazon",
 			},
 			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "windows", ARCH: "amd64",
@@ -259,60 +227,12 @@ func TestPlugin_ListInstallations(t *testing.T) {
 			},
 		},
 		{
-			"windows_google_multifolder",
-			fields{
-				Identifier: "github.com/hashicorp/google",
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					APIVersionMajor: "5", APIVersionMinor: "0",
-					OS: "windows", ARCH: "amd64",
-					Ext: ".exe",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.7",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.8",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.9",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
-				},
-			},
-		},
-		{
 			"test nil identifier - multiple plugins with same version",
 			fields{
 				Identifier: "",
 			},
 			ListInstallationsOptions{
-				[]string{
-					pluginFolderThree,
-				},
+				pluginFolderThree,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "linux", ARCH: "amd64",
@@ -398,11 +318,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
@@ -435,11 +351,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "1",
@@ -481,11 +393,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
@@ -529,11 +437,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
@@ -580,11 +484,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
@@ -631,11 +531,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
@@ -676,11 +572,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
@@ -720,9 +612,7 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-				},
+				pluginFolderTwo,
 				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
