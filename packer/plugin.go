@@ -71,24 +71,6 @@ func (c *PluginConfig) Discover() error {
 		return err
 	}
 
-	// Manually installed plugins take precedence over all. Duplicate plugins installed
-	// prior to the packer plugins install command should be removed by user to avoid overrides.
-	for _, knownFolder := range c.KnownPluginFolders {
-		pluginPaths, err := c.discoverSingle(filepath.Join(knownFolder, "packer-plugin-*"))
-		if err != nil {
-			return err
-		}
-		for pluginName, pluginPath := range pluginPaths {
-			// Test pluginPath points to an executable
-			if _, err := exec.LookPath(pluginPath); err != nil {
-				log.Printf("[WARN] %q is not executable; skipping", pluginPath)
-				continue
-			}
-			if err := c.DiscoverMultiPlugin(pluginName, pluginPath); err != nil {
-				return err
-			}
-		}
-	}
 	return nil
 }
 
