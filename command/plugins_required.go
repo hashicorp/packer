@@ -84,7 +84,7 @@ func (c *PluginsRequiredCommand) RunContext(buildCtx context.Context, cla *Plugi
 	}
 
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: []string{c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory},
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
