@@ -329,11 +329,16 @@ func extractMachineReadable(args []string) ([]string, bool) {
 }
 
 func loadConfig() (*config, error) {
+	pluginDir, err := packer.PluginFolder()
+	if err != nil {
+		return nil, err
+	}
+
 	var config config
 	config.Plugins = &packer.PluginConfig{
-		PluginMinPort:      10000,
-		PluginMaxPort:      25000,
-		KnownPluginFolders: packer.PluginFolders("."),
+		PluginMinPort:   10000,
+		PluginMaxPort:   25000,
+		PluginDirectory: pluginDir,
 	}
 	if err := config.Plugins.Discover(); err != nil {
 		return nil, err

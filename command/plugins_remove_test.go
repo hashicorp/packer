@@ -186,7 +186,7 @@ func TestPluginsRemoveCommand_Run(t *testing.T) {
 				Meta: tt.Meta,
 			}
 
-			c.CoreConfig.Components.PluginConfig.KnownPluginFolders = []string{tt.packerConfigDir}
+			c.CoreConfig.Components.PluginConfig.PluginDirectory = tt.packerConfigDir
 			if got := c.Run(tt.pluginSourceArgs); got != tt.want {
 				t.Errorf("PluginsRemoveCommand.Run() = %v, want %v", got, tt.want)
 			}

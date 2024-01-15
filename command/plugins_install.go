@@ -121,7 +121,7 @@ func (c *PluginsInstallCommand) ParseArgs(args []string) (*PluginsInstallArgs, i
 
 func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *PluginsInstallArgs) int {
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
+		FromFolders: []string{c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory},
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,

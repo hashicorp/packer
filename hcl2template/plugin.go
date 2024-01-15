@@ -56,7 +56,7 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 
 func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: cfg.parser.PluginConfig.KnownPluginFolders,
+		FromFolders: []string{cfg.parser.PluginConfig.PluginDirectory},
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
