@@ -151,7 +151,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 				t.Fatalf("Failed to discover plugins: %s", err)
 			}
 
-			c.CoreConfig.Components.PluginConfig.KnownPluginFolders = []string{tt.packerConfigDir}
+			c.CoreConfig.Components.PluginConfig.PluginDirectory = tt.packerConfigDir
 			if got := c.Run(tt.pluginSourceArgs); got != tt.want {
 				t.Errorf("PluginsInstallCommand.Run() = %v, want %v", got, tt.want)
 			}
