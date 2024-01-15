@@ -27,13 +27,13 @@ var defaultChecksummer = plugingetter.Checksummer{
 
 // PluginConfig helps load and use packer plugins
 type PluginConfig struct {
-	KnownPluginFolders []string
-	PluginMinPort      int
-	PluginMaxPort      int
-	Builders           BuilderSet
-	Provisioners       ProvisionerSet
-	PostProcessors     PostProcessorSet
-	DataSources        DatasourceSet
+	PluginDirectory string
+	PluginMinPort   int
+	PluginMaxPort   int
+	Builders        BuilderSet
+	Provisioners    ProvisionerSet
+	PostProcessors  PostProcessorSet
+	DataSources     DatasourceSet
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -67,15 +67,7 @@ func (c *PluginConfig) Discover() error {
 		return nil
 	}
 
-	if len(c.KnownPluginFolders) == 0 {
-		//PluginFolders should match the call in github.com/hahicorp/packer/main.go#loadConfig
-		c.KnownPluginFolders = PluginFolders(".")
-	}
-
-	// Pick last folder as it's the one with the highest priority
-	// This is the same logic used when installing plugins via Packer's plugin installation commands.
-	pluginInstallationPath := c.KnownPluginFolders[len(c.KnownPluginFolders)-1]
-	if err := c.discoverInstalledComponents(pluginInstallationPath); err != nil {
+	if err := c.discoverInstalledComponents(c.PluginDirectory); err != nil {
 		return err
 	}
 
