@@ -121,7 +121,7 @@ func (c *PluginsInstallCommand) ParseArgs(args []string) (*PluginsInstallArgs, i
 
 func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *PluginsInstallArgs) int {
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: []string{c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory},
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
@@ -176,7 +176,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 	}
 
 	newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
-		InFolders:                 opts.FromFolders,
+		PluginDirectory:           opts.PluginDirectory,
 		BinaryInstallationOptions: opts.BinaryInstallationOptions,
 		Getters:                   getters,
 		Force:                     args.Force,
@@ -201,10 +201,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 }
 
 func (c *PluginsInstallCommand) InstallFromBinary(opts plugingetter.ListInstallationsOptions, pluginIdentifier *addrs.Plugin, args *PluginsInstallArgs) int {
-	// As with the other commands, we get the last plugin directory as it
-	// has precedence over the others, and is where we'll install the
-	// plugins to.
-	pluginDir := opts.FromFolders[len(opts.FromFolders)-1]
+	pluginDir := opts.PluginDirectory
 
 	var err error
 

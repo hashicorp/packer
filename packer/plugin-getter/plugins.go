@@ -58,9 +58,8 @@ type BinaryInstallationOptions struct {
 }
 
 type ListInstallationsOptions struct {
-	// FromFolders where plugins could be installed. Paths should be absolute for
-	// safety but can also be relative.
-	FromFolders []string
+	// The directory in which to look for when installing plugins
+	PluginDirectory string
 
 	BinaryInstallationOptions
 }
@@ -105,84 +104,84 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	FilenamePrefix := pr.FilenamePrefix()
 	filenameSuffix := opts.FilenameSuffix()
 	log.Printf("[TRACE] listing potential installations for %q that match %q. %#v", pr.Identifier, pr.VersionConstraints, opts)
-	for _, knownFolder := range opts.FromFolders {
-		glob := ""
-		if pr.Identifier == nil {
-			glob = filepath.Join(knownFolder, "*", "*", "*", FilenamePrefix+"*"+filenameSuffix)
-		} else {
-			glob = filepath.Join(knownFolder, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, FilenamePrefix+"*"+filenameSuffix)
-		}
 
-		matches, err := filepath.Glob(glob)
-		if err != nil {
-			return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", pr.Identifier.String(), err)
-		}
-		for _, path := range matches {
-			fname := filepath.Base(path)
-			if fname == "." {
-				continue
-			}
-
-			// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
-			versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
-			versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
-
-			if pr.Identifier == nil {
-				if idx := strings.Index(versionsStr, "_"); idx > 0 {
-					versionsStr = versionsStr[idx+1:]
-				}
-			}
-
-			// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
-			parts := strings.SplitN(versionsStr, "_", 2)
-			pluginVersionStr, protocolVerionStr := parts[0], parts[1]
-			pv, err := version.NewVersion(pluginVersionStr)
-			if err != nil {
-				// could not be parsed, ignoring the file
-				log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
-				continue
-			}
-
-			// no constraint means always pass, this will happen for implicit
-			// plugin requirements and when we list all plugins.
-			if !pr.VersionConstraints.Check(pv) {
-				log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
-				continue
-			}
-
-			if err := opts.CheckProtocolVersion(protocolVerionStr); err != nil {
-				log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
-					"with this version of Packer. %s", path, protocolVerionStr, err)
-				continue
-			}
-
-			checksumOk := false
-			for _, checksummer := range opts.Checksummers {
-
-				cs, err := checksummer.GetCacheChecksumOfFile(path)
-				if err != nil {
-					log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
-					continue
-				}
-
-				if err := checksummer.ChecksumFile(cs, path); err != nil {
-					log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
-					continue
-				}
-				checksumOk = true
-				break
-			}
-			if !checksumOk {
-				log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
-				continue
-			}
-
-			res = append(res, &Installation{
-				BinaryPath: path,
-				Version:    pluginVersionStr,
-			})
-		}
+	glob := ""
+	if pr.Identifier == nil {
+		glob = filepath.Join(opts.PluginDirectory, "*", "*", "*", FilenamePrefix+"*"+filenameSuffix)
+	} else {
+		glob = filepath.Join(opts.PluginDirectory, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, FilenamePrefix+"*"+filenameSuffix)
 	}
+
+	matches, err := filepath.Glob(glob)
+	if err != nil {
+		return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", pr.Identifier.String(), err)
+	}
+	for _, path := range matches {
+		fname := filepath.Base(path)
+		if fname == "." {
+			continue
+		}
+
+		// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
+		versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
+		versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
+
+		if pr.Identifier == nil {
+			if idx := strings.Index(versionsStr, "_"); idx > 0 {
+				versionsStr = versionsStr[idx+1:]
+			}
+		}
+
+		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
+		parts := strings.SplitN(versionsStr, "_", 2)
+		pluginVersionStr, protocolVerionStr := parts[0], parts[1]
+		pv, err := version.NewVersion(pluginVersionStr)
+		if err != nil {
+			// could not be parsed, ignoring the file
+			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
+			continue
+		}
+
+		// no constraint means always pass, this will happen for implicit
+		// plugin requirements and when we list all plugins.
+		if !pr.VersionConstraints.Check(pv) {
+			log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
+			continue
+		}
+
+		if err := opts.CheckProtocolVersion(protocolVerionStr); err != nil {
+			log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
+				"with this version of Packer. %s", path, protocolVerionStr, err)
+			continue
+		}
+
+		checksumOk := false
+		for _, checksummer := range opts.Checksummers {
+
+			cs, err := checksummer.GetCacheChecksumOfFile(path)
+			if err != nil {
+				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
+				continue
+			}
+
+			if err := checksummer.ChecksumFile(cs, path); err != nil {
+				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
+				continue
+			}
+			checksumOk = true
+			break
+		}
+		if !checksumOk {
+			log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
+			continue
+		}
+
+		res = append(res, &Installation{
+			BinaryPath: path,
+			Version:    pluginVersionStr,
+		})
+	}
+
 	return res, nil
 }
 
@@ -224,9 +223,8 @@ type InstallOptions struct {
 	// Different means to get releases, sha256 and binary files.
 	Getters []Getter
 
-	// Any downloaded binary and checksum file will be put in the last possible
-	// folder of this list.
-	InFolders []string
+	// The directory in which the plugins should be installed
+	PluginDirectory string
 
 	// Forces installation of the plugin, even if already installed.
 	Force bool
@@ -481,7 +479,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 		outputFolder := filepath.Join(
 			// Pick last folder as it's the one with the highest priority
-			opts.InFolders[len(opts.InFolders)-1],
+			opts.PluginDirectory,
 			// add expected full path
 			filepath.Join(pr.Identifier.Parts()...),
 		)
@@ -549,36 +547,33 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					expectedZipFilename := checksum.Filename
 					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename)) + opts.BinaryInstallationOptions.Ext
 
-					for _, outputFolder := range opts.InFolders {
-						potentialOutputFilename := filepath.Join(
-							outputFolder,
-							filepath.Join(pr.Identifier.Parts()...),
-							expectedBinaryFilename,
-						)
-						for _, potentialChecksumer := range opts.Checksummers {
-							// First check if a local checksum file is already here in the expected
-							// download folder. Here we want to download a binary so we only check
-							// for an existing checksum file from the folder we want to download
-							// into.
-							cs, err := potentialChecksumer.GetCacheChecksumOfFile(potentialOutputFilename)
-							if err == nil && len(cs) > 0 {
-								localChecksum := &FileChecksum{
-									Expected:    cs,
-									Checksummer: potentialChecksumer,
-								}
+					outputFileName := filepath.Join(
+						outputFolder,
+						expectedBinaryFilename,
+					)
+					for _, potentialChecksumer := range opts.Checksummers {
+						// First check if a local checksum file is already here in the expected
+						// download folder. Here we want to download a binary so we only check
+						// for an existing checksum file from the folder we want to download
+						// into.
+						cs, err := potentialChecksumer.GetCacheChecksumOfFile(outputFileName)
+						if err == nil && len(cs) > 0 {
+							localChecksum := &FileChecksum{
+								Expected:    cs,
+								Checksummer: potentialChecksumer,
+							}
 
-								log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
-								// if outputFile is there and matches the checksum: do nothing more.
-								if err := localChecksum.ChecksumFile(localChecksum.Expected, potentialOutputFilename); err == nil && !opts.Force {
-									log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier, version, potentialOutputFilename)
-									return nil, nil // success
-								}
+							log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
+							// if outputFile is there and matches the checksum: do nothing more.
+							if err := localChecksum.ChecksumFile(localChecksum.Expected, outputFileName); err == nil && !opts.Force {
+								log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier, version, outputFileName)
+								return nil, nil // success
 							}
 						}
 					}
 
 					// The last folder from the installation list is where we will install.
-					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
+					outputFileName = filepath.Join(outputFolder, expectedBinaryFilename)
 
 					// create directories if need be
 					if err := os.MkdirAll(outputFolder, 0755); err != nil {
