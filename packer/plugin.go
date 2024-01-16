@@ -71,7 +71,7 @@ func (c *PluginConfig) Discover() error {
 		c.PluginDirectory, _ = PluginFolder()
 	}
 
-	if err := c.discoverInstalledComponents(c.PluginDirectory); err != nil {
+	if err := c.discoverInstalledComponents(); err != nil {
 		return err
 	}
 
@@ -260,7 +260,7 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 
 // discoverInstalledComponents scans the provided path for plugins installed by running packer plugins install or packer init.
 // Valid plugins contain a matching system binary and valid checksum file.
-func (c *PluginConfig) discoverInstalledComponents(path string) error {
+func (c *PluginConfig) discoverInstalledComponents() error {
 	//Check for installed plugins using the `packer plugins install` command
 	binInstallOpts := plugingetter.BinaryInstallationOptions{
 		OS:              runtime.GOOS,
@@ -276,7 +276,7 @@ func (c *PluginConfig) discoverInstalledComponents(path string) error {
 		binInstallOpts.Ext = ".exe"
 	}
 
-	pluginPath := filepath.Join(path, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", binInstallOpts.FilenameSuffix()))
+	pluginPath := filepath.Join(c.PluginDirectory, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", binInstallOpts.FilenameSuffix()))
 	pluginPaths, err := c.discoverSingle(pluginPath)
 	if err != nil {
 		return err
@@ -300,7 +300,7 @@ func (c *PluginConfig) discoverInstalledComponents(path string) error {
 		}
 
 		if !checksumOk {
-			log.Printf("[WARN] No checksum found for %q ignoring possibly unsafe binary", path)
+			log.Printf("[WARN] No checksum found for %q ignoring possibly unsafe binary", pluginPath)
 			continue
 		}
 
