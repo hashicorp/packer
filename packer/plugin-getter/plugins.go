@@ -205,6 +205,54 @@ func (l InstallList) String() string {
 	return v.String()
 }
 
+// Len is the number of elements in the collection.
+func (l InstallList) Len() int {
+	return len(l)
+}
+
+var rawPluginName = regexp.MustCompile("packer-plugin-[^_]+")
+
+// Less reports whether the element with index i
+// must sort before the element with index j.
+//
+// If both Less(i, j) and Less(j, i) are false,
+// then the elements at index i and j are considered equal.
+// Sort may place equal elements in any order in the final result,
+// while Stable preserves the original input order of equal elements.
+//
+// Less must describe a transitive ordering:
+//   - if both Less(i, j) and Less(j, k) are true, then Less(i, k) must be true as well.
+//   - if both Less(i, j) and Less(j, k) are false, then Less(i, k) must be false as well.
+//
+// Note that floating-point comparison (the < operator on float32 or float64 values)
+// is not a transitive ordering when not-a-number (NaN) values are involved.
+// See Float64Slice.Less for a correct implementation for floating-point values.
+func (l InstallList) Less(i, j int) bool {
+	lowPluginPath := l[i]
+	hiPluginPath := l[j]
+
+	lowRawPluginName := rawPluginName.FindString(path.Base(lowPluginPath.BinaryPath))
+	hiRawPluginName := rawPluginName.FindString(path.Base(hiPluginPath.BinaryPath))
+
+	// We group by path, then by descending order for the versions
+	//
+	// i.e. if the path are not the same, we can return the plain
+	// lexicographic order, otherwise, we'll do a semver-conscious
+	// version comparison for sorting.
+	if lowRawPluginName != hiRawPluginName {
+		return lowRawPluginName < hiRawPluginName
+	}
+
+	return semver.Compare(lowPluginPath.Version, hiPluginPath.Version) > 0
+}
+
+// Swap swaps the elements with indexes i and j.
+func (l InstallList) Swap(i, j int) {
+	tmp := l[i]
+	l[i] = l[j]
+	l[j] = tmp
+}
+
 // Installation describes a plugin installation
 type Installation struct {
 	// Path to where binary is installed.
