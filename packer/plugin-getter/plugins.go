@@ -137,6 +137,18 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			}
 		}
 
+		descOut, err := exec.Command(path, "describe").Output()
+		if err != nil {
+			log.Printf("couldn't call describe on %q, ignoring", path)
+			continue
+		}
+
+		var describeInfo pluginsdk.SetDescription
+		err = json.Unmarshal(descOut, &describeInfo)
+		if err != nil {
+			log.Printf("%q: describe output deserialization error %q, ignoring", path, err)
+		}
+
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 		parts := strings.SplitN(versionsStr, "_", 2)
 		pluginVersionStr, protocolVerionStr := parts[0], parts[1]
@@ -144,6 +156,11 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		if err != nil {
 			// could not be parsed, ignoring the file
 			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
+			continue
+		}
+
+		if strings.Replace(pluginVersionStr, "v", "", -1) != describeInfo.Version {
+			log.Printf("plugin %q reported version %s while its name implies version %s, ignoring", path, describeInfo.Version, pluginVersionStr)
 			continue
 		}
 
