@@ -17,6 +17,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
+	"github.com/hashicorp/packer-plugin-sdk/version"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -305,6 +306,7 @@ func TestHelperPlugins(t *testing.T) {
 	for _, mock := range allMocks {
 		plugin, found := mock[pluginName]
 		if found {
+			plugin.SetVersion(version.InitializePluginVersion("1.0.0", ""))
 			err := plugin.RunCommand(args...)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
