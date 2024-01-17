@@ -207,13 +207,12 @@ func (l InstallList) String() string {
 
 // Installation describes a plugin installation
 type Installation struct {
-	// path to where binary is installed, if installed.
-	// Ex: /usr/azr/.packer.d/plugins/github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v1.2.3_darwin_amd64
+	// Path to where binary is installed.
+	// Ex: /usr/azr/.packer.d/plugins/github.com/hashicorp/amazon/packer-plugin-amazon_v1.2.3_darwin_amd64
 	BinaryPath string
 
-	// Version of this plugin, if installed and versionned. Ex:
+	// Version of this plugin. Ex:
 	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_x5
-	//  * empty  for packer-plugin-amazon
 	Version string
 }
 
