@@ -6,13 +6,13 @@ package packer
 import (
 	"crypto/sha256"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
-	"sort"
 	"strings"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -40,7 +40,9 @@ type PluginConfig struct {
 // without being confused with spaces in the path to the command itself.
 const PACKERSPACE = "-PACKERSPACE-"
 
-// Discover discovers plugins.
+var extractPluginBasename = regexp.MustCompile("^packer-plugin-([^_]+)")
+
+// Discover discovers the latest installed version of each installed plugin.
 //
 // Search the directory of the executable, then the plugins directory, and
 // finally the CWD, in that order. Any conflicts will overwrite previously
@@ -71,67 +73,54 @@ func (c *PluginConfig) Discover() error {
 		c.PluginDirectory, _ = PluginFolder()
 	}
 
-	if err := c.discoverInstalledComponents(); err != nil {
+	installations, err := plugingetter.Requirement{}.ListInstallations(plugingetter.ListInstallationsOptions{
+		PluginDirectory: c.PluginDirectory,
+		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
+			OS:   runtime.GOOS,
+			ARCH: runtime.GOARCH,
+			Checksummers: []plugingetter.Checksummer{
+				{Type: "sha256", Hash: sha256.New()},
+			},
+		},
+	})
+	if err != nil {
 		return err
 	}
 
-	return nil
-}
+	// Map of plugin basename to executable
+	//
+	// We'll use that later to register the components for each plugin
+	pluginMap := map[string]string{}
+	for _, install := range installations {
+		pluginBasename := path.Base(install.BinaryPath)
+		matches := extractPluginBasename.FindStringSubmatch(pluginBasename)
+		if len(matches) != 2 {
+			log.Printf("[INFO] - plugin %q could not have its name matched, ignoring", pluginBasename)
+			continue
+		}
 
-func (c *PluginConfig) discoverSingle(glob string) (map[string]string, error) {
-	matches, err := filepath.Glob(glob)
-	if err != nil {
-		return nil, err
+		pluginName := matches[1]
+
+		// If the plugin is already registered in the plugin map, we
+		// can ignore the current executable, as they're sorted by
+		// version in descending order, so if it's already in the map,
+		// a more recent version was already discovered.
+		_, ok := pluginMap[pluginName]
+		if ok {
+			continue
+		}
+
+		pluginMap[pluginName] = install.BinaryPath
 	}
-	var prefix string
-	res := make(map[string]string)
-	// Sort the matches so we add the newer version of a plugin last
-	sort.Strings(matches)
-	prefix = filepath.Base(glob)
-	prefix = prefix[:strings.Index(prefix, "*")]
-	for _, match := range matches {
-		file := filepath.Base(match)
-		// skip folders like packer-plugin-sdk
-		if stat, err := os.Stat(file); err == nil && stat.IsDir() {
-			continue
-		}
 
-		// On Windows, ignore any plugins that don't end in .exe.
-		// We could do a full PATHEXT parse, but this is probably good enough.
-		if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(file)) != ".exe" {
-			log.Printf(
-				"[TRACE] Ignoring plugin match %s, no exe extension",
-				match)
-			continue
-		}
-
-		if strings.Contains(strings.ToUpper(file), defaultChecksummer.FileExt()) {
-			log.Printf(
-				"[TRACE] Ignoring plugin match %s, which looks to be a checksum file",
-				match)
-			continue
-
-		}
-
-		// If the filename has a ".", trim up to there
-		if idx := strings.Index(file, ".exe"); idx >= 0 {
-			file = file[:idx]
-		}
-
-		// Look for foo-bar-baz. The plugin name is "baz"
-		pluginName := file[len(prefix):]
-		// multi-component plugins installed via the plugins subcommand will have a name that looks like baz_vx.y.z_x5.0_darwin_arm64.
-		// After the split the plugin name is "baz".
-		pluginName = strings.SplitN(pluginName, "_", 2)[0]
-
-		pluginPath, err := filepath.Abs(match)
+	for name, path := range pluginMap {
+		err := c.DiscoverMultiPlugin(name, path)
 		if err != nil {
-			pluginPath = match
+			return err
 		}
-		res[pluginName] = pluginPath
 	}
 
-	return res, nil
+	return nil
 }
 
 // DiscoverMultiPlugin takes the description from a multi-component plugin
@@ -256,58 +245,4 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 	config.MinPort = c.PluginMinPort
 	config.MaxPort = c.PluginMaxPort
 	return NewClient(&config)
-}
-
-// discoverInstalledComponents scans the provided path for plugins installed by running packer plugins install or packer init.
-// Valid plugins contain a matching system binary and valid checksum file.
-func (c *PluginConfig) discoverInstalledComponents() error {
-	//Check for installed plugins using the `packer plugins install` command
-	binInstallOpts := plugingetter.BinaryInstallationOptions{
-		OS:              runtime.GOOS,
-		ARCH:            runtime.GOARCH,
-		APIVersionMajor: pluginsdk.APIVersionMajor,
-		APIVersionMinor: pluginsdk.APIVersionMinor,
-		Checksummers: []plugingetter.Checksummer{
-			defaultChecksummer,
-		},
-	}
-
-	if runtime.GOOS == "windows" {
-		binInstallOpts.Ext = ".exe"
-	}
-
-	pluginPath := filepath.Join(c.PluginDirectory, "*", "*", "*", fmt.Sprintf("packer-plugin-*%s", binInstallOpts.FilenameSuffix()))
-	pluginPaths, err := c.discoverSingle(pluginPath)
-	if err != nil {
-		return err
-	}
-
-	for pluginName, pluginPath := range pluginPaths {
-		var checksumOk bool
-		for _, checksummer := range binInstallOpts.Checksummers {
-			cs, err := checksummer.GetCacheChecksumOfFile(pluginPath)
-			if err != nil {
-				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v\n", pluginPath, err)
-				continue
-			}
-
-			if err := checksummer.ChecksumFile(cs, pluginPath); err != nil {
-				log.Printf("[TRACE] ChecksumFile(%q) failed: %v\n", pluginPath, err)
-				continue
-			}
-			checksumOk = true
-			break
-		}
-
-		if !checksumOk {
-			log.Printf("[WARN] No checksum found for %q ignoring possibly unsafe binary", pluginPath)
-			continue
-		}
-
-		if err := c.DiscoverMultiPlugin(pluginName, pluginPath); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
