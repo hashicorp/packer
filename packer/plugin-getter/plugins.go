@@ -11,7 +11,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
+	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,8 +22,10 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/hcl2template/addrs"
+	"golang.org/x/mod/semver"
 )
 
 type Requirements []*Requirement
@@ -181,6 +186,8 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			Version:    pluginVersionStr,
 		})
 	}
+
+	sort.Sort(res)
 
 	return res, nil
 }
