@@ -53,13 +53,6 @@
     "version": "latest"
   },
   {
-    "title": "Mondoo",
-    "path": "mondoo",
-    "repo": "mondoohq/packer-plugin-mondoo",
-    "pluginTier": "verified",
-    "version": "latest"
-  },
-  {
     "title": "Nutanix",
     "path": "nutanix",
     "repo": "nutanix-cloud-native/packer-plugin-nutanix",
@@ -74,13 +67,6 @@
     "version": "latest",
     "pluginTier": "verified",
     "isHcpPackerReady": true
-  },
-  {
-    "title": "Scaleway",
-    "path": "scaleway",
-    "repo": "scaleway/packer-plugin-scaleway",
-    "pluginTier": "verified",
-    "version": "latest"
   },
   {
     "title": "UCloud",
