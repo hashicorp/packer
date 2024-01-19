@@ -8,10 +8,10 @@ import (
 	"path"
 	"testing"
 
-	git "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5"
 )
 
-func TestIteration_Initialize(t *testing.T) {
+func TestVersion_Initialize(t *testing.T) {
 	var tc = []struct {
 		name          string
 		fingerprint   string
@@ -56,7 +56,7 @@ func TestIteration_Initialize(t *testing.T) {
 				tt.setupFn(t)
 			}
 
-			i := NewIteration()
+			i := NewVersion()
 			err := i.Initialize()
 			if tt.errorExpected {
 				t.Logf("%v", err)
@@ -65,7 +65,7 @@ func TestIteration_Initialize(t *testing.T) {
 				}
 
 				if i.Fingerprint != "" {
-					t.Errorf("expected %q to result in an error with an empty iteration fingerprint, but got %q", tt.name, i.Fingerprint)
+					t.Errorf("expected %q to result in an error with an empty version fingerprint, but got %q", tt.name, i.Fingerprint)
 				}
 				return
 			}

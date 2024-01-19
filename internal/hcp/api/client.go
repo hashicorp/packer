@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
+	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/organization_service"
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/project_service"
 	rmmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/models"
@@ -183,18 +183,18 @@ func getOldestProject(projects []*rmmodels.HashicorpCloudResourcemanagerProject)
 
 // ValidateRegistryForProject validates that there is an active registry associated to the configured organization and project ids.
 // A successful validation will result in a nil response. All other response represent an invalid registry error request or a registry not found error.
-func (client *Client) ValidateRegistryForProject() error {
+func (c *Client) ValidateRegistryForProject() error {
 	params := packerSvc.NewPackerServiceGetRegistryParams()
-	params.LocationOrganizationID = client.OrganizationID
-	params.LocationProjectID = client.ProjectID
+	params.LocationOrganizationID = c.OrganizationID
+	params.LocationProjectID = c.ProjectID
 
-	resp, err := client.Packer.PackerServiceGetRegistry(params, nil)
+	resp, err := c.Packer.PackerServiceGetRegistry(params, nil)
 	if err != nil {
 		return err
 	}
 
 	if resp.GetPayload().Registry == nil {
-		return fmt.Errorf("No active HCP Packer registry was found for the organization %q and project %q", client.OrganizationID, client.ProjectID)
+		return fmt.Errorf("No active HCP Packer registry was found for the organization %q and project %q", c.OrganizationID, c.ProjectID)
 	}
 
 	return nil

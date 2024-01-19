@@ -12,7 +12,7 @@ import (
 // nullRegistry is a special handler that does nothing
 type nullRegistry struct{}
 
-func (r nullRegistry) PopulateIteration(context.Context) error {
+func (r nullRegistry) PopulateVersion(context.Context) error {
 	return nil
 }
 
@@ -29,4 +29,4 @@ func (r nullRegistry) CompleteBuild(
 	return artifacts, nil
 }
 
-func (r nullRegistry) IterationStatusSummary() {}
+func (r nullRegistry) VersionStatusSummary() {}
