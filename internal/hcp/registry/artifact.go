@@ -10,9 +10,9 @@ import (
 const BuilderId = "packer.post-processor.hpc-packer-registry"
 
 type registryArtifact struct {
-	BucketSlug  string
-	IterationID string
-	BuildName   string
+	BucketName string
+	VersionID  string
+	BuildName  string
 }
 
 func (a *registryArtifact) BuilderId() string {
@@ -28,7 +28,7 @@ func (a *registryArtifact) Files() []string {
 }
 
 func (a *registryArtifact) String() string {
-	return fmt.Sprintf("Published metadata to HCP Packer registry packer/%s/iterations/%s", a.BucketSlug, a.IterationID)
+	return fmt.Sprintf("Published metadata to HCP Packer registry packer/%s/versions/%s", a.BucketName, a.VersionID)
 }
 
 func (*registryArtifact) State(name string) interface{} {

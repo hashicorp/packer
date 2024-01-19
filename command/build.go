@@ -105,13 +105,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	defer hcpRegistry.IterationStatusSummary()
+	defer hcpRegistry.VersionStatusSummary()
 
-	err := hcpRegistry.PopulateIteration(buildCtx)
+	err := hcpRegistry.PopulateVersion(buildCtx)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "HCP: populating iteration failed",
+				Summary:  "HCP: populating version failed",
 				Severity: hcl.DiagError,
 				Detail:   err.Error(),
 			},
