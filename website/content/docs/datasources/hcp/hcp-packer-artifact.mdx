@@ -1,0 +1,105 @@
+---
+description: |
+  The HCP Packer Artifact Data Source retrieves information about an
+  artifact from the HCP Packer Registry. This information can be used to
+  provide a source artifact to various Packer builders.
+page_title: HCP Packer Artifact - Data Sources
+---
+
+<BadgesHeader>
+  <PluginBadge type="official" />
+  <PluginBadge type="hcp_packer_ready" />
+</BadgesHeader>
+
+# HCP Packer Artifact Data Source
+
+Type: `hcp-packer-artifact`
+
+The `HCP Packer Artifact` Data Source retrieves information about an
+artifact from the HCP Packer Registry. This information can be used to
+provide a source artifact to various Packer builders.
+
+To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/docs/packer) or try
+the [Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).
+
+~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry.
+An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries
+with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
+
+## Revoked Versions
+
+If an HCP Packer Version is revoked, the `hcp-packer-version` data source will fail and Packer won't proceed with
+the build. Building new artifacts from a revoked artifact is not compliant.
+Versions that are scheduled to be revoked will still be considered valid until the revocation date.
+
+## Basic Example
+
+Below is a fully functioning example. It stores information about an image artifact,
+which can then be parsed and accessed as a variable.
+
+```hcl
+data "hcp-packer-artifact" "example" {
+  bucket_name         = "hardened-ubuntu-16-04"
+  version_fingerprint = "${data.hcp-packer-version.hardened-source.fingerprint}"
+  platform            = "aws"
+  region              = "us-east-1"
+}
+```
+
+## Full Example
+
+This data source can be used in conjunction with the hcp-packer-version
+data source to retrieve a version fingerprint using a channel. You provide the version fingerprint and channel
+name to the version data source, then use the version source inside the
+artifact data source, then use the artifact data source inside your source block.
+
+```hcl
+# Retrieves information about the HCP Packer Version; a "version" can be
+# thought of as all the metadata created by a single call of `packer build`.
+data "hcp-packer-version" "hardened-source" {
+  bucket_name  = "hardened-ubuntu-16-04"
+  channel_name = "dev"
+}
+
+# Retrieves information about the HCP Packer Artifact; an artifact can be thought
+# of as all the metadata (including the artifact names) created by a single
+# "source" builder; this can include multiple artifacts so we provide a
+# region to disambiguate.
+data "hcp-packer-artifact" "example" {
+  bucket_name         = "hardened-ubuntu-16-04"
+  version_fingerprint = data.hcp_packer_version.hardened-source.fingerprint
+  platform            = "aws"
+  region              = "us-east-1"
+}
+
+# This source uses the output from a previous Packer build. By using the
+# HCP Packer Registry in this way, you can easily create build pipelines where
+# a single base artifact can be customized in multiple secondary layers.
+source "amazon-ebs" "packer-secondary" {
+  source_ami       = data.hcp-packer-artifact.example.external_identifier
+  ...
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+### Required:
+
+@include 'datasource/hcp-packer-artifact/Config-required.mdx'
+
+### Optional:
+
+~> **Note:** This data source only returns the first found artifact's metadata filtered by the given options,
+from the returned list of artifacts associated with the specified version. Therefore, if multiple artifacts exist
+in the same region, it will only pick one of them. In this case, you can filter artifact by a source build name
+(Ex: `amazon-ebs.example`) using the `component_type` option.
+
+@include 'datasource/hcp-packer-artifact/Config-not-required.mdx'
+
+### Output Fields:
+
+@include 'datasource/hcp-packer-artifact/DatasourceOutput.mdx'
