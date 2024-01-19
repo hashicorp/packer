@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	hcpPackerAPI "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
@@ -84,7 +84,9 @@ func (c *Client) UpdateBuild(
 	}
 
 	if resp == nil {
-		return "", errors.New("not sure why response is nil")
+		return "", fmt.Errorf(
+			"something went wrong retrieving the build %s from bucket %s", buildID, bucketName,
+		)
 	}
 
 	return resp.Payload.Build.ID, nil

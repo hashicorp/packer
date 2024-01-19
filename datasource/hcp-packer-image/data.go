@@ -36,9 +36,9 @@ type Config struct {
 	// Mutually exclusive with `iteration_id`.
 	// If using several images from a single iteration, you may prefer
 	// sourcing an iteration first, and referencing it for subsequent uses,
-	// as every `hcp_packer_image` with the channel set will generate a
+	// as every `hcp-packer-image` with the channel set will generate a
 	// potentially billable HCP Packer request, but if several
-	// `hcp_packer_image`s use a shared `hcp_packer_iteration` that will
+	// `hcp-packer-image`s use a shared `hcp-packer-iteration` that will
 	// only generate one potentially billable request.
 	Channel string `mapstructure:"channel" required:"true"`
 	// The ID of the iteration to use when retrieving your image

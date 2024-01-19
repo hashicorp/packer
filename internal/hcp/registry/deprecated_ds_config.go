@@ -72,7 +72,7 @@ func withDeprecatedDatasourceConfiguration(vals map[string]cty.Value, ui sdkpack
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Invalid HCP datasources",
-					Detail:   fmt.Sprintf("Failed to decode hcp_packer_iteration datasources: %s", err),
+					Detail:   fmt.Sprintf("Failed to decode hcp-packer-iteration datasources: %s", err),
 				})
 				return diags
 			}
