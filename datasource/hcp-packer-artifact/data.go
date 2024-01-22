@@ -200,7 +200,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		version = channel.Version
 	}
 
-	if version.Status == hcpPackerModels.HashicorpCloudPacker20230101VersionStatusVERSIONREVOKED.Pointer() {
+	if *version.Status == hcpPackerModels.HashicorpCloudPacker20230101VersionStatusVERSIONREVOKED {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf(
 			"the version %s is revoked and can not be used on Packer builds", version.ID,
 		)
