@@ -15,6 +15,7 @@ import (
 
 	filebuilder "github.com/hashicorp/packer/builder/file"
 	nullbuilder "github.com/hashicorp/packer/builder/null"
+	filedatasource "github.com/hashicorp/packer/datasource/file"
 	hcppackerimagedatasource "github.com/hashicorp/packer/datasource/hcp-packer-image"
 	hcppackeriterationdatasource "github.com/hashicorp/packer/datasource/hcp-packer-iteration"
 	httpdatasource "github.com/hashicorp/packer/datasource/http"
@@ -63,6 +64,7 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 }
 
 var Datasources = map[string]packersdk.Datasource{
+	"file":                 new(filedatasource.Datasource),
 	"hcp-packer-image":     new(hcppackerimagedatasource.Datasource),
 	"hcp-packer-iteration": new(hcppackeriterationdatasource.Datasource),
 	"http":                 new(httpdatasource.Datasource),

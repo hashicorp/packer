@@ -1,0 +1,44 @@
+---
+description: |
+  The File Data Source writes contents to a file so it can be used
+  later during Packer builds
+page_title: File - Data Sources
+---
+
+<BadgesHeader>
+  <PluginBadge type="official" />
+</BadgesHeader>
+
+# File Data Source
+
+Type: `file`
+
+The `file` data source takes a destination file, and writes the specified contents to that file, creating it in the process.
+
+## Basic Example
+
+```hcl
+data "file" "example" {
+  contents    = "this is an example"
+  destination = "output.file"
+}
+```
+
+## Configuration Reference
+
+Configuration options are organized below into two categories: required and
+optional. Within each category, the available options are alphabetized and
+described.
+
+### Required:
+
+@include 'datasource/file/Config-required.mdx'
+
+### Not Required:
+@include 'datasource/file/Config-not-required.mdx'
+
+## Datasource outputs
+
+The outputs for this datasource are as follows:
+
+@include 'datasource/file/DatasourceOutput.mdx'
