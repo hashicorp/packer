@@ -1,4 +1,68 @@
-## 1.10.1 (Upcoming)
+## 1.11.0 (Upcoming)
+
+### NOTES:
+**Breaking Change**: Support for loading single-component plugins has been removed from Packer. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+
+### IMPROVEMENTS:
+* core: remove support single-component plugins. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+
+## 1.10.1 (January 30, 2024)
+
+### NOTES:
+* **HCP Packer** has been updated to follow an artifact-agnostic approach for 
+     publishing and consuming built artifacts. To best support the new approach, HCP Packer components within Packer have
+     been updated to use the v2 nomenclature when publishing build metadata to
+     HCP Packer. These changes include data source components for consuming HCP
+     Packer stored artifacts. The data source components [hcp-packer-version](https://developer.hashicorp.com/packer/docs/datasources/hcp/hcp-packer-version) 
+     and [hcp-packer-artifact](https://developer.hashicorp.com/packer/docs/datasources/hcp/hcp-packer-artifact) respectively replace, the now deprecated, 
+     [hcp-packer-iteration](https://developer.hashicorp.com/packer/docs/datasources/hcp/hcp-packer-iteration) 
+     and [hcp-packer-image](https://developer.hashicorp.com/packer/docs/datasources/hcp/hcp-packer-image)
+     component data sources. The added changes are compatible with all existing HCP Packer workflows and do not warrant any
+     immediate template changes by the user. However, we encourage all HCP Packer users to visit the updated 
+     HCP Packer [CHANGELOG](https://developer.hashicorp.com/hcp/docs/changelog) to familiarize themselves with the nomenclature changes. 
+     [GH-12794](https://github.com/hashicorp/packer/pull/12794) [GH-12799](https://github.com/hashicorp/packer/pull/12799)
+* The `hcp-packer-image` data source has been deprecated, please use HCP Packer
+     Artifact data source instead.
+     [GH-12794](https://github.com/hashicorp/packer/pull/12794)
+* The `hcp-packer-iteration` data source has been deprecated, please use HCP
+     Packer Version data source instead.
+     [GH-12794](https://github.com/hashicorp/packer/pull/12794)
+* The contextual variable `packer.iterationID` has been deprecated, please use
+     the new contextual variable `packer.versionFingerprint`. The iterationID
+     represents the HCP Packer iteration that build metadata has been publish
+     to, with this release an Iteration is now referred to as a Version and the
+     ID has been replaced by the Version Fingerprint.
+     [GH-12803](https://github.com/hashicorp/packer/pull/12803)
+
+### FEATURES:
+* **New Data source** `hcp-packer-artifact` The HCP Packer Artifact Data Source
+     retrieves information about an artifact from the HCP Packer Registry.
+     [GH-12794](https://github.com/hashicorp/packer/pull/12794)
+* **New Data source** `hcp-packer-version`  The HCP Packer Version Data Source
+     retrieves information about HCP Packer Version from the HCP Packer.
+     Registry. [GH-12794](https://github.com/hashicorp/packer/pull/12794)
+
+### SECURITY:
+* core: Bump Go dependencies to address various CVEs. [GH-12777](https://github.com/hashicorp/packer/pull/12777)
+* core: Bump github.com/cloudflare/circl to address GHSA-9763-4f94-gfch. [GH-12781](https://github.com/hashicorp/packer/pull/12781)
+
+### IMPROVEMENTS:
+* core: Bump github.com/hashicorp/hcp-sdk-go from 0.79.0 to 0.81.0
+     [GH-12792](https://github.com/hashicorp/packer/pull/12792)
+     [GH-12764](https://github.com/hashicorp/packer/pull/12764)
+* core: Update error messaging for HCP incompatible plugin builds.
+     [GH-12800](https://github.com/hashicorp/packer/pull/12800)
+* core: Update HCP Packer integration to use HCP Packer v2 nomenclature, with
+     this change HCP Packer iterations are now referred to as Versions, and
+     Images are now referred to as Artifacts. The data sources for interacting
+     with HCP Packer have been respectively renamed to align with the terminology
+     of Version and Artifact.
+     [GH-12794](https://github.com/hashicorp/packer/pull/12794)
+     [GH-12799](https://github.com/hashicorp/packer/pull/12799)
+* core: Update spacing for flags within Help text.
+     [GH-12742](https://github.com/hashicorp/packer/pull/12742)
+     [GH-12743](https://github.com/hashicorp/packer/pull/12743)
+
 
 ## 1.10.0 (December 5, 2023)
 
