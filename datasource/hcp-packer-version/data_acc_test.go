@@ -1,7 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: BUSL-1.1
 
-package hcp_packer_iteration
+package hcp_packer_version
 
 import (
 	_ "embed"
@@ -25,7 +25,7 @@ var testHCPBuild string
 //
 // Your HCP credentials must be provided through your runtime
 // environment because the template this test uses does not set them.
-func TestAccDatasource_HCPPackerIteration(t *testing.T) {
+func TestAccDatasource_HCPPackerVersion(t *testing.T) {
 	if os.Getenv(env.HCPClientID) == "" && os.Getenv(env.HCPClientSecret) == "" {
 		t.Skipf(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", env.HCPClientID, env.HCPClientSecret))
 		return
@@ -46,7 +46,7 @@ func TestAccDatasource_HCPPackerIteration(t *testing.T) {
 	acctest.TestPlugin(t, &testSetup)
 
 	testCase := acctest.PluginTestCase{
-		Name:     "hcp_packer_iteration_datasource_basic_test",
+		Name:     "hcp_packer_version_datasource_basic_test",
 		Template: fmt.Sprintf(testDatasourceBasic, filepath.Dir(tmpFile)),
 		Setup: func() error {
 			if _, err := os.Stat(tmpFile); os.IsNotExist(err) {
@@ -54,7 +54,7 @@ func TestAccDatasource_HCPPackerIteration(t *testing.T) {
 			}
 			return nil
 		},
-		// TODO have acc test write iteration id to a file and check it to make
+		// TODO have acc test write version id to a file and check it to make
 		// sure it isn't empty.
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
 			if buildCommand.ProcessState != nil {
