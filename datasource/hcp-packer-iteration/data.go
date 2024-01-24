@@ -100,9 +100,11 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
+	log.Printf("[WARN] Deprecation: `hcp-packer-iteration` datasource has been deprecated. " +
+		"Please use `hcp-packer-version` datasource instead.")
 	ctx := context.TODO()
 
-	cli, err := hcpapi.NewClient()
+	cli, err := hcpapi.NewDeprecatedClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}

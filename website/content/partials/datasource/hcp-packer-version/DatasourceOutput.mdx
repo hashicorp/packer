@@ -1,0 +1,25 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-version/data.go; DO NOT EDIT MANUALLY -->
+
+- `author_id` (string) - Name of the author who created this version.
+
+- `bucket_name` (string) - The name of the bucket that this version is associated with.
+
+- `status` (string) - Current state of the version.
+
+- `created_at` (string) - The date the version was created.
+
+- `fingerprint` (string) - The fingerprint of the version; this is a  unique identifier set by the Packer build
+  that created this version.
+
+- `id` (string) - The version ID. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when a version is
+  first created, and is unique to this version.
+
+- `name` (string) - The version name is created by the HCP Packer Registry once a version is
+  "complete". Incomplete or failed versions currently default to having a name "v0".
+
+- `updated_at` (string) - The date when this version was last updated.
+
+- `channel_id` (string) - The ID of the channel used to query this version.
+
+<!-- End of code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-version/data.go; -->
