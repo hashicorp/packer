@@ -3,12 +3,12 @@ source "null" "example" {
 }
 
 data "hcp-packer-iteration" "hardened-source" {
-  bucket_name = "simple"
+  bucket_name = "simple-deprecated"
   channel = "latest"
 }
 
 data "hcp-packer-image" "file" {
-  bucket_name = "simple"
+  bucket_name = "simple-deprecated"
   iteration_id = "${data.hcp-packer-iteration.hardened-source.id}"
   cloud_provider = "packer.file"
   region = %q

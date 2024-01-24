@@ -10,7 +10,7 @@ source "file" "test" {
 
 build {
     hcp_packer_registry {
-     bucket_name = "simple"
+     bucket_name = "simple-deprecated"
     }
   sources = ["source.file.test"]
 }
