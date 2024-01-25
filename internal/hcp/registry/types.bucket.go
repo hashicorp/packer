@@ -641,7 +641,7 @@ func (bucket *Bucket) completeBuild(
 		err = decoder.Decode(state)
 		if err != nil {
 			return packerSDKArtifacts, fmt.Errorf(
-				"failed to obtain HCP Packer artifact from post-processor artifact: %w",
+				"failed to obtain HCP Packer compliant artifact: %w",
 				err)
 		}
 		log.Printf("[TRACE] updating artifacts for build %q", buildName)

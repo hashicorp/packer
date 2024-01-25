@@ -25,6 +25,10 @@ import (
 	"github.com/posener/complete"
 )
 
+const (
+	hcpReadyIntegrationURL = "https://developer.hashicorp.com/packer/integrations?flags=hcp-ready"
+)
+
 type BuildCommand struct {
 	Meta
 }
@@ -202,6 +206,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		m map[string]error
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
+
+	var hasPossibleIncompatibleHCPIntegration bool
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -267,12 +273,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				writeDiags(c.Ui, nil, hcl.Diagnostics{
 					&hcl.Diagnostic{
 						Summary: fmt.Sprintf(
-							"failed to complete HCP-enabled build %q",
+							"publishing build metadata to HCP Packer for %q failed",
 							name),
 						Severity: hcl.DiagError,
 						Detail:   hcperr.Error(),
 					},
 				})
+				hasPossibleIncompatibleHCPIntegration = true
 			}
 
 			if err != nil {
@@ -382,6 +389,15 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
+	}
+
+	if hasPossibleIncompatibleHCPIntegration {
+		msg := fmt.Sprintf(`
+It looks like one or more plugins in your build is incompatible with HCP Packer.
+Check that you are using an HCP Ready integration before trying again:
+%s`, hcpReadyIntegrationURL)
+
+		c.Ui.Error(msg)
 	}
 
 	if len(errs.m) > 0 {
