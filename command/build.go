@@ -393,7 +393,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 	if hasPossibleIncompatibleHCPIntegration {
 		msg := fmt.Sprintf(`
-It looks like one or more plugins in your build is incompatible with HCP Packer.
+It looks like one or more plugins in your build may be incompatible with HCP Packer.
 Check that you are using an HCP Ready integration before trying again:
 %s`, hcpReadyIntegrationURL)
 
