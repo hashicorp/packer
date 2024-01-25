@@ -164,7 +164,7 @@ func (version *Version) statusSummary(ui sdkpacker.Ui) {
 	buf := &strings.Builder{}
 
 	buf.WriteString(fmt.Sprintf(
-		"\nVersion %q is not complete, the following builds are not done:\n\n",
+		"\nVersion %q is incomplete, the following builds are missing artifact metadata:\n\n",
 		version.Fingerprint))
 	for _, b := range rem {
 		buf.WriteString(fmt.Sprintf("* %q: %s\n", b.ComponentType, b.Status))
