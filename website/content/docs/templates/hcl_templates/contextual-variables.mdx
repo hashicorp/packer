@@ -147,6 +147,12 @@ source "amazon-ebs" "cannonical-ubuntu-server" {
 }
 ```
 
+```shell-session
+==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
+    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
+    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_iteration_id": "01FHGF3M2AK4TS6PCZES4VX5E7"
+```
+
 # HCP Packer Version Fingerprint
 
 If your build is pushing metadata to the HCP Packer registry, this variable is
@@ -162,11 +168,10 @@ source "amazon-ebs" "cannonical-ubuntu-server" {
 }
 ```
 
-
 ```shell-session
 ==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
     vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_iteration_id": "01FHGF3M2AK4TS6PCZES4VX5E7"
+    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_version_fingerprint": "01FHGF3M2AK4TS6PCZES4VX5E74tf"
 ```
 
 You can also add this value to post-processors, for example to add to a manifest file:
