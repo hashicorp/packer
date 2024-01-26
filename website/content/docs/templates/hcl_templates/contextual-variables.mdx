@@ -132,6 +132,8 @@ parenthesis may through off your shell escaping otherwise.
 
 # HCP Packer Iteration ID
 
+~> **Note**: Deprecation: Contextual Variable `iterationID` has been deprecated packer context. Please use `versionFingerprint` variable instead.
+
 If your build is pushing metadata to the HCP Packer registry, this variable is
 set to the value of the Iteration ID associated with this run.
 
@@ -144,6 +146,22 @@ source "amazon-ebs" "cannonical-ubuntu-server" {
   }
 }
 ```
+
+# HCP Packer Version Fingerprint
+
+If your build is pushing metadata to the HCP Packer registry, this variable is
+set to the value of the Version Fingerprint associated with this run.
+
+```hcl
+source "amazon-ebs" "cannonical-ubuntu-server" {
+  ami_name         = "packer-example"
+  // ...
+  run_volume_tags = {
+    hcp_version_fingerprint = packer.versionFingerprint
+  }
+}
+```
+
 
 ```shell-session
 ==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
@@ -158,6 +176,8 @@ You can also add this value to post-processors, for example to add to a manifest
     output     = "manifest.json"
     strip_path = true
     custom_data = {
+      version_fingerprint = "${packer.versionFingerprint}"
+      // `packer.iterationID` has been deprecated.
       iteration = "${packer.iterationID}"
     }
   }
