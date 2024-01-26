@@ -5,7 +5,6 @@ package hcl2template
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
@@ -122,23 +121,22 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 		},
 	}
 
-	iterID, ok := cfg.HCPVars["iterationID"]
-	if ok {
-		log.Printf("[WARN] Deprecation: Contextual Variable `iterationID` has been deprecated packer context. " +
-			"Please use `versionFingerprint` variable instead.")
-		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
-			"version":     cty.StringVal(cfg.CorePackerVersionString),
-			"iterationID": iterID,
-		})
+	packerVars := map[string]cty.Value{
+		"version":            cty.StringVal(cfg.CorePackerVersionString),
+		"iterationID":        cty.UnknownVal(cty.String),
+		"versionFingerprint": cty.UnknownVal(cty.String),
 	}
 
-	versionFingerprint, ok := cfg.HCPVars["versionFingerprint"]
+	iterID, ok := cfg.HCPVars["iterationID"]
 	if ok {
-		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
-			"version":            cty.StringVal(cfg.CorePackerVersionString),
-			"versionFingerprint": versionFingerprint,
-		})
+		packerVars["iterationID"] = iterID
 	}
+	versionFP, ok := cfg.HCPVars["versionFingerprint"]
+	if ok {
+		packerVars["versionFingerprint"] = versionFP
+	}
+
+	ectx.Variables[packerAccessor] = cty.ObjectVal(packerVars)
 
 	// In the future we'd like to load and execute HCL blocks using a graph
 	// dependency tree, so that any block can use any block whatever the
