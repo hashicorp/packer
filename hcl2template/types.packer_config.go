@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gobwas/glob"
-	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -125,6 +125,14 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
 			"version":     cty.StringVal(cfg.CorePackerVersionString),
 			"iterationID": iterID,
+		})
+	}
+
+	versionFingerprint, ok := cfg.HCPVars["versionFingerprint"]
+	if ok {
+		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
+			"version":            cty.StringVal(cfg.CorePackerVersionString),
+			"versionFingerprint": versionFingerprint,
 		})
 	}
 
