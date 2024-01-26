@@ -132,25 +132,48 @@ parenthesis may through off your shell escaping otherwise.
 
 # HCP Packer Iteration ID
 
-~> **Note**: Deprecation: Contextual Variable `iterationID` has been deprecated packer context. Please use `versionFingerprint` variable instead.
+~> **Note**: The `packer.iterationID` variable is now deprecated and will be removed in a future version of Packer. HCP Packer Versions should be accessed with their fingerprint instead. The `packer.versionFingerprint` variable is now exposed to be used in its stead with the new HCP Packer data sources.
 
 If your build is pushing metadata to the HCP Packer registry, this variable is
 set to the value of the Iteration ID associated with this run.
 
 ```hcl
-source "amazon-ebs" "cannonical-ubuntu-server" {
-  ami_name         = "packer-example"
-  // ...
-  run_volume_tags = {
-    hcp_iteration_id = packer.iterationID
+source "null" "example" {
+  communicator = "none"
+}
+
+data "hcp-packer-version" "hardened-source" {
+  bucket_name = "example"
+  channel_name = "latest"
+}
+
+data "hcp-packer-artifact" "file" {
+  bucket_name = "example"
+  version_fingerprint = "${data.hcp-packer-version.hardened-source.fingerprint}"
+  platform = "aws"
+  region = "us-east-1"
+}
+
+build {
+  hcp_packer_registry {
+    bucket_name = "simple"
+  }
+  sources = [
+    "source.null.example"
+  ]
+
+  provisioner "shell-local" {
+    inline = [
+      "echo data is ${packer.iterationID}"
+    ]
   }
 }
+
 ```
 
 ```shell-session
-==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_iteration_id": "01FHGF3M2AK4TS6PCZES4VX5E7"
+==> mybuild.null.example: Running local shell script: /var/folders/cz/q3cr3tld2457gtlgw7qs1kqc0000gq/T/packer-shell842419427
+    mybuild.null.example: data is 01HN3KCRPVKR5PBQ28TS6B12W0
 ```
 
 # HCP Packer Version Fingerprint
@@ -159,19 +182,42 @@ If your build is pushing metadata to the HCP Packer registry, this variable is
 set to the value of the Version Fingerprint associated with this run.
 
 ```hcl
-source "amazon-ebs" "cannonical-ubuntu-server" {
-  ami_name         = "packer-example"
-  // ...
-  run_volume_tags = {
-    hcp_version_fingerprint = packer.versionFingerprint
+source "null" "example" {
+  communicator = "none"
+}
+
+data "hcp-packer-version" "hardened-source" {
+  bucket_name = "example"
+  channel_name = "latest"
+}
+
+data "hcp-packer-artifact" "file" {
+  bucket_name = "example"
+  version_fingerprint = "${data.hcp-packer-version.hardened-source.fingerprint}"
+  platform = "aws"
+  region = "us-east-1"
+}
+
+build {
+  hcp_packer_registry {
+    bucket_name = "simple"
+  }
+  sources = [
+    "source.null.example"
+  ]
+
+  provisioner "shell-local" {
+    inline = [
+      "echo data is ${packer.versionFingerprint}"
+    ]
   }
 }
+
 ```
 
 ```shell-session
-==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_version_fingerprint": "01FHGF3M2AK4TS6PCZES4VX5E74tf"
+==> mybuild.null.example: Running local shell script: /var/folders/cz/q3cr3tld2457gtlgw7qs1kqc0000gq/T/packer-shell842419427
+    mybuild.null.example: data is 01HN3KCRPVKR5PBQ28TS6B12W0
 ```
 
 You can also add this value to post-processors, for example to add to a manifest file:
@@ -182,7 +228,6 @@ You can also add this value to post-processors, for example to add to a manifest
     strip_path = true
     custom_data = {
       version_fingerprint = "${packer.versionFingerprint}"
-      // `packer.iterationID` has been deprecated.
       iteration = "${packer.iterationID}"
     }
   }
