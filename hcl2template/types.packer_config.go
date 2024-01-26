@@ -5,6 +5,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 
@@ -110,8 +111,9 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 			}),
 			buildAccessor: cty.UnknownVal(cty.EmptyObject),
 			packerAccessor: cty.ObjectVal(map[string]cty.Value{
-				"version":     cty.StringVal(cfg.CorePackerVersionString),
-				"iterationID": cty.UnknownVal(cty.String),
+				"version":            cty.StringVal(cfg.CorePackerVersionString),
+				"iterationID":        cty.UnknownVal(cty.String),
+				"versionFingerprint": cty.UnknownVal(cty.String),
 			}),
 			pathVariablesAccessor: cty.ObjectVal(map[string]cty.Value{
 				"cwd":  cty.StringVal(strings.ReplaceAll(cfg.Cwd, `\`, `/`)),
@@ -122,6 +124,8 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 
 	iterID, ok := cfg.HCPVars["iterationID"]
 	if ok {
+		log.Printf("[WARN] Deprecation: Contextual Variable `iterationID` has been deprecated packer context. " +
+			"Please use `versionFingerprint` variable instead.")
 		ectx.Variables[packerAccessor] = cty.ObjectVal(map[string]cty.Value{
 			"version":     cty.StringVal(cfg.CorePackerVersionString),
 			"iterationID": iterID,
