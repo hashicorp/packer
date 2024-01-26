@@ -47,10 +47,11 @@ func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
 	}
 
 	versionID := h.bucket.Version.ID
+	versionFingerprint := h.bucket.Version.Fingerprint
 
 	// FIXME: Remove
 	h.configuration.HCPVars["iterationID"] = cty.StringVal(versionID)
-	h.configuration.HCPVars["versionID"] = cty.StringVal(versionID)
+	h.configuration.HCPVars["versionFingerprint"] = cty.StringVal(versionFingerprint)
 
 	sha, err := getGitSHA(h.configuration.Basedir)
 	if err != nil {
