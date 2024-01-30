@@ -6,7 +6,6 @@
   "devDependencies": {
     "@hashicorp/platform-cli": "^2.7.3",
     "@hashicorp/platform-content-conformance": "^0.0.12",
-    "husky": "^9.0.6",
     "next": "^14.0.4",
     "prettier": "^3.2.4"
   },
@@ -14,7 +13,7 @@
   "scripts": {
     "build": "./scripts/website-build.sh",
     "format": "next-hashicorp format",
-    "prepare": "husky",
+    "prepare": "cd .. && husky website/.husky",
     "lint": "next-hashicorp lint",
     "start": "./scripts/website-start.sh",
     "linkcheck": "linkcheck https://packer.io",
