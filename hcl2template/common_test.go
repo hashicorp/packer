@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/builder/null"
@@ -348,6 +349,7 @@ var cmpOpts = []cmp.Option{
 	cmpopts.IgnoreUnexported(
 		PackerConfig{},
 		Variable{},
+		BuildBlock{},
 		SourceBlock{},
 		DatasourceBlock{},
 		ProvisionerBlock{},
@@ -376,6 +378,7 @@ var cmpOpts = []cmp.Option{
 	cmpopts.IgnoreFields(packer.CoreBuildPostProcessor{},
 		"HCLConfig",
 	),
+	cmpopts.IgnoreTypes(hclsyntax.Body{}),
 	cmpopts.IgnoreTypes(hcl2template.MockBuilder{}),
 	cmpopts.IgnoreTypes(HCL2Ref{}),
 	cmpopts.IgnoreTypes([]*LocalBlock{}),

@@ -118,6 +118,11 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Builds: Builds{
+					&BuildBlock{
+						Name: "bucket-slug",
+					},
+				},
 			},
 			true, true,
 			nil,
@@ -129,6 +134,11 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Builds: Builds{
+					&BuildBlock{
+						Name: "bucket-slug",
+					},
+				},
 			},
 			true, true,
 			nil,

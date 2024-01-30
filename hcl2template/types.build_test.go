@@ -64,7 +64,9 @@ func TestParse_build(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{},
+				},
 			},
 			true, true,
 			nil,
@@ -118,6 +120,18 @@ func TestParse_build(t *testing.T) {
 				Sources: map[SourceRef]SourceBlock{
 					refVBIsoUbuntu1204: {Type: "virtualbox-iso", Name: "ubuntu-1204"},
 				},
+				Builds: Builds{
+					&BuildBlock{
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refVBIsoUbuntu1204,
+							},
+						},
+						ErrorCleanupProvisionerBlock: &ProvisionerBlock{
+							PType: "shell-local",
+						},
+					},
+				},
 			},
 			true, true,
 			[]packersdk.Build{&packer.CoreBuild{
@@ -142,7 +156,9 @@ func TestParse_build(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{},
+				},
 			},
 			true, true,
 			[]packersdk.Build{&packer.CoreBuild{}},
@@ -195,7 +211,9 @@ func TestParse_build(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{},
+				},
 			},
 			true, true,
 			[]packersdk.Build{},
@@ -565,7 +583,9 @@ func TestParse_build(t *testing.T) {
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "build"),
 				InputVariables:          Variables{},
-				Builds:                  nil,
+				Builds: Builds{
+					&BuildBlock{},
+				},
 			},
 			true, true,
 			[]packersdk.Build{},

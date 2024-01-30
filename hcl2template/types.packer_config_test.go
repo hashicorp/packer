@@ -575,8 +575,19 @@ func TestParser_no_init(t *testing.T) {
 						Type: cty.List(cty.String),
 					},
 				},
-				Sources: nil,
-				Builds:  nil,
+				Sources: map[SourceRef]SourceBlock{
+					refAWSV3MyImage: {
+						Type: "amazon-v3-ebs",
+						Name: "my-image",
+					},
+					refVBIsoUbuntu1204: {
+						Type: "virtualbox-iso",
+						Name: "ubuntu-1204",
+					},
+				},
+				Builds: Builds{
+					&BuildBlock{},
+				},
 			},
 			false, false,
 			[]packersdk.Build{},

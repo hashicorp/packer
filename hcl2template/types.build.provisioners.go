@@ -77,7 +77,7 @@ func (p *ProvisionerBlock) String() string {
 	return fmt.Sprintf(buildProvisionerLabel+"-block %q %q", p.PType, p.PName)
 }
 
-func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*ProvisionerBlock, hcl.Diagnostics) {
+func (cfg *PackerConfig) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*ProvisionerBlock, hcl.Diagnostics) {
 	var b struct {
 		Name        string    `hcl:"name,optional"`
 		PauseBefore string    `hcl:"pause_before,optional"`

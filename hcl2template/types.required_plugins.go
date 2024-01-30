@@ -12,37 +12,6 @@ import (
 	"github.com/zclconf/go-cty/cty"
 )
 
-func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
-
-	for _, block := range content.Blocks {
-		switch block.Type {
-		case packerLabel:
-			content, contentDiags := block.Body.Content(packerBlockSchema)
-			diags = append(diags, contentDiags...)
-
-			// We ignore "packer_version"" here because
-			// sniffCoreVersionRequirements already dealt with that
-
-			for _, innerBlock := range content.Blocks {
-				switch innerBlock.Type {
-				case "required_plugins":
-					reqs, reqsDiags := decodeRequiredPluginsBlock(innerBlock)
-					diags = append(diags, reqsDiags...)
-					cfg.Packer.RequiredPlugins = append(cfg.Packer.RequiredPlugins, reqs)
-				default:
-					continue
-				}
-
-			}
-		}
-	}
-	return diags
-}
-
 // RequiredPlugin represents a declaration of a dependency on a particular
 // Plugin version or source.
 type RequiredPlugin struct {
