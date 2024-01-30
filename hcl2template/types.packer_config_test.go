@@ -22,6 +22,7 @@ var (
 	refVBIsoUbuntu1204  = SourceRef{Type: "virtualbox-iso", Name: "ubuntu-1204"}
 	refAWSEBSUbuntu1604 = SourceRef{Type: "amazon-ebs", Name: "ubuntu-1604"}
 	refAWSV3MyImage     = SourceRef{Type: "amazon-v3-ebs", Name: "my-image"}
+	refNull             = SourceRef{Type: "null", Name: "test"}
 	pTrue               = pointerToBool(true)
 )
 
