@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 // Generate Plugins is a small program that updates the lists of plugins in
 // command/plugin.go so they will be compiled into the main packer binary.
@@ -12,6 +12,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -141,7 +142,7 @@ func makeImports(builders, provisioners, postProcessors, Datasources []plugin) s
 // listDirectories recursively lists directories under the specified path
 func listDirectories(path string) ([]string, error) {
 	names := []string{}
-	items, err := os.ReadDir(path)
+	items, err := ioutil.ReadDir(path)
 	if err != nil {
 		return names, err
 	}

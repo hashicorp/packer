@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc struct-markdown
 //go:generate packer-sdc mapstructure-to-hcl2 -type DatasourceOutput,Config
@@ -100,11 +100,9 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
-	log.Printf("[WARN] Deprecation: `hcp-packer-iteration` datasource has been deprecated. " +
-		"Please use `hcp-packer-version` datasource instead.")
 	ctx := context.TODO()
 
-	cli, err := hcpapi.NewDeprecatedClient()
+	cli, err := hcpapi.NewClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}

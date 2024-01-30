@@ -1,11 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
 import (
 	"bytes"
-	"os"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 
@@ -27,7 +27,7 @@ func fatalCommand(t *testing.T, m Meta) {
 
 func testFixtureContent(n ...string) string {
 	path := filepath.Join(append([]string{fixturesDir}, n...)...)
-	b, err := os.ReadFile(path)
+	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}

@@ -1,10 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package hcl2template
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -47,12 +48,12 @@ func TestHCL2Formatter_Format_Write(t *testing.T) {
 	f.Output = &buf
 	f.Write = true
 
-	unformattedData, err := os.ReadFile("testdata/format/unformatted.pkr.hcl")
+	unformattedData, err := ioutil.ReadFile("testdata/format/unformatted.pkr.hcl")
 	if err != nil {
 		t.Fatalf("failed to open the unformatted fixture %s", err)
 	}
 
-	tf, err := os.CreateTemp("", "*.pkr.hcl")
+	tf, err := ioutil.TempFile("", "*.pkr.hcl")
 	if err != nil {
 		t.Fatalf("failed to create tempfile for test %s", err)
 	}
@@ -67,12 +68,12 @@ func TestHCL2Formatter_Format_Write(t *testing.T) {
 	}
 
 	//lets re-read the tempfile which should now be formatted
-	data, err := os.ReadFile(tf.Name())
+	data, err := ioutil.ReadFile(tf.Name())
 	if err != nil {
 		t.Fatalf("failed to open the newly formatted fixture %s", err)
 	}
 
-	formattedData, err := os.ReadFile("testdata/format/formatted.pkr.hcl")
+	formattedData, err := ioutil.ReadFile("testdata/format/formatted.pkr.hcl")
 	if err != nil {
 		t.Fatalf("failed to open the formatted fixture %s", err)
 	}

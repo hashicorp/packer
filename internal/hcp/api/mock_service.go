@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package api
 
@@ -9,8 +9,9 @@ import (
 	"strconv"
 
 	"github.com/go-openapi/runtime"
-	hcpPackerService "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
-	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
+	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/client/packer_service"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -19,28 +20,28 @@ import (
 // Upon calling a service method a boolean is set to true to indicate that a method has been called.
 // To skip the setting of these booleans set TrackCalledServiceMethods to false; defaults to true in NewMockPackerClientService().
 type MockPackerClientService struct {
-	CreateBucketCalled, UpdateBucketCalled, BucketAlreadyExist                   bool
-	CreateVersionCalled, GetVersionCalled, VersionAlreadyExist, VersionCompleted bool
-	CreateBuildCalled, UpdateBuildCalled, ListBuildsCalled, BuildAlreadyDone     bool
-	TrackCalledServiceMethods                                                    bool
+	CreateBucketCalled, UpdateBucketCalled, BucketAlreadyExist                           bool
+	CreateIterationCalled, GetIterationCalled, IterationAlreadyExist, IterationCompleted bool
+	CreateBuildCalled, UpdateBuildCalled, ListBuildsCalled, BuildAlreadyDone             bool
+	TrackCalledServiceMethods                                                            bool
 
 	// Mock Creates
-	CreateBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101CreateBucketResponse
-	CreateVersionResp *hcpPackerModels.HashicorpCloudPacker20230101CreateVersionResponse
-	CreateBuildResp   *hcpPackerModels.HashicorpCloudPacker20230101CreateBuildResponse
+	CreateBucketResp    *models.HashicorpCloudPackerCreateBucketResponse
+	CreateIterationResp *models.HashicorpCloudPackerCreateIterationResponse
+	CreateBuildResp     *models.HashicorpCloudPackerCreateBuildResponse
 
 	// Mock Gets
-	GetVersionResp *hcpPackerModels.HashicorpCloudPacker20230101GetVersionResponse
+	GetIterationResp *models.HashicorpCloudPackerGetIterationResponse
 
 	ExistingBuilds      []string
 	ExistingBuildLabels map[string]string
 
-	hcpPackerService.ClientService
+	packerSvc.ClientService
 }
 
 // NewMockPackerClientService returns a basic mock of the Cloud Packer Service.
 // Upon calling a service method a boolean is set to true to indicate that a method has been called.
-// To skip the setting of these booleans set TrackCalledServiceMethods to false. By default, it is true.
+// To skip the setting of these booleans set TrackCalledServiceMethods to false. By default it is true.
 func NewMockPackerClientService() *MockPackerClientService {
 	m := MockPackerClientService{
 		ExistingBuilds:            make([]string, 0),
@@ -51,234 +52,205 @@ func NewMockPackerClientService() *MockPackerClientService {
 	return &m
 }
 
-func (svc *MockPackerClientService) PackerServiceCreateBucket(
-	params *hcpPackerService.PackerServiceCreateBucketParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceCreateBucketOK, error) {
+func (svc *MockPackerClientService) PackerServiceCreateBucket(params *packerSvc.PackerServiceCreateBucketParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceCreateBucketOK, error) {
 
 	if svc.BucketAlreadyExist {
-		return nil, status.Error(
-			codes.AlreadyExists,
-			fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()),
-		)
+		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()))
 	}
 
-	if params.Body.Name == "" {
-		return nil, errors.New("no bucket name was passed in")
+	if params.Body.BucketSlug == "" {
+		return nil, errors.New("No bucket slug was passed in")
 	}
 
 	if svc.TrackCalledServiceMethods {
 		svc.CreateBucketCalled = true
 	}
-	payload := &hcpPackerModels.HashicorpCloudPacker20230101CreateBucketResponse{
-		Bucket: &hcpPackerModels.HashicorpCloudPacker20230101Bucket{
+	payload := &models.HashicorpCloudPackerCreateBucketResponse{
+		Bucket: &models.HashicorpCloudPackerBucket{
 			ID: "bucket-id",
 		},
 	}
-	payload.Bucket.Name = params.Body.Name
+	payload.Bucket.Slug = params.Body.BucketSlug
 
-	ok := &hcpPackerService.PackerServiceCreateBucketOK{
+	ok := &packerSvc.PackerServiceCreateBucketOK{
 		Payload: payload,
 	}
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) PackerServiceUpdateBucket(
-	params *hcpPackerService.PackerServiceUpdateBucketParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceUpdateBucketOK, error) {
+func (svc *MockPackerClientService) PackerServiceUpdateBucket(params *packerSvc.PackerServiceUpdateBucketParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceUpdateBucketOK, error) {
 	if svc.TrackCalledServiceMethods {
 		svc.UpdateBucketCalled = true
 	}
 
-	return hcpPackerService.NewPackerServiceUpdateBucketOK(), nil
+	return packerSvc.NewPackerServiceUpdateBucketOK(), nil
 }
 
-func (svc *MockPackerClientService) PackerServiceCreateVersion(
-	params *hcpPackerService.PackerServiceCreateVersionParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceCreateVersionOK,
-	error) {
-	if svc.VersionAlreadyExist {
-		return nil, status.Error(
-			codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists,
-				codes.AlreadyExists.String()),
-		)
+func (svc *MockPackerClientService) PackerServiceCreateIteration(params *packerSvc.PackerServiceCreateIterationParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceCreateIterationOK, error) {
+	if svc.IterationAlreadyExist {
+		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()))
 	}
 
 	if params.Body.Fingerprint == "" {
-		return nil, errors.New("no valid Fingerprint was passed in")
+		return nil, errors.New("No valid Fingerprint was passed in")
 	}
 
 	if svc.TrackCalledServiceMethods {
-		svc.CreateVersionCalled = true
+		svc.CreateIterationCalled = true
 	}
-	payload := &hcpPackerModels.HashicorpCloudPacker20230101CreateVersionResponse{
-		Version: &hcpPackerModels.HashicorpCloudPacker20230101Version{
-			BucketName:   params.BucketName,
-			Fingerprint:  params.Body.Fingerprint,
-			ID:           "version-id",
-			Name:         "v0",
-			Status:       hcpPackerModels.HashicorpCloudPacker20230101VersionStatusVERSIONRUNNING.Pointer(),
+	payload := &models.HashicorpCloudPackerCreateIterationResponse{
+		Iteration: &models.HashicorpCloudPackerIteration{
+			ID:           "iteration-id",
 			TemplateType: params.Body.TemplateType,
 		},
 	}
 
-	ok := &hcpPackerService.PackerServiceCreateVersionOK{
+	payload.Iteration.BucketSlug = params.BucketSlug
+	payload.Iteration.Fingerprint = params.Body.Fingerprint
+
+	ok := &packerSvc.PackerServiceCreateIterationOK{
 		Payload: payload,
 	}
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) PackerServiceGetVersion(
-	params *hcpPackerService.PackerServiceGetVersionParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceGetVersionOK, error) {
-	if !svc.VersionAlreadyExist {
+func (svc *MockPackerClientService) PackerServiceGetIteration(params *packerSvc.PackerServiceGetIterationParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceGetIterationOK, error) {
+	if !svc.IterationAlreadyExist {
 		return nil, status.Error(codes.AlreadyExists, fmt.Sprintf("Code:%d %s", codes.Aborted, codes.Aborted.String()))
 	}
 
-	if params.BucketName == "" {
-		return nil, errors.New("no valid BucketName was passed in")
+	if params.BucketSlug == "" {
+		return nil, errors.New("No valid BucketSlug was passed in")
 	}
 
-	if params.Fingerprint == "" {
-		return nil, errors.New("no valid Fingerprint was passed in")
+	if params.Fingerprint == nil {
+		return nil, errors.New("No valid Fingerprint was passed in")
 	}
 
 	if svc.TrackCalledServiceMethods {
-		svc.GetVersionCalled = true
+		svc.GetIterationCalled = true
 	}
 
-	payload := &hcpPackerModels.HashicorpCloudPacker20230101GetVersionResponse{
-		Version: &hcpPackerModels.HashicorpCloudPacker20230101Version{
-			ID:           "version-id",
-			Builds:       make([]*hcpPackerModels.HashicorpCloudPacker20230101Build, 0),
-			TemplateType: hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeTEMPLATETYPEUNSET.Pointer(),
+	payload := &models.HashicorpCloudPackerGetIterationResponse{
+		Iteration: &models.HashicorpCloudPackerIteration{
+			ID:           "iteration-id",
+			Builds:       make([]*models.HashicorpCloudPackerBuild, 0),
+			TemplateType: models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET.Pointer(),
 		},
 	}
 
-	payload.Version.BucketName = params.BucketName
-	payload.Version.Fingerprint = params.Fingerprint
-	ok := &hcpPackerService.PackerServiceGetVersionOK{
+	payload.Iteration.BucketSlug = params.BucketSlug
+	payload.Iteration.Fingerprint = *params.Fingerprint
+	ok := &packerSvc.PackerServiceGetIterationOK{
 		Payload: payload,
 	}
 
-	if svc.VersionCompleted {
-		ok.Payload.Version.Name = "v1"
-		ok.Payload.Version.Builds = append(ok.Payload.Version.Builds, &hcpPackerModels.HashicorpCloudPacker20230101Build{
+	if svc.IterationCompleted {
+		ok.Payload.Iteration.Complete = true
+		ok.Payload.Iteration.IncrementalVersion = 1
+		ok.Payload.Iteration.Builds = append(ok.Payload.Iteration.Builds, &models.HashicorpCloudPackerBuild{
 			ID:            "build-id",
 			ComponentType: svc.ExistingBuilds[0],
-			Status:        hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE.Pointer(),
-			Artifacts: []*hcpPackerModels.HashicorpCloudPacker20230101Artifact{
-				{ExternalIdentifier: "image-id", Region: "somewhere"},
+			Status:        models.HashicorpCloudPackerBuildStatusDONE.Pointer(),
+			Images: []*models.HashicorpCloudPackerImage{
+				{ImageID: "image-id", Region: "somewhere"},
 			},
 			Labels: make(map[string]string),
 		})
-	} else {
-		ok.Payload.Version.Name = "v0"
 	}
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) PackerServiceCreateBuild(
-	params *hcpPackerService.PackerServiceCreateBuildParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceCreateBuildOK, error) {
-	if params.BucketName == "" {
-		return nil, errors.New("no valid BucketName was passed in")
+func (svc *MockPackerClientService) PackerServiceCreateBuild(params *packerSvc.PackerServiceCreateBuildParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceCreateBuildOK, error) {
+	if params.BucketSlug == "" {
+		return nil, errors.New("No valid BucketSlug was passed in")
 	}
 
-	if params.Fingerprint == "" {
-		return nil, errors.New("no valid Fingerprint was passed in")
+	if params.Body.Fingerprint == "" {
+		return nil, errors.New("No valid Fingerprint was passed in")
 	}
 
-	if params.Body.ComponentType == "" {
-		return nil, errors.New("no build componentType was passed in")
+	if params.Body.Build.ComponentType == "" {
+		return nil, errors.New("No build componentType was passed in")
 	}
 
 	if svc.TrackCalledServiceMethods {
 		svc.CreateBuildCalled = true
 	}
 
-	payload := &hcpPackerModels.HashicorpCloudPacker20230101CreateBuildResponse{
-		Build: &hcpPackerModels.HashicorpCloudPacker20230101Build{
+	payload := &models.HashicorpCloudPackerCreateBuildResponse{
+		Build: &models.HashicorpCloudPackerBuild{
 			PackerRunUUID: "test-uuid",
-			Status:        hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET.Pointer(),
+			Status:        models.HashicorpCloudPackerBuildStatusUNSET.Pointer(),
 		},
 	}
 
-	payload.Build.ComponentType = params.Body.ComponentType
+	payload.Build.ComponentType = params.Body.Build.ComponentType
+	payload.Build.IterationID = params.IterationID
 
-	ok := hcpPackerService.NewPackerServiceCreateBuildOK()
+	ok := packerSvc.NewPackerServiceCreateBuildOK()
 	ok.Payload = payload
 
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) PackerServiceUpdateBuild(
-	params *hcpPackerService.PackerServiceUpdateBuildParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceUpdateBuildOK, error) {
+func (svc *MockPackerClientService) PackerServiceUpdateBuild(params *packerSvc.PackerServiceUpdateBuildParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceUpdateBuildOK, error) {
 	if params.BuildID == "" {
-		return nil, errors.New("no valid BuildID was passed in")
+		return nil, errors.New("No valid BuildID was passed in")
 	}
 
-	if params.Body == nil {
-		return nil, errors.New("no valid Updates were passed in")
+	if params.Body.Updates == nil {
+		return nil, errors.New("No valid Updates were passed in")
 	}
 
-	if params.Body.Status == nil || *params.Body.Status == "" {
-		return nil, errors.New("no build status was passed in")
+	if params.Body.Updates.Status == nil || *params.Body.Updates.Status == "" {
+		return nil, errors.New("No build status was passed in")
 	}
 
 	if svc.TrackCalledServiceMethods {
 		svc.UpdateBuildCalled = true
 	}
 
-	ok := hcpPackerService.NewPackerServiceUpdateBuildOK()
-	ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101UpdateBuildResponse{
-		Build: &hcpPackerModels.HashicorpCloudPacker20230101Build{
+	ok := packerSvc.NewPackerServiceUpdateBuildOK()
+	ok.Payload = &models.HashicorpCloudPackerUpdateBuildResponse{
+		Build: &models.HashicorpCloudPackerBuild{
 			ID: params.BuildID,
 		},
 	}
 	return ok, nil
 }
 
-func (svc *MockPackerClientService) PackerServiceListBuilds(
-	params *hcpPackerService.PackerServiceListBuildsParams, _ runtime.ClientAuthInfoWriter,
-	opts ...hcpPackerService.ClientOption,
-) (*hcpPackerService.PackerServiceListBuildsOK, error) {
+func (svc *MockPackerClientService) PackerServiceListBuilds(params *packerSvc.PackerServiceListBuildsParams, _ runtime.ClientAuthInfoWriter, opts ...packer_service.ClientOption) (*packerSvc.PackerServiceListBuildsOK, error) {
 
-	status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET
-	artifacts := make([]*hcpPackerModels.HashicorpCloudPacker20230101Artifact, 0)
+	status := models.HashicorpCloudPackerBuildStatusUNSET
+	images := make([]*models.HashicorpCloudPackerImage, 0)
 	labels := make(map[string]string)
 	if svc.BuildAlreadyDone {
-		status = hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE
-		artifacts = append(artifacts, &hcpPackerModels.HashicorpCloudPacker20230101Artifact{ExternalIdentifier: "image-id", Region: "somewhere"})
+		status = models.HashicorpCloudPackerBuildStatusDONE
+		images = append(images, &models.HashicorpCloudPackerImage{ImageID: "image-id", Region: "somewhere"})
 	}
 
 	for k, v := range svc.ExistingBuildLabels {
 		labels[k] = v
 	}
 
-	builds := make([]*hcpPackerModels.HashicorpCloudPacker20230101Build, 0, len(svc.ExistingBuilds))
+	builds := make([]*models.HashicorpCloudPackerBuild, 0, len(svc.ExistingBuilds))
 	for i, name := range svc.ExistingBuilds {
-		builds = append(builds, &hcpPackerModels.HashicorpCloudPacker20230101Build{
+		builds = append(builds, &models.HashicorpCloudPackerBuild{
 			ID:            name + "--" + strconv.Itoa(i),
 			ComponentType: name,
-			Platform:      "mockPlatform",
-			Status:        &status,
-			Artifacts:     artifacts,
+			CloudProvider: "mockProvider",
+			Status:        status.Pointer(),
+			Images:        images,
 			Labels:        labels,
 		})
 	}
 
-	ok := hcpPackerService.NewPackerServiceListBuildsOK()
-	ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101ListBuildsResponse{
+	ok := packerSvc.NewPackerServiceListBuildsOK()
+	ok.Payload = &models.HashicorpCloudPackerListBuildsResponse{
 		Builds: builds,
 	}
 

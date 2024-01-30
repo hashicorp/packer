@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -28,7 +28,7 @@ func (c *InspectCommand) Run(args []string) int {
 
 func (c *InspectCommand) ParseArgs(args []string) (*InspectArgs, int) {
 	var cfg InspectArgs
-	flags := c.Meta.FlagSet("inspect")
+	flags := c.Meta.FlagSet("inspect", FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {

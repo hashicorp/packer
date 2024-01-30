@@ -1,11 +1,11 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package powershell_test
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,7 +35,7 @@ func LoadProvisionerFragment(templateFragmentPath string) (string, error) {
 	}
 	defer fragmentFile.Close()
 
-	fragmentString, err := io.ReadAll(fragmentFile)
+	fragmentString, err := ioutil.ReadAll(fragmentFile)
 	if err != nil {
 		return "", fmt.Errorf("Unable to read %s", fragmentAbsPath)
 	}

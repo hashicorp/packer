@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package packer
 
@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -113,7 +114,7 @@ func NewClient(config *PluginClientConfig) (c *PluginClient) {
 	}
 
 	if config.Stderr == nil {
-		config.Stderr = io.Discard
+		config.Stderr = ioutil.Discard
 	}
 
 	c = &PluginClient{config: config}

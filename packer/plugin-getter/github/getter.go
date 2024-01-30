@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package github
 
@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -70,7 +71,7 @@ func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 			}
 		}
 		_, _ = buffer.WriteString("]")
-		return io.NopCloser(buffer), nil
+		return ioutil.NopCloser(buffer), nil
 	}
 }
 
@@ -102,7 +103,7 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	return io.NopCloser(buf), nil
+	return ioutil.NopCloser(buf), nil
 }
 
 // HostSpecificTokenAuthTransport makes sure the http roundtripper only sets an

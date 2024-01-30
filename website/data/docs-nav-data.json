@@ -730,14 +730,6 @@
             "path": "datasources/hcp"
           },
           {
-            "title": "Version",
-            "path": "datasources/hcp/hcp-packer-version"
-          },
-          {
-            "title": "Artifact",
-            "path": "datasources/hcp/hcp-packer-artifact"
-          },
-          {
             "title": "Iteration",
             "path": "datasources/hcp/hcp-packer-iteration"
           },

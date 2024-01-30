@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -8,10 +8,10 @@ import (
 	"path"
 	"testing"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/go-git/go-git/v5"
 )
 
-func TestVersion_Initialize(t *testing.T) {
+func TestIteration_Initialize(t *testing.T) {
 	var tc = []struct {
 		name          string
 		fingerprint   string
@@ -56,7 +56,7 @@ func TestVersion_Initialize(t *testing.T) {
 				tt.setupFn(t)
 			}
 
-			i := NewVersion()
+			i := NewIteration()
 			err := i.Initialize()
 			if tt.errorExpected {
 				t.Logf("%v", err)
@@ -65,7 +65,7 @@ func TestVersion_Initialize(t *testing.T) {
 				}
 
 				if i.Fingerprint != "" {
-					t.Errorf("expected %q to result in an error with an empty version fingerprint, but got %q", tt.name, i.Fingerprint)
+					t.Errorf("expected %q to result in an error with an empty iteration fingerprint, but got %q", tt.name, i.Fingerprint)
 				}
 				return
 			}

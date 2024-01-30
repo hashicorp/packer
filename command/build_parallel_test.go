@@ -1,11 +1,12 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -100,7 +101,7 @@ func TestBuildParallel_1(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel-builds=10",
+		fmt.Sprintf("-parallel-builds=10"),
 		filepath.Join(testFixture("parallel"), "1lock-5wg.json"),
 	}
 
@@ -129,7 +130,7 @@ func TestBuildParallel_2(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel-builds=3",
+		fmt.Sprintf("-parallel-builds=3"),
 		filepath.Join(testFixture("parallel"), "2lock-4wg.json"),
 	}
 
@@ -158,7 +159,7 @@ func TestBuildParallel_Timeout(t *testing.T) {
 	}
 
 	args := []string{
-		"-parallel-builds=3",
+		fmt.Sprintf("-parallel-builds=3"),
 		filepath.Join(testFixture("parallel"), "2lock-timeout.json"),
 	}
 

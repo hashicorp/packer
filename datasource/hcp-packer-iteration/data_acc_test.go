@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package hcp_packer_iteration
 
@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
@@ -18,42 +17,27 @@ import (
 //go:embed test-fixtures/template.pkr.hcl
 var testDatasourceBasic string
 
-//go:embed test-fixtures/hcp-setup-build.pkr.hcl
-var testHCPBuild string
-
 // Acceptance tests for data sources.
 //
-// Your HCP credentials must be provided through your runtime
-// environment because the template this test uses does not set them.
+// To be successful, the HCP project you're providing credentials for must
+// contain a bucket named "hardened-ubuntu-16-04", with a channel named
+// "packer-acc-test". It must contain a build that references an image in AWS
+// region "us-east-1". Your HCP credentials must be provided through your
+// runtime environment because the template this test uses does not set them.
+//
+// TODO: update this acceptance to create and clean up the HCP resources this
+// data source queries, to prevent plugin developers from having to have images
+// as defined above.
+
 func TestAccDatasource_HCPPackerIteration(t *testing.T) {
 	if os.Getenv(env.HCPClientID) == "" && os.Getenv(env.HCPClientSecret) == "" {
 		t.Skipf(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", env.HCPClientID, env.HCPClientSecret))
 		return
 	}
 
-	tmpFile := filepath.Join(t.TempDir(), "hcp-target-file")
-	testSetup := acctest.PluginTestCase{
-		Template: fmt.Sprintf(testHCPBuild, tmpFile),
-		Check: func(buildCommand *exec.Cmd, logfile string) error {
-			if buildCommand.ProcessState != nil {
-				if buildCommand.ProcessState.ExitCode() != 0 {
-					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
-				}
-			}
-			return nil
-		},
-	}
-	acctest.TestPlugin(t, &testSetup)
-
-	testCase := acctest.PluginTestCase{
+	testCase := &acctest.PluginTestCase{
 		Name:     "hcp_packer_iteration_datasource_basic_test",
-		Template: fmt.Sprintf(testDatasourceBasic, filepath.Dir(tmpFile)),
-		Setup: func() error {
-			if _, err := os.Stat(tmpFile); os.IsNotExist(err) {
-				return err
-			}
-			return nil
-		},
+		Template: testDatasourceBasic,
 		// TODO have acc test write iteration id to a file and check it to make
 		// sure it isn't empty.
 		Check: func(buildCommand *exec.Cmd, logfile string) error {
@@ -65,5 +49,5 @@ func TestAccDatasource_HCPPackerIteration(t *testing.T) {
 			return nil
 		},
 	}
-	acctest.TestPlugin(t, &testCase)
+	acctest.TestPlugin(t, testCase)
 }

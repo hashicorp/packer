@@ -3,20 +3,20 @@ source "null" "example" {
 }
 
 data "hcp-packer-iteration" "hardened-source" {
-  bucket_name = "simple-deprecated"
-  channel = "latest"
+  bucket_name = "hardened-ubuntu-16-04"
+  channel = "packer-acc-test"
 }
 
-data "hcp-packer-image" "file" {
-  bucket_name = "simple-deprecated"
+data "hcp-packer-image" "aws" {
+  bucket_name = "hardened-ubuntu-16-04"
   iteration_id = "${data.hcp-packer-iteration.hardened-source.id}"
-  cloud_provider = "packer.file"
-  region = %q
+  cloud_provider = "aws"
+  region = "us-east-1"
 }
 
 locals {
   foo              = "${data.hcp-packer-iteration.hardened-source.id}"
-  bar              = "${data.hcp-packer-image.file.id}"
+  bar              = "${data.hcp-packer-image.aws.id}"
 }
 
 build {

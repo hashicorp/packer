@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
@@ -67,7 +67,8 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		ui.Say("Pausing at breakpoint provisioner.")
 	}
 
-	message := "Press enter to continue."
+	message := fmt.Sprintf(
+		"Press enter to continue.")
 
 	var g errgroup.Group
 	result := make(chan string, 1)

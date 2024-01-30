@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -10,19 +10,19 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2"
-	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
 )
 
-// JSONRegistry is a HCP handler made to process legacy JSON templates
-type JSONRegistry struct {
+// JSONMetadataRegistry is a HCP handler made to process legacy JSON templates
+type JSONMetadataRegistry struct {
 	configuration *packer.Core
 	bucket        *Bucket
 	ui            sdkpacker.Ui
 }
 
-func NewJSONRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONRegistry, hcl.Diagnostics) {
+func NewJSONMetadataRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONMetadataRegistry, hcl.Diagnostics) {
 	bucket, diags := createConfiguredBucket(
 		filepath.Dir(config.Template.Path),
 		withPackerEnvConfiguration,
@@ -46,27 +46,27 @@ func NewJSONRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONRegistry, hcl.D
 		bucket.RegisterBuildForComponent(buildName)
 	}
 
-	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Version.Fingerprint))
+	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Iteration.Fingerprint))
 
-	return &JSONRegistry{
+	return &JSONMetadataRegistry{
 		configuration: config,
 		bucket:        bucket,
 		ui:            ui,
 	}, nil
 }
 
-// PopulateVersion creates the metadata in HCP Packer Registry for a build
-func (h *JSONRegistry) PopulateVersion(ctx context.Context) error {
+// PopulateIteration creates the metadata on HCP for a build
+func (h *JSONMetadataRegistry) PopulateIteration(ctx context.Context) error {
 	err := h.bucket.Validate()
 	if err != nil {
 		return err
 	}
-	err = h.bucket.Initialize(ctx, hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeJSON)
+	err = h.bucket.Initialize(ctx, models.HashicorpCloudPackerIterationTemplateTypeJSON)
 	if err != nil {
 		return err
 	}
 
-	err = h.bucket.populateVersion(ctx)
+	err = h.bucket.populateIteration(ctx)
 	if err != nil {
 		return err
 	}
@@ -75,19 +75,19 @@ func (h *JSONRegistry) PopulateVersion(ctx context.Context) error {
 	if err != nil {
 		log.Printf("failed to get GIT SHA from environment, won't set as build labels")
 	} else {
-		h.bucket.Version.AddSHAToBuildLabels(sha)
+		h.bucket.Iteration.AddSHAToBuildLabels(sha)
 	}
 
 	return nil
 }
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
-func (h *JSONRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
+func (h *JSONMetadataRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
 	return h.bucket.startBuild(ctx, build.Name())
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
-func (h *JSONRegistry) CompleteBuild(
+func (h *JSONMetadataRegistry) CompleteBuild(
 	ctx context.Context,
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
@@ -96,7 +96,7 @@ func (h *JSONRegistry) CompleteBuild(
 	return h.bucket.completeBuild(ctx, build.Name(), artifacts, buildErr)
 }
 
-// VersionStatusSummary prints a status report in the UI if the version is not yet done
-func (h *JSONRegistry) VersionStatusSummary() {
-	h.bucket.Version.statusSummary(h.ui)
+// IterationStatusSummary prints a status report in the UI if the iteration is not yet done
+func (h *JSONMetadataRegistry) IterationStatusSummary() {
+	h.bucket.Iteration.iterationStatusSummary(h.ui)
 }

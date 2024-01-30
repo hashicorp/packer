@@ -1,7 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
-
-//go:build amd64 && (darwin || windows || linux)
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -10,9 +8,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -203,6 +201,100 @@ func TestInitCommand_Run(t *testing.T) {
 			nil,
 		},
 		{
+			"manually-installed-single-component-plugin-works",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+				initTestGoGetPlugin{
+					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v1.0.0/" +
+						"packer-provisioner-comment_v1.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
+					Dst: filepath.Join(cfg.dir("4_pkr_config"), defaultConfigDir, "plugins"),
+				}.fn,
+			},
+			TestMetaFile(t),
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			map[string]string{
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
+			},
+			cfg.dir("4_pkr_config"),
+			cfg.dir("4_pkr_user_folder"),
+			0,
+			nil,
+			map[string]string{
+				"darwin":  "h1:nVebbXToeehPUASRbvV9M4qaA9+UgoR5AMp7LjTrSBk=",
+				"linux":   "h1:/U5vdeMtOpRKNu0ld8+qf4t6WC+BsfCQ6JRo9Dh/khI=",
+				"windows": "h1:0nkdNCjtTHTgBNkzVKG++/VYmWAvq/o236GGTxrIf/Q=",
+			}[runtime.GOOS],
+			[]func(*testing.T, testCaseInit){
+				testBuild{want: 0}.fn,
+			},
+		},
+		{
+			"manually-installed-single-component-plugin-old-api-fails",
+			[]func(t *testing.T, tc testCaseInit){
+				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
+				initTestGoGetPlugin{
+					Src: "https://github.com/azr/packer-provisioner-comment/releases/download/v0.0.0/" +
+						"packer-provisioner-comment_v0.0.0_" + runtime.GOOS + "_" + runtime.GOARCH + ".zip",
+					Dst: filepath.Join(cfg.dir("5_pkr_config"), defaultConfigDir, "plugins"),
+				}.fn,
+			},
+			TestMetaFile(t),
+			nil,
+			map[string]string{
+				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
+				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
+				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
+			}[runtime.GOOS],
+			map[string]string{
+				`source.pkr.hcl`: `
+				source "null" "test" {
+					communicator = "none"
+				}
+				`,
+				`build.pkr.hcl`: `
+				build {
+					sources = ["source.null.test"]
+					provisioner "comment" {
+						comment		= "Begin ¡"
+						ui			= true
+						bubble_text	= true
+					}
+				}
+				`,
+			},
+			cfg.dir("5_pkr_config"),
+			cfg.dir("5_pkr_user_folder"),
+			0,
+			nil,
+			map[string]string{
+				"darwin":  "h1:gW4gzpDXeu3cDrXgHJj9iWAN7Pyak626Gq8Bu2LG1kY=",
+				"linux":   "h1:wQ2H5+J7VXwQzqR9DgpWtjhw9OVEFbcKQL6dgm/+zwo=",
+				"windows": "h1:BqRdW3c5H1PZ2Q4DOaKWja21v3nDlY5Nn8kqahhHGSw=",
+			}[runtime.GOOS],
+			[]func(*testing.T, testCaseInit){
+				testBuild{want: 1}.fn,
+			},
+		},
+		{
 			"unsupported-non-github-source-address",
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
@@ -318,57 +410,5 @@ type initTestGoGetPlugin struct {
 func (opts initTestGoGetPlugin) fn(t *testing.T, _ testCaseInit) {
 	if _, err := getter.Get(context.Background(), opts.Dst, opts.Src); err != nil {
 		t.Fatalf("get: %v", err)
-	}
-}
-
-// TestInitCmd aims to test the init command, with output validation
-func TestInitCmd(t *testing.T) {
-	tests := []struct {
-		name         string
-		args         []string
-		expectedCode int
-		outputCheck  func(string, string) error
-	}{
-		{
-			name: "Ensure init warns on template without required_plugin blocks",
-			args: []string{
-				testFixture("hcl", "build-var-in-pp.pkr.hcl"),
-			},
-			expectedCode: 0,
-			outputCheck: func(stdout, stderr string) error {
-				if !strings.Contains(stdout, "No plugins requirement found") {
-					return fmt.Errorf("command should warn about plugin requirements not found, but did not")
-				}
-				return nil
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &InitCommand{
-				Meta: TestMetaFile(t),
-			}
-
-			exitCode := c.Run(tt.args)
-			if exitCode != tt.expectedCode {
-				t.Errorf("process exit code mismatch: expected %d, got %d",
-					tt.expectedCode,
-					exitCode)
-			}
-
-			out, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
-			err := tt.outputCheck(out, stderr)
-			if err != nil {
-				if len(out) != 0 {
-					t.Logf("command stdout: %q", out)
-				}
-
-				if len(stderr) != 0 {
-					t.Logf("command stderr: %q", stderr)
-				}
-				t.Error(err.Error())
-			}
-		})
 	}
 }

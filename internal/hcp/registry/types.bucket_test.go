@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -10,22 +10,22 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/packer/hcl2template"
-	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
+	"github.com/hashicorp/packer/internal/hcp/api"
 )
 
 func createInitialTestBucket(t testing.TB) *Bucket {
 	t.Helper()
-	bucket := NewBucketWithVersion()
-	err := bucket.Version.Initialize()
+	bucket := NewBucketWithIteration()
+	err := bucket.Iteration.Initialize()
 	if err != nil {
 		t.Errorf("failed to initialize Bucket: %s", err)
 		return nil
 	}
 
-	mockService := hcpPackerAPI.NewMockPackerClientService()
+	mockService := api.NewMockPackerClientService()
 	mockService.TrackCalledServiceMethods = false
-	bucket.Name = "TestBucket"
-	bucket.client = &hcpPackerAPI.Client{
+	bucket.Slug = "TestBucket"
+	bucket.client = &api.Client{
 		Packer: mockService,
 	}
 
@@ -42,20 +42,20 @@ func checkError(t testing.TB, err error) {
 	t.Errorf("received an error during testing %s", err)
 }
 
-func TestBucket_CreateInitialBuildForVersion(t *testing.T) {
+func TestBucket_CreateInitialBuildForIteration(t *testing.T) {
 	bucket := createInitialTestBucket(t)
 
-	componentName := "happycloud.artifact"
+	componentName := "happycloud.image"
 	bucket.RegisterBuildForComponent(componentName)
 	bucket.BuildLabels = map[string]string{
 		"version":   "1.7.0",
 		"based_off": "alpine",
 	}
-	err := bucket.CreateInitialBuildForVersion(context.TODO(), componentName)
+	err := bucket.CreateInitialBuildForIteration(context.TODO(), componentName)
 	checkError(t, err)
 
-	// Assert that a build stored on the version
-	build, err := bucket.Version.Build(componentName)
+	// Assert that a build stored on the iteration
+	build, err := bucket.Iteration.Build(componentName)
 	if err != nil {
 		t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 	}
@@ -80,12 +80,12 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 	}{
 		{
 			desc:           "no bucket or build specific labels",
-			buildName:      "happcloud.artifact",
+			buildName:      "happcloud.image",
 			noDiffExpected: true,
 		},
 		{
 			desc:      "bucket build labels",
-			buildName: "happcloud.artifact",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
 				"based_off": "alpine",
@@ -95,22 +95,22 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 		},
 		{
 			desc:      "bucket build labels and build specific label",
-			buildName: "happcloud.artifact",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
 				"based_off": "alpine",
 			},
 			buildLabels: map[string]string{
-				"source_artifact": "another-happycloud-artifact",
+				"source_image": "another-happycloud-image",
 			},
 			labelsCount:    3,
 			noDiffExpected: false,
 		},
 		{
 			desc:      "build specific label",
-			buildName: "happcloud.artifact",
+			buildName: "happcloud.image",
 			buildLabels: map[string]string{
-				"source_artifact": "another-happycloud-artifact",
+				"source_image": "another-happycloud-image",
 			},
 			labelsCount:    1,
 			noDiffExpected: false,
@@ -129,11 +129,11 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 				bucket.BuildLabels[k] = v
 			}
 
-			err := bucket.CreateInitialBuildForVersion(context.TODO(), componentName)
+			err := bucket.CreateInitialBuildForIteration(context.TODO(), componentName)
 			checkError(t, err)
 
-			// Assert that the build is stored on the version
-			build, err := bucket.Version.Build(componentName)
+			// Assert that the build is stored on the iteration
+			build, err := bucket.Iteration.Build(componentName)
 			if err != nil {
 				t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 			}
@@ -161,31 +161,31 @@ func TestBucket_UpdateLabelsForBuild(t *testing.T) {
 func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	bucket := createInitialTestBucket(t)
 
-	firstComponent := "happycloud.artifact"
+	firstComponent := "happycloud.image"
 	bucket.RegisterBuildForComponent(firstComponent)
 
-	secondComponent := "happycloud.artifact2"
+	secondComponent := "happycloud.image2"
 	bucket.RegisterBuildForComponent(secondComponent)
 
-	err := bucket.populateVersion(context.TODO())
+	err := bucket.populateIteration(context.TODO())
 	checkError(t, err)
 
 	err = bucket.UpdateLabelsForBuild(firstComponent, map[string]string{
-		"source_artifact": "another-happycloud-artifact",
+		"source_image": "another-happycloud-image",
 	})
 	checkError(t, err)
 
 	err = bucket.UpdateLabelsForBuild(secondComponent, map[string]string{
-		"source_artifact": "the-original-happycloud-artifact",
-		"role_name":       "no-role-is-a-good-role",
+		"source_image": "the-original-happycloud-image",
+		"role_name":    "no-role-is-a-good-role",
 	})
 	checkError(t, err)
 
 	var registeredBuilds []*Build
 	expectedComponents := []string{firstComponent, secondComponent}
 	for _, componentName := range expectedComponents {
-		// Assert that a build stored on the version
-		build, err := bucket.Version.Build(componentName)
+		// Assert that a build stored on the iteration
+		build, err := bucket.Iteration.Build(componentName)
 		if err != nil {
 			t.Errorf("expected an initial build for %s to be created, but it failed", componentName)
 		}
@@ -209,7 +209,7 @@ func TestBucket_UpdateLabelsForBuild_withMultipleBuilds(t *testing.T) {
 	}
 }
 
-func TestBucket_PopulateVersion(t *testing.T) {
+func TestBucket_PopulateIteration(t *testing.T) {
 	tc := []struct {
 		desc              string
 		buildName         string
@@ -220,15 +220,15 @@ func TestBucket_PopulateVersion(t *testing.T) {
 		noDiffExpected    bool
 	}{
 		{
-			desc:           "populating version with existing incomplete build and no bucket build labels does nothing",
-			buildName:      "happcloud.artifact",
+			desc:           "populating iteration with existing incomplete build and no bucket build labels does nothing",
+			buildName:      "happcloud.image",
 			labelsCount:    0,
 			buildCompleted: false,
 			noDiffExpected: true,
 		},
 		{
-			desc:      "populating version with existing incomplete build should add bucket build labels",
-			buildName: "happcloud.artifact",
+			desc:      "populating iteration with existing incomplete build should add bucket build labels",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
 				"based_off": "alpine",
@@ -238,8 +238,8 @@ func TestBucket_PopulateVersion(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "populating version with existing incomplete build should update bucket build labels",
-			buildName: "happcloud.artifact",
+			desc:      "populating iteration with existing incomplete build should update bucket build labels",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
 				"based_off": "alpine-3.14",
@@ -253,8 +253,8 @@ func TestBucket_PopulateVersion(t *testing.T) {
 			noDiffExpected: true,
 		},
 		{
-			desc:      "populating version with completed build should not modify any labels",
-			buildName: "happcloud.artifact",
+			desc:      "populating iteration with completed build should not modify any labels",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.0",
 				"based_off": "alpine",
@@ -264,8 +264,8 @@ func TestBucket_PopulateVersion(t *testing.T) {
 			noDiffExpected: false,
 		},
 		{
-			desc:      "populating version with existing build should only modify bucket build labels",
-			buildName: "happcloud.artifact",
+			desc:      "populating iteration with existing build should only modify bucket build labels",
+			buildName: "happcloud.image",
 			bucketBuildLabels: map[string]string{
 				"version":   "1.7.3",
 				"based_off": "alpine-3.14",
@@ -285,39 +285,39 @@ func TestBucket_PopulateVersion(t *testing.T) {
 
 			t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "test-run-"+strconv.Itoa(i))
 
-			mockService := hcpPackerAPI.NewMockPackerClientService()
+			mockService := api.NewMockPackerClientService()
 			mockService.BucketAlreadyExist = true
-			mockService.VersionAlreadyExist = true
+			mockService.IterationAlreadyExist = true
 			mockService.BuildAlreadyDone = tt.buildCompleted
 
-			bucket := NewBucketWithVersion()
-			err := bucket.Version.Initialize()
+			bucket := NewBucketWithIteration()
+			err := bucket.Iteration.Initialize()
 			if err != nil {
-				t.Fatalf("failed when calling NewBucketWithVersion: %s", err)
+				t.Fatalf("failed when calling NewBucketWithIteration: %s", err)
 			}
 
-			bucket.Name = "TestBucket"
-			bucket.client = &hcpPackerAPI.Client{
+			bucket.Slug = "TestBucket"
+			bucket.client = &api.Client{
 				Packer: mockService,
 			}
 			for k, v := range tt.bucketBuildLabels {
 				bucket.BuildLabels[k] = v
 			}
 
-			componentName := "happycloud.artifact"
+			componentName := "happycloud.image"
 			bucket.RegisterBuildForComponent(componentName)
 
 			mockService.ExistingBuilds = append(mockService.ExistingBuilds, componentName)
 			mockService.ExistingBuildLabels = tt.buildLabels
 
-			err = bucket.populateVersion(context.TODO())
+			err = bucket.populateIteration(context.TODO())
 			checkError(t, err)
 
 			if mockService.CreateBuildCalled {
 				t.Errorf("expected an initial build for %s to already exist, but it called CreateBuild", componentName)
 			}
-			// Assert that a build stored on the version
-			build, err := bucket.Version.Build(componentName)
+			// Assert that a build stored on the iteration
+			build, err := bucket.Iteration.Build(componentName)
 			if err != nil {
 				t.Errorf("expected an existing build for %s to be stored, but it failed", componentName)
 			}
@@ -360,7 +360,7 @@ func TestReadFromHCLBuildBlock(t *testing.T) {
 				},
 			},
 			expectedBucket: &Bucket{
-				Name:        "hcp_packer_registry-block-test",
+				Slug:        "hcp_packer_registry-block-test",
 				Description: "description from hcp_packer_registry block",
 				BucketLabels: map[string]string{
 					"org": "test",

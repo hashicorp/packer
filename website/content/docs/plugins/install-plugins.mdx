@@ -69,7 +69,7 @@ various outputs, like error messages.
 
 At initialization, Packer attempts to discover the plugins installed locally. The
 logic follows what's described in Configuring Packer's
-[plugin directory](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory)
+[plugin directory](/packer/docs/configure#packer-s-plugin-directory)
 section.
 
 While Packer is not verbose during this step, you can peek into what it is discovering
@@ -208,7 +208,7 @@ packer plugins install github.com/hashicorp/vagrant
 
 The command will install the plugin in the `PACKER_CONFIG_DIR` set, or its
 default location, which depends on the OS/environment, as documented in
-[Configuring Packer](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory).
+[Configuring Packer](/packer/docs/configure#packer-s-plugin-directory).
 
 </Tab>
 <Tab heading="Manual installation">
@@ -217,7 +217,7 @@ If you have obtained or built a plugin binary for your OS/Architecture and want 
 use it with Packer, you can install it manually. For Packer to load the plugin,
 it must be named with the convention `packer-plugin-NAME`, and placed in Packer's plugin
 directory, as documented in
-[Configuring Packer](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory).
+[Configuring Packer](/packer/docs/configure#packer-s-plugin-directory).
 
 For example, if your configuration directory is located in `~/.config/packer`,
 you can copy the binary to `~/.config/packer/plugins/packer-plugin-NAME`, and
@@ -226,16 +226,6 @@ Packer will be able to load it afterwards.
 If you have a `required_plugins` for the plugin you're manually installing, make sure
 it respects the constraints described in the [Plugin loading workflow](#plugin-loading-workflow)
 section, otherwise Packer will not be able to load it.
-
-Starting with v1.10.0 of Packer, you can also use `packer plugins install` with the
-`--path` flag to install a plugin from a binary, following the layout that is required to
-work with `required_plugins` block.
-
-```shell
-packer plugins install --path <path-to-plugin-binary> github.com/hashicorp/vagrant
-```
-
--> packer plugins install --path only works with release versions of plugins.
 
 </Tab>
 </Tabs>

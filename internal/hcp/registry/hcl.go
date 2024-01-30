@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -9,62 +9,56 @@ import (
 	"log"
 
 	"github.com/hashicorp/hcl/v2"
-	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/gocty"
 )
 
-// HCLRegistry is a HCP handler made for handling HCL configurations
-type HCLRegistry struct {
+// HCLMetadataRegistry is a HCP handler made for handling HCL configurations
+type HCLMetadataRegistry struct {
 	configuration *hcl2template.PackerConfig
 	bucket        *Bucket
 	ui            sdkpacker.Ui
 }
 
 const (
-	// Known HCP Packer Datasource, whose id is the SourceImageId for some build.
-	hcpImageDatasourceType    string = "hcp-packer-image"
-	hcpArtifactDatasourceType string = "hcp-packer-artifact"
-
+	// Known HCP Packer Image Datasource, whose id is the SourceImageId for some build.
+	hcpImageDatasourceType     string = "hcp-packer-image"
 	hcpIterationDatasourceType string = "hcp-packer-iteration"
-	hcpVersionDatasourceType   string = "hcp-packer-version"
-
-	buildLabel string = "build"
+	buildLabel                 string = "build"
 )
 
-// PopulateVersion creates the metadata in HCP Packer Registry for a build
-func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
-	err := h.bucket.Initialize(ctx, hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
+// PopulateIteration creates the metadata on HCP for a build
+func (h *HCLMetadataRegistry) PopulateIteration(ctx context.Context) error {
+	err := h.bucket.Initialize(ctx, models.HashicorpCloudPackerIterationTemplateTypeHCL2)
 	if err != nil {
 		return err
 	}
 
-	err = h.bucket.populateVersion(ctx)
+	err = h.bucket.populateIteration(ctx)
 	if err != nil {
 		return err
 	}
 
-	versionID := h.bucket.Version.ID
-	versionFingerprint := h.bucket.Version.Fingerprint
+	iterationID := h.bucket.Iteration.ID
 
-	// FIXME: Remove
-	h.configuration.HCPVars["iterationID"] = cty.StringVal(versionID)
-	h.configuration.HCPVars["versionFingerprint"] = cty.StringVal(versionFingerprint)
+	h.configuration.HCPVars["iterationID"] = cty.StringVal(iterationID)
 
 	sha, err := getGitSHA(h.configuration.Basedir)
 	if err != nil {
 		log.Printf("failed to get GIT SHA from environment, won't set as build labels")
 	} else {
-		h.bucket.Version.AddSHAToBuildLabels(sha)
+		h.bucket.Iteration.AddSHAToBuildLabels(sha)
 	}
 
 	return nil
 }
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
-func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
+func (h *HCLMetadataRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
 	name := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
@@ -74,7 +68,7 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
-func (h *HCLRegistry) CompleteBuild(
+func (h *HCLMetadataRegistry) CompleteBuild(
 	ctx context.Context,
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
@@ -88,20 +82,20 @@ func (h *HCLRegistry) CompleteBuild(
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
-// VersionStatusSummary prints a status report in the UI if the version is not yet done
-func (h *HCLRegistry) VersionStatusSummary() {
-	h.bucket.Version.statusSummary(h.ui)
+// IterationStatusSummary prints a status report in the UI if the iteration is not yet done
+func (h *HCLMetadataRegistry) IterationStatusSummary() {
+	h.bucket.Iteration.iterationStatusSummary(h.ui)
 }
 
-func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
+func NewHCLMetadataRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLMetadataRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	if len(config.Builds) > 1 {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Multiple " + buildLabel + " blocks",
-			Detail: fmt.Sprintf("For HCP Packer Registry enabled builds, only one " + buildLabel +
+			Detail: fmt.Sprintf("For Packer Registry enabled builds, only one " + buildLabel +
 				" block can be defined. Please remove any additional " + buildLabel +
-				" block(s). If this " + buildLabel + " is not meant for the HCP Packer registry please " +
+				" block(s). If this " + buildLabel + " is not meant for the Packer registry please " +
 				"clear any HCP_PACKER_* environment variables."),
 		})
 
@@ -111,10 +105,10 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
 		return func(bucket *Bucket) hcl.Diagnostics {
 			bucket.ReadFromHCLBuildBlock(bb)
-			// If at this point the bucket.Name is still empty,
+			// If at this point the bucket.Slug is still empty,
 			// last try is to use the build.Name if present
-			if bucket.Name == "" && bb.Name != "" {
-				bucket.Name = bb.Name
+			if bucket.Slug == "" && bb.Name != "" {
+				bucket.Slug = bb.Name
 			}
 
 			// If the description is empty, use the one from the build block
@@ -136,7 +130,6 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		config.Basedir,
 		withPackerEnvConfiguration,
 		withHCLBucketConfiguration(build),
-		withDeprecatedDatasourceConfiguration(vals, ui),
 		withDatasourceConfiguration(vals),
 	)
 	if bucketDiags != nil {
@@ -151,11 +144,128 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		bucket.RegisterBuildForComponent(source.String())
 	}
 
-	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Version.Fingerprint))
+	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Iteration.Fingerprint))
 
-	return &HCLRegistry{
+	return &HCLMetadataRegistry{
 		configuration: config,
 		bucket:        bucket,
 		ui:            ui,
 	}, nil
+}
+
+type hcpImage struct {
+	ID          string
+	ChannelID   string
+	IterationID string
+}
+
+func imageValueToDSOutput(imageVal map[string]cty.Value) hcpImage {
+	image := hcpImage{}
+	for k, v := range imageVal {
+		switch k {
+		case "id":
+			image.ID = v.AsString()
+		case "channel_id":
+			image.ChannelID = v.AsString()
+		case "iteration_id":
+			image.IterationID = v.AsString()
+		}
+	}
+
+	return image
+}
+
+type hcpIteration struct {
+	ID        string
+	ChannelID string
+}
+
+func iterValueToDSOutput(iterVal map[string]cty.Value) hcpIteration {
+	iter := hcpIteration{}
+	for k, v := range iterVal {
+		switch k {
+		case "id":
+			iter.ID = v.AsString()
+		case "channel_id":
+			iter.ChannelID = v.AsString()
+		}
+	}
+	return iter
+}
+
+func withDatasourceConfiguration(vals map[string]cty.Value) bucketConfigurationOpts {
+	return func(bucket *Bucket) hcl.Diagnostics {
+		var diags hcl.Diagnostics
+
+		imageDS, imageOK := vals[hcpImageDatasourceType]
+		iterDS, iterOK := vals[hcpIterationDatasourceType]
+
+		if !imageOK && !iterOK {
+			return nil
+		}
+
+		iterations := map[string]hcpIteration{}
+
+		var err error
+		if iterOK {
+			hcpData := map[string]cty.Value{}
+			err = gocty.FromCtyValue(iterDS, &hcpData)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid HCP datasources",
+					Detail:   fmt.Sprintf("Failed to decode hcp_packer_iteration datasources: %s", err),
+				})
+				return diags
+			}
+
+			for k, v := range hcpData {
+				iterVals := v.AsValueMap()
+				iter := iterValueToDSOutput(iterVals)
+				iterations[k] = iter
+			}
+		}
+
+		images := map[string]hcpImage{}
+
+		if imageOK {
+			hcpData := map[string]cty.Value{}
+			err = gocty.FromCtyValue(imageDS, &hcpData)
+			if err != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid HCP datasources",
+					Detail:   fmt.Sprintf("Failed to decode hcp_packer_image datasources: %s", err),
+				})
+				return diags
+			}
+
+			for k, v := range hcpData {
+				imageVals := v.AsValueMap()
+				img := imageValueToDSOutput(imageVals)
+				images[k] = img
+			}
+		}
+
+		for _, img := range images {
+			sourceIteration := ParentIteration{}
+
+			sourceIteration.IterationID = img.IterationID
+
+			if img.ChannelID != "" {
+				sourceIteration.ChannelID = img.ChannelID
+			} else {
+				for _, it := range iterations {
+					if it.ID == img.IterationID {
+						sourceIteration.ChannelID = it.ChannelID
+						break
+					}
+				}
+			}
+
+			bucket.SourceImagesToParentIterations[img.ID] = sourceIteration
+		}
+
+		return diags
+	}
 }

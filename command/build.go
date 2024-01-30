@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package command
 
@@ -25,10 +25,6 @@ import (
 	"github.com/posener/complete"
 )
 
-const (
-	hcpReadyIntegrationURL = "https://developer.hashicorp.com/packer/integrations?flags=hcp-ready"
-)
-
 type BuildCommand struct {
 	Meta
 }
@@ -47,7 +43,7 @@ func (c *BuildCommand) Run(args []string) int {
 
 func (c *BuildCommand) ParseArgs(args []string) (*BuildArgs, int) {
 	var cfg BuildArgs
-	flags := c.Meta.FlagSet("build")
+	flags := c.Meta.FlagSet("build", FlagSetBuildFilter|FlagSetVars)
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -91,13 +87,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags := packerStarter.DetectPluginBinaries()
-	ret = writeDiags(c.Ui, nil, diags)
-	if ret != 0 {
-		return ret
-	}
-
-	diags = packerStarter.Initialize(packer.InitializeOptions{})
+	diags := packerStarter.Initialize(packer.InitializeOptions{})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -109,13 +99,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	defer hcpRegistry.VersionStatusSummary()
+	defer hcpRegistry.IterationStatusSummary()
 
-	err := hcpRegistry.PopulateVersion(buildCtx)
+	err := hcpRegistry.PopulateIteration(buildCtx)
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
-				Summary:  "HCP: populating version failed",
+				Summary:  "HCP: populating iteration failed",
 				Severity: hcl.DiagError,
 				Detail:   err.Error(),
 			},
@@ -206,8 +196,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		m map[string]error
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
-
-	var hasPossibleIncompatibleHCPIntegration bool
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -273,13 +261,12 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				writeDiags(c.Ui, nil, hcl.Diagnostics{
 					&hcl.Diagnostic{
 						Summary: fmt.Sprintf(
-							"publishing build metadata to HCP Packer for %q failed",
+							"failed to complete HCP-enabled build %q",
 							name),
 						Severity: hcl.DiagError,
 						Detail:   hcperr.Error(),
 					},
 				})
-				hasPossibleIncompatibleHCPIntegration = true
 			}
 
 			if err != nil {
@@ -389,15 +376,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
-	}
-
-	if hasPossibleIncompatibleHCPIntegration {
-		msg := fmt.Sprintf(`
-It looks like one or more plugins in your build may be incompatible with HCP Packer.
-Check that you are using an HCP Ready integration before trying again:
-%s`, hcpReadyIntegrationURL)
-
-		c.Ui.Error(msg)
 	}
 
 	if len(errs.m) > 0 {

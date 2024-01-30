@@ -1,12 +1,12 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package acctest
 
 import (
 	"context"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -136,9 +136,6 @@ func Test(t TestT, c TestCase) {
 		Components: packer.ComponentFinder{
 			PluginConfig: &packer.PluginConfig{
 				Builders: TestBuilderSet{
-					BuilderSet: packersdk.MapOfBuilder{
-						"test": func() (packersdk.Builder, error) { return c.Builder, nil },
-					},
 					StartFn: func(n string) (packersdk.Builder, error) {
 						if n == "test" {
 							return c.Builder, nil
@@ -185,8 +182,8 @@ func Test(t TestT, c TestCase) {
 	log.Printf("[DEBUG] Running 'test' build")
 	ui := &packersdk.BasicUi{
 		Reader:      os.Stdin,
-		Writer:      io.Discard,
-		ErrorWriter: io.Discard,
+		Writer:      ioutil.Discard,
+		ErrorWriter: ioutil.Discard,
 		PB:          &packersdk.NoopProgressTracker{},
 	}
 	artifacts, err := build.Run(context.Background(), ui)

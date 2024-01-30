@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package packer
 
@@ -26,7 +26,7 @@ const (
 	JSONTemplate    PackerTemplateType = "JSON"
 )
 
-const TelemetryVersion string = "beta/packer/7"
+const TelemetryVersion string = "beta/packer/6"
 const TelemetryPanicVersion string = "beta/packer_panic/4"
 
 var CheckpointReporter *CheckpointTelemetry
@@ -37,7 +37,6 @@ type PackerReport struct {
 	Error        string             `json:"error"`
 	Command      string             `json:"command"`
 	TemplateType PackerTemplateType `json:"template_type"`
-	UseBundled   bool               `json:"use_bundled"`
 }
 
 type CheckpointTelemetry struct {
@@ -45,7 +44,6 @@ type CheckpointTelemetry struct {
 	signatureFile string
 	startTime     time.Time
 	templateType  PackerTemplateType
-	useBundled    bool
 }
 
 func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
@@ -130,14 +128,6 @@ func (c *CheckpointTelemetry) SetTemplateType(t PackerTemplateType) {
 	c.templateType = t
 }
 
-// SetBundledUsage marks the template as using bundled plugins
-func (c *CheckpointTelemetry) SetBundledUsage() {
-	if c == nil {
-		return
-	}
-	c.useBundled = true
-}
-
 func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) error {
 	if c == nil {
 		return nil
@@ -155,7 +145,6 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 		extra.Error = err.Error()
 	}
 
-	extra.UseBundled = c.useBundled
 	extra.TemplateType = c.templateType
 	params.Payload = extra
 	// b, _ := json.MarshalIndent(params, "", "    ")

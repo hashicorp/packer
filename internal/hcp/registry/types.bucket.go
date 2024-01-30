@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
-	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
-	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
+	registryimage "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/hcl2template"
-	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
+	"github.com/hashicorp/packer/internal/hcp/api"
 	"github.com/hashicorp/packer/internal/hcp/env"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
@@ -27,52 +27,48 @@ import (
 // build is still alive.
 const HeartbeatPeriod = 2 * time.Minute
 
-// Bucket represents a single bucket on the HCP Packer registry.
+// Bucket represents a single Image bucket on the HCP Packer registry.
 type Bucket struct {
-	Name                                     string
-	Description                              string
-	Destination                              string
-	BucketLabels                             map[string]string
-	BuildLabels                              map[string]string
-	SourceExternalIdentifierToParentVersions map[string]ParentVersion
-	RunningBuilds                            map[string]chan struct{}
-	Version                                  *Version
-	client                                   *hcpPackerAPI.Client
+	Slug                           string
+	Description                    string
+	Destination                    string
+	BucketLabels                   map[string]string
+	BuildLabels                    map[string]string
+	SourceImagesToParentIterations map[string]ParentIteration
+	RunningBuilds                  map[string]chan struct{}
+	Iteration                      *Iteration
+	client                         *api.Client
 }
 
-type ParentVersion struct {
-	VersionID string
-	ChannelID string
+type ParentIteration struct {
+	IterationID string
+	ChannelID   string
 }
 
-// NewBucketWithVersion initializes a simple Bucket that can be used for publishing Packer build artifacts
-// to the HCP Packer registry.
-func NewBucketWithVersion() *Bucket {
+// NewBucketWithIteration initializes a simple Bucket that can be used publishing Packer build
+// images to the HCP Packer registry.
+func NewBucketWithIteration() *Bucket {
 	b := Bucket{
-		BucketLabels:                             make(map[string]string),
-		BuildLabels:                              make(map[string]string),
-		SourceExternalIdentifierToParentVersions: make(map[string]ParentVersion),
-		RunningBuilds:                            make(map[string]chan struct{}),
+		BucketLabels:                   make(map[string]string),
+		BuildLabels:                    make(map[string]string),
+		SourceImagesToParentIterations: make(map[string]ParentIteration),
+		RunningBuilds:                  make(map[string]chan struct{}),
 	}
-	b.Version = NewVersion()
+	b.Iteration = NewIteration()
 
 	return &b
 }
 
-func (bucket *Bucket) Validate() error {
-	if bucket.Name == "" {
-		return fmt.Errorf(
-			"no Packer bucket name defined; either the environment variable %q is undefined or "+
-				"the HCL configuration has no build name",
-			env.HCPPackerBucket,
-		)
+func (b *Bucket) Validate() error {
+	if b.Slug == "" {
+		return fmt.Errorf("no Packer bucket name defined; either the environment variable %q is undefined or the HCL configuration has no build name", env.HCPPackerBucket)
 	}
 	return nil
 }
 
 // ReadFromHCLBuildBlock reads the information for initialising a Bucket from a HCL2 build block
-func (bucket *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
-	if bucket == nil {
+func (b *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
+	if b == nil {
 		return
 	}
 
@@ -81,77 +77,76 @@ func (bucket *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
 		return
 	}
 
-	bucket.Description = registryBlock.Description
-	bucket.BucketLabels = registryBlock.BucketLabels
-	bucket.BuildLabels = registryBlock.BuildLabels
-	// If there's already a Name this was set from env variable.
+	b.Description = registryBlock.Description
+	b.BucketLabels = registryBlock.BucketLabels
+	b.BuildLabels = registryBlock.BuildLabels
+	// If there's already a Slug this was set from env variable.
 	// In Packer, env variable overrides config values so we keep it that way for consistency.
-	if bucket.Name == "" && registryBlock.Slug != "" {
-		bucket.Name = registryBlock.Slug
+	if b.Slug == "" && registryBlock.Slug != "" {
+		b.Slug = registryBlock.Slug
 	}
 }
 
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
-func (bucket *Bucket) connect() error {
-	if bucket.client != nil {
+func (b *Bucket) connect() error {
+	if b.client != nil {
 		return nil
 	}
 
-	registryClient, err := hcpPackerAPI.NewClient()
+	registryClient, err := api.NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
 	}
-	bucket.client = registryClient
+	b.client = registryClient
 	return nil
 }
 
-// Initialize registers the bucket with the configured HCP Packer Registry.
-// Upon initialization a Bucket will be upserted to, and new version will be created for the build if the configured
-// fingerprint has no associated versions. Lastly, the initialization process with register the builds that need to be
-// completed before an version can be marked as DONE.
+// Initialize registers the Bucket b with the configured HCP Packer Registry.
+// Upon initialization a Bucket will be upserted to, and new iteration will be created for the build if the configured
+// fingerprint has no associated iterations. Lastly, the initialization process with register the builds that need to be
+// completed before an iteration can be marked as DONE.
 //
 // b.Initialize() must be called before any data can be published to the configured HCP Packer Registry.
 // TODO ensure initialize can only be called once
-func (bucket *Bucket) Initialize(
-	ctx context.Context, templateType hcpPackerModels.HashicorpCloudPacker20230101TemplateType,
-) error {
+func (b *Bucket) Initialize(ctx context.Context, templateType models.HashicorpCloudPackerIterationTemplateType) error {
 
-	if err := bucket.connect(); err != nil {
+	if err := b.connect(); err != nil {
 		return err
 	}
 
-	bucket.Destination = fmt.Sprintf("%s/%s", bucket.client.OrganizationID, bucket.client.ProjectID)
+	b.Destination = fmt.Sprintf("%s/%s", b.client.OrganizationID, b.client.ProjectID)
 
-	err := bucket.client.UpsertBucket(ctx, bucket.Name, bucket.Description, bucket.BucketLabels)
+	err := b.client.UpsertBucket(ctx, b.Slug, b.Description, b.BucketLabels)
 	if err != nil {
-		return fmt.Errorf("failed to initialize bucket %q: %w", bucket.Name, err)
+		return fmt.Errorf("failed to initialize bucket %q: %w", b.Slug, err)
 	}
 
-	return bucket.initializeVersion(ctx, templateType)
+	return b.initializeIteration(ctx, templateType)
 }
 
-func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {
-	if bucket == nil {
+func (b *Bucket) RegisterBuildForComponent(sourceName string) {
+	if b == nil {
 		return
 	}
 
-	if ok := bucket.Version.HasBuild(sourceName); ok {
+	if ok := b.Iteration.HasBuild(sourceName); ok {
 		return
 	}
 
-	bucket.Version.expectedBuilds = append(bucket.Version.expectedBuilds, sourceName)
+	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, sourceName)
 }
 
-// CreateInitialBuildForVersion will create a build entry on the HCP Packer Registry for the named componentType.
-// This initial creation is needed so that Packer can properly track when an version is complete.
-func (bucket *Bucket) CreateInitialBuildForVersion(ctx context.Context, componentType string) error {
-	status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET
+// CreateInitialBuildForIteration will create a build entry on the HCP Packer Registry for the named componentType.
+// This initial creation is needed so that Packer can properly track when an iteration is complete.
+func (b *Bucket) CreateInitialBuildForIteration(ctx context.Context, componentType string) error {
+	status := models.HashicorpCloudPackerBuildStatusUNSET
 
-	resp, err := bucket.client.CreateBuild(ctx,
-		bucket.Name,
-		bucket.Version.RunUUID,
-		bucket.Version.Fingerprint,
+	resp, err := b.client.CreateBuild(ctx,
+		b.Slug,
+		b.Iteration.RunUUID,
+		b.Iteration.ID,
+		b.Iteration.Fingerprint,
 		componentType,
 		status,
 	)
@@ -165,30 +160,27 @@ func (bucket *Bucket) CreateInitialBuildForVersion(ctx context.Context, componen
 	}
 
 	build.Labels = make(map[string]string)
-	build.Artifacts = make(map[string]packerSDKRegistry.Image)
+	build.Images = make(map[string]registryimage.Image)
 
 	// Initial build labels are only pushed to the registry when an actual Packer run is executed on the said build.
-	// For example filtered builds (e.g --only or except) will not get the initial build labels until a build is
-	// executed on them.
-	// Global build label updates to existing builds are handled in PopulateVersion.
-	if len(bucket.BuildLabels) > 0 {
-		build.MergeLabels(bucket.BuildLabels)
+	// For example filtered builds (e.g --only or except) will not get the initial build labels until a build is executed on them.
+	// Global build label updates to existing builds are handled in PopulateIteration.
+	if len(b.BuildLabels) > 0 {
+		build.MergeLabels(b.BuildLabels)
 	}
-	bucket.Version.StoreBuild(componentType, build)
+	b.Iteration.StoreBuild(componentType, build)
 
 	return nil
 }
 
 // UpdateBuildStatus updates the status of a build entry on the HCP Packer registry with its current local status.
 // For updating a build status to DONE use CompleteBuild.
-func (bucket *Bucket) UpdateBuildStatus(
-	ctx context.Context, name string, status hcpPackerModels.HashicorpCloudPacker20230101BuildStatus,
-) error {
-	if status == hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE {
+func (b *Bucket) UpdateBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {
+	if status == models.HashicorpCloudPackerBuildStatusDONE {
 		return fmt.Errorf("do not use UpdateBuildStatus for updating to DONE")
 	}
 
-	buildToUpdate, err := bucket.Version.Build(name)
+	buildToUpdate, err := b.Iteration.Build(name)
 	if err != nil {
 		return err
 	}
@@ -197,13 +189,11 @@ func (bucket *Bucket) UpdateBuildStatus(
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	if buildToUpdate.Status == hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE {
+	if buildToUpdate.Status == models.HashicorpCloudPackerBuildStatusDONE {
 		return fmt.Errorf("cannot modify status of DONE build %s", name)
 	}
 
-	_, err = bucket.client.UpdateBuild(ctx,
-		bucket.Name,
-		bucket.Version.Fingerprint,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
 		"",
@@ -218,15 +208,15 @@ func (bucket *Bucket) UpdateBuildStatus(
 		return err
 	}
 	buildToUpdate.Status = status
-	bucket.Version.StoreBuild(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
-// Upon a successful call markBuildComplete will publish all artifacts created by the named build,
-// and set the build to done. A build with no artifacts can not be set to DONE.
-func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error {
-	buildToUpdate, err := bucket.Version.Build(name)
+// Upon a successful call markBuildComplete will publish all images created by the named build,
+// and set the registry build to done. A build with no images can not be set to DONE.
+func (b *Bucket) markBuildComplete(ctx context.Context, name string) error {
+	buildToUpdate, err := b.Iteration.Build(name)
 	if err != nil {
 		return err
 	}
@@ -235,184 +225,157 @@ func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error 
 		return fmt.Errorf("the build for the component %q does not have a valid id", name)
 	}
 
-	status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE
+	status := models.HashicorpCloudPackerBuildStatusDONE
 
 	if buildToUpdate.Status == status {
 		// let's no mess with anything that is already done
 		return nil
 	}
 
-	if len(buildToUpdate.Artifacts) == 0 {
-		return fmt.Errorf("setting a build to DONE with no published artifacts is not currently supported")
+	if len(buildToUpdate.Images) == 0 {
+		return fmt.Errorf("setting a build to DONE with no published images is not currently supported.")
 	}
 
-	var platformName, sourceID, parentVersionID, parentChannelID string
-	artifacts := make([]*hcpPackerModels.HashicorpCloudPacker20230101ArtifactCreateBody, 0, len(buildToUpdate.Artifacts))
-	for _, artifact := range buildToUpdate.Artifacts {
-		// These values will always be the same for all artifacts in a single build,
+	var providerName, sourceID, sourceIterationID, sourceChannelID string
+	images := make([]*models.HashicorpCloudPackerImageCreateBody, 0, len(buildToUpdate.Images))
+	for _, image := range buildToUpdate.Images {
+		// These values will always be the same for all images in a single build,
 		// so we can just set it inside the loop without consequence
-		if platformName == "" {
-			platformName = artifact.ProviderName
+		if providerName == "" {
+			providerName = image.ProviderName
 		}
-		if artifact.SourceImageID != "" {
-			sourceID = artifact.SourceImageID
-		}
-
-		// Check if artifact is using some other HCP Packer artifact
-		if v, ok := bucket.SourceExternalIdentifierToParentVersions[artifact.SourceImageID]; ok {
-			parentVersionID = v.VersionID
-			parentChannelID = v.ChannelID
+		if image.SourceImageID != "" {
+			sourceID = image.SourceImageID
 		}
 
-		artifacts = append(
-			artifacts,
-			&hcpPackerModels.HashicorpCloudPacker20230101ArtifactCreateBody{
-				ExternalIdentifier: artifact.ImageID,
-				Region:             artifact.ProviderRegion,
-			},
-		)
+		// Check if image is using some other HCP Packer image
+		if v, ok := b.SourceImagesToParentIterations[image.SourceImageID]; ok {
+			sourceIterationID = v.IterationID
+			sourceChannelID = v.ChannelID
+		}
+
+		images = append(images, &models.HashicorpCloudPackerImageCreateBody{ImageID: image.ImageID, Region: image.ProviderRegion})
 	}
 
-	_, err = bucket.client.UpdateBuild(ctx,
-		bucket.Name,
-		bucket.Version.Fingerprint,
+	_, err = b.client.UpdateBuild(ctx,
 		buildToUpdate.ID,
 		buildToUpdate.RunUUID,
-		buildToUpdate.Platform,
+		buildToUpdate.CloudProvider,
 		sourceID,
-		parentVersionID,
-		parentChannelID,
+		sourceIterationID,
+		sourceChannelID,
 		buildToUpdate.Labels,
 		status,
-		artifacts,
+		images,
 	)
 	if err != nil {
 		return err
 	}
 
 	buildToUpdate.Status = status
-	bucket.Version.StoreBuild(name, buildToUpdate)
+	b.Iteration.StoreBuild(name, buildToUpdate)
 	return nil
 }
 
-// UpdateArtifactForBuild appends one or more artifacts to the build referred to by componentType.
-func (bucket *Bucket) UpdateArtifactForBuild(componentType string, artifacts ...packerSDKRegistry.Image) error {
-	return bucket.Version.AddArtifactToBuild(componentType, artifacts...)
+// UpdateImageForBuild appends one or more images artifacts to the build referred to by componentType.
+func (b *Bucket) UpdateImageForBuild(componentType string, images ...registryimage.Image) error {
+	return b.Iteration.AddImageToBuild(componentType, images...)
 }
 
 // UpdateLabelsForBuild merges the contents of data to the labels associated with the build referred to by componentType.
-func (bucket *Bucket) UpdateLabelsForBuild(componentType string, data map[string]string) error {
-	return bucket.Version.AddLabelsToBuild(componentType, data)
+func (b *Bucket) UpdateLabelsForBuild(componentType string, data map[string]string) error {
+	return b.Iteration.AddLabelsToBuild(componentType, data)
 }
 
-// LoadDefaultSettingsFromEnv loads defaults from environment variables
-func (bucket *Bucket) LoadDefaultSettingsFromEnv() {
+// Load defaults from environment variables
+func (b *Bucket) LoadDefaultSettingsFromEnv() {
 	// Configure HCP Packer Registry destination
-	if bucket.Name == "" {
-		bucket.Name = os.Getenv(env.HCPPackerBucket)
+	if b.Slug == "" {
+		b.Slug = os.Getenv(env.HCPPackerBucket)
 	}
 
-	// Set some version values. For Packer RunUUID should always be set.
-	// Creating an version differently? Let's not overwrite a UUID that might be set.
-	if bucket.Version.RunUUID == "" {
-		bucket.Version.RunUUID = os.Getenv("PACKER_RUN_UUID")
+	// Set some iteration values. For Packer RunUUID should always be set.
+	// Creating an iteration differently? Let's not overwrite a UUID that might be set.
+	if b.Iteration.RunUUID == "" {
+		b.Iteration.RunUUID = os.Getenv("PACKER_RUN_UUID")
 	}
 
 }
 
-// createVersion creates an empty version for a given bucket on the HCP Packer registry.
-// The version can then be stored locally and used for tracking build status and artifacts for a running
+// createIteration creates an empty iteration for a give bucket on the HCP Packer registry.
+// The iteration can then be stored locally and used for tracking build status and images for a running
 // Packer build.
-func (bucket *Bucket) createVersion(
-	templateType hcpPackerModels.HashicorpCloudPacker20230101TemplateType,
-) (*hcpPackerModels.HashicorpCloudPacker20230101Version, error) {
+func (b *Bucket) createIteration(templateType models.HashicorpCloudPackerIterationTemplateType) (*models.HashicorpCloudPackerIteration, error) {
 	ctx := context.Background()
 
-	if templateType == hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeTEMPLATETYPEUNSET {
-		return nil, fmt.Errorf(
-			"packer error: template type should not be unset when creating a version. " +
-				"This is a Packer internal bug which should be reported to the development team for a fix",
-		)
+	if templateType == models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET {
+		return nil, fmt.Errorf("packer error: template type should not be unset when creating an iteration. This is a Packer internal bug which should be reported to the development team for a fix.")
 	}
 
-	createVersionResp, err := bucket.client.CreateVersion(
-		ctx, bucket.Name, bucket.Version.Fingerprint, templateType,
-	)
+	createIterationResp, err := b.client.CreateIteration(ctx, b.Slug, b.Iteration.Fingerprint, templateType)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Version for Bucket %s with error: %w", bucket.Name, err)
+		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	if createVersionResp == nil {
-		return nil, fmt.Errorf("failed to create Version for Bucket %s with error: %w", bucket.Name, err)
+	if createIterationResp == nil {
+		return nil, fmt.Errorf("failed to create Iteration for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	log.Println(
-		"[TRACE] a valid version for build was created with the Id", createVersionResp.Payload.Version.ID,
-	)
-	return createVersionResp.Payload.Version, nil
+	log.Println("[TRACE] a valid iteration for build was created with the Id", createIterationResp.Payload.Iteration.ID)
+	return createIterationResp.Payload.Iteration, nil
 }
 
-func (bucket *Bucket) initializeVersion(
-	ctx context.Context, templateType hcpPackerModels.HashicorpCloudPacker20230101TemplateType,
-) error {
-	// load existing version using fingerprint.
-	version, err := bucket.client.GetVersion(ctx, bucket.Name, bucket.Version.Fingerprint)
-	if hcpPackerAPI.CheckErrorCode(err, codes.Aborted) {
-		// probably means Version doesn't exist need a way to check the error
-		version, err = bucket.createVersion(templateType)
+func (b *Bucket) initializeIteration(ctx context.Context, templateType models.HashicorpCloudPackerIterationTemplateType) error {
+	// load existing iteration using fingerprint.
+	iteration, err := b.client.GetIteration(ctx, b.Slug, api.GetIteration_byFingerprint(b.Iteration.Fingerprint))
+	if api.CheckErrorCode(err, codes.Aborted) {
+		// probably means Iteration doesn't exist need a way to check the error
+		iteration, err = b.createIteration(templateType)
 	}
 
 	if err != nil {
-		return fmt.Errorf("failed to initialize version for fingerprint %s: %s", bucket.Version.Fingerprint, err)
+		return fmt.Errorf("failed to initialize iteration for fingerprint %s: %s", b.Iteration.Fingerprint, err)
 	}
 
-	if version == nil {
-		return fmt.Errorf("failed to initialize version details for Bucket %s with error: %w", bucket.Name, err)
+	if iteration == nil {
+		return fmt.Errorf("failed to initialize iteration details for Bucket %s with error: %w", b.Slug, err)
 	}
 
-	if version.TemplateType != nil &&
-		*version.TemplateType != hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeTEMPLATETYPEUNSET &&
-		*version.TemplateType != templateType {
-		return fmt.Errorf(
-			"This version was initially created with a %[2]s template. "+
-				"Changing from %[2]s to %[1]s is not supported",
-			templateType, *version.TemplateType,
-		)
+	if iteration.TemplateType != nil &&
+		*iteration.TemplateType != models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET &&
+		*iteration.TemplateType != templateType {
+		return fmt.Errorf("This iteration was initially created with a %[2]s template. Changing from %[2]s to %[1]s is not supported.",
+			templateType, *iteration.TemplateType)
 	}
 
-	log.Println(
-		"[TRACE] a valid version was retrieved with the id", version.ID,
-	)
-	bucket.Version.ID = version.ID
+	log.Println("[TRACE] a valid iteration was retrieved with the id", iteration.ID)
+	b.Iteration.ID = iteration.ID
 
-	// If the version is completed and there are no new builds to add, Packer
+	// If the iteration is completed and there are no new builds to add, Packer
 	// should exit and inform the user that artifacts already exists for the
-	// fingerprint associated with the version.
-	if bucket.client.IsVersionComplete(version) {
-		return fmt.Errorf(
-			"The version associated to the fingerprint %v is complete. If you wish to add a new build to "+
-				"this bucket a new version must be created by changing the fingerprint.",
-			bucket.Version.Fingerprint,
-		)
+	// fingerprint associated with the iteration.
+	if iteration.Complete {
+		return fmt.Errorf("This iteration associated to the fingerprint %s is complete. "+
+			"If you wish to add a new build to this image a new iteration must be created by changing the build fingerprint.", b.Iteration.Fingerprint)
 	}
 
 	return nil
 }
 
-// populateVersion populates the version with the details needed for tracking builds for a Packer run.
-// If a version exists for the said fingerprint, calling initialize on version that doesn't yet exist will call
-// createVersion to create the entry on the HCP packer registry for the given bucket.
-// All build details will be created (if they don't exist) and added to b.Version.builds for tracking during runtime.
-func (bucket *Bucket) populateVersion(ctx context.Context) error {
-	// list all this version's builds so we can figure out which ones
+// populateIteration populates the bucket iteration with the details needed for tracking builds for a Packer run.
+// If an existing Packer registry iteration exists for the said iteration fingerprint, calling initialize on iteration
+// that doesn't yet exist will call createIteration to create the entry on the HCP packer registry for the given bucket.
+// All build details will be created (if they don't exists) and added to b.Iteration.builds for tracking during runtime.
+func (b *Bucket) populateIteration(ctx context.Context) error {
+	// list all this iteration's builds so we can figure out which ones
 	// we want to run against. TODO: pagination?
-	existingBuilds, err := bucket.client.ListBuilds(ctx, bucket.Name, bucket.Version.Fingerprint)
+	existingBuilds, err := b.client.ListBuilds(ctx, b.Slug, b.Iteration.ID)
 	if err != nil {
-		return fmt.Errorf("error listing builds for this existing version: %s", err)
+		return fmt.Errorf("error listing builds for this existing iteration: %s", err)
 	}
 
 	var toCreate []string
-	for _, expected := range bucket.Version.expectedBuilds {
+	for _, expected := range b.Iteration.expectedBuilds {
 		var found bool
 		for _, existing := range existingBuilds {
 
@@ -424,27 +387,25 @@ func (bucket *Bucket) populateVersion(ctx context.Context) error {
 				}
 
 				// When running against an existing build the Packer RunUUID is most likely different.
-				// We capture that difference here to know that the artifacts were created in a different Packer run.
-				build.RunUUID = bucket.Version.RunUUID
+				// We capture that difference here to know that the image was created in a different Packer run.
+				build.RunUUID = b.Iteration.RunUUID
 
 				// When bucket build labels represent some dynamic data set, possibly set via some user variable,
 				//  we need to make sure that any newly executed builds get the labels at runtime.
-				if build.IsNotDone() && len(bucket.BuildLabels) > 0 {
-					build.MergeLabels(bucket.BuildLabels)
+				if build.IsNotDone() && len(b.BuildLabels) > 0 {
+					build.MergeLabels(b.BuildLabels)
 				}
 
-				log.Printf(
-					"[TRACE] a build of component type %s already exists; skipping the create call", expected,
-				)
-				bucket.Version.StoreBuild(existing.ComponentType, build)
+				log.Printf("[TRACE] a build of component type %s already exists; skipping the create call", expected)
+				b.Iteration.StoreBuild(existing.ComponentType, build)
 
 				break
 			}
 		}
 
 		if !found {
-			missingBuild := expected
-			toCreate = append(toCreate, missingBuild)
+			missingbuild := expected
+			toCreate = append(toCreate, missingbuild)
 		}
 	}
 
@@ -460,10 +421,10 @@ func (bucket *Bucket) populateVersion(ctx context.Context) error {
 		go func(name string) {
 			defer wg.Done()
 
-			log.Printf("[TRACE] registering build with version for %q.", name)
-			err := bucket.CreateInitialBuildForVersion(ctx, name)
+			log.Printf("[TRACE] registering build with iteration for %q.", name)
+			err := b.CreateInitialBuildForIteration(ctx, name)
 
-			if hcpPackerAPI.CheckErrorCode(err, codes.AlreadyExists) {
+			if api.CheckErrorCode(err, codes.AlreadyExists) {
 				log.Printf("[TRACE] build %s already exists in Packer registry, continuing...", name)
 				return
 			}
@@ -480,14 +441,14 @@ func (bucket *Bucket) populateVersion(ctx context.Context) error {
 	return errs.ErrorOrNil()
 }
 
-// IsExpectingBuildForComponent returns true if the component referenced by buildName is part of the version
+// IsExpectingBuildForComponent returns true if the component referenced by buildName is part of the iteration
 // and is not marked as DONE on the HCP Packer registry.
-func (bucket *Bucket) IsExpectingBuildForComponent(buildName string) bool {
-	if !bucket.Version.HasBuild(buildName) {
+func (b *Bucket) IsExpectingBuildForComponent(buildName string) bool {
+	if !b.Iteration.HasBuild(buildName) {
 		return false
 	}
 
-	build, err := bucket.Version.Build(buildName)
+	build, err := b.Iteration.Build(buildName)
 	if err != nil {
 		return false
 	}
@@ -501,8 +462,8 @@ func (bucket *Bucket) IsExpectingBuildForComponent(buildName string) bool {
 // as cancelled by the HCP Packer registry service.
 //
 // Usage: defer (b.HeartbeatBuild(ctx, build, period))()
-func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), error) {
-	buildToUpdate, err := bucket.Version.Build(build)
+func (b *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(), error) {
+	buildToUpdate, err := b.Iteration.Build(build)
 	if err != nil {
 		return nil, err
 	}
@@ -523,9 +484,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 				tick.Stop()
 				break outHeartbeats
 			case <-tick.C:
-				_, err = bucket.client.UpdateBuild(ctx,
-					bucket.Name,
-					bucket.Version.Fingerprint,
+				_, err = b.client.UpdateBuild(ctx,
 					buildToUpdate.ID,
 					buildToUpdate.RunUUID,
 					"",
@@ -533,7 +492,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 					"",
 					"",
 					nil,
-					hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
+					models.HashicorpCloudPackerBuildStatusRUNNING,
 					nil,
 				)
 				if err != nil {
@@ -551,19 +510,19 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 	}, nil
 }
 
-func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
-	if !bucket.IsExpectingBuildForComponent(buildName) {
+func (b *Bucket) startBuild(ctx context.Context, buildName string) error {
+	if !b.IsExpectingBuildForComponent(buildName) {
 		return &ErrBuildAlreadyDone{
 			Message: "build is already done",
 		}
 	}
 
-	err := bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING)
+	err := b.UpdateBuildStatus(ctx, buildName, models.HashicorpCloudPackerBuildStatusRUNNING)
 	if err != nil {
-		return fmt.Errorf("failed to update HCP Packer Build status for %q: %s", buildName, err)
+		return fmt.Errorf("failed to update HCP Packer registry status for %q: %s", buildName, err)
 	}
 
-	cleanupHeartbeat, err := bucket.HeartbeatBuild(ctx, buildName)
+	cleanupHeartbeat, err := b.HeartbeatBuild(ctx, buildName)
 	if err != nil {
 		log.Printf("[ERROR] failed to start heartbeat function")
 	}
@@ -574,13 +533,13 @@ func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
 		select {
 		case <-ctx.Done():
 			cleanupHeartbeat()
-			err := bucket.UpdateBuildStatus(
+			err := b.UpdateBuildStatus(
 				context.Background(),
 				buildName,
-				hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDCANCELLED)
+				models.HashicorpCloudPackerBuildStatusCANCELLED)
 			if err != nil {
 				log.Printf(
-					"[ERROR] failed to update HCP Packer Build status for %q: %s",
+					"[ERROR] failed to update HCP Packer registry status for %q: %s",
 					buildName,
 					err)
 			}
@@ -590,18 +549,18 @@ func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
 		log.Printf("[TRACE] done waiting for heartbeat completion")
 	}()
 
-	bucket.RunningBuilds[buildName] = buildDone
+	b.RunningBuilds[buildName] = buildDone
 
 	return nil
 }
 
-func (bucket *Bucket) completeBuild(
+func (b *Bucket) completeBuild(
 	ctx context.Context,
 	buildName string,
-	packerSDKArtifacts []packerSDK.Artifact,
+	artifacts []packer.Artifact,
 	buildErr error,
-) ([]packerSDK.Artifact, error) {
-	doneCh, ok := bucket.RunningBuilds[buildName]
+) ([]packer.Artifact, error) {
+	doneCh, ok := b.RunningBuilds[buildName]
 	if !ok {
 		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
 
@@ -613,56 +572,56 @@ func (bucket *Bucket) completeBuild(
 	}
 
 	if buildErr != nil {
-		status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED
+		status := models.HashicorpCloudPackerBuildStatusFAILED
 		if ctx.Err() != nil {
-			status = hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDCANCELLED
+			status = models.HashicorpCloudPackerBuildStatusCANCELLED
 		}
-		err := bucket.UpdateBuildStatus(context.Background(), buildName, status)
+		err := b.UpdateBuildStatus(context.Background(), buildName, status)
 		if err != nil {
 			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
 		}
-		return packerSDKArtifacts, fmt.Errorf("build failed, not uploading artifacts")
+		return artifacts, fmt.Errorf("build failed, not uploading artifacts")
 	}
 
-	for _, art := range packerSDKArtifacts {
-		var sdkImages []packerSDKRegistry.Image
+	for _, art := range artifacts {
+		var images []registryimage.Image
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-			Result:           &sdkImages,
+			Result:           &images,
 			WeaklyTypedInput: true,
 			ErrorUnused:      false,
 		})
 		if err != nil {
-			return packerSDKArtifacts, fmt.Errorf(
-				"failed to create decoder for HCP Packer artifact: %w",
+			return artifacts, fmt.Errorf(
+				"failed to create decoder for HCP Packer registry image: %w",
 				err)
 		}
 
-		state := art.State(packerSDKRegistry.ArtifactStateURI)
+		state := art.State(registryimage.ArtifactStateURI)
 		err = decoder.Decode(state)
 		if err != nil {
-			return packerSDKArtifacts, fmt.Errorf(
-				"failed to obtain HCP Packer compliant artifact: %w",
+			return artifacts, fmt.Errorf(
+				"failed to obtain HCP Packer registry image from post-processor artifact: %w",
 				err)
 		}
 		log.Printf("[TRACE] updating artifacts for build %q", buildName)
-		err = bucket.UpdateArtifactForBuild(buildName, sdkImages...)
+		err = b.UpdateImageForBuild(buildName, images...)
 
 		if err != nil {
-			return packerSDKArtifacts, fmt.Errorf("failed to add artifact for %q: %s", buildName, err)
+			return artifacts, fmt.Errorf("failed to add image artifact for %q: %s", buildName, err)
 		}
 	}
 
-	parErr := bucket.markBuildComplete(ctx, buildName)
+	parErr := b.markBuildComplete(ctx, buildName)
 	if parErr != nil {
-		return packerSDKArtifacts, fmt.Errorf(
-			"failed to update HCP Packer artifacts for %q: %s",
+		return artifacts, fmt.Errorf(
+			"failed to update Packer registry with image artifacts for %q: %s",
 			buildName,
 			parErr)
 	}
 
-	return append(packerSDKArtifacts, &registryArtifact{
-		BuildName:  buildName,
-		BucketName: bucket.Name,
-		VersionID:  bucket.Version.ID,
+	return append(artifacts, &registryArtifact{
+		BuildName:   buildName,
+		BucketSlug:  b.Slug,
+		IterationID: b.Iteration.ID,
 	}), nil
 }

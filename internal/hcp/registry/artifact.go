@@ -1,5 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
@@ -10,9 +10,9 @@ import (
 const BuilderId = "packer.post-processor.hpc-packer-registry"
 
 type registryArtifact struct {
-	BucketName string
-	VersionID  string
-	BuildName  string
+	BucketSlug  string
+	IterationID string
+	BuildName   string
 }
 
 func (a *registryArtifact) BuilderId() string {
@@ -28,7 +28,7 @@ func (a *registryArtifact) Files() []string {
 }
 
 func (a *registryArtifact) String() string {
-	return fmt.Sprintf("Published metadata to HCP Packer registry packer/%s/versions/%s", a.BucketName, a.VersionID)
+	return fmt.Sprintf("Published metadata to HCP Packer registry packer/%s/iterations/%s", a.BucketSlug, a.IterationID)
 }
 
 func (*registryArtifact) State(name string) interface{} {

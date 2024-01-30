@@ -1,12 +1,12 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package http
 
 import (
 	_ "embed"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -84,7 +84,7 @@ func TestHttpDataSource(t *testing.T) {
 						}
 						defer logs.Close()
 
-						logsBytes, err := io.ReadAll(logs)
+						logsBytes, err := ioutil.ReadAll(logs)
 						if err != nil {
 							return fmt.Errorf("Unable to read %s", logfile)
 						}

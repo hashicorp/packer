@@ -1,12 +1,12 @@
 // Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: BUSL-1.1
+// SPDX-License-Identifier: MPL-2.0
 
 package registry
 
 import (
 	"fmt"
 
-	"github.com/go-git/go-git/v5"
+	git "github.com/go-git/go-git/v5"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/internal/hcp/env"
@@ -71,7 +71,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	bucket := NewBucketWithVersion()
+	bucket := NewBucketWithIteration()
 
 	for _, opt := range opts {
 		if optDiags := opt(bucket); optDiags.HasErrors() {
@@ -79,10 +79,10 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		}
 	}
 
-	if bucket.Name == "" {
+	if bucket.Slug == "" {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Bucket name required",
-			Detail: "You must provide a bucket name for HCP Packer builds. " +
+			Summary: "Image bucket name required",
+			Detail: "You must provide an image bucket name for HCP Packer builds. " +
 				"You can set the HCP_PACKER_BUCKET_NAME environment variable. " +
 				"For HCL2 templates, the registry either uses the name of your " +
 				"template's build block, or you can set the bucket_name argument " +
@@ -91,11 +91,20 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	err := bucket.Version.Initialize()
+	err := bucket.Iteration.Initialize()
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Version initialization failed",
-			Detail: fmt.Sprintf("Initialization of the version failed with "+
+			Severity: hcl.DiagError,
+			Summary:  "Failed to initialize iteration",
+			Detail: fmt.Sprintf("The iteration failed to be initialized for bucket %q: %s",
+				bucket.Slug, err),
+		})
+	}
+
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary: "Iteration initialization failed",
+			Detail: fmt.Sprintf("Initialization of the iteration failed with "+
 				"the following error message: %s", err),
 			Severity: hcl.DiagError,
 		})
