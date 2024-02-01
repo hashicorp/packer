@@ -96,6 +96,8 @@ func (opts BinaryInstallationOptions) FilenameSuffix() string {
 	return "_" + opts.OS + "_" + opts.ARCH + opts.Ext
 }
 
+var pluginVersionRegex = regexp.MustCompile("^v([0-9]+\\.[0-9]+\\.[0-9]+)(-dev)?$")
+
 // ListInstallations lists unique installed versions of plugin Requirement pr
 // with opts as a filter.
 //
@@ -152,21 +154,37 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 		parts := strings.SplitN(versionsStr, "_", 2)
 		pluginVersionStr, protocolVerionStr := parts[0], parts[1]
-		pv, err := version.NewVersion(pluginVersionStr)
+		_, err = version.NewVersion(pluginVersionStr)
 		if err != nil {
 			// could not be parsed, ignoring the file
 			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
 			continue
 		}
 
-		if strings.Replace(pluginVersionStr, "v", "", -1) != describeInfo.Version {
-			log.Printf("plugin %q reported version %s while its name implies version %s, ignoring", path, describeInfo.Version, pluginVersionStr)
+		matches := pluginVersionRegex.FindStringSubmatch(pluginVersionStr)
+		if matches == nil {
+			log.Printf("invalid version found: %q, ignoring", pluginVersionStr)
 			continue
 		}
 
+		absVersion := matches[1]
+		if len(matches) == 3 {
+			absVersion = fmt.Sprintf("%s%s", absVersion, matches[2])
+		}
+
+		if absVersion != describeInfo.Version {
+			log.Printf("plugin %q reported version %s while its name implies version %s, ignoring", path, describeInfo.Version, absVersion)
+			continue
+		}
+
+		rawVersion, _ := version.NewVersion(matches[1])
 		// no constraint means always pass, this will happen for implicit
 		// plugin requirements and when we list all plugins.
-		if !pr.VersionConstraints.Check(pv) {
+		//
+		// Note: we use the raw version name here, without the pre-release
+		// suffix, as otherwise constraints reject them, which is not
+		// what we want by default.
+		if !pr.VersionConstraints.Check(rawVersion) {
 			log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
 			continue
 		}
