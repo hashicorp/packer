@@ -159,6 +159,11 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
+		if pv.Prerelease() != "" {
+			log.Printf("pre-release version of plugin %q discovered: unsupported, ignoring", path)
+			continue
+		}
+
 		if strings.Replace(pluginVersionStr, "v", "", -1) != describeInfo.Version {
 			log.Printf("plugin %q reported version %s while its name implies version %s, ignoring", path, describeInfo.Version, pluginVersionStr)
 			continue
