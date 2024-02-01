@@ -507,3 +507,123 @@ func zipFile(content map[string]string) io.ReadCloser {
 }
 
 var _ Getter = &mockPluginGetter{}
+
+func Test_LessInstallList(t *testing.T) {
+	tests := []struct {
+		name       string
+		installs   InstallList
+		expectLess bool
+	}{
+		{
+			"v1.2.1 < v1.2.2 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.2",
+				},
+			},
+			true,
+		},
+		{
+			// Impractical with the changes to the loading model
+			"v1.2.1 = v1.2.1 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.1",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.2 < v1.2.1 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.1",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.2-dev < v1.2.2 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2-dev",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.2",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.2 < v1.2.2-dev => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.2-dev",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.1 < v1.2.2-dev => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.2-dev",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3 < v1.2.2-dev => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+				},
+				&Installation{
+					BinaryPath: "github.com",
+					Version:    "v1.2.2-dev",
+				},
+			},
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			isLess := tt.installs.Less(0, 1)
+			if isLess != tt.expectLess {
+				t.Errorf("Less mismatch for %s < %s, expected %t, got %t",
+					tt.installs[0].Version,
+					tt.installs[1].Version,
+					tt.expectLess, isLess)
+			}
+		})
+	}
+}

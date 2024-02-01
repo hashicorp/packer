@@ -267,7 +267,7 @@ func (l InstallList) Less(i, j int) bool {
 		return lowRawPluginName < hiRawPluginName
 	}
 
-	return semver.Compare(lowPluginPath.Version, hiPluginPath.Version) > 0
+	return semver.Compare(lowPluginPath.Version, hiPluginPath.Version) < 0
 }
 
 // Swap swaps the elements with indexes i and j.

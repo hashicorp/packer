@@ -100,16 +100,6 @@ func (c *PluginConfig) Discover() error {
 		}
 
 		pluginName := matches[1]
-
-		// If the plugin is already registered in the plugin map, we
-		// can ignore the current executable, as they're sorted by
-		// version in descending order, so if it's already in the map,
-		// a more recent version was already discovered.
-		_, ok := pluginMap[pluginName]
-		if ok {
-			continue
-		}
-
 		pluginMap[pluginName] = install.BinaryPath
 	}
 
