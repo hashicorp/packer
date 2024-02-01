@@ -94,7 +94,7 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 			continue
 		}
 		log.Printf("[TRACE] Found the following %q installations: %v", pluginRequirement.Identifier, sortedInstalls)
-		install := sortedInstalls[0]
+		install := sortedInstalls[len(sortedInstalls)-1]
 		err = cfg.parser.PluginConfig.DiscoverMultiPlugin(pluginRequirement.Accessor, install.BinaryPath)
 		if err != nil {
 			diags = append(diags, &hcl.Diagnostic{
