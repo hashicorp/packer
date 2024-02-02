@@ -48,6 +48,11 @@ func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 }
 
 func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
+	// Set the release only flag if specified as argument
+	//
+	// This deactivates the capacity for Packer to load development binaries.
+	c.CoreConfig.Components.PluginConfig.ReleasesOnly = cla.ReleaseOnly
+
 	// By default we want to inform users of undeclared variables when validating but not during build time.
 	cla.MetaArgs.WarnOnUndeclaredVar = true
 	if cla.NoWarnUndeclaredVar {

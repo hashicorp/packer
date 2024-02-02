@@ -86,6 +86,11 @@ func writeDiags(ui packersdk.Ui, files map[string]*hcl.File, diags hcl.Diagnosti
 }
 
 func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int {
+	// Set the release only flag if specified as argument
+	//
+	// This deactivates the capacity for Packer to load development binaries.
+	c.CoreConfig.Components.PluginConfig.ReleasesOnly = cla.ReleaseOnly
+
 	packerStarter, ret := c.GetConfig(&cla.MetaArgs)
 	if ret != 0 {
 		return ret
