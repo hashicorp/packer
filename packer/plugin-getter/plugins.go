@@ -60,6 +60,10 @@ type BinaryInstallationOptions struct {
 	Ext string
 
 	Checksummers []Checksummer
+
+	// ReleasesOnly may be set by commands like validate or build, and
+	// forces Packer to not consider plugin pre-releases.
+	ReleasesOnly bool
 }
 
 type ListInstallationsOptions struct {
@@ -154,10 +158,15 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 		parts := strings.SplitN(versionsStr, "_", 2)
 		pluginVersionStr, protocolVerionStr := parts[0], parts[1]
-		_, err = version.NewVersion(pluginVersionStr)
+		ver, err := version.NewVersion(pluginVersionStr)
 		if err != nil {
 			// could not be parsed, ignoring the file
 			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
+			continue
+		}
+
+		if ver.Prerelease() != "" && opts.ReleasesOnly {
+			log.Printf("ignoring pre-release plugin %q", path)
 			continue
 		}
 

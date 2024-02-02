@@ -76,6 +76,7 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: cfg.parser.PluginConfig.ReleasesOnly,
 		},
 	}
 
