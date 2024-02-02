@@ -34,6 +34,7 @@ type PluginConfig struct {
 	Provisioners    ProvisionerSet
 	PostProcessors  PostProcessorSet
 	DataSources     DatasourceSet
+	ReleasesOnly    bool
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -81,6 +82,7 @@ func (c *PluginConfig) Discover() error {
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: c.ReleasesOnly,
 		},
 	})
 	if err != nil {
