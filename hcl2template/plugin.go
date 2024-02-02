@@ -55,6 +55,17 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 }
 
 func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
+	// Do first pass to discover all the installed plugins
+	err := cfg.parser.PluginConfig.Discover()
+	if err != nil {
+		return (hcl.Diagnostics{}).Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to discover installed plugins",
+			Detail:   err.Error(),
+		})
+	}
+
+	// Then we can apply any constraint from the template, if any
 	opts := plugingetter.ListInstallationsOptions{
 		PluginDirectory: cfg.parser.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{

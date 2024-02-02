@@ -339,9 +339,10 @@ func loadConfig() (*config, error) {
 		PluginMinPort:   10000,
 		PluginMaxPort:   25000,
 		PluginDirectory: pluginDir,
-	}
-	if err := config.Plugins.Discover(); err != nil {
-		return nil, err
+		Builders:        packer.MapOfBuilder{},
+		Provisioners:    packer.MapOfProvisioner{},
+		PostProcessors:  packer.MapOfPostProcessor{},
+		DataSources:     packer.MapOfDatasource{},
 	}
 
 	// Finally, try to use an internal plugin. Note that this will not override
