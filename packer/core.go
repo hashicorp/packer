@@ -136,7 +136,18 @@ func NewCore(c *CoreConfig) *Core {
 // DetectPluginBinaries is used to load required plugins from the template,
 // since it is unsupported in JSON, this is essentially a no-op.
 func (c *Core) DetectPluginBinaries() hcl.Diagnostics {
-	return nil
+	var diags hcl.Diagnostics
+
+	err := c.components.PluginConfig.Discover()
+	if err != nil {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to discover installed plugins",
+			Detail:   err.Error(),
+		})
+	}
+
+	return diags
 }
 
 func (c *Core) Initialize(_ InitializeOptions) hcl.Diagnostics {
