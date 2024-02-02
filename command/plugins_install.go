@@ -260,11 +260,11 @@ func (c *PluginsInstallCommand) InstallFromBinary(opts plugingetter.ListInstalla
 			Detail:   fmt.Sprintf("Plugin's reported version (%q) is not semver-compatible: %s", desc.Version, err),
 		}})
 	}
-	if semver.Prerelease() != "" {
+	if semver.Prerelease() != "" && semver.Prerelease() != "dev" {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid version",
-			Detail:   fmt.Sprintf("Packer can only install plugin releases with this command (ex: 1.0.0), the binary's reported version is %q", desc.Version),
+			Detail:   fmt.Sprintf("Packer can only install plugin releases with this command (ex: 1.0.0) or development pre-releases (ex: 1.0.0-dev), the binary's reported version is %q", desc.Version),
 		}})
 	}
 
