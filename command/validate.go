@@ -65,7 +65,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return 0
 	}
 
-	diags := packerStarter.DetectPluginBinaries(false)
+	diags := packerStarter.DetectPluginBinaries(cla.ReleaseOnly)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret

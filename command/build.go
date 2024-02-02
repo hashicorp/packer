@@ -91,7 +91,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags := packerStarter.DetectPluginBinaries(false)
+	diags := packerStarter.DetectPluginBinaries(cla.ReleaseOnly)
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
