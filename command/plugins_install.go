@@ -49,10 +49,10 @@ Usage: packer plugins install [OPTIONS...] <plugin> [<version constraint>]
       packer plugins install --path ./packer-plugin-happycloud "github.com/hashicorp/happycloud"
 
 Options:
-  -path <path>                  Install the plugin from a locally-sourced plugin binary. 
-                                This installs the plugin where a normal invocation would, but will 
+  -path <path>                  Install the plugin from a locally-sourced plugin binary.
+                                This installs the plugin where a normal invocation would, but will
                                 not try to download it from a remote location, and instead
-                                install the binary in the Packer plugins path. This option cannot 
+                                install the binary in the Packer plugins path. This option cannot
                                 be specified with a version constraint.
   -force                        Forces reinstallation of plugins, even if already installed.
 `
