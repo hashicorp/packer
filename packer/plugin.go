@@ -49,7 +49,7 @@ var extractPluginBasename = regexp.MustCompile("^packer-plugin-([^_]+)")
 // found plugins, in that order.
 // Hence, the priority order is the reverse of the search order - i.e., the
 // CWD has the highest priority.
-func (c *PluginConfig) Discover() error {
+func (c *PluginConfig) Discover(releasesOnly bool) error {
 	if c.Builders == nil {
 		c.Builders = MapOfBuilder{}
 	}
@@ -81,6 +81,7 @@ func (c *PluginConfig) Discover() error {
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: releasesOnly,
 		},
 	})
 	if err != nil {

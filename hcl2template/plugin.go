@@ -54,9 +54,9 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 	return reqs, diags
 }
 
-func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
+func (cfg *PackerConfig) DetectPluginBinaries(releaseOnly bool) hcl.Diagnostics {
 	// Do first pass to discover all the installed plugins
-	err := cfg.parser.PluginConfig.Discover()
+	err := cfg.parser.PluginConfig.Discover(releaseOnly)
 	if err != nil {
 		return (hcl.Diagnostics{}).Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -76,6 +76,7 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: releaseOnly,
 		},
 	}
 

@@ -147,7 +147,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 				Meta: tt.Meta,
 			}
 
-			if err := c.CoreConfig.Components.PluginConfig.Discover(); err != nil {
+			if err := c.CoreConfig.Components.PluginConfig.Discover(false); err != nil {
 				t.Fatalf("Failed to discover plugins: %s", err)
 			}
 

@@ -33,7 +33,7 @@ func TestDiscoverReturnsIfMagicCookieSet(t *testing.T) {
 
 	t.Setenv(pluginsdk.MagicCookieKey, pluginsdk.MagicCookieValue)
 
-	err := config.Discover()
+	err := config.Discover(false)
 	if err != nil {
 		t.Fatalf("Should not have errored: %s", err)
 	}
@@ -48,7 +48,7 @@ func TestMultiPlugin_describe(t *testing.T) {
 	pluginDir := os.Getenv("PACKER_PLUGIN_PATH")
 	defer os.RemoveAll(pluginDir)
 	c := PluginConfig{}
-	err := c.Discover()
+	err := c.Discover(false)
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s", err.Error())
 	}
@@ -88,7 +88,7 @@ func TestMultiPlugin_describe_installed(t *testing.T) {
 	defer os.RemoveAll(pluginDir)
 
 	c := PluginConfig{}
-	err := c.Discover()
+	err := c.Discover(false)
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s", err.Error())
 	}
@@ -151,7 +151,7 @@ func TestMultiPlugin_describe_installed_for_invalid(t *testing.T) {
 			defer os.RemoveAll(pluginDir)
 
 			c := PluginConfig{}
-			err := c.Discover()
+			err := c.Discover(false)
 			if err != nil {
 				t.Fatalf("error discovering plugins; %s", err.Error())
 			}
@@ -195,7 +195,7 @@ func TestMultiPlugin_defaultName(t *testing.T) {
 	defer os.RemoveAll(pluginDir)
 
 	c := PluginConfig{}
-	err := c.Discover()
+	err := c.Discover(false)
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s ; mocks are %#v", err.Error(), defaultNameMock)
 	}
@@ -226,7 +226,7 @@ func TestMultiPlugin_IgnoreChecksumFile(t *testing.T) {
 	}
 
 	c := PluginConfig{}
-	err = c.Discover()
+	err = c.Discover(false)
 	if err != nil {
 		t.Fatalf("error discovering plugins; %s ; mocks are %#v", err.Error(), defaultNameMock)
 	}
@@ -244,7 +244,7 @@ func TestMultiPlugin_defaultName_each_plugin_type(t *testing.T) {
 	defer os.RemoveAll(pluginDir)
 
 	c := PluginConfig{}
-	err := c.Discover()
+	err := c.Discover(false)
 	if err != nil {
 		t.Fatal("Should not have error because pluginsdk.DEFAULT_NAME is used twice but only once per plugin type.")
 	}

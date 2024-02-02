@@ -43,7 +43,7 @@ type InitializeOptions struct {
 type PluginBinaryDetector interface {
 	// DetectPluginBinaries is used only for HCL2 templates, and loads required
 	// plugins if specified.
-	DetectPluginBinaries() hcl.Diagnostics
+	DetectPluginBinaries(releaseOnly bool) hcl.Diagnostics
 }
 
 // The Handler handles all Packer things. This interface reflects the Packer
