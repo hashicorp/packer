@@ -857,10 +857,6 @@
         "path": "plugins/install-plugins"
       },
       {
-        "title": "External Plugins",
-        "href": "/plugins"
-      },
-      {
         "title": "Developing Plugins",
         "routes": [
           {
