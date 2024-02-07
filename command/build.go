@@ -207,7 +207,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
 
-	var hasPossibleIncompatibleHCPIntegration bool
 	for i := range builds {
 		if err := buildCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
@@ -270,16 +269,29 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				runArtifacts,
 				err)
 			if hcperr != nil {
-				writeDiags(c.Ui, nil, hcl.Diagnostics{
-					&hcl.Diagnostic{
-						Summary: fmt.Sprintf(
-							"publishing build metadata to HCP Packer for %q failed",
-							name),
-						Severity: hcl.DiagError,
-						Detail:   hcperr.Error(),
-					},
-				})
-				hasPossibleIncompatibleHCPIntegration = true
+				if _, ok := hcperr.(*registry.NotAHCPArtifactError); ok {
+					writeDiags(c.Ui, nil, hcl.Diagnostics{
+						&hcl.Diagnostic{
+							Severity: hcl.DiagError,
+							Summary:  fmt.Sprintf("The %q builder produced an artifact that cannot be pushed to HCP Packer", b.Name()),
+							Detail: fmt.Sprintf(
+								`%s
+Check that you are using an HCP Ready integration before trying again:
+%s`,
+								hcperr, hcpReadyIntegrationURL),
+						},
+					})
+				} else {
+					writeDiags(c.Ui, nil, hcl.Diagnostics{
+						&hcl.Diagnostic{
+							Summary: fmt.Sprintf(
+								"publishing build metadata to HCP Packer for %q failed",
+								name),
+							Severity: hcl.DiagError,
+							Detail:   hcperr.Error(),
+						},
+					})
+				}
 			}
 
 			if err != nil {
@@ -389,15 +401,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		}
 	} else {
 		c.Ui.Say("\n==> Builds finished but no artifacts were created.")
-	}
-
-	if hasPossibleIncompatibleHCPIntegration {
-		msg := fmt.Sprintf(`
-It looks like one or more plugins in your build may be incompatible with HCP Packer.
-Check that you are using an HCP Ready integration before trying again:
-%s`, hcpReadyIntegrationURL)
-
-		c.Ui.Error(msg)
 	}
 
 	if len(errs.m) > 0 {
