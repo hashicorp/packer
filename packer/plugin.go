@@ -6,6 +6,7 @@ package packer
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -41,6 +43,16 @@ type PluginConfig struct {
 const PACKERSPACE = "-PACKERSPACE-"
 
 var extractPluginBasename = regexp.MustCompile("^packer-plugin-([^_]+)")
+
+// UseProtobuf is updated when plugins are discovered.
+//
+// If any plugin is discovered that doesn't support protobuf encoding for
+// their HCL specs, Packer will only use Gob, and avertise as such to the
+// plugins it uses.
+//
+// TODO: check if we can dynamically switch serialisation formats without
+// being too intrusive for plugins.
+var UseProtobuf bool = true
 
 // Discover discovers the latest installed version of each installed plugin.
 //
@@ -114,6 +126,8 @@ func (c *PluginConfig) Discover(releasesOnly bool) error {
 	return nil
 }
 
+var apiVersionMinorRe = regexp.MustCompile("[0-9]+$")
+
 // DiscoverMultiPlugin takes the description from a multi-component plugin
 // binary and makes the plugins available to use in Packer. Each plugin found in the
 // binary will be addressable using `${pluginName}-${builderName}` for example.
@@ -129,6 +143,23 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	var desc pluginsdk.SetDescription
 	if err := json.Unmarshal(out, &desc); err != nil {
 		return err
+	}
+
+	// If the major version isn't a match with what Packer expects, the
+	// plugin won't be considered for loading, so we can safely ignore that
+	// check here, and only check that the version is at least 5.1 for
+	// protobuf support.
+	// So by only looking at the minor version number, we'll be good here,
+	// at least until we officially remove gob support in v6.0, in which
+	// case, this check will be removed.
+	minVersion := apiVersionMinorRe.FindString(desc.APIVersion)
+	if minVersion == "" {
+		return fmt.Errorf("plugin API minor number could not be extracted, this is a Packer bug, please open an issue on the project tracker.")
+	}
+	minNb, _ := strconv.Atoi(minVersion)
+	if minNb == 0 {
+		log.Printf("[DEBUG] - plugin %q uses an older SDK, won't attempt to use protobuf for serialisation", pluginName)
+		UseProtobuf = false
 	}
 
 	pluginPrefix := pluginName + "-"

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
 	"sort"
 	"strconv"
@@ -145,6 +146,15 @@ func (c *Core) DetectPluginBinaries(releaseOnly bool) hcl.Diagnostics {
 			Summary:  "Failed to discover installed plugins",
 			Detail:   err.Error(),
 		})
+	}
+
+	// If no installed plugin is incompatible with Protobuf, we setup the
+	// environment before invoking any plugin so that they are setup to
+	// use protobuf.
+	if UseProtobuf {
+		os.Setenv("PACKER_RPC_PB", "1")
+	} else {
+		os.Setenv("PACKER_RPC_PB", "0")
 	}
 
 	return diags

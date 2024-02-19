@@ -194,6 +194,11 @@ func wrappedMain() int {
 	// the arguments...
 	args, machineReadable := extractMachineReadable(os.Args[1:])
 
+	// Set potential protobuf usage off if requested
+	if !packer.MayUseProtobuf() {
+		packer.UseProtobuf = false
+	}
+
 	defer packer.CleanupClients()
 
 	var ui packersdk.Ui

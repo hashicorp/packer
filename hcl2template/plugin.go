@@ -7,12 +7,14 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -130,6 +132,15 @@ func (cfg *PackerConfig) DetectPluginBinaries(releaseOnly bool) hcl.Diagnostics 
 			Summary:  "Missing plugins",
 			Detail:   detailMessage.String(),
 		})
+	}
+
+	// If no installed plugin is incompatible with Protobuf, we setup the
+	// environment before invoking any plugin so that they are setup to
+	// use protobuf.
+	if packer.UseProtobuf {
+		os.Setenv("PACKER_RPC_PB", "1")
+	} else {
+		os.Setenv("PACKER_RPC_PB", "0")
 	}
 
 	return diags
