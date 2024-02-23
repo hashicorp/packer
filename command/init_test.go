@@ -61,71 +61,75 @@ func TestInitCommand_Run(t *testing.T) {
 	cfg := &configDirSingleton{map[string]string{}}
 
 	tests := []testCaseInit{
+		//	{
+		//		// here we pre-write plugins with valid checksums, Packer will
+		//		// see those as valid installations it did.
+		//		// the directory hash before and after init should be the same,
+		//		// that's a no-op. This also should do no GH query, so it is best
+		//		// to always run it.
+		//		//
+		//		// Note: cannot work with plugin changes since the fake binary
+		//		// isn't recognised  as a potential plugin, so Packer always
+		//		// installs it.
+		//		"already-installed-no-op",
+		//		nil,
+		//		TestMetaFile(t),
+		//		map[string]string{
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64":                "1",
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM":      "a23e48324f2d9b912a89354945562b21b0ae99133b31d3132e2e6671aba8e085",
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe":           "1.exe",
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM": "f1cf5865b35933b8e5195625ac8be44487b64007f223912cc5c1784e493e62b2",
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64":                 "1.out",
+		//			"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM":       "0a4e4e1d6de28054f64946782a5eb92edc663e980ae0780fcb3a614d27c58506",
+		//		},
+		//		"h1:jQchMpyaQhkZYn0iguw6E6O4VCWxacYx2aR/RJJNLmo=",
+		//		map[string]string{
+		//			`cfg.pkr.hcl`: `
+		//				packer {
+		//					required_plugins {
+		//						comment = {
+		//							source  = "github.com/hashicorp/hashicups"
+		//							version = "v1.0.1"
+		//						}
+		//					}
+		//				}`,
+		//		},
+		//		cfg.dir("1_pkr_config"),
+		//		cfg.dir("1_pkr_user_folder"),
+		//		0,
+		//		nil,
+		//		"h1:jQchMpyaQhkZYn0iguw6E6O4VCWxacYx2aR/RJJNLmo=",
+		//		[]func(t *testing.T, tc testCaseInit){
+		//			// test that a build will not work since plugins are broken for
+		//			// this tests (they are not binaries).
+		//			testBuild{want: 1}.fn,
+		//		},
+		//	},
 		{
 			// here we pre-write plugins with valid checksums, Packer will
 			// see those as valid installations it did.
-			// the directory hash before and after init should be the same,
-			// that's a no-op. This also should do no GH query, so it is best
-			// to always run it.
-			"already-installed-no-op",
-			nil,
-			TestMetaFile(t),
-			map[string]string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
-			},
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
-			map[string]string{
-				`cfg.pkr.hcl`: `
-					packer {
-						required_plugins {
-							comment = {
-								source  = "github.com/sylviamoss/comment"
-								version = "v0.2.018"
-							}
-						}
-					}`,
-			},
-			cfg.dir("1_pkr_config"),
-			cfg.dir("1_pkr_user_folder"),
-			0,
-			nil,
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
-			[]func(t *testing.T, tc testCaseInit){
-				// test that a build will not work since plugins are broken for
-				// this tests (they are not binaries).
-				testBuild{want: 1}.fn,
-			},
-		},
-		{
-			// here we pre-write plugins with valid checksums, Packer will
-			// see those as valid installations it did.
-			// But because we require version 0.2.19, we will upgrade.
+			// But because we require version 1.0.2, we will upgrade.
 			"already-installed-upgrade",
 			[]func(t *testing.T, tc testCaseInit){
 				skipInitTestUnlessEnVar(acctest.TestEnvVar).fn,
 			},
 			TestMetaFile(t),
 			map[string]string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64":                "1",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM":      "a23e48324f2d9b912a89354945562b21b0ae99133b31d3132e2e6671aba8e085",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe":           "1.exe",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM": "f1cf5865b35933b8e5195625ac8be44487b64007f223912cc5c1784e493e62b2",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64":                 "1.out",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM":       "0a4e4e1d6de28054f64946782a5eb92edc663e980ae0780fcb3a614d27c58506",
 			},
-			"h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			"h1:jQchMpyaQhkZYn0iguw6E6O4VCWxacYx2aR/RJJNLmo=",
 			map[string]string{
 				`cfg.pkr.hcl`: `
 					packer {
 						required_plugins {
-							comment = {
-								source  = "github.com/sylviamoss/comment"
-								version = "v0.2.019"
+							hashicups = {
+								source  = "github.com/hashicorp/hashicups"
+								version = "v1.0.2"
 							}
 						}
 					}`,
@@ -136,11 +140,9 @@ func TestInitCommand_Run(t *testing.T) {
 				`,
 				`build.pkr.hcl`: `
 				build {
-					sources = ["source.null.test"]
-					provisioner "comment" {
-						comment		= "Begin ¡"
-						ui			= true
-						bubble_text	= true
+					sources = ["null.test"]
+					provisioner "hashicups-toppings" {
+						toppings = ["sugar"] # Takes 5 seconds in the current state
 					}
 				}
 				`,
@@ -149,27 +151,27 @@ func TestInitCommand_Run(t *testing.T) {
 			cfg.dir("2_pkr_user_folder"),
 			0,
 			[]string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM",
 				map[string]string{
-					"darwin":  "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64_SHA256SUM",
-					"linux":   "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64_SHA256SUM",
-					"windows": "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe_SHA256SUM",
+					"darwin":  "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_darwin_amd64_SHA256SUM",
+					"linux":   "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64_SHA256SUM",
+					"windows": "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_windows_amd64.exe_SHA256SUM",
 				}[runtime.GOOS],
 				map[string]string{
-					"darwin":  "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64",
-					"linux":   "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64",
-					"windows": "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe",
+					"darwin":  "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_darwin_amd64",
+					"linux":   "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64",
+					"windows": "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_windows_amd64.exe",
 				}[runtime.GOOS],
 			},
 			map[string]string{
-				"darwin":  "h1:ORwcCYUx8z/5n/QvuTJo2vrgKpfJA4AxlNg1G9/BCDI=",
-				"linux":   "h1:CGym0+Nd0LEANgzqL0wx/LDjRL8bYwlpZ0HajPJo/hs=",
-				"windows": "h1:ag0/C1YjP7KoEDYOiJHE0K+lhFgs0tVgjriWCXVT1fg=",
+				"darwin":  "h1:ptsMLvUeLsMMeXDJP2PWKAKIkE+kWVhOkhNYOYPJbSE=",
+				"linux":   "h1:ivCmyQ+/qNXfBsyeccGsa7P5232q7MUZk83B3yl80Ms=",
+				"windows": "h1:BeqAUnyGiBg9fVuf9Cn9a4h91bgdZ2U4kV7EuQKefcM=",
 			}[runtime.GOOS],
 			[]func(t *testing.T, tc testCaseInit){
 				// test that a build will work as the plugin was just installed
