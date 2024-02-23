@@ -77,8 +77,10 @@ func (c *PluginConfig) Discover() error {
 	installations, err := plugingetter.Requirement{}.ListInstallations(plugingetter.ListInstallationsOptions{
 		PluginDirectory: c.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
-			OS:   runtime.GOOS,
-			ARCH: runtime.GOARCH,
+			OS:              runtime.GOOS,
+			ARCH:            runtime.GOARCH,
+			APIVersionMajor: pluginsdk.APIVersionMajor,
+			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
