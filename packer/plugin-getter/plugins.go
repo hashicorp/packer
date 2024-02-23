@@ -379,7 +379,7 @@ func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string
 	}
 
 	if vMinori > APIVersoinMinori {
-		return fmt.Errorf("Unsupported remote protocol MINOR version %q. The supported MINOR protocol versions are version %q and bellow."+
+		return fmt.Errorf("Unsupported remote protocol MINOR version %q. The supported MINOR protocol versions are version %q and below. "+
 			"Please upgrade Packer or use an older version of the plugin if possible.", vMinor, binOpts.APIVersionMinor)
 	}
 
