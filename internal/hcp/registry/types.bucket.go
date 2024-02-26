@@ -643,23 +643,31 @@ func (bucket *Bucket) completeBuild(
 
 		state := art.State(packerSDKRegistry.ArtifactStateURI)
 		if state == nil {
-			return packerSDKArtifacts, &NotAHCPArtifactError{
-				fmt.Errorf("The HCP artifact returned by the builder is nil, this is likely because the builder does not support HCP Packer."),
-			}
+			log.Printf("[WARN] - artifact %q returned a nil value for the HCP state, ignoring", art.BuilderId())
+			continue
 		}
 
 		err = decoder.Decode(state)
 		if err != nil {
-			return packerSDKArtifacts, &NotAHCPArtifactError{
-				fmt.Errorf("Failed to obtain HCP Packer compliant artifact: %s", err),
-			}
+			log.Printf("[WARN] - artifact %q failed to be decoded to an HCP artifact, this is probably because it is not compatible: %s", art.BuilderId(), err)
+			continue
 		}
 
-		log.Printf("[TRACE] updating artifacts for build %q", buildName)
 		err = bucket.UpdateArtifactForBuild(buildName, sdkImages...)
-
 		if err != nil {
 			return packerSDKArtifacts, fmt.Errorf("failed to add artifact for %q: %s", buildName, err)
+		}
+	}
+
+	build, err := bucket.Version.Build(buildName)
+	if err != nil {
+		return packerSDKArtifacts, fmt.Errorf(
+			"failed to get build %q from version being built. This is a Packer bug.",
+			buildName)
+	}
+	if len(build.Artifacts) == 0 {
+		return packerSDKArtifacts, &NotAHCPArtifactError{
+			fmt.Errorf("No HCP Packer-compatible artifacts were found for the build"),
 		}
 	}
 
