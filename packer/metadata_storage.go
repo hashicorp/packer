@@ -1,8 +1,7 @@
-package metadata
+package packer
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/hashicorp/packer/version"
 )
@@ -12,33 +11,29 @@ type PluginComponentUsedInBuild struct {
 	ComponentKey string
 }
 
-type MetadataStorage struct {
+type metadataStorage struct {
 	PluginComponentUsage []*PluginComponentUsedInBuild
 }
 
 var (
-	metadataStorage     *MetadataStorage
-	metadataStorageOnce sync.Once
+	MetadataStorage *metadataStorage
 )
 
-func GetMetadataStorage() *MetadataStorage {
-	metadataStorageOnce.Do(func() {
-		metadataStorage = &MetadataStorage{
-			PluginComponentUsage: []*PluginComponentUsedInBuild{},
-		}
-	})
-	return metadataStorage
+func init() {
+	MetadataStorage = &metadataStorage{
+		PluginComponentUsage: []*PluginComponentUsedInBuild{},
+	}
 }
 
-func (ms *MetadataStorage) AddPluginUsageMetadataFor(buildName string, componentKey string) {
+func (ms *metadataStorage) AddPluginUsageMetadataFor(buildName string, componentKey string) {
 	ms.PluginComponentUsage = append(ms.PluginComponentUsage, &PluginComponentUsedInBuild{
 		BuildName:    buildName,
 		ComponentKey: componentKey,
 	})
 }
 
-func (ms *MetadataStorage) GetMetadataByBuild() map[string]map[string]string {
-	pluginStorage := GetAllPluginsStorage()
+func (ms *metadataStorage) GetMetadataByBuild() map[string]map[string]string {
+	pluginStorage := AllPluginsStorage
 	resp := map[string]map[string]string{}
 
 	fmt.Printf("<===> All Plugins: %q\n", pluginStorage.Components)
@@ -79,33 +74,35 @@ type BuildsMetadata struct {
 	PackerCoreMetadata PackerCoreMetadata
 }
 
-/* Response structure:
-{
-	"PackerCoreMetadata": {
-		"Version": "1.10.1"
-	},
-	"PluginsMetadata": {
-		"build1": [
-			{
-				"Name": "docker",
-				"Version": "1.10.1"
-			}
-		],
-		"build2": [
-			{
-				"Name": "amazon",
-				"Version": "1.11.1"
-			},
-			{
-				"Name": "docker",
-				"Version": "1.10.1"
-			}
-		]
+/*
+Response structure:
+
+	{
+		"PackerCoreMetadata": {
+			"Version": "1.10.1"
+		},
+		"PluginsMetadata": {
+			"build1": [
+				{
+					"Name": "docker",
+					"Version": "1.10.1"
+				}
+			],
+			"build2": [
+				{
+					"Name": "amazon",
+					"Version": "1.11.1"
+				},
+				{
+					"Name": "docker",
+					"Version": "1.10.1"
+				}
+			]
+		}
 	}
-}
 */
-func (ms *MetadataStorage) GetMetadata() *BuildsMetadata {
-	pluginStorage := GetAllPluginsStorage()
+func (ms *metadataStorage) GetMetadata() *BuildsMetadata {
+	pluginStorage := AllPluginsStorage
 
 	respMetadata := BuildsMetadata{
 		PackerCoreMetadata: PackerCoreMetadata{Version: version.FormattedVersion()},

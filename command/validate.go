@@ -5,6 +5,7 @@ package command
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
@@ -88,6 +89,8 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		Only:   cla.Only,
 		Except: cla.Except,
 	})
+	metadataByBuild := packer.MetadataStorage.GetMetadataByBuild()
+	fmt.Printf("<===> Metadata =  %q", metadataByBuild)
 
 	fixerDiags := packerStarter.FixConfig(packer.FixConfigOptions{
 		Mode: packer.Diff,

@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/internal/hcp/registry"
-	"github.com/hashicorp/packer/metadata"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/sync/semaphore"
 
@@ -136,7 +135,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		OnError: cla.OnError,
 	})
 
-	metadataByBuild := metadata.GetMetadataStorage().GetMetadataByBuild()
+	metadataByBuild := packer.MetadataStorage.GetMetadataByBuild()
 	fmt.Printf("<===> Metadata =  %q", metadataByBuild)
 
 	// here, something could have gone wrong but we still want to run valid
