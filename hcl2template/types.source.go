@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
+	"github.com/hashicorp/packer/metadata"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -112,6 +113,7 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 		})
 		return builder, diags, nil
 	}
+	metadata.GetMetadataStorage().AddPluginUsageMetadataFor(source.String(), source.Type)
 
 	body := source.Body
 	// Add known values to source accessor in eval context.

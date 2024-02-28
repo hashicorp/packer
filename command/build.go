@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/internal/hcp/registry"
+	"github.com/hashicorp/packer/metadata"
 	"github.com/hashicorp/packer/packer"
 	"golang.org/x/sync/semaphore"
 
@@ -134,6 +135,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		Force:   cla.Force,
 		OnError: cla.OnError,
 	})
+
+	metadataByBuild := metadata.GetMetadataStorage().GetMetadataByBuild()
+	fmt.Printf("<===> Metadata =  %q", metadataByBuild)
 
 	// here, something could have gone wrong but we still want to run valid
 	// builds.
@@ -272,7 +276,8 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				buildCtx,
 				b,
 				runArtifacts,
-				err)
+				err,
+				metadataByBuild)
 			if hcperr != nil {
 				if _, ok := hcperr.(*registry.NotAHCPArtifactError); ok {
 					writeDiags(c.Ui, nil, hcl.Diagnostics{

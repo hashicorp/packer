@@ -15,13 +15,14 @@ import (
 	ttmp "text/template"
 
 	"github.com/google/go-cmp/cmp"
-	multierror "github.com/hashicorp/go-multierror"
-	version "github.com/hashicorp/go-version"
-	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	"github.com/hashicorp/packer/metadata"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	packerversion "github.com/hashicorp/packer/version"
 )
@@ -258,6 +259,7 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 		return cbp, fmt.Errorf(
 			"provisioner failed to be started and did not error: %s", rawP.Type)
 	}
+	metadata.GetMetadataStorage().AddPluginUsageMetadataFor(rawName, rawP.Type)
 
 	// Get the configuration
 	config := make([]interface{}, 1, 2)
@@ -393,6 +395,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		return nil, fmt.Errorf(
 			"builder type not found: %s", configBuilder.Type)
 	}
+	metadata.GetMetadataStorage().AddPluginUsageMetadataFor(n, configBuilder.Type)
 
 	// rawName is the uninterpolated name that we use for various lookups
 	rawName := configBuilder.Name
@@ -469,6 +472,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 				return nil, fmt.Errorf(
 					"post-processor type not found: %s", rawP.Type)
 			}
+			metadata.GetMetadataStorage().AddPluginUsageMetadataFor(n, rawP.Type)
 
 			current = append(current, CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,

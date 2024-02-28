@@ -92,8 +92,16 @@ func (h *JSONRegistry) CompleteBuild(
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
+	buildsMetadata map[string]map[string]string,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.completeBuild(ctx, build.Name(), artifacts, buildErr)
+	name := build.Name()
+	buildMetadata, ok := buildsMetadata[name]
+	if !ok {
+		fmt.Printf("[METADATA] JSON Metadata for build name %q: MISSING\n", name)
+	} else {
+		fmt.Printf("[METADATA] JSON Metadata for build name %q: %q\n", name, buildMetadata)
+	}
+	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done

@@ -17,7 +17,7 @@ import (
 type Registry interface {
 	PopulateVersion(context.Context) error
 	StartBuild(context.Context, sdkpacker.Build) error
-	CompleteBuild(ctx context.Context, build sdkpacker.Build, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
+	CompleteBuild(ctx context.Context, build sdkpacker.Build, artifacts []sdkpacker.Artifact, buildErr error, buildsMetadata map[string]map[string]string) ([]sdkpacker.Artifact, error)
 	VersionStatusSummary()
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
+	"github.com/hashicorp/packer/metadata"
 	"github.com/zclconf/go-cty/cty"
 )
 
@@ -179,6 +180,7 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 		})
 		return nil, diags
 	}
+	metadata.GetMetadataStorage().AddPluginUsageMetadataFor(source.String(), pb.PType)
 
 	builderVars := source.builderVariables()
 	builderVars["packer_core_version"] = cfg.CorePackerVersionString

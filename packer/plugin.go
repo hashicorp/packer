@@ -17,6 +17,7 @@ import (
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/metadata"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
@@ -134,6 +135,8 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		return err
 	}
 
+	pluginStorage := metadata.GetAllPluginsStorage()
+
 	pluginPrefix := pluginName + "-"
 
 	for _, builderName := range desc.Builders {
@@ -145,6 +148,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
+		pluginStorage.AddPluginDetails(key, pluginName, desc)
 	}
 
 	if len(desc.Builders) > 0 {
@@ -160,6 +164,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
+		pluginStorage.AddPluginDetails(key, pluginName, desc)
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -175,6 +180,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
+		pluginStorage.AddPluginDetails(key, pluginName, desc)
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
