@@ -79,6 +79,31 @@ type BuildsMetadata struct {
 	PackerCoreMetadata PackerCoreMetadata
 }
 
+/* Response structure:
+{
+	"PackerCoreMetadata": {
+		"Version": "1.10.1"
+	},
+	"PluginsMetadata": {
+		"build1": [
+			{
+				"Name": "docker",
+				"Version": "1.10.1"
+			}
+		],
+		"build2": [
+			{
+				"Name": "amazon",
+				"Version": "1.11.1"
+			},
+			{
+				"Name": "docker",
+				"Version": "1.10.1"
+			}
+		]
+	}
+}
+*/
 func (ms *MetadataStorage) GetMetadata() *BuildsMetadata {
 	pluginStorage := GetAllPluginsStorage()
 
