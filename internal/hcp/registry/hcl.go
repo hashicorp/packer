@@ -79,18 +79,18 @@ func (h *HCLRegistry) CompleteBuild(
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
-	buildsMetadata map[string]map[string]string,
 ) ([]sdkpacker.Artifact, error) {
 	name := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
 		name = cb.Type
 	}
-	buildMetadata, ok := buildsMetadata[name]
-	if !ok {
-		fmt.Printf("[METADATA] HCL Metadata for build name %q: MISSING\n", name)
-	} else {
-		fmt.Printf("[METADATA] HCL Metadata for build name %q: %q\n", name, buildMetadata)
+
+	for k, pluginDetails := range cb.GetPluginsMetadata() {
+		fmt.Printf(
+			"[METADATA] HCL Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
 	}
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }

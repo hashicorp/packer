@@ -7,6 +7,7 @@ import (
 type PluginDetails struct {
 	Name        string
 	Description pluginsdk.SetDescription
+	PluginPath  string
 }
 
 type allPluginsStorage struct {
@@ -23,10 +24,12 @@ func init() {
 	}
 }
 
-func (aps *allPluginsStorage) AddPluginDetails(componentKey, pluginName string, pluginDescription pluginsdk.SetDescription) {
+func (aps *allPluginsStorage) AddPluginDetails(
+	componentKey, pluginName, pluginPath string, pluginDescription pluginsdk.SetDescription) {
 	aps.Components[componentKey] = &PluginDetails{
 		Name:        pluginName,
 		Description: pluginDescription,
+		PluginPath:  pluginPath,
 	}
 }
 

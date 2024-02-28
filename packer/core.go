@@ -258,7 +258,6 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 		return cbp, fmt.Errorf(
 			"provisioner failed to be started and did not error: %s", rawP.Type)
 	}
-	MetadataStorage.AddPluginUsageMetadataFor(rawName, rawP.Type)
 
 	// Get the configuration
 	config := make([]interface{}, 1, 2)
@@ -394,7 +393,6 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		return nil, fmt.Errorf(
 			"builder type not found: %s", configBuilder.Type)
 	}
-	MetadataStorage.AddPluginUsageMetadataFor(n, configBuilder.Type)
 
 	// rawName is the uninterpolated name that we use for various lookups
 	rawName := configBuilder.Name
@@ -471,7 +469,6 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 				return nil, fmt.Errorf(
 					"post-processor type not found: %s", rawP.Type)
 			}
-			MetadataStorage.AddPluginUsageMetadataFor(n, rawP.Type)
 
 			current = append(current, CoreBuildPostProcessor{
 				PostProcessor:     postProcessor,

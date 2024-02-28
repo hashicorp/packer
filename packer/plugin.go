@@ -145,7 +145,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		AllPluginsStorage.AddPluginDetails(key, pluginName, desc)
+		AllPluginsStorage.AddPluginDetails(key, pluginName, pluginPath, desc)
 	}
 
 	if len(desc.Builders) > 0 {
@@ -161,7 +161,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		AllPluginsStorage.AddPluginDetails(key, pluginName, desc)
+		AllPluginsStorage.AddPluginDetails(key, pluginName, pluginPath, desc)
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -177,7 +177,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		AllPluginsStorage.AddPluginDetails(key, pluginName, desc)
+		AllPluginsStorage.AddPluginDetails(key, pluginName, pluginPath, desc)
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)

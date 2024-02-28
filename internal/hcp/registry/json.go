@@ -92,14 +92,18 @@ func (h *JSONRegistry) CompleteBuild(
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
-	buildsMetadata map[string]map[string]string,
 ) ([]sdkpacker.Artifact, error) {
 	name := build.Name()
-	buildMetadata, ok := buildsMetadata[name]
-	if !ok {
-		fmt.Printf("[METADATA] JSON Metadata for build name %q: MISSING\n", name)
-	} else {
-		fmt.Printf("[METADATA] JSON Metadata for build name %q: %q\n", name, buildMetadata)
+	pluginMetadata := map[string]packer.PluginDetails{}
+	coreBuild, ok := build.(*packer.CoreBuild)
+	if ok {
+		pluginMetadata = coreBuild.GetPluginsMetadata()
+	}
+	for k, pluginDetails := range pluginMetadata {
+		fmt.Printf(
+			"[METADATA] JSON Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
 	}
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }

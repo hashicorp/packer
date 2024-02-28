@@ -52,6 +52,33 @@ type CoreBuild struct {
 	prepareCalled bool
 }
 
+func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
+	resp := map[string]PluginDetails{}
+
+	builderPlugin := AllPluginsStorage.GetPluginDetailsFor(b.BuilderType)
+	if builderPlugin != nil {
+		resp[builderPlugin.Name] = *builderPlugin
+	}
+
+	for _, pv := range b.Provisioners {
+		provisionerPlugin := AllPluginsStorage.GetPluginDetailsFor(pv.PType)
+		if provisionerPlugin != nil {
+			resp[provisionerPlugin.Name] = *provisionerPlugin
+		}
+
+	}
+
+	for _, pp := range b.PostProcessors {
+		for _, p := range pp {
+			postprocessorsPlugin := AllPluginsStorage.GetPluginDetailsFor(p.PType)
+			if postprocessorsPlugin != nil {
+				resp[postprocessorsPlugin.Name] = *postprocessorsPlugin
+			}
+		}
+	}
+	return resp
+}
+
 // CoreBuildPostProcessor Keeps track of the post-processor and the
 // configuration of the post-processor used within a build.
 type CoreBuildPostProcessor struct {

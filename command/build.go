@@ -135,9 +135,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		OnError: cla.OnError,
 	})
 
-	metadataByBuild := packer.MetadataStorage.GetMetadataByBuild()
-	fmt.Printf("<===> Metadata =  %q", metadataByBuild)
-
 	// here, something could have gone wrong but we still want to run valid
 	// builds.
 	ret = writeDiags(c.Ui, nil, diags)
@@ -275,8 +272,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 				buildCtx,
 				b,
 				runArtifacts,
-				err,
-				metadataByBuild)
+				err)
 			if hcperr != nil {
 				if _, ok := hcperr.(*registry.NotAHCPArtifactError); ok {
 					writeDiags(c.Ui, nil, hcl.Diagnostics{

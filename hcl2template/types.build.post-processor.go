@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer/packer"
 )
 
 // ProvisionerBlock references a detected but unparsed post processor
@@ -71,7 +70,6 @@ func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProce
 		})
 		return nil, diags
 	}
-	packer.MetadataStorage.AddPluginUsageMetadataFor(source.String(), pp.PType)
 
 	builderVars := source.builderVariables()
 	builderVars["packer_core_version"] = cfg.CorePackerVersionString

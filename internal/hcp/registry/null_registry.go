@@ -25,7 +25,6 @@ func (r nullRegistry) CompleteBuild(
 	build sdkpacker.Build,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
-	buildsMetadata map[string]map[string]string,
 ) ([]sdkpacker.Artifact, error) {
 	return artifacts, nil
 }
