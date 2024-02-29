@@ -146,9 +146,12 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		AddPluginDetails(
-			fmt.Sprintf("%q-%q", PluginComponentBuilder, key), pluginName, pluginPath, desc,
-		)
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, key)] = PluginDetails{
+			Name:        pluginName,
+			Description: desc,
+			PluginPath:  pluginPath,
+		}
+
 	}
 
 	if len(desc.Builders) > 0 {
@@ -164,9 +167,11 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		AddPluginDetails(
-			fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key), pluginName, pluginPath, desc,
-		)
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key)] = PluginDetails{
+			Name:        pluginName,
+			Description: desc,
+			PluginPath:  pluginPath,
+		}
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -182,9 +187,12 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		AddPluginDetails(
-			fmt.Sprintf("%q-%q", PluginComponentProvisioner, key), pluginName, pluginPath, desc,
-		)
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, key)] = PluginDetails{
+			Name:        pluginName,
+			Description: desc,
+			PluginPath:  pluginPath,
+		}
+
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
@@ -199,9 +207,11 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
-		AddPluginDetails(
-			fmt.Sprintf("%q-%q", PluginComponentDataSource, key), pluginName, pluginPath, desc,
-		)
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentDataSource, key)] = PluginDetails{
+			Name:        pluginName,
+			Description: desc,
+			PluginPath:  pluginPath,
+		}
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
@@ -253,3 +263,20 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 	config.MaxPort = c.PluginMaxPort
 	return NewClient(&config)
 }
+
+type PluginComponentType string
+
+const (
+	PluginComponentBuilder       PluginComponentType = "builder"
+	PluginComponentPostProcessor PluginComponentType = "post-processor"
+	PluginComponentProvisioner   PluginComponentType = "provisioner"
+	PluginComponentDataSource    PluginComponentType = "data-source"
+)
+
+type PluginDetails struct {
+	Name        string
+	Description pluginsdk.SetDescription
+	PluginPath  string
+}
+
+var PluginsDetailsStorage = map[string]PluginDetails{}

@@ -52,6 +52,11 @@ type CoreBuild struct {
 	prepareCalled bool
 }
 
+type BuildMetadata struct {
+	PackerVersion string
+	Plugins       map[string]PluginDetails
+}
+
 func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
@@ -77,6 +82,14 @@ func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 	}
 
 	return resp
+}
+
+func (b *CoreBuild) GetMetadata() BuildMetadata {
+	metadata := BuildMetadata{
+		PackerVersion: version.FormattedVersion(),
+		Plugins:       b.GetPluginsMetadata(),
+	}
+	return metadata
 }
 
 // CoreBuildPostProcessor Keeps track of the post-processor and the
