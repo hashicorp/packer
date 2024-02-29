@@ -6,6 +6,7 @@ package packer
 import (
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -145,7 +146,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		AllPluginsStorage.AddPluginDetails(PluginComponentBuilder, key, pluginName, pluginPath, desc)
+		AddPluginDetails(
+			fmt.Sprintf("%q-%q", PluginComponentBuilder, key), pluginName, pluginPath, desc,
+		)
 	}
 
 	if len(desc.Builders) > 0 {
@@ -161,7 +164,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		AllPluginsStorage.AddPluginDetails(PluginComponentPostProcessor, key, pluginName, pluginPath, desc)
+		AddPluginDetails(
+			fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key), pluginName, pluginPath, desc,
+		)
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -177,7 +182,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		AllPluginsStorage.AddPluginDetails(PluginComponentProvisioner, key, pluginName, pluginPath, desc)
+		AddPluginDetails(
+			fmt.Sprintf("%q-%q", PluginComponentProvisioner, key), pluginName, pluginPath, desc,
+		)
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
@@ -192,6 +199,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
+		AddPluginDetails(
+			fmt.Sprintf("%q-%q", PluginComponentDataSource, key), pluginName, pluginPath, desc,
+		)
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)

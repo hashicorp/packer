@@ -55,24 +55,24 @@ type CoreBuild struct {
 func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
-	builderPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentBuilder, b.BuilderType)
-	if builderPlugin != nil {
-		resp[builderPlugin.Name] = *builderPlugin
+	builderPlugin, builderPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType)]
+	if builderPluginOk {
+		resp[builderPlugin.Name] = builderPlugin
 	}
 
 	for _, pp := range b.PostProcessors {
 		for _, p := range pp {
-			postprocessorsPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentPostProcessor, p.PType)
-			if postprocessorsPlugin != nil {
-				resp[postprocessorsPlugin.Name] = *postprocessorsPlugin
+			postprocessorsPlugin, postprocessorsPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType)]
+			if postprocessorsPluginOk {
+				resp[postprocessorsPlugin.Name] = postprocessorsPlugin
 			}
 		}
 	}
 
 	for _, pv := range b.Provisioners {
-		provisionerPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentProvisioner, pv.PType)
-		if provisionerPlugin != nil {
-			resp[provisionerPlugin.Name] = *provisionerPlugin
+		provisionerPlugin, provisionerPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, pv.PType)]
+		if provisionerPluginOk {
+			resp[provisionerPlugin.Name] = provisionerPlugin
 		}
 
 	}
