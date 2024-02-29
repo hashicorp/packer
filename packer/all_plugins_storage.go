@@ -1,7 +1,17 @@
 package packer
 
 import (
+	"fmt"
+
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+)
+
+type PluginComponentType string
+
+const (
+	PluginComponentBuilder       PluginComponentType = "builder"
+	PluginComponentPostProcessor PluginComponentType = "post-processor"
+	PluginComponentProvisioner   PluginComponentType = "provisioner"
 )
 
 type PluginDetails struct {
@@ -25,16 +35,19 @@ func init() {
 }
 
 func (aps *allPluginsStorage) AddPluginDetails(
-	componentKey, pluginName, pluginPath string, pluginDescription pluginsdk.SetDescription) {
-	aps.Components[componentKey] = &PluginDetails{
+	componentType PluginComponentType, componentKey, pluginName, pluginPath string, pluginDescription pluginsdk.SetDescription,
+) {
+	key := fmt.Sprintf("%q-%q", componentKey, componentType)
+	aps.Components[key] = &PluginDetails{
 		Name:        pluginName,
 		Description: pluginDescription,
 		PluginPath:  pluginPath,
 	}
 }
 
-func (aps *allPluginsStorage) GetPluginDetailsFor(componentKey string) *PluginDetails {
-	pluginDetails, ok := aps.Components[componentKey]
+func (aps *allPluginsStorage) GetPluginDetailsFor(componentType PluginComponentType, componentKey string) *PluginDetails {
+	key := fmt.Sprintf("%q-%q", componentKey, componentType)
+	pluginDetails, ok := aps.Components[key]
 	if !ok {
 		return nil
 	}

@@ -55,27 +55,28 @@ type CoreBuild struct {
 func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
-	builderPlugin := AllPluginsStorage.GetPluginDetailsFor(b.BuilderType)
+	builderPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentBuilder, b.BuilderType)
 	if builderPlugin != nil {
 		resp[builderPlugin.Name] = *builderPlugin
 	}
 
+	for _, pp := range b.PostProcessors {
+		for _, p := range pp {
+			postprocessorsPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentPostProcessor, p.PType)
+			if postprocessorsPlugin != nil {
+				resp[postprocessorsPlugin.Name] = *postprocessorsPlugin
+			}
+		}
+	}
+
 	for _, pv := range b.Provisioners {
-		provisionerPlugin := AllPluginsStorage.GetPluginDetailsFor(pv.PType)
+		provisionerPlugin := AllPluginsStorage.GetPluginDetailsFor(PluginComponentProvisioner, pv.PType)
 		if provisionerPlugin != nil {
 			resp[provisionerPlugin.Name] = *provisionerPlugin
 		}
 
 	}
 
-	for _, pp := range b.PostProcessors {
-		for _, p := range pp {
-			postprocessorsPlugin := AllPluginsStorage.GetPluginDetailsFor(p.PType)
-			if postprocessorsPlugin != nil {
-				resp[postprocessorsPlugin.Name] = *postprocessorsPlugin
-			}
-		}
-	}
 	return resp
 }
 
