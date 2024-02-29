@@ -15,8 +15,8 @@ import (
 	ttmp "text/template"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/go-version"
+	multierror "github.com/hashicorp/go-multierror"
+	version "github.com/hashicorp/go-version"
 	hcl "github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -503,7 +503,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		Variables:          c.variables,
 	}
 
-	// configBuilder.Name is left uninterpolated so we must check against
+	//configBuilder.Name is left uninterpolated so we must check against
 	// the interpolated name.
 	if configBuilder.Type != configBuilder.Name {
 		cb.BuildName = configBuilder.Type
