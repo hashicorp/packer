@@ -94,11 +94,15 @@ func (h *JSONRegistry) CompleteBuild(
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
 	name := build.Name()
-	pluginMetadata := build.(*packer.CoreBuild).GetPluginsMetadata()
 
-	for k, pluginDetails := range pluginMetadata {
-		fmt.Printf(
-			"[METADATA] JSON Metadata for build name %q: %q -- %q\n",
+	metadata := build.(*packer.CoreBuild).GetMetadata()
+	log.Printf(
+		"[TRACE] JSON 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] JSON 'Plugin' Metadata for build name %q: %q -- %q\n",
 			name, k, pluginDetails.Description.Version,
 		)
 	}

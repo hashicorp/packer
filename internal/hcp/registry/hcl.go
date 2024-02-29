@@ -86,9 +86,14 @@ func (h *HCLRegistry) CompleteBuild(
 		name = cb.Type
 	}
 
-	for k, pluginDetails := range cb.GetPluginsMetadata() {
-		fmt.Printf(
-			"[METADATA] HCL Metadata for build name %q: %q -- %q\n",
+	metadata := cb.GetMetadata()
+	log.Printf(
+		"[TRACE] HCL 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] HCL 'Plugin' Metadata for build name %q: %q -- %q\n",
 			name, k, pluginDetails.Description.Version,
 		)
 	}
