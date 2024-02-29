@@ -74,7 +74,6 @@ func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 		if provisionerPluginOk {
 			resp[provisionerPlugin.Name] = provisionerPlugin
 		}
-
 	}
 
 	return resp
