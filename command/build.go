@@ -162,7 +162,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		packer.UiColorYellow,
 		packer.UiColorBlue,
 	}
-	buildUis := make(map[packersdk.Build]packersdk.Ui)
+	buildUis := make(map[*packer.CoreBuild]packersdk.Ui)
 	for i := range builds {
 		ui := c.Ui
 		if cla.Color {
