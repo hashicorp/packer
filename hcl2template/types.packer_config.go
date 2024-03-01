@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -643,8 +642,8 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
-	res := []packersdk.Build{}
+func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.CoreBuild, hcl.Diagnostics) {
+	res := []*packer.CoreBuild{}
 	var diags hcl.Diagnostics
 	possibleBuildNames := []string{}
 

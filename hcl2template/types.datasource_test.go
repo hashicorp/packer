@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
@@ -54,7 +53,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -142,7 +141,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",

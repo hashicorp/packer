@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
@@ -52,7 +51,7 @@ func TestParse_source(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -98,7 +97,7 @@ func TestParse_source(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"used source with unknown type fails",
