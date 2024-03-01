@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -55,7 +54,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			true,
 		},
 		{"untyped provisioner",
@@ -104,7 +103,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{&packer.CoreBuild{
+			[]*packer.CoreBuild{&packer.CoreBuild{
 				Provisioners: []packer.CoreBuildProvisioner{},
 			}},
 			false,
@@ -120,7 +119,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{&packer.CoreBuild{
+			[]*packer.CoreBuild{&packer.CoreBuild{
 				Builder: emptyMockBuilder,
 				CleanupProvisioner: packer.CoreBuildProvisioner{
 					PType: "shell-local",
@@ -145,7 +144,7 @@ func TestParse_build(t *testing.T) {
 				Builds:                  nil,
 			},
 			true, true,
-			[]packersdk.Build{&packer.CoreBuild{}},
+			[]*packer.CoreBuild{&packer.CoreBuild{}},
 			false,
 		},
 		{"nonexistent post-processor",
@@ -184,7 +183,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{&packer.CoreBuild{
+			[]*packer.CoreBuild{&packer.CoreBuild{
 				PostProcessors: [][]packer.CoreBuildPostProcessor{},
 			}},
 			true,
@@ -198,7 +197,7 @@ func TestParse_build(t *testing.T) {
 				Builds:                  nil,
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"named build",
@@ -225,7 +224,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			true,
 		},
 		{"post-processor with only and except",
@@ -280,7 +279,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:         "virtualbox-iso.ubuntu-1204",
 					BuilderType:  "virtualbox-iso",
@@ -397,7 +396,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:        "virtualbox-iso.ubuntu-1204",
 					BuilderType: "virtualbox-iso",
@@ -488,7 +487,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:        "virtualbox-iso.ubuntu-1204",
 					BuilderType: "virtualbox-iso",
@@ -551,7 +550,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					BuildName:      "build-name",
 					Type:           "virtualbox-iso.ubuntu-1204",
@@ -574,7 +573,7 @@ func TestParse_build(t *testing.T) {
 				Builds:                  nil,
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"use build.name in post-processor block",
@@ -606,7 +605,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					BuildName:    "test-build",
 					Type:         "virtualbox-iso.ubuntu-1204",
@@ -664,7 +663,7 @@ func TestParse_build(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					BuildName:   "build-name-test",
 					Type:        "virtualbox-iso.ubuntu-1204",

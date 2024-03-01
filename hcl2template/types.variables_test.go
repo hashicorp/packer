@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/hcl/v2"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/null"
 	. "github.com/hashicorp/packer/hcl2template/internal"
 	"github.com/hashicorp/packer/packer"
@@ -126,7 +125,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -156,7 +155,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"duplicate variable in variables",
@@ -177,7 +176,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"duplicate local block",
@@ -200,7 +199,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 		{"invalid default type",
@@ -221,7 +220,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 
@@ -240,7 +239,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 
@@ -258,7 +257,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			true,
 		},
 
@@ -291,7 +290,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			true, true,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null",
 					BuilderType:    "null",
@@ -378,7 +377,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -399,7 +398,7 @@ func TestParse_variables(t *testing.T) {
 				LocalVariables:          nil,
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
 		},
 
@@ -442,7 +441,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -484,7 +483,7 @@ func TestParse_variables(t *testing.T) {
 				Basedir: filepath.Join("testdata", "variables"),
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -542,47 +541,48 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{&packer.CoreBuild{
-				Type:        "null.null-builder",
-				BuilderType: "null",
-				Prepared:    true,
-				Builder:     &null.Builder{},
-				Provisioners: []packer.CoreBuildProvisioner{
-					{
-						PType: "shell",
-						Provisioner: &packer.RetriedProvisioner{
-							MaxRetries: 1,
-							Provisioner: &HCL2Provisioner{
-								Provisioner: &MockProvisioner{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{
-											Tags: []MockTag{},
+			[]*packer.CoreBuild{
+				&packer.CoreBuild{
+					Type:        "null.null-builder",
+					BuilderType: "null",
+					Prepared:    true,
+					Builder:     &null.Builder{},
+					Provisioners: []packer.CoreBuildProvisioner{
+						{
+							PType: "shell",
+							Provisioner: &packer.RetriedProvisioner{
+								MaxRetries: 1,
+								Provisioner: &HCL2Provisioner{
+									Provisioner: &MockProvisioner{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{
+												Tags: []MockTag{},
+											},
+											NestedSlice: []NestedMockConfig{},
 										},
-										NestedSlice: []NestedMockConfig{},
+									},
+								},
+							},
+						},
+						{
+							PType: "shell",
+							Provisioner: &packer.RetriedProvisioner{
+								MaxRetries: 1,
+								Provisioner: &HCL2Provisioner{
+									Provisioner: &MockProvisioner{
+										Config: MockConfig{
+											NestedMockConfig: NestedMockConfig{
+												Tags: []MockTag{},
+											},
+											NestedSlice: []NestedMockConfig{},
+										},
 									},
 								},
 							},
 						},
 					},
-					{
-						PType: "shell",
-						Provisioner: &packer.RetriedProvisioner{
-							MaxRetries: 1,
-							Provisioner: &HCL2Provisioner{
-								Provisioner: &MockProvisioner{
-									Config: MockConfig{
-										NestedMockConfig: NestedMockConfig{
-											Tags: []MockTag{},
-										},
-										NestedSlice: []NestedMockConfig{},
-									},
-								},
-							},
-						},
-					},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 				},
-				PostProcessors: [][]packer.CoreBuildPostProcessor{},
-			},
 			},
 			false,
 		},
@@ -630,7 +630,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
