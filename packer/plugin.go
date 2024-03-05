@@ -136,7 +136,12 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	}
 
 	pluginPrefix := pluginName + "-"
-
+	pluginDetails := PluginDetails{
+		Name:        pluginName,
+		Description: desc,
+		PluginPath:  pluginPath,
+	}
+	
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
 		key := pluginPrefix + builderName
@@ -146,11 +151,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, key)] = PluginDetails{
-			Name:        pluginName,
-			Description: desc,
-			PluginPath:  pluginPath,
-		}
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, key)] = pluginDetails
 
 	}
 
@@ -167,11 +168,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key)] = PluginDetails{
-			Name:        pluginName,
-			Description: desc,
-			PluginPath:  pluginPath,
-		}
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key)] = pluginDetails
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -187,11 +184,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, key)] = PluginDetails{
-			Name:        pluginName,
-			Description: desc,
-			PluginPath:  pluginPath,
-		}
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, key)] = pluginDetails
 
 	}
 	if len(desc.Provisioners) > 0 {
@@ -207,11 +200,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentDataSource, key)] = PluginDetails{
-			Name:        pluginName,
-			Description: desc,
-			PluginPath:  pluginPath,
-		}
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentDataSource, key)] = pluginDetails
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
