@@ -85,6 +85,18 @@ func (h *HCLRegistry) CompleteBuild(
 	if ok {
 		name = cb.Type
 	}
+
+	metadata := cb.GetMetadata()
+	log.Printf(
+		"[TRACE] HCL 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] HCL 'Plugin' Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
+	}
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
