@@ -57,7 +57,7 @@ type BuildMetadata struct {
 	Plugins       map[string]PluginDetails
 }
 
-func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
+func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
 	builderPlugin, builderPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType)]
@@ -87,7 +87,7 @@ func (b *CoreBuild) GetPluginsMetadata() map[string]PluginDetails {
 func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
-		Plugins:       b.GetPluginsMetadata(),
+		Plugins:       b.getPluginsMetadata(),
 	}
 	return metadata
 }

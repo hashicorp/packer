@@ -141,7 +141,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		Description: desc,
 		PluginPath:  pluginPath,
 	}
-	
+
 	for _, builderName := range desc.Builders {
 		builderName := builderName // copy to avoid pointer overwrite issue
 		key := pluginPrefix + builderName
