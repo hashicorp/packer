@@ -5,10 +5,15 @@ package registry
 
 import (
 	"context"
+	"reflect"
 	"strconv"
+	"sync"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/hcl2template"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 )
@@ -381,6 +386,126 @@ func TestReadFromHCLBuildBlock(t *testing.T) {
 			diff := cmp.Diff(bucket, tt.expectedBucket, cmp.AllowUnexported(Bucket{}))
 			if diff != "" {
 				t.Errorf("expected the build to to have contents of hcp_packer_registry block but it does not: %v", diff)
+			}
+		})
+	}
+}
+
+func TestCompleteBuild(t *testing.T) {
+	hcpArtifact := &packer.MockArtifact{
+		BuilderIdValue: "builder.test",
+		FilesValue:     []string{"file.one"},
+		IdValue:        "Test",
+		StateValues: map[string]interface{}{
+			"builder.test": "OK",
+			image.ArtifactStateURI: &image.Image{
+				ImageID:        "hcp-test",
+				ProviderName:   "none",
+				ProviderRegion: "none",
+				Labels:         map[string]string{},
+				SourceImageID:  "",
+			},
+		},
+		DestroyCalled: false,
+		StringValue:   "",
+	}
+	nonHCPArtifact := &packer.MockArtifact{
+		BuilderIdValue: "builder.test",
+		FilesValue:     []string{"file.one"},
+		IdValue:        "Test",
+		StateValues: map[string]interface{}{
+			"builder.test": "OK",
+		},
+		DestroyCalled: false,
+		StringValue:   "",
+	}
+
+	testCases := []struct {
+		name           string
+		artifactsToUse []packer.Artifact
+		expectError    bool
+		wantNotHCPErr  bool
+	}{
+		{
+			"OK - one artifact compatible with HCP",
+			[]packer.Artifact{
+				hcpArtifact,
+			},
+			false, false,
+		},
+		{
+			"Fail - no artifacts",
+			[]packer.Artifact{},
+			true, false,
+		},
+		{
+			"Fail - only non HCP compatible artifacts",
+			[]packer.Artifact{
+				nonHCPArtifact,
+			},
+			true, true,
+		},
+		{
+			"OK - one hcp artifact, one non hcp artifact (order matters)",
+			[]packer.Artifact{
+				hcpArtifact,
+				nonHCPArtifact,
+			},
+			false, false,
+		},
+		{
+			"OK - one non hcp artifact, one hcp artifact (order matters)",
+			[]packer.Artifact{
+				nonHCPArtifact,
+				hcpArtifact,
+			},
+			false, false,
+		},
+	}
+	mockCli := &hcpPackerAPI.Client{
+		Packer: hcpPackerAPI.NewMockPackerClientService(),
+	}
+
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			dummyBucket := &Bucket{
+				Name:        "test-bucket",
+				Description: "test",
+				Destination: "none",
+				RunningBuilds: map[string]chan struct{}{
+					// Need buffer with 1 cap so we can signal end of
+					// heartbeats in test, otherwise it'll block
+					"test-build": make(chan struct{}, 1),
+				},
+				Version: &Version{
+					ID:          "noneID",
+					Fingerprint: "TestFingerprint",
+					RunUUID:     "testuuid",
+					builds:      sync.Map{},
+				},
+				client: mockCli,
+			}
+
+			dummyBucket.Version.StoreBuild("test-build", &Build{
+				ID:            "test-build",
+				Platform:      "none",
+				ComponentType: "none",
+				RunUUID:       "testuuid",
+				Artifacts:     make(map[string]image.Image),
+				Status:        models.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
+			})
+
+			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, nil)
+			if err != nil != tt.expectError {
+				t.Errorf("expected %t error; got %t", tt.expectError, err != nil)
+				t.Logf("error was: %s", err)
+			}
+
+			if err != nil && tt.wantNotHCPErr {
+				_, ok := err.(*NotAHCPArtifactError)
+				if !ok {
+					t.Errorf("expected a NotAHCPArtifactError, got a %q", reflect.TypeOf(err).String())
+				}
 			}
 		})
 	}
