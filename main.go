@@ -265,7 +265,7 @@ func wrappedMain() int {
 		Args:         args,
 		Autocomplete: true,
 		Commands:     Commands,
-		HelpFunc:     excludeHelpFunc(Commands, []string{"execute"}),
+		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin"}),
 		HelpWriter:   os.Stdout,
 		Name:         "packer",
 		Version:      version.Version,
