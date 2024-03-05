@@ -107,5 +107,36 @@ func init() {
 				CheckFunc: commandVersionCheck,
 			}, nil
 		},
+
+		// plugin is essentially an alias to the plugins command
+		//
+		// It is not meant to be documented or used outside of simple
+		// typos, as it's easy to write plugin instead of plugins, so
+		// we opted not to error, but silently alias the two writings.
+		"plugin": func() (cli.Command, error) {
+			return &command.PluginsCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+		"plugin installed": func() (cli.Command, error) {
+			return &command.PluginsInstalledCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+		"plugin install": func() (cli.Command, error) {
+			return &command.PluginsInstallCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+		"plugin remove": func() (cli.Command, error) {
+			return &command.PluginsRemoveCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+		"plugin required": func() (cli.Command, error) {
+			return &command.PluginsRequiredCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
 	}
 }
