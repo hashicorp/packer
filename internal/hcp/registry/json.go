@@ -93,7 +93,20 @@ func (h *JSONRegistry) CompleteBuild(
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.completeBuild(ctx, build.Name(), artifacts, buildErr)
+	name := build.Name()
+
+	metadata := build.(*packer.CoreBuild).GetMetadata()
+	log.Printf(
+		"[TRACE] JSON 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] JSON 'Plugin' Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
+	}
+	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done
