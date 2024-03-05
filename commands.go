@@ -29,6 +29,12 @@ func init() {
 			}, nil
 		},
 
+		"execute": func() (cli.Command, error) {
+			return &command.ExecuteCommand{
+				Meta: *CommandMeta,
+			}, nil
+		},
+
 		"fix": func() (cli.Command, error) {
 			return &command.FixCommand{
 				Meta: *CommandMeta,
@@ -55,12 +61,6 @@ func init() {
 
 		"inspect": func() (cli.Command, error) {
 			return &command.InspectCommand{
-				Meta: *CommandMeta,
-			}, nil
-		},
-
-		"plugin": func() (cli.Command, error) {
-			return &command.PluginCommand{
 				Meta: *CommandMeta,
 			}, nil
 		},
