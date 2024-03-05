@@ -21,7 +21,7 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-const target = "command/plugin.go"
+const target = "command/execute.go"
 
 func main() {
 	wd, _ := os.Getwd()
@@ -278,7 +278,7 @@ packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 IMPORTS
 )
 
-type PluginCommand struct {
+type ExecuteCommand struct {
 	Meta
 }
 
@@ -292,20 +292,20 @@ DATASOURCES
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 
-func (c *PluginCommand) Run(args []string) int {
+func (c *ExecuteCommand) Run(args []string) int {
 	// This is an internal call (users should not call this directly) so we're
 	// not going to do much input validation. If there's a problem we'll often
 	// just crash. Error handling should be added to facilitate debugging.
 	log.Printf("args: %#v", args)
 	if len(args) != 1 {
-		c.Ui.Error("Wrong number of args")
+		c.Ui.Error(c.Help())
 		return 1
 	}
 
 	// Plugin will match something like "packer-builder-amazon-ebs"
 	parts := pluginRegexp.FindStringSubmatch(args[0])
 	if len(parts) != 3 {
-		c.Ui.Error(fmt.Sprintf("Error parsing plugin argument [DEBUG]: %#v", parts))
+		c.Ui.Error(c.Help())
 		return 1
 	}
 	pluginType := parts[1] // capture group 1 (builder|post-processor|provisioner)
@@ -353,9 +353,9 @@ func (c *PluginCommand) Run(args []string) int {
 	return 0
 }
 
-func (*PluginCommand) Help() string {
+func (*ExecuteCommand) Help() string {
 	helpText := ` + "`" + `
-Usage: packer plugin PLUGIN
+Usage: packer execute PLUGIN
 
   Runs an internally-compiled version of a plugin from the packer binary.
 
@@ -365,7 +365,7 @@ Usage: packer plugin PLUGIN
 	return strings.TrimSpace(helpText)
 }
 
-func (c *PluginCommand) Synopsis() string {
+func (c *ExecuteCommand) Synopsis() string {
 	return "internal plugin command"
 }
 `
