@@ -98,8 +98,6 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
      [GH-12854](https://github.com/hashicorp/packer/pull/12854)
      [GH-12835](https://github.com/hashicorp/packer/pull/12835)
 
-### NOTES:
-
 ## 1.10.1 (January 30, 2024)
 
 ### NOTES:
