@@ -70,7 +70,7 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
           └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
-## 1.10.2 (Upcoming)
+## 1.10.2 (March 6, 2024)
 
 ### NOTES:
 * Continuing the work in in Packer v1.10.0 we introduced the ability to install
