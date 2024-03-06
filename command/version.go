@@ -38,7 +38,12 @@ func (c *VersionCommand) Run(args []string) int {
 	c.Ui.Machine("version-prelease", version.VersionPrerelease)
 	c.Ui.Machine("version-commit", version.GitCommit)
 
-	c.Ui.Say(fmt.Sprintf("Packer v%s", version.FormattedVersion()))
+	versionString := fmt.Sprintf("Packer v%s", version.FormattedVersion())
+	if version.VersionMetadata != "" {
+		versionString = fmt.Sprintf("%s - %s", versionString, version.VersionMetadata)
+	}
+
+	c.Ui.Say(versionString)
 
 	// If we have a version check function, then let's check for
 	// the latest version as well.
