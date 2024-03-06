@@ -1,10 +1,102 @@
 ## 1.11.0 (Upcoming)
 
 ### NOTES:
-**Breaking Change**: Support for loading single-component plugins has been removed from Packer. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+* **Breaking Change**: Support for loading single-component plugins has been removed from Packer. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+
+* **Breaking Change**: Support for loading plugin binaries following
+     the naming convention of packer-plugin-name has been dropped. Packer will now only load
+     plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
+     directory and CHECKSUM files. This change drops support for loading plugin
+     binaries in Packer's executable directory or a template's current working
+     directory. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+
+```shell
+/Users/dev/.packer.d/plugins
+└── github.com
+    └── hashicorp
+        └── happycloud
+            ├── packer-plugin-happycloud_v0.0.1_x5.0_darwin_arm64
+            └── packer-plugin-happycloud_v0.0.1_x5.0_darwin_arm64_SHA256SUM
+```
 
 ### IMPROVEMENTS:
-* core: remove support single-component plugins. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+* core: Move to predictable plugin loading schema -  Packer will now only load
+     plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
+     directory and CHECKSUM files.
+     [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+* core: Remove support loading single-component plugins.
+     [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+* core: Packer now considers development binaries when evaluating plugin
+     version constraints. This work allows users to use binaries with versions
+     reported as "x.y.z-dev" to be used with the Packer `required_plugins`
+     block. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+
+Given the specified version constraint only versions greater than or equal to 1.1.0 will be considered.
+
+```hcl
+amazon = {
+  source = "github.com/hashicorp/amazon"
+  version = ">= 1.1.0"
+}
+```
+If a development binary is installed, Packer will use it if:
+
+1. It is the highest compatible version installed.
+2. There is no final plugin version with the same version number installed alongside it.
+
+```shell
+/Users/dev/.packer.d/plugins
+└─ github.com
+   └─ hashicorp
+    	└── amazon
+          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64
+          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64_SHA256SUM
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
+          └── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
+```
+
+Version 1.1.1-dev of the Amazon plugin will match the specified version constraint and be used for executing the Packer build.
+
+If, however, a 1.1.1 release version of the plugin is available, it will have precedence over the development binary.
+
+```shell
+/Users/dev/.packer.d/plugins
+└─ github.com
+   └─ hashicorp
+    	└── amazon
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
+          ├── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64
+          └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
+```
+
+## 1.10.2 (March 6, 2024)
+
+### NOTES:
+* Continuing the work in in Packer v1.10.0 we introduced the ability to install
+     a locally sourced plugin using packer `plugins install --path`, this
+     release extends support to development plugin binaries - binaries that
+     report "dev" as part of their plugin version. Instead of manually placing a
+     downloaded binary into the executable or current working directory we
+     encourage you to run the command `packer plugins install –path <path-to-
+     downloaded-extracted-binary> github.com/hashicorp/happycloud` to install
+     the binary into a Packer compatible path.
+     [GH-12855](https://github.com/hashicorp/packer/pull/12855)
+
+### IMPROVEMENTS:
+* cmd/plugins: Add support for installing local development binaries to `packer plugins install`.
+     [GH-12855](https://github.com/hashicorp/packer/pull/12855)
+* core: Validate bucket name when using `hcp_packer_registry` block.
+     [GH-12820](https://github.com/hashicorp/packer/pull/12820)
+* core: Update github.com/hashicorp/hcp-sdk-go from 0.83.0 to 0.85.0.
+     [GH-12850](https://github.com/hashicorp/packer/pull/12850)
+     [GH-12827](https://github.com/hashicorp/packer/pull/12827)
+ 
+### BUG FIXES:
+* core/hcp: HCP Packer build failures properly distinguish between incompatible
+     plugins and general publishing errors.
+     [GH-12854](https://github.com/hashicorp/packer/pull/12854)
+     [GH-12835](https://github.com/hashicorp/packer/pull/12835)
 
 ## 1.10.1 (January 30, 2024)
 
