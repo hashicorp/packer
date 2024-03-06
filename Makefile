@@ -64,7 +64,7 @@ dev: ## Build and install a development build
 	fi
 	@mkdir -p pkg/$(GOOS)_$(GOARCH)
 	@mkdir -p bin
-	@go install -ldflags '$(GOLDFLAGS)'
+	@go install -ldflags '-X "$(GIT_IMPORT).VersionMetadata=$(shell date)" $(GOLDFLAGS)'
 	@cp $(GOPATH)/bin/packer bin/packer
 	@cp $(GOPATH)/bin/packer pkg/$(GOOS)_$(GOARCH)
 
