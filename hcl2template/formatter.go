@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -135,7 +136,7 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 
 	_, diags := f.parser.ParseHCL(inSrc, filename)
 	if diags.HasErrors() {
-		return nil, fmt.Errorf("failed to parse HCL %s", filename)
+		return nil, multierror.Append(nil, diags.Errs()...)
 	}
 
 	outSrc := hclwrite.Format(inSrc)

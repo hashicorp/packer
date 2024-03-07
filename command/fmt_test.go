@@ -177,3 +177,18 @@ func Test_fmt_pipe(t *testing.T) {
 		})
 	}
 }
+
+const malformedTemplate = "test-fixtures/fmt_errs/malformed.pkr.hcl"
+
+func TestFmtParseError(t *testing.T) {
+	p := helperCommand(t, "fmt", malformedTemplate)
+	outs, err := p.CombinedOutput()
+	if err == nil {
+		t.Errorf("Expected failure to format file, but command did not fail")
+	}
+	strLogs := string(outs)
+
+	if !strings.Contains(strLogs, "An argument or block definition is required here.") {
+		t.Errorf("Expected some diags about parse error, found none")
+	}
+}
