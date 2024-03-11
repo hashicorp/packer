@@ -31,6 +31,9 @@
      [GH-12828](https://github.com/hashicorp/packer/pull/12828)
 * core: Remove support loading single-component plugins.
      [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+* core: Rename internal plugin command to execute to avoid user confusion with
+     the plugins subcommand.
+     [GH-12865](https://github.com/hashicorp/packer/pull/12865)
 * core: Packer now considers development binaries when evaluating plugin
      version constraints. This work allows users to use binaries with versions
      reported as "x.y.z-dev" to be used with the Packer `required_plugins`
