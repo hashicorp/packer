@@ -70,6 +70,13 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
           └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
+## 1.10.3 (Upcoming)
+
+### IMPROVEMENTS:
+* cmd/fmt: Display actual parsing errors when the `packer fmt` fails to read a
+     template containing invalid HCL2 syntax.
+     [GH-12870](https://github.com/hashicorp/packer/pull/12870)
+
 ## 1.10.2 (March 6, 2024)
 
 ### NOTES:
