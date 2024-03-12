@@ -19,6 +19,11 @@
             └── packer-plugin-happycloud_v0.0.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
+### FEATURES:
+* core: Add `-ignore-prerelease-plugins` flag to disable the use of development
+     plugin binaries for the `build` and `validate` commands development plugin
+     binaries. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+
 ### IMPROVEMENTS:
 * core: Move to predictable plugin loading schema -  Packer will now only load
      plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
