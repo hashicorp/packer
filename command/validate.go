@@ -123,6 +123,7 @@ Options:
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
   -no-warn-undeclared-var       Disable warnings for user variable files containing undeclared variables.
   -evaluate-datasources         Evaluate data sources during validation (HCL2 only, may incur costs); Defaults to false. 
+  -ignore-prerelease-plugins    Disable the loading of prerelease plugin binaries (x.y.z-dev).
 `
 
 	return strings.TrimSpace(helpText)
