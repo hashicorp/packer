@@ -91,7 +91,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 
 	flags.BoolVar(&ba.MetaArgs.WarnOnUndeclaredVar, "warn-on-undeclared-var", false, "Show warnings for variable files containing undeclared variables.")
 
-	flags.BoolVar(&ba.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-<prerelease-name>.")
+	flags.BoolVar(&ba.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-dev).")
 
 	ba.MetaArgs.AddFlagSets(flags)
 }
@@ -146,7 +146,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
 	flags.BoolVar(&va.NoWarnUndeclaredVar, "no-warn-undeclared-var", false, "Ignore warnings for variable files containing undeclared variables.")
 	flags.BoolVar(&va.EvaluateDatasources, "evaluate-datasources", false, "evaluate datasources for validation (HCL2 only, may incur costs)")
-	flags.BoolVar(&va.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-<prerelease-name>.")
+	flags.BoolVar(&va.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-dev).")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
