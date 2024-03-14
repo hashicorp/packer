@@ -131,6 +131,27 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
+		checksumOk := false
+		for _, checksummer := range opts.Checksummers {
+
+			cs, err := checksummer.GetCacheChecksumOfFile(path)
+			if err != nil {
+				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
+				continue
+			}
+
+			if err := checksummer.ChecksumFile(cs, path); err != nil {
+				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
+				continue
+			}
+			checksumOk = true
+			break
+		}
+		if !checksumOk {
+			log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
+			continue
+		}
+
 		// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
 		versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
 		versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
@@ -204,27 +225,6 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		if err := opts.CheckProtocolVersion(protocolVerionStr); err != nil {
 			log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
 				"with this version of Packer. %s", path, protocolVerionStr, err)
-			continue
-		}
-
-		checksumOk := false
-		for _, checksummer := range opts.Checksummers {
-
-			cs, err := checksummer.GetCacheChecksumOfFile(path)
-			if err != nil {
-				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
-				continue
-			}
-
-			if err := checksummer.ChecksumFile(cs, path); err != nil {
-				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
-				continue
-			}
-			checksumOk = true
-			break
-		}
-		if !checksumOk {
-			log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
 			continue
 		}
 
