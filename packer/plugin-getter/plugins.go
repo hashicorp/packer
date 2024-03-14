@@ -100,8 +100,6 @@ func (opts BinaryInstallationOptions) FilenameSuffix() string {
 	return "_" + opts.OS + "_" + opts.ARCH + opts.Ext
 }
 
-var pluginVersionRegex = regexp.MustCompile(`^v([0-9]+\.[0-9]+\.[0-9]+)(-dev)?$`)
-
 // ListInstallations lists unique installed versions of plugin Requirement pr
 // with opts as a filter.
 //
@@ -170,30 +168,35 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
-		matches := pluginVersionRegex.FindStringSubmatch(pluginVersionStr)
-		if matches == nil {
-			log.Printf("invalid version found: %q, ignoring", pluginVersionStr)
+		rawVersion, err := version.NewVersion(pluginVersionStr)
+		if err != nil {
+			log.Printf("malformed version string in filename %q: %s, ignoring", pluginVersionStr, err)
 			continue
 		}
 
-		absVersion := matches[1]
-		if len(matches) == 3 {
-			absVersion = fmt.Sprintf("%s%s", absVersion, matches[2])
-		}
-
-		if absVersion != describeInfo.Version {
-			log.Printf("plugin %q reported version %s while its name implies version %s, ignoring", path, describeInfo.Version, absVersion)
+		descVersion, err := version.NewVersion(describeInfo.Version)
+		if err != nil {
+			log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
 			continue
 		}
 
-		rawVersion, _ := version.NewVersion(matches[1])
+		if rawVersion.Compare(descVersion) != 0 {
+			log.Printf("plugin %q reported version %q while its name implies version %q, ignoring", path, describeInfo.Version, pluginVersionStr)
+			continue
+		}
+
+		preRel := descVersion.Prerelease()
+		if preRel != "" && preRel != "dev" {
+			log.Printf("invalid plugin pre-release version %q, only development or release binaries are accepted", pluginVersionStr)
+		}
+
 		// no constraint means always pass, this will happen for implicit
 		// plugin requirements and when we list all plugins.
 		//
 		// Note: we use the raw version name here, without the pre-release
 		// suffix, as otherwise constraints reject them, which is not
 		// what we want by default.
-		if !pr.VersionConstraints.Check(rawVersion) {
+		if !pr.VersionConstraints.Check(rawVersion.Core()) {
 			log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
 			continue
 		}
