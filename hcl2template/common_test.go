@@ -72,7 +72,7 @@ type parseTest struct {
 	parseWantDiags         bool
 	parseWantDiagHasErrors bool
 
-	getBuildsWantBuilds []packersdk.Build
+	getBuildsWantBuilds []*packer.CoreBuild
 	getBuildsWantDiags  bool
 	// getBuildsWantDiagHasErrors bool
 }

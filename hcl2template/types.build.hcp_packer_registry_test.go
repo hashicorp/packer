@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/hcl/v2"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -50,7 +49,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "virtualbox-iso.ubuntu-1204",
 					Prepared:       true,
@@ -103,7 +102,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "virtualbox-iso.ubuntu-1204",
 					Prepared:       true,
@@ -233,7 +232,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					BuildName:      "bucket-slug",
 					Type:           "null.test",
