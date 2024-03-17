@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/hcl2template"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 	"github.com/hashicorp/packer/internal/hcp/env"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 )
@@ -213,6 +214,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 		nil,
 		status,
 		nil,
+		buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -285,6 +287,7 @@ func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error 
 		buildToUpdate.Labels,
 		status,
 		artifacts,
+		buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -535,6 +538,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 					nil,
 					hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 					nil,
+					buildToUpdate.Metadata,
 				)
 				if err != nil {
 					log.Printf("[ERROR] failed to send heartbeat for build %q: %s", build, err)
@@ -597,6 +601,32 @@ func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
 
 type NotAHCPArtifactError struct {
 	error
+}
+
+// AddMetadataToBuild adds metadata to a build in the HCP Packer registry.
+func (bucket *Bucket) AddMetadataToBuild(
+	ctx context.Context, buildName string, metadata packer.BuildMetadata,
+) error {
+	buildToUpdate, err := bucket.Version.Build(buildName)
+	if err != nil {
+		return err
+	}
+
+	preparedMetadata := make(map[string]interface{})
+	preparedMetadata["version"] = metadata.PackerVersion
+
+	var pluginsMetadata []map[string]interface{}
+	for _, plugin := range metadata.Plugins {
+		pluginMetadata := map[string]interface{}{
+			"version": plugin.Description.Version,
+			"name":    plugin.Name,
+		}
+		pluginsMetadata = append(pluginsMetadata, pluginMetadata)
+	}
+	preparedMetadata["plugins"] = pluginsMetadata
+
+	buildToUpdate.Metadata = preparedMetadata
+	return nil
 }
 
 func (bucket *Bucket) completeBuild(
