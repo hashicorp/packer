@@ -78,7 +78,7 @@ func (c *Client) UpdateBuild(
 		SourceExternalIdentifier: sourceExternalIdentifier,
 		Status:                   &buildStatus,
 		Metadata: &hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata{
-			Packer: metadata["packer"],
+			Packer: metadata,
 		},
 	}
 
