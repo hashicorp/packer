@@ -300,10 +300,16 @@ func (c *PluginsInstallCommand) InstallFromBinary(opts plugingetter.ListInstalla
 		}})
 	}
 
+	// Remove metadata from plugin path
+	noMetaVersion := semver.Core().String()
+	if semver.Prerelease() != "" {
+		noMetaVersion = fmt.Sprintf("%s-%s", noMetaVersion, semver.Prerelease())
+	}
+
 	outputPrefix := fmt.Sprintf(
 		"packer-plugin-%s_v%s_%s",
 		pluginIdentifier.Type,
-		semver.String(),
+		noMetaVersion,
 		desc.APIVersion,
 	)
 	binaryPath := filepath.Join(
