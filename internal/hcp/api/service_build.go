@@ -77,9 +77,12 @@ func (c *Client) UpdateBuild(
 		Platform:                 platform,
 		SourceExternalIdentifier: sourceExternalIdentifier,
 		Status:                   &buildStatus,
-		Metadata: &hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata{
+	}
+
+	if metadata != nil {
+		params.Body.Metadata = &hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata{
 			Packer: metadata,
-		},
+		}
 	}
 
 	resp, err := c.Packer.PackerServiceUpdateBuild(params, nil)

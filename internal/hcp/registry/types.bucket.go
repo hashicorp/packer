@@ -538,7 +538,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 					nil,
 					hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 					nil,
-					buildToUpdate.Metadata,
+					nil,
 				)
 				if err != nil {
 					log.Printf("[ERROR] failed to send heartbeat for build %q: %s", build, err)
