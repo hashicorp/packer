@@ -211,6 +211,12 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			log.Printf("invalid plugin pre-release version %q, only development or release binaries are accepted", pluginVersionStr)
 		}
 
+		// Check the API version matches between path and describe
+		if describeInfo.APIVersion != protocolVerionStr {
+			log.Printf("plugin %q reported API version %q while its name implies version %q, ignoring", path, describeInfo.APIVersion, protocolVerionStr)
+			continue
+		}
+
 		// no constraint means always pass, this will happen for implicit
 		// plugin requirements and when we list all plugins.
 		//
