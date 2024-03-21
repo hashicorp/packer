@@ -24,6 +24,14 @@
      plugin binaries for the `build` and `validate` commands development plugin
      binaries. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
 
+### BUG FIXES:
+* core: fix plugin version ordering to not be lexicographic. This fixes an issue
+     with how plugins are discovered by Packer, and ensures proper version ordering.
+     This means that with this change, versions that are semantically greater,
+     but lexicographically inferior will be loaded.
+     Ex: 1.0.9 vs. 1.0.10; `1.0.9 > 1.0.10` lexicographically, but semantically
+     `1.0.10 > 1.0.9`
+
 ### IMPROVEMENTS:
 * core: Move to predictable plugin loading schema -  Packer will now only load
      plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
