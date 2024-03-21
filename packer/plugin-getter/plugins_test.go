@@ -520,10 +520,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.1",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2",
+					APIVersion: "x5.0",
 				},
 			},
 			true,
@@ -535,10 +537,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.1",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.1",
+					APIVersion: "x5.0",
 				},
 			},
 			false,
@@ -549,10 +553,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.1",
+					APIVersion: "x5.0",
 				},
 			},
 			false,
@@ -563,10 +569,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2",
+					APIVersion: "x5.0",
 				},
 			},
 			true,
@@ -577,10 +585,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
 				},
 			},
 			false,
@@ -591,10 +601,12 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.1",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
 				},
 			},
 			true,
@@ -605,10 +617,108 @@ func Test_LessInstallList(t *testing.T) {
 				&Installation{
 					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.3",
+					APIVersion: "x5.0",
 				},
 				&Installation{
-					BinaryPath: "github.com",
+					BinaryPath: "host/org/plugin",
 					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x5.1 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.1",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x5.0 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.3_x4.15 < v1.2.3_x5.0 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x4.15",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x9.0 < v1.2.3_x10.0 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x9.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x10.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.9 < v1.2.3_x5.10 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.9",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.10",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x4.15 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x4.15",
 				},
 			},
 			false,
@@ -619,9 +729,11 @@ func Test_LessInstallList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			isLess := tt.installs.Less(0, 1)
 			if isLess != tt.expectLess {
-				t.Errorf("Less mismatch for %s < %s, expected %t, got %t",
+				t.Errorf("Less mismatch for %s_%s < %s_%s, expected %t, got %t",
 					tt.installs[0].Version,
+					tt.installs[0].APIVersion,
 					tt.installs[1].Version,
+					tt.installs[1].APIVersion,
 					tt.expectLess, isLess)
 			}
 		})
