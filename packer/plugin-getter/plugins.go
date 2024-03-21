@@ -50,7 +50,10 @@ type Requirement struct {
 }
 
 type BinaryInstallationOptions struct {
+	// The API version with which to check remote compatibility
 	//
+	// They're generally extracted from the SDK since it's what Packer Core
+	// supports as far as the protocol goes
 	APIVersionMajor, APIVersionMinor string
 	// OS and ARCH usually should be runtime.GOOS and runtime.ARCH, they allow
 	// to pick the correct binary.
@@ -237,6 +240,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		res = append(res, &Installation{
 			BinaryPath: path,
 			Version:    pluginVersionStr,
+			APIVersion: describeInfo.APIVersion,
 		})
 	}
 
@@ -303,7 +307,20 @@ func (l InstallList) Less(i, j int) bool {
 		return lowRawPluginName < hiRawPluginName
 	}
 
-	return semver.Compare(lowPluginPath.Version, hiPluginPath.Version) < 0
+	verCmp := semver.Compare(lowPluginPath.Version, hiPluginPath.Version)
+	if verCmp != 0 {
+		return verCmp < 0
+	}
+
+	// Ignore errors here, they are already validated when populating the InstallList
+	loAPIVer, _ := NewAPIVersion(lowPluginPath.APIVersion)
+	hiAPIVer, _ := NewAPIVersion(hiPluginPath.APIVersion)
+
+	if loAPIVer.Major != hiAPIVer.Major {
+		return loAPIVer.Major < hiAPIVer.Major
+	}
+
+	return loAPIVer.Minor < hiAPIVer.Minor
 }
 
 // Swap swaps the elements with indexes i and j.
@@ -322,6 +339,11 @@ type Installation struct {
 	// Version of this plugin. Ex:
 	//  * v1.2.3 for packer-plugin-amazon_v1.2.3_darwin_x5
 	Version string
+
+	// API version for the plugin. Ex:
+	//  * 5.0 for packer-plugin-amazon_v1.2.3_darwin_x5.0
+	//  * 5.1 for packer-plugin-amazon_v1.2.3_darwin_x5.1
+	APIVersion string
 }
 
 // InstallOptions describes the possible options for installing the plugin that
@@ -355,41 +377,70 @@ func (gp *GetOptions) ExpectedZipFilename() string {
 	return gp.expectedZipFilename
 }
 
-func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string) error {
-	remoteProt = strings.TrimPrefix(remoteProt, "x")
-	parts := strings.Split(remoteProt, ".")
-	if len(parts) < 2 {
-		return fmt.Errorf("Invalid remote protocol: %q, expected something like '%s.%s'", remoteProt, binOpts.APIVersionMajor, binOpts.APIVersionMinor)
-	}
-	vMajor, vMinor := parts[0], parts[1]
+type APIVersion struct {
+	Major int
+	Minor int
+}
 
+func NewAPIVersion(apiVersion string) (APIVersion, error) {
+	ver := APIVersion{}
+
+	apiVersion = strings.TrimPrefix(strings.TrimSpace(apiVersion), "x")
+	parts := strings.Split(apiVersion, ".")
+	if len(parts) < 2 {
+		return ver, fmt.Errorf(
+			"Invalid remote protocol: %q, expected something like '%s.%s'",
+			apiVersion, pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor,
+		)
+	}
+
+	vMajor, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return ver, err
+	}
+	ver.Major = vMajor
+
+	vMinor, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return ver, err
+	}
+	ver.Minor = vMinor
+
+	return ver, nil
+}
+
+var localAPIVersion APIVersion
+
+func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string) error {
 	// no protocol version check
 	if binOpts.APIVersionMajor == "" && binOpts.APIVersionMinor == "" {
 		return nil
 	}
 
-	if vMajor != binOpts.APIVersionMajor {
-		return fmt.Errorf("Unsupported remote protocol MAJOR version %q. The current MAJOR protocol version is %q."+
-			" This version of Packer can only communicate with plugins using that version.", vMajor, binOpts.APIVersionMajor)
+	localVersion := localAPIVersion
+	if binOpts.APIVersionMajor != pluginsdk.APIVersionMajor ||
+		binOpts.APIVersionMinor != pluginsdk.APIVersionMinor {
+		var err error
+
+		localVersion, err = NewAPIVersion(fmt.Sprintf("x%s.%s", binOpts.APIVersionMajor, binOpts.APIVersionMinor))
+		if err != nil {
+			return fmt.Errorf("Failed to parse API Version from constraints: %s", err)
+		}
 	}
 
-	if vMinor == binOpts.APIVersionMinor {
-		return nil
-	}
-
-	vMinori, err := strconv.Atoi(vMinor)
+	remoteVersion, err := NewAPIVersion(remoteProt)
 	if err != nil {
 		return err
 	}
 
-	APIVersoinMinori, err := strconv.Atoi(binOpts.APIVersionMinor)
-	if err != nil {
-		return err
+	if localVersion.Major != remoteVersion.Major {
+		return fmt.Errorf("Unsupported remote protocol MAJOR version %d. The current MAJOR protocol version is %d."+
+			" This version of Packer can only communicate with plugins using that version.", remoteVersion.Major, localVersion.Major)
 	}
 
-	if vMinori > APIVersoinMinori {
-		return fmt.Errorf("Unsupported remote protocol MINOR version %q. The supported MINOR protocol versions are version %q and below. "+
-			"Please upgrade Packer or use an older version of the plugin if possible.", vMinor, binOpts.APIVersionMinor)
+	if remoteVersion.Minor > localVersion.Minor {
+		return fmt.Errorf("Unsupported remote protocol MINOR version %d. The supported MINOR protocol versions are version %d and below. "+
+			"Please upgrade Packer or use an older version of the plugin if possible.", remoteVersion.Minor, localVersion.Minor)
 	}
 
 	return nil
@@ -829,4 +880,13 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	errs = multierror.Append(errs, fmt.Errorf("could not install any compatible version of plugin %q", pr.Identifier))
 
 	return nil, errs
+}
+
+func init() {
+	var err error
+	// Should never error if both components are set
+	localAPIVersion, err = NewAPIVersion(fmt.Sprintf("x%s.%s", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor))
+	if err != nil {
+		panic(fmt.Sprintf("malformed API version in Packer. This is a programming error, please open an error to report it."))
+	}
 }
