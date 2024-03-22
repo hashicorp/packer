@@ -187,6 +187,11 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
+		if fmt.Sprintf("v%s", ver.String()) != pluginVersionStr {
+			log.Printf("version %q in path is non canonical, this could introduce ambiguity and is not supported, ignoring it.", pluginVersionStr)
+			continue
+		}
+
 		if ver.Prerelease() != "" && opts.ReleasesOnly {
 			log.Printf("ignoring pre-release plugin %q", path)
 			continue
