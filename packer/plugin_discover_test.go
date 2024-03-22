@@ -490,91 +490,90 @@ func getFormattedInstalledPluginSuffix() string {
 }
 
 var (
-	mockPlugins = map[string]pluginsdk.Set{
-		"bird": {
-			Builders: map[string]packersdk.Builder{
-				"feather":   nil,
-				"guacamole": nil,
-			},
-		},
-		"chimney": {
-			PostProcessors: map[string]packersdk.PostProcessor{
-				"smoke": nil,
-			},
-		},
-		"data": {
-			Datasources: map[string]packersdk.Datasource{
-				"source": nil,
-			},
-		},
-	}
-	mockInstalledPlugins = map[string]pluginsdk.Set{
-		fmt.Sprintf("bird_%s", getFormattedInstalledPluginSuffix()): {
-			Builders: map[string]packersdk.Builder{
-				"feather":   nil,
-				"guacamole": nil,
-			},
-		},
-		fmt.Sprintf("chimney_%s", getFormattedInstalledPluginSuffix()): {
-			PostProcessors: map[string]packersdk.PostProcessor{
-				"smoke": nil,
-			},
-		},
-		fmt.Sprintf("data_%s", getFormattedInstalledPluginSuffix()): {
-			Datasources: map[string]packersdk.Datasource{
-				"source": nil,
-			},
-		},
-	}
-
-	invalidInstalledPluginsMock = map[string]pluginsdk.Set{
-		"bird_v0.1.1_x5.0_wrong_architecture": {
-			Builders: map[string]packersdk.Builder{
-				"feather":   nil,
-				"guacamole": nil,
-			},
-		},
-		"chimney_cool_ranch": {
-			PostProcessors: map[string]packersdk.PostProcessor{
-				"smoke": nil,
-			},
-		},
-		"data": {
-			Datasources: map[string]packersdk.Datasource{
-				"source": nil,
-			},
-		},
-	}
-	defaultNameMock = map[string]pluginsdk.Set{
-		"foo": {
-			Builders: map[string]packersdk.Builder{
-				"bar":                  nil,
-				"baz":                  nil,
-				pluginsdk.DEFAULT_NAME: nil,
-			},
-		},
-	}
-
-	doubleDefaultMock = map[string]pluginsdk.Set{
-		"yolo": {
-			Builders: map[string]packersdk.Builder{
-				"bar":                  nil,
-				"baz":                  nil,
-				pluginsdk.DEFAULT_NAME: nil,
-			},
-			PostProcessors: map[string]packersdk.PostProcessor{
-				pluginsdk.DEFAULT_NAME: nil,
-			},
-		},
-	}
-
-	badDefaultNameMock = map[string]pluginsdk.Set{
-		"foo": {
-			Builders: map[string]packersdk.Builder{
-				"bar":                  nil,
-				"baz":                  nil,
-				pluginsdk.DEFAULT_NAME: nil,
-			},
-		},
-	}
+	mockPlugins                 = map[string]pluginsdk.Set{}
+	mockInstalledPlugins        = map[string]pluginsdk.Set{}
+	invalidInstalledPluginsMock = map[string]pluginsdk.Set{}
+	defaultNameMock             = map[string]pluginsdk.Set{}
+	doubleDefaultMock           = map[string]pluginsdk.Set{}
+	badDefaultNameMock          = map[string]pluginsdk.Set{}
 )
+
+func init() {
+	mockPluginsBird := pluginsdk.NewSet()
+	mockPluginsBird.Builders = map[string]packersdk.Builder{
+		"feather":   nil,
+		"guacamole": nil,
+	}
+	mockPluginsChim := pluginsdk.NewSet()
+	mockPluginsChim.PostProcessors = map[string]packersdk.PostProcessor{
+		"smoke": nil,
+	}
+	mockPluginsData := pluginsdk.NewSet()
+	mockPluginsData.Datasources = map[string]packersdk.Datasource{
+		"source": nil,
+	}
+	mockPlugins["bird"] = *mockPluginsBird
+	mockPlugins["chimney"] = *mockPluginsChim
+	mockPlugins["data"] = *mockPluginsData
+
+	mockInstalledPluginsBird := pluginsdk.NewSet()
+	mockInstalledPluginsBird.Builders = map[string]packersdk.Builder{
+		"feather":   nil,
+		"guacamole": nil,
+	}
+	mockInstalledPluginsChim := pluginsdk.NewSet()
+	mockInstalledPluginsChim.PostProcessors = map[string]packersdk.PostProcessor{
+		"smoke": nil,
+	}
+	mockInstalledPluginsData := pluginsdk.NewSet()
+	mockInstalledPluginsData.Datasources = map[string]packersdk.Datasource{
+		"source": nil,
+	}
+	mockInstalledPlugins[fmt.Sprintf("bird_%s", getFormattedInstalledPluginSuffix())] = *mockInstalledPluginsBird
+	mockInstalledPlugins[fmt.Sprintf("chimney_%s", getFormattedInstalledPluginSuffix())] = *mockInstalledPluginsChim
+	mockInstalledPlugins[fmt.Sprintf("data_%s", getFormattedInstalledPluginSuffix())] = *mockInstalledPluginsData
+
+	invalidInstalledPluginsMockBird := pluginsdk.NewSet()
+	invalidInstalledPluginsMockBird.Builders = map[string]packersdk.Builder{
+		"feather":   nil,
+		"guacamole": nil,
+	}
+	invalidInstalledPluginsMockChimney := pluginsdk.NewSet()
+	invalidInstalledPluginsMockChimney.PostProcessors = map[string]packersdk.PostProcessor{
+		"smoke": nil,
+	}
+	invalidInstalledPluginsMockData := pluginsdk.NewSet()
+	invalidInstalledPluginsMockData.Datasources = map[string]packersdk.Datasource{
+		"source": nil,
+	}
+	invalidInstalledPluginsMock["bird_v0.1.1_x5.0_wrong_architecture"] = *invalidInstalledPluginsMockBird
+	invalidInstalledPluginsMock["chimney_cool_ranch"] = *invalidInstalledPluginsMockChimney
+	invalidInstalledPluginsMock["data"] = *invalidInstalledPluginsMockData
+
+	defaultNameFooSet := pluginsdk.NewSet()
+	defaultNameFooSet.Builders = map[string]packersdk.Builder{
+		"bar":                  nil,
+		"baz":                  nil,
+		pluginsdk.DEFAULT_NAME: nil,
+	}
+	defaultNameMock["foo"] = *defaultNameFooSet
+
+	doubleDefaultYoloSet := pluginsdk.NewSet()
+	doubleDefaultYoloSet.Builders = map[string]packersdk.Builder{
+		"bar":                  nil,
+		"baz":                  nil,
+		pluginsdk.DEFAULT_NAME: nil,
+	}
+	doubleDefaultYoloSet.PostProcessors = map[string]packersdk.PostProcessor{
+		pluginsdk.DEFAULT_NAME: nil,
+	}
+	doubleDefaultMock["yolo"] = *doubleDefaultYoloSet
+
+	badDefaultSet := pluginsdk.NewSet()
+	badDefaultSet.Builders = map[string]packersdk.Builder{
+		"bar":                  nil,
+		"baz":                  nil,
+		pluginsdk.DEFAULT_NAME: nil,
+	}
+	badDefaultNameMock["foo"] = *badDefaultSet
+}
