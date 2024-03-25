@@ -179,7 +179,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 		parts := strings.SplitN(versionsStr, "_", 2)
-		pluginVersionStr, protocolVerionStr := parts[0], parts[1]
+		pluginVersionStr, protocolVersionStr := parts[0], parts[1]
 		ver, err := version.NewVersion(pluginVersionStr)
 		if err != nil {
 			// could not be parsed, ignoring the file
@@ -220,8 +220,8 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		}
 
 		// Check the API version matches between path and describe
-		if describeInfo.APIVersion != protocolVerionStr {
-			log.Printf("plugin %q reported API version %q while its name implies version %q, ignoring", path, describeInfo.APIVersion, protocolVerionStr)
+		if describeInfo.APIVersion != protocolVersionStr {
+			log.Printf("plugin %q reported API version %q while its name implies version %q, ignoring", path, describeInfo.APIVersion, protocolVersionStr)
 			continue
 		}
 
@@ -236,9 +236,9 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
-		if err := opts.CheckProtocolVersion(protocolVerionStr); err != nil {
+		if err := opts.CheckProtocolVersion(protocolVersionStr); err != nil {
 			log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
-				"with this version of Packer. %s", path, protocolVerionStr, err)
+				"with this version of Packer. %s", path, protocolVersionStr, err)
 			continue
 		}
 
