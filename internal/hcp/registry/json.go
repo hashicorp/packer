@@ -83,7 +83,14 @@ func (h *JSONRegistry) PopulateVersion(ctx context.Context) error {
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
 func (h *JSONRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
-	return h.bucket.startBuild(ctx, build.Name())
+	name := build.Name()
+
+	metadata := build.(*packer.CoreBuild).GetMetadata()
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return err
+	}
+	return h.bucket.startBuild(ctx, name)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
@@ -105,6 +112,11 @@ func (h *JSONRegistry) CompleteBuild(
 			"[TRACE] JSON 'Plugin' Metadata for build name %q: %q -- %q\n",
 			name, k, pluginDetails.Description.Version,
 		)
+	}
+
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return nil, err
 	}
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
