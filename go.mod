@@ -1,6 +1,6 @@
 module github.com/hashicorp/packer
 
-replace github.com/hashicorp/hcp-sdk-go => ../hcp-sdk-go-internal
+replace github.com/hashicorp/hcp-sdk-go => github.com/hashicorp/hcp-sdk-go-internal v0.0.0-20240325194734-0bb6bd5bbc19
 
 require (
 	cloud.google.com/go v0.110.8 // indirect
@@ -24,7 +24,6 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/hcl/v2 v2.19.1
-	// github.com/hashicorp/hcp-sdk-go v0.85.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.2
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
