@@ -1,5 +1,7 @@
 module github.com/hashicorp/packer
 
+replace github.com/hashicorp/hcp-sdk-go => github.com/hashicorp/hcp-sdk-go-internal v0.0.0-20240325194734-0bb6bd5bbc19
+
 require (
 	cloud.google.com/go v0.110.8 // indirect
 	github.com/biogo/hts v1.4.3
