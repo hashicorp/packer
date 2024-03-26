@@ -19,6 +19,7 @@ type Build struct {
 	Labels        map[string]string
 	Artifacts     map[string]packerSDKRegistry.Image
 	Status        hcpPackerModels.HashicorpCloudPacker20230101BuildStatus
+	Metadata      hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata
 }
 
 // NewBuildFromCloudPackerBuild converts a HashicorpCloudPackerBuild to a local build that can be tracked and
