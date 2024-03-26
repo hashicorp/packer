@@ -46,6 +46,15 @@
      version constraints. This work allows users to use binaries with versions
      reported as "x.y.z-dev" to be used with the Packer `required_plugins`
      block. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+* core: Packer now supports local paths to plugins for the `packer plugins remove`
+     command. This addition makes it possible to pipe commands like
+     `packer plugins installed` with it for speedy cleanup of installed plugins.
+     [GH-12886](https://github.com/hashicorp/packer/pull/12886)
+* core: Version metadata support for plugins. Plugins may now formally have metadata
+     in their versions, Packer supports it, and applies the semver recommendations on
+     them, i.e. they are ignored for comparison/sorting purposes, but allowed for
+     adding extra information about a plugin.
+     [GH-12888](https://github.com/hashicorp/packer/pull/12888)
 
 Given the specified version constraint only versions greater than or equal to 1.1.0 will be considered.
 
