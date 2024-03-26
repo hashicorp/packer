@@ -214,7 +214,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 		nil,
 		status,
 		nil,
-		buildToUpdate.Metadata,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -287,7 +287,7 @@ func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error 
 		buildToUpdate.Labels,
 		status,
 		artifacts,
-		buildToUpdate.Metadata,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -612,8 +612,8 @@ func (bucket *Bucket) AddMetadataToBuild(
 		return err
 	}
 
-	preparedMetadata := make(map[string]interface{})
-	preparedMetadata["version"] = metadata.PackerVersion
+	packerMetadata := make(map[string]interface{})
+	packerMetadata["version"] = metadata.PackerVersion
 
 	var pluginsMetadata []map[string]interface{}
 	for _, plugin := range metadata.Plugins {
@@ -623,9 +623,9 @@ func (bucket *Bucket) AddMetadataToBuild(
 		}
 		pluginsMetadata = append(pluginsMetadata, pluginMetadata)
 	}
-	preparedMetadata["plugins"] = pluginsMetadata
+	packerMetadata["plugins"] = pluginsMetadata
 
-	buildToUpdate.Metadata = preparedMetadata
+	buildToUpdate.Metadata.Packer = packerMetadata
 	return nil
 }
 
