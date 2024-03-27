@@ -52,6 +52,46 @@ type CoreBuild struct {
 	prepareCalled bool
 }
 
+type BuildMetadata struct {
+	PackerVersion string
+	Plugins       map[string]PluginDetails
+}
+
+func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
+	resp := map[string]PluginDetails{}
+
+	builderPlugin, builderPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType)]
+	if builderPluginOk {
+		resp[builderPlugin.Name] = builderPlugin
+	}
+
+	for _, pp := range b.PostProcessors {
+		for _, p := range pp {
+			postprocessorsPlugin, postprocessorsPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType)]
+			if postprocessorsPluginOk {
+				resp[postprocessorsPlugin.Name] = postprocessorsPlugin
+			}
+		}
+	}
+
+	for _, pv := range b.Provisioners {
+		provisionerPlugin, provisionerPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, pv.PType)]
+		if provisionerPluginOk {
+			resp[provisionerPlugin.Name] = provisionerPlugin
+		}
+	}
+
+	return resp
+}
+
+func (b *CoreBuild) GetMetadata() BuildMetadata {
+	metadata := BuildMetadata{
+		PackerVersion: version.FormattedVersion(),
+		Plugins:       b.getPluginsMetadata(),
+	}
+	return metadata
+}
+
 // CoreBuildPostProcessor Keeps track of the post-processor and the
 // configuration of the post-processor used within a build.
 type CoreBuildPostProcessor struct {

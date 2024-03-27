@@ -622,6 +622,7 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Bu
 
 			decoded, _ := decodeHCL2Spec(srcUsage.Body, cfg.EvalContext(BuildContext, nil), builder)
 			pcb.HCLConfig = decoded
+			pcb.BuilderType = srcUsage.Type
 
 			// If the builder has provided a list of to-be-generated variables that
 			// should be made accessible to provisioners, pass that list into

@@ -70,6 +70,12 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	if ok {
 		name = cb.Type
 	}
+
+	metadata := cb.GetMetadata()
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return err
+	}
 	return h.bucket.startBuild(ctx, name)
 }
 
@@ -84,6 +90,22 @@ func (h *HCLRegistry) CompleteBuild(
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
 		name = cb.Type
+	}
+
+	metadata := cb.GetMetadata()
+	log.Printf(
+		"[TRACE] HCL 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] HCL 'Plugin' Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
+	}
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return nil, err
 	}
 	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }

@@ -83,7 +83,14 @@ func (h *JSONRegistry) PopulateVersion(ctx context.Context) error {
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
 func (h *JSONRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
-	return h.bucket.startBuild(ctx, build.Name())
+	name := build.Name()
+
+	metadata := build.(*packer.CoreBuild).GetMetadata()
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return err
+	}
+	return h.bucket.startBuild(ctx, name)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
@@ -93,7 +100,25 @@ func (h *JSONRegistry) CompleteBuild(
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	return h.bucket.completeBuild(ctx, build.Name(), artifacts, buildErr)
+	name := build.Name()
+
+	metadata := build.(*packer.CoreBuild).GetMetadata()
+	log.Printf(
+		"[TRACE] JSON 'Packer Version' Metadata for build name %q: %q\n",
+		name, metadata.PackerVersion,
+	)
+	for k, pluginDetails := range metadata.Plugins {
+		log.Printf(
+			"[TRACE] JSON 'Plugin' Metadata for build name %q: %q -- %q\n",
+			name, k, pluginDetails.Description.Version,
+		)
+	}
+
+	err := h.bucket.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return nil, err
+	}
+	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done
