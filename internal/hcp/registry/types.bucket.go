@@ -19,7 +19,6 @@ import (
 	"github.com/hashicorp/packer/hcl2template"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 	"github.com/hashicorp/packer/internal/hcp/env"
-	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 )
@@ -601,32 +600,6 @@ func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
 
 type NotAHCPArtifactError struct {
 	error
-}
-
-// AddMetadataToBuild adds metadata to a build in the HCP Packer registry.
-func (bucket *Bucket) AddMetadataToBuild(
-	ctx context.Context, buildName string, metadata packer.BuildMetadata,
-) error {
-	buildToUpdate, err := bucket.Version.Build(buildName)
-	if err != nil {
-		return err
-	}
-
-	packerMetadata := make(map[string]interface{})
-	packerMetadata["version"] = metadata.PackerVersion
-
-	var pluginsMetadata []map[string]interface{}
-	for _, plugin := range metadata.Plugins {
-		pluginMetadata := map[string]interface{}{
-			"version": plugin.Description.Version,
-			"name":    plugin.Name,
-		}
-		pluginsMetadata = append(pluginsMetadata, pluginMetadata)
-	}
-	packerMetadata["plugins"] = pluginsMetadata
-
-	buildToUpdate.Metadata.Packer = packerMetadata
-	return nil
 }
 
 func (bucket *Bucket) completeBuild(
