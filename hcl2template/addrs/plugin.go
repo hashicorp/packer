@@ -110,7 +110,7 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 
 	// split the source string into individual components
 	parts := strings.Split(str, "/")
-	if len(parts) != 3 {
+	if len(parts) < 3 {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid plugin source string",
@@ -157,8 +157,8 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 	}
 	ret.Namespace = namespace
 
-	// the hostname is always the first part in a three-part source string
-	ret.Hostname = parts[0]
+	// the hostname is always the first-to-last-second part
+	ret.Hostname = strings.Join(parts[0:len(parts)-2], "/")
 
 	// Due to how plugin executables are named and plugin git repositories
 	// are conventionally named, it's a reasonable and
