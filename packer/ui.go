@@ -47,8 +47,16 @@ func (u *ColoredUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.colorize(query, u.Color, true))
 }
 
+func (u *ColoredUi) Askf(query string, vals ...any) (string, error) {
+	return u.Ask(fmt.Sprintf(query, vals...))
+}
+
 func (u *ColoredUi) Say(message string) {
 	u.Ui.Say(u.colorize(message, u.Color, true))
+}
+
+func (u *ColoredUi) Sayf(message string, vals ...any) {
+	u.Say(fmt.Sprintf(message, vals...))
 }
 
 func (u *ColoredUi) Message(message string) {
@@ -62,6 +70,10 @@ func (u *ColoredUi) Error(message string) {
 	}
 
 	u.Ui.Error(u.colorize(message, color, true))
+}
+
+func (u *ColoredUi) Errorf(message string, vals ...any) {
+	u.Error(fmt.Sprintf(message, vals...))
 }
 
 func (u *ColoredUi) Machine(t string, args ...string) {
@@ -121,8 +133,16 @@ func (u *TargetedUI) Ask(query string) (string, error) {
 	return u.Ui.Ask(u.prefixLines(true, query))
 }
 
+func (u *TargetedUI) Askf(query string, args ...any) (string, error) {
+	return u.Ask(fmt.Sprintf(query, args...))
+}
+
 func (u *TargetedUI) Say(message string) {
 	u.Ui.Say(u.prefixLines(true, message))
+}
+
+func (u *TargetedUI) Sayf(message string, args ...any) {
+	u.Say(fmt.Sprintf(message, args...))
 }
 
 func (u *TargetedUI) Message(message string) {
@@ -131,6 +151,10 @@ func (u *TargetedUI) Message(message string) {
 
 func (u *TargetedUI) Error(message string) {
 	u.Ui.Error(u.prefixLines(true, message))
+}
+
+func (u *TargetedUI) Errorf(message string, args ...any) {
+	u.Error(fmt.Sprintf(message, args...))
 }
 
 func (u *TargetedUI) Machine(t string, args ...string) {
@@ -170,8 +194,16 @@ func (u *MachineReadableUi) Ask(query string) (string, error) {
 	return "", errors.New("machine-readable UI can't ask")
 }
 
+func (u *MachineReadableUi) Askf(query string, args ...any) (string, error) {
+	return u.Ask(fmt.Sprintf(query, args...))
+}
+
 func (u *MachineReadableUi) Say(message string) {
 	u.Machine("ui", "say", message)
+}
+
+func (u *MachineReadableUi) Sayf(message string, args ...any) {
+	u.Say(fmt.Sprintf(message, args...))
 }
 
 func (u *MachineReadableUi) Message(message string) {
@@ -180,6 +212,10 @@ func (u *MachineReadableUi) Message(message string) {
 
 func (u *MachineReadableUi) Error(message string) {
 	u.Machine("ui", "error", message)
+}
+
+func (u *MachineReadableUi) Errorf(message string, args ...any) {
+	u.Error(fmt.Sprintf(message, args...))
 }
 
 func (u *MachineReadableUi) Machine(category string, args ...string) {
@@ -232,8 +268,16 @@ func (u *TimestampedUi) Ask(query string) (string, error) {
 	return u.Ui.Ask(query)
 }
 
+func (u *TimestampedUi) Askf(query string, args ...any) (string, error) {
+	return u.Ask(fmt.Sprintf(query, args...))
+}
+
 func (u *TimestampedUi) Say(message string) {
 	u.Ui.Say(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Sayf(message string, args ...any) {
+	u.Say(fmt.Sprintf(message, args...))
 }
 
 func (u *TimestampedUi) Message(message string) {
@@ -242,6 +286,10 @@ func (u *TimestampedUi) Message(message string) {
 
 func (u *TimestampedUi) Error(message string) {
 	u.Ui.Error(u.timestampLine(message))
+}
+
+func (u *TimestampedUi) Errorf(message string, args ...any) {
+	u.Error(fmt.Sprintf(message, args...))
 }
 
 func (u *TimestampedUi) Machine(message string, args ...string) {
