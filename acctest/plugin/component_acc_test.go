@@ -22,9 +22,7 @@ var basicAmazonAmiDatasourceHCL2Template string
 
 func TestAccInitAndBuildBasicAmazonAmiDatasource(t *testing.T) {
 	plugin := addrs.Plugin{
-		Hostname:  "github.com",
-		Namespace: "hashicorp",
-		Type:      "amazon",
+		Source: "github.com/hashicorp/amazon",
 	}
 	testCase := &acctest.PluginTestCase{
 		Name: "amazon-ami_basic_datasource_test",

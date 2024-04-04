@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -96,11 +97,64 @@ func (pr Requirement) FilenamePrefix() string {
 	if pr.Identifier == nil {
 		return "packer-plugin-"
 	}
-	return "packer-plugin-" + pr.Identifier.Type + "_"
+
+	return "packer-plugin-" + pr.Identifier.Name() + "_"
 }
 
 func (opts BinaryInstallationOptions) FilenameSuffix() string {
 	return "_" + opts.OS + "_" + opts.ARCH + opts.Ext
+}
+
+// getPluginBinaries lists the plugin binaries installed locally.
+//
+// Each plugin binary must be in the right hierarchy (not root) and has to be
+// conforming to the packer-plugin-<name>_<version>_<API>_<os>_<arch> convention.
+func (pr Requirement) getPluginBinaries(opts ListInstallationsOptions) ([]string, error) {
+	var matches []string
+
+	rootdir := opts.PluginDirectory
+	if pr.Identifier != nil {
+		rootdir = filepath.Join(rootdir, path.Dir(pr.Identifier.Source))
+	}
+
+	if _, err := os.Lstat(rootdir); err != nil {
+		log.Printf("Directory %q does not exist, the plugin likely isn't installed locally yet.", rootdir)
+		return matches, nil
+	}
+
+	err := filepath.WalkDir(rootdir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// No need to inspect directory entries, we can continue walking
+		if d.IsDir() {
+			return nil
+		}
+
+		// Skip plugins installed at root, only those in a hierarchy should be considered valid
+		if filepath.Dir(path) == opts.PluginDirectory {
+			return nil
+		}
+
+		// If the binary's name doesn't start with packer-plugin-, we skip it.
+		if !strings.HasPrefix(filepath.Base(path), pr.FilenamePrefix()) {
+			return nil
+		}
+		// If the binary's name doesn't match the expected convention, we skip it
+		if !strings.HasSuffix(filepath.Base(path), opts.FilenameSuffix()) {
+			return nil
+		}
+
+		matches = append(matches, path)
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return matches, err
 }
 
 // ListInstallations lists unique installed versions of plugin Requirement pr
@@ -113,21 +167,13 @@ func (opts BinaryInstallationOptions) FilenameSuffix() string {
 // considered.
 func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallList, error) {
 	res := InstallList{}
-	FilenamePrefix := pr.FilenamePrefix()
-	filenameSuffix := opts.FilenameSuffix()
 	log.Printf("[TRACE] listing potential installations for %q that match %q. %#v", pr.Identifier, pr.VersionConstraints, opts)
 
-	glob := ""
-	if pr.Identifier == nil {
-		glob = filepath.Join(opts.PluginDirectory, "*", "*", "*", FilenamePrefix+"*"+filenameSuffix)
-	} else {
-		glob = filepath.Join(opts.PluginDirectory, pr.Identifier.Hostname, pr.Identifier.Namespace, pr.Identifier.Type, FilenamePrefix+"*"+filenameSuffix)
+	matches, err := pr.getPluginBinaries(opts)
+	if err != nil {
+		return nil, fmt.Errorf("ListInstallations: failed to list installed plugins: %s", err)
 	}
 
-	matches, err := filepath.Glob(glob)
-	if err != nil {
-		return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", pr.Identifier.String(), err)
-	}
 	for _, path := range matches {
 		fname := filepath.Base(path)
 		if fname == "." {
@@ -156,8 +202,8 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		}
 
 		// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
-		versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
-		versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
+		versionsStr := strings.TrimPrefix(fname, pr.FilenamePrefix())
+		versionsStr = strings.TrimSuffix(versionsStr, opts.FilenameSuffix())
 
 		if pr.Identifier == nil {
 			if idx := strings.Index(versionsStr, "_"); idx > 0 {

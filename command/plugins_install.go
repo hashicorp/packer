@@ -308,7 +308,7 @@ func (c *PluginsInstallCommand) InstallFromBinary(opts plugingetter.ListInstalla
 
 	outputPrefix := fmt.Sprintf(
 		"packer-plugin-%s_v%s_%s",
-		pluginIdentifier.Type,
+		pluginIdentifier.Name(),
 		noMetaVersion,
 		desc.APIVersion,
 	)

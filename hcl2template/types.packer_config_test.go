@@ -474,9 +474,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon",
 									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
+										Source: "github.com/hashicorp/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v0")),
@@ -486,9 +484,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon-v1",
 									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
+										Source: "github.com/hashicorp/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v1")),
@@ -498,9 +494,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon-v2",
 									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
+										Source: "github.com/hashicorp/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v2")),
@@ -510,9 +504,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon-v3",
 									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
+										Source: "github.com/hashicorp/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v3")),
@@ -522,9 +514,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon-v3-azr",
 									Source: "github.com/azr/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "azr",
-										Hostname:  "github.com",
+										Source: "github.com/azr/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v3")),
@@ -534,9 +524,7 @@ func TestParser_no_init(t *testing.T) {
 									Name:   "amazon-v4",
 									Source: "github.com/hashicorp/amazon",
 									Type: &addrs.Plugin{
-										Type:      "amazon",
-										Namespace: "hashicorp",
-										Hostname:  "github.com",
+										Source: "github.com/hashicorp/amazon",
 									},
 									Requirement: VersionConstraint{
 										Required: mustVersionConstraints(version.NewConstraint(">= v4")),
