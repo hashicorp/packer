@@ -35,9 +35,7 @@ func TestChecksumFileEntry_init(t *testing.T) {
 	expectedVersion := "v0.3.0"
 	req := &Requirement{
 		Identifier: &addrs.Plugin{
-			Hostname:  "github.com",
-			Namespace: "ddelnano",
-			Type:      "xenserver",
+			Source: "github.com/ddelnano/xenserver",
 		},
 	}
 
@@ -460,9 +458,10 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 		}
 		toEncode = enc
 	case "zip":
-		acc := options.PluginRequirement.Identifier.Hostname + "/" +
-			options.PluginRequirement.Identifier.RealRelativePath() + "/" +
-			options.ExpectedZipFilename()
+		// Note: we'll act as if the plugin sources would always be github sources for now.
+		// This test will need to be updated if/when we move on to support other sources.
+		parts := options.PluginRequirement.Identifier.Parts()
+		acc := fmt.Sprintf("%s/%s/packer-plugin-%s/%s", parts[0], parts[1], parts[2], options.ExpectedZipFilename())
 
 		zip, found := g.Zips[acc]
 		if found == false {
