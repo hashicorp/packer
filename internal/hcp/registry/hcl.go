@@ -65,12 +65,8 @@ func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
 func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
-	name := build.Name()
-	cb, ok := build.(*packer.CoreBuild)
-	if ok {
-		name = cb.Type
-	}
-	return h.bucket.startBuild(ctx, name)
+	coreBuild := build.(*packer.CoreBuild)
+	return h.bucket.startBuild(ctx, coreBuild)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
@@ -80,12 +76,8 @@ func (h *HCLRegistry) CompleteBuild(
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	name := build.Name()
-	cb, ok := build.(*packer.CoreBuild)
-	if ok {
-		name = cb.Type
-	}
-	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
+	coreBuild := build.(*packer.CoreBuild)
+	return h.bucket.completeBuild(ctx, coreBuild, artifacts, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done

@@ -55,6 +55,7 @@ func TestParse_source(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},

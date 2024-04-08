@@ -5,12 +5,14 @@ package packer
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -498,5 +500,48 @@ func TestBuild_Cancel(t *testing.T) {
 	_, err := build.Run(topCtx, testUi())
 	if err == nil {
 		t.Fatal("build should err")
+	}
+}
+
+func TestCoreBuild_GetMetadata(t *testing.T) {
+	// Create a new CoreBuild
+	build := testBuild()
+
+	for _, p := range build.Provisioners {
+		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, p.PType)] = PluginDetails{
+			Name: "mock",
+			Description: pluginsdk.SetDescription{
+				Version: "1.2.3",
+			},
+			PluginPath: "foo/bar",
+		}
+	}
+
+	for _, pp := range build.PostProcessors {
+		for _, p := range pp {
+			PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType)] = PluginDetails{
+				Name: "mock",
+				Description: pluginsdk.SetDescription{
+					Version: "1.2.3",
+				},
+				PluginPath: "foo/bar",
+			}
+		}
+	}
+
+	// Call GetMetadata
+	metadata := build.GetMetadata()
+
+	// Check the Packer version
+	if metadata.PackerVersion != version.FormattedVersion() {
+		t.Errorf("unexpected Packer version: got %v want %v",
+			metadata.PackerVersion, version.FormattedVersion())
+	}
+
+	// Check the plugins
+	plugins := build.getPluginsMetadata()
+	if !reflect.DeepEqual(metadata.Plugins, plugins) {
+		t.Errorf("unexpected plugins: got %v want %v",
+			metadata.Plugins, plugins)
 	}
 }

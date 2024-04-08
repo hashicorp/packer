@@ -58,6 +58,7 @@ func (c *Client) UpdateBuild(
 	buildLabels map[string]string,
 	buildStatus hcpPackerModels.HashicorpCloudPacker20230101BuildStatus,
 	artifacts []*hcpPackerModels.HashicorpCloudPacker20230101ArtifactCreateBody,
+	metadata *hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata,
 ) (string, error) {
 
 	params := hcpPackerAPI.NewPackerServiceUpdateBuildParamsWithContext(ctx)
@@ -76,6 +77,7 @@ func (c *Client) UpdateBuild(
 		Platform:                 platform,
 		SourceExternalIdentifier: sourceExternalIdentifier,
 		Status:                   &buildStatus,
+		Metadata:                 metadata,
 	}
 
 	resp, err := c.Packer.PackerServiceUpdateBuild(params, nil)

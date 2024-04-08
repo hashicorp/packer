@@ -4,6 +4,7 @@
 package registry
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -16,6 +17,7 @@ import (
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/internal/hcp/env"
+	"github.com/hashicorp/packer/packer"
 	"github.com/oklog/ulid"
 )
 
@@ -173,4 +175,34 @@ func (version *Version) statusSummary(ui sdkpacker.Ui) {
 	buf.WriteString(fmt.Sprintf("HCP_PACKER_BUILD_FINGERPRINT=%q", version.Fingerprint))
 
 	ui.Say(buf.String())
+}
+
+// AddMetadataToBuild adds metadata to a build in the HCP Packer registry.
+func (version *Version) AddMetadataToBuild(
+	ctx context.Context, buildName string, metadata packer.BuildMetadata,
+) error {
+	buildToUpdate, err := version.Build(buildName)
+	if err != nil {
+		return err
+	}
+
+	buildToUpdate.Metadata.Packer = GetPackerMetadataFrom(metadata)
+	return nil
+}
+
+func GetPackerMetadataFrom(bm packer.BuildMetadata) map[string]interface{} {
+	packerMetadata := make(map[string]interface{})
+	packerMetadata["version"] = bm.PackerVersion
+
+	var pluginsMetadata []map[string]interface{}
+	for _, plugin := range bm.Plugins {
+		pluginMetadata := map[string]interface{}{
+			"version": plugin.Description.Version,
+			"name":    plugin.Name,
+		}
+		pluginsMetadata = append(pluginsMetadata, pluginMetadata)
+	}
+	packerMetadata["plugins"] = pluginsMetadata
+
+	return packerMetadata
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/hcl2template"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
+	pkr "github.com/hashicorp/packer/packer"
 )
 
 func createInitialTestBucket(t testing.TB) *Bucket {
@@ -486,7 +487,7 @@ func TestCompleteBuild(t *testing.T) {
 				client: mockCli,
 			}
 
-			dummyBucket.Version.StoreBuild("test-build", &Build{
+			dummyBucket.Version.StoreBuild("test.build", &Build{
 				ID:            "test-build",
 				Platform:      "none",
 				ComponentType: "none",
@@ -495,7 +496,11 @@ func TestCompleteBuild(t *testing.T) {
 				Status:        models.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 			})
 
-			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, nil)
+			testCoreBuild := pkr.CoreBuild{
+				BuildName: "test",
+				Type:      "build",
+			}
+			_, err := dummyBucket.completeBuild(context.Background(), &testCoreBuild, tt.artifactsToUse, nil)
 			if err != nil != tt.expectError {
 				t.Errorf("expected %t error; got %t", tt.expectError, err != nil)
 				t.Logf("error was: %s", err)

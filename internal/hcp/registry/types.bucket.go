@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/packer/hcl2template"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 	"github.com/hashicorp/packer/internal/hcp/env"
+	"github.com/hashicorp/packer/packer"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc/codes"
 )
@@ -213,6 +214,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 		nil,
 		status,
 		nil,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -285,6 +287,7 @@ func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error 
 		buildToUpdate.Labels,
 		status,
 		artifacts,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -535,6 +538,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 					nil,
 					hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 					nil,
+					nil,
 				)
 				if err != nil {
 					log.Printf("[ERROR] failed to send heartbeat for build %q: %s", build, err)
@@ -551,14 +555,22 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 	}, nil
 }
 
-func (bucket *Bucket) startBuild(ctx context.Context, buildName string) error {
+func (bucket *Bucket) startBuild(ctx context.Context, build *packer.CoreBuild) error {
+	buildName := build.Name()
+
+	metadata := build.GetMetadata()
+	err := bucket.Version.AddMetadataToBuild(ctx, buildName, metadata)
+	if err != nil {
+		return err
+	}
+
 	if !bucket.IsExpectingBuildForComponent(buildName) {
 		return &ErrBuildAlreadyDone{
 			Message: "build is already done",
 		}
 	}
 
-	err := bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING)
+	err = bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING)
 	if err != nil {
 		return fmt.Errorf("failed to update HCP Packer Build status for %q: %s", buildName, err)
 	}
@@ -601,10 +613,18 @@ type NotAHCPArtifactError struct {
 
 func (bucket *Bucket) completeBuild(
 	ctx context.Context,
-	buildName string,
+	coreBuild *packer.CoreBuild,
 	packerSDKArtifacts []packerSDK.Artifact,
 	buildErr error,
 ) ([]packerSDK.Artifact, error) {
+	buildName := coreBuild.Name()
+
+	buildMetadata := coreBuild.GetMetadata()
+	err := bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata)
+	if err != nil {
+		return nil, err
+	}
+
 	doneCh, ok := bucket.RunningBuilds[buildName]
 	if !ok {
 		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
