@@ -24,6 +24,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	goversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer-plugin-sdk/random"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	"golang.org/x/mod/semver"
@@ -863,9 +864,76 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							return nil, errs
 						}
 
-						outputFile, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+						tempPluginPath := filepath.Join(os.TempDir(), fmt.Sprintf(
+							"packer-plugin-temp-%s%s",
+							random.Numbers(8),
+							opts.BinaryInstallationOptions.Ext))
+
+						// Save binary to temp so we can ensure it is really the version advertised
+						tempOutput, err := os.OpenFile(tempPluginPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 						if err != nil {
-							err := fmt.Errorf("failed to create %s: %w", outputFileName, err)
+							log.Printf("[ERROR] failed to create temp plugin executable: %s", err)
+							return nil, multierror.Append(errs, err)
+						}
+						defer os.Remove(tempPluginPath)
+
+						_, err = io.Copy(tempOutput, copyFrom)
+						if err != nil {
+							log.Printf("[ERROR] failed to copy uncompressed binary to %q: %s", tempPluginPath, err)
+							return nil, multierror.Append(errs, err)
+						}
+
+						// Not a problem on most platforms, but unsure Windows will let us execute an already
+						// open file, so we close it temporarily to avoid problems
+						_ = tempOutput.Close()
+
+						desc, err := GetPluginDescription(tempPluginPath)
+						if err != nil {
+							err := fmt.Errorf("failed to describe plugin binary %q: %s", tempPluginPath, err)
+							errs = multierror.Append(errs, err)
+							continue
+						}
+
+						descVersion, err := goversion.NewSemver(desc.Version)
+						if err != nil {
+							err := fmt.Errorf("invalid self-reported version %q: %s", desc.Version, err)
+							errs = multierror.Append(errs, err)
+							continue
+						}
+
+						if descVersion.Core().Compare(version.Core()) != 0 {
+							log.Printf("[ERROR] binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
+							continue
+						}
+
+						localOutputFileName := outputFileName
+
+						// Since releases only can be installed remotely, a non-empty prerelease version
+						// means something's not right on the release, as it should report a final version instead.
+						//
+						// Therefore to avoid surprises (and avoid being able to install a version that
+						// cannot be loaded), we error here, and advise users to manually install the plugin if they
+						// need it.
+						if descVersion.Prerelease() != "" {
+							fmt.Printf("Plugin %q release v%s binary reports version %q. This is likely an upstream issue.\n"+
+								"Try opening an issue on the plugin repository asking them to update the plugin's version information.\n",
+								pr.Identifier.String(), version, desc.Version)
+							fmt.Printf("If you need this exact version of the plugin, you can download the binary from the source and install "+
+								"it locally with `packer plugins install --path '<plugin_binary>' %q`.\n"+
+								"This will install the plugin in version %q (required_plugins constraints may need to be updated).\n",
+								pr.Identifier.String(), desc.Version)
+							continue
+						}
+
+						copyFrom, err = os.OpenFile(tempPluginPath, os.O_RDONLY, 0755)
+						if err != nil {
+							log.Printf("[ERROR] failed to re-open temporary plugin file %q: %s", tempPluginPath, err)
+							return nil, multierror.Append(errs, err)
+						}
+
+						outputFile, err := os.OpenFile(localOutputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+						if err != nil {
+							err := fmt.Errorf("failed to create %s: %w", localOutputFileName, err)
 							errs = multierror.Append(errs, err)
 							return nil, errs
 						}
@@ -890,7 +958,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							log.Printf("[WARNING] %v, ignoring", err)
 						}
 
-						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
+						if err := os.WriteFile(localOutputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
@@ -898,7 +966,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 						// Success !!
 						return &Installation{
-							BinaryPath: strings.ReplaceAll(outputFileName, "\\", "/"),
+							BinaryPath: strings.ReplaceAll(localOutputFileName, "\\", "/"),
 							Version:    "v" + version.String(),
 						}, nil
 					}

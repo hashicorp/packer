@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -199,12 +200,17 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						ChecksumFileEntries: map[string][]ChecksumFileEntry{
 							"2.10.0": {{
 								Filename: "packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip",
-								Checksum: "43156b1900dc09b026b54610c4a152edd277366a7f71ff3812583e4a35dd0d4a",
+								Checksum: "5763f8b5b5ed248894e8511a089cf399b96c7ef92d784fb30ee6242a7cb35bce",
 							}},
 						},
 						Zips: map[string]io.ReadCloser{
 							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64.zip": zipFile(map[string]string{
-								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "v2.10.0_x6.0_darwin_amd64",
+								// Make the false plugin echo an output that matches a subset of `describe` for install to work
+								//
+								// Note: this won't work on Windows as they don't have bin/sh, but this will
+								// eventually be replaced by acceptance tests.
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": `#!/bin/sh
+echo '{"version":"v2.10.0","api_version":"x6.0"}'`,
 							}),
 						},
 					},
@@ -246,12 +252,17 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						ChecksumFileEntries: map[string][]ChecksumFileEntry{
 							"2.10.1": {{
 								Filename: "packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64.zip",
-								Checksum: "90ca5b0f13a90238b62581bbf30bacd7e2c9af6592c7f4849627bddbcb039dec",
+								Checksum: "51451da5cd7f1ecd8699668d806bafe58a9222430842afbefdc62a6698dab260",
 							}},
 						},
 						Zips: map[string]io.ReadCloser{
 							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64.zip": zipFile(map[string]string{
-								"packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64": "v2.10.1_x6.1_darwin_amd64",
+								// Make the false plugin echo an output that matches a subset of `describe` for install to work
+								//
+								// Note: this won't work on Windows as they don't have bin/sh, but this will
+								// eventually be replaced by acceptance tests.
+								"packer-plugin-amazon_v2.10.1_x6.1_darwin_amd64": `#!/bin/sh
+echo '{"version":"v2.10.1","api_version":"x6.1"}'`,
 							}),
 						},
 					},
@@ -293,12 +304,17 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						ChecksumFileEntries: map[string][]ChecksumFileEntry{
 							"2.10.0": {{
 								Filename: "packer-plugin-amazon_v2.10.0_x6.1_linux_amd64.zip",
-								Checksum: "825fc931ae0cb151df0c56be41a17a9136c4d1f1ee73ddb8ed6baa17cef31afa",
+								Checksum: "5196f57f37e18bfeac10168db6915caae0341bfc4168ebc3d2b959d746cebd0a",
 							}},
 						},
 						Zips: map[string]io.ReadCloser{
 							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_v2.10.0_x6.1_linux_amd64.zip": zipFile(map[string]string{
-								"packer-plugin-amazon_v2.10.0_x6.1_linux_amd64": "v2.10.0_x6.1_linux_amd64",
+								// Make the false plugin echo an output that matches a subset of `describe` for install to work
+								//
+								// Note: this won't work on Windows as they don't have bin/sh, but this will
+								// eventually be replaced by acceptance tests.
+								"packer-plugin-amazon_v2.10.0_x6.1_linux_amd64": `#!/bin/sh
+echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 							}),
 						},
 					},
@@ -402,6 +418,16 @@ func TestRequirement_InstallLatest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			switch tt.name {
+			case "upgrade-with-diff-protocol-version",
+				"upgrade-with-same-protocol-version",
+				"upgrade-with-one-missing-checksum-file":
+				if runtime.GOOS != "windows" {
+					break
+				}
+				t.Skipf("Test %q cannot run on Windows because of a shell script being invoked, skipping.", tt.name)
+			}
+
 			log.Printf("starting %s test", tt.name)
 
 			identifier, diags := addrs.ParsePluginSourceString("github.com/hashicorp/" + tt.fields.Identifier)
