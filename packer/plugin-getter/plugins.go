@@ -864,7 +864,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							break
 						}
 						if copyFrom == nil {
-							err := fmt.Errorf("could not find a %s file in zipfile", checksum.Filename)
+							err := fmt.Errorf("could not find a %q file in zipfile", expectedBinaryFilename)
 							errs = multierror.Append(errs, err)
 							return nil, errs
 						}
