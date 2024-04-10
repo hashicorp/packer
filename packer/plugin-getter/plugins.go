@@ -211,16 +211,10 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			}
 		}
 
-		descOut, err := exec.Command(path, "describe").Output()
+		describeInfo, err := GetPluginDescription(path)
 		if err != nil {
-			log.Printf("couldn't call describe on %q, ignoring", path)
+			log.Printf("failed to call describe on %q: %s", path, err)
 			continue
-		}
-
-		var describeInfo pluginsdk.SetDescription
-		err = json.Unmarshal(descOut, &describeInfo)
-		if err != nil {
-			log.Printf("%q: describe output deserialization error %q, ignoring", path, err)
 		}
 
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
@@ -931,6 +925,18 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	errs = multierror.Append(errs, fmt.Errorf("could not install any compatible version of plugin %q", pr.Identifier))
 
 	return nil, errs
+}
+
+func GetPluginDescription(pluginPath string) (pluginsdk.SetDescription, error) {
+	out, err := exec.Command(pluginPath, "describe").Output()
+	if err != nil {
+		return pluginsdk.SetDescription{}, err
+	}
+
+	desc := pluginsdk.SetDescription{}
+	err = json.Unmarshal(out, &desc)
+
+	return desc, err
 }
 
 func init() {

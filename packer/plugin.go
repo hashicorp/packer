@@ -5,7 +5,6 @@ package packer
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -127,13 +126,9 @@ func (c *PluginConfig) Discover() error {
 // if the "packer-plugin-amazon" binary had an "ebs" builder one could use
 // the "amazon-ebs" builder.
 func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error {
-	out, err := exec.Command(pluginPath, "describe").Output()
+	desc, err := plugingetter.GetPluginDescription(pluginPath)
 	if err != nil {
-		return err
-	}
-	var desc pluginsdk.SetDescription
-	if err := json.Unmarshal(out, &desc); err != nil {
-		return err
+		return fmt.Errorf("failed to get plugin description from executable %q: %s", pluginPath, err)
 	}
 
 	pluginPrefix := pluginName + "-"
