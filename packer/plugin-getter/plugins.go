@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/go-version"
+	goversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/hcl2template/addrs"
@@ -47,7 +47,7 @@ type Requirement struct {
 
 	// VersionConstraints as defined by user. Empty ( to be avoided ) means
 	// highest found version.
-	VersionConstraints version.Constraints
+	VersionConstraints goversion.Constraints
 }
 
 type BinaryInstallationOptions struct {
@@ -220,7 +220,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
 		parts := strings.SplitN(versionsStr, "_", 2)
 		pluginVersionStr, protocolVersionStr := parts[0], parts[1]
-		ver, err := version.NewVersion(pluginVersionStr)
+		ver, err := goversion.NewVersion(pluginVersionStr)
 		if err != nil {
 			// could not be parsed, ignoring the file
 			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
@@ -237,13 +237,13 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
-		rawVersion, err := version.NewVersion(pluginVersionStr)
+		rawVersion, err := goversion.NewVersion(pluginVersionStr)
 		if err != nil {
 			log.Printf("malformed version string in filename %q: %s, ignoring", pluginVersionStr, err)
 			continue
 		}
 
-		descVersion, err := version.NewVersion(describeInfo.Version)
+		descVersion, err := goversion.NewVersion(describeInfo.Version)
 		if err != nil {
 			log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
 			continue
@@ -411,7 +411,7 @@ type GetOptions struct {
 
 	BinaryInstallationOptions
 
-	version *version.Version
+	version *goversion.Version
 
 	expectedZipFilename string
 }
@@ -614,7 +614,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	getters := opts.Getters
 
 	log.Printf("[TRACE] getting available versions for the %s plugin", pr.Identifier)
-	versions := version.Collection{}
+	versions := goversion.Collection{}
 	var errs *multierror.Error
 	for _, getter := range getters {
 
@@ -642,7 +642,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 			continue
 		}
 		for _, release := range releases {
-			v, err := version.NewVersion(release.Version)
+			v, err := goversion.NewVersion(release.Version)
 			if err != nil {
 				err := fmt.Errorf("could not parse release version %s. %w", release.Version, err)
 				errs = multierror.Append(errs, err)
