@@ -917,7 +917,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}
 	}
 
-	if errs.Len() == 0 {
+	if errs == nil || errs.Len() == 0 {
 		err := fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 		errs = multierror.Append(errs, err)
 	}
