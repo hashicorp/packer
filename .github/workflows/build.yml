@@ -6,13 +6,14 @@
 
 name: build
 
-on: 
-  workflow_dispatch: 
+on:
+  workflow_dispatch:
   workflow_call:
   push:
     branches:
       - main
       - release/**
+      - alvin-huang/**
 
 env:
   REPO_NAME: "packer"
@@ -27,7 +28,7 @@ jobs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
-      - name: 'Determine Go version'
+      - name: "Determine Go version"
         id: get-go-version
         # We use .go-version as our source of truth for current Go
         # version, because "goenv" can react to it automatically.
@@ -66,7 +67,7 @@ jobs:
     outputs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
     steps:
-      - name: 'Checkout directory'
+      - name: "Checkout directory"
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       - name: Generate metadata file
         id: generate-metadata-file
@@ -79,7 +80,7 @@ jobs:
         with:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
-  
+
   build-other:
     needs:
       - set-product-version
@@ -87,9 +88,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [ freebsd, windows, netbsd, openbsd, solaris ]
-        goarch: [ "386", "amd64", "arm"]
-        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
+        goos: [freebsd, windows, netbsd, openbsd, solaris]
+        goarch: ["386", "amd64", "arm"]
+        go: ["${{ needs.get-go-version.outputs.go-version }}"]
         exclude:
           - goos: solaris
             goarch: 386
@@ -122,7 +123,7 @@ jobs:
           reproducible: report
           instructions: |-
             cp LICENSE "$TARGET_DIR/LICENSE.txt"
-            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false    
+            go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false
 
   build-linux:
     needs:
@@ -131,9 +132,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [ linux ]
-        goarch: [ "arm", "arm64", "386", "amd64", "ppc64le"]
-        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
+        goos: [linux]
+        goarch: ["arm", "arm64", "386", "amd64", "ppc64le"]
+        go: ["${{ needs.get-go-version.outputs.go-version }}"]
       fail-fast: true
 
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
@@ -202,9 +203,9 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        goos: [ darwin ]
-        goarch: [ "amd64", "arm64" ]
-        go: [ "${{ needs.get-go-version.outputs.go-version }}" ]
+        goos: [darwin]
+        goarch: ["amd64", "arm64"]
+        go: ["${{ needs.get-go-version.outputs.go-version }}"]
       fail-fast: true
     name: Go ${{ matrix.go }} ${{ matrix.goos }} ${{ matrix.goarch }} build
 
@@ -240,7 +241,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [ "arm", "arm64", "386", "amd64" ]
+        arch: ["arm", "arm64", "386", "amd64"]
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
@@ -270,7 +271,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [ "arm", "arm64", "386", "amd64" ]
+        arch: ["arm", "arm64", "386", "amd64"]
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
