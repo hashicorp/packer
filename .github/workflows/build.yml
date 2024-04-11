@@ -162,6 +162,12 @@ jobs:
             cp LICENSE.txt "$TARGET_DIR/"
             go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false
 
+      - name: Copy license file to config_dir
+        if: ${{ matrix.goos == 'linux' }}
+        env:
+          LICENSE_DIR: ".release/linux/package/usr/share/doc/${{ env.REPO_NAME }}"
+        run: |
+          mkdir -p "$LICENSE_DIR" && cp LICENSE "$LICENSE_DIR/LICENSE.txt"
       - name: Linux Packaging
         uses: hashicorp/actions-packaging-linux@v1
         with:
@@ -175,6 +181,7 @@ jobs:
           binary: "dist/${{ env.REPO_NAME }}"
           deb_depends: "openssl"
           rpm_depends: "openssl"
+          config_dir: ".release/linux/package/"
       - name: Add Linux Package names to env
         run: |
           echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
