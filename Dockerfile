@@ -45,11 +45,13 @@ LABEL name="Packer" \
       version=$PRODUCT_VERSION \
       release=$PRODUCT_VERSION \
       summary="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration." \
-      description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues"
+      description="Packer is a tool for creating identical machine images for multiple platforms from a single source configuration. Please submit issues to https://github.com/hashicorp/packer/issues" \
+      org.opencontainers.image.licenses="BUSL-1.1"
 
 RUN apk add --no-cache git bash wget openssl gnupg xorriso
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
+COPY LICENSE /usr/share/doc/$PRODUCT_NAME/LICENSE.txt
 
 ENTRYPOINT ["/bin/packer"]
 
