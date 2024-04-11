@@ -121,7 +121,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            cp LICENSE.txt "$TARGET_DIR/"
+            cp LICENSE "$TARGET_DIR/LICENSE.txt"
             go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false    
 
   build-linux:
@@ -159,7 +159,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            cp LICENSE.txt "$TARGET_DIR/"
+            cp LICENSE "$TARGET_DIR/LICENSE.txt"
             go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -trimpath -buildvcs=false
 
       - name: Copy license file to config_dir
@@ -229,7 +229,7 @@ jobs:
           arch: ${{ matrix.goarch }}
           reproducible: report
           instructions: |-
-            cp LICENSE.txt "$TARGET_DIR/"
+            cp LICENSE "$TARGET_DIR/LICENSE.txt"
             go build -o "$BIN_PATH" -ldflags="$LD_FLAGS" -tags netcgo -trimpath -buildvcs=false
 
   build-docker-light:
