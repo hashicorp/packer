@@ -70,6 +70,12 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	if ok {
 		name = cb.Type
 	}
+
+	metadata := cb.GetMetadata()
+	err := h.bucket.Version.AddMetadataToBuild(ctx, name, metadata)
+	if err != nil {
+		return err
+	}
 	return h.bucket.startBuild(ctx, name)
 }
 
@@ -80,12 +86,18 @@ func (h *HCLRegistry) CompleteBuild(
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	name := build.Name()
+	buildName := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
-		name = cb.Type
+		buildName = cb.Type
 	}
-	return h.bucket.completeBuild(ctx, name, artifacts, buildErr)
+
+	buildMetadata := cb.GetMetadata()
+	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata)
+	if err != nil {
+		return nil, err
+	}
+	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done

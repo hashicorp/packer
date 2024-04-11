@@ -213,6 +213,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 		nil,
 		status,
 		nil,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -285,6 +286,7 @@ func (bucket *Bucket) markBuildComplete(ctx context.Context, name string) error 
 		buildToUpdate.Labels,
 		status,
 		artifacts,
+		&buildToUpdate.Metadata,
 	)
 	if err != nil {
 		return err
@@ -534,6 +536,7 @@ func (bucket *Bucket) HeartbeatBuild(ctx context.Context, build string) (func(),
 					"",
 					nil,
 					hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
+					nil,
 					nil,
 				)
 				if err != nil {
