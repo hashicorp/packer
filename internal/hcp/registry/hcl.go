@@ -70,7 +70,7 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	if ok {
 		name = cb.Type
 	}
-	
+
 	return h.bucket.startBuild(ctx, name)
 }
 
