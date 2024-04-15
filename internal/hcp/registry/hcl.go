@@ -92,11 +92,6 @@ func (h *HCLRegistry) CompleteBuild(
 		buildName = cb.Type
 	}
 
-	buildMetadata := cb.GetMetadata()
-	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata)
-	if err != nil {
-		return nil, err
-	}
 	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
 }
 
