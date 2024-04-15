@@ -213,7 +213,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 		nil,
 		status,
 		nil,
-		&buildToUpdate.Metadata,
+		nil,
 	)
 	if err != nil {
 		return err

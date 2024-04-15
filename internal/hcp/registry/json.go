@@ -84,12 +84,6 @@ func (h *JSONRegistry) PopulateVersion(ctx context.Context) error {
 // StartBuild is invoked when one build for the configuration is starting to be processed
 func (h *JSONRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
 	name := build.Name()
-
-	metadata := build.(*packer.CoreBuild).GetMetadata()
-	err := h.bucket.Version.AddMetadataToBuild(ctx, name, metadata)
-	if err != nil {
-		return err
-	}
 	return h.bucket.startBuild(ctx, name)
 }
 
