@@ -70,12 +70,7 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	if ok {
 		name = cb.Type
 	}
-
-	metadata := cb.GetMetadata()
-	err := h.bucket.Version.AddMetadataToBuild(ctx, name, metadata)
-	if err != nil {
-		return err
-	}
+	
 	return h.bucket.startBuild(ctx, name)
 }
 
