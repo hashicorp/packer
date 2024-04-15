@@ -157,7 +157,7 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	// Before we go further, we'll check to make sure this version can read
 	// all files, so we can produce a version-related error message rather than
 	// potentially-confusing downstream errors.
-	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion)
+	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion.Core())
 	diags = append(diags, versionDiags...)
 	if versionDiags.HasErrors() {
 		return cfg, diags
