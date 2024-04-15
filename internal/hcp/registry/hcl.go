@@ -71,11 +71,6 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 		name = cb.Type
 	}
 
-	metadata := cb.GetMetadata()
-	err := h.bucket.Version.AddMetadataToBuild(ctx, name, metadata)
-	if err != nil {
-		return err
-	}
 	return h.bucket.startBuild(ctx, name)
 }
 
@@ -92,6 +87,11 @@ func (h *HCLRegistry) CompleteBuild(
 		buildName = cb.Type
 	}
 
+	metadata := cb.GetMetadata()
+	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, metadata)
+	if err != nil {
+		return nil, err
+	}
 	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
 }
 
