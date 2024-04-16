@@ -2,6 +2,10 @@
 
 The root of this repository contains the officially supported HashiCorp Dockerfile to build the hashicorp/packer docker image. The `dev` docker image should be built for local dev and testing, while the production docker image, `release`, is built in CI and makes use of CI-built binaries. The `light` and `full` docker images are built using the official binaries from releases.hashicorp.com.
 
+## License
+
+This image is licensed under (BUSL-1.1)[https://github.com/hashicorp/packer/blob/main/LICENSE].
+
 ## Build
 
 Refer to the Makefile of this repository, especially the `docker` and `docker-dev` targets to build a local version of the dev image based on the sources available.
