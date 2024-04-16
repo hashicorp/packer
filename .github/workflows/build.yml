@@ -40,7 +40,7 @@ jobs:
     outputs:
       product-version: ${{ steps.set-product-version.outputs.product-version }}
       base-product-version: ${{ steps.set-product-version.outputs.base-product-version }}
-      product-date: ${{ steps.get-product-version.outputs.product-date }}
+      product-date: ${{ steps.set-product-version.outputs.product-date }}
       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
       set-ld-flags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}
     steps:
@@ -242,10 +242,10 @@ jobs:
           target: release-light
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{ env.REPO_NAME }}:light
+            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('docker.io/hashicorp/{0}:light', env.REPO_NAME) }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
-            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light
+            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('public.ecr.aws/hashicorp/{0}:light', env.REPO_NAME) }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
           dev_tags: |
@@ -272,9 +272,9 @@ jobs:
           target: release-full
           arch: ${{ matrix.arch }}
           tags: |
-            docker.io/hashicorp/${{ env.REPO_NAME }}:full
+            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('docker.io/hashicorp/{0}:full', env.REPO_NAME) }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
-            public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:full
+            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('public.ecr.aws/hashicorp/{0}:full', env.REPO_NAME) }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
           dev_tags: |
             docker.io/hashicorppreview/${{ env.REPO_NAME }}:full-${{ env.version }}
