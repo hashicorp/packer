@@ -5,7 +5,6 @@ package version
 
 import (
 	_ "embed"
-	"fmt"
 	"strings"
 
 	"github.com/hashicorp/go-version"
@@ -52,21 +51,14 @@ func FormattedVersion() string {
 var SemVer *version.Version
 
 func init() {
-	var err error
+	rawVersion = strings.TrimSpace(rawVersion)
 
-	// Note: we use strings.TrimSpace on the version read from version/VERSION
-	// as it could have trailing whitespaces that must not be part of the
-	// version string, otherwise version.NewSemver will reject it.
-	SemVer, err = version.NewSemver(strings.TrimSpace(rawVersion))
-	if err != nil {
-		panic(fmt.Sprintf("Invalid semver version specified in 'version/VERSION' (%q): %s", rawVersion, err))
-	}
+	PackerVersion = pluginVersion.NewRawVersion(rawVersion)
+	SemVer = PackerVersion.SemVer()
 
-	Version = SemVer.Core().String()
-	VersionPrerelease = SemVer.Prerelease()
-	VersionMetadata = SemVer.Metadata()
-
-	PackerVersion = pluginVersion.InitializePluginVersion(SemVer.Core().String(), SemVer.Prerelease())
+	Version = PackerVersion.GetVersion()
+	VersionPrerelease = PackerVersion.GetVersionPrerelease()
+	VersionMetadata = PackerVersion.GetMetadata()
 }
 
 // String returns the complete version string, including prerelease
