@@ -54,7 +54,11 @@ func init() {
 	rawVersion = strings.TrimSpace(rawVersion)
 
 	PackerVersion = pluginVersion.NewRawVersion(rawVersion)
-	SemVer = PackerVersion.SemVer()
+	// A bug in the SDK prevents us from calling SemVer on the PluginVersion
+	// derived from the rawVersion, as when doing so, we reset the semVer
+	// attribute to only use the core part of the version, thereby dropping any
+	// information on pre-release/metadata.
+	SemVer, _ = version.NewVersion(rawVersion)
 
 	Version = PackerVersion.GetVersion()
 	VersionPrerelease = PackerVersion.GetVersionPrerelease()
