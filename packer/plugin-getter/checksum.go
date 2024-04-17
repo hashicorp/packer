@@ -5,6 +5,8 @@ package plugingetter
 
 import (
 	"bytes"
+	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"hash"
@@ -46,8 +48,16 @@ type FileChecksum struct {
 type Checksummer struct {
 	// Something like md5 or sha256
 	Type string
-	// Hash function
-	hash.Hash
+}
+
+func (c *Checksummer) Hash() hash.Hash {
+	switch c.Type {
+	case "sha256":
+		return sha256.New()
+	case "md5":
+		return md5.New()
+	}
+	panic(fmt.Sprintf("Unsupported hash type %q, only md5 and sha256 are supported", c.Type))
 }
 
 func (c *Checksummer) FileExt() string {
@@ -70,7 +80,8 @@ func (c *Checksummer) GetCacheChecksumOfFile(filePath string) ([]byte, error) {
 // ParseChecksum expects the checksum reader to only contain the checksum and
 // nothing else.
 func (c *Checksummer) ParseChecksum(f io.Reader) (Checksum, error) {
-	res := make([]byte, c.Hash.Size())
+	hash := c.Hash()
+	res := make([]byte, hash.Size())
 	_, err := hex.NewDecoder(f).Read(res)
 	if err == io.EOF {
 		err = nil
@@ -94,11 +105,12 @@ func (c *Checksummer) ChecksumFile(expected []byte, filePath string) error {
 }
 
 func (c *Checksummer) Sum(f io.Reader) ([]byte, error) {
-	c.Hash.Reset()
-	if _, err := io.Copy(c.Hash, f); err != nil {
+	hash := c.Hash()
+	hash.Reset()
+	if _, err := io.Copy(hash, f); err != nil {
 		return nil, fmt.Errorf("Failed to hash: %s", err)
 	}
-	return c.Hash.Sum(nil), nil
+	return hash.Sum(nil), nil
 }
 
 func (c *Checksummer) Checksum(expected []byte, f io.Reader) error {
@@ -109,7 +121,7 @@ func (c *Checksummer) Checksum(expected []byte, f io.Reader) error {
 
 	if !bytes.Equal(actual, expected) {
 		return &ChecksumError{
-			Hash:     c.Hash,
+			Hash:     c.Hash(),
 			Actual:   actual,
 			Expected: expected,
 		}

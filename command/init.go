@@ -5,7 +5,6 @@ package command
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"log"
 	"runtime"
@@ -83,7 +82,7 @@ for more info.`)
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 		},
 	}

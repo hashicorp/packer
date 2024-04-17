@@ -5,7 +5,6 @@ package command
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"runtime"
 	"strings"
@@ -91,7 +90,7 @@ func (c *PluginsRequiredCommand) RunContext(buildCtx context.Context, cla *Plugi
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 		},
 	}

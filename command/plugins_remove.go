@@ -5,7 +5,6 @@ package command
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"log"
 	"os"
@@ -133,7 +132,7 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 			OS:   runtime.GOOS,
 			ARCH: runtime.GOARCH,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 		},
 	}

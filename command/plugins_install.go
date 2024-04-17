@@ -128,7 +128,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 		},
 	}

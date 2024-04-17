@@ -6,7 +6,6 @@ package plugingetter
 import (
 	"archive/zip"
 	"bytes"
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -100,7 +99,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -133,7 +131,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -175,7 +172,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -219,7 +215,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -266,7 +261,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -313,7 +307,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -354,7 +347,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},
@@ -394,7 +386,6 @@ func TestRequirement_InstallLatest(t *testing.T) {
 					Checksummers: []Checksummer{
 						{
 							Type: "sha256",
-							Hash: sha256.New(),
 						},
 					},
 				},

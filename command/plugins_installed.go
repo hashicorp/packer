@@ -5,7 +5,6 @@ package command
 
 import (
 	"context"
-	"crypto/sha256"
 	"log"
 	"runtime"
 	"strings"
@@ -48,7 +47,7 @@ func (c *PluginsInstalledCommand) RunContext(buildCtx context.Context) int {
 			OS:   runtime.GOOS,
 			ARCH: runtime.GOARCH,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 		},
 	}

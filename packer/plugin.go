@@ -4,7 +4,6 @@
 package packer
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,6 +14,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -23,7 +23,6 @@ import (
 
 var defaultChecksummer = plugingetter.Checksummer{
 	Type: "sha256",
-	Hash: sha256.New(),
 }
 
 // PluginConfig helps load and use packer plugins
@@ -83,7 +82,7 @@ func (c *PluginConfig) Discover() error {
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 			ReleasesOnly: c.ReleasesOnly,
 		},

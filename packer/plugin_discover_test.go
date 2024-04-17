@@ -4,7 +4,6 @@
 package packer
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"os"
 	"os/exec"
@@ -414,7 +413,6 @@ func createMockChecksumFile(t testing.TB, filePath string) {
 func generateMockChecksumFile(filePath string) (string, error) {
 	cs := plugingetter.Checksummer{
 		Type: "sha256",
-		Hash: sha256.New(),
 	}
 
 	f, err := os.Open(filePath)

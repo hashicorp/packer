@@ -4,7 +4,6 @@
 package hcl2template
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"log"
 	"runtime"
@@ -74,7 +73,7 @@ func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
-				{Type: "sha256", Hash: sha256.New()},
+				{Type: "sha256"},
 			},
 			ReleasesOnly: cfg.parser.PluginConfig.ReleasesOnly,
 		},

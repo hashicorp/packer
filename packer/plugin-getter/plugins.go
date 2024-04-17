@@ -18,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -128,130 +129,161 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 	if err != nil {
 		return nil, fmt.Errorf("ListInstallations: %q failed to list binaries in folder: %v", pr.Identifier.String(), err)
 	}
+
+	resChan := make(chan *Installation, len(matches))
+	wg := &sync.WaitGroup{}
+
 	for _, path := range matches {
-		fname := filepath.Base(path)
-		if fname == "." {
-			continue
-		}
-
-		checksumOk := false
-		for _, checksummer := range opts.Checksummers {
-
-			cs, err := checksummer.GetCacheChecksumOfFile(path)
-			if err != nil {
-				log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
-				continue
+		wg.Add(1)
+		go func(path string) {
+			inst := pr.LoadInstallation(opts, path)
+			if inst != nil {
+				resChan <- inst
 			}
-
-			if err := checksummer.ChecksumFile(cs, path); err != nil {
-				log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
-				continue
-			}
-			checksumOk = true
-			break
-		}
-		if !checksumOk {
-			log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
-			continue
-		}
-
-		// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
-		versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
-		versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
-
-		if pr.Identifier == nil {
-			if idx := strings.Index(versionsStr, "_"); idx > 0 {
-				versionsStr = versionsStr[idx+1:]
-			}
-		}
-
-		descOut, err := exec.Command(path, "describe").Output()
-		if err != nil {
-			log.Printf("couldn't call describe on %q, ignoring", path)
-			continue
-		}
-
-		var describeInfo pluginsdk.SetDescription
-		err = json.Unmarshal(descOut, &describeInfo)
-		if err != nil {
-			log.Printf("%q: describe output deserialization error %q, ignoring", path, err)
-		}
-
-		// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
-		parts := strings.SplitN(versionsStr, "_", 2)
-		pluginVersionStr, protocolVersionStr := parts[0], parts[1]
-		ver, err := version.NewVersion(pluginVersionStr)
-		if err != nil {
-			// could not be parsed, ignoring the file
-			log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
-			continue
-		}
-
-		if fmt.Sprintf("v%s", ver.String()) != pluginVersionStr {
-			log.Printf("version %q in path is non canonical, this could introduce ambiguity and is not supported, ignoring it.", pluginVersionStr)
-			continue
-		}
-
-		if ver.Prerelease() != "" && opts.ReleasesOnly {
-			log.Printf("ignoring pre-release plugin %q", path)
-			continue
-		}
-
-		rawVersion, err := version.NewVersion(pluginVersionStr)
-		if err != nil {
-			log.Printf("malformed version string in filename %q: %s, ignoring", pluginVersionStr, err)
-			continue
-		}
-
-		descVersion, err := version.NewVersion(describeInfo.Version)
-		if err != nil {
-			log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
-			continue
-		}
-
-		if rawVersion.Compare(descVersion) != 0 {
-			log.Printf("plugin %q reported version %q while its name implies version %q, ignoring", path, describeInfo.Version, pluginVersionStr)
-			continue
-		}
-
-		preRel := descVersion.Prerelease()
-		if preRel != "" && preRel != "dev" {
-			log.Printf("invalid plugin pre-release version %q, only development or release binaries are accepted", pluginVersionStr)
-		}
-
-		// Check the API version matches between path and describe
-		if describeInfo.APIVersion != protocolVersionStr {
-			log.Printf("plugin %q reported API version %q while its name implies version %q, ignoring", path, describeInfo.APIVersion, protocolVersionStr)
-			continue
-		}
-
-		// no constraint means always pass, this will happen for implicit
-		// plugin requirements and when we list all plugins.
-		//
-		// Note: we use the raw version name here, without the pre-release
-		// suffix, as otherwise constraints reject them, which is not
-		// what we want by default.
-		if !pr.VersionConstraints.Check(rawVersion.Core()) {
-			log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
-			continue
-		}
-
-		if err := opts.CheckProtocolVersion(protocolVersionStr); err != nil {
-			log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
-				"with this version of Packer. %s", path, protocolVersionStr, err)
-			continue
-		}
-
-		res = append(res, &Installation{
-			BinaryPath: path,
-			Version:    pluginVersionStr,
-			APIVersion: describeInfo.APIVersion,
-		})
+			wg.Done()
+		}(path)
 	}
+	go func() {
+		wg.Wait()
+		close(resChan)
+	}()
 
+	pileWg := &sync.WaitGroup{}
+	pileWg.Add(1)
+	go func() {
+		for inst := range resChan {
+			res = append(res, inst)
+		}
+		pileWg.Done()
+	}()
+
+	pileWg.Wait()
 	sort.Sort(res)
 
 	return res, nil
+}
+
+func (pr Requirement) LoadInstallation(opts ListInstallationsOptions, path string) *Installation {
+	fname := filepath.Base(path)
+	if fname == "." {
+		return nil
+	}
+
+	checksumOk := false
+	for _, checksummer := range opts.Checksummers {
+
+		cs, err := checksummer.GetCacheChecksumOfFile(path)
+		if err != nil {
+			log.Printf("[TRACE] GetChecksumOfFile(%q) failed: %v", path, err)
+			continue
+		}
+
+		if err := checksummer.ChecksumFile(cs, path); err != nil {
+			log.Printf("[TRACE] ChecksumFile(%q) failed: %v", path, err)
+			continue
+		}
+		checksumOk = true
+		break
+	}
+	if !checksumOk {
+		log.Printf("[TRACE] No checksum found for %q ignoring possibly unsafe binary", path)
+		return nil
+	}
+
+	FilenamePrefix := pr.FilenamePrefix()
+	filenameSuffix := opts.FilenameSuffix()
+	// base name could look like packer-plugin-amazon_v1.2.3_x5.1_darwin_amd64.exe
+	versionsStr := strings.TrimPrefix(fname, FilenamePrefix)
+	versionsStr = strings.TrimSuffix(versionsStr, filenameSuffix)
+
+	if pr.Identifier == nil {
+		if idx := strings.Index(versionsStr, "_"); idx > 0 {
+			versionsStr = versionsStr[idx+1:]
+		}
+	}
+
+	descOut, err := exec.Command(path, "describe").Output()
+	if err != nil {
+		log.Printf("couldn't call describe on %q, ignoring", path)
+		return nil
+	}
+
+	var describeInfo pluginsdk.SetDescription
+	err = json.Unmarshal(descOut, &describeInfo)
+	if err != nil {
+		log.Printf("%q: describe output deserialization error %q, ignoring", path, err)
+	}
+
+	// versionsStr now looks like v1.2.3_x5.1 or amazon_v1.2.3_x5.1
+	parts := strings.SplitN(versionsStr, "_", 2)
+	pluginVersionStr, protocolVersionStr := parts[0], parts[1]
+	ver, err := version.NewVersion(pluginVersionStr)
+	if err != nil {
+		// could not be parsed, ignoring the file
+		log.Printf("found %q with an incorrect %q version, ignoring it. %v", path, pluginVersionStr, err)
+		return nil
+	}
+
+	if fmt.Sprintf("v%s", ver.String()) != pluginVersionStr {
+		log.Printf("version %q in path is non canonical, this could introduce ambiguity and is not supported, ignoring it.", pluginVersionStr)
+		return nil
+	}
+
+	if ver.Prerelease() != "" && opts.ReleasesOnly {
+		log.Printf("ignoring pre-release plugin %q", path)
+		return nil
+	}
+
+	rawVersion, err := version.NewVersion(pluginVersionStr)
+	if err != nil {
+		log.Printf("malformed version string in filename %q: %s, ignoring", pluginVersionStr, err)
+		return nil
+	}
+
+	descVersion, err := version.NewVersion(describeInfo.Version)
+	if err != nil {
+		log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
+		return nil
+	}
+
+	if rawVersion.Compare(descVersion) != 0 {
+		log.Printf("plugin %q reported version %q while its name implies version %q, ignoring", path, describeInfo.Version, pluginVersionStr)
+		return nil
+	}
+
+	preRel := descVersion.Prerelease()
+	if preRel != "" && preRel != "dev" {
+		log.Printf("invalid plugin pre-release version %q, only development or release binaries are accepted", pluginVersionStr)
+	}
+
+	// Check the API version matches between path and describe
+	if describeInfo.APIVersion != protocolVersionStr {
+		log.Printf("plugin %q reported API version %q while its name implies version %q, ignoring", path, describeInfo.APIVersion, protocolVersionStr)
+		return nil
+	}
+
+	// no constraint means always pass, this will happen for implicit
+	// plugin requirements and when we list all plugins.
+	//
+	// Note: we use the raw version name here, without the pre-release
+	// suffix, as otherwise constraints reject them, which is not
+	// what we want by default.
+	if !pr.VersionConstraints.Check(rawVersion.Core()) {
+		log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
+		return nil
+	}
+
+	if err := opts.CheckProtocolVersion(protocolVersionStr); err != nil {
+		log.Printf("[NOTICE] binary %s requires protocol version %s that is incompatible "+
+			"with this version of Packer. %s", path, protocolVersionStr, err)
+		return nil
+	}
+
+	return &Installation{
+		BinaryPath: path,
+		Version:    pluginVersionStr,
+		APIVersion: describeInfo.APIVersion,
+	}
 }
 
 // InstallList is a list of installed plugins (binaries) with their versions,
