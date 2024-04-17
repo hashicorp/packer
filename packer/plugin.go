@@ -149,6 +149,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if builderName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
+		if c.Builders.Has(key) {
+			continue
+		}
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
@@ -164,6 +167,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		key := pluginPrefix + postProcessorName
 		if postProcessorName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
+		}
+		if c.PostProcessors.Has(key) {
+			continue
 		}
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
@@ -181,6 +187,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if provisionerName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
 		}
+		if c.Provisioners.Has(key) {
+			continue
+		}
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
@@ -195,6 +204,9 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		key := pluginPrefix + datasourceName
 		if datasourceName == pluginsdk.DEFAULT_NAME {
 			key = pluginName
+		}
+		if c.DataSources.Has(key) {
+			continue
 		}
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()

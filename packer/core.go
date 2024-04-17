@@ -74,6 +74,7 @@ type BasicStore interface {
 
 type BuilderStore interface {
 	BasicStore
+	Has(name string) bool
 	Start(name string) (packersdk.Builder, error)
 }
 
@@ -84,6 +85,7 @@ type BuilderSet interface {
 
 type ProvisionerStore interface {
 	BasicStore
+	Has(name string) bool
 	Start(name string) (packersdk.Provisioner, error)
 }
 
@@ -94,6 +96,7 @@ type ProvisionerSet interface {
 
 type PostProcessorStore interface {
 	BasicStore
+	Has(name string) bool
 	Start(name string) (packersdk.PostProcessor, error)
 }
 
@@ -104,6 +107,7 @@ type PostProcessorSet interface {
 
 type DatasourceStore interface {
 	BasicStore
+	Has(name string) bool
 	Start(name string) (packersdk.Datasource, error)
 }
 
