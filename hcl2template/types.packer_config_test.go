@@ -644,13 +644,26 @@ func TestParser_no_init(t *testing.T) {
 				}{
 					VersionConstraints: nil,
 					RequiredPlugins: []*RequiredPlugins{
-						{},
+						{
+							RequiredPlugins: map[string]*RequiredPlugin{
+								"amazon": {
+									Name:   "amazon",
+									Source: "hashicorp/amazon",
+									Type: &addrs.Plugin{
+										Source: "hashicorp/amazon",
+									},
+									Requirement: VersionConstraint{
+										Required: mustVersionConstraints(version.NewConstraint(">= v0")),
+									},
+								},
+							},
+						},
 					},
 				},
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Clean("testdata/init"),
 			},
-			true, true,
+			false, false,
 			[]packersdk.Build{},
 			false,
 		},
