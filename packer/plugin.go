@@ -151,8 +151,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, key)] = pluginDetails
-
+		GlobalPluginDetailStore.Store(PluginComponentBuilder, key, pluginDetails)
 	}
 
 	if len(desc.Builders) > 0 {
@@ -168,7 +167,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key)] = pluginDetails
+		GlobalPluginDetailStore.Store(PluginComponentPostProcessor, key, pluginDetails)
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -184,8 +183,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, key)] = pluginDetails
-
+		GlobalPluginDetailStore.Store(PluginComponentProvisioner, key, pluginDetails)
 	}
 	if len(desc.Provisioners) > 0 {
 		log.Printf("found external %v provisioner from %s plugin", desc.Provisioners, pluginName)
@@ -200,7 +198,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentDataSource, key)] = pluginDetails
+		GlobalPluginDetailStore.Store(PluginComponentDataSource, key, pluginDetails)
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
@@ -253,13 +251,13 @@ func (c *PluginConfig) Client(path string, args ...string) *PluginClient {
 	return NewClient(&config)
 }
 
-type PluginComponentType string
+type PluginComponentType int
 
 const (
-	PluginComponentBuilder       PluginComponentType = "builder"
-	PluginComponentPostProcessor PluginComponentType = "post-processor"
-	PluginComponentProvisioner   PluginComponentType = "provisioner"
-	PluginComponentDataSource    PluginComponentType = "data-source"
+	PluginComponentBuilder PluginComponentType = iota
+	PluginComponentPostProcessor
+	PluginComponentProvisioner
+	PluginComponentDataSource
 )
 
 type PluginDetails struct {
@@ -268,4 +266,40 @@ type PluginDetails struct {
 	PluginPath  string
 }
 
-var PluginsDetailsStorage = map[string]PluginDetails{}
+type PluginDetailStore struct {
+	BuilderComponents       map[string]PluginDetails
+	DataSourceComponents    map[string]PluginDetails
+	ProvisionerComponents   map[string]PluginDetails
+	PostProcessorComponents map[string]PluginDetails
+}
+
+var GlobalPluginDetailStore = &PluginDetailStore{
+	BuilderComponents:       map[string]PluginDetails{},
+	DataSourceComponents:    map[string]PluginDetails{},
+	ProvisionerComponents:   map[string]PluginDetails{},
+	PostProcessorComponents: map[string]PluginDetails{},
+}
+
+func (pds PluginDetailStore) mapForComponentType(pt PluginComponentType) map[string]PluginDetails {
+	switch pt {
+	case PluginComponentBuilder:
+		return pds.BuilderComponents
+	case PluginComponentPostProcessor:
+		return pds.PostProcessorComponents
+	case PluginComponentProvisioner:
+		return pds.ProvisionerComponents
+	case PluginComponentDataSource:
+		return pds.DataSourceComponents
+	}
+
+	panic(fmt.Sprintf("Unknown plugin type: %d", pt))
+}
+
+func (pds *PluginDetailStore) Get(pt PluginComponentType, name string) (PluginDetails, bool) {
+	pd, ok := pds.mapForComponentType(pt)[name]
+	return pd, ok
+}
+
+func (pds *PluginDetailStore) Store(pt PluginComponentType, name string, detail PluginDetails) {
+	pds.mapForComponentType(pt)[name] = detail
+}
