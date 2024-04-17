@@ -60,24 +60,27 @@ type BuildMetadata struct {
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
-	builderPlugin, builderPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType)]
+	builderPlugin, builderPluginOk := PluginsDetailsStorage.Load(fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType))
 	if builderPluginOk {
-		resp[builderPlugin.Name] = builderPlugin
+		bp := builderPlugin.(PluginDetails)
+		resp[bp.Name] = bp
 	}
 
 	for _, pp := range b.PostProcessors {
 		for _, p := range pp {
-			postprocessorsPlugin, postprocessorsPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType)]
+			postprocessorsPlugin, postprocessorsPluginOk := PluginsDetailsStorage.Load(fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType))
 			if postprocessorsPluginOk {
-				resp[postprocessorsPlugin.Name] = postprocessorsPlugin
+				ppd := postprocessorsPlugin.(PluginDetails)
+				resp[ppd.Name] = ppd
 			}
 		}
 	}
 
 	for _, pv := range b.Provisioners {
-		provisionerPlugin, provisionerPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, pv.PType)]
+		provisionerPlugin, provisionerPluginOk := PluginsDetailsStorage.Load(fmt.Sprintf("%q-%q", PluginComponentProvisioner, pv.PType))
 		if provisionerPluginOk {
-			resp[provisionerPlugin.Name] = provisionerPlugin
+			pd := provisionerPlugin.(PluginDetails)
+			resp[pd.Name] = pd
 		}
 	}
 

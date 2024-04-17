@@ -151,8 +151,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
 			return c.Client(pluginPath, "start", "builder", builderName).Builder()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, key)] = pluginDetails
-
+		PluginsDetailsStorage.Store(fmt.Sprintf("%q-%q", PluginComponentBuilder, key), pluginDetails)
 	}
 
 	if len(desc.Builders) > 0 {
@@ -168,7 +167,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
 			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key)] = pluginDetails
+		PluginsDetailsStorage.Store(fmt.Sprintf("%q-%q", PluginComponentPostProcessor, key), pluginDetails)
 	}
 
 	if len(desc.PostProcessors) > 0 {
@@ -184,7 +183,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
 			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, key)] = pluginDetails
+		PluginsDetailsStorage.Store(fmt.Sprintf("%q-%q", PluginComponentProvisioner, key), pluginDetails)
 
 	}
 	if len(desc.Provisioners) > 0 {
@@ -200,7 +199,7 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
 			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
 		})
-		PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentDataSource, key)] = pluginDetails
+		PluginsDetailsStorage.Store(fmt.Sprintf("%q-%q", PluginComponentDataSource, key), pluginDetails)
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
@@ -268,4 +267,4 @@ type PluginDetails struct {
 	PluginPath  string
 }
 
-var PluginsDetailsStorage = map[string]PluginDetails{}
+var PluginsDetailsStorage = &sync.Map{}
