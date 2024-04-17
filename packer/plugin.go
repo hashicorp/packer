@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -271,6 +272,8 @@ type PluginDetailStore struct {
 	DataSourceComponents    map[string]PluginDetails
 	ProvisionerComponents   map[string]PluginDetails
 	PostProcessorComponents map[string]PluginDetails
+
+	rwMutex sync.RWMutex
 }
 
 var GlobalPluginDetailStore = &PluginDetailStore{
@@ -280,7 +283,7 @@ var GlobalPluginDetailStore = &PluginDetailStore{
 	PostProcessorComponents: map[string]PluginDetails{},
 }
 
-func (pds PluginDetailStore) mapForComponentType(pt PluginComponentType) map[string]PluginDetails {
+func (pds *PluginDetailStore) mapForComponentType(pt PluginComponentType) map[string]PluginDetails {
 	switch pt {
 	case PluginComponentBuilder:
 		return pds.BuilderComponents
@@ -296,10 +299,14 @@ func (pds PluginDetailStore) mapForComponentType(pt PluginComponentType) map[str
 }
 
 func (pds *PluginDetailStore) Get(pt PluginComponentType, name string) (PluginDetails, bool) {
+	pds.rwMutex.RLock()
+	defer pds.rwMutex.RUnlock()
 	pd, ok := pds.mapForComponentType(pt)[name]
 	return pd, ok
 }
 
 func (pds *PluginDetailStore) Store(pt PluginComponentType, name string, detail PluginDetails) {
+	pds.rwMutex.Lock()
+	defer pds.rwMutex.Unlock()
 	pds.mapForComponentType(pt)[name] = detail
 }
