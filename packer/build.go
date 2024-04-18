@@ -60,14 +60,14 @@ type BuildMetadata struct {
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
 	resp := map[string]PluginDetails{}
 
-	builderPlugin, builderPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentBuilder, b.BuilderType)]
+	builderPlugin, builderPluginOk := GlobalPluginsDetailsStore.GetBuilder(b.BuilderType)
 	if builderPluginOk {
 		resp[builderPlugin.Name] = builderPlugin
 	}
 
 	for _, pp := range b.PostProcessors {
 		for _, p := range pp {
-			postprocessorsPlugin, postprocessorsPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentPostProcessor, p.PType)]
+			postprocessorsPlugin, postprocessorsPluginOk := GlobalPluginsDetailsStore.GetPostProcessor(p.PType)
 			if postprocessorsPluginOk {
 				resp[postprocessorsPlugin.Name] = postprocessorsPlugin
 			}
@@ -75,7 +75,7 @@ func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
 	}
 
 	for _, pv := range b.Provisioners {
-		provisionerPlugin, provisionerPluginOk := PluginsDetailsStorage[fmt.Sprintf("%q-%q", PluginComponentProvisioner, pv.PType)]
+		provisionerPlugin, provisionerPluginOk := GlobalPluginsDetailsStore.GetProvisioner(pv.PType)
 		if provisionerPluginOk {
 			resp[provisionerPlugin.Name] = provisionerPlugin
 		}
