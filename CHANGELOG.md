@@ -1,74 +1,26 @@
-## 1.11.0 (Upcoming)
+## 1.10.3 (April 22, 2024)
 
-### NOTES:
-* **Breaking Change**: Support for loading single-component plugins has been removed from Packer. [GH-12785](https://github.com/hashicorp/packer/pull/12785)
+### NOTES
+* A LICENSE.txt file has been added to the Packer release artifacts.
+     [12981](https://github.com/hashicorp/packer/pull/12931)
 
-* **Breaking Change**: Support for loading plugin binaries following
-     the naming convention of packer-plugin-name has been dropped. Packer will now only load
-     plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
-     directory and CHECKSUM files. This change drops support for loading plugin
-     binaries in Packer's executable directory or a template's current working
-     directory. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
+### FEATURES
+* Packer users can now track Packer version and plugin versions used for each
+     build artifact in HCP Packer.
+     [GH-12891](https://github.com/hashicorp/packer/pull/12891)
+     [GH-12910](https://github.com/hashicorp/packer/pull/12910)
+     [GH-12923](https://github.com/hashicorp/packer/pull/12923)
+     [GH-12926](https://github.com/hashicorp/packer/pull/12926)
 
-```shell
-/Users/dev/.packer.d/plugins
-└── github.com
-    └── hashicorp
-        └── happycloud
-            ├── packer-plugin-happycloud_v0.0.1_x5.0_darwin_arm64
-            └── packer-plugin-happycloud_v0.0.1_x5.0_darwin_arm64_SHA256SUM
-```
+### SECURITY
+* Bump github.com/go-jose/go-jose/v3 to address GHSA-c5q2-7r4c-mv6g.
+     [GH-12928](https://github.com/hashicorp/packer/pull/12928)
+* Bump golang.org/x/net to v0.24.0 to address GO-2024-2687.
+     [GH-12924](https://github.com/hashicorp/packer/pull/12924)
 
-### IMPROVEMENTS:
-* core: Move to predictable plugin loading schema -  Packer will now only load
-     plugins stored under PACKER_PLUGIN_PATH using the expected namespaced
-     directory and CHECKSUM files.
-     [GH-12828](https://github.com/hashicorp/packer/pull/12828)
-* core: Remove support loading single-component plugins.
-     [GH-12785](https://github.com/hashicorp/packer/pull/12785)
-* core: Packer now considers development binaries when evaluating plugin
-     version constraints. This work allows users to use binaries with versions
-     reported as "x.y.z-dev" to be used with the Packer `required_plugins`
-     block. [GH-12828](https://github.com/hashicorp/packer/pull/12828)
-
-Given the specified version constraint only versions greater than or equal to 1.1.0 will be considered.
-
-```hcl
-amazon = {
-  source = "github.com/hashicorp/amazon"
-  version = ">= 1.1.0"
-}
-```
-If a development binary is installed, Packer will use it if:
-
-1. It is the highest compatible version installed.
-2. There is no final plugin version with the same version number installed alongside it.
-
-```shell
-/Users/dev/.packer.d/plugins
-└─ github.com
-   └─ hashicorp
-    	└── amazon
-          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64
-          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64_SHA256SUM
-          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
-          └── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
-```
-
-Version 1.1.1-dev of the Amazon plugin will match the specified version constraint and be used for executing the Packer build.
-
-If, however, a 1.1.1 release version of the plugin is available, it will have precedence over the development binary.
-
-```shell
-/Users/dev/.packer.d/plugins
-└─ github.com
-   └─ hashicorp
-    	└── amazon
-          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
-          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
-          ├── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64
-          └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
-```
+### BUG FIXES
+* cmd/fmt: Display information error when Packer `fmt` fails due to HCL2
+     parsing error. [GH-12870](https://github.com/hashicorp/packer/pull/12870)
 
 ## 1.10.2 (March 6, 2024)
 
