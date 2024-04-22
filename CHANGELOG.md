@@ -95,12 +95,35 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
           └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
-## 1.10.3 (Upcoming)
+## 1.10.3 (April 22, 2024)
+
+### NOTES
+* A LICENSE.txt file has been added to the Packer release artifacts.
+     [GH-12981](https://github.com/hashicorp/packer/pull/12931)
+
+### FEATURES
+* Packer users can now track Packer version and plugin versions used for each
+     build artifact in HCP Packer.
+     [GH-12891](https://github.com/hashicorp/packer/pull/12891)
+     [GH-12910](https://github.com/hashicorp/packer/pull/12910)
+     [GH-12923](https://github.com/hashicorp/packer/pull/12923)
+     [GH-12926](https://github.com/hashicorp/packer/pull/12926)
 
 ### IMPROVEMENTS:
 * cmd/fmt: Display actual parsing errors when the `packer fmt` fails to read a
      template containing invalid HCL2 syntax.
      [GH-12870](https://github.com/hashicorp/packer/pull/12870)
+
+### SECURITY
+* Bump github.com/go-jose/go-jose/v3 to address GHSA-c5q2-7r4c-mv6g.
+     [GH-12928](https://github.com/hashicorp/packer/pull/12928)
+* Bump golang.org/x/net to v0.24.0 to address GO-2024-2687.
+     [GH-12924](https://github.com/hashicorp/packer/pull/12924)
+
+### BUG FIXES
+* cmd/fmt: Display information error when Packer `fmt` fails due to HCL2
+     parsing error. [GH-12870](https://github.com/hashicorp/packer/pull/12870)
+
 
 ## 1.10.2 (March 6, 2024)
 
