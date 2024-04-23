@@ -109,11 +109,6 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
      [GH-12923](https://github.com/hashicorp/packer/pull/12923)
      [GH-12926](https://github.com/hashicorp/packer/pull/12926)
 
-### IMPROVEMENTS:
-* cmd/fmt: Display actual parsing errors when the `packer fmt` fails to read a
-     template containing invalid HCL2 syntax.
-     [GH-12870](https://github.com/hashicorp/packer/pull/12870)
-
 ### SECURITY
 * Bump github.com/go-jose/go-jose/v3 to address GHSA-c5q2-7r4c-mv6g.
      [GH-12928](https://github.com/hashicorp/packer/pull/12928)
