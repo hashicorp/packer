@@ -2,7 +2,7 @@
 
 ### NOTES
 * A LICENSE.txt file has been added to the Packer release artifacts.
-     [12981](https://github.com/hashicorp/packer/pull/12931)
+     [GH-12981](https://github.com/hashicorp/packer/pull/12931)
 
 ### FEATURES
 * Packer users can now track Packer version and plugin versions used for each
