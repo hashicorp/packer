@@ -51,7 +51,8 @@ LABEL name="Packer" \
 RUN apk add --no-cache git bash wget openssl gnupg xorriso
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
-COPY LICENSE /usr/share/doc/$PRODUCT_NAME/LICENSE.txt
+RUN mkdir -p /usr/share/doc/Packer
+COPY LICENSE /usr/share/doc/Packer/LICENSE.txt
 
 ENTRYPOINT ["/bin/packer"]
 
