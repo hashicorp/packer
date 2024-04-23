@@ -237,19 +237,13 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
-		rawVersion, err := goversion.NewVersion(pluginVersionStr)
-		if err != nil {
-			log.Printf("malformed version string in filename %q: %s, ignoring", pluginVersionStr, err)
-			continue
-		}
-
 		descVersion, err := goversion.NewVersion(describeInfo.Version)
 		if err != nil {
 			log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
 			continue
 		}
 
-		if rawVersion.Compare(descVersion) != 0 {
+		if ver.Compare(descVersion) != 0 {
 			log.Printf("plugin %q reported version %q while its name implies version %q, ignoring", path, describeInfo.Version, pluginVersionStr)
 			continue
 		}
@@ -271,7 +265,7 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 		// Note: we use the raw version name here, without the pre-release
 		// suffix, as otherwise constraints reject them, which is not
 		// what we want by default.
-		if !pr.VersionConstraints.Check(rawVersion.Core()) {
+		if !pr.VersionConstraints.Check(ver.Core()) {
 			log.Printf("[TRACE] version %q of file %q does not match constraint %q", pluginVersionStr, path, pr.VersionConstraints.String())
 			continue
 		}
