@@ -127,7 +127,20 @@ for more info.`)
 			}
 
 			if cla.Force && !cla.Upgrade {
-				pluginRequirement.VersionConstraints, _ = gversion.NewConstraint(fmt.Sprintf("=%s", installs[len(installs)-1].Version))
+				// Only place another constaint to the latest release
+				// binary, if any, otherwise this is essentially the same
+				// as an upgrade
+				var installVersion string
+				for _, install := range installs {
+					ver, _ := gversion.NewVersion(install.Version)
+					if ver.Prerelease() == "" {
+						installVersion = install.Version
+					}
+				}
+
+				if installVersion != "" {
+					pluginRequirement.VersionConstraints, _ = gversion.NewConstraint(fmt.Sprintf("=%s", installVersion))
+				}
 			}
 		}
 
