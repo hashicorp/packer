@@ -721,7 +721,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						continue
 					}
 					if err := entry.validate("v"+version.String(), opts.BinaryInstallationOptions); err != nil {
-						log.Printf("[INFO] ignoring invalid remote binary %s: %s", entry.Filename, err)
 						continue
 					}
 
