@@ -85,6 +85,7 @@ for more info.`)
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: true,
 		},
 	}
 

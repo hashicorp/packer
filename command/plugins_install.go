@@ -130,6 +130,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: true,
 		},
 	}
 	if runtime.GOOS == "windows" {
