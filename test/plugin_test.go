@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
 var compiledPlugins = struct {
@@ -81,6 +82,23 @@ func BinaryName(version *version.Version) string {
 	}
 
 	return retStr
+}
+
+// ExpectedInstalledName is the expected full name of the plugin once installed.
+func ExpectedInstalledName(versionStr string) string {
+	v := version.Must(version.NewSemver(versionStr))
+
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+
+	return fmt.Sprintf("packer-plugin-tester_v%s%s_x%s.%s_%s_%s%s",
+		v.Core().String(),
+		v.Prerelease(),
+		plugin.APIVersionMajor,
+		plugin.APIVersionMinor,
+		runtime.GOOS, runtime.GOARCH, ext)
 }
 
 // BuildSimplePlugin creates a plugin that essentially does nothing.
