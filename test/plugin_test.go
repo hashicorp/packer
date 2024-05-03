@@ -246,3 +246,19 @@ func CopyFile(t *testing.T, dest, src string) {
 		t.Fatalf("failed to copy from %q -> %q: %s", src, dest, err)
 	}
 }
+
+// WriteFile writes `content` to a file `dest`
+//
+// The default permissions of that file is 0644
+func WriteFile(t *testing.T, dest string, content string) {
+	outFile, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		t.Fatalf("failed to open/create %q: %s", dest, err)
+	}
+	defer outFile.Close()
+
+	_, err = fmt.Fprintf(outFile, content)
+	if err != nil {
+		t.Fatalf("failed to write to file %q: %s", dest, err)
+	}
+}
