@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -115,5 +116,14 @@ func (d Dump) Check(stdout, stderr string, err error) error {
 	d.t.Logf("Dumping command result.")
 	d.t.Logf("Stdout: %s", stdout)
 	d.t.Logf("stderr: %s", stderr)
+	return nil
+}
+
+type PanicCheck struct{}
+
+func (_ PanicCheck) Check(stdout, stderr string, _ error) error {
+	if strings.Contains(stdout, "= PACKER CRASH =") || strings.Contains(stderr, "= PACKER CRASH =") {
+		return fmt.Errorf("packer has crashed: this is never normal and should be investigated")
+	}
 	return nil
 }
