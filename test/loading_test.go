@@ -37,7 +37,7 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 			t.Run(tt.name, func(t *testing.T) {
 				ts.PackerCommand().
 					SetArgs(command, tt.templatePath).
-					AddEnv("PACKER_PLUGIN_PATH", pluginDir).
+					UsePluginDir(pluginDir).
 					Assert(t, MustSucceed{}, Grep{
 						streams: BothStreams,
 						expect:  tt.grepStr,
