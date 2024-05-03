@@ -53,41 +53,20 @@ func PluginBinaryDir() string {
 	return tempPluginBinaryPath.path
 }
 
-type PluginBuildConfig struct {
-	version *version.Version
-}
-
-func NewPluginBuildConfig(versionStr string) *PluginBuildConfig {
-	return &PluginBuildConfig{
-		version.Must(version.NewVersion(versionStr)),
-	}
-}
-
-// Version is the core version string of the test plugin.
-//
-// If the version isn't set, it'll default to 1.0.0
-func (pc PluginBuildConfig) Version() string {
-	return pc.version.Core().String()
-}
-
-func (pc PluginBuildConfig) PreRelease() string {
-	return pc.version.Prerelease()
-}
-
-func (pc PluginBuildConfig) Metadata() string {
-	return pc.version.Metadata()
+func NewPluginBuildConfig(versionStr string) *version.Version {
+	return version.Must(version.NewVersion(versionStr))
 }
 
 // LDFlags compiles the ldflags for the plugin to compile based on the information provided.
-func (pc PluginBuildConfig) LDFlags() string {
+func LDFlags(version *version.Version) string {
 	pluginPackage := "github.com/hashicorp/packer-plugin-tester"
 
-	ldflagsArg := fmt.Sprintf("-X %s/version.Version=%s", pluginPackage, pc.Version())
-	if pc.PreRelease() != "" {
-		ldflagsArg = fmt.Sprintf("%s -X %s/version.VersionPrerelease=%s", ldflagsArg, pluginPackage, pc.PreRelease())
+	ldflagsArg := fmt.Sprintf("-X %s/version.Version=%s", pluginPackage, version.Core())
+	if version.Prerelease() != "" {
+		ldflagsArg = fmt.Sprintf("%s -X %s/version.VersionPrerelease=%s", ldflagsArg, pluginPackage, version.Prerelease())
 	}
-	if pc.Metadata() != "" {
-		ldflagsArg = fmt.Sprintf("%s -X %s/version.VersionMetadata=%s", ldflagsArg, pluginPackage, pc.Metadata())
+	if version.Metadata() != "" {
+		ldflagsArg = fmt.Sprintf("%s -X %s/version.VersionMetadata=%s", ldflagsArg, pluginPackage, version.Metadata())
 	}
 
 	return ldflagsArg
@@ -96,13 +75,13 @@ func (pc PluginBuildConfig) LDFlags() string {
 // BinaryName is the raw name of the plugin binary to produce
 //
 // It's expected to be in the "mini-plugin_<version>[-<prerelease>][+<metadata>]" format
-func (pc PluginBuildConfig) BinaryName() string {
-	retStr := fmt.Sprintf("mini-plugin_%s", pc.Version())
-	if pc.PreRelease() != "" {
-		retStr = fmt.Sprintf("%s-%s", retStr, pc.PreRelease())
+func BinaryName(version *version.Version) string {
+	retStr := fmt.Sprintf("mini-plugin_%s", version.Core())
+	if version.Prerelease() != "" {
+		retStr = fmt.Sprintf("%s-%s", retStr, version.Prerelease())
 	}
-	if pc.Metadata() != "" {
-		retStr = fmt.Sprintf("%s+%s", retStr, pc.Metadata())
+	if version.Metadata() != "" {
+		retStr = fmt.Sprintf("%s+%s", retStr, version.Metadata())
 	}
 
 	return retStr
@@ -120,8 +99,8 @@ func (pc PluginBuildConfig) BinaryName() string {
 //
 // The path to the plugin is returned, it won't be removed automatically
 // though, deletion is the caller's responsibility.
-func BuildSimplePlugin(config *PluginBuildConfig, t *testing.T) {
-	t.Logf("Building plugin in version %v", config.version)
+func BuildSimplePlugin(version *version.Version, t *testing.T) {
+	t.Logf("Building plugin in version %v", version)
 
 	testDir, err := currentDir()
 	if err != nil {
@@ -129,15 +108,15 @@ func BuildSimplePlugin(config *PluginBuildConfig, t *testing.T) {
 	}
 
 	miniPluginDir := filepath.Join(testDir, "mini_plugin")
-	outBin := filepath.Join(PluginBinaryDir(), config.BinaryName())
+	outBin := filepath.Join(PluginBinaryDir(), BinaryName(version))
 
-	compileCommand := exec.Command("go", "build", "-C", miniPluginDir, "-o", outBin, "-ldflags", config.LDFlags(), ".")
+	compileCommand := exec.Command("go", "build", "-C", miniPluginDir, "-o", outBin, "-ldflags", LDFlags(version), ".")
 	logs, err := compileCommand.CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
 	}
 
-	StorePluginVersion(config.version.String(), outBin)
+	StorePluginVersion(version.String(), outBin)
 }
 
 // currentDir returns the directory in which the current file is located.
