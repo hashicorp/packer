@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"testing"
 )
@@ -32,7 +33,25 @@ func (s Stream) String() string {
 
 type Checker interface {
 	Check(stdout, stderr string, err error) error
-	Name() string
+}
+
+func InferName(c Checker) string {
+	if c == nil {
+		panic("nil checker - malformed test?")
+	}
+
+	checkerType := reflect.TypeOf(c)
+	_, ok := checkerType.MethodByName("Name")
+	if !ok {
+		return checkerType.String()
+	}
+
+	retVals := reflect.ValueOf(c).MethodByName("Name").Call([]reflect.Value{})
+	if len(retVals) != 1 {
+		panic(fmt.Sprintf("Name function called - returned %d values. Must be one string only.", len(retVals)))
+	}
+
+	return retVals[0].String()
 }
 
 type MustSucceed struct{}
@@ -41,8 +60,13 @@ func (_ MustSucceed) Check(stdout, stderr string, err error) error {
 	return err
 }
 
-func (_ MustSucceed) Name() string {
-	return "Must succeed"
+type MustFail struct{}
+
+func (_ MustFail) Check(stdout, stderr string, err error) error {
+	if err == nil {
+		return fmt.Errorf("unexpected command success")
+	}
+	return nil
 }
 
 // Grep is essentially the equivalent to a normal grep -E on the command line.
@@ -92,8 +116,4 @@ func (d Dump) Check(stdout, stderr string, err error) error {
 	d.t.Logf("Stdout: %s", stdout)
 	d.t.Logf("stderr: %s", stderr)
 	return nil
-}
-
-func (_ Dump) Name() string {
-	return "dump"
 }

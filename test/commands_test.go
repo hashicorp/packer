@@ -75,7 +75,8 @@ func (pc *packerCommand) Assert(t *testing.T, checks ...Checker) {
 	for _, check := range checks {
 		checkErr := check.Check(stdout, stderr, err)
 		if checkErr != nil {
-			t.Errorf("check %q failed: %s", check.Name(), checkErr)
+			checkerName := InferName(check)
+			t.Errorf("check %q failed: %s", checkerName, checkErr)
 		}
 	}
 }
