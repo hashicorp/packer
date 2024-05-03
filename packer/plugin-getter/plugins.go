@@ -938,6 +938,6 @@ func init() {
 	// Should never error if both components are set
 	localAPIVersion, err = NewAPIVersion(fmt.Sprintf("x%s.%s", pluginsdk.APIVersionMajor, pluginsdk.APIVersionMinor))
 	if err != nil {
-		panic(fmt.Sprintf("malformed API version in Packer. This is a programming error, please open an error to report it."))
+		panic("malformed API version in Packer. This is a programming error, please open an error to report it.")
 	}
 }
