@@ -1,0 +1,6 @@
+{
+	"builders": [{
+		"type": "tester-dynamic",
+		"name": "test"
+	}]
+}
