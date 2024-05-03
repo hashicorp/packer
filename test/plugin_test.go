@@ -149,6 +149,10 @@ func currentDir() (string, error) {
 func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDir string, cleanup func()) {
 	t := ts.T()
 
+	for _, ver := range pluginVersions {
+		BuildSimplePlugin(ver, t)
+	}
+
 	var err error
 
 	defer func() {
