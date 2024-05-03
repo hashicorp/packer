@@ -12,7 +12,7 @@ jobs:
     if: startsWith(github.event.label.name, 'remote-plugin/')
     runs-on: ubuntu-latest
     steps:
-      - uses: bflad/action-migrate-issue@main
+      - uses: bflad/action-migrate-issue@2e049d822b08e67d25b938343227051518f14d9a # v1.0.2
         with:
           source-issue-comment: |
             This issue has been migrated to {target-issue-url} due to the [Packer Plugin split](https://github.com/hashicorp/packer/issues/8610#issuecomment-770034737).

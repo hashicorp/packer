@@ -3,8 +3,13 @@
 _packer () {
   local -a sub_commands && sub_commands=(
     'build:Build image(s) from template'
+    'console:Creates a console for testing variable interpolation'
     'fix:Fixes templates from old versions of packer'
+    'fmt:Rewrites HCL2 config files to canonical format'
+    'hcl2_upgrade:Transform a JSON template into an HCL2 configuration'
+    'init:Install missing plugins or upgrade plugins'
     'inspect:See components of a template'
+    'plugins:Interact with Packer plugins and catalog'
     'validate:Check that a template is valid'
     'version:Prints the Packer version'
   )
@@ -19,14 +24,39 @@ _packer () {
     '-only=[(foo,bar,baz) Only build the given builds by name.]'
     '-parallel=[(false) Disable parallelization. (Default: false)]'
     '-parallel-builds=[(0) Number of builds to run in parallel. (Defaults to infinite: 0)]'
+    '-timestamp-ui[Enable prefixing of each ui output with an RFC3339 timestamp]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON or HCL2 file containing user variables.]'
+    '-warn-on-undeclared-var[Display warnings for user variable files containing undeclared variables.]'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
+  )
+
+  local -a console_arguments && console_arguments=(
+    '-var[("key=value") Variable for templates, can be used multiple times.]'
+    '-var-file=[(path) JSON or HCL2 file containing user variables.]'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
+  )
+
+  local -a fix_arguments && fix_arguments=(
     '(-)*:files:_files -g "*.json"'
+  )
+
+  local -a fmt_arguments && fmt_arguments=(
+    '-check[Check if the input is formatted. Exit status 0 = properly formatted, non-zero otherwise.]'
+    '-diff[Display diffs of formatting change]'
+    '-write=[(false) Don not write to source files (always disabled if using -check)]'
+    '-recursive[Also process files in subdirectories. By default cwd only]'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
+  )
+
+  local -a init_arguments && init_arguments=(
+    '-upgrade[on top also update plugins to latest]'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
   )
 
   local -a inspect_arguments && inspect_arguments=(
     '-machine-readable[Machine-readable output]'
-    '(-)*:files:_files -g "*.json"'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
   )
 
   local -a validate_arguments && validate_arguments=(
@@ -35,7 +65,9 @@ _packer () {
     '-only=[(foo,bar,baz) Validate only these builds.]'
     '-var[("key=value") Variable for templates, can be used multiple times.]'
     '-var-file=[(path) JSON or HCL2 file containing user variables.]'
-    '(-)*:files:_files -g "*.json"'
+    '-no-warn-undeclared-var[Disable warnings for user variable files containing undeclared variables.]'
+    '-evaluate-datasources[(false) Evaluate data sources during validation (HCL2 only, may incur costs).]'
+    '(-)*:files:_files -g "*pkr.{hcl,json}"'
   )
 
   _arguments -C \
@@ -49,6 +81,14 @@ _packer () {
         case $line[1] in
           build)
             _arguments -s -S : $build_arguments ;;
+          console)
+            _arguments -s -S : $console_arguments ;;
+          fix)
+            _arguments -s -S : $fix_arguments ;;
+          fmt)
+            _arguments -s -S : $fmt_arguments ;;
+          init)
+            _arguments -s -S : $init_arguments ;;
           inspect)
             _arguments -s -S : $inspect_arguments ;;
           validate)

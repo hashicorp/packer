@@ -31,11 +31,11 @@ Along with each key, it is noted whether it is required or not.
   builders that will be used to create machine images for this template, and
   configures each of those builders. For more information on how to define
   and configure a builder, read the sub-section on [configuring builders in
-  templates](/docs/templates/legacy_json_templates/builders).
+  templates](/packer/docs/templates/legacy_json_templates/builders).
 
 - `description` (optional) is a string providing a description of what the
   template does. This output is used only in the [inspect
-  command](/docs/commands/inspect).
+  command](/packer/docs/commands/inspect).
 
 - `min_packer_version` (optional) is a string that has a minimum Packer
   version that is required to parse the template. This can be used to ensure
@@ -48,20 +48,20 @@ Along with each key, it is noted whether it is required or not.
   not specified, then no post-processing will be done. For more information
   on what post-processors do and how they're defined, read the sub-section on
   [configuring post-processors in
-  templates](/docs/templates/legacy_json_templates/post-processors).
+  templates](/packer/docs/templates/legacy_json_templates/post-processors).
 
 - `provisioners` (optional) is an array of one or more objects that defines
   the provisioners that will be used to install and configure software for
   the machines created by each of the builders. If it is not specified, then
   no provisioners will be run. For more information on how to define and
   configure a provisioner, read the sub-section on [configuring provisioners
-  in templates](/docs/templates/legacy_json_templates/provisioners).
+  in templates](/packer/docs/templates/legacy_json_templates/provisioners).
 
 - `variables` (optional) is an object of one or more key/value strings that
   defines user variables contained in the template. If it is not specified,
   then no variables are defined. For more information on how to define and
   use user variables, read the sub-section on [user variables in
-  templates](/docs/templates/legacy_json_templates/user-variables).
+  templates](/packer/docs/templates/legacy_json_templates/user-variables).
 
 ## Comments
 
@@ -155,7 +155,7 @@ script to it and run that script using SSH.
 
 -> **Note:** This example requires an account with Amazon Web Services.
 There are a number of parameters which need to be provided for a functional
-build to take place. See the [Amazon builder](/plugins/builders/amazon)
+build to take place. See the [Amazon builder](/packer/plugins/builders/amazon)
 documentation for more information.
 
 ```json

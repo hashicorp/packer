@@ -1,0 +1,18 @@
+{
+  "builders": [
+    {
+      "type": "null",
+      "communicator": "ssh",
+      "ssh_host": "{{ user `ssh_host` }}", 
+      "ssh_password": "{{ user `ssh_password` }}",
+      "ssh_username": "{{ user `ssh_username` }}"
+    }
+  ],
+  "provisioners": [
+    {
+        "pause_before": "20s",
+        "type": "shell-local",
+        "inline": [ "echo {{ user `version_tag` }} > provision.txt" ]
+    }
+  ]
+}

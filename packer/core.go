@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package packer
 
 import (
@@ -15,6 +18,7 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
@@ -129,6 +133,23 @@ func NewCore(c *CoreConfig) *Core {
 	return core
 }
 
+// DetectPluginBinaries is used to load required plugins from the template,
+// since it is unsupported in JSON, this is essentially a no-op.
+func (c *Core) DetectPluginBinaries() hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	err := c.components.PluginConfig.Discover()
+	if err != nil {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to discover installed plugins",
+			Detail:   err.Error(),
+		})
+	}
+
+	return diags
+}
+
 func (c *Core) Initialize(_ InitializeOptions) hcl.Diagnostics {
 	err := c.initialize()
 	if err != nil {
@@ -209,15 +230,33 @@ func (c *Core) BuildNames(only, except []string) []string {
 func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName string) (CoreBuildProvisioner, error) {
 	// Get the provisioner
 	cbp := CoreBuildProvisioner{}
+
+	if !c.components.PluginConfig.Provisioners.Has(rawP.Type) {
+		err := fmt.Errorf(
+			"The provisioner %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+				"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+				"https://developer.hashicorp.com/packer/integrations?filter=%s",
+			rawP.Type,
+			strings.Split(rawP.Type, "-")[0],
+		)
+
+		if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.Provisioners.List()); sugg != "" {
+			err = fmt.Errorf("Did you mean to use %q?", sugg)
+		}
+
+		return cbp, err
+	}
+
 	provisioner, err := c.components.PluginConfig.Provisioners.Start(rawP.Type)
 	if err != nil {
 		return cbp, fmt.Errorf(
 			"error initializing provisioner '%s': %s",
 			rawP.Type, err)
 	}
+	// Seems unlikely that a provisioner doesn't start successfully without error
 	if provisioner == nil {
 		return cbp, fmt.Errorf(
-			"provisioner type not found: %s", rawP.Type)
+			"provisioner failed to be started and did not error: %s", rawP.Type)
 	}
 
 	// Get the configuration
@@ -268,10 +307,9 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 
 // This is used for json templates to launch the build plugins.
 // They will be prepared via b.Prepare() later.
-func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]string, hcl.Diagnostics) {
+func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []packersdk.Build{}
-	hcpTranslationMap := map[string]string{}
 	diags := hcl.Diagnostics{}
 	for _, n := range buildNames {
 		b, err := c.Build(n)
@@ -283,8 +321,6 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]s
 			})
 			continue
 		}
-
-		hcpTranslationMap[n] = HCPName(c.builds[n])
 
 		// Now that build plugin has been launched, call Prepare()
 		log.Printf("Preparing build: %s", b.Name())
@@ -315,25 +351,7 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]packersdk.Build, map[string]s
 			}
 		}
 	}
-	return builds, hcpTranslationMap, diags
-}
-
-// HCPName is a helper to get a curated HCP name for a legacy JSON builder.
-//
-// In order to make the naming scheme between HCL2 and JSON more consistent,
-// we implement a similar kind of logic on both template types.
-//
-// This means that when for HCL2 templates we have a build name formed of
-// the source type and the source name, we will do the name here for JSON.
-func HCPName(builder *template.Builder) string {
-	// By default, if the name is unspecified, it will be assigned the type
-	//
-	// No need to repeat ourselves here, so we can keep the current behaviour
-	if builder.Name == builder.Type {
-		return builder.Name
-	}
-
-	return fmt.Sprintf("%s.%s", builder.Type, builder.Name)
+	return builds, diags
 }
 
 // Build returns the Build object for the given name.
@@ -346,6 +364,22 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 	// BuilderStore = config.Builders, gathered in loadConfig() in main.go
 	// For reference, the builtin BuilderStore is generated in
 	// packer/config.go in the Discover() func.
+
+	if !c.components.PluginConfig.Builders.Has(configBuilder.Type) {
+		err := fmt.Errorf(
+			"The builder %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+				"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+				"https://developer.hashicorp.com/packer/integrations?filter=%s",
+			configBuilder.Type,
+			strings.Split(configBuilder.Type, "-")[0],
+		)
+
+		if sugg := didyoumean.NameSuggestion(configBuilder.Type, c.components.PluginConfig.Builders.List()); sugg != "" {
+			err = fmt.Errorf("Did you mean to use %q?", sugg)
+		}
+
+		return nil, err
+	}
 
 	// the Start command launches the builder plugin of the given type without
 	// calling Prepare() or passing any build-specific details.
@@ -408,6 +442,22 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 				break
 			}
 
+			if !c.components.PluginConfig.PostProcessors.Has(rawP.Type) {
+				err := fmt.Errorf(
+					"The post-processor %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					rawP.Type,
+					strings.Split(rawP.Type, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(rawP.Type, c.components.PluginConfig.PostProcessors.List()); sugg != "" {
+					err = fmt.Errorf("Did you mean to use %q?", sugg)
+				}
+
+				return nil, err
+			}
+
 			// Get the post-processor
 			postProcessor, err := c.components.PluginConfig.PostProcessors.Start(rawP.Type)
 			if err != nil {
@@ -441,7 +491,7 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
-	return &CoreBuild{
+	cb := &CoreBuild{
 		Type:               n,
 		Builder:            builder,
 		BuilderConfig:      configBuilder.Config,
@@ -451,7 +501,15 @@ func (c *Core) Build(n string) (packersdk.Build, error) {
 		CleanupProvisioner: cleanupProvisioner,
 		TemplatePath:       c.Template.Path,
 		Variables:          c.variables,
-	}, nil
+	}
+
+	//configBuilder.Name is left uninterpolated so we must check against
+	// the interpolated name.
+	if configBuilder.Type != configBuilder.Name {
+		cb.BuildName = configBuilder.Type
+	}
+
+	return cb, nil
 }
 
 // Context returns an interpolation context.

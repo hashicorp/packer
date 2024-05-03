@@ -11,28 +11,26 @@ description: |-
 
 There are two kinds of variables in HCL Packer templates: Input variables,
 sometimes simply called "variables", and Local variables, also known as
-"locals". Input variables may have defaults, but those defaults can
-be overridden from the command line or special variable files. Local variables
-can be thought of as constants, and are not able to be overridden at runtime.
+"locals". Input variables may have defaults, but those defaults can be
+overridden using command line options, environment variables, or variable
+definitions files. However, nothing can change the value of an input variable
+after the initial override.
 
 This page is about input variables. To learn about local variables, see the
-[locals](/docs/templates/hcl_templates/locals) page.
+[locals](/packer/docs/templates/hcl_templates/locals) page.
 
 Input variables serve as parameters for a Packer build, allowing aspects of the
 build to be customized without altering the build's own source code.
 
-When you declare variables in the build of your configuration, you can set
-their values using CLI options and environment variables.
-
 Input variable and local variable usage are introduced in the [_Variables
-Guide_](/guides/hcl/variables).
+Guide_](/packer/guides/hcl/variables).
 
 -> **Note:** For brevity, input variables are often referred to as just
 "variables" or "Packer variables" when it is clear from context what sort of
 variable is being discussed. Other kinds of variables in Packer include
 _environment variables_ (set by the shell where Packer runs) and _expression
 variables_ (used to indirectly represent a value in an
-[expression](/docs/templates/hcl_templates/expressions)).
+[expression](/packer/docs/templates/hcl_templates/expressions)).
 
 ## Declaring an Input Variable
 
@@ -98,7 +96,7 @@ Packer defines the following arguments for variable declarations:
 
 The variable declaration can also include a `default` argument. If present,
 the variable is considered to be _optional_ and the default value will be used
-if no value is set when calling the module or running Terraform. The `default`
+if no value is set when running Packer. The `default`
 argument requires a literal value and cannot reference other objects in the
 configuration.
 
@@ -107,7 +105,7 @@ configuration.
 [inpage-type]: #type-constraints
 
 The `type` argument in a `variable` block allows you to restrict the [type of
-value](/docs/templates/hcl_templates/expressions#types-and-values) that will be accepted as the value
+value](/packer/docs/templates/hcl_templates/expressions#types-and-values) that will be accepted as the value
 for a variable. If no type constraint is set then a value of any type is
 accepted.
 
@@ -133,7 +131,7 @@ The type constructors allow you to specify complex types such as collections:
 The keyword `any` may be used to indicate that any type is acceptable. For more
 information on the meaning and behavior of these different types, as well as
 detailed information about automatic conversion of complex types, see [Type
-Constraints](https://www.terraform.io/docs/configuration/types.html).
+Constraints](/terraform/docs/configuration/types).
 
 If both the `type` and `default` arguments are specified, the given default
 value must be convertible to the specified type.
@@ -174,7 +172,7 @@ maintainers, use comments.
 ## Using Input Variable Values
 
 Within the build that declared a variable, its value can be accessed from
-within [expressions](/docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
+within [expressions](/packer/docs/templates/hcl_templates/expressions) as `var.<NAME>`, where `<NAME>`
 matches the label given in the declaration block:
 
 ```hcl
@@ -282,7 +280,7 @@ case letters as in the above example.
 ### Complex-typed Values
 
 When variable values are provided in a variable definitions file, Packer's
-[usual syntax](/docs/templates/hcl_templates/expressions) can be used to assign
+[usual syntax](/packer/docs/templates/hcl_templates/expressions) can be used to assign
 complex-typed values, like lists and maps.
 
 Some special rules apply to the `-var` command line option and to environment

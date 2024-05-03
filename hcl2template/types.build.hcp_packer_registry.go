@@ -1,7 +1,11 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
@@ -19,6 +23,8 @@ type HCPPackerRegistryBlock struct {
 
 	HCL2Ref
 }
+
+var bucketNameRegexp = regexp.MustCompile("^[a-zA-Z0-9-]{3,36}$")
 
 func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPackerRegistryBlock, hcl.Diagnostics) {
 	par := &HCPPackerRegistryBlock{}
@@ -46,6 +52,14 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 			Subject:  block.DefRange.Ptr(),
 		})
 		return nil, diags
+	}
+
+	if !bucketNameRegexp.MatchString(b.Slug) {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("%s.bucket_name can only contain between 3 and 36 ASCII letters, numbers and hyphens", buildHCPPackerRegistryLabel),
+			Subject:  block.DefRange.Ptr(),
+		})
 	}
 
 	par.Slug = b.Slug

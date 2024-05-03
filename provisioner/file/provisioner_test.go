@@ -1,9 +1,11 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package file
 
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -59,7 +61,7 @@ func TestProvisionerPrepare_InvalidSource(t *testing.T) {
 func TestProvisionerPrepare_ValidSource(t *testing.T) {
 	var p Provisioner
 
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -104,7 +106,7 @@ func TestProvisionerPrepare_EmptyDestination(t *testing.T) {
 
 func TestProvisionerProvision_SendsFile(t *testing.T) {
 	var p Provisioner
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -192,7 +194,7 @@ func TestProvisionerProvision_SendsContent(t *testing.T) {
 
 func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 	var p Provisioner
-	tf1, err := ioutil.TempFile("", "packer")
+	tf1, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -202,7 +204,7 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	tf2, err := ioutil.TempFile("", "packer")
+	tf2, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -245,13 +247,13 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	var p Provisioner
 
 	// Prepare the first directory
-	td1, err := ioutil.TempDir("", "packerdir")
+	td1, err := os.MkdirTemp("", "packerdir")
 	if err != nil {
 		t.Fatalf("error temp folder 1: %s", err)
 	}
 	defer os.Remove(td1)
 
-	tf1, err := ioutil.TempFile(td1, "packer")
+	tf1, err := os.CreateTemp(td1, "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -261,13 +263,13 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 	}
 
 	// Prepare the second directory
-	td2, err := ioutil.TempDir("", "packerdir")
+	td2, err := os.MkdirTemp("", "packerdir")
 	if err != nil {
 		t.Fatalf("error temp folder 1: %s", err)
 	}
 	defer os.Remove(td2)
 
-	tf2, err := ioutil.TempFile(td2, "packer")
+	tf2, err := os.CreateTemp(td2, "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -314,7 +316,7 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 	var p Provisioner
 
-	tf1, err := ioutil.TempFile("", "packer")
+	tf1, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -324,7 +326,7 @@ func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	tf2, err := ioutil.TempFile("", "packer")
+	tf2, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -385,7 +387,7 @@ func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 	var p Provisioner
 
-	tf1, err := ioutil.TempFile("", "packer")
+	tf1, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -395,7 +397,7 @@ func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	tf2, err := ioutil.TempFile("", "packer")
+	tf2, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -451,12 +453,12 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 		{"path/to/dir"},
 		{"path/to/dir/"},
 	}
-	tmpDir, err := ioutil.TempDir("", "packer-file")
+	tmpDir, err := os.MkdirTemp("", "packer-file")
 	if err != nil {
 		t.Fatalf("error tempdir: %s", err)
 	}
 	defer os.RemoveAll(tmpDir)
-	tf, err := ioutil.TempFile(tmpDir, "packer")
+	tf, err := os.CreateTemp(tmpDir, "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}

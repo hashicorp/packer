@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package packer
 
 import (
@@ -10,6 +13,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
 	"github.com/hashicorp/packer/version"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // A CoreBuild struct represents a single build job, the result of which should
@@ -17,10 +21,19 @@ import (
 // multiple files, of course, but it should be for only a single provider (such
 // as VirtualBox, EC2, etc.).
 type CoreBuild struct {
-	BuildName          string
-	Type               string
-	Builder            packersdk.Builder
-	BuilderConfig      interface{}
+	BuildName string
+	Type      string
+	Builder   packersdk.Builder
+	// BuilderConfig is the config for the builder.
+	//
+	// Is is deserialised directly from the JSON template,
+	// and is only populated for legacy JSON templates.
+	BuilderConfig interface{}
+	// HCLConfig is the HCL config for the builder
+	//
+	// Its only use is for telemetry, since we use it to extract the
+	// field names from it.
+	HCLConfig          cty.Value
 	BuilderType        string
 	hooks              map[string][]packersdk.Hook
 	Provisioners       []CoreBuildProvisioner
@@ -39,12 +52,59 @@ type CoreBuild struct {
 	prepareCalled bool
 }
 
+type BuildMetadata struct {
+	PackerVersion string
+	Plugins       map[string]PluginDetails
+}
+
+func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
+	resp := map[string]PluginDetails{}
+
+	builderPlugin, builderPluginOk := GlobalPluginsDetailsStore.GetBuilder(b.BuilderType)
+	if builderPluginOk {
+		resp[builderPlugin.Name] = builderPlugin
+	}
+
+	for _, pp := range b.PostProcessors {
+		for _, p := range pp {
+			postprocessorsPlugin, postprocessorsPluginOk := GlobalPluginsDetailsStore.GetPostProcessor(p.PType)
+			if postprocessorsPluginOk {
+				resp[postprocessorsPlugin.Name] = postprocessorsPlugin
+			}
+		}
+	}
+
+	for _, pv := range b.Provisioners {
+		provisionerPlugin, provisionerPluginOk := GlobalPluginsDetailsStore.GetProvisioner(pv.PType)
+		if provisionerPluginOk {
+			resp[provisionerPlugin.Name] = provisionerPlugin
+		}
+	}
+
+	return resp
+}
+
+func (b *CoreBuild) GetMetadata() BuildMetadata {
+	metadata := BuildMetadata{
+		PackerVersion: version.FormattedVersion(),
+		Plugins:       b.getPluginsMetadata(),
+	}
+	return metadata
+}
+
 // CoreBuildPostProcessor Keeps track of the post-processor and the
 // configuration of the post-processor used within a build.
 type CoreBuildPostProcessor struct {
-	PostProcessor     packersdk.PostProcessor
-	PType             string
-	PName             string
+	PostProcessor packersdk.PostProcessor
+	PType         string
+	PName         string
+	// HCLConfig is the HCL config for the post-processor
+	//
+	// Its only use is for telemetry, since we use it to extract the
+	// field names from it.
+	HCLConfig cty.Value
+	// config is JSON-specific, the configuration for the post-processor
+	// deserialised directly from the JSON template
 	config            map[string]interface{}
 	KeepInputArtifact *bool
 }
@@ -55,7 +115,14 @@ type CoreBuildProvisioner struct {
 	PType       string
 	PName       string
 	Provisioner packersdk.Provisioner
-	config      []interface{}
+	// HCLConfig is the HCL config for the provisioner
+	//
+	// Its only use is for telemetry, since we use it to extract the
+	// field names from it.
+	HCLConfig cty.Value
+	// config is JSON-specific, and is the configuration of the
+	// provisioner, with overrides
+	config []interface{}
 }
 
 // Returns the name of the build.
@@ -173,6 +240,8 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 			var pConfig interface{}
 			if len(p.config) > 0 {
 				pConfig = p.config[0]
+			} else {
+				pConfig = p.HCLConfig
 			}
 			if b.debug {
 				hookedProvisioners[i] = &HookedProvisioner{
@@ -218,8 +287,13 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 		Ui:     originalUi,
 	}
 
+	var ts *TelemetrySpan
 	log.Printf("Running builder: %s", b.BuilderType)
-	ts := CheckpointReporter.AddSpan(b.Type, "builder", b.BuilderConfig)
+	if b.BuilderConfig != nil {
+		ts = CheckpointReporter.AddSpan(b.Type, "builder", b.BuilderConfig)
+	} else {
+		ts = CheckpointReporter.AddSpan(b.Type, "builder", b.HCLConfig)
+	}
 	builderArtifact, err := b.Builder.Run(ctx, builderUi, hook)
 	ts.End(err)
 	if err != nil {
@@ -238,7 +312,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	select {
 	case <-ctx.Done():
 		log.Println("Build was cancelled. Skipping post-processors.")
-		return nil, nil
+		return nil, ctx.Err()
 	default:
 	}
 
@@ -257,7 +331,12 @@ PostProcessorRunSeqLoop:
 			} else {
 				builderUi.Say(fmt.Sprintf("Running post-processor: %s (type %s)", corePP.PName, corePP.PType))
 			}
-			ts := CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
+			var ts *TelemetrySpan
+			if corePP.config != nil {
+				ts = CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.config)
+			} else {
+				ts = CheckpointReporter.AddSpan(corePP.PType, "post-processor", corePP.HCLConfig)
+			}
 			artifact, defaultKeep, forceOverride, err := corePP.PostProcessor.PostProcess(ctx, ppUi, priorArtifact)
 			ts.End(err)
 			if err != nil {

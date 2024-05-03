@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -106,7 +109,7 @@ func testParse(t *testing.T, tests []parseTest) {
 				return
 			}
 
-			gotBuilds, _, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
+			gotBuilds, gotDiags := gotCfg.GetBuilds(packer.GetBuildsOptions{})
 			if tt.getBuildsWantDiags == (gotDiags == nil) {
 				t.Fatalf("Parser.getBuilds() unexpected diagnostics. %s", gotDiags)
 			}
@@ -363,6 +366,15 @@ var cmpOpts = []cmp.Option{
 	),
 	cmpopts.IgnoreFields(VariableAssignment{},
 		"Expr", // its an interface
+	),
+	cmpopts.IgnoreFields(packer.CoreBuild{},
+		"HCLConfig",
+	),
+	cmpopts.IgnoreFields(packer.CoreBuildProvisioner{},
+		"HCLConfig",
+	),
+	cmpopts.IgnoreFields(packer.CoreBuildPostProcessor{},
+		"HCLConfig",
 	),
 	cmpopts.IgnoreTypes(hcl2template.MockBuilder{}),
 	cmpopts.IgnoreTypes(HCL2Ref{}),

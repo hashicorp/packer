@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 package compress
@@ -21,7 +24,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/klauspost/pgzip"
-	"github.com/pierrec/lz4"
+	"github.com/pierrec/lz4/v4"
 	"github.com/ulikunitz/xz"
 )
 
@@ -330,8 +333,27 @@ func makeBZIP2Writer(output io.Writer, compressionLevel int) (io.WriteCloser, er
 
 func makeLZ4Writer(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
 	lzwriter := lz4.NewWriter(output)
-	if compressionLevel > 0 {
-		lzwriter.Header.CompressionLevel = compressionLevel
+	if compressionLevel < 0 {
+		return lzwriter, nil
+	}
+	levels := map[int]lz4.CompressionLevel{
+		0: lz4.Fast,
+		1: lz4.Level1,
+		2: lz4.Level2,
+		3: lz4.Level3,
+		4: lz4.Level4,
+		5: lz4.Level5,
+		6: lz4.Level6,
+		7: lz4.Level7,
+		8: lz4.Level8,
+		9: lz4.Level9,
+	}
+	level, ok := levels[compressionLevel]
+	if !ok {
+		return nil, ErrInvalidCompressionLevel
+	}
+	if err := lzwriter.Apply(lz4.CompressionLevelOption(level)); err != nil {
+		return nil, err
 	}
 	return lzwriter, nil
 }

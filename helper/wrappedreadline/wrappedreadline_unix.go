@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:build darwin || dragonfly || freebsd || (linux && !appengine) || netbsd || openbsd
 // +build darwin dragonfly freebsd linux,!appengine netbsd openbsd
 

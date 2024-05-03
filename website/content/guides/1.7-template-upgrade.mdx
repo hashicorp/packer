@@ -1,5 +1,7 @@
 ---
 page_title: Upgrading your template to use Packer init
+description: >-
+  Use packer init and the required_plugins block to better control plugin usage within Packer templates. Learn how to update your template to work with these new features.
 ---
 
 # Upgrading your template to be compatible with `packer init`
@@ -9,10 +11,10 @@ usage within a Packer template configuration.
 
 In short, `packer init` will look at the `required_plugins` block definition within a template, and download the correct
 binaries for that template. For details about how the command works and where the plugins will be installed, please
-refer to the [`packer init`](/docs/commands/init) documentation.
+refer to the [`packer init`](/packer/docs/commands/init) documentation.
 
 -> **Note:** `packer init` is only supported for HCL templates. You can
-upgrade legacy JSON templates to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
+upgrade legacy JSON templates to HCL using the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) command.
 
 ## Updating your template with the `required_plugins` block
 
@@ -25,7 +27,7 @@ won't work if no `required_plugins` is provided.
 
 We strongly encourage you to upgrade and start using `required_plugins` block within your templates to manage plugin
 installation, but if you prefer not to use the `required_plugins` block you can continue to
-[install plugins manually](/docs/plugins#installing-plugins).
+[install plugins manually](/packer/docs/plugins#installing-plugins).
 
 ### What if you only use components that are built into the Packer core?
 
@@ -48,7 +50,7 @@ that the plugin is ready for use with `packer init`:
   `packer init`. If the repository has a name that references a specific Packer component (for example,
   `packer-provisioner-*`, `packer-builder-*`, or `packer-post-processor-*`) then the plugin likely still needs to be
   upgraded to be compatible with `packer init`. Reach out to your plugin maintainer to request that they upgrade; the
-  Packer team has written a maintainer-focused guide [here](/guides/1.7-plugin-upgrade).
+  Packer team has written a maintainer-focused guide [here](/packer/guides/1.7-plugin-upgrade).
 
 If the plugin(s) have been upgraded, then they can be used with the `required_plugins` block in your upgraded template.
 
@@ -60,10 +62,10 @@ in touch with all currently known plugin maintainers to provide support during t
 
 If you are willing to upgrade your template but found out that the plugin you are using hasn't been upgraded yet,
 we suggest you reach out to the plugin maintainers and ask for an upgrade; the Packer team has written a
-maintainer-focused guide [here](/guides/1.7-plugin-upgrade).
+maintainer-focused guide [here](/packer/guides/1.7-plugin-upgrade).
 
 Check the table below to better understand whether your plugin is compatible with `packer init`, with manual
-installation, or with both for the the Packer version you are using.
+installation, or with both for the Packer version you are using.
 
 | Packer Core Version | Single Component Plugin - API v4                  | Single Component Plugin - API v5.0                | Multi Component Plugin - API v5.0                         |
 | ------------------- | ------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------- |
@@ -133,13 +135,13 @@ in the rest of the template.
 
 Here it is a brief explanation of each field:
 
-- `version` - Should follow the [version constraints](/docs/templates/hcl_templates/blocks/packer#version-constraints).
+- `version` - Should follow the [version constraints](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints).
 - `source` - Should have the GitHub hostname, the plugin's organizational namespace, and its short name.
   Packer will be responsible for determining the full GitHub
   address. For example, if the source is `github.com/sylviamoss/comment`, Packer
   will download the binaries from `github.com/sylviamoss/packer-plugin-comment`.
   To learn more about the source field, check out the [Source
-  Address](/docs/plugins#source-addresses) documentation.
+  Address](/packer/docs/plugins#source-addresses) documentation.
 - `local_name`- Can be replaced with whatever you want, and the new value will become the name of the plugin.
   For example:
 

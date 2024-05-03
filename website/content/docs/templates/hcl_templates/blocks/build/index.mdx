@@ -15,14 +15,14 @@ To use builders in a `build` block you can either:
 
 - Set the `sources` array of string with references to pre-defined sources.
 
-- Define [build-level `source` blocks](/docs/templates/hcl_templates/blocks/build/source).
+- Define [build-level `source` blocks](/packer/docs/templates/hcl_templates/blocks/build/source).
   This also allows you to set specific fields.
 
 `@include 'from-1.5/builds/example-block.mdx'`
 
-Define [top-level `source` blocks](/docs/templates/hcl_templates/blocks/source) to configure
+Define [top-level `source` blocks](/packer/docs/templates/hcl_templates/blocks/source) to configure
 your builders. The list of available builders can be found in the
-[builders](/docs/builders) section.
+[builders](/packer/docs/builders) section.
 
 ## Naming your builds
 
@@ -75,7 +75,7 @@ matching **builders** (source) or all referenced builders 'except' the matching
 ones, for example with the same config file:
 
 ```shell-session
-> packer build -only "*.second" ./folder
+> packer build -only "*.second-example" ./folder
 Build 'null.second-example' finished.
 Build 'a.null.second-example' finished.
 
@@ -92,6 +92,6 @@ this is soon going to be possible. So here "a.\*" will match nothing.
 ## Related
 
 - A list of [community
-  builders](/community-tools#community-builders) is available.
+  builders](https://packer.io/community-tools#community-builders) is available.
 
-- Create your own [custom builder](/docs/plugins/creation/custom-builders) !
+- Create your own [custom builder](/packer/docs/plugins/creation/custom-builders) !

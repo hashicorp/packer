@@ -66,8 +66,8 @@ Here is the list of available build variables:
 For backwards compatibility, `WinRMPassword` is also available through this
 engine, though it is no different than using the more general `Password`.
 
-All build variables are valid to use with any of the [HCL2 functions](/docs/templates/hcl_templates/functions).
-Example of using [upper](/docs/templates/hcl_templates/functions/string/upper) to upper case the build ID:
+All build variables are valid to use with any of the [HCL2 functions](/packer/docs/templates/hcl_templates/functions).
+Example of using [upper](/packer/docs/templates/hcl_templates/functions/string/upper) to upper case the build ID:
 
 ```hcl
   post-processor "shell-local" {
@@ -77,11 +77,11 @@ Example of using [upper](/docs/templates/hcl_templates/functions/string/upper) t
 
 For builder-specific builder variables, please also refer to the builder docs:
 
-- Amazon EC2: [chroot](/plugins/builders/amazon/chroot#build-shared-information-variables),
-  [EBS Volume](/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
-  [EBS](/plugins/builders/amazon/ebs#build-shared-information-variables),
-  [EBS Surrogate](/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
-  [Instance](/plugins/builders/amazon/instance#build-shared-information-variables).
+- Amazon EC2: [chroot](/packer/plugins/builders/amazon/chroot#build-shared-information-variables),
+  [EBS Volume](/packer/plugins/builders/amazon/ebsvolume#build-shared-information-variables),
+  [EBS](/packer/plugins/builders/amazon/ebs#build-shared-information-variables),
+  [EBS Surrogate](/packer/plugins/builders/amazon/ebssurrogate#build-shared-information-variables),
+  [Instance](/packer/plugins/builders/amazon/instance#build-shared-information-variables).
 
 The HCL2 Special Build Variables is in beta; please report any issues or requests on the Packer
 issue tracker on GitHub.
@@ -132,23 +132,92 @@ parenthesis may through off your shell escaping otherwise.
 
 # HCP Packer Iteration ID
 
+~> **Note**: The `packer.iterationID` variable is now deprecated and will be removed in a future version of Packer. HCP Packer Versions should be accessed with their fingerprint instead. The `packer.versionFingerprint` variable is now exposed to be used in its stead with the new HCP Packer data sources.
+
 If your build is pushing metadata to the HCP Packer registry, this variable is
 set to the value of the Iteration ID associated with this run.
 
 ```hcl
-source "amazon-ebs" "cannonical-ubuntu-server" {
-  ami_name         = "packer-example"
-  // ...
-  run_volume_tags = {
-    hcp_iteration_id = packer.iterationID
+source "null" "example" {
+  communicator = "none"
+}
+
+data "hcp-packer-version" "hardened-source" {
+  bucket_name = "example"
+  channel_name = "latest"
+}
+
+data "hcp-packer-artifact" "file" {
+  bucket_name = "example"
+  version_fingerprint = "${data.hcp-packer-version.hardened-source.fingerprint}"
+  platform = "aws"
+  region = "us-east-1"
+}
+
+build {
+  hcp_packer_registry {
+    bucket_name = "simple"
+  }
+  sources = [
+    "source.null.example"
+  ]
+
+  provisioner "shell-local" {
+    inline = [
+      "echo data is ${packer.iterationID}"
+    ]
   }
 }
+
 ```
 
 ```shell-session
-==> vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tags to source instance
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "Name": "Packer Builder"
-    vanilla.amazon-ebs.cannonical-ubuntu-server: Adding tag: "hcp_iteration_id": "01FHGF3M2AK4TS6PCZES4VX5E7"
+==> mybuild.null.example: Running local shell script: /var/folders/cz/q3cr3tld2457gtlgw7qs1kqc0000gq/T/packer-shell842419427
+    mybuild.null.example: data is 01HN3KCRPVKR5PBQ28TS6B12W0
+```
+
+# HCP Packer Version Fingerprint
+
+If your build is pushing metadata to the HCP Packer registry, this variable is
+set to the value of the Version Fingerprint associated with this run.
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+data "hcp-packer-version" "hardened-source" {
+  bucket_name = "example"
+  channel_name = "latest"
+}
+
+data "hcp-packer-artifact" "file" {
+  bucket_name = "example"
+  version_fingerprint = "${data.hcp-packer-version.hardened-source.fingerprint}"
+  platform = "aws"
+  region = "us-east-1"
+}
+
+build {
+  hcp_packer_registry {
+    bucket_name = "simple"
+  }
+  sources = [
+    "source.null.example"
+  ]
+
+  provisioner "shell-local" {
+    inline = [
+      "echo data is ${packer.versionFingerprint}"
+    ]
+  }
+}
+
+```
+
+```shell-session
+==> mybuild.null.example: Running local shell script: /var/folders/cz/q3cr3tld2457gtlgw7qs1kqc0000gq/T/packer-shell842419427
+    mybuild.null.example: data is 01HN3KCRPVKR5PBQ28TS6B12W0
 ```
 
 You can also add this value to post-processors, for example to add to a manifest file:
@@ -158,6 +227,7 @@ You can also add this value to post-processors, for example to add to a manifest
     output     = "manifest.json"
     strip_path = true
     custom_data = {
+      version_fingerprint = "${packer.versionFingerprint}"
       iteration = "${packer.iterationID}"
     }
   }

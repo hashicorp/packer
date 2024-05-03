@@ -1,33 +1,35 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package registry
 
 import (
 	"context"
 	"testing"
 
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
-	"github.com/hashicorp/packer/internal/hcp/api"
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 )
 
-func TestInitialize_NewBucketNewIteration(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+func TestInitialize_NewBucketNewVersion(t *testing.T) {
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -36,19 +38,19 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("expected a call to CreateBucket but it didn't happen")
 	}
 
-	if !mockService.CreateIterationCalled {
-		t.Errorf("expected a call to CreateIteration but it didn't happen")
+	if !mockService.CreateVersionCalled {
+		t.Errorf("expected a call to CreateVersion but it didn't happen")
 	}
 
 	if mockService.CreateBuildCalled {
 		t.Errorf("Didn't expect a call to CreateBuild")
 	}
 
-	if b.Iteration.ID != "iteration-id" {
-		t.Errorf("expected an iteration to created but it didn't")
+	if b.Version.ID != "version-id" {
+		t.Errorf("expected a version to created but it didn't")
 	}
 
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -56,57 +58,55 @@ func TestInitialize_NewBucketNewIteration(t *testing.T) {
 		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
-	if ok := b.Iteration.HasBuild("happycloud.image"); !ok {
+	if ok := b.Version.HasBuild("happycloud.image"); !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
 	}
 }
 
 func TestInitialize_UnsetTemplateTypeError(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testunsettemplate")
-	mockService := api.NewMockPackerClientService()
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeTEMPLATETYPEUNSET)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeTEMPLATETYPEUNSET)
 	if err == nil {
 		t.Fatalf("unexpected success")
 	}
 
-	t.Logf("iteration creating failed as expected: %s", err)
+	t.Logf("version creating failed as expected: %s", err)
 }
 
-func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+func TestInitialize_ExistingBucketNewVersion(t *testing.T) {
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -115,19 +115,19 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("expected call to UpdateBucket but it didn't happen")
 	}
 
-	if !mockService.CreateIterationCalled {
-		t.Errorf("expected a call to CreateIteration but it didn't happen")
+	if !mockService.CreateVersionCalled {
+		t.Errorf("expected a call to CreateVersion but it didn't happen")
 	}
 
 	if mockService.CreateBuildCalled {
 		t.Errorf("Didn't expect a call to CreateBuild")
 	}
 
-	if b.Iteration.ID != "iteration-id" {
-		t.Errorf("expected an iteration to created but it didn't")
+	if b.Version.ID != "version-id" {
+		t.Errorf("expected a version to created but it didn't")
 	}
 
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -135,39 +135,38 @@ func TestInitialize_ExistingBucketNewIteration(t *testing.T) {
 		t.Errorf("Expected a call to CreateBuild but it didn't happen")
 	}
 
-	if ok := b.Iteration.HasBuild("happycloud.image"); !ok {
+	if ok := b.Version.HasBuild("happycloud.image"); !ok {
 		t.Errorf("expected a basic build entry to be created but it didn't")
 	}
 
 }
 
-func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+func TestInitialize_ExistingBucketExistingVersion(t *testing.T) {
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
-	mockService.IterationAlreadyExist = true
+	mockService.VersionAlreadyExist = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
@@ -180,193 +179,188 @@ func TestInitialize_ExistingBucketExistingIteration(t *testing.T) {
 		t.Errorf("expected call to UpdateBucket but it didn't happen")
 	}
 
-	if mockService.CreateIterationCalled {
-		t.Errorf("unexpected a call to CreateIteration")
+	if mockService.CreateVersionCalled {
+		t.Errorf("unexpected a call to CreateVersion")
 	}
 
-	if !mockService.GetIterationCalled {
-		t.Errorf("expected a call to GetIteration but it didn't happen")
+	if !mockService.GetVersionCalled {
+		t.Errorf("expected a call to GetVersion but it didn't happen")
 	}
 
 	if mockService.CreateBuildCalled {
 		t.Errorf("unexpected a call to CreateBuild")
 	}
 
-	if b.Iteration.ID != "iteration-id" {
-		t.Errorf("expected an iteration to created but it didn't")
+	if b.Version.ID != "version-id" {
+		t.Errorf("expected a version to created but it didn't")
 	}
 
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	existingBuild, err := b.Iteration.Build("happycloud.image")
+	existingBuild, err := b.Version.Build("happycloud.image")
 	if err != nil {
 		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
-	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
+	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET {
 		t.Errorf("expected the existing build to be in the default state")
 	}
 }
 
-func TestInitialize_ExistingBucketCompleteIteration(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+func TestInitialize_ExistingBucketCompleteVersion(t *testing.T) {
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
-	mockService.IterationAlreadyExist = true
-	mockService.IterationCompleted = true
+	mockService.VersionAlreadyExist = true
+	mockService.VersionCompleted = true
 	mockService.BuildAlreadyDone = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err == nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	if mockService.CreateIterationCalled {
-		t.Errorf("unexpected call to CreateIteration")
+	if mockService.CreateVersionCalled {
+		t.Errorf("unexpected call to CreateVersion")
 	}
 
-	if !mockService.GetIterationCalled {
-		t.Errorf("expected a call to GetIteration but it didn't happen")
+	if !mockService.GetVersionCalled {
+		t.Errorf("expected a call to GetVersion but it didn't happen")
 	}
 
 	if mockService.CreateBuildCalled {
 		t.Errorf("unexpected call to CreateBuild")
 	}
 
-	if b.Iteration.ID != "iteration-id" {
-		t.Errorf("expected an iteration to be returned but it wasn't")
+	if b.Version.ID != "version-id" {
+		t.Errorf("expected a version to be returned but it wasn't")
 	}
 }
 
 func TestUpdateBuildStatus(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
-	mockService.IterationAlreadyExist = true
+	mockService.VersionAlreadyExist = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	existingBuild, err := b.Iteration.Build("happycloud.image")
+	existingBuild, err := b.Version.Build("happycloud.image")
 	if err != nil {
 		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
-	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
+	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET {
 		t.Errorf("expected the existing build to be in the default state")
 	}
 
-	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
+	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING)
 	if err != nil {
 		t.Errorf("unexpected failure for PublishBuildStatus: %v", err)
 	}
 
-	existingBuild, err = b.Iteration.Build("happycloud.image")
+	existingBuild, err = b.Version.Build("happycloud.image")
 	if err != nil {
 		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
-	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusRUNNING {
+	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING {
 		t.Errorf("expected the existing build to be in the running state")
 	}
 }
 
 func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
-	t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "testnumber")
-	mockService := api.NewMockPackerClientService()
+	mockService := hcpPackerAPI.NewMockPackerClientService()
 	mockService.BucketAlreadyExist = true
-	mockService.IterationAlreadyExist = true
+	mockService.VersionAlreadyExist = true
 
 	b := &Bucket{
-		Slug: "TestBucket",
-		client: &api.Client{
+		Name: "TestBucket",
+		client: &hcpPackerAPI.Client{
 			Packer: mockService,
 		},
 	}
 
-	b.Iteration = NewIteration()
-	err := b.Iteration.Initialize(IterationOptions{})
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	b.Iteration.expectedBuilds = append(b.Iteration.expectedBuilds, "happycloud.image")
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
 	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
 
-	err = b.Initialize(context.TODO(), models.HashicorpCloudPackerIterationTemplateTypeHCL2)
+	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
-	err = b.populateIteration(context.TODO())
+	err = b.populateVersion(context.TODO())
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
-	existingBuild, err := b.Iteration.Build("happycloud.image")
+	existingBuild, err := b.Version.Build("happycloud.image")
 	if err != nil {
 		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
-	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusUNSET {
+	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDUNSET {
 		t.Errorf("expected the existing build to be in the default state")
 	}
 
 	//nolint:errcheck
-	b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusRUNNING)
+	_ = b.UpdateBuildStatus(context.TODO(), "happycloud.image", hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING)
 
-	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", models.HashicorpCloudPackerBuildStatusDONE)
+	err = b.UpdateBuildStatus(context.TODO(), "happycloud.image", hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDDONE)
 	if err == nil {
 		t.Errorf("expected failure for PublishBuildStatus when setting status to DONE with no images")
 	}
 
-	existingBuild, err = b.Iteration.Build("happycloud.image")
+	existingBuild, err = b.Version.Build("happycloud.image")
 	if err != nil {
 		t.Errorf("expected the existing build loaded from an existing bucket to be valid: %v", err)
 	}
 
-	if existingBuild.Status != models.HashicorpCloudPackerBuildStatusRUNNING {
+	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING {
 		t.Errorf("expected the existing build to be in the running state")
 	}
 }
-
-//func (b *Bucket) PublishBuildStatus(ctx context.Context, name string, status models.HashicorpCloudPackerBuildStatus) error {}

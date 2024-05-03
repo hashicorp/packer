@@ -14,7 +14,7 @@ page_title: Custom Provisioners - Extending
 # Custom Provisioners
 
 Packer provisioners install and configure software into a running machine prior to turning that machine into an image. For example, the [shell
-provisioner](/docs/provisioners/shell), which runs shell scripts within
+provisioner](/packer/docs/provisioners/shell), which runs shell scripts within
 the machines.
 
 Provisioner plugins implement the [`packer.Provisioner`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Provisioner) interface and are served
@@ -25,7 +25,7 @@ using the `plugin.ServeProvisioner` function.
 ## Before You Begin
 
 We recommend reviewing the following resources before you begin development:
-- [Developing Plugins - Overview](/docs/plugins/creation)
+- [Developing Plugins - Overview](/packer/docs/plugins/creation)
 - The [Go](https://go.dev/) language. You must write custom plugins in Go, so this guide assumes you are familiar with the language.
 
 ## The Interface
@@ -74,7 +74,7 @@ may be displayed to the user before anything actually happens.
 This method returns a hcldec.ObjectSpec, which is a spec necessary for using
 HCL2 templates with Packer. For information on how to use and implement this
 function, check our
-[object spec docs](/guides/hcl/component-object-spec)
+[object spec docs](/packer/guides/hcl/component-object-spec)
 
 ### The "Provision" Method
 

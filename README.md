@@ -1,16 +1,8 @@
 # Packer
-
+[![License: BUSL-1.1](https://img.shields.io/badge/License-BUSL--1.1-yellow.svg)](LICENSE)
 [![Build Status](https://github.com/hashicorp/packer/actions/workflows/build.yml/badge.svg)](https://github.com/hashicorp/packer/actions/workflows/build.yml)
 [![Discuss](https://img.shields.io/badge/discuss-packer-3d89ff?style=flat)](https://discuss.hashicorp.com/c/packer)
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/hashicorp/packer)](https://pkg.go.dev/github.com/hashicorp/packer)
-[![GoReportCard][report-badge]][report]
-
-[github-badge]: https://github.com/hashicorp/packer/actions/workflows/build.yml/badge.svg
-[appveyor-badge]: https://ci.appveyor.com/api/projects/status/miavlgnp989e5obc/branch/master?svg=true
-[godoc-badge]: https://godoc.org/github.com/hashicorp/packer?status.svg
-[godoc]: https://godoc.org/github.com/hashicorp/packer
-[report-badge]: https://goreportcard.com/badge/github.com/hashicorp/packer
-[report]: https://goreportcard.com/report/github.com/hashicorp/packer
+===
 
 <p align="center" style="text-align:center;">
   <a href="https://www.packer.io">
@@ -23,79 +15,31 @@ from a single source configuration.
 
 Packer is lightweight, runs on every major operating system, and is highly
 performant, creating machine images for multiple platforms in parallel. Packer
-comes out of the box with support for many platforms, the full list of which can
-be found at https://www.packer.io/docs/builders.
+supports various platforms through external plugin integrations, the full list of which can
+be found at https://developer.hashicorp.com/packer/integrations.
 
-Support for other platforms can be added via plugins.
-
-The images that Packer creates can easily be turned into
-[Vagrant](http://www.vagrantup.com) boxes.
+The images that Packer creates can easily be turned into [Vagrant](http://www.vagrantup.com) boxes.
 
 ## Quick Start
 
-**Note:** There is a great
-[introduction and getting started guide](https://learn.hashicorp.com/tutorials/packer/get-started-install-cli)
-for those with a bit more patience. Otherwise, the quick start below
-will get you up and running quickly, at the sacrifice of not explaining some
-key points.
+### Packer 
 
-First, [download a pre-built Packer
-binary](https://www.packer.io/downloads.html) for your operating system or
-[compile Packer
-yourself](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md#setting-up-go-to-work-on-packer).
+There is a great [introduction and getting started guide](https://learn.hashicorp.com/tutorials/packer/get-started-install-cli)
+for building a Docker image on your local machine without using any paid cloud resources. 
 
-After Packer is installed, create your first template, which tells Packer
-what platforms to build images for and how you want to build them. In our
-case, we'll create a simple AMI that has Redis pre-installed.
+Alternatively, you can refer to [getting started with AWS](https://developer.hashicorp.com/packer/tutorials/aws-get-started) to
+learn how to build a machine image for an external cloud provider. 
 
-Save this file as `quick-start.pkr.hcl`. Export your AWS credentials as the
-`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables.
+### HCP Packer
 
-```hcl
-variable "access_key" {
-  type    = string
-  default = "${env("AWS_ACCESS_KEY_ID")}"
-}
+HCP Packer registry stores Packer image metadata, enabling you to track your image lifecycle. 
 
-variable "secret_key" {
-  type      = string
-  default   = "${env("AWS_SECRET_ACCESS_KEY")}"
-  sensitive = true
-}
-
-locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
-
-source "amazon-ebs" "quick-start" {
-  access_key    = "${var.access_key}"
-  ami_name      = "packer-example ${local.timestamp}"
-  instance_type = "t2.micro"
-  region        = "us-east-1"
-  secret_key    = "${var.secret_key}"
-  source_ami    = "ami-af22d9b9"
-  ssh_username  = "ubuntu"
-}
-
-build {
-  sources = ["source.amazon-ebs.quick-start"]
-}
-```
-
-Next, tell Packer to build the image:
-
-```
-$ packer build quick-start.pkr.hcl
-...
-```
-
-Packer will build an AMI according to the "quick-start" template. The AMI
-will be available in your AWS account. To delete the AMI, you must manually
-delete it using the [AWS console](https://console.aws.amazon.com/). Packer
-builds your images, it does not manage their lifecycle. Where they go, how
-they're run, etc., is up to you.
+To get started with building an AWS machine image to HCP Packer for referencing in Terraform refer
+to the collection of [HCP Packer Tutorials](https://developer.hashicorp.com/packer/tutorials/hcp-get-started).
 
 ## Documentation
 
-Comprehensive documentation is viewable on the Packer website at https://www.packer.io/docs.
+Comprehensive documentation is viewable on the Packer website at https://developer.hashicorp.com/packer/docs.
 
 ## Contributing to Packer
 
@@ -117,4 +61,5 @@ What does **unmaintained** mean?
 1. No active development will be performed by HashiCorp.
 
 If you are interested in maintaining an unmaintained or archived plugin, please reach out to us at packer@hashicorp.com.
+
 

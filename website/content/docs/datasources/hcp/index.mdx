@@ -11,31 +11,37 @@ sidebar_title: Overview
 
 # HCP Packer Registry Data sources
 
-The HCP Packer registry bridges the gap between image factories and image
+The HCP Packer Registry bridges the gap between artifact factories and artifact
 deployments, allowing development and security teams to work together to create,
-manage, and consume images in a centralized way.
+manage, and consume artifacts in a centralized way.
 
-The HCP Packer registry stores metadata about your images, including when they
-were created, where the image exists in the cloud, and what (if any) git commit
-is associated with your image build. You can use the registry to track
-information about the golden images your Packer builds produce, clearly
-designate which images are appropriate for test and production environments,
-and query for the right golden images to use in both Packer and Terraform
+The HCP Packer Registry stores metadata about your artifacts, including when they
+were created, where the artifacts exists in the cloud, and what (if any) git commit
+is associated with your build. You can use the registry to track
+information about the artifacts your Packer builds produce, clearly
+designate which artifacts are appropriate for test and production environments,
+and query for the right artifacts to use in both Packer and Terraform
 configurations.
 
 Packer has two data sources that work together to retrieve information from the
 HCP Packer registry:
 
-- [hcp-packer-iteration](/docs/datasources/hcp/hcp-packer-iteration) -
+- [hcp-packer-version](/packer/docs/datasources/hcp/hcp-packer-version) -
+retrieves information about an HCP Packer Version in HCP Packer Registry
+- [hcp-packer-artifact](/packer/docs/datasources/hcp/hcp-packer-artifact) - retrieves
+information about a specific artifact created in the HCP Packer registry
+
+Deprecated data sources: (Please use above given data sources instead)
+- [hcp-packer-iteration](/packer/docs/datasources/hcp/hcp-packer-iteration) -
   retrieves information about an iteration in HCP Packer registry
-- [hcp-packer-image](/docs/datasources/hcp/hcp-packer-image) - retrieves
+- [hcp-packer-image](/packer/docs/datasources/hcp/hcp-packer-image) - retrieves
   information about a specific image created in the HCP Packer registry
 
-These data sources are intended to be used together to determine source images
+These data sources are intended to be used together to determine source artifact
 for pipelined Packer builds.
 
 ## How to use this plugin
 
 This plugin comes bundled with the Packer core, so you do not need to install
 it separately. Please install Packer v1.7.7 or above to use the latest version
-of the HCP Packer registry datasources.
+of the HCP Packer Registry data sources.

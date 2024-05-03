@@ -49,11 +49,12 @@ local "foo" {
     expression = vault("secrets/hello", "foo")
     sensitive  = true
 }
+```
 
 The `local` block example accesses the Vault path `secrets/foo` and returns the value
 stored at the key `foo`, storing it as the local variable `local.foo`. However, the output of
 the newly stored local variable will be filtered from the Packer build output, and replaced
-with the value '<sensitive>'. See [Local Values](/docs/templates/hcl_templates/locals) for more details.
+with the value `<sensitive>`. See [Local Values](/packer/docs/templates/hcl_templates/locals) for more details.
 
 
 ## Usage
@@ -88,4 +89,4 @@ The full list of available environment variables is:
 ```
 
 and detailed documentation for usage of each of those variables can be found
-[here](https://www.vaultproject.io/docs/commands/#environment-variables).
+[here](/vault/docs/commands#environment-variables).

@@ -1,3 +1,8 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
+//go:build amd64 && (darwin || windows || linux)
+
 package command
 
 import (
@@ -8,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/mitchellh/cli"
 	"golang.org/x/mod/sumdb/dirhash"
 )
 
@@ -33,57 +37,57 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			name: "already-installed-no-op",
 			Meta: TestMetaFile(t),
 			inPluginFolder: map[string]string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64":                "1",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe":           "1.exe",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64":                 "1.out",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
 			},
-			expectedPackerConfigDirHashBeforeInstall: "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			expectedPackerConfigDirHashBeforeInstall: "h1:sxhWsXwLkxCO1fm86oO2QIg7ImLdfw9pmXa0hKHIeUw=",
 			packerConfigDir:                          cfg.dir("1_pkr_plugins_config"),
-			pluginSourceArgs:                         []string{"github.com/sylviamoss/comment", "v0.2.18"},
+			pluginSourceArgs:                         []string{"github.com/hashicorp/hashicups", "v1.0.1"},
 			want:                                     0,
 			dirFiles:                                 nil,
-			expectedPackerConfigDirHashAfterInstall:  "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			expectedPackerConfigDirHashAfterInstall:  "h1:sxhWsXwLkxCO1fm86oO2QIg7ImLdfw9pmXa0hKHIeUw=",
 		},
 		{
 			name: "install-newer-version",
 			Meta: TestMetaFile(t),
 			inPluginFolder: map[string]string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64":                "1",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe":           "1.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64":                 "1.out",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64":                "1",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM":      "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe":           "1.exe",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM": "07d8453027192ee0c4120242e6e84e2ca2328b8e0f506e2f818a1a5b82790a0b",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64":                 "1.out",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM":       "59031c50e0dfeedfde2b4e9445754804dce3f29e4efa737eead0ca9b4f5b85a5",
 			},
-			expectedPackerConfigDirHashBeforeInstall: "h1:Q5qyAOdD43hL3CquQdVfaHpOYGf0UsZ/+wVA9Ry6cbA=",
+			expectedPackerConfigDirHashBeforeInstall: "h1:sxhWsXwLkxCO1fm86oO2QIg7ImLdfw9pmXa0hKHIeUw=",
 			packerConfigDir:                          cfg.dir("2_pkr_plugins_config"),
-			pluginSourceArgs:                         []string{"github.com/sylviamoss/comment", "v0.2.19"},
+			pluginSourceArgs:                         []string{"github.com/hashicorp/hashicups", "v1.0.2"},
 			want:                                     0,
 			dirFiles: []string{
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_darwin_amd64_SHA256SUM",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_linux_amd64_SHA256SUM",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe",
-				"github.com/sylviamoss/comment/packer-plugin-comment_v0.2.18_x5.0_windows_amd64.exe_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_darwin_amd64_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_linux_amd64_SHA256SUM",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe",
+				"github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.1_x5.0_windows_amd64.exe_SHA256SUM",
 				map[string]string{
-					"darwin":  "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64_SHA256SUM",
-					"linux":   "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64_SHA256SUM",
-					"windows": "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe_SHA256SUM",
+					"darwin":  "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_darwin_amd64_SHA256SUM",
+					"linux":   "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64_SHA256SUM",
+					"windows": "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_windows_amd64.exe_SHA256SUM",
 				}[runtime.GOOS],
 				map[string]string{
-					"darwin":  "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_darwin_amd64",
-					"linux":   "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_linux_amd64",
-					"windows": "github.com/sylviamoss/comment/packer-plugin-comment_v0.2.19_x5.0_windows_amd64.exe",
+					"darwin":  "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_darwin_amd64",
+					"linux":   "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64",
+					"windows": "github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_windows_amd64.exe",
 				}[runtime.GOOS],
 			},
 			expectedPackerConfigDirHashAfterInstall: map[string]string{
-				"darwin":  "h1:ORwcCYUx8z/5n/QvuTJo2vrgKpfJA4AxlNg1G9/BCDI=",
-				"linux":   "h1:CGym0+Nd0LEANgzqL0wx/LDjRL8bYwlpZ0HajPJo/hs=",
-				"windows": "h1:ag0/C1YjP7KoEDYOiJHE0K+lhFgs0tVgjriWCXVT1fg=",
+				"darwin":  "h1:itQ7rZfZarDHmnajkzfxBVMxZ0wBou4I6FNX/ysHggA=",
+				"linux":   "h1:+zgZKpRpVofVgjny13tZNonPBcNNxWF741iYdTE9UCg=",
+				"windows": "h1:scuTEDpGEWJ0LaKL7ETZ8o7wdW6dJUzV+eg/2shQ+tQ=",
 			}[runtime.GOOS],
 		},
 		{
@@ -92,7 +96,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			inPluginFolder:                           nil,
 			expectedPackerConfigDirHashBeforeInstall: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			packerConfigDir:                          cfg.dir("3_pkr_plugins_config"),
-			pluginSourceArgs:                         []string{"example.com/sylviamoss/comment", "v0.2.19"},
+			pluginSourceArgs:                         []string{"example.com/hashicorp/hashicups", "v0.2.19"},
 			want:                                     1,
 			dirFiles:                                 nil,
 			expectedPackerConfigDirHashAfterInstall:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
@@ -103,8 +107,8 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			inPluginFolder:                           nil,
 			expectedPackerConfigDirHashBeforeInstall: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			packerConfigDir:                          cfg.dir("4_pkr_plugins_config"),
-			pluginSourceArgs:                         []string{"github.com/sylviamoss/comment", "v0.2.18", "github.com/sylviamoss/comment", "v0.2.19"},
-			want:                                     cli.RunResultHelp,
+			pluginSourceArgs:                         []string{"github.com/hashicorp/hashicups", "v0.2.18", "github.com/hashicorp/hashicups", "v0.2.19"},
+			want:                                     1,
 			dirFiles:                                 nil,
 			expectedPackerConfigDirHashAfterInstall:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},
@@ -115,7 +119,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 			expectedPackerConfigDirHashBeforeInstall: "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 			packerConfigDir:                          cfg.dir("5_pkr_plugins_config"),
 			pluginSourceArgs:                         []string{},
-			want:                                     cli.RunResultHelp,
+			want:                                     1,
 			dirFiles:                                 nil,
 			expectedPackerConfigDirHashAfterInstall:  "h1:47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
 		},
@@ -147,7 +151,7 @@ func TestPluginsInstallCommand_Run(t *testing.T) {
 				t.Fatalf("Failed to discover plugins: %s", err)
 			}
 
-			c.CoreConfig.Components.PluginConfig.KnownPluginFolders = []string{tt.packerConfigDir}
+			c.CoreConfig.Components.PluginConfig.PluginDirectory = tt.packerConfigDir
 			if got := c.Run(tt.pluginSourceArgs); got != tt.want {
 				t.Errorf("PluginsInstallCommand.Run() = %v, want %v", got, tt.want)
 			}

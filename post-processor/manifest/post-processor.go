@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 //go:generate packer-sdc struct-markdown
 
@@ -7,7 +10,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,7 +34,7 @@ type Config struct {
 	// Don't write the `build_time` field from the output.
 	StripTime bool `mapstructure:"strip_time"`
 	// Arbitrary data to add to the manifest. This is a [template
-	// engine](https://packer.io/docs/templates/legacy_json_templates/engine.html). Therefore, you
+	// engine](/packer/docs/templates/legacy_json_templates/engine). Therefore, you
 	// may use user variables and template functions in this field.
 	CustomData map[string]string `mapstructure:"custom_data"`
 	ctx        interpolate.Context
@@ -140,7 +142,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 
 	// Read the current manifest file from disk
 	contents := []byte{}
-	if contents, err = ioutil.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
+	if contents, err = os.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
 		return source, true, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.OutputPath, err)
 	}
 
@@ -164,7 +166,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 
 	// Write JSON to disk
 	if out, err := json.MarshalIndent(manifestFile, "", "  "); err == nil {
-		if err = ioutil.WriteFile(p.config.OutputPath, out, 0664); err != nil {
+		if err = os.WriteFile(p.config.OutputPath, out, 0664); err != nil {
 			return source, true, true, fmt.Errorf("Unable to write %s: %s", p.config.OutputPath, err)
 		}
 	} else {

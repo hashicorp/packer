@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package function
 
 import (
@@ -9,19 +12,20 @@ import (
 	"github.com/zclconf/go-cty/cty/function"
 )
 
-// InitTime is the UTC time when this package was initialized. It is
+// initTime is the UTC time when this package was initialized. It is
 // used as the timestamp for all configuration templates so that they
 // match for a single build.
-var InitTime time.Time
+var initTime time.Time
 
 func init() {
-	InitTime = time.Now().UTC()
+	initTime = time.Now().UTC()
 }
 
 // TimestampFunc constructs a function that returns a string representation of the current date and time.
 var TimestampFunc = function.New(&function.Spec{
-	Params: []function.Parameter{},
-	Type:   function.StaticReturnType(cty.String),
+	Params:       []function.Parameter{},
+	Type:         function.StaticReturnType(cty.String),
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		return cty.StringVal(time.Now().UTC().Format(time.RFC3339)), nil
 	},
@@ -37,42 +41,46 @@ func Timestamp() (cty.Value, error) {
 }
 
 // LegacyIsotimeFunc constructs a function that returns a string representation
-// of the current date and time using golang's datetime formatting.
+// of the current date and time using the Go language datetime formatting syntax.
 var LegacyIsotimeFunc = function.New(&function.Spec{
 	Params: []function.Parameter{},
 	VarParam: &function.Parameter{
 		Name: "format",
 		Type: cty.String,
 	},
-	Type: function.StaticReturnType(cty.String),
+	Type:         function.StaticReturnType(cty.String),
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		if len(args) > 1 {
 			return cty.StringVal(""), fmt.Errorf("too many values, 1 needed: %v", args)
-		} else if len(args) == 0 {
-			return cty.StringVal(InitTime.Format(time.RFC3339)), nil
+		}
+		if len(args) == 0 {
+			return cty.StringVal(initTime.Format(time.RFC3339)), nil
 		}
 		format := args[0].AsString()
-		return cty.StringVal(InitTime.Format(format)), nil
+		return cty.StringVal(initTime.Format(format)), nil
 	},
 })
 
 // LegacyStrftimeFunc constructs a function that returns a string representation
-// of the current date and time using golang's strftime datetime formatting.
+// of the current date and time using the Go language strftime datetime formatting syntax.
 var LegacyStrftimeFunc = function.New(&function.Spec{
 	Params: []function.Parameter{},
 	VarParam: &function.Parameter{
 		Name: "format",
 		Type: cty.String,
 	},
-	Type: function.StaticReturnType(cty.String),
+	Type:         function.StaticReturnType(cty.String),
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
 		if len(args) > 1 {
 			return cty.StringVal(""), fmt.Errorf("too many values, 1 needed: %v", args)
-		} else if len(args) == 0 {
-			return cty.StringVal(InitTime.Format(time.RFC3339)), nil
+		}
+		if len(args) == 0 {
+			return cty.StringVal(initTime.Format(time.RFC3339)), nil
 		}
 		format := args[0].AsString()
-		return cty.StringVal(strftime.Format(format, InitTime)), nil
+		return cty.StringVal(strftime.Format(format, initTime)), nil
 	},
 })
 

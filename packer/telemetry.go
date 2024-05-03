@@ -1,7 +1,11 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package packer
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,24 +15,37 @@ import (
 	checkpoint "github.com/hashicorp/go-checkpoint"
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 	packerVersion "github.com/hashicorp/packer/version"
+	"github.com/zclconf/go-cty/cty"
 )
 
-const TelemetryVersion string = "beta/packer/5"
+type PackerTemplateType string
+
+const (
+	UnknownTemplate PackerTemplateType = "Unknown"
+	HCL2Template    PackerTemplateType = "HCL2"
+	JSONTemplate    PackerTemplateType = "JSON"
+)
+
+const TelemetryVersion string = "beta/packer/7"
 const TelemetryPanicVersion string = "beta/packer_panic/4"
 
 var CheckpointReporter *CheckpointTelemetry
 
 type PackerReport struct {
-	Spans    []*TelemetrySpan `json:"spans"`
-	ExitCode int              `json:"exit_code"`
-	Error    string           `json:"error"`
-	Command  string           `json:"command"`
+	Spans        []*TelemetrySpan   `json:"spans"`
+	ExitCode     int                `json:"exit_code"`
+	Error        string             `json:"error"`
+	Command      string             `json:"command"`
+	TemplateType PackerTemplateType `json:"template_type"`
+	UseBundled   bool               `json:"use_bundled"`
 }
 
 type CheckpointTelemetry struct {
 	spans         []*TelemetrySpan
 	signatureFile string
 	startTime     time.Time
+	templateType  PackerTemplateType
+	useBundled    bool
 }
 
 func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
@@ -52,6 +69,7 @@ func NewCheckpointReporter(disableSignature bool) *CheckpointTelemetry {
 	return &CheckpointTelemetry{
 		signatureFile: signatureFile,
 		startTime:     time.Now().UTC(),
+		templateType:  UnknownTemplate,
 	}
 }
 
@@ -103,6 +121,23 @@ func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options interface
 	return ts
 }
 
+// SetTemplateType registers the template type being processed for a Packer command
+func (c *CheckpointTelemetry) SetTemplateType(t PackerTemplateType) {
+	if c == nil {
+		return
+	}
+
+	c.templateType = t
+}
+
+// SetBundledUsage marks the template as using bundled plugins
+func (c *CheckpointTelemetry) SetBundledUsage() {
+	if c == nil {
+		return
+	}
+	c.useBundled = true
+}
+
 func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) error {
 	if c == nil {
 		return nil
@@ -119,6 +154,9 @@ func (c *CheckpointTelemetry) Finalize(command string, errCode int, err error) e
 	if err != nil {
 		extra.Error = err.Error()
 	}
+
+	extra.UseBundled = c.useBundled
+	extra.TemplateType = c.templateType
 	params.Payload = extra
 	// b, _ := json.MarshalIndent(params, "", "    ")
 	// log.Println(string(b))
@@ -154,22 +192,66 @@ func flattenConfigKeys(options interface{}) []string {
 	var flatten func(string, interface{}) []string
 
 	flatten = func(prefix string, options interface{}) (strOpts []string) {
-		if m, ok := options.(map[string]interface{}); ok {
-			for k, v := range m {
-				if prefix != "" {
-					k = prefix + "/" + k
-				}
-				if n, ok := v.(map[string]interface{}); ok {
-					strOpts = append(strOpts, flatten(k, n)...)
-				} else {
-					strOpts = append(strOpts, k)
-				}
-			}
+		switch opt := options.(type) {
+		case map[string]interface{}:
+			return flattenJSON(prefix, options)
+		case cty.Value:
+			return flattenHCL(prefix, opt)
+		default:
+			return nil
 		}
-		return
 	}
 
 	flattened := flatten("", options)
 	sort.Strings(flattened)
 	return flattened
+}
+
+func flattenJSON(prefix string, options interface{}) (strOpts []string) {
+	if m, ok := options.(map[string]interface{}); ok {
+		for k, v := range m {
+			if prefix != "" {
+				k = prefix + "/" + k
+			}
+			if n, ok := v.(map[string]interface{}); ok {
+				strOpts = append(strOpts, flattenJSON(k, n)...)
+			} else {
+				strOpts = append(strOpts, k)
+			}
+		}
+	}
+	return
+}
+
+func flattenHCL(prefix string, v cty.Value) (args []string) {
+	if v.IsNull() {
+		return []string{}
+	}
+	t := v.Type()
+	switch {
+	case t.IsObjectType(), t.IsMapType():
+		if !v.IsKnown() {
+			return []string{}
+		}
+		it := v.ElementIterator()
+		for it.Next() {
+			key, val := it.Element()
+			keyStr := key.AsString()
+
+			if val.IsNull() {
+				continue
+			}
+
+			if prefix != "" {
+				keyStr = fmt.Sprintf("%s/%s", prefix, keyStr)
+			}
+
+			if val.Type().IsObjectType() || val.Type().IsMapType() {
+				args = append(args, flattenHCL(keyStr, val)...)
+			} else {
+				args = append(args, keyStr)
+			}
+		}
+	}
+	return args
 }

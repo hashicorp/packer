@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
@@ -51,7 +54,7 @@ func (c *PluginsRequiredCommand) Run(args []string) int {
 
 func (c *PluginsRequiredCommand) ParseArgs(args []string) (*PluginsRequiredArgs, int) {
 	var cfg PluginsRequiredArgs
-	flags := c.Meta.FlagSet("plugins required", 0)
+	flags := c.Meta.FlagSet("plugins required")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -81,7 +84,7 @@ func (c *PluginsRequiredCommand) RunContext(buildCtx context.Context, cla *Plugi
 	}
 
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,

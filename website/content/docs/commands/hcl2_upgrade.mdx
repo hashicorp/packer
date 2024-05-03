@@ -81,7 +81,7 @@ here is the list of calls that should get transformed:
 - `` {{ user `my_var` }} `` becomes `${var.my_var}`.
 - `` {{ env `my_var` }} `` becomes `${var.my_var}`. Packer HCL2 supports
   environment variables through input variables. See
-  [docs](/docs/templates/hcl_templates/variables#environment-variables)
+  [docs](/packer/docs/templates/hcl_templates/variables#environment-variables)
   for more info.
 - `{{ timestamp }}` becomes `${local.timestamp}`, the local variable
   will be created for all generated files.
@@ -134,6 +134,6 @@ locals {
 ## Upgrading templates that use third-party community plugins
 
 If your template references a plugin that is not bundled with the main Packer
-binary, you need to make sure that the [plugin is installed](/docs/plugins#installing-plugins)
+binary, you need to make sure that the [plugin is installed](/packer/docs/plugins#installing-plugins)
 or you will get an `unknown builder type` error. Packer needs to load the plugin
 to transpose the template.

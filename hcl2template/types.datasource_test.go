@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -54,6 +57,7 @@ func TestParse_datasource(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -131,6 +135,7 @@ func TestParse_datasource(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},

@@ -14,7 +14,7 @@ Packer uses the HashiCorp Configuration Language - HCL - designed to allow
 concise descriptions of the required steps to get to a build file. This page
 describes the features of HCL2 exhaustively, if you would like to give a quick
 try to HCL2, you can also read the quicker [HCL2 getting started
-guide](/guides/hcl).
+guide](/packer/guides/hcl).
 
 ## Builds
 
@@ -55,14 +55,14 @@ source "amazon-ebs" "main" {
 
 For full details about Packer's syntax, see:
 
-- [Configuration Syntax](/docs/templates/hcl_templates/syntax)
-- [Expressions](/docs/templates/hcl_templates/expressions)
+- [Configuration Syntax](/packer/docs/templates/hcl_templates/syntax)
+- [Expressions](/packer/docs/templates/hcl_templates/expressions)
 
 ## Code Organization
 
 The HCL language uses configuration files that are named with the `.pkr.hcl`
 file extension. There is also [a JSON-based variant of the
-language](/docs/templates/hcl_templates/syntax-json) that is named with the `.pkr.json` file
+language](/packer/docs/templates/hcl_templates/syntax-json) that is named with the `.pkr.json` file
 extension.
 
 Configuration files must always use UTF-8 encoding, and by convention are

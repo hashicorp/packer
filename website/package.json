@@ -4,16 +4,12 @@
   "version": "1.0.0",
   "author": "HashiCorp",
   "devDependencies": {
-    "@hashicorp/platform-cli": "^2.1.0",
-    "dart-linkcheck": "2.0.15",
-    "husky": "4.3.8",
-    "next": "^12.3.1",
-    "prettier": "2.2.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "next-hashicorp precommit"
-    }
+    "@hashicorp/platform-cli": "^2.7.3",
+    "@hashicorp/platform-content-conformance": "^0.0.12",
+    "dart-linkcheck": "^2.0.15",
+    "husky": "^9.0.7",
+    "next": "^14.0.4",
+    "prettier": "^3.2.4"
   },
   "main": "index.js",
   "scripts": {
@@ -21,9 +17,11 @@
     "format": "next-hashicorp format",
     "lint": "next-hashicorp lint",
     "start": "./scripts/website-start.sh",
-    "linkcheck": "linkcheck https://packer.io"
+    "linkcheck": "linkcheck https://packer.io",
+    "content-check": "hc-content --config base-docs",
+    "prepare": "cd .. && husky website/.husky"
   },
   "engines": {
-    "npm": ">=7.0.0"
+    "npm": ">=9.6.7"
   }
 }

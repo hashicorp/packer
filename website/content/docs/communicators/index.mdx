@@ -11,16 +11,16 @@ Communicators are the mechanism Packer uses to upload files, execute scripts,
 etc. with the machine being created.
 
 Communicators are configured within the
-[builder](/docs/templates/legacy_json_templates/builders) section. Packer currently supports
+[builder](/packer/docs/templates/legacy_json_templates/builders) section. Packer currently supports
 three kinds of communicators:
 
 - `none` - No communicator will be used. If this is set, most provisioners
   also can't be used.
 
-- [ssh](/docs/communicators/ssh) - An SSH connection will be established to the machine. This is
+- [ssh](/packer/docs/communicators/ssh) - An SSH connection will be established to the machine. This is
   usually the default.
 
-- [winrm](/docs/communicators/winrm) - A WinRM connection will be established.
+- [winrm](/packer/docs/communicators/winrm) - A WinRM connection will be established.
 
 In addition to the above, some builders have custom communicators they can use.
 For example, the Docker builder has a "docker" communicator that uses

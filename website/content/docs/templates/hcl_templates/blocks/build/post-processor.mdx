@@ -27,11 +27,11 @@ build {
 Each `post-processor` runs after each defined build. A post-processor takes the
 `Artifact` from a build. Post-processors are optional, and they can be used to
 upload artifacts, re-package, or more. The list of available post-processors
-can be found in the [post-processors](/docs/post-processors) section.
+can be found in the [post-processors](/packer/docs/post-processors) section.
 
 A `post-processor` can also take the `Artifact` from another post-processor
 when it is defined in a [`post-processors`
-block](/docs/templates/hcl_templates/blocks/build/post-processor) list, that is a list of
+block](/packer/docs/templates/hcl_templates/blocks/build/post-processor) list, that is a list of
 chained post processors.
 
 -> Note: The input 'artifact' received by a post-processor will be automatically
@@ -98,11 +98,11 @@ to only run a post-processor for a given source build  you must use the
 Packer allows to access connection information and basic instance state
 information from a post-processor. These information are stored in the `build`
 variable. Check out the [Contextual
-Variables](/docs/templates/hcl_templates/contextual-variables) documentation to learn more
+Variables](/packer/docs/templates/hcl_templates/contextual-variables) documentation to learn more
 about and see some examples of how to use them.
 
 ### Related
 
-- The [`post-processors` block](/docs/templates/hcl_templates/blocks/build/post-processors)
+- The [`post-processors` block](/packer/docs/templates/hcl_templates/blocks/build/post-processors)
   allows to define one or more chain of `post-processor`s that will take the
   output from the build and provision steps.

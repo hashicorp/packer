@@ -1,10 +1,12 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package powershell
 
 import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -32,7 +34,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	}
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
-	readFile, err := ioutil.ReadFile(file)
+	readFile, err := os.ReadFile(file)
 	expectedContents := "foo\nbar\n"
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
@@ -184,7 +186,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -211,7 +213,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 	}
 
 	// Test with both
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -231,7 +233,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 	config := testConfig()
 
 	// Test with both
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -258,7 +260,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -509,7 +511,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 }
 
 func TestProvisionerProvision_Scripts(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
+	tempFile, _ := os.CreateTemp("", "packer")
 	defer os.Remove(tempFile.Name())
 	defer tempFile.Close()
 
@@ -539,7 +541,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 }
 
 func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
+	tempFile, _ := os.CreateTemp("", "packer")
 	ui := testUi()
 	defer os.Remove(tempFile.Name())
 	defer tempFile.Close()
@@ -576,7 +578,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 }
 
 func TestProvisionerProvision_SkipClean(t *testing.T) {
-	tempFile, _ := ioutil.TempFile("", "packer")
+	tempFile, _ := os.CreateTemp("", "packer")
 	defer func() {
 		tempFile.Close()
 		os.Remove(tempFile.Name())

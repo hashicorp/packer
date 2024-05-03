@@ -1,7 +1,9 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,23 +19,25 @@ func Test_hcl2_upgrade(t *testing.T) {
 		exitCode  int
 		exitEarly bool
 	}{
-		{folder: "unknown_builder", flags: []string{}, exitCode: 1},
-		{folder: "complete", flags: []string{"-with-annotations"}},
-		{folder: "without-annotations", flags: []string{}},
-		{folder: "minimal", flags: []string{"-with-annotations"}},
-		{folder: "source-name", flags: []string{"-with-annotations"}},
-		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}},
-		{folder: "aws-access-config", flags: []string{}},
-		{folder: "escaping", flags: []string{}},
-		{folder: "vsphere_linux_options_and_network_interface", exitCode: 1, flags: []string{}},
+		{folder: "unknown_builder", flags: []string{}, exitCode: 1}, // warn for unknown components not tracked in knownPluginPrefixes
+		{folder: "complete", flags: []string{"-with-annotations"}, exitCode: 0},
+		{folder: "without-annotations", flags: []string{}, exitCode: 0},
+		{folder: "minimal", flags: []string{"-with-annotations"}, exitCode: 0},
+		{folder: "source-name", flags: []string{"-with-annotations"}, exitCode: 0},
+		{folder: "error-cleanup-provisioner", flags: []string{"-with-annotations"}, exitCode: 0},
+		{folder: "aws-access-config", flags: []string{}, exitCode: 0},
+		{folder: "escaping", flags: []string{}, exitCode: 0},
+		{folder: "vsphere_linux_options_and_network_interface", flags: []string{}, exitCode: 0}, //do not warn for known uninstalled plugins components
 		{folder: "nonexistent", flags: []string{}, exitCode: 1, exitEarly: true},
 		{folder: "placeholders", flags: []string{}, exitCode: 0},
 		{folder: "ami_test", flags: []string{}, exitCode: 0},
 		{folder: "azure_shg", flags: []string{}, exitCode: 0},
-		{folder: "variables-only", flags: []string{}},
-		{folder: "variables-with-variables", flags: []string{}},
-		{folder: "complete-variables-with-template-engine", flags: []string{}},
+		{folder: "variables-only", flags: []string{}, exitCode: 0},
+		{folder: "variables-with-variables", flags: []string{}, exitCode: 0},
+		{folder: "complete-variables-with-template-engine", flags: []string{}, exitCode: 0},
 		{folder: "undeclared-variables", flags: []string{}, exitCode: 0},
+		{folder: "varfile-with-no-variables-block", flags: []string{}, exitCode: 0},
+		{folder: "bundled-plugin-used", flags: []string{}, exitCode: 0},
 	}
 
 	for _, tc := range tc {
@@ -59,8 +63,8 @@ func Test_hcl2_upgrade(t *testing.T) {
 			if tc.exitEarly {
 				return
 			}
-			expected := string(mustBytes(ioutil.ReadFile(expectedPath)))
-			actual := string(mustBytes(ioutil.ReadFile(outputPath)))
+			expected := string(mustBytes(os.ReadFile(expectedPath)))
+			actual := string(mustBytes(os.ReadFile(outputPath)))
 
 			if diff := cmp.Diff(expected, actual); diff != "" {
 				t.Fatalf("unexpected output: %s", diff)

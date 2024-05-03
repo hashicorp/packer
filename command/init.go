@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
@@ -8,6 +11,7 @@ import (
 	"runtime"
 	"strings"
 
+	gversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
@@ -34,7 +38,7 @@ func (c *InitCommand) Run(args []string) int {
 
 func (c *InitCommand) ParseArgs(args []string) (*InitArgs, int) {
 	var cfg InitArgs
-	flags := c.Meta.FlagSet("init", 0)
+	flags := c.Meta.FlagSet("init")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -63,8 +67,16 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 		return ret
 	}
 
+	if len(reqs) == 0 {
+		c.Ui.Message(`
+No plugins requirement found, make sure you reference a Packer config
+containing a packer.required_plugins block. See
+https://www.packer.io/docs/templates/hcl_templates/blocks/packer
+for more info.`)
+	}
+
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: c.Meta.CoreConfig.Components.PluginConfig.KnownPluginFolders,
+		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
@@ -109,67 +121,30 @@ func (c *InitCommand) RunContext(buildCtx context.Context, cla *InitArgs) int {
 			return 1
 		}
 
-		log.Printf("[TRACE] for plugin %s found %d matching installation(s)", pluginRequirement.Identifier, len(installs))
+		if len(installs) > 0 {
+			if !cla.Force && !cla.Upgrade {
+				continue
+			}
 
-		if len(installs) > 0 && cla.Upgrade == false {
-			continue
+			if cla.Force && !cla.Upgrade {
+				pluginRequirement.VersionConstraints, _ = gversion.NewConstraint(fmt.Sprintf("=%s", installs[len(installs)-1].Version))
+			}
 		}
 
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
-			InFolders:                 opts.FromFolders,
+			PluginDirectory:           opts.PluginDirectory,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
 			Getters:                   getters,
+			Force:                     cla.Force,
 		})
 		if err != nil {
-			if pluginRequirement.Implicit {
-				msg := fmt.Sprintf(`
-Warning! At least one component used in your config file(s) has moved out of 
-Packer into the %q plugin.
-For that reason, Packer init tried to install the latest version of the %s 
-plugin. Unfortunately, this failed :
-%s`,
-					pluginRequirement.Identifier,
-					pluginRequirement.Identifier.Type,
-					err)
-				c.Ui.Say(msg)
-			} else {
-				c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
-				c.Ui.Error(err.Error())
-				ret = 1
-			}
+			c.Ui.Error(fmt.Sprintf("Failed getting the %q plugin:", pluginRequirement.Identifier))
+			c.Ui.Error(err.Error())
+			ret = 1
 		}
 		if newInstall != nil {
-			if pluginRequirement.Implicit {
-				msg := fmt.Sprintf("Installed implicitly required plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
-				ui.Say(msg)
-
-				warn := fmt.Sprintf(`
-Warning, at least one component used in your config file(s) has moved out of 
-Packer into the %[2]q plugin and is now being implicitly required. 
-For more details on implicitly required plugins see https://packer.io/docs/commands/init#implicit-required-plugin
-
-To avoid any backward incompatible changes with your
-config file you may want to lock the plugin version by pasting the following to your config:
-
-packer {
-  required_plugins {
-    %[1]s = {
-      source  = "%[2]s"
-      version = "~> %[3]s"
-    }
-  }
-}
-`,
-					pluginRequirement.Identifier.Type,
-					pluginRequirement.Identifier,
-					newInstall.Version,
-				)
-				ui.Error(warn)
-				continue
-			}
 			msg := fmt.Sprintf("Installed plugin %s %s in %q", pluginRequirement.Identifier, newInstall.Version, newInstall.BinaryPath)
 			ui.Say(msg)
-
 		}
 	}
 	return ret
@@ -177,7 +152,7 @@ packer {
 
 func (*InitCommand) Help() string {
 	helpText := `
-Usage: packer init [options] [config.pkr.hcl|folder/]
+Usage: packer init [options] TEMPLATE
 
   Install all the missing plugins required in a Packer config. Note that Packer
   does not have a state.
@@ -194,6 +169,8 @@ Options:
                                version, if there is a new higher one. Note that
                                this still takes into consideration the version
                                constraint of the config.
+  -force                       Forces reinstallation of plugins, even if already
+                               installed.
 `
 
 	return strings.TrimSpace(helpText)

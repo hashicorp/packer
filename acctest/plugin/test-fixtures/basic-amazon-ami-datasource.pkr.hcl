@@ -1,7 +1,7 @@
 packer {
   required_plugins {
     amazon = {
-      version = ">= 0.0.1"
+      version = "~>1"
       source = "github.com/hashicorp/amazon"
     }
   }
@@ -9,7 +9,7 @@ packer {
 
 data "amazon-ami" "test" {
   filters = {
-    name                = "ubuntu/images/*ubuntu-xenial-16.04-amd64-server-*"
+    name                = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
     root-device-type    = "ebs"
     virtualization-type = "hvm"
   }
@@ -25,6 +25,7 @@ source "amazon-ebs" "basic-example" {
   communicator  = "ssh"
   instance_type = "t2.micro"
   ssh_username  = "ubuntu"
+  skip_create_ami = true
 }
 
 build {

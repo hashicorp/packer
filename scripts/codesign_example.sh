@@ -1,4 +1,7 @@
 #! /usr/bin/env bash
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: BUSL-1.1
+
 set -euo pipefail
 
 # first makes some assertions about the environment and set some shared

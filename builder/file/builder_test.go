@@ -1,8 +1,11 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package file
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -30,7 +33,7 @@ func TestBuilderFileAcc_copy(t *testing.T) {
 }
 
 func checkContent(artifacts []packersdk.Artifact) error {
-	content, err := ioutil.ReadFile("contentTest.txt")
+	content, err := os.ReadFile("contentTest.txt")
 	if err != nil {
 		return err
 	}
@@ -42,7 +45,7 @@ func checkContent(artifacts []packersdk.Artifact) error {
 }
 
 func checkCopy(artifacts []packersdk.Artifact) error {
-	content, err := ioutil.ReadFile("copyTest.txt")
+	content, err := os.ReadFile("copyTest.txt")
 	if err != nil {
 		return err
 	}

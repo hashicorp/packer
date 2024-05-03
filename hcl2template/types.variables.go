@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -738,7 +741,6 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 					Severity: hcl.DiagError,
 					Summary:  "Invalid argument value for -var variable",
 					Detail:   fmt.Sprintf("The received arg value for %s is not compatible with the variable's type constraint: %s.", name, err),
-					Subject:  expr.Range().Ptr(),
 				})
 				val = cty.DynamicVal
 			}

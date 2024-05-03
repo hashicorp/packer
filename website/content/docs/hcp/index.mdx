@@ -1,44 +1,120 @@
 ---
 description: |
-   Packer can publish metadata for completed builds to an HCP Packer registry. Legacy JSON templates can connect to the registry using environment variables. HCL2 templates can connect using an hcp_packer_registry block. 
+  Packer can publish metadata for completed builds to an HCP Packer Registry. Legacy JSON templates can connect to the registry using environment variables. HCL2 templates can connect using an hcp_packer_registry block.
 page_title: HCP Packer
 ---
 
+-> **Note:** On May 16th 2023, HCP introduced multi-project support to the platform. In order to use multiple projects
+in your organization, you will need to update Packer to version 1.9.1 or above. Starting with 1.9.1, you may specify
+a project ID to push builds to with the `HCP_PROJECT_ID` environment variable. If no project ID is specified,
+Packer will pick the project with the oldest creation date. Older versions of Packer are incompatible with multi-project
+support on HCP, and builds will fail for HCP organizations with multiple projects on versions before 1.9.1.
+
 # HCP Packer
 
-The HCP Packer registry bridges the gap between image factories and image deployments, allowing development and security teams to work together to create, manage, and consume images in a centralized way.
+The HCP Packer registry bridges the gap between artifact factories and artifact deployments, allowing development and
+security teams to work together to create, manage, and consume artifacts in a centralized way.
 
-The HCP Packer registry stores metadata about your images, including when they were created, where the image exists in the cloud, and what (if any) git commit is associated with your image build. You can use the registry to track information about the golden images your Packer builds produce, clearly designate which images are appropriate for test and production environments, and query for the right golden images to use in both Packer and Terraform configurations.
+The HCP Packer Registry stores metadata about your artifact, including when they were created, where the artifact
+exists on the external platform, and what (if any) git commit is associated with your build. You can use the registry
+to track information about the artifact your Packer builds produce, clearly designate which artifact are appropriate
+for test and production environments, and query for the right artifact to use in both Packer and Terraform
+configurations.
 
-You can use HCP Packer with both JSON and HCL2 templates. If you are using JSON templates, we recommend getting started with 
-the [HCP Packer environment variables](#hcp-packer-environment-variables) and then migrating to HCL when possible. 
+You can use HCP Packer with both JSON and HCL2 templates. If you are using JSON templates, we recommend getting started with
+the [HCP Packer environment variables](#hcp-packer-environment-variables) and then migrating to HCL when possible.
 
-This page summarizes the methods you can use to connect JSON and HCL2 templates to the HCP Packer registry. It also provides a full list of HCP Packer environment variables. Refer to the [Packer Template Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration) page in the HCP Packer documentation for full configuration details and examples.
+This page summarizes the methods you can use to connect JSON and HCL2 templates to the HCP Packer registry. It also
+provides a full list of HCP Packer environment variables. Refer to the
+[Packer Template Configuration](/hcp/docs/packer/store-image-metadata/packer-template-configuration) page in the HCP
+Packer documentation for full configuration details and examples.
 
 ### HCP Packer Environment Variables
 
-The following environment variables let you configure Packer to push image metadata to an active registry without changing your template. You can use environment variables with both JSON and HCL2 templates. Refer to [Basic Configuration With Environment Variables](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration#basic-configuration-with-environment-variables) in the HCP Packer documentation for complete instructions and examples. 
+The following environment variables let you configure Packer to push artifact metadata to an active registry without
+changing your template. You can use environment variables with both JSON and HCL2 templates.
+Refer to [Basic Configuration With Environment Variables](/hcp/docs/packer/store-image-metadata/packer-template-configuration#basic-configuration-with-environment-variables)
+in the HCP Packer documentation for complete instructions and examples.
 
 You must set the following environment variables to enable Packer to push metadata to a registry.
 
-- `HCP_CLIENT_ID`          - The HCP client ID of a HashiCorp Cloud Platform service principle that Packer can use to authenticate to an HCP Packer registry.
+- `HCP_CLIENT_ID`          - The HCP client ID of a HashiCorp Cloud Platform service principle that Packer can use to
+authenticate to an HCP Packer Registry.
 
-- `HCP_CLIENT_SECRET`      - The HCP client secret of the HashiCorp Cloud Platform service principle that Packer can use to authenticate to an HCP Packer registry.
+- `HCP_CLIENT_SECRET`      - The HCP client secret of the HashiCorp Cloud Platform service principle that Packer
+can use to authenticate to an HCP Packer Registry.
 
-- `HCP_PACKER_BUCKET_NAME` - The name of the image bucket where you want HCP Packer to store image metadata from builds associated with your template. HCP Packer automatically creates the image bucket if it does not already exist. If your HCL2 template contains an `hcp_packer_registry` block, the bucket name specified in the configuration will be overwritten by this environment variable.
+- `HCP_PACKER_BUCKET_NAME` - The name of the HCP Packer Bucket where you want HCP Packer to store artifact metadata
+from builds associated with your template. HCP Packer automatically creates the bucket if it does not already exist.
+If your HCL2 template contains an `hcp_packer_registry` block, the bucket name specified in the configuration will be
+overwritten by this environment variable.
 
 You can set these additional environment variables to control how metadata is pushed to the registry.
 
-- `HCP_PACKER_BUILD_FINGERPRINT` - A unique identifier assigned to each build. HCP Packer uses this identifier to determine if metadata for a build on the registry is complete. By default, HCP Packer uses the HEAD Git SHA for the template file. If the template is not version controlled, you must set this environment variable to a unique value before running `packer build`. 
+- `HCP_PACKER_BUILD_FINGERPRINT` - A unique identifier assigned to each version. To reuse a fingerprint that is
+associated with an existing incomplete version you must set this environment variable. Refer to
+[Version Fingerprinting](#version-fingerprinting) for usage details.
 
-- `HCP_PACKER_REGISTRY`    -  When set, Packer does not push image metadata to HCP Packer from an otherwise configured template. Allowed values are [0|OFF].
+- `HCP_PACKER_REGISTRY`    -  When set, Packer does not push artifact metadata to HCP Packer from an otherwise
+configured template. Allowed values are [0|OFF].
+
+- `HCP_ORGANIZATION_ID` - The ID of the HCP organization linked to your service principal. This is environment
+variable is not required and available for the sole purpose of keeping parity with the HCP SDK authentication options.
+Its use may change in a future release.
+
+- `HCP_PROJECT_ID`  - The ID of the HCP project to use. This is useful if your service principal has access to multiple
+projects, as by default Packer will pick the one created first as target.
+
+-> **Note**: The HCP_PROJECT_ID environment variable must be set if you're authenticating with a project-level service
+principal, otherwise Packer will attempt to get the list of projects for an organization and error due to a lack of
+permissions for a project-level service principal. This is supported starting with Packer 1.9.3; older versions of
+Packer do not support using project-level service principals.
 
 ### HCP Packer Registry Block
 
-The only metadata that Packer can infer from a template with the basic configuration are the build name and build fingerprint. For HCL2 templates, we recommend adding the `hcp_packer_registry` block to your template so that you can customize the metadata that Packer sends to the registry. 
+The only metadata that Packer can infer from a template with the basic configuration are the build name and build fingerprint.
+For HCL2 templates, we recommend adding the `hcp_packer_registry` block to your template so that you can customize
+the metadata that Packer sends to the registry.
 
-The `hcp_packer_registry` block is only available for HCL2 Packer templates. There is no [`PACKER_CONFIG`](docs/configure#packer-s-config-file) equivalent for JSON.
+The `hcp_packer_registry` block is only available for HCL2 Packer templates. There is no [`PACKER_CONFIG`](/packer/docs/configure#packer-s-config-file) equivalent for JSON.
 
-Refer to [`hcp_packer_registry`](docs/templates/hcl_templates/blocks/build/hcp_packer_registry) for a full list of configuration arguments. Refer to [Custom Configuration](https://cloud.hashicorp.com/docs/packer/store-image-metadata/packer-template-configuration#custom-configuration) in the HCP Packer documentation for information and examples about how to customize image metadata.
+Refer to [`hcp_packer_registry`](/packer/docs/templates/hcl_templates/blocks/build/hcp_packer_registry) for a full list
+of configuration arguments. Refer to [Custom Configuration](/hcp/docs/packer/store-image-metadata/packer-template-configuration#custom-configuration)
+in the HCP Packer documentation for information and examples about how to customize artifact metadata.
 
+### Version Fingerprinting
 
+Packer uses a unique fingerprint for tracking the completion of builds associated to a version. By default a fingerprint
+is automatically generated by Packer during each invocation of `packer build`, unless a fingerprint is manually provided
+via the `HCP_PACKER_BUILD_FINGERPRINT` environment variable.
+
+In versions before 1.9.0, this fingerprint was computed from the Git SHA of the current HEAD in which your template is
+stored. If you were running builds using a non Git managed template, you had to set the `HCP_PACKER_BUILD_FINGERPRINT`
+environment variable prior to invoking `packer build`.
+Starting with Packer 1.9.0, fingerprint generation does not rely on Git at all, and instead Packer now generates
+a Unique Lexicographically sortable Identifier (ULID) as the fingerprint for every `packer build` invocation.
+
+#### Fingerprints and Incomplete Versions
+
+When you build a template with Packer, there's always a chance that it does not succeed because of a network issue,
+a provisioning failure, or some upstream error. When that happens, Packer will output the generated fingerprint
+associated with the incomplete version so that you can resume building that version using the `HCP_PACKER_BUILD_FINGERPRINT`
+environment variable; a version can be resumed until it is marked as complete. This environment variable is necessary
+for resuming an incomplete version, otherwise Packer will create a new version for the build.
+
+There are two alternatives for when and how to set your own fingerprint:
+
+* You can set it prior to invoking `packer build` for the first time on this template. This will require the
+fingerprint to be unique, otherwise Packer will attempt to continue the version with the same fingerprint.
+* You can invoke `packer build` on the template, and if it fails, you can then get the fingerprint from the output of
+the command and set it for subsequent runs, Packer will then continue building this version.
+
+The first alternative is recommended for CI environments, as you can use environment variables from the CI to generate
+a unique, deterministic, fingerprint, and then re-use this in case the step fails for any reason. This will let you
+continue building the same version, rather than creating a new one on each invocation.
+
+The second alternative is good for local builds, as you can interact with the build environment directly, and therefore
+can decide if you want to continue building a version by setting the fingerprint provided by Packer in case of failure.
+
+Please note that in all cases, a version can only be continued if it has not completed yet. Once a version is
+complete, it cannot be modified, and you will have to create a new one.

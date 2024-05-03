@@ -10,7 +10,7 @@ page_title: packer validate - Commands
 # `validate` Command
 
 The `packer validate` Packer command is used to validate the syntax and
-configuration of a [template](/docs/templates). The command will
+configuration of a [template](/packer/docs/templates). The command will
 return a zero exit status on success, and a non-zero exit status on failure.
 Additionally, if a template doesn't validate, any error messages will be
 outputted.
@@ -47,7 +47,7 @@ Errors validating build 'vmware'. 1 error(s) occurred:
   source block's "name" label, unless an in-build source definition adds the
   "name" configuration option.
 
-- `-no-warn-on-undeclared-var` - Silence warnings when the a variable definition
+- `-no-warn-undeclared-var` - Silence warnings when the variable definition
   file contains variable assignments for undeclared variables. This can occur
   when using a var-file that contains a large amount of unused variables for a
   given HCL2 template. For HCL2 template defining a value for a variable in a

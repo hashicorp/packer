@@ -20,14 +20,14 @@ those files, and returning an artifact with a single ID: the URL of the upload.
 Post-processor plugins implement the [`packer.PostProcessor`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#PostProcessor) interface and are
 served using the `plugin.ServePostProcessor` function.
 
-This page explains how to implement and serve custom post-processors. If you want your post-processor to support HashiCorp Cloud Platform (HCP) Packer, you should also review the [HCP Packer Support](/docs/plugins/creation/hcp-support) documentation.
+This page explains how to implement and serve custom post-processors. If you want your post-processor to support HashiCorp Cloud Platform (HCP) Packer, you should also review the [HCP Packer Support](/packer/docs/plugins/creation/hcp-support) documentation.
 
 ~> **Warning:** This is an advanced topic that requires strong knowledge of Packer and Packer plugins.
 
 ## Before You Begin
 
 We recommend reviewing the following resources before you begin development:
-- [Developing Plugins - Overview](/docs/plugins/creation)
+- [Developing Plugins - Overview](/packer/docs/plugins/creation)
 - The [Go](https://go.dev/) language. You must write custom plugins in Go, so this guide assumes you are familiar with the language.
 
 ## The Interface
@@ -50,7 +50,7 @@ type PostProcessor interface {
 This method returns a hcldec.ObjectSpec, which is a spec necessary for using
 HCL2 templates with Packer. For information on how to use and implement this
 function, check our
-[object spec docs](/guides/hcl/component-object-spec)
+[object spec docs](/packer/guides/hcl/component-object-spec)
 
 ### The "Configure" Method
 

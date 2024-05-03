@@ -1,5 +1,7 @@
 ---
 page_title: Upgrading your plugin to use the Packer plugin sdk
+description: >-
+  Learn how to upgrade your plugin to support v1.7.0 and later.
 ---
 
 # Upgrading your plugin to be compatible with Packer v1.7.0 and later
@@ -27,7 +29,7 @@ There are two main reasons we wrote the new server type.
 
 First, it enables multiple related components, for example a builder and a post-processor that share a hypervisor or cloud, to live together in the same plugin. This helps maintainers who are experts in a specific technology to focus on that technology without having to maintain several repositories that submodule the same common code. You can think of a multi-component plugin as being in some ways analogous to Terraform providers, in the sense that both frequently bundle common resources or components by hypervisor or cloud.
 
-Second, the new server provides the Packer core with structured metadata that allows the new `packer init` feature to work. This data includes semantic versioning that we need to implement the new [`required_plugins`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) block, which allows us to ensure that users are using the correct _version_ of their plugin for a given Packer template. If you don't upgrade, your users cannot take advantage of the `packer init` tooling.
+Second, the new server provides the Packer core with structured metadata that allows the new `packer init` feature to work. This data includes semantic versioning that we need to implement the new [`required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) block, which allows us to ensure that users are using the correct _version_ of their plugin for a given Packer template. If you don't upgrade, your users cannot take advantage of the `packer init` tooling.
 
 ### How to upgrade the plugin
 
@@ -105,12 +107,12 @@ When you do this, if you install your plugin as `packer-plugin-foo`, the Packer 
 
 ## Registering multiple components
 
-The goal of this guide is to help you upgrade a single-component plugin to use the new SDK and plugin server; check out our [Plugin Development Basics](/docs/plugins/creation#plugin-development-basics) guide for details on how to add new components to your plugin.
+The goal of this guide is to help you upgrade a single-component plugin to use the new SDK and plugin server; check out our [Plugin Development Basics](/packer/docs/plugins/creation#plugin-development-basics) guide for details on how to add new components to your plugin.
 
 ## Distributing migrated plugins
 
-Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/docs/plugins#installing-plugins) manually into the Packer plugin directory. But this method will not allow your users to take advantage of the `packer init` command.
+Once a plugin has been migrated to use the `packer-plugin-sdk` it can be released as it normally would and used by Packer by [installing the plugin](/packer/docs/plugins#installing-plugins) manually into the Packer plugin directory. But this method will not allow your users to take advantage of the `packer init` command.
 
 If you want Packer to be able to automatically install your plugin for your users via`packer init` -- the preferred method of installation -- you need to make the plugin available on GitHub in a repository named after the multi-component plugin. `https://github.com/<yourorg>/packer-plugin-name`. We recognize that this may require you to rename or fork your plugin repository, but we think that it is worth the inconvenience to reduce ambiguity in the `init` call.
 
-See our documentation on [Creating a GitHub Release](/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.
+See our documentation on [Creating a GitHub Release](/packer/docs/plugins/creation#creating-a-github-release) for details on the recommended practice for releasing Packer plugins on GitHub.

@@ -1,15 +1,18 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -73,7 +76,7 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 		return f.formatFile(path, diags, bytesModified)
 	}
 
-	fileInfos, err := ioutil.ReadDir(path)
+	fileInfos, err := os.ReadDir(path)
 	if err != nil {
 		diag := &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -126,14 +129,14 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		}
 	}
 
-	inSrc, err := ioutil.ReadAll(in)
+	inSrc, err := io.ReadAll(in)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read %s: %s", filename, err)
 	}
 
 	_, diags := f.parser.ParseHCL(inSrc, filename)
 	if diags.HasErrors() {
-		return nil, fmt.Errorf("failed to parse HCL %s", filename)
+		return nil, multierror.Append(nil, diags.Errs()...)
 	}
 
 	outSrc := hclwrite.Format(inSrc)
@@ -155,7 +158,7 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		if filename == "-" {
 			_, _ = f.Output.Write(outSrc)
 		} else {
-			if err := ioutil.WriteFile(filename, outSrc, 0644); err != nil {
+			if err := os.WriteFile(filename, outSrc, 0644); err != nil {
 				return nil, err
 			}
 		}
@@ -175,14 +178,14 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 // bytesDiff returns the unified diff of b1 and b2
 // Shamelessly copied from Terraform's fmt command.
 func bytesDiff(b1, b2 []byte, path string) (data []byte, err error) {
-	f1, err := ioutil.TempFile("", "")
+	f1, err := os.CreateTemp("", "")
 	if err != nil {
 		return
 	}
 	defer os.Remove(f1.Name())
 	defer f1.Close()
 
-	f2, err := ioutil.TempFile("", "")
+	f2, err := os.CreateTemp("", "")
 	if err != nil {
 		return
 	}

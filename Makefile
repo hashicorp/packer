@@ -12,8 +12,6 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
-EXECUTABLE_FILES=$(shell find . -type f -executable | egrep -v '^\./(website/[vendor|tmp]|vendor/|\.git|bin/|scripts/|pkg/)' | egrep -v '.*(\.sh|\.bats|\.git)' | egrep -v './provisioner/(ansible|inspec)/test-fixtures/exit1')
-
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
@@ -57,7 +55,7 @@ install-gen-deps: ## Install dependencies for code generation
 
 install-lint-deps: ## Install linter dependencies
 	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.46.0
+	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.52.0
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -73,41 +71,22 @@ dev: ## Build and install a development build
 # Docker build variables and targets
 REGISTRY_NAME?=docker.io/hashicorp
 IMAGE_NAME=packer
-VERSION?=1.7.10
-IMAGE_TAG=$(REGISTRY_NAME)/$(IMAGE_NAME):$(VERSION)
-IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(shell git rev-parse --short HEAD)
+IMAGE_TAG_DEV=$(REGISTRY_NAME)/$(IMAGE_NAME):latest-$(GIT_COMMIT)
 
-docker: docker-official
-docker-light: docker-official
-
-# Builds from the releases.hashicorp.com official binary
-docker-official:
-	docker build \
-		--tag $(IMAGE_TAG) \
-		--tag hashicorp/packer:latest \
-		--target=official \
-		--build-arg VERSION=$(VERSION) \
-		.
-
-# Builds multiarch from the releases.hashicorp.com official binary
-docker-multiarch-official:
-	docker buildx build \
-		--tag $(IMAGE_TAG) \
-		--tag hashicorp/packer:latest \
-		--target=official \
-		--build-arg VERSION=$(VERSION) \
-		--platform linux/amd64,linux/arm64 \
-		.
+docker: docker-dev
 
 # Builds from the locally generated binary in ./bin/
 # To generate the local binary, run `make dev`
-docker-dev: export GOOS=linux
-docker-dev: export GOARCH=amd64
-docker-dev: dev
+docker-dev:
+	@GOOS=linux \
+	GOARCH=amd64 \
+	CGO_ENABLED=0 \
+	go build -ldflags '$(GOLDFLAGS)' -o bin/packer .
 	@docker build \
 		--tag $(IMAGE_TAG_DEV) \
 		--target=dev \
 		.
+	@rm -f bin/packer # Clean up the Linux/amd64 binary to avoid conficts on other OS/archs
 
 lint: install-lint-deps ## Lint Go code
 	@if [ ! -z  $(PKG_NAME) ]; then \
@@ -133,15 +112,6 @@ fmt-check: fmt ## Check go code formatting
 		exit 1; \
 	fi
 
-mode-check: ## Check that only certain files are executable
-	@echo "==> Checking that only certain files are executable..."
-	@if [ ! -z "$(EXECUTABLE_FILES)" ]; then \
-		echo "These files should not be executable or they must be white listed in the Makefile:"; \
-		echo "$(EXECUTABLE_FILES)" | xargs -n1; \
-		exit 1; \
-	else \
-		echo "Check passed."; \
-	fi
 fmt-docs:
 	@find ./website/pages/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
 
@@ -166,7 +136,7 @@ generate-check: generate ## Check go code generation is on par
 		exit 1; \
 	fi
 
-test: mode-check vet ## Run unit tests
+test: vet ## Run unit tests
 	@go test -count $(COUNT) $(TEST) $(TESTARGS) -timeout=3m
 
 # acctest runs provisioners acceptance tests
@@ -178,7 +148,7 @@ testacc: # install-build-deps generate ## Run acceptance tests
 	@echo "WARN: Acceptance tests will take a long time to run and may cost money. Ctrl-C if you want to cancel."
 	PACKER_ACC=1 go test -count $(COUNT) -v $(TEST) $(TESTARGS) -timeout=120m
 
-testrace: mode-check vet ## Test with race detection enabled
+testrace: vet ## Test with race detection enabled
 	@go test -count $(COUNT) -race $(TEST) $(TESTARGS) -timeout=3m -p=8
 
 # Runs code coverage and open a html page with report
@@ -196,6 +166,3 @@ vet: ## Vet Go code
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-# This is used for release builds by .github/workflows/build.yml
-version:
-	@$(CURDIR)/scripts/version.sh version/version.go

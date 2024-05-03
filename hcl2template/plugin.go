@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -5,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
@@ -41,7 +45,6 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 				Accessor:           name,
 				Identifier:         block.Type,
 				VersionConstraints: block.Requirement.Required,
-				Implicit:           block.PluginDependencyReason == PluginDependencyImplicit,
 			})
 			uniq[name] = block
 		}
@@ -51,9 +54,20 @@ func (cfg *PackerConfig) PluginRequirements() (plugingetter.Requirements, hcl.Di
 	return reqs, diags
 }
 
-func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
+func (cfg *PackerConfig) DetectPluginBinaries() hcl.Diagnostics {
+	// Do first pass to discover all the installed plugins
+	err := cfg.parser.PluginConfig.Discover()
+	if err != nil {
+		return (hcl.Diagnostics{}).Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Failed to discover installed plugins",
+			Detail:   err.Error(),
+		})
+	}
+
+	// Then we can apply any constraint from the template, if any
 	opts := plugingetter.ListInstallationsOptions{
-		FromFolders: cfg.parser.PluginConfig.KnownPluginFolders,
+		PluginDirectory: cfg.parser.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
@@ -62,6 +76,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 			Checksummers: []plugingetter.Checksummer{
 				{Type: "sha256", Hash: sha256.New()},
 			},
+			ReleasesOnly: cfg.parser.PluginConfig.ReleasesOnly,
 		},
 	}
 
@@ -74,6 +89,8 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		return diags
 	}
 
+	uninstalledPlugins := map[string]string{}
+
 	for _, pluginRequirement := range pluginReqs {
 		sortedInstalls, err := pluginRequirement.ListInstallations(opts)
 		if err != nil {
@@ -85,11 +102,7 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 			continue
 		}
 		if len(sortedInstalls) == 0 {
-			diags = append(diags, &hcl.Diagnostic{
-				Severity: hcl.DiagError,
-				Summary:  fmt.Sprintf("no plugin installed for %s %v", pluginRequirement.Identifier, pluginRequirement.VersionConstraints.String()),
-				Detail:   "Did you run packer init for this project ?",
-			})
+			uninstalledPlugins[pluginRequirement.Identifier.String()] = pluginRequirement.VersionConstraints.String()
 			continue
 		}
 		log.Printf("[TRACE] Found the following %q installations: %v", pluginRequirement.Identifier, sortedInstalls)
@@ -105,6 +118,20 @@ func (cfg *PackerConfig) detectPluginBinaries() hcl.Diagnostics {
 		}
 	}
 
+	if len(uninstalledPlugins) > 0 {
+		detailMessage := &strings.Builder{}
+		detailMessage.WriteString("The following plugins are required, but not installed:\n\n")
+		for pluginName, pluginVersion := range uninstalledPlugins {
+			fmt.Fprintf(detailMessage, "* %s %s\n", pluginName, pluginVersion)
+		}
+		detailMessage.WriteString("\nDid you run packer init for this project ?")
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Missing plugins",
+			Detail:   detailMessage.String(),
+		})
+	}
+
 	return diags
 }
 
@@ -118,10 +145,22 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 			// its body.
 			srcUsage := &(build.Sources[i])
 			if !cfg.parser.PluginConfig.Builders.Has(srcUsage.Type) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildSourceLabel,
+					srcUsage.Type,
+					strings.Split(srcUsage.Type, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(srcUsage.Type, cfg.parser.PluginConfig.Builders.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  "Unknown " + buildSourceLabel + " type " + srcUsage.Type,
 					Subject:  &build.HCL2Ref.DefRange,
-					Detail:   fmt.Sprintf("known builders: %v", cfg.parser.PluginConfig.Builders.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 				continue
@@ -154,10 +193,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 		for _, provBlock := range build.ProvisionerBlocks {
 			if !cfg.parser.PluginConfig.Provisioners.Has(provBlock.PType) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildProvisionerLabel,
+					provBlock.PType,
+					strings.Split(provBlock.PType, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(provBlock.PType, cfg.parser.PluginConfig.Provisioners.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
+
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  fmt.Sprintf("Unknown "+buildProvisionerLabel+" type %q", provBlock.PType),
 					Subject:  provBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 			}
@@ -165,10 +217,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 
 		if build.ErrorCleanupProvisionerBlock != nil {
 			if !cfg.parser.PluginConfig.Provisioners.Has(build.ErrorCleanupProvisionerBlock.PType) {
+				detail := fmt.Sprintf(
+					"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+						"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+						"https://developer.hashicorp.com/packer/integrations?filter=%s",
+					buildErrorCleanupProvisionerLabel,
+					build.ErrorCleanupProvisionerBlock.PType,
+					strings.Split(build.ErrorCleanupProvisionerBlock.PType, "-")[0],
+				)
+
+				if sugg := didyoumean.NameSuggestion(build.ErrorCleanupProvisionerBlock.PType, cfg.parser.PluginConfig.Provisioners.List()); sugg != "" {
+					detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+				}
+
 				diags = append(diags, &hcl.Diagnostic{
 					Summary:  fmt.Sprintf("Unknown "+buildErrorCleanupProvisionerLabel+" type %q", build.ErrorCleanupProvisionerBlock.PType),
 					Subject:  build.ErrorCleanupProvisionerBlock.HCL2Ref.TypeRange.Ptr(),
-					Detail:   fmt.Sprintf("known "+buildErrorCleanupProvisionerLabel+"s: %v", cfg.parser.PluginConfig.Provisioners.List()),
+					Detail:   detail,
 					Severity: hcl.DiagError,
 				})
 			}
@@ -177,10 +242,23 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 		for _, ppList := range build.PostProcessorsLists {
 			for _, ppBlock := range ppList {
 				if !cfg.parser.PluginConfig.PostProcessors.Has(ppBlock.PType) {
+					detail := fmt.Sprintf(
+						"The %s %s is unknown by Packer, and is likely part of a plugin that is not installed.\n"+
+							"You may find the needed plugin along with installation instructions documented on the Packer integrations page.\n\n"+
+							"https://developer.hashicorp.com/packer/integrations?filter=%s",
+						buildPostProcessorLabel,
+						ppBlock.PType,
+						strings.Split(ppBlock.PType, "-")[0],
+					)
+
+					if sugg := didyoumean.NameSuggestion(ppBlock.PType, cfg.parser.PluginConfig.PostProcessors.List()); sugg != "" {
+						detail = fmt.Sprintf("Did you mean to use %q?", sugg)
+					}
+
 					diags = append(diags, &hcl.Diagnostic{
 						Summary:  fmt.Sprintf("Unknown "+buildPostProcessorLabel+" type %q", ppBlock.PType),
 						Subject:  ppBlock.HCL2Ref.TypeRange.Ptr(),
-						Detail:   fmt.Sprintf("known "+buildPostProcessorLabel+"s: %v", cfg.parser.PluginConfig.PostProcessors.List()),
+						Detail:   detail,
 						Severity: hcl.DiagError,
 					})
 				}

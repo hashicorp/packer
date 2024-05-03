@@ -1,35 +1,34 @@
 ---
-page_title: Local Values - HCL Configuration Language
+page_title: Local Variables - HCL Configuration Language
 description: >-
-  Local values assign a name to an expression that can then be used multiple
+  Local variables assign a name to an expression that you can use multiple
   times within a folder.
 ---
 
-# Local Values
+# Local Variables
 
 `@include 'from-1.5/beta-hcl2-note.mdx'`
 
 There are two kinds of variables in HCL Packer templates: Input variables,
 sometimes simply called "variables", and Local variables, also known as
-"locals". Input variables may have defaults, but those defaults can
-be overridden from the command line or special variable files. Local variables
-can be thought of as constants, and are not able to be overridden at runtime.
+"locals". Input variables may have defaults, but those defaults can be
+overridden using command line options, environment variables, or variable
+definitions files. Local variables can not be overridden.
 
 This page is about local variables. To learn about input variables, see the
-[input variables](/docs/templates/hcl_templates/variables) page.
+[input variables](/packer/docs/templates/hcl_templates/variables) page.
 
-Local values assign a name to an expression, that can then be used multiple
-times within a folder.
-
-If [variables](/docs/templates/hcl_templates/variables) are analogous to function arguments then
-_local values_ are comparable to a function's local variables.
+Local variables assign a name to an expression, which you can use multiple
+times within a folder. The expression is evaluated at run time, and can
+reference input variables, other local variables, data sources, and HCL
+functions.
 
 Input variable and local variable usage are introduced in the [_Variables
-Guide_](/guides/hcl/variables).
+Guide_](/packer/guides/hcl/variables).
 
 ## Examples
 
-Local values are defined in `local` or `locals` blocks:
+Local variables are defined in a `local` or `locals` block:
 
 ```hcl
 # Using the local block allows you to mark locals as sensitive, which will
@@ -51,7 +50,7 @@ locals {
   name_prefix         = "${var.name_prefix != "" ? var.name_prefix : local.default_name_prefix}"
 }
 
-# Local values can be interpolated elsewhere using the "local." prefix.
+# Local variables can be referenced using the "local." prefix.
 source "virtualbox-iso" "example" {
   output = "${local.name_prefix}-files"
   # ...
@@ -120,10 +119,10 @@ The expression of a local value can refer to other locals, but reference cycles
 are not allowed. That is, a local cannot refer to itself or to a variable that
 refers (directly or indirectly) back to it.
 
-It's recommended to group together logically-related local values into a single
+It's recommended to group together logically-related local variables into a single
 block, particularly if they depend on each other. This will help the reader
 understand the relationships between variables. Conversely, prefer to define
-_unrelated_ local values in _separate_ blocks, and consider annotating each
+_unrelated_ local variables in _separate_ blocks, and consider annotating each
 block with a comment describing any context common to all of the enclosed
 locals.
 

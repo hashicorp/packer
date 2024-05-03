@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 // plugin_acc_test.go should contain acceptance tests for features related to
 // installing, discovering and running plugins.
 package plugin
@@ -5,18 +8,17 @@ package plugin
 import (
 	_ "embed"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"testing"
 
-	amazonacc "github.com/hashicorp/packer-plugin-amazon/builder/ebs/acceptance"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"github.com/hashicorp/packer-plugin-sdk/acctest/testutils"
 	"github.com/hashicorp/packer/hcl2template/addrs"
-	"github.com/mitchellh/go-homedir"
+	"github.com/hashicorp/packer/packer"
 )
 
 //go:embed test-fixtures/basic-amazon-ebs.pkr.hcl
@@ -24,21 +26,12 @@ var basicAmazonEbsHCL2Template string
 
 func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 	plugin := addrs.Plugin{
-		Hostname:  "github.com",
-		Namespace: "hashicorp",
-		Type:      "amazon",
+		Source: "github.com/hashicorp/amazon",
 	}
 	testCase := &acctest.PluginTestCase{
 		Name: "amazon-ebs_basic_plugin_init_and_build_test",
 		Setup: func() error {
 			return cleanupPluginInstallation(plugin)
-		},
-		Teardown: func() error {
-			helper := amazonacc.AMIHelper{
-				Region: "us-east-1",
-				Name:   "packer-plugin-amazon-ebs-test",
-			}
-			return helper.CleanUpAmi()
 		},
 		Template: basicAmazonEbsHCL2Template,
 		Type:     "amazon-ebs",
@@ -55,7 +48,7 @@ func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 			}
 			defer logs.Close()
 
-			logsBytes, err := ioutil.ReadAll(logs)
+			logsBytes, err := io.ReadAll(logs)
 			if err != nil {
 				return fmt.Errorf("Unable to read %s", logfile)
 			}
@@ -74,27 +67,22 @@ func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
 	acctest.TestPlugin(t, testCase)
 }
 
+func pluginDirectory(plugin addrs.Plugin) (string, error) {
+	pluginDir, err := packer.PluginFolder()
+	if err != nil {
+		return "", err
+	}
+
+	pluginParts := []string{pluginDir}
+	pluginParts = append(pluginParts, plugin.Parts()...)
+	return filepath.Join(pluginParts...), nil
+}
+
 func cleanupPluginInstallation(plugin addrs.Plugin) error {
-	home, err := homedir.Dir()
+	pluginPath, err := pluginDirectory(plugin)
 	if err != nil {
 		return err
 	}
-	pluginPath := filepath.Join(home,
-		".packer.d",
-		"plugins",
-		plugin.Hostname,
-		plugin.Namespace,
-		plugin.Type)
-
-	if xdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); xdgConfigHome != "" {
-		pluginPath = filepath.Join(xdgConfigHome,
-			"packer",
-			"plugins",
-			plugin.Hostname,
-			plugin.Namespace,
-			plugin.Type)
-	}
-
 	testutils.CleanupFiles(pluginPath)
 	return nil
 }
@@ -105,25 +93,9 @@ func checkPluginInstallation(initOutput string, plugin addrs.Plugin) error {
 		return fmt.Errorf("logs doesn't contain expected foo value %q", initOutput)
 	}
 
-	home, err := homedir.Dir()
+	pluginPath, err := pluginDirectory(plugin)
 	if err != nil {
 		return err
-	}
-
-	pluginPath := filepath.Join(home,
-		".packer.d",
-		"plugins",
-		plugin.Hostname,
-		plugin.Namespace,
-		plugin.Type)
-
-	if xdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); xdgConfigHome != "" {
-		pluginPath = filepath.Join(xdgConfigHome,
-			"packer",
-			"plugins",
-			plugin.Hostname,
-			plugin.Namespace,
-			plugin.Type)
 	}
 
 	if !testutils.FileExists(pluginPath) {

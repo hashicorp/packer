@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:build ignore
 // +build ignore
 
@@ -15,7 +18,7 @@ import (
 
 	"github.com/biogo/hts/bgzf"
 	"github.com/klauspost/pgzip"
-	"github.com/pierrec/lz4"
+	"github.com/pierrec/lz4/v4"
 	"github.com/ulikunitz/xz"
 )
 
@@ -187,7 +190,7 @@ func (c *Compressor) BenchmarkPGZIPReader(b *testing.B) {
 func (c *Compressor) BenchmarkLZ4Writer(b *testing.B) {
 	cw := lz4.NewWriter(c.w)
 	//	cw.Header.HighCompression = true
-	cw.Header.NoChecksum = true
+	cw.Apply(lz4.ChecksumOption(false))
 	b.ResetTimer()
 
 	_, err := io.Copy(cw, c.r)
