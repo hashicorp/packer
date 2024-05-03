@@ -7,7 +7,7 @@ import (
 func (ts *PackerTestSuite) TestLoadingOrder() {
 	t := ts.T()
 
-	pluginDir, cleanup := ts.MakePluginDir(t, "1.0.9", "1.0.10")
+	pluginDir, cleanup := ts.MakePluginDir("1.0.9", "1.0.10")
 	defer cleanup()
 
 	for _, command := range []string{"build", "validate"} {
