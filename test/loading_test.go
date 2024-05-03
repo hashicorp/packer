@@ -1,6 +1,11 @@
 package test
 
 import (
+	"crypto/sha256"
+	"fmt"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -45,4 +50,82 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 			})
 		}
 	}
+}
+
+func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
+	pluginDir, cleanup := ts.MakePluginDir("1.0.0")
+	defer cleanup()
+
+	plugin := BuildSimplePlugin("1.0.10", ts.T())
+
+	CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
+
+	ts.Run("multiple plugins installed: one with no version in path, one with qualified name. Should pick-up the qualified one only.", func() {
+		ts.PackerCommand().UsePluginDir(pluginDir).
+			SetArgs("build", "templates/simple.pkr.hcl").
+			Assert(ts.T(), MustSucceed{}, Grep{
+				streams: OnlyStderr,
+				expect:  "packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:",
+			})
+	})
+}
+
+func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
+	plugin := BuildSimplePlugin("1.0.10", ts.T())
+
+	ts.Run("move plugin with right name, but no SHA256SUM, should reject", func() {
+		pluginDir, cleanup := ts.MakePluginDir("1.0.9")
+		defer cleanup()
+
+		pluginDestName := ExpectedInstalledName("1.0.10")
+
+		CopyFile(ts.T(), filepath.Join(pluginDir, "github.com", "hashicorp", "tester", pluginDestName), plugin)
+
+		ts.PackerCommand().UsePluginDir(pluginDir).
+			SetArgs("plugins", "installed").
+			Assert(ts.T(), MustSucceed{}, Grep{
+				streams: OnlyStdout,
+				expect:  "packer-plugin-tester_v1\\.0\\.9[^\\n]+",
+			}, Grep{
+				streams: OnlyStdout,
+				expect:  "packer-plugin-tester_v1.0.10",
+				inverse: true,
+			}, Grep{
+				streams: OnlyStderr,
+				expect:  "v1.0.10[^\\n]+ignoring possibly unsafe binary",
+			})
+	})
+
+	ts.Run("move plugin with right name, invalid SHA256SUM, should reject", func() {
+		pluginDir, cleanup := ts.MakePluginDir("1.0.9")
+		defer cleanup()
+
+		pluginDestName := ExpectedInstalledName("1.0.10")
+		noExtDest := pluginDestName
+		if runtime.GOOS == "windows" {
+			noExtDest = strings.Replace(pluginDestName, ".exe", "", 1)
+		}
+
+		CopyFile(ts.T(), filepath.Join(pluginDir, "github.com", "hashicorp", "tester", pluginDestName), plugin)
+		WriteFile(ts.T(),
+			filepath.Join(pluginDir, "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", noExtDest)),
+			fmt.Sprintf("%x", sha256.New().Sum([]byte("Not the plugin's contents for sure."))))
+
+		ts.PackerCommand().UsePluginDir(pluginDir).
+			SetArgs("plugins", "installed").
+			Assert(ts.T(), MustSucceed{}, Grep{
+				streams: OnlyStdout,
+				expect:  "packer-plugin-tester_v1\\.0\\.9[^\\n]+",
+			}, Grep{
+				streams: OnlyStdout,
+				expect:  "packer-plugin-tester_v1.0.10",
+				inverse: true,
+			}, Grep{
+				streams: OnlyStderr,
+				expect:  "v1.0.10[^\\n]+ignoring possibly unsafe binary",
+			}, Grep{
+				streams: OnlyStderr,
+				expect:  `Checksums \(\*sha256\.digest\) did not match.`,
+			})
+	})
 }
