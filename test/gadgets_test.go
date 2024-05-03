@@ -1,6 +1,7 @@
 package test
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -77,6 +78,7 @@ func (_ MustFail) Check(stdout, stderr string, err error) error {
 type Grep struct {
 	streams Stream
 	expect  string
+	inverse bool
 }
 
 func (g Grep) Check(stdout, stderr string, err error) error {
@@ -98,8 +100,11 @@ func (g Grep) Check(stdout, stderr string, err error) error {
 		found = found || re.MatchString(stream)
 	}
 
-	if !found {
-		return fmt.Errorf("streams %q did not match the expected regexp %q", g.streams, g.expect)
+	if g.inverse && found {
+		return errors.New("unexpectedly matched the regexp")
+	}
+	if !g.inverse && !found {
+		return errors.New("did not match the regexp")
 	}
 	return nil
 }
