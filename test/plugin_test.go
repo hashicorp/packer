@@ -140,7 +140,9 @@ func currentDir() (string, error) {
 // packer will be able to use that directory for running its functions.
 //
 // Deletion of the directory is the caller's responsibility.
-func (ts *PackerTestSuite) MakePluginDir(t *testing.T, pluginVersions ...string) (pluginTempDir string, cleanup func()) {
+func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDir string, cleanup func()) {
+	t := ts.T()
+
 	var err error
 
 	defer func() {
