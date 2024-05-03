@@ -1,7 +1,5 @@
 module github.com/hashicorp/packer
 
-go 1.18
-
 require (
 	cloud.google.com/go v0.110.8 // indirect
 	github.com/biogo/hts v1.4.3
