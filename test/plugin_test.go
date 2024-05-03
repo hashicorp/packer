@@ -53,10 +53,6 @@ func PluginBinaryDir() string {
 	return tempPluginBinaryPath.path
 }
 
-func NewPluginBuildConfig(versionStr string) *version.Version {
-	return version.Must(version.NewVersion(versionStr))
-}
-
 // LDFlags compiles the ldflags for the plugin to compile based on the information provided.
 func LDFlags(version *version.Version) string {
 	pluginPackage := "github.com/hashicorp/packer-plugin-tester"
@@ -99,8 +95,10 @@ func BinaryName(version *version.Version) string {
 //
 // The path to the plugin is returned, it won't be removed automatically
 // though, deletion is the caller's responsibility.
-func BuildSimplePlugin(version *version.Version, t *testing.T) {
-	t.Logf("Building plugin in version %v", version)
+func BuildSimplePlugin(versionString string, t *testing.T) {
+	v := version.Must(version.NewSemver(versionString))
+
+	t.Logf("Building plugin in version %v", v)
 
 	testDir, err := currentDir()
 	if err != nil {
@@ -108,15 +106,15 @@ func BuildSimplePlugin(version *version.Version, t *testing.T) {
 	}
 
 	miniPluginDir := filepath.Join(testDir, "mini_plugin")
-	outBin := filepath.Join(PluginBinaryDir(), BinaryName(version))
+	outBin := filepath.Join(PluginBinaryDir(), BinaryName(v))
 
-	compileCommand := exec.Command("go", "build", "-C", miniPluginDir, "-o", outBin, "-ldflags", LDFlags(version), ".")
+	compileCommand := exec.Command("go", "build", "-C", miniPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
 	logs, err := compileCommand.CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
 	}
 
-	StorePluginVersion(version.String(), outBin)
+	StorePluginVersion(v.String(), outBin)
 }
 
 // currentDir returns the directory in which the current file is located.
