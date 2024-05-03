@@ -53,12 +53,8 @@ func (pc *packerCommand) AddEnv(key, val string) *packerCommand {
 //
 // Note: "Run" will only execute the command once, and return the streams and
 // error from the only execution for every subsequent call
-func (pc *packerCommand) Run(t *testing.T) (string, string, error) {
+func (pc *packerCommand) Run() (string, string, error) {
 	pc.once.Do(pc.doRun)
-
-	if strings.Contains(pc.stdout.String(), "PACKER CRASH") || strings.Contains(pc.stderr.String(), "PACKER CRASH") {
-		t.Fatalf("Packer has crashed while running the following command: packer %#v", pc.args)
-	}
 
 	return pc.stdout.String(), pc.stderr.String(), pc.err
 }
@@ -75,7 +71,9 @@ func (pc *packerCommand) doRun() {
 }
 
 func (pc *packerCommand) Assert(t *testing.T, checks ...Checker) {
-	stdout, stderr, err := pc.Run(t)
+	stdout, stderr, err := pc.Run()
+
+	checks = append(checks, PanicCheck{})
 
 	for _, check := range checks {
 		checkErr := check.Check(stdout, stderr, err)
