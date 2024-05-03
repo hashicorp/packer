@@ -33,6 +33,11 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 	}
 }
 
+// UsePluginDir sets the plugin directory in the environment to `dir`
+func (pc *packerCommand) UsePluginDir(dir string) *packerCommand {
+	return pc.AddEnv("PACKER_PLUGIN_PATH", dir)
+}
+
 func (pc *packerCommand) SetArgs(args ...string) *packerCommand {
 	pc.args = args
 	return pc
