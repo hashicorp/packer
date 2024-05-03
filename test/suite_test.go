@@ -34,8 +34,8 @@ func (ts *PackerTestSuite) buildPluginBinaries(t *testing.T) {
 	wg := &sync.WaitGroup{}
 
 	buildPluginVersion(wg, "1.0.0", t)
-	buildPluginVersion(wg, "1.0.1-dev", t)
-	buildPluginVersion(wg, "1.0.1", t)
+	buildPluginVersion(wg, "1.0.0+metadata", t)
+	buildPluginVersion(wg, "1.0.1-alpha1", t)
 	buildPluginVersion(wg, "1.0.9", t)
 	buildPluginVersion(wg, "1.0.10", t)
 
