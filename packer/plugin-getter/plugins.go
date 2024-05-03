@@ -24,7 +24,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	goversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
-	"github.com/hashicorp/packer-plugin-sdk/random"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	"golang.org/x/mod/semver"
@@ -741,11 +740,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					}
 					expectedZipFilename := checksum.Filename
 					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename)) + opts.BinaryInstallationOptions.Ext
+					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
 
-					outputFileName := filepath.Join(
-						outputFolder,
-						expectedBinaryFilename,
-					)
 					for _, potentialChecksumer := range opts.Checksummers {
 						// First check if a local checksum file is already here in the expected
 						// download folder. Here we want to download a binary so we only check
@@ -758,7 +754,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 								Checksummer: potentialChecksumer,
 							}
 
-							log.Printf("[TRACE] found a pre-exising %q checksum file", potentialChecksumer.Type)
+							log.Printf("[TRACE] found a pre-existing %q checksum file", potentialChecksumer.Type)
 							// if outputFile is there and matches the checksum: do nothing more.
 							if err := localChecksum.ChecksumFile(localChecksum.Expected, outputFileName); err == nil && !opts.Force {
 								log.Printf("[INFO] %s v%s plugin is already correctly installed in %q", pr.Identifier, version, outputFileName)
@@ -767,9 +763,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						}
 					}
 
-					// The last folder from the installation list is where we will install.
-					outputFileName = filepath.Join(outputFolder, expectedBinaryFilename)
-
 					// create directories if need be
 					if err := os.MkdirAll(outputFolder, 0755); err != nil {
 						err := fmt.Errorf("could not create plugin folder %q: %w", outputFolder, err)
@@ -777,21 +770,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						log.Printf("[TRACE] %s", err.Error())
 						return nil, errs
 					}
-
 					for _, getter := range getters {
-						// create temporary file that will receive a temporary binary.zip
-						tmpFile, err := tmp.File("packer-plugin-*.zip")
-						if err != nil {
-							err = fmt.Errorf("could not create temporary file to dowload plugin: %w", err)
-							errs = multierror.Append(errs, err)
-							return nil, errs
-						}
-						defer func() {
-							tmpFilePath := tmpFile.Name()
-							tmpFile.Close()
-							os.Remove(tmpFilePath)
-						}()
-
 						// start fetching binary
 						remoteZipFile, err := getter.Get("zip", GetOptions{
 							PluginRequirement:         pr,
@@ -800,29 +779,37 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							expectedZipFilename:       expectedZipFilename,
 						})
 						if err != nil {
-							err := fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s", pr.Identifier, version, err)
-							errs = multierror.Append(errs, err)
-							log.Printf("[TRACE] %v", err)
+							errs = multierror.Append(errs,
+								fmt.Errorf("could not get binary for %s version %s. Is the file present on the release and correctly named ? %s",
+									pr.Identifier, version, err))
 							continue
 						}
-
+						// create temporary file that will receive a temporary binary.zip
+						tmpFile, err := tmp.File("packer-plugin-*.zip")
+						if err != nil {
+							err = fmt.Errorf("could not create temporary file to download plugin: %w", err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
+						}
+						defer func() {
+							tmpFilePath := tmpFile.Name()
+							tmpFile.Close()
+							os.Remove(tmpFilePath)
+						}()
 						// write binary to tmp file
 						_, err = io.Copy(tmpFile, remoteZipFile)
 						_ = remoteZipFile.Close()
 						if err != nil {
 							err := fmt.Errorf("Error getting plugin, trying another getter: %w", err)
 							errs = multierror.Append(errs, err)
-							log.Printf("[TRACE] %s", err)
 							continue
 						}
 
 						if _, err := tmpFile.Seek(0, 0); err != nil {
-							err := fmt.Errorf("Error seeking begining of temporary file for checksumming, continuing: %w", err)
+							err := fmt.Errorf("Error seeking beginning of temporary file for checksumming, continuing: %w", err)
 							errs = multierror.Append(errs, err)
-							log.Printf("[TRACE] %s", err)
 							continue
 						}
-
 						// verify that the checksum for the zip is what we expect.
 						if err := checksum.Checksummer.Checksum(checksum.Expected, tmpFile); err != nil {
 							err := fmt.Errorf("%w. Is the checksum file correct ? Is the binary file correct ?", err)
@@ -830,17 +817,9 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							continue
 						}
 
-						tmpFileStat, err := tmpFile.Stat()
+						zr, err := zip.OpenReader(tmpFile.Name())
 						if err != nil {
-							err := fmt.Errorf("failed to stat: %w", err)
-							errs = multierror.Append(errs, err)
-							return nil, errs
-						}
-
-						zr, err := zip.NewReader(tmpFile, tmpFileStat.Size())
-						if err != nil {
-							err := fmt.Errorf("zip : %v", err)
-							errs = multierror.Append(errs, err)
+							errs = multierror.Append(errs, fmt.Errorf("zip : %v", err))
 							return nil, errs
 						}
 
@@ -851,8 +830,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							}
 							copyFrom, err = f.Open()
 							if err != nil {
-								err := fmt.Errorf("failed to open temp file: %w", err)
-								errs = multierror.Append(errs, err)
+								multierror.Append(errs, fmt.Errorf("failed to open temp file: %w", err))
 								return nil, errs
 							}
 							break
@@ -863,49 +841,60 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							return nil, errs
 						}
 
-						tempPluginPath := filepath.Join(os.TempDir(), fmt.Sprintf(
-							"packer-plugin-temp-%s%s",
-							random.Numbers(8),
-							opts.BinaryInstallationOptions.Ext))
-
-						// Save binary to temp so we can ensure it is really the version advertised
-						tempOutput, err := os.OpenFile(tempPluginPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+						tmpBinFileName := filepath.Join(os.TempDir(), expectedBinaryFilename)
 						if err != nil {
-							log.Printf("[ERROR] failed to create temp plugin executable: %s", err)
-							return nil, multierror.Append(errs, err)
+							err = fmt.Errorf("could not create temporary file to download plugin: %w", err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
 						}
-						defer os.Remove(tempPluginPath)
+						defer func() {
+							tmpBinPath := tmpBinFileName
+							os.Remove(tmpBinPath)
+						}()
 
-						_, err = io.Copy(tempOutput, copyFrom)
+						tmpOutputFile, err := os.OpenFile(tmpBinFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 						if err != nil {
-							log.Printf("[ERROR] failed to copy uncompressed binary to %q: %s", tempPluginPath, err)
-							return nil, multierror.Append(errs, err)
+							err := fmt.Errorf("failed to create %s: %w", tmpBinFileName, err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
+						}
+						if _, err := io.Copy(tmpOutputFile, copyFrom); err != nil {
+							err := fmt.Errorf("extract file: %w", err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
 						}
 
-						// Not a problem on most platforms, but unsure Windows will let us execute an already
-						// open file, so we close it temporarily to avoid problems
-						_ = tempOutput.Close()
+						if _, err := tmpOutputFile.Seek(0, 0); err != nil {
+							err := fmt.Errorf("Error seeking beginning of binary file for checksumming: %w", err)
+							errs = multierror.Append(errs, err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
 
-						desc, err := GetPluginDescription(tempPluginPath)
+						outputFileCS, err := checksum.Checksummer.Sum(tmpOutputFile)
 						if err != nil {
-							err := fmt.Errorf("failed to describe plugin binary %q: %s", tempPluginPath, err)
+							err := fmt.Errorf("failed to checksum binary file: %s", err)
+							errs = multierror.Append(errs, err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
+						tmpOutputFile.Close()
+
+						desc, err := GetPluginDescription(tmpBinFileName)
+						if err != nil {
+							err := fmt.Errorf("failed to describe plugin binary %q: %s", tmpBinFileName, err)
 							errs = multierror.Append(errs, err)
 							continue
 						}
-
 						descVersion, err := goversion.NewSemver(desc.Version)
 						if err != nil {
 							err := fmt.Errorf("invalid self-reported version %q: %s", desc.Version, err)
 							errs = multierror.Append(errs, err)
 							continue
 						}
-
 						if descVersion.Core().Compare(version.Core()) != 0 {
-							log.Printf("[ERROR] binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
+							err := fmt.Errorf("binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
+							errs = multierror.Append(errs, err)
 							continue
 						}
-
-						localOutputFileName := outputFileName
 
 						// Since releases only can be installed remotely, a non-empty prerelease version
 						// means something's not right on the release, as it should report a final version instead.
@@ -914,50 +903,26 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						// cannot be loaded), we error here, and advise users to manually install the plugin if they
 						// need it.
 						if descVersion.Prerelease() != "" {
-							fmt.Printf("Plugin %q release v%s binary reports version %q. This is likely an upstream issue.\n"+
-								"Try opening an issue on the plugin repository asking them to update the plugin's version information.\n",
+							err := fmt.Errorf(`binary for %[1]q release v%[2]s reported version %[3]q.
+
+Remote installation of pre-release binaries is unsupported an likely an upstream plugin issue.
+We encourage you to open an issue on the plugin repository asking to update the version information.
+If you require this specific version of the plugin, you can manually download the binary from the source and install
+the versioned binary as %[3]q using the following command:
+
+packer plugins install --path '<plugin_binary>' %[1]q`,
 								pr.Identifier.String(), version, desc.Version)
-							fmt.Printf("If you need this exact version of the plugin, you can download the binary from the source and install "+
-								"it locally with `packer plugins install --path '<plugin_binary>' %q`.\n"+
-								"This will install the plugin in version %q (required_plugins constraints may need to be updated).\n",
-								pr.Identifier.String(), desc.Version)
-							continue
-						}
 
-						copyFrom, err = os.OpenFile(tempPluginPath, os.O_RDONLY, 0755)
-						if err != nil {
-							log.Printf("[ERROR] failed to re-open temporary plugin file %q: %s", tempPluginPath, err)
-							return nil, multierror.Append(errs, err)
-						}
-
-						outputFile, err := os.OpenFile(localOutputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-						if err != nil {
-							err := fmt.Errorf("failed to create %s: %w", localOutputFileName, err)
-							errs = multierror.Append(errs, err)
-							return nil, errs
-						}
-						defer outputFile.Close()
-
-						if _, err := io.Copy(outputFile, copyFrom); err != nil {
-							err := fmt.Errorf("extract file: %w", err)
 							errs = multierror.Append(errs, err)
 							return nil, errs
 						}
 
-						if _, err := outputFile.Seek(0, 0); err != nil {
-							err := fmt.Errorf("Error seeking begining of binary file for checksumming: %w", err)
+						if err := os.Rename(tmpBinFileName, outputFileName); err != nil {
+							err := fmt.Errorf("failed to write local binary file to plugin path: %s", err)
 							errs = multierror.Append(errs, err)
-							log.Printf("[WARNING] %v, ignoring", err)
+							return nil, errs
 						}
-
-						cs, err := checksum.Checksummer.Sum(outputFile)
-						if err != nil {
-							err := fmt.Errorf("failed to checksum binary file: %s", err)
-							errs = multierror.Append(errs, err)
-							log.Printf("[WARNING] %v, ignoring", err)
-						}
-
-						if err := os.WriteFile(localOutputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
+						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(outputFileCS)), 0644); err != nil {
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
@@ -965,7 +930,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 
 						// Success !!
 						return &Installation{
-							BinaryPath: strings.ReplaceAll(localOutputFileName, "\\", "/"),
+							BinaryPath: strings.ReplaceAll(outputFileName, "\\", "/"),
 							Version:    "v" + version.String(),
 						}, nil
 					}
@@ -976,13 +941,11 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 		}
 	}
 
-	if errs == nil || errs.Len() == 0 {
+	if errs.ErrorOrNil() == nil {
 		err := fmt.Errorf("could not find a local nor a remote checksum for plugin %q %q", pr.Identifier, pr.VersionConstraints)
 		errs = multierror.Append(errs, err)
 	}
-
 	errs = multierror.Append(errs, fmt.Errorf("could not install any compatible version of plugin %q", pr.Identifier))
-
 	return nil, errs
 }
 
