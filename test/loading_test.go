@@ -1,20 +1,14 @@
 package test
 
 import (
-	"os"
 	"testing"
 )
 
 func (ts *PackerTestSuite) TestLoadingOrder() {
 	t := ts.T()
 
-	pluginDir := ts.MakePluginDir(t, "1.0.9", "1.0.10")
-	defer func() {
-		err := os.RemoveAll(pluginDir)
-		if err != nil {
-			t.Logf("failed to remove temporary plugin directory %q: %s. This may need manual intervention.", pluginDir, err)
-		}
-	}()
+	pluginDir, cleanup := ts.MakePluginDir(t, "1.0.9", "1.0.10")
+	defer cleanup()
 
 	for _, command := range []string{"build", "validate"} {
 		tests := []struct {
