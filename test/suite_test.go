@@ -2,6 +2,7 @@ package test
 
 import (
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -21,12 +22,24 @@ type PackerTestSuite struct {
 	packerPath string
 }
 
+func buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
+	waitgroup.Add(1)
+	go func() {
+		BuildSimplePlugin(NewPluginBuildConfig(versionString), t)
+		waitgroup.Done()
+	}()
+}
+
 func (ts *PackerTestSuite) buildPluginBinaries(t *testing.T) {
-	BuildSimplePlugin(NewPluginBuildConfig("1.0.0"), t)
-	BuildSimplePlugin(NewPluginBuildConfig("1.0.1-dev"), t)
-	BuildSimplePlugin(NewPluginBuildConfig("1.0.1"), t)
-	BuildSimplePlugin(NewPluginBuildConfig("1.0.9"), t)
-	BuildSimplePlugin(NewPluginBuildConfig("1.0.10"), t)
+	wg := &sync.WaitGroup{}
+
+	buildPluginVersion(wg, "1.0.0", t)
+	buildPluginVersion(wg, "1.0.1-dev", t)
+	buildPluginVersion(wg, "1.0.1", t)
+	buildPluginVersion(wg, "1.0.9", t)
+	buildPluginVersion(wg, "1.0.10", t)
+
+	wg.Wait()
 }
 
 func Test_PackerCoreSuite(t *testing.T) {
