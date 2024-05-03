@@ -95,7 +95,13 @@ func BinaryName(version *version.Version) string {
 //
 // The path to the plugin is returned, it won't be removed automatically
 // though, deletion is the caller's responsibility.
-func BuildSimplePlugin(versionString string, t *testing.T) {
+func BuildSimplePlugin(versionString string, t *testing.T) string {
+	// Only build plugin binary if not already done beforehand
+	path, ok := LoadPluginVersion(versionString)
+	if ok {
+		return path
+	}
+
 	v := version.Must(version.NewSemver(versionString))
 
 	t.Logf("Building plugin in version %v", v)
@@ -115,6 +121,8 @@ func BuildSimplePlugin(versionString string, t *testing.T) {
 	}
 
 	StorePluginVersion(v.String(), outBin)
+
+	return outBin
 }
 
 // currentDir returns the directory in which the current file is located.
