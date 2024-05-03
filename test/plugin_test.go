@@ -196,3 +196,41 @@ func (ts *PackerTestSuite) MakePluginDir(t *testing.T, pluginVersions ...string)
 		}
 	}
 }
+
+// CopyFile essentially replicates the `cp` command, for a file only.
+//
+// # Permissions are copied over from the source to destination
+//
+// The function detects if destination is a directory or a file (existent or not).
+//
+// If this is the former, we append the source file's basename to the
+// directory and create the file from that inferred path.
+func CopyFile(t *testing.T, dest, src string) {
+	st, err := os.Stat(src)
+	if err != nil {
+		t.Fatalf("failed to stat origin file %q: %s", src, err)
+	}
+
+	// If the stat call fails, we assume dest is the destination file.
+	dstStat, err := os.Stat(dest)
+	if err == nil && dstStat.IsDir() {
+		dest = filepath.Join(dest, filepath.Base(src))
+	}
+
+	destFD, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, st.Mode().Perm())
+	if err != nil {
+		t.Fatalf("failed to create cp destination file %q: %s", dest, err)
+	}
+	defer destFD.Close()
+
+	srcFD, err := os.Open(src)
+	if err != nil {
+		t.Fatalf("failed to open source file to copy: %s", err)
+	}
+	defer srcFD.Close()
+
+	_, err = io.Copy(destFD, srcFD)
+	if err != nil {
+		t.Fatalf("failed to copy from %q -> %q: %s", src, dest, err)
+	}
+}
