@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -160,7 +161,7 @@ func currentDir() (string, error) {
 // packer will be able to use that directory for running its functions.
 //
 // Deletion of the directory is the caller's responsibility.
-func (ts *PackerTestSuite) MakePluginDir(t *testing.T, pluginVersions ...string) (pluginTempDir string) {
+func (ts *PackerTestSuite) MakePluginDir(t *testing.T, pluginVersions ...string) (pluginTempDir string, cleanup func()) {
 	var err error
 
 	defer func() {
@@ -188,5 +189,10 @@ func (ts *PackerTestSuite) MakePluginDir(t *testing.T, pluginVersions ...string)
 		}
 	}
 
-	return pluginTempDir
+	return pluginTempDir, func() {
+		err := os.RemoveAll(pluginTempDir)
+		if err != nil {
+			t.Logf("failed to remove temporary plugin directory %q: %s. This may need manual intervention.", pluginTempDir, err)
+		}
+	}
 }
