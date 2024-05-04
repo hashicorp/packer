@@ -93,6 +93,25 @@ func (rlerr *RateLimitError) Error() string {
 	return s
 }
 
+// PrereleaseInstallError is returned when a getter encounters the install of a pre-release version.
+type PrereleaseInstallError struct {
+	RequestedVersion, ReportedVersion string
+	Source                            string
+}
+
+func (pe *PrereleaseInstallError) Error() string {
+	s := strings.Builder{}
+	s.WriteString("error:\n")
+	fmt.Fprintf(&s, "Remote installation of the plugin version %s is unsupported.\n", pe.ReportedVersion)
+
+	if pe.RequestedVersion != pe.ReportedVersion {
+		fmt.Fprintf(&s, "This is likely an upstream issue with the %s release, which should be reported.\n", pe.RequestedVersion)
+	}
+	s.WriteString("If you require this specific version of the plugin, download the binary and install it manually.\n")
+	fmt.Fprintf(&s, "\npacker plugins install --path '<plugin_binary>' %s\n", pe.Source)
+	return s.String()
+}
+
 func (pr Requirement) FilenamePrefix() string {
 	if pr.Identifier == nil {
 		return "packer-plugin-"
@@ -869,7 +888,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
 						}
-
 						outputFileCS, err := checksum.Checksummer.Sum(tmpOutputFile)
 						if err != nil {
 							err := fmt.Errorf("failed to checksum binary file: %s", err)
@@ -896,25 +914,19 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							continue
 						}
 
-						// Since releases only can be installed remotely, a non-empty prerelease version
-						// means something's not right on the release, as it should report a final version instead.
+						// Since only final releases can be installed remotely, a non-empty prerelease version
+						// means something's not right on the release, as it should report a final version.
 						//
 						// Therefore to avoid surprises (and avoid being able to install a version that
 						// cannot be loaded), we error here, and advise users to manually install the plugin if they
 						// need it.
 						if descVersion.Prerelease() != "" {
-							err := fmt.Errorf(`binary for %[1]q release v%[2]s reported version %[3]q.
-
-Remote installation of pre-release binaries is unsupported an likely an upstream plugin issue.
-We encourage you to open an issue on the plugin repository asking to update the version information.
-If you require this specific version of the plugin, you can manually download the binary from the source and install
-the versioned binary as %[3]q using the following command:
-
-packer plugins install --path '<plugin_binary>' %[1]q`,
-								pr.Identifier.String(), version, desc.Version)
-
-							errs = multierror.Append(errs, err)
-							return nil, errs
+							err := PrereleaseInstallError{
+								Source:           pr.Identifier.String(),
+								RequestedVersion: version.String(),
+								ReportedVersion:  desc.Version,
+							}
+							return nil, &err
 						}
 
 						if err := os.Rename(tmpBinFileName, outputFileName); err != nil {
@@ -926,6 +938,8 @@ packer plugins install --path '<plugin_binary>' %[1]q`,
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
+							os.Remove(outputFileName)
+							continue
 						}
 
 						// Success !!
@@ -934,10 +948,8 @@ packer plugins install --path '<plugin_binary>' %[1]q`,
 							Version:    "v" + version.String(),
 						}, nil
 					}
-
 				}
 			}
-
 		}
 	}
 
