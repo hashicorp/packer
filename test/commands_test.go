@@ -33,6 +33,15 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 	}
 }
 
+// NoVerbose removes the `PACKER_LOG=1` environment variable from the command
+func (pc *packerCommand) NoVerbose() *packerCommand {
+	_, ok := pc.env["PACKER_LOG"]
+	if ok {
+		delete(pc.env, "PACKER_LOG")
+	}
+	return pc
+}
+
 // UsePluginDir sets the plugin directory in the environment to `dir`
 func (pc *packerCommand) UsePluginDir(dir string) *packerCommand {
 	return pc.AddEnv("PACKER_PLUGIN_PATH", dir)
