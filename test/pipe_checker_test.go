@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -28,6 +29,18 @@ func PipeGrep(expression string) Pipe {
 	re := regexp.MustCompilePOSIX(expression)
 	return CustomPipe(func(input string) (string, error) {
 		return strings.Join(re.FindAllString(input, -1), "\n"), nil
+	})
+}
+
+// LineCount counts the number of lines received
+//
+// This excludes empty lines.
+func LineCount() Pipe {
+	return CustomPipe(func(s string) (string, error) {
+		lines := strings.FieldsFunc(s, func(r rune) bool {
+			return r == '\n'
+		})
+		return fmt.Sprintf("%d\n", len(lines)), nil
 	})
 }
 
@@ -65,6 +78,72 @@ func EmptyInput() Tester {
 		if in == "" {
 			return fmt.Errorf("input is empty, expected it not to")
 		}
+		return nil
+	})
+}
+
+type op int
+
+const (
+	eq op = iota
+	ne
+	gt
+	ge
+	lt
+	le
+)
+
+func (op op) String() string {
+	switch op {
+	case eq:
+		return "=="
+	case ne:
+		return "!="
+	case gt:
+		return ">"
+	case ge:
+		return ">="
+	case lt:
+		return "<"
+	case le:
+		return "<="
+	}
+
+	panic(fmt.Sprintf("Unknown operator %d", op))
+}
+
+// IntCompare reads the input from the pipeline and compares it to a value using `op`
+//
+// If the input is not an int, this fails.
+func IntCompare(op op, value int) Tester {
+	return CustomTester(func(in string) error {
+		n, err := strconv.Atoi(in)
+		if err != nil {
+			return fmt.Errorf("not an integer %q: %s", in, err)
+		}
+
+		var result bool
+		switch op {
+		case eq:
+			result = n == value
+		case ne:
+			result = n != value
+		case gt:
+			result = n > value
+		case ge:
+			result = n >= value
+		case lt:
+			result = n < value
+		case le:
+			result = n <= value
+		default:
+			panic(fmt.Sprintf("Unsupported operator %d, make sure the operation is implemented for IntCompare", op))
+		}
+
+		if !result {
+			return fmt.Errorf("comparison failed: %d %s %d -> %t", n, op, value, result)
+		}
+
 		return nil
 	})
 }
