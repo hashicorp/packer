@@ -90,12 +90,12 @@ func Grep(expression string, opts ...grepOpts) Checker {
 		pipers: []Pipe{
 			PipeGrep(expression),
 		},
-		check: EmptyInput(),
+		check: ExpectNonEmptyInput(),
 	}
 	for _, opt := range opts {
 		switch opt {
 		case grepInvert:
-			pc.check = NonEmptyInput()
+			pc.check = ExpectEmptyInput()
 		case grepStderr:
 			pc.stream = OnlyStderr
 		case grepStdout:

@@ -60,23 +60,31 @@ func (ct CustomTester) Check(input string) error {
 	return ct(input)
 }
 
-// NonEmptyInput errors if the result from the pipeline was empty
-func NonEmptyInput() Tester {
+// ExpectNonEmptyInput errors if the result from the pipeline was empty
+//
+// Non-empty in this context means that the output contains characters that are
+// non-whitespace, i.e. anything that `TrimSpace` (aka unicode.IsSpace) recognizes
+// as whitespace.
+func ExpectNonEmptyInput() Tester {
 	return CustomTester(func(in string) error {
 		in = strings.TrimSpace(in)
-		if in != "" {
-			return fmt.Errorf("input is not empty, expected it to be: %s", in)
+		if in == "" {
+			return fmt.Errorf("input is empty, expected it not to")
 		}
 		return nil
 	})
 }
 
-// EmptyInput errors if the result from the pipeline was not empty
-func EmptyInput() Tester {
+// ExpectEmptyInput errors if the result from the pipeline was not empty
+//
+// Non-empty in this context means that the output contains characters that are
+// non-whitespace, i.e. anything that `TrimSpace` (aka unicode.IsSpace) recognizes
+// as whitespace.
+func ExpectEmptyInput() Tester {
 	return CustomTester(func(in string) error {
 		in = strings.TrimSpace(in)
-		if in == "" {
-			return fmt.Errorf("input is empty, expected it not to")
+		if in != "" {
+			return fmt.Errorf("input is not empty, expected it to be: %s", in)
 		}
 		return nil
 	})
