@@ -1,10 +1,8 @@
 package test
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
-	"regexp"
 	"strings"
 	"testing"
 )
@@ -71,46 +69,40 @@ func (_ MustFail) Check(stdout, stderr string, err error) error {
 	return nil
 }
 
-// Grep is essentially the equivalent to a normal grep -E on the command line.
+type grepOpts int
+
+const (
+	// Invert the check, i.e. by default an empty grep fails, if this is set, a non-empty grep fails
+	grepInvert grepOpts = iota
+	// Only grep stderr
+	grepStderr
+	// Only grep stdout
+	grepStdout
+)
+
+// Grep returns a checker that performs a regexp match on the command's output and returns an error if it failed
 //
-// The `expect` string is meant to be a regexp, which will be compiled on-demand,
-// and will panic if it isn't a valid POSIX extended regexp.
-type Grep struct {
-	streams Stream
-	expect  string
-	inverse bool
-}
-
-func (g Grep) Check(stdout, stderr string, err error) error {
-	re := regexp.MustCompilePOSIX(g.expect)
-
-	streams := []string{}
-
-	switch g.streams {
-	case BothStreams:
-		streams = append(streams, stdout, stderr)
-	case OnlyStdout:
-		streams = append(streams, stdout)
-	case OnlyStderr:
-		streams = append(streams, stderr)
+// Note: by default both streams will be checked by the grep
+func Grep(expression string, opts ...grepOpts) Checker {
+	pc := PipeChecker{
+		name:   "command | grep -E %q",
+		stream: BothStreams,
+		pipers: []Pipe{
+			PipeGrep(expression),
+		},
+		check: EmptyInput(),
 	}
-
-	var found bool
-	for _, stream := range streams {
-		found = found || re.MatchString(stream)
+	for _, opt := range opts {
+		switch opt {
+		case grepInvert:
+			pc.check = NonEmptyInput()
+		case grepStderr:
+			pc.stream = OnlyStderr
+		case grepStdout:
+			pc.stream = OnlyStdout
+		}
 	}
-
-	if g.inverse && found {
-		return errors.New("unexpectedly matched the regexp")
-	}
-	if !g.inverse && !found {
-		return errors.New("did not match the regexp")
-	}
-	return nil
-}
-
-func (g Grep) Name() string {
-	return fmt.Sprintf("command (%s) | grep -E %q", g.streams, g.expect)
+	return pc
 }
 
 type Dump struct {
