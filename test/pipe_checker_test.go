@@ -47,6 +47,28 @@ func (ct CustomTester) Check(input string) error {
 	return ct(input)
 }
 
+// NonEmptyInput errors if the result from the pipeline was empty
+func NonEmptyInput() Tester {
+	return CustomTester(func(in string) error {
+		in = strings.TrimSpace(in)
+		if in != "" {
+			return fmt.Errorf("input is not empty, expected it to be: %s", in)
+		}
+		return nil
+	})
+}
+
+// EmptyInput errors if the result from the pipeline was not empty
+func EmptyInput() Tester {
+	return CustomTester(func(in string) error {
+		in = strings.TrimSpace(in)
+		if in == "" {
+			return fmt.Errorf("input is empty, expected it not to")
+		}
+		return nil
+	})
+}
+
 // PipeChecker is a kind of checker that essentially lets users write mini
 // gadgets that pipe inputs together, and compose those to end as a true/false
 // statement, which translates to an error.
