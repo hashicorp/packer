@@ -1,6 +1,10 @@
 package test
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 // Pipe is any command that allows piping two gadgets together
 //
@@ -15,6 +19,16 @@ type CustomPipe func(string) (string, error)
 
 func (c CustomPipe) Process(input string) (string, error) {
 	return c(input)
+}
+
+// PipeGrep performs a grep on an input and returns the matches, one-per-line.
+//
+// The expression passed as parameter will be compiled to a POSIX extended regexp.
+func PipeGrep(expression string) Pipe {
+	re := regexp.MustCompilePOSIX(expression)
+	return CustomPipe(func(input string) (string, error) {
+		return strings.Join(re.FindAllString(input, -1), "\n"), nil
+	})
 }
 
 // Tester is the end of a pipe for testing purposes.
