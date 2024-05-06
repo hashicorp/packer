@@ -7,28 +7,19 @@ func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
 	ts.Run("metadata plugin installed must not have metadata in its path", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStdout,
-				expect:  "packer-plugin-tester_v1.0.0[^+]",
-			})
+			Assert(ts.T(), MustSucceed{}, Grep("packer-plugin-tester_v1.0.0[^+]", grepStdout))
 	})
 
 	ts.Run("plugin with metadata should work with validate", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("validate", "./templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStderr,
-				expect:  "packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:",
-			})
+			Assert(ts.T(), MustSucceed{}, Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
 	})
 
 	ts.Run("plugin with metadata should work with build", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("build", "./templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStderr,
-				expect:  "packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:",
-			})
+			Assert(ts.T(), MustSucceed{}, Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
 	})
 }
 
@@ -41,9 +32,6 @@ func (ts *PackerTestSuite) TestInstallPluginPrerelease() {
 	ts.Run("try install plugin with alpha1 prerelease - should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "install", "--path", pluginPath, "github.com/hashicorp/tester").
-			Assert(ts.T(), MustFail{}, Grep{
-				streams: OnlyStdout,
-				expect:  "Packer can only install plugin releases with this command",
-			})
+			Assert(ts.T(), MustFail{}, Grep("Packer can only install plugin releases with this command", grepStdout))
 	})
 }
