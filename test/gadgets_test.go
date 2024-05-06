@@ -132,3 +132,20 @@ func (_ PanicCheck) Check(stdout, stderr string, _ error) error {
 	}
 	return nil
 }
+
+// CustomCheck is meant to be a one-off checker with a user-provided function.
+//
+// Use this if none of the existing checkers match your use case, and it is not
+// reusable/generic enough for use in other tests.
+type CustomCheck struct {
+	name      string
+	checkFunc func(stdout, stderr string, err error) error
+}
+
+func (c CustomCheck) Check(stdout, stderr string, err error) error {
+	return c.checkFunc(stdout, stderr, err)
+}
+
+func (c CustomCheck) Name() string {
+	return fmt.Sprintf("custom check - %s", c.name)
+}
