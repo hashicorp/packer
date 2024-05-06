@@ -43,10 +43,7 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 				ts.PackerCommand().
 					SetArgs(command, tt.templatePath).
 					UsePluginDir(pluginDir).
-					Assert(t, MustSucceed{}, Grep{
-						streams: BothStreams,
-						expect:  tt.grepStr,
-					})
+					Assert(t, MustSucceed{}, Grep(tt.grepStr))
 			})
 		}
 	}
@@ -63,10 +60,7 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 	ts.Run("multiple plugins installed: one with no version in path, one with qualified name. Should pick-up the qualified one only.", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("build", "templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStderr,
-				expect:  "packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:",
-			})
+			Assert(ts.T(), MustSucceed{}, Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
 	})
 }
 
@@ -83,17 +77,10 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStdout,
-				expect:  "packer-plugin-tester_v1\\.0\\.9[^\\n]+",
-			}, Grep{
-				streams: OnlyStdout,
-				expect:  "packer-plugin-tester_v1.0.10",
-				inverse: true,
-			}, Grep{
-				streams: OnlyStderr,
-				expect:  "v1.0.10[^\\n]+ignoring possibly unsafe binary",
-			})
+			Assert(ts.T(), MustSucceed{},
+				Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", grepStdout),
+				Grep("packer-plugin-tester_v1.0.10", grepStdout, grepInvert),
+				Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", grepStderr))
 	})
 
 	ts.Run("move plugin with right name, invalid SHA256SUM, should reject", func() {
@@ -113,19 +100,10 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed{}, Grep{
-				streams: OnlyStdout,
-				expect:  "packer-plugin-tester_v1\\.0\\.9[^\\n]+",
-			}, Grep{
-				streams: OnlyStdout,
-				expect:  "packer-plugin-tester_v1.0.10",
-				inverse: true,
-			}, Grep{
-				streams: OnlyStderr,
-				expect:  "v1.0.10[^\\n]+ignoring possibly unsafe binary",
-			}, Grep{
-				streams: OnlyStderr,
-				expect:  `Checksums \(\*sha256\.digest\) did not match.`,
-			})
+			Assert(ts.T(), MustSucceed{},
+				Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", grepStdout),
+				Grep("packer-plugin-tester_v1.0.10", grepInvert, grepStdout),
+				Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", grepStderr),
+				Grep(`Checksums \(\*sha256\.digest\) did not match.`, grepStderr))
 	})
 }
