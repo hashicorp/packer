@@ -97,19 +97,17 @@ func (rlerr *RateLimitError) Error() string {
 
 // PrereleaseInstallError is returned when a getter encounters the install of a pre-release version.
 type PrereleaseInstallError struct {
-	RequestedVersion, ReportedVersion string
-	Source                            string
+	PluginSrc string
+	Err       error
 }
 
 func (e *PrereleaseInstallError) Error() string {
-	s := strings.Builder{}
-	fmt.Fprintf(&s, "Error: Remote installation of the plugin version %s is unsupported.\n", e.ReportedVersion)
-
-	if e.RequestedVersion != e.ReportedVersion {
-		fmt.Fprintf(&s, "This is likely an upstream issue with the %s release, which should be reported.\n", e.RequestedVersion)
-	}
+	var s strings.Builder
+	s.WriteString(e.Err.Error() + "\n")
+	s.WriteString("Remote installation of pre-release plugin versions is unsupported.\n")
+	s.WriteString("This is likely an upstream issue, which should be reported.\n")
 	s.WriteString("If you require this specific version of the plugin, download the binary and install it manually.\n")
-	fmt.Fprintf(&s, "\npacker plugins install --path '<plugin_binary>' %s\n", e.Source)
+	s.WriteString("\npacker plugins install --path '<plugin_binary>' " + e.PluginSrc)
 	return s.String()
 }
 
@@ -978,6 +976,12 @@ func checkVersion(binPath string, identifier string, version *goversion.Version)
 		err := fmt.Errorf("binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
 		return &ContinuableInstallError{Err: err}
 	}
+	if version.Prerelease() != "" {
+		return &PrereleaseInstallError{
+			PluginSrc: identifier,
+			Err:       errors.New("binary reported a pre-release version of " + version.String()),
+		}
+	}
 	// Since only final releases can be installed remotely, a non-empty prerelease version
 	// means something's not right on the release, as it should report a final version.
 	//
@@ -986,9 +990,8 @@ func checkVersion(binPath string, identifier string, version *goversion.Version)
 	// need it.
 	if descVersion.Prerelease() != "" {
 		return &PrereleaseInstallError{
-			Source:           identifier,
-			RequestedVersion: version.String(),
-			ReportedVersion:  desc.Version,
+			PluginSrc: identifier,
+			Err:       errors.New("binary reported a pre-release version of " + descVersion.String()),
 		}
 	}
 	return nil
