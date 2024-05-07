@@ -33,7 +33,7 @@ jobs:
     name: Go Mod Tidy
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # 4.1.4
-      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # 5.0.0
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: go mod tidy
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # 4.1.4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # 5.0.0
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: echo "$GITHUB_SHA"
@@ -60,7 +60,7 @@ jobs:
     name: Fmt check
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # 4.1.4
-      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # 5.0.0
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: make fmt-check
@@ -71,7 +71,7 @@ jobs:
     name: Generate check
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # 4.1.4
-      - uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # 5.0.0
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - run: make generate-check
