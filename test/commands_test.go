@@ -15,6 +15,7 @@ type packerCommand struct {
 	env        map[string]string
 	stderr     *strings.Builder
 	stdout     *strings.Builder
+	workdir    string
 	err        error
 }
 
@@ -39,6 +40,12 @@ func (pc *packerCommand) NoVerbose() *packerCommand {
 	if ok {
 		delete(pc.env, "PACKER_LOG")
 	}
+	return pc
+}
+
+// SetWD changes the directory Packer is invoked from
+func (pc *packerCommand) SetWD(dir string) *packerCommand {
+	pc.workdir = dir
 	return pc
 }
 
@@ -75,6 +82,10 @@ func (pc *packerCommand) doRun() {
 	}
 	cmd.Stdout = pc.stdout
 	cmd.Stderr = pc.stderr
+
+	if pc.workdir != "" {
+		cmd.Dir = pc.workdir
+	}
 
 	pc.err = cmd.Run()
 }
