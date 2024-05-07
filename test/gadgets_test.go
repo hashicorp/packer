@@ -54,15 +54,23 @@ func InferName(c Checker) string {
 	return retVals[0].String()
 }
 
-type MustSucceed struct{}
+func MustSucceed() Checker {
+	return mustSucceed{}
+}
 
-func (_ MustSucceed) Check(stdout, stderr string, err error) error {
+type mustSucceed struct{}
+
+func (_ mustSucceed) Check(stdout, stderr string, err error) error {
 	return err
 }
 
-type MustFail struct{}
+func MustFail() Checker {
+	return mustFail{}
+}
 
-func (_ MustFail) Check(stdout, stderr string, err error) error {
+type mustFail struct{}
+
+func (_ mustFail) Check(stdout, stderr string, err error) error {
 	if err == nil {
 		return fmt.Errorf("unexpected command success")
 	}
