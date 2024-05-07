@@ -193,7 +193,7 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 			err = fmt.Errorf("failed to get path to version %q, was it compiled?", pluginVersion)
 		}
 		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
-		cmd.Assert(t, MustSucceed{})
+		cmd.Assert(t, MustSucceed())
 		out, stderr, cmdErr := cmd.Run()
 		if cmdErr != nil {
 			err = fmt.Errorf("failed to install tester plugin version %q: %s\nCommand stdout: %s\nCommand stderr: %s", pluginVersion, err, out, stderr)
