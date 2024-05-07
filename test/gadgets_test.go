@@ -31,6 +31,15 @@ func (s Stream) String() string {
 	panic(fmt.Sprintf("Unknown stream value: %d", s))
 }
 
+// Checker represents anything that can be used in conjunction with Assert.
+//
+// The role of a checker is performing a test on a command's outputs/error, and
+// return an error if the test fails.
+//
+// Note: the Check method is the only required, however during tests the name
+// of the checker is printed out in case it fails, so it may be useful to have
+// a custom string for this: the `Name() string` method is exactly what to
+// implement for this kind of customization.
 type Checker interface {
 	Check(stdout, stderr string, err error) error
 }
