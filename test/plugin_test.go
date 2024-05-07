@@ -262,3 +262,37 @@ func WriteFile(t *testing.T, dest string, content string) {
 		t.Fatalf("failed to write to file %q: %s", dest, err)
 	}
 }
+
+// TempWorkdir creates a working directory for a Packer test with the list of files
+// given as input.
+//
+// The files should either have a path relative to the test that invokes it, or should
+// be absolute.
+// Each file will be copied to the root of the workdir being created.
+//
+// If any file cannot be found, this function will fail
+func TempWorkdir(t *testing.T, files ...string) (string, func()) {
+	var err error
+	tempDir, err := os.MkdirTemp("", "packer-test-workdir-%d")
+	if err != nil {
+		t.Fatalf("failed to create temporary working directory: %s", err)
+	}
+
+	defer func() {
+		if err != nil {
+			os.RemoveAll(tempDir)
+			t.Errorf("failed to create temporary workdir: %s", err)
+		}
+	}()
+
+	for _, file := range files {
+		CopyFile(t, tempDir, file)
+	}
+
+	return tempDir, func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			t.Logf("failed to remove temporary workdir %q: %s. This will need manual action.", tempDir, err)
+		}
+	}
+}
