@@ -5,6 +5,7 @@ package plugingetter
 
 import (
 	"archive/zip"
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -782,13 +783,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						}
 					}
 
-					// create directories if need be
-					if err := os.MkdirAll(outputFolder, 0755); err != nil {
-						err := fmt.Errorf("could not create plugin folder %q: %w", outputFolder, err)
-						errs = multierror.Append(errs, err)
-						log.Printf("[TRACE] %s", err.Error())
-						return nil, errs
-					}
 					for _, getter := range getters {
 						// start fetching binary
 						remoteZipFile, err := getter.Get("zip", GetOptions{
@@ -823,7 +817,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							errs = multierror.Append(errs, err)
 							continue
 						}
-
 						if _, err := tmpFile.Seek(0, 0); err != nil {
 							err := fmt.Errorf("Error seeking beginning of temporary file for checksumming, continuing: %w", err)
 							errs = multierror.Append(errs, err)
@@ -835,7 +828,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							errs = multierror.Append(errs, err)
 							continue
 						}
-
 						zr, err := zip.OpenReader(tmpFile.Name())
 						if err != nil {
 							errs = multierror.Append(errs, fmt.Errorf("zip : %v", err))
@@ -860,39 +852,27 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							return nil, errs
 						}
 
+						var outputFileData bytes.Buffer
+						if _, err := io.Copy(&outputFileData, copyFrom); err != nil {
+							err := fmt.Errorf("extract file: %w", err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
+						}
 						tmpBinFileName := filepath.Join(os.TempDir(), expectedBinaryFilename)
+						tmpOutputFile, err := os.OpenFile(tmpBinFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 						if err != nil {
 							err = fmt.Errorf("could not create temporary file to download plugin: %w", err)
 							errs = multierror.Append(errs, err)
 							return nil, errs
 						}
 						defer func() {
-							tmpBinPath := tmpBinFileName
-							os.Remove(tmpBinPath)
+							os.Remove(tmpBinFileName)
 						}()
 
-						tmpOutputFile, err := os.OpenFile(tmpBinFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
-						if err != nil {
-							err := fmt.Errorf("failed to create %s: %w", tmpBinFileName, err)
-							errs = multierror.Append(errs, err)
-							return nil, errs
-						}
-						if _, err := io.Copy(tmpOutputFile, copyFrom); err != nil {
+						if _, err := tmpOutputFile.Write(outputFileData.Bytes()); err != nil {
 							err := fmt.Errorf("extract file: %w", err)
 							errs = multierror.Append(errs, err)
 							return nil, errs
-						}
-
-						if _, err := tmpOutputFile.Seek(0, 0); err != nil {
-							err := fmt.Errorf("Error seeking beginning of binary file for checksumming: %w", err)
-							errs = multierror.Append(errs, err)
-							log.Printf("[WARNING] %v, ignoring", err)
-						}
-						outputFileCS, err := checksum.Checksummer.Sum(tmpOutputFile)
-						if err != nil {
-							err := fmt.Errorf("failed to checksum binary file: %s", err)
-							errs = multierror.Append(errs, err)
-							log.Printf("[WARNING] %v, ignoring", err)
 						}
 						tmpOutputFile.Close()
 
@@ -913,7 +893,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							errs = multierror.Append(errs, err)
 							continue
 						}
-
 						// Since only final releases can be installed remotely, a non-empty prerelease version
 						// means something's not right on the release, as it should report a final version.
 						//
@@ -929,12 +908,34 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							return nil, &err
 						}
 
-						if err := os.Rename(tmpBinFileName, outputFileName); err != nil {
-							err := fmt.Errorf("failed to write local binary file to plugin path: %s", err)
+						// create directories if need be
+						if err := os.MkdirAll(outputFolder, 0755); err != nil {
+							err := fmt.Errorf("could not create plugin folder %q: %w", outputFolder, err)
+							errs = multierror.Append(errs, err)
+							log.Printf("[TRACE] %s", err.Error())
+							return nil, errs
+						}
+
+						outputFile, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
+						if err != nil {
+							err = fmt.Errorf("could not create final plugin binary file: %w", err)
 							errs = multierror.Append(errs, err)
 							return nil, errs
 						}
-						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(outputFileCS)), 0644); err != nil {
+						if _, err := outputFile.Write(outputFileData.Bytes()); err != nil {
+							err = fmt.Errorf("could not write final plugin binary file: %w", err)
+							errs = multierror.Append(errs, err)
+							return nil, errs
+						}
+						outputFile.Close()
+
+						cs, err := checksum.Checksummer.Sum(&outputFileData)
+						if err != nil {
+							err := fmt.Errorf("failed to checksum binary file: %s", err)
+							errs = multierror.Append(errs, err)
+							log.Printf("[WARNING] %v, ignoring", err)
+						}
+						if err := os.WriteFile(outputFileName+checksum.Checksummer.FileExt(), []byte(hex.EncodeToString(cs)), 0644); err != nil {
 							err := fmt.Errorf("failed to write local binary checksum file: %s", err)
 							errs = multierror.Append(errs, err)
 							log.Printf("[WARNING] %v, ignoring", err)
