@@ -61,7 +61,7 @@ jobs:
       - name: Create ticket
         id: create-ticket
         if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: atlassian/gajira-create@1ff0b6bd115a780592b47bfbb63fc4629132e6ec # v3
+        uses: atlassian/gajira-create@59e177c4f6451399df5b4911c2211104f171e669 # v3.0.1
         with:
           project: HPR
           issuetype: "${{ steps.set-ticket-type.outputs.type }}"
@@ -72,7 +72,7 @@ jobs:
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             github.rest.issues.createComment({
