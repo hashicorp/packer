@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -100,17 +101,26 @@ type PrereleaseInstallError struct {
 	Source                            string
 }
 
-func (pe *PrereleaseInstallError) Error() string {
+func (e *PrereleaseInstallError) Error() string {
 	s := strings.Builder{}
-	s.WriteString("error:\n")
-	fmt.Fprintf(&s, "Remote installation of the plugin version %s is unsupported.\n", pe.ReportedVersion)
+	fmt.Fprintf(&s, "Error: Remote installation of the plugin version %s is unsupported.\n", e.ReportedVersion)
 
-	if pe.RequestedVersion != pe.ReportedVersion {
-		fmt.Fprintf(&s, "This is likely an upstream issue with the %s release, which should be reported.\n", pe.RequestedVersion)
+	if e.RequestedVersion != e.ReportedVersion {
+		fmt.Fprintf(&s, "This is likely an upstream issue with the %s release, which should be reported.\n", e.RequestedVersion)
 	}
 	s.WriteString("If you require this specific version of the plugin, download the binary and install it manually.\n")
-	fmt.Fprintf(&s, "\npacker plugins install --path '<plugin_binary>' %s\n", pe.Source)
+	fmt.Fprintf(&s, "\npacker plugins install --path '<plugin_binary>' %s\n", e.Source)
 	return s.String()
+}
+
+// ContinuableInstallError describe a failed getter install that is
+// capable of falling back to next available version.
+type ContinuableInstallError struct {
+	Err error
+}
+
+func (e *ContinuableInstallError) Error() string {
+	return fmt.Sprintf("Continuing to next available version: %s", e.Err)
 }
 
 func (pr Requirement) FilenamePrefix() string {
@@ -876,36 +886,13 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						}
 						tmpOutputFile.Close()
 
-						desc, err := GetPluginDescription(tmpBinFileName)
-						if err != nil {
-							err := fmt.Errorf("failed to describe plugin binary %q: %s", tmpBinFileName, err)
+						if err := checkVersion(tmpBinFileName, pr.Identifier.String(), version); err != nil {
 							errs = multierror.Append(errs, err)
-							continue
-						}
-						descVersion, err := goversion.NewSemver(desc.Version)
-						if err != nil {
-							err := fmt.Errorf("invalid self-reported version %q: %s", desc.Version, err)
-							errs = multierror.Append(errs, err)
-							continue
-						}
-						if descVersion.Core().Compare(version.Core()) != 0 {
-							err := fmt.Errorf("binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
-							errs = multierror.Append(errs, err)
-							continue
-						}
-						// Since only final releases can be installed remotely, a non-empty prerelease version
-						// means something's not right on the release, as it should report a final version.
-						//
-						// Therefore to avoid surprises (and avoid being able to install a version that
-						// cannot be loaded), we error here, and advise users to manually install the plugin if they
-						// need it.
-						if descVersion.Prerelease() != "" {
-							err := PrereleaseInstallError{
-								Source:           pr.Identifier.String(),
-								RequestedVersion: version.String(),
-								ReportedVersion:  desc.Version,
+							var continuableError *ContinuableInstallError
+							if errors.As(err, &continuableError) {
+								continue
 							}
-							return nil, &err
+							return nil, errs
 						}
 
 						// create directories if need be
@@ -915,7 +902,6 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							log.Printf("[TRACE] %s", err.Error())
 							return nil, errs
 						}
-
 						outputFile, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 						if err != nil {
 							err = fmt.Errorf("could not create final plugin binary file: %w", err)
@@ -972,6 +958,40 @@ func GetPluginDescription(pluginPath string) (pluginsdk.SetDescription, error) {
 	err = json.Unmarshal(out, &desc)
 
 	return desc, err
+}
+
+// checkVersion checks the described version of a plugin binary against the requested version constriant.
+// A ContinuableInstallError is returned upon a version mismatch to indicate that the caller should try the next
+// available version. A PrereleaseInstallError is returned to indicate an unsupported version install.
+func checkVersion(binPath string, identifier string, version *goversion.Version) error {
+	desc, err := GetPluginDescription(binPath)
+	if err != nil {
+		err := fmt.Errorf("failed to describe plugin binary %q: %s", binPath, err)
+		return &ContinuableInstallError{Err: err}
+	}
+	descVersion, err := goversion.NewSemver(desc.Version)
+	if err != nil {
+		err := fmt.Errorf("invalid self-reported version %q: %s", desc.Version, err)
+		return &ContinuableInstallError{Err: err}
+	}
+	if descVersion.Core().Compare(version.Core()) != 0 {
+		err := fmt.Errorf("binary reported version (%q) is different from the expected %q, skipping", desc.Version, version.String())
+		return &ContinuableInstallError{Err: err}
+	}
+	// Since only final releases can be installed remotely, a non-empty prerelease version
+	// means something's not right on the release, as it should report a final version.
+	//
+	// Therefore to avoid surprises (and avoid being able to install a version that
+	// cannot be loaded), we error here, and advise users to manually install the plugin if they
+	// need it.
+	if descVersion.Prerelease() != "" {
+		return &PrereleaseInstallError{
+			Source:           identifier,
+			RequestedVersion: version.String(),
+			ReportedVersion:  desc.Version,
+		}
+	}
+	return nil
 }
 
 func init() {
