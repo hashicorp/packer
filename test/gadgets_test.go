@@ -102,7 +102,7 @@ const (
 // Note: by default both streams will be checked by the grep
 func Grep(expression string, opts ...grepOpts) Checker {
 	pc := PipeChecker{
-		name:   "command | grep -E %q",
+		name:   fmt.Sprintf("command | grep -E %q", expression),
 		stream: BothStreams,
 		pipers: []Pipe{
 			PipeGrep(expression),
