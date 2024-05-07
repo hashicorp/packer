@@ -50,10 +50,32 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 }
 
 func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
-	pluginDir, cleanup := ts.MakePluginDir("1.0.0")
+	pluginDir, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
 	plugin := BuildSimplePlugin("1.0.10", ts.T())
+
+	CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
+
+	ts.Run("only legacy plugins installed: expect build to fail", func() {
+		ts.Run("with required_plugins - expect prompt for packer init", func() {
+			ts.PackerCommand().UsePluginDir(pluginDir).
+				SetArgs("build", "templates/simple.pkr.hcl").
+				Assert(ts.T(), MustFail(),
+					Grep("Did you run packer init for this project", grepStdout),
+					Grep("following plugins are required", grepStdout))
+		})
+
+		ts.Run("JSON template, without required_plugins: should say the component is unknown", func() {
+			ts.PackerCommand().UsePluginDir(pluginDir).
+				SetArgs("build", "templates/simple.json").
+				Assert(ts.T(), MustFail(),
+					Grep("The builder tester-dynamic is unknown by Packer", grepStdout))
+		})
+	})
+
+	pluginDir, cleanup = ts.MakePluginDir("1.0.0")
+	defer cleanup()
 
 	CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
 

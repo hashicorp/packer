@@ -35,3 +35,20 @@ func (ts *PackerTestSuite) TestInstallPluginPrerelease() {
 			Assert(ts.T(), MustFail(), Grep("Packer can only install plugin releases with this command", grepStdout))
 	})
 }
+
+func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
+	pluginPath, cleanup := ts.MakePluginDir()
+	defer cleanup()
+
+	ts.Run("install latest version of a remote plugin with packer plugins install", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "install", "github.com/hashicorp/hashicups").
+			Assert(ts.T(), MustSucceed())
+	})
+
+	ts.Run("install dev version of a remote plugin with packer plugins install - must fail", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "v1.0.2-dev").
+			Assert(ts.T(), MustFail(), Grep("Remote installation of pre-release plugin versions is unsupported.", grepStdout))
+	})
+}
