@@ -62,6 +62,17 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 			SetArgs("build", "templates/simple.pkr.hcl").
 			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
 	})
+
+	wd, cleanup := TempWorkdir(ts.T(), "./templates/simple.pkr.hcl")
+	defer cleanup()
+
+	CopyFile(ts.T(), filepath.Join(wd, "packer-plugin-tester"), plugin)
+
+	ts.Run("multiple plugins installed: 1.0.0 in plugin dir with sum, one in workdir (no version). Should load 1.0.0", func() {
+		ts.PackerCommand().UsePluginDir(pluginDir).SetWD(wd).
+			SetArgs("build", "simple.pkr.hcl").
+			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
+	})
 }
 
 func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
