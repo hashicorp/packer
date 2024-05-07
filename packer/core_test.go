@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package packer
 
 import (
@@ -68,6 +71,10 @@ func TestCoreBuild_basic(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	if build.Name() != "test" {
+		t.Fatalf("bad: build name does not match expected: %q, got: %q", "test", build.Name())
+	}
+
 	if _, err := build.Prepare(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
@@ -96,6 +103,10 @@ func TestCoreBuild_basicInterpolated(t *testing.T) {
 	build, err := core.Build("NAME")
 	if err != nil {
 		t.Fatalf("err: %s", err)
+	}
+
+	if build.Name() != "test.NAME" {
+		t.Fatalf("bad: build name does not match expected: %q, got: %q", "NAME", build.Name())
 	}
 
 	if _, err := build.Prepare(); err != nil {
@@ -863,5 +874,66 @@ func TestCoreBuild_packerVersion(t *testing.T) {
 
 	if result["value"] != expected {
 		t.Fatalf("bad: %#v", result)
+	}
+}
+
+func TestCoreBuild_buildNameIntepolation(t *testing.T) {
+	config := TestCoreConfig(t)
+	cases := []struct {
+		File                       string
+		InterpolatedName, Expected string
+		Vars                       map[string]string
+	}{
+		{
+			File:             "build-interpolated-name.json",
+			InterpolatedName: "mybuild-RandomToken",
+			Expected:         "test.mybuild-RandomToken",
+			Vars: map[string]string{
+				"build_name": "mybuild-RandomToken",
+			},
+		},
+		{
+			File:             "build-interpolated-name.json",
+			InterpolatedName: "build-vardata",
+			Expected:         "test.build-vardata",
+			Vars: map[string]string{
+				"build_name": "build-vardata",
+			},
+		},
+		{
+			File:             "build-interpolated-name.json",
+			InterpolatedName: "build-12345",
+			Expected:         "test.build-12345",
+			Vars: map[string]string{
+				"something":  "build-12345",
+				"build_name": "{{user `something`}}",
+			},
+		},
+		{
+			// When no name attribute is provided in the config the builder type is the default name.
+			File:             "build-basic.json",
+			InterpolatedName: "test",
+			Expected:         "test",
+		},
+	}
+
+	for _, tc := range cases {
+		config.Variables = tc.Vars
+		testCoreTemplate(t, config, fixtureDir(tc.File))
+		core := TestCore(t, config)
+		diags := core.Initialize(InitializeOptions{})
+		if diags.HasErrors() {
+			t.Fatalf("err: %s\n\n%s", tc.File, diags)
+		}
+
+		build, err := core.Build(tc.InterpolatedName)
+		if err != nil {
+			t.Fatalf("err for InterpolatedName(%q): %s", tc.InterpolatedName, err)
+		}
+
+		if build.Name() != tc.Expected {
+			t.Errorf("build type interpolation failed; expected %q, got %q", tc.Expected, build.Name())
+		}
+
 	}
 }

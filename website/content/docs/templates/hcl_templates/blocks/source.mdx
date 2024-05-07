@@ -19,7 +19,7 @@ once. Builders are usually found in plugins, except for the `file` and the
 `null` builders that will remain in Packer core.
 
 You can start builders by referring to those source blocks from a [`build`
-block](/docs/templates/hcl_templates/blocks/build) :
+block](/packer/docs/templates/hcl_templates/blocks/build) :
 
 ```hcl
 build {
@@ -32,7 +32,7 @@ build {
 ```
 
 The build-level [`source`
-block](/docs/templates/hcl_templates/blocks/build/source) allows to set specific
+block](/packer/docs/templates/hcl_templates/blocks/build/source) allows to set specific
 source fields. Each field must be defined only once and it is currently not
 allowed to override a value.
 
@@ -52,10 +52,10 @@ build {
 
 ## Related
 
-- The list of available builders can be found in the [builders](/docs/builders)
+- The list of available builders can be found in the [builders](/packer/docs/builders)
   section.
 
 - A list of [community
-  builders](/community-tools#community-builders) is available.
+  builders](https://packer.io/community-tools#community-builders) is available.
 
-- Create your own [custom builder](/docs/plugins/creation/custom-builders) !
+- Create your own [custom builder](/packer/docs/plugins/creation/custom-builders) !

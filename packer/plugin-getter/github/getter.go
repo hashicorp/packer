@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package github
 
 import (
@@ -8,14 +11,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/go-github/v33/github"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"golang.org/x/oauth2"
 )
@@ -68,7 +72,7 @@ func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 			}
 		}
 		_, _ = buffer.WriteString("]")
-		return ioutil.NopCloser(buffer), nil
+		return io.NopCloser(buffer), nil
 	}
 }
 
@@ -100,7 +104,7 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	return ioutil.NopCloser(buf), nil
+	return io.NopCloser(buf), nil
 }
 
 // HostSpecificTokenAuthTransport makes sure the http roundtripper only sets an
@@ -154,10 +158,40 @@ func (t *HostSpecificTokenAuthTransport) base() http.RoundTripper {
 	return http.DefaultTransport
 }
 
+type GithubPlugin struct {
+	Hostname  string
+	Namespace string
+	Type      string
+}
+
+func NewGithubPlugin(source *addrs.Plugin) (*GithubPlugin, error) {
+	parts := source.Parts()
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("Invalid github.com URI %q: a Github-compatible source must be in the github.com/<namespace>/<name> format.", source.String())
+	}
+
+	if parts[0] != defaultHostname {
+		return nil, fmt.Errorf("%q doesn't appear to be a valid %q source address; check source and try again.", source.String(), defaultHostname)
+	}
+
+	return &GithubPlugin{
+		Hostname:  parts[0],
+		Namespace: parts[1],
+		Type:      strings.Replace(parts[2], "packer-plugin-", "", 1),
+	}, nil
+}
+
+func (gp GithubPlugin) RealRelativePath() string {
+	return path.Join(
+		gp.Namespace,
+		fmt.Sprintf("packer-plugin-%s", gp.Type),
+	)
+}
+
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
-	if opts.PluginRequirement.Identifier.Hostname != defaultHostname {
-		s := opts.PluginRequirement.Identifier.String() + " doesn't appear to be a valid " + defaultHostname + " source address; check source and try again."
-		return nil, errors.New(s)
+	ghURI, err := NewGithubPlugin(opts.PluginRequirement.Identifier)
+	if err != nil {
+		return nil, err
 	}
 
 	ctx := context.TODO()
@@ -186,19 +220,18 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 
 	var req *http.Request
-	var err error
 	transform := func(in io.ReadCloser) (io.ReadCloser, error) {
 		return in, nil
 	}
 
 	switch what {
 	case "releases":
-		u := filepath.ToSlash("/repos/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/git/matching-refs/tags")
+		u := filepath.ToSlash("/repos/" + ghURI.RealRelativePath() + "/git/matching-refs/tags")
 		req, err = g.Client.NewRequest("GET", u, nil)
 		transform = transformVersionStream
 	case "sha256":
 		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
-		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.PluginRequirement.FilenamePrefix() + opts.Version() + "_SHA256SUMS")
+		u := filepath.ToSlash("https://github.com/" + ghURI.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.PluginRequirement.FilenamePrefix() + opts.Version() + "_SHA256SUMS")
 		req, err = g.Client.NewRequest(
 			"GET",
 			u,
@@ -206,7 +239,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		)
 		transform = transformChecksumStream()
 	case "zip":
-		u := filepath.ToSlash("https://github.com/" + opts.PluginRequirement.Identifier.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
+		u := filepath.ToSlash("https://github.com/" + ghURI.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
 		req, err = g.Client.NewRequest(
 			"GET",
 			u,

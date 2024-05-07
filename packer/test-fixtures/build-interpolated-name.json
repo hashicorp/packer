@@ -1,0 +1,7 @@
+
+{
+    "builders": [{
+        "type": "test",
+        "name": "{{user `build_name`}}"
+    }]
+}

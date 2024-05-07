@@ -27,7 +27,7 @@ Provisioners use builtin and third-party software to install and configure the
 machine image after booting. Provisioners prepare the system for use.
 
 The list of available provisioners can be found in the
-[provisioners](/docs/provisioners) section.
+[provisioners](/packer/docs/provisioners) section.
 
 ## Run on Specific Sources
 
@@ -135,8 +135,8 @@ build {
 ```
 
 As you can see, the `override` key is used. The value of this key is another
-HCL attribute map where the key is the name of a [builder
-definition](/docs/templates/hcl_templates/blocks/source). The value of this is in turn
+HCL attribute map where the key is the name of a [source
+definition](/packer/docs/templates/hcl_templates/blocks/source). The value of this is in turn
 another HCL attribute map. This HCL attribute map simply contains the provisioner
 configuration as normal. This configuration is merged into the default
 provisioner configuration.
@@ -259,4 +259,4 @@ Timeout has no effect in debug mode.
 ## Build Contextual Variables
 
 Packer allows to access connection information and basic instance state information from a provisioner. These information are stored in the `build` variable.
-Check out the [Contextual Variables](/docs/templates/hcl_templates/contextual-variables) documentation to learn more about and see some examples of how to use them.
+Check out the [Contextual Variables](/packer/docs/templates/hcl_templates/contextual-variables) documentation to learn more about and see some examples of how to use them.

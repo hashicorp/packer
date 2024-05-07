@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -154,33 +157,19 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	// Before we go further, we'll check to make sure this version can read
 	// all files, so we can produce a version-related error message rather than
 	// potentially-confusing downstream errors.
-	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion)
+	versionDiags := cfg.CheckCoreVersionRequirements(p.CorePackerVersion.Core())
 	diags = append(diags, versionDiags...)
 	if versionDiags.HasErrors() {
 		return cfg, diags
 	}
 
-	// Decode required_plugins blocks and create implicit required_plugins
-	// blocks. Implicit required_plugins blocks happen when a builder or another
-	// plugin cannot be found, for example if one uses :
-	//  source "amazon-ebs" "example" { ... }
-	// And no `amazon-ebs` builder can be found. This will then be the
-	// equivalent of having :
-	//  packer {
-	//    required_plugins {
-	//      amazon = {
-	//        version = "latest"
-	//        source  = "github.com/hashicorp/amazon"
-	//    }
-	//  }
+	// Decode required_plugins blocks.
+	//
 	// Note: using `latest` ( or actually an empty string ) in a config file
 	// does not work and packer will ask you to pick a version
 	{
 		for _, file := range files {
 			diags = append(diags, cfg.decodeRequiredPluginsBlock(file)...)
-		}
-		for _, file := range files {
-			diags = append(diags, cfg.decodeImplicitRequiredPluginsBlocks(file)...)
 		}
 	}
 
@@ -305,19 +294,7 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 }
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
-	var diags hcl.Diagnostics
-
-	// enable packer to start plugins requested in required_plugins.
-	moreDiags := cfg.detectPluginBinaries()
-	diags = append(diags, moreDiags...)
-	if moreDiags.HasErrors() {
-		return diags
-	}
-
-	moreDiags = cfg.InputVariables.ValidateValues()
-	diags = append(diags, moreDiags...)
-	moreDiags = cfg.LocalVariables.ValidateValues()
-	diags = append(diags, moreDiags...)
+	diags := cfg.InputVariables.ValidateValues()
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
 	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)

@@ -21,7 +21,7 @@ Packer run.
 -> **Breaking change note:** Packer previously let you decide your own "Date
 and Time format" syntax. With HCL2 and for parity with Terraform, Packer will
 be using the [RFC 3339](https://tools.ietf.org/html/rfc3339) "Date and Time
-format" syntax. As a string. [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) still allows you
+format" syntax. As a string. [`formatdate`](/packer/docs/templates/hcl_templates/functions/datetime/formatdate) still allows you
 to format a date.
 
 ## Examples
@@ -33,5 +33,5 @@ to format a date.
 
 ## Related Functions
 
-- [`formatdate`](/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
+- [`formatdate`](/packer/docs/templates/hcl_templates/functions/datetime/formatdate) can convert the resulting timestamp to
   other date and time formats.

@@ -12,10 +12,11 @@ jobs:
     permissions:
       contents: read  # for actions/checkout to fetch code
       issues: write  # for actions-ecosystem/action-remove-labels to remove issue labels
+    if: ${{contains(github.event.issue.labels.*.name, 'waiting-reply') || contains(github.event.issue.labels.*.name, 'stale')}}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-ecosystem/action-remove-labels@v1
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: actions-ecosystem/action-remove-labels@2ce5d41b4b6aa8503e285553f75ed56e0a40bae0 # v1.3.0
         with:
           github_token: "${{ secrets.GITHUB_TOKEN }}"
           labels: |

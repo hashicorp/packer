@@ -1,8 +1,7 @@
 ---
 page_title: Packer Build Pipelines
-description: |-
-  Here we explore how to break your builds into discrete steps so that your
-  builds can be shorter and more reliable.
+description: >-
+  Learn how to shorten Packer build times and improve reliability. Start from an ISO, customize using the virtualbox-ovf builder, and improve efficiency.
 ---
 
 # Why Create a Template Pipeline?
@@ -117,7 +116,7 @@ build {
 
 In order to build using this template, create a directory named "http" in your
 current working directory. Copy the minimal example from our
-[preseed guide](https://packer.io/guides/automatic-operating-system-installs/preseed_ubuntu#examples)
+[preseed guide](/packer/guides/automatic-operating-system-installs/preseed_ubuntu#examples)
 into a file in your http directory and name it "ubuntu_preseed.cfg". Copy the
 above json template into your current working directory and save it as
 "example_virtualbox_iso.json"
@@ -127,7 +126,7 @@ To run the build, call `packer build example_virtualbox_iso.json`.
 This example does not set the output_directory or output_filename, so the file
 will be placed in a default name of "output-virtualbox-iso/vbox-example.ovf" --
 the builder will print this file name to the UI output, but in this example the
-[manifest](/docs/post-processors/manifest) post-processor
+[manifest](/packer/docs/post-processors/manifest) post-processor
 to will store build information, including the names of the output files, in a
 json file named "stage-1-manifest.json". From there, you can programmatically
 look up the output file information.
@@ -135,7 +134,7 @@ look up the output file information.
 ## Customizing the iso using the virtualbox-ovf builder
 
 That output filename generated in the first stage can be used as the
-[source_path](/plugins/builders/virtualbox/ovf#source_path)
+[source_path](/packer/plugins/builders/virtualbox/ovf#source_path)
 for the virtualbox-ovf builder.
 
 <Tabs>

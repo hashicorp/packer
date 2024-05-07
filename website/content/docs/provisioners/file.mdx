@@ -17,7 +17,7 @@ Type: `file`
 
 The file Packer provisioner uploads files to machines built by Packer. The
 recommended usage of the file provisioner is to use it to upload files, and
-then use [shell provisioner](/docs/provisioners/shell) to move them to the
+then use [shell provisioner](/packer/docs/provisioners/shell) to move them to the
 proper place, set permissions, etc.
 
 Warning: You can only upload files to locations that the provisioning user
@@ -185,7 +185,7 @@ build {
 Because of the way our WinRM transfers works, it can take a very long time to
 upload and download even moderately sized files. If you're experiencing slowness
 using the file provisioner on Windows, it's suggested that you set up an SSH
-server and use the [ssh communicator](/docs/communicators/ssh). If you only want
+server and use the [ssh communicator](/packer/docs/communicators/ssh). If you only want
 to transfer files to your guest, and if your builder supports it, you may also
 use the `http_directory` or `http_content` directives. This will cause that
 directory to be available to the guest over HTTP, and set the environment

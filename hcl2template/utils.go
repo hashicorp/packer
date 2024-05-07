@@ -1,14 +1,17 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobwas/glob"
 	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/hcl2template/repl"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
@@ -71,7 +74,7 @@ func GetHCL2Files(filename, hclSuffix, jsonSuffix string) (hclFiles, jsonFiles [
 		return nil, nil, diags
 	}
 
-	fileInfos, err := ioutil.ReadDir(filename)
+	fileInfos, err := os.ReadDir(filename)
 	if err != nil {
 		diag := &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -183,4 +186,49 @@ func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
 		return cty.Value{}, fmt.Errorf("unhandled buildvar type: %T", v)
 	}
 	return buildValue, nil
+}
+
+// GetVarsByType walks through a hcl body, and gathers all the Traversals that
+// have a root type matching one of the specified top-level labels.
+//
+// This will only work on finite, expanded, HCL bodies.
+func GetVarsByType(block *hcl.Block, topLevelLabels ...string) []hcl.Traversal {
+	var travs []hcl.Traversal
+
+	switch body := block.Body.(type) {
+	case *hclsyntax.Body:
+		travs = getVarsByTypeForHCLSyntaxBody(body)
+	default:
+		attrs, _ := body.JustAttributes()
+		for _, attr := range attrs {
+			travs = append(travs, attr.Expr.Variables()...)
+		}
+	}
+
+	var rets []hcl.Traversal
+	for _, t := range travs {
+		varRootname := t.RootName()
+		for _, lbl := range topLevelLabels {
+			if varRootname == lbl {
+				rets = append(rets, t)
+				break
+			}
+		}
+	}
+
+	return rets
+}
+
+func getVarsByTypeForHCLSyntaxBody(body *hclsyntax.Body) []hcl.Traversal {
+	var rets []hcl.Traversal
+
+	for _, attr := range body.Attributes {
+		rets = append(rets, attr.Expr.Variables()...)
+	}
+
+	for _, block := range body.Blocks {
+		rets = append(rets, getVarsByTypeForHCLSyntaxBody(block.Body)...)
+	}
+
+	return rets
 }

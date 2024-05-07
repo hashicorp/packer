@@ -9,7 +9,7 @@ page_title: Extending
 # Developing Plugins
 
 Packer is extensible and supports plugins that let you
-create and use custom builders, provisioners, post-processors, and data sources. This page explains how to develop Packer plugins. Before you begin, we recommend reviewing the Packer documentation and the instructions for [installing external plugins](/docs/plugins/install-plugins).
+create and use custom builders, provisioners, post-processors, and data sources. This page explains how to develop Packer plugins. Before you begin, we recommend reviewing the Packer documentation and the instructions for [installing external plugins](https://developer.hashicorp.com/packer/docs/plugins/install-plugins).
 
 ~> **Warning** This is an advanced topic. You should have strong knowledge of Packer before you start writing plugins.
 
@@ -49,15 +49,7 @@ danger of colliding dependencies.
 
 - [`github.com/hashicorp/packer-plugin-sdk/plugin`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin) - Contains the code to serve the plugin. This handles all the inter-process communication.
 
-Basic examples of serving your component are shown below. Note that if you
-define a multi-component plugin, you can (but do not need to) add more than one
-component per plugin binary. The multi-component plugin is also compatible with
-download and installation via `packer init`, whereas the single-component plugin
-is not.
-
-<Tabs>
-
-<Tab heading="Multi-component Plugin (recommended) ">
+Basic examples of serving your component are shown below. 
 
 ```go
 // main.go
@@ -107,46 +99,9 @@ the following components available:
 - the `my-foo` post-processor
 - the `my-bar` provisioner
 
-</Tab>
-
-<Tab heading="Single Component Plugin (deprecated)">
-
-```go
-// main.go
-
-import (
-  "github.com/hashicorp/packer-plugin-sdk/plugin"
-)
-
-// Assume this implements the packer.Builder interface
-type Builder struct{}
-
-func main() {
-    server, err := plugin.Server()
-    if err != nil {
-        panic(err)
-    }
-    server.RegisterBuilder(new(Builder))
-    server.Serve()
-}
-```
-
-This `server.Serve()` invocation handles all the details of communicating with
-Packer core and serving your component over RPC. As long as your struct being
-registered implements one of the component interfaces, Packer will now be able
-to launch your plugin and use it.
-
-Please note that single-component plugins exist for backwards-compatability. We
-would rather you register your component using the multi-component method shown
-in the other tab, even if you only have one component in your binary. This is
-because the `packer init` command only supports multi-component plugins.
-
-</Tab>
-</Tabs>
-
 Next, build your plugin as you would any other Go application. The resulting
 binary is the plugin that can be installed using
-[standard installation procedures](/docs/plugins#installing-plugins).
+[standard installation procedures](https://developer.hashicorp.com/packer/docs/plugins#installing-plugins).
 
 This documentation explains how to implement each type of plugin interface: builders, data sources, provisioners, and post-processors.
 
@@ -212,89 +167,64 @@ Here's what you need to create releases using GitHub Actions:
    releaser is working. The tag must be a valid
    [Semantic Version](https://semver.org/) preceded with a `v`. Once the tag is pushed, the github actions you just configured will automatically build release binaries that Packer can download using `packer init`. For more details on how
    to install a plugin using `packer init`, see the
-   [init docs](/docs/commands/init).
+   [init docs](https://developer.hashicorp.com/packer/docs/commands/init).
 
-## Registering Plugin Documentation
+## Registering Plugins
 
-~> Note: Registering a remote plugin's plugin documentation requires the use of [Packer's plugin docs configuration](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/docs).
+~> Note: Registering a plugin as an integration requires the documentation to match the [Scaffolding example layout](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/.web-docs).
 
-`packer init` allows users to require and install remote Packer plugins, those not bundled with Packer core, that have been published to GitHub automatically.
-To help with the discovery of remote Packer plugins on GitHub, plugins maintainers can choose to register plugin documentation for each component directly on the [Packer Documentation Page](https://packer.io/docs).
+To help with the discovery of Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](https://developer.hashicorp.com/packer/integrations).
 
-The registration process requires the creation of a `docs.zip` file archive containing the `.mdx` files for each of the plugin components in the remote plugin's repository. A working example can be seen at the [packer-plugin-docker repository](https://github.com/hashicorp/packer-plugin-docker/releases/latest).
+The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) to be added to your plugin repository for configuring the Packer integration pipeline and 
+a specific directory structure for plugin documentation to be rendered on the [Packer Integrations](https://developer.hashicorp.com/packer/integrations) portal.
 
-Once in place the remote plugin can be added to Packer's website builds by opening a pull-request against [hashicorp/packer](https://github.com/hashicorp/packer), with the needed configuration for pulling in the remote documentation.
+You can execute the following steps to register your plugin as an integration:
 
-Remote plugins will have their components listed under the respected types (i.e builders, provisioners, etc) using the names specified in the remote block configuration, and labeled with their respective [tier and namespace](/docs/plugins#tiers-and-namespaces).
+1.  Update your plugin documentation structure to match the [Scaffolding example layout](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/.web-docs).
+New plugins generated from this template have the necessary structure in place. If so you can jump to step 3.
+1. For the integrations library, only one top-level README per integration is supported. Any top-level index.mdx files that exist
+within a plugin's existing documentation will need to migrate to a top-level README. 
+1. Update your top-level integration README to include a description, plugin installation steps, available components section, and, any, additional sections
+needed to inform users on how to work with your integration. Refer to [Packer scaffolding plugin](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/docs/README.md) for an example. 
+1. Update the top-level README for each of the components within your integration to follow the structure defined in the scaffolding template.
+1. Add the integration configuration file [metadata.hcl](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.web-docs/metadata.hcl) to the plugins `.web-docs` directory.
+1. Open a request for integration issue with the Packer team - [Open Request](https://github.com/hashicorp/packer/issues/new?labels=new-plugin-contribution&template=plugin_integration.md).
+Provide all the requested information to help expedite the integration request. 
 
-To register a plugin follow one of the following setups
+#### [Example] Add integration files to existing plugin repository
 
-<Tabs>
-<Tab heading="Generating docs.zip on plugin release">
+```shell
+## Update Plugin repository with integration config, workflows, and scripts
+cd packer-plugin-name
+mkdir -p .web-docs/scripts
 
-Documentation for a plugin is maintained within the `docs` directory and served on GitHub.
+# Download packer-plugin-scaffolding repo copy files
+wget https://github.com/hashicorp/packer-plugin-scaffolding/archive/refs/heads/main.zip
+unzip main.zip
+cp packer-plugin-scaffolding-main/.web-docs/metadata.hcl .web-docs/
+cp -r packer-plugin-scaffolding-main/.web-docs/scripts/ .web-docs/scripts/
+cp packer-plugin-scaffolding-main/.github/workflows/notify-integration-release-via-* .github/workflows/
 
-To include plugin docs on the website, a global pre-hook has been added to the main scaffolding [.goreleaser.yml](https://github.com/hashicorp/packer-plugin-scaffolding/blob/42e5b0b1e575879b0477cb6d4291e027f4d92f85/.goreleaser.yml#L10) file, that if uncommented will generate and include a docs.zip file as part of the plugin release.
+# Remove downloaded scaffolding project
+rm main.zip
+rm -rf packer-plugin-scaffolding-main
 
-The `docs.zip` file contains all of the `.mdx` files under the plugins root `docs/` directory that the website can consume remotely.
-
-</Tab>
-
-<Tab heading="Manually generating docs.zip">
-
-You can generate the required documentation structure manually by creating a zip file called `docs.zip` of the docs directory and including that zip file in the plugin release.
-
-```/bin/bash
-[[ -d docs/ ]] && zip -r docs.zip docs/
+# Add the following commands to your plugin GNUmakefile
+generate: install-packer-sdc
+    @go generate ./...
+    @rm -rf .docs
+    @packer-sdc renderdocs -src docs -partials docs-partials/ -dst .docs/
+    @./.web-docs/scripts/compile-to-webdocs.sh "." ".docs" ".web-docs" "<orgname>"
+    @rm -r ".docs"
 ```
 
-</Tab>
-</Tabs>
+By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation, 
+and, finally, to open an internal pull-request to finalize the integration setup. 
 
-Once the first `docs.zip` file has been included into a release you will need to open a one time pull-request against [hashicorp/packer](https://github.com/hashicorp/packer) to register the plugin docs.
+Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your the plugin. 
 
-This is done by adding the block below for the respective plugin to the file [website/data/plugins-manifest.json](https://github.com/hashicorp/packer/blob/main/website/data/plugins-manifest.json).
-
-```json
-{
-  "title": "Scaffolding",
-  "path": "scaffolding",
-  "repo": "hashicorp/packer-plugin-scaffolding",
-  "version": "latest",
-  "sourceBranch": "main"
-}
-```
-
-If a plugin maintainer wishes to only include a specific version of released docs, then the `"version"` key in the above configuration should be set to a released version of the plugin. Otherwise it should be set to `"latest"`.
-
-The `"sourceBranch"` key in the above configuration ensures potential contributors can link back to source files in the plugin repository from the Packer docs site. If a `"sourceBranch"` value is not present, it will default to `"main"`.
-
-### Testing Plugin Documentation
-
-Before publishing the `docs.zip` file, you might want to preview your documentation changes.
-We provide a mechanism that allows to preview how the docs will look like within
-the Packer documentation.
-
-Follow the next steps to get the Packer website running and preview the documentation changes:
-
-- Get the [Packer source code](https://github.com/hashicorp/packer). Our website code is under the [website folder](https://github.com/hashicorp/packer/tree/main/website).
-- Generate the `docs.zip` file. You can find above the steps to do so.
-- Add the `zipFile` attribute to the plugin entry in `plugins-manifest.json`. The value should be the full path of the `docs.zip` generated. For example:
-
-```json
-{
-  "title": "Scaffolding",
-  "path": "scaffolding",
-  "repo": "hashicorp/packer-plugin-scaffolding",
-  "version": "latest",
-  "sourceBranch": "main",
-  "zipFile": "/Users/myuser/Packer/plugins/packer-plugin-scaffolding/docs.zip"
-}
-```
-
-- Go to the [website folder](https://github.com/hashicorp/packer/tree/main/website).
-  In the website README, follow the steps to [run the website with node](https://github.com/hashicorp/packer/tree/main/website#with-node).
-- Once the website is up and running, the plugin documentation should be available in `http://localhost:3000/docs`.
+Plugin integrations, once deployed, can be updated manually, or automatically upon a new release, by the plugin authors. Changes to the defined documentation structure 
+or parent repository should be communicated to the Packer team to ensure a working integration pipeline. 
 
 ## Plugin Development Tips and FAQs
 

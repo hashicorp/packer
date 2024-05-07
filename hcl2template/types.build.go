@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -87,22 +90,26 @@ type Builds []*BuildBlock
 // decodeBuildConfig is called when a 'build' block has been detected. It will
 // load the references to the contents of the build block.
 func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildBlock, hcl.Diagnostics) {
-	build := &BuildBlock{}
-	body := block.Body
-
 	var b struct {
 		Name        string   `hcl:"name,optional"`
 		Description string   `hcl:"description,optional"`
 		FromSources []string `hcl:"sources,optional"`
 		Config      hcl.Body `hcl:",remain"`
 	}
+
+	body := block.Body
 	diags := gohcl.DecodeBody(body, cfg.EvalContext(LocalContext, nil), &b)
 	if diags.HasErrors() {
 		return nil, diags
 	}
 
+	build := &BuildBlock{
+		HCL2Ref: newHCL2Ref(block, b.Config),
+	}
+
 	build.Name = b.Name
 	build.Description = b.Description
+	build.HCL2Ref.DefRange = block.DefRange
 
 	// Expose build.name during parsing of pps and provisioners
 	ectx := cfg.EvalContext(BuildContext, nil)

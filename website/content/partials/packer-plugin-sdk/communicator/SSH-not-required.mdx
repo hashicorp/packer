@@ -9,7 +9,7 @@
 
 - `ssh_password` (string) - A plaintext password to use to authenticate with SSH.
 
-- `ssh_ciphers` ([]string) - This overrides the value of ciphers supported by default by Go.
+- `ssh_ciphers` ([]string) - This overrides the value of ciphers supported by default by Golang.
   The default value is [
     "aes128-gcm@openssh.com",
     "chacha20-poly1305@openssh.com",
@@ -28,8 +28,8 @@
   (unless the user has set the `-debug` flag). Defaults to "false";
   currently only works on guests with `sed` installed.
 
-- `ssh_key_exchange_algorithms` ([]string) - If set, Packer will override the value of key exchange (kex) altorighms
-  supported by default by Go. Acceptable values include:
+- `ssh_key_exchange_algorithms` ([]string) - If set, Packer will override the value of key exchange (kex) algorithms
+  supported by default by Golang. Acceptable values include:
   "curve25519-sha256@libssh.org", "ecdh-sha2-nistp256",
   "ecdh-sha2-nistp384", "ecdh-sha2-nistp521",
   "diffie-hellman-group14-sha1", and "diffie-hellman-group1-sha1".
@@ -44,11 +44,12 @@
 - `ssh_timeout` (duration string | ex: "1h5m2s") - The time to wait for SSH to become available. Packer uses this to
   determine when the machine has booted so this is usually quite long.
   Example value: `10m`.
+  This defaults to `5m`, unless `ssh_handshake_attempts` is set.
 
 - `ssh_disable_agent_forwarding` (bool) - If true, SSH agent forwarding will be disabled. Defaults to `false`.
 
-- `ssh_handshake_attempts` (int) - The number of handshakes to attempt with SSH once it can connect. This
-  defaults to `10`.
+- `ssh_handshake_attempts` (int) - The number of handshakes to attempt with SSH once it can connect.
+  This defaults to `10`, unless a `ssh_timeout` is set.
 
 - `ssh_bastion_host` (string) - A bastion host to use for the actual SSH connection.
 
@@ -73,6 +74,11 @@
 
 - `ssh_file_transfer_method` (string) - `scp` or `sftp` - How to transfer files, Secure copy (default) or SSH
   File Transfer Protocol.
+  
+  **NOTE**: Guests using Windows with Win32-OpenSSH v9.1.0.0p1-Beta, scp
+  (the default protocol for copying data) returns a non-zero error code since the MOTW
+  cannot be set, which cause any file transfer to fail. As a workaround you can override the transfer protocol
+  with SFTP instead `ssh_file_transfer_protocol = "sftp"`.
 
 - `ssh_proxy_host` (string) - A SOCKS proxy host to use for SSH connection
 
@@ -92,3 +98,5 @@
 - `ssh_remote_tunnels` ([]string) - 
 
 - `ssh_local_tunnels` ([]string) - 
+
+<!-- End of code generated from the comments of the SSH struct in communicator/config.go; -->

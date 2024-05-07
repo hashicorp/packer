@@ -101,6 +101,10 @@
         "path": "templates"
       },
       {
+        "title": "JSON to HCL2",
+        "path": "templates/json_to_hcl"
+      },
+      {
         "title": "HCL Templates",
         "routes": [
           {
@@ -726,6 +730,14 @@
             "path": "datasources/hcp"
           },
           {
+            "title": "Version",
+            "path": "datasources/hcp/hcp-packer-version"
+          },
+          {
+            "title": "Artifact",
+            "path": "datasources/hcp/hcp-packer-artifact"
+          },
+          {
             "title": "Iteration",
             "path": "datasources/hcp/hcp-packer-iteration"
           },
@@ -845,10 +857,6 @@
         "path": "plugins/install-plugins"
       },
       {
-        "title": "External Plugins",
-        "href": "/plugins"
-      },
-      {
         "title": "Developing Plugins",
         "routes": [
           {
@@ -882,6 +890,10 @@
   {
     "title": "Integration Program",
     "path": "partnerships"
+  },
+  {
+    "title": "Community Tools",
+    "path": "community-tools"
   },
   {
     "divider": true

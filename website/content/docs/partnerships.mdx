@@ -15,10 +15,10 @@ This program is intended to be largely a self-service process with links and gui
 
 ### Types of Packer Integrations
 
-Packer is an open source tool for creating identical machine images for multiple platforms from a single source configuration.
+Packer is a community tool for creating identical machine images for multiple platforms from a single source configuration.
 Packer is lightweight, runs on every major operating system, and is highly performant, creating machine images for multiple platforms in parallel. Packer does not replace configuration management like Chef or Puppet. In fact, when building images, Packer is able to use tools like Chef or Puppet to install software onto the image.
 
-A machine image is a single static unit that contains a pre-configured operating system and installed software which is used to quickly create new running machines. Machine image formats change for each platform. Some examples include AMIs for EC2, VMDK/VMX files for VMware, OVF exports for VirtualBox, etc. To know more about use cases of Packer click ([Use Cases - Introduction | Packer by HashiCorp](/#features))
+A machine image is a single static unit that contains a pre-configured operating system and installed software which is used to quickly create new running machines. Machine image formats change for each platform. Some examples include AMIs for EC2, VMDK/VMX files for VMware, OVF exports for VirtualBox, etc. To know more about use cases of Packer click ([Use Cases - Introduction | Packer by HashiCorp](/packer/docs/intro/use-cases))
 
 The diagram below depicts the key Packer integration categories and types.
 
@@ -31,7 +31,7 @@ The diagram below depicts the key Packer integration categories and types.
 Main Packer categories for partners to integrate with include:
 
 - **Data Sources**
-  - Data Sources allow users to retrieve values from a remote API and store them as variables in the Packer configuration template. An example is the [AWS secrets manager](/plugins/datasources/amazon/secretsmanager) data source.
+  - Data Sources allow users to retrieve values from a remote API and store them as variables in the Packer configuration template. An example is the [AWS secrets manager](/packer/plugins/datasources/amazon/secretsmanager) data source.
 - **Builders**
   - Builders manage the VM lifecycle. They manage launching a VM/instance, running provisioners against that instance, shutting the instance down, and saving an artifact image from that instance. Your builder handles all of the setup and cleanup costs associated with creating the output image artifact.
 - **Provisioners**
@@ -68,7 +68,7 @@ While not mandatory, HashiCorp encourages vendors to sign an MNDA (Mutual Non-Di
 
 In an effort to support our self-serve model we’ve included links to resources, documentation, examples and best practices to guide you through the Packer integration development and testing process.
 
-- [Writing vendor extension guide](/docs/plugins/creation)
+- [Writing vendor extension guide](/packer/docs/plugins/creation)
 - Sample development implemented by a [partner](https://github.com/exoscale/packer-plugin-exoscale)
 - [Scaffolding plugin repository](https://github.com/hashicorp/packer-plugin-scaffolding) to help bootstrap a new contribution:
 - Contributing to Packer [guidelines](https://github.com/hashicorp/packer/blob/main/.github/CONTRIBUTING.md)
@@ -83,22 +83,22 @@ Packer requires all code-level integrations to be written in the [Go](https://go
 
 Data Sources
 
-- [Custom Data Sources documentation](/docs/plugins/creation/custom-datasources)
+- [Custom Data Sources documentation](/packer/docs/plugins/creation/custom-datasources)
 - [Example Data Source](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/datasource)
 
 Builders
 
-- [Custom Builders documentation](/docs/plugins/creation/custom-builders)
+- [Custom Builders documentation](/packer/docs/plugins/creation/custom-builders)
 - [Example Builder](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/builder/order)
 
 Provisioners
 
-- [Custom Provisioners documentation](/docs/plugins/creation/custom-provisioners)
+- [Custom Provisioners documentation](/packer/docs/plugins/creation/custom-provisioners)
 - [Example Provisioner](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/provisioner/toppings)
 
 Post-Processors
 
-- [Custom Post-Processors documentation](/docs/plugins/creation/custom-post-processors)
+- [Custom Post-Processors documentation](/packer/docs/plugins/creation/custom-post-processors)
 - [Example Post-Processor](https://github.com/hashicorp/packer-plugin-hashicups/tree/main/post-processor/receipt)
 
 Packer-Plugin-SDK
@@ -109,12 +109,12 @@ Packer-Plugin-SDK
 
 During the review process, HashiCorp will provide feedback on the newly developed integration. This is an important step to allow HashiCorp to review and verify your Packer integration. Please send the integration code and other relevant logs for verification to: [Packer-integration-dev@hashicorp.com](mailto:packer-integration-dev@hashicorp.com).
 
-In order to document your plugins with Packer, please submit a GitHub pull request (PR) against the [Packer project](https://github.com/hashicorp/packer). See [Registering Plugin Documentation](/docs/plugins/creation#registering-plugin-documentation) for instructions on how to register your remote plugin documentation with Packer.
+In order to document your plugins with Packer, please submit a GitHub pull request (PR) against the [Packer project](https://github.com/hashicorp/packer). See [Registering Plugin Documentation](/packer/docs/plugins/creation#registering-plugin-documentation) for instructions on how to register your remote plugin documentation with Packer.
 The review process can take a while to complete and may require some iterations through the code to address any problems identified by the HashiCorp team.
 
 #### 5. Release
 
-At this stage, it is expected that the integration is fully complete, the necessary documentation has been written, the acceptance tests have all passed, and that HashiCorp has reviewed the integration. Once the plugin has been validated and accepted by HashiCorp, the plugin can be hosted on GitHub so it can easily be [downloaded then installed within Packer](/docs/plugins/creation#creating-a-github-release).
+At this stage, it is expected that the integration is fully complete, the necessary documentation has been written, the acceptance tests have all passed, and that HashiCorp has reviewed the integration. Once the plugin has been validated and accepted by HashiCorp, the plugin can be hosted on GitHub so it can easily be [downloaded then installed within Packer](/packer/docs/plugins/creation#creating-a-github-release).
 
 Once the integration has been released the vendor is requested to sign the HashiCorp Technology Partner Agreement so that we can have their integration be listed on the HashiCorp website.
 

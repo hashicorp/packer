@@ -1,8 +1,10 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -71,12 +73,12 @@ func main() {
 		log.Fatalf("%s already exists.", cla.Filename)
 	}
 	log.Printf("Saving private key to %s", cla.Filename)
-	if err := ioutil.WriteFile(cla.Filename, keypair.Private, 0600); err != nil {
+	if err := os.WriteFile(cla.Filename, keypair.Private, 0600); err != nil {
 		log.Fatal(err)
 	}
 	publicFilename := cla.Filename + ".pub"
 	log.Printf("Saving public key to %s", publicFilename)
-	if err := ioutil.WriteFile(publicFilename, keypair.Public, 0644); err != nil {
+	if err := os.WriteFile(publicFilename, keypair.Public, 0644); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -23,9 +23,9 @@ for the official documentation.
 
 If you are installing the Windows Operating System from a mounted iso as part of
 your Packer build, you will need to use an Answer file. For example, you're
-building an image from scratch using the [vmware-iso](/plugins/builders/vmware/iso),
-[virtualbox-iso](/plugins/builders/virtualbox/iso), or
-[hyperv-iso](/plugins/builders/hyperv/iso) builders.
+building an image from scratch using the [vmware-iso](/packer/plugins/builders/vmware/iso),
+[virtualbox-iso](/packer/plugins/builders/virtualbox/iso), or
+[hyperv-iso](/packer/plugins/builders/hyperv/iso) builders.
 
 If you are not installing the operating system, you won't need to provide an
 answer file. If you are using a pre-built image
@@ -67,7 +67,7 @@ disconnections can fail a build.
 The chef-maintained bento boxes are a great example of a Windows build that
 sets up openssh as part of the unattended installation so that Packer can
 connect using the SSH communicator. The functioning answer files for every
-modern Windows version can be found [here](https://github.com/chef/bento/tree/master/packer_templates/windows/answer_files).
+modern Windows version can be found [here](https://github.com/chef/bento/tree/master/packer_templates/win_answer_files).
 
 Stefan Scherer's [packer-windows repo](https://github.com/StefanScherer/packer-windows)
 is a great example of Windows builds that set up WinRM as part of the unattended

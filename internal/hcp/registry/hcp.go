@@ -1,8 +1,12 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package registry
 
 import (
 	"fmt"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/internal/hcp/env"
@@ -67,7 +71,7 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	bucket := NewBucketWithIteration()
+	bucket := NewBucketWithVersion()
 
 	for _, opt := range opts {
 		if optDiags := opt(bucket); optDiags.HasErrors() {
@@ -75,10 +79,10 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		}
 	}
 
-	if bucket.Slug == "" {
+	if bucket.Name == "" {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Image bucket name required",
-			Detail: "You must provide an image bucket name for HCP Packer builds. " +
+			Summary: "Bucket name required",
+			Detail: "You must provide a bucket name for HCP Packer builds. " +
 				"You can set the HCP_PACKER_BUCKET_NAME environment variable. " +
 				"For HCL2 templates, the registry either uses the name of your " +
 				"template's build block, or you can set the bucket_name argument " +
@@ -87,14 +91,11 @@ func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts)
 		})
 	}
 
-	err := bucket.Iteration.Initialize(IterationOptions{
-		TemplateBaseDir: templateDir,
-	})
-
+	err := bucket.Version.Initialize()
 	if err != nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary: "Iteration initialization failed",
-			Detail: fmt.Sprintf("Initialization of the iteration failed with "+
+			Summary: "Version initialization failed",
+			Detail: fmt.Sprintf("Initialization of the version failed with "+
 				"the following error message: %s", err),
 			Severity: hcl.DiagError,
 		})
@@ -108,4 +109,36 @@ func withPackerEnvConfiguration(bucket *Bucket) hcl.Diagnostics {
 	bucket.LoadDefaultSettingsFromEnv()
 
 	return nil
+}
+
+// getGitSHA returns the HEAD commit for some template dir defined in baseDir.
+// If the base directory is not under version control an error is returned.
+func getGitSHA(baseDir string) (string, error) {
+	r, err := git.PlainOpenWithOptions(baseDir, &git.PlainOpenOptions{
+		DetectDotGit: true,
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("Packer could not read the fingerprint from git.")
+	}
+
+	// The config can be used to retrieve user identity. for example,
+	// c.User.Email. Leaving in but commented because I'm not sure we care
+	// about this identity right now. - Megan
+	//
+	// c, err := r.ConfigScoped(config.GlobalScope)
+	// if err != nil {
+	//      return "", fmt.Errorf("Error setting git scope", err)
+	// }
+	ref, err := r.Head()
+	if err != nil {
+		// If we get there, we're in a Git dir, but HEAD cannot be read.
+		//
+		// This may happen when there's no commit in the git dir.
+		return "", fmt.Errorf("Packer could not read a git SHA in directory %q: %s", baseDir, err)
+	}
+
+	// log.Printf("Author: %v, Commit: %v\n", c.User.Email, ref.Hash())
+
+	return ref.Hash().String(), nil
 }

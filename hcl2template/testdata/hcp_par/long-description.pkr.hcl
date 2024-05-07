@@ -1,3 +1,7 @@
+source "null" "test" {
+  communicator = "none"
+}
+
 build {
   name = "bucket-slug"
   hcp_packer_registry {
@@ -7,4 +11,6 @@ super super super super super super super super super super super super super su
 super super super long description
     EOT
   }
+
+  sources = ["null.test"]
 }

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
 
 // This package implements a provisioner for Packer that executes
@@ -25,7 +28,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 )
 
-//FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
+// FIXME query remote host or use %SYSTEMROOT%, %TEMP% and more creative filename
 const DefaultRemotePath = "c:/Windows/Temp/script.bat"
 
 type Config struct {

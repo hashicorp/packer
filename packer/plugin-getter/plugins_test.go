@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package plugingetter
 
 import (
@@ -7,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -16,7 +18,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
@@ -32,9 +33,7 @@ func TestChecksumFileEntry_init(t *testing.T) {
 	expectedVersion := "v0.3.0"
 	req := &Requirement{
 		Identifier: &addrs.Plugin{
-			Hostname:  "github.com",
-			Namespace: "ddelnano",
-			Type:      "xenserver",
+			Source: "github.com/ddelnano/xenserver",
 		},
 	}
 
@@ -51,259 +50,6 @@ func TestChecksumFileEntry_init(t *testing.T) {
 
 	if checkSum.binVersion != expectedVersion {
 		t.Errorf("failed to parse ChecksumFileEntry properly expected version '%s' but found '%s'", expectedVersion, checkSum.binVersion)
-	}
-}
-
-func TestPlugin_ListInstallations(t *testing.T) {
-
-	type fields struct {
-		Identifier         string
-		VersionConstraints version.Constraints
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		opts    ListInstallationsOptions
-		wantErr bool
-		want    InstallList
-	}{
-
-		{
-			"windows_all_plugins",
-			fields{
-				// empty
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					OS: "windows", ARCH: "amd64",
-					Ext: ".exe",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v1.2.3",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v1.2.4",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v1.2.5",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_windows_amd64.exe"),
-				},
-				{
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-					Version:    "v4.5.6",
-				},
-				{
-					Version:    "v4.5.7",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.8",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.9",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
-				},
-			},
-		},
-
-		{
-			"darwin_amazon_prot_5.0",
-			fields{
-				Identifier: "github.com/hashicorp/amazon",
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					APIVersionMajor: "5", APIVersionMinor: "0",
-					OS: "darwin", ARCH: "amd64",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v1.2.3",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64"),
-				},
-				{
-					Version:    "v1.2.4",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_darwin_amd64"),
-				},
-				{
-					Version:    "v1.2.5",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_darwin_amd64"),
-				},
-			},
-		},
-		{
-			"darwin_amazon_prot_5.1",
-			fields{
-				Identifier: "github.com/hashicorp/amazon",
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					APIVersionMajor: "5", APIVersionMinor: "1",
-					OS: "darwin", ARCH: "amd64",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v1.2.3",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_darwin_amd64"),
-				},
-				{
-					Version:    "v1.2.4",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_darwin_amd64"),
-				},
-				{
-					Version:    "v1.2.5",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_darwin_amd64"),
-				},
-				{
-					Version:    "v1.2.6",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.6_x5.1_darwin_amd64"),
-				},
-			},
-		},
-		{
-			"windows_amazon",
-			fields{
-				Identifier: "github.com/hashicorp/amazon",
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					APIVersionMajor: "5", APIVersionMinor: "0",
-					OS: "windows", ARCH: "amd64",
-					Ext: ".exe",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v1.2.3",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.3_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v1.2.4",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.4_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v1.2.5",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "amazon", "packer-plugin-amazon_v1.2.5_x5.0_windows_amd64.exe"),
-				},
-			},
-		},
-		{
-			"windows_google_multifolder",
-			fields{
-				Identifier: "github.com/hashicorp/google",
-			},
-			ListInstallationsOptions{
-				[]string{
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
-				BinaryInstallationOptions{
-					APIVersionMajor: "5", APIVersionMinor: "0",
-					OS: "windows", ARCH: "amd64",
-					Ext: ".exe",
-					Checksummers: []Checksummer{
-						{
-							Type: "sha256",
-							Hash: sha256.New(),
-						},
-					},
-				},
-			},
-			false,
-			[]*Installation{
-				{
-					Version:    "v4.5.6",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.6_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.7",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.7_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.8",
-					BinaryPath: filepath.Join(pluginFolderOne, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.8_x5.0_windows_amd64.exe"),
-				},
-				{
-					Version:    "v4.5.9",
-					BinaryPath: filepath.Join(pluginFolderTwo, "github.com", "hashicorp", "google", "packer-plugin-google_v4.5.9_x5.0_windows_amd64.exe"),
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var identifier *addrs.Plugin
-			if tt.fields.Identifier != "" {
-				var diags hcl.Diagnostics
-				identifier, diags = addrs.ParsePluginSourceString(tt.fields.Identifier)
-				if diags.HasErrors() {
-					t.Fatalf("%v", diags)
-				}
-			}
-			p := Requirement{
-				Identifier:         identifier,
-				VersionConstraints: tt.fields.VersionConstraints,
-			}
-			got, err := p.ListInstallations(tt.opts)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Plugin.ListInstallations() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if diff := cmp.Diff(tt.want, got); diff != "" {
-				t.Errorf("Plugin.ListInstallations() unexpected output: %s", diff)
-			}
-		})
 	}
 }
 
@@ -342,11 +88,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "darwin", ARCH: "amd64",
@@ -378,11 +121,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -423,11 +163,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderOne,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "5", APIVersionMinor: "0",
 					OS: "darwin", ARCH: "amd64",
@@ -470,11 +207,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -520,11 +254,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -570,11 +301,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "linux", ARCH: "amd64",
@@ -614,11 +342,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-					pluginFolderOne,
-					pluginFolderTwo,
-				},
+				pluginFolderTwo,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -657,9 +382,8 @@ func TestRequirement_InstallLatest(t *testing.T) {
 						},
 					},
 				},
-				[]string{
-					pluginFolderWrongChecksums,
-				},
+				pluginFolderTwo,
+				false,
 				BinaryInstallationOptions{
 					APIVersionMajor: "6", APIVersionMinor: "1",
 					OS: "darwin", ARCH: "amd64",
@@ -732,9 +456,10 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 		}
 		toEncode = enc
 	case "zip":
-		acc := options.PluginRequirement.Identifier.Hostname + "/" +
-			options.PluginRequirement.Identifier.RealRelativePath() + "/" +
-			options.ExpectedZipFilename()
+		// Note: we'll act as if the plugin sources would always be github sources for now.
+		// This test will need to be updated if/when we move on to support other sources.
+		parts := options.PluginRequirement.Identifier.Parts()
+		acc := fmt.Sprintf("%s/%s/packer-plugin-%s/%s", parts[0], parts[1], parts[2], options.ExpectedZipFilename())
 
 		zip, found := g.Zips[acc]
 		if found == false {
@@ -751,7 +476,7 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 			panic(err)
 		}
 	}()
-	return ioutil.NopCloser(read), nil
+	return io.NopCloser(read), nil
 }
 
 func zipFile(content map[string]string) io.ReadCloser {
@@ -775,7 +500,239 @@ func zipFile(content map[string]string) io.ReadCloser {
 	if err != nil {
 		panic(err)
 	}
-	return ioutil.NopCloser(buff)
+	return io.NopCloser(buff)
 }
 
 var _ Getter = &mockPluginGetter{}
+
+func Test_LessInstallList(t *testing.T) {
+	tests := []struct {
+		name       string
+		installs   InstallList
+		expectLess bool
+	}{
+		{
+			"v1.2.1 < v1.2.2 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+					APIVersion: "x5.0",
+				},
+			},
+			true,
+		},
+		{
+			// Impractical with the changes to the loading model
+			"v1.2.1 = v1.2.1 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.2 < v1.2.1 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.2-dev < v1.2.2 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+					APIVersion: "x5.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.2 < v1.2.2-dev => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.1 < v1.2.2-dev => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.1",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3 < v1.2.2-dev => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.2-dev",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x5.1 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.1",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x5.0 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+			},
+			false,
+		},
+		{
+			"v1.2.3_x4.15 < v1.2.3_x5.0 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x4.15",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x9.0 < v1.2.3_x10.0 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x9.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x10.0",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.9 < v1.2.3_x5.10 => true",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.9",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.10",
+				},
+			},
+			true,
+		},
+		{
+			"v1.2.3_x5.0 < v1.2.3_x4.15 => false",
+			InstallList{
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x5.0",
+				},
+				&Installation{
+					BinaryPath: "host/org/plugin",
+					Version:    "v1.2.3",
+					APIVersion: "x4.15",
+				},
+			},
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			isLess := tt.installs.Less(0, 1)
+			if isLess != tt.expectLess {
+				t.Errorf("Less mismatch for %s_%s < %s_%s, expected %t, got %t",
+					tt.installs[0].Version,
+					tt.installs[0].APIVersion,
+					tt.installs[1].Version,
+					tt.installs[1].APIVersion,
+					tt.expectLess, isLess)
+			}
+		})
+	}
+}

@@ -1,8 +1,10 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package packer
 
 import (
 	"bytes"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -99,7 +101,7 @@ func TestClient_Stderr(t *testing.T) {
 
 func TestClient_Stdin(t *testing.T) {
 	// Overwrite stdin for this test with a temporary file
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}

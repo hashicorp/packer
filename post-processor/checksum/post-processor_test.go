@@ -1,10 +1,13 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package checksum
 
 import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -35,7 +38,7 @@ func TestChecksumSHA1(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to read checksum file: %s", err)
 	}
-	if buf, _ := ioutil.ReadAll(f); !bytes.Equal(buf, []byte("d3486ae9136e7856bc42212385ea797094475802\tpackage.txt\n")) {
+	if buf, _ := io.ReadAll(f); !bytes.Equal(buf, []byte("d3486ae9136e7856bc42212385ea797094475802\tpackage.txt\n")) {
 		t.Errorf("Failed to compute checksum: %s\n%s", buf, "d3486ae9136e7856bc42212385ea797094475802 package.txt")
 	}
 

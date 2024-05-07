@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
@@ -28,7 +31,7 @@ func (c *ValidateCommand) Run(args []string) int {
 func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 	var cfg ValidateArgs
 
-	flags := c.Meta.FlagSet("validate", FlagSetBuildFilter|FlagSetVars)
+	flags := c.Meta.FlagSet("validate")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -45,6 +48,11 @@ func (c *ValidateCommand) ParseArgs(args []string) (*ValidateArgs, int) {
 }
 
 func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int {
+	// Set the release only flag if specified as argument
+	//
+	// This deactivates the capacity for Packer to load development binaries.
+	c.CoreConfig.Components.PluginConfig.ReleasesOnly = cla.ReleaseOnly
+
 	// By default we want to inform users of undeclared variables when validating but not during build time.
 	cla.MetaArgs.WarnOnUndeclaredVar = true
 	if cla.NoWarnUndeclaredVar {
@@ -62,7 +70,13 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return 0
 	}
 
-	diags := packerStarter.Initialize(packer.InitializeOptions{
+	diags := packerStarter.DetectPluginBinaries()
+	ret = writeDiags(c.Ui, nil, diags)
+	if ret != 0 {
+		return ret
+	}
+
+	diags = packerStarter.Initialize(packer.InitializeOptions{
 		SkipDatasourcesExecution: !cla.EvaluateDatasources,
 	})
 	ret = writeDiags(c.Ui, nil, diags)
@@ -70,7 +84,7 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 		return ret
 	}
 
-	_, _, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
+	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:   cla.Only,
 		Except: cla.Except,
 	})
@@ -109,6 +123,7 @@ Options:
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
   -no-warn-undeclared-var       Disable warnings for user variable files containing undeclared variables.
   -evaluate-datasources         Evaluate data sources during validation (HCL2 only, may incur costs); Defaults to false. 
+  -ignore-prerelease-plugins    Disable the loading of prerelease plugin binaries (x.y.z-dev).
 `
 
 	return strings.TrimSpace(helpText)

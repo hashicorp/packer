@@ -1,0 +1,31 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-artifact/data.go; DO NOT EDIT MANUALLY -->
+
+- `platform` (string) - The name of the platform that the artifact exists in.
+  For example, "aws", "azure", or "gce".
+
+- `component_type` (string) - The specific Packer builder or post-processor used to create the artifact.
+
+- `created_at` (string) - The date and time at which the artifact was created.
+
+- `build_id` (string) - The ID of the build that created the artifact. This is a ULID, which is a
+  unique identifier similar to a UUID. It is created by the HCP Packer
+  Registry when a build is first created, and is unique to this build.
+
+- `version_id` (string) - The version ID. This is a ULID, which is a unique identifier similar
+  to a UUID. It is created by the HCP Packer Registry when a version is
+  first created, and is unique to this version.
+
+- `channel_id` (string) - The ID of the channel used to query the version. This value will be empty if the `version_fingerprint` was used
+  directly instead of a channel.
+
+- `packer_run_uuid` (string) - The UUID associated with the Packer run that created this artifact.
+
+- `external_identifier` (string) - Identifier or URL of the remote artifact as given by a build.
+  For example, ami-12345.
+
+- `region` (string) - The region as given by `packer build`. eg. "ap-east-1".
+  For locally managed clouds, this may map instead to a cluster, server or datastore.
+
+- `labels` (map[string]string) - The key:value metadata labels associated with this build.
+
+<!-- End of code generated from the comments of the DatasourceOutput struct in datasource/hcp-packer-artifact/data.go; -->

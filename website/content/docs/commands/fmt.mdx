@@ -53,3 +53,6 @@ $ cat my-template.pkr.hcl | packer fmt -
   (always disabled if using -check)
 
 - `-` - read formatting changes from stdin and write them to stdout.
+
+- `recursive` Also process files in subdirectories. By default, only the
+  given directory (or current directory) is processed.

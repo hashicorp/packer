@@ -36,7 +36,7 @@ Within a template, a section of builder definitions looks like this:
 ## Builder Definition
 
 A single builder definition maps to exactly one
-[build](/docs/terminology#builds). A builder definition is a
+[build](/packer/docs/terminology#builds). A builder definition is a
 JSON object that requires at least a `type` key. The `type` is the name of the
 builder that will be used to create a machine image for the build.
 
@@ -69,10 +69,10 @@ of them since the names must be unique.
 ## Communicators
 
 Every build is associated with a single
-[communicator](/docs/templates/legacy_json_templates/communicator). Communicators are used to
+[communicator](/packer/docs/templates/legacy_json_templates/communicator). Communicators are used to
 establish a connection for provisioning a remote machine (such as an AWS
 instance or local virtual machine).
 
 All the examples for the various builders show some communicator (usually SSH),
 but the communicators are highly customizable so we recommend reading the
-[communicator documentation](/docs/templates/legacy_json_templates/communicator).
+[communicator documentation](/packer/docs/templates/legacy_json_templates/communicator).

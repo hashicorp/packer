@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package function
 
 import (
@@ -20,7 +23,8 @@ var IndexFunc = function.New(&function.Spec{
 			Type: cty.DynamicPseudoType,
 		},
 	},
-	Type: function.StaticReturnType(cty.Number),
+	Type:         function.StaticReturnType(cty.Number),
+	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
 		if !(args[0].Type().IsListType() || args[0].Type().IsTupleType()) {
 			return cty.NilVal, errors.New("argument must be a list or tuple")

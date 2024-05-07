@@ -123,7 +123,7 @@ types described above:
 
   Key/value pairs can be separated by either a comma or a line break. Values
   can be arbitrary expressions. Keys are strings; they can be left unquoted if
-  they are a valid [identifier](/docs/templates/hcl_templates/syntax#identifiers), but must be quoted
+  they are a valid [identifier](/packer/docs/templates/hcl_templates/syntax#identifiers), but must be quoted
   otherwise. You can use a non-literal expression as a key by wrapping it in
   parentheses, like `(var.business_unit_tag_name) = "SRE"`.
 
@@ -134,13 +134,13 @@ Packer makes one named values available.
 The following named values are available:
 
 - `source.<SOURCE TYPE>.<NAME>` is an object representing a
-  [source](/docs/templates/hcl_templates/blocks/source) of the given type
+  [source](/packer/docs/templates/hcl_templates/blocks/source) of the given type
   and name.
 
 ### Available Functions
 
 For a full list of available functions, see [the function
-reference](/docs/templates/hcl_templates/functions).
+reference](/packer/docs/templates/hcl_templates/functions).
 
 ## `for` Expressions
 
@@ -233,7 +233,7 @@ The above expression is equivalent to the following `for` expression:
 
 Splat expressions are for lists only (and thus cannot be used [to reference
 resources created with
-`for_each`](https://www.terraform.io/docs/configuration/resources.html#referring-to-instances), which
+`for_each`](/terraform/docs/configuration/resources#referring-to-instances), which
 are represented as maps). However, if a splat expression is applied to a value
 that is _not_ a list or tuple then the value is automatically wrapped in a
 single-element list before processing.
@@ -255,7 +255,7 @@ set.
 
 ## `dynamic` blocks
 
-Within top-level block constructs like [source](/docs/templates/hcl_templates/blocks/source), expressions
+Within top-level block constructs like [source](/packer/docs/templates/hcl_templates/blocks/source), expressions
 can usually be used only when assigning a value to an argument using the `name = expression` or `key = expression` form.
 This covers many uses, but some source types include repeatable _nested blocks_ in their arguments, which do not accept expressions:
 
@@ -335,8 +335,8 @@ block. If you need to declare resource instances based on a nested data
 structure or combinations of elements from multiple data structures you can use
 expressions and functions to derive a suitable value. For some common examples
 of such situations, see the
-[`flatten`](/docs/templates/hcl_templates/functions/collection/flatten) and
-[`setproduct`](/docs/templates/hcl_templates/functions/collection/setproduct)
+[`flatten`](/packer/docs/templates/hcl_templates/functions/collection/flatten) and
+[`setproduct`](/packer/docs/templates/hcl_templates/functions/collection/setproduct)
 functions.
 
 ### Best Practices for `dynamic` Blocks

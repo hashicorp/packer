@@ -1,10 +1,15 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
 	"path/filepath"
 	"testing"
 
+	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -52,6 +57,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 					Builder:        emptyMockBuilder,
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					BuilderType:    "virtualbox-iso",
 				},
 			},
 			false,
@@ -105,6 +111,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 					Builder:        emptyMockBuilder,
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					BuilderType:    "virtualbox-iso",
 				},
 			},
 			false,
@@ -126,9 +133,119 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			&PackerConfig{
 				CorePackerVersionString: lockedVersion,
 				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
 			},
 			true, true,
 			nil,
+			false,
+		},
+		{"bucket name too short",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/short_bucket.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+			},
+			true, true,
+			nil,
+			false,
+		},
+		{"bucket name too long",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/long_bucket.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+			},
+			true, true,
+			nil,
+			false,
+		},
+		{"bucket name invalid chars",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/invalid_bucket.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+			},
+			true, true,
+			nil,
+			false,
+		},
+		{"bucket name OK",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/ok_bucket.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+				Builds: Builds{
+					{
+						Name:              "bucket-slug",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+			},
 			false,
 		},
 	}

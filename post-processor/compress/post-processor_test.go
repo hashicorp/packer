@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package compress
 
 import (
@@ -6,7 +9,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 	"testing"
@@ -15,7 +18,7 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/builder/file"
-	"github.com/pierrec/lz4"
+	"github.com/pierrec/lz4/v4"
 )
 
 func TestDetectFilename(t *testing.T) {
@@ -81,7 +84,7 @@ func TestCompressOptions(t *testing.T) {
 	filename := "package.gz"
 	archive, _ := os.Open(filename)
 	gzipReader, _ := gzip.NewReader(archive)
-	data, _ := ioutil.ReadAll(gzipReader)
+	data, _ := io.ReadAll(gzipReader)
 
 	if string(data) != expectedFileContents {
 		t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, data)
@@ -112,7 +115,7 @@ func TestCompressInterpolation(t *testing.T) {
 	}
 
 	gzipReader, _ := gzip.NewReader(archive)
-	data, _ := ioutil.ReadAll(gzipReader)
+	data, _ := io.ReadAll(gzipReader)
 
 	if string(data) != expectedFileContents {
 		t.Errorf("Expected:\n%s\nFound:\n%s\n", expectedFileContents, data)
@@ -191,7 +194,7 @@ func TestArchive(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			return ioutil.ReadAll(bzipReader)
+			return io.ReadAll(bzipReader)
 		},
 		"zip": func(archive *os.File) ([]byte, error) {
 			fi, _ := archive.Stat()
@@ -203,7 +206,7 @@ func TestArchive(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			return ioutil.ReadAll(ctt)
+			return io.ReadAll(ctt)
 		},
 		"tar": func(archive *os.File) ([]byte, error) {
 			tarReader := tar.NewReader(archive)
@@ -211,7 +214,7 @@ func TestArchive(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			return ioutil.ReadAll(tarReader)
+			return io.ReadAll(tarReader)
 		},
 		"tar.gz": func(archive *os.File) ([]byte, error) {
 			gzipReader, err := gzip.NewReader(archive)
@@ -223,15 +226,15 @@ func TestArchive(t *testing.T) {
 			if err != nil {
 				return nil, err
 			}
-			return ioutil.ReadAll(tarReader)
+			return io.ReadAll(tarReader)
 		},
 		"gz": func(archive *os.File) ([]byte, error) {
 			gzipReader, _ := gzip.NewReader(archive)
-			return ioutil.ReadAll(gzipReader)
+			return io.ReadAll(gzipReader)
 		},
 		"lz4": func(archive *os.File) ([]byte, error) {
 			lz4Reader := lz4.NewReader(archive)
-			return ioutil.ReadAll(lz4Reader)
+			return io.ReadAll(lz4Reader)
 		},
 	}
 

@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 //go:generate packer-sdc struct-markdown
 //go:generate packer-sdc mapstructure-to-hcl2 -type DatasourceOutput,Config
 package hcp_packer_image
@@ -12,7 +15,7 @@ import (
 	"github.com/zclconf/go-cty/cty"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
+	hcpPackerDeprecatedModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2021-04-30/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -33,9 +36,9 @@ type Config struct {
 	// Mutually exclusive with `iteration_id`.
 	// If using several images from a single iteration, you may prefer
 	// sourcing an iteration first, and referencing it for subsequent uses,
-	// as every `hcp_packer_image` with the channel set will generate a
+	// as every `hcp-packer-image` with the channel set will generate a
 	// potentially billable HCP Packer request, but if several
-	// `hcp_packer_image`s use a shared `hcp_packer_iteration` that will
+	// `hcp-packer-image`s use a shared `hcp-packer-iteration` that will
 	// only generate one potentially billable request.
 	Channel string `mapstructure:"channel" required:"true"`
 	// The ID of the iteration to use when retrieving your image
@@ -98,8 +101,8 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 	return nil
 }
 
-// DatasourceOutput Information from []*models.HashicorpCloudPackerImage with some information
-// from the parent []*models.HashicorpCloudPackerBuild included where it seemed
+// DatasourceOutput Information from []*hcpPackerDeprecatedModels.HashicorpCloudPackerImage with some information
+// from the parent []*hcpPackerDeprecatedModels.HashicorpCloudPackerBuild included where it seemed
 // like it might be relevant. Need to copy so we can generate
 type DatasourceOutput struct {
 	// The name of the cloud provider that the image exists in. For example,
@@ -137,14 +140,16 @@ func (d *Datasource) OutputSpec() hcldec.ObjectSpec {
 }
 
 func (d *Datasource) Execute() (cty.Value, error) {
+	log.Printf("[WARN] Deprecation: `hcp-packer-image` datasource has been deprecated. " +
+		"Please use `hcp-packer-artifact` datasource instead.")
 	ctx := context.TODO()
 
-	cli, err := hcpapi.NewClient()
+	cli, err := hcpapi.NewDeprecatedClient()
 	if err != nil {
 		return cty.NullVal(cty.EmptyObject), err
 	}
 
-	var iteration *models.HashicorpCloudPackerIteration
+	var iteration *hcpPackerDeprecatedModels.HashicorpCloudPackerIteration
 	var channelID string
 	if d.config.IterationID != "" {
 		log.Printf("[INFO] Reading info from HCP Packer registry (%s) [project_id=%s, organization_id=%s, iteration_id=%s]",
@@ -216,7 +221,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 		d.config.Region, d.config.CloudProvider, d.config.ComponentType, cloudAndRegions)
 }
 
-func filterBuildByComponentType(build *models.HashicorpCloudPackerBuild, componentType string) bool {
+func filterBuildByComponentType(build *hcpPackerDeprecatedModels.HashicorpCloudPackerBuild, componentType string) bool {
 	// optional field is not specified, passthrough
 	if componentType == "" {
 		return true

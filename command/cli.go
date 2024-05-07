@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
@@ -87,6 +90,9 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.Var(flagOnError, "on-error", "")
 
 	flags.BoolVar(&ba.MetaArgs.WarnOnUndeclaredVar, "warn-on-undeclared-var", false, "Show warnings for variable files containing undeclared variables.")
+
+	flags.BoolVar(&ba.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-dev).")
+
 	ba.MetaArgs.AddFlagSets(flags)
 }
 
@@ -97,10 +103,12 @@ type BuildArgs struct {
 	Color, TimestampUi, MachineReadable bool
 	ParallelBuilds                      int64
 	OnError                             string
+	ReleaseOnly                         bool
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ia.Upgrade, "upgrade", false, "upgrade any present plugin to the highest allowed version.")
+	flags.BoolVar(&ia.Force, "force", false, "force installation of a plugin, even if already installed")
 
 	ia.MetaArgs.AddFlagSets(flags)
 }
@@ -109,6 +117,7 @@ func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
 type InitArgs struct {
 	MetaArgs
 	Upgrade bool
+	Force   bool
 }
 
 // PluginsRequiredArgs represents a parsed cli line for a `packer plugins required <path>`
@@ -137,6 +146,7 @@ func (va *ValidateArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&va.SyntaxOnly, "syntax-only", false, "check syntax only")
 	flags.BoolVar(&va.NoWarnUndeclaredVar, "no-warn-undeclared-var", false, "Ignore warnings for variable files containing undeclared variables.")
 	flags.BoolVar(&va.EvaluateDatasources, "evaluate-datasources", false, "evaluate datasources for validation (HCL2 only, may incur costs)")
+	flags.BoolVar(&va.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-dev).")
 
 	va.MetaArgs.AddFlagSets(flags)
 }
@@ -146,6 +156,7 @@ type ValidateArgs struct {
 	MetaArgs
 	SyntaxOnly, NoWarnUndeclaredVar bool
 	EvaluateDatasources             bool
+	ReleaseOnly                     bool
 }
 
 func (va *InspectArgs) AddFlagSets(flags *flag.FlagSet) {

@@ -19,14 +19,14 @@ jobs:
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: 'Determine Go version'
         id: get-go-version
         # We use .go-version as our source of truth for current Go
         # version, because "goenv" can react to it automatically.
         run: |
           echo "Building with Go $(cat .go-version)"
-          echo "::set-output name=go-version::$(cat .go-version)"
+          echo "go-version=$(cat .go-version)" >> $GITHUB_OUTPUT
   acceptance-test:
     runs-on: ubuntu-latest
     name: Acceptance Test
@@ -37,13 +37,15 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.TESTACC_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.TESTACC_AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.TESTACC_AWS_REGION }}
+      # Packer GH Token for API Rate Limiting
+      PACKER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+      - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: ${{ needs.get-go-version.outputs.go-version }}
       - name: IAM Assume Role
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -68,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send slack notification on failure
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           payload: |
             {

@@ -1,6 +1,10 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -338,6 +342,45 @@ func TestValidateCommand_VarFilesDisableWarnOnUndeclared(t *testing.T) {
 				t.Errorf("Unexpected output: %s", diff)
 			}
 			t.Log(stderr)
+		})
+	}
+}
+
+func TestValidateCommand_ShowLineNumForMissing(t *testing.T) {
+	tt := []struct {
+		path      string
+		exitCode  int
+		extraArgs []string
+	}{
+		{path: filepath.Join(testFixture("validate-invalid"), "missing_build_block.pkr.hcl"), exitCode: 1},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.path, func(t *testing.T) {
+			c := &ValidateCommand{
+				Meta: TestMetaFile(t),
+			}
+			tc := tc
+			args := tc.extraArgs
+			args = append(args, tc.path)
+			if code := c.Run(args); code != tc.exitCode {
+				fatalCommand(t, c.Meta)
+			}
+
+			stdout, stderr := GetStdoutAndErrFromTestMeta(t, c.Meta)
+			expected := fmt.Sprintf(`Error: Unknown source file.cho
+
+  on %s line 6:
+  (source code not available)
+
+Known: [file.chocolate]
+
+
+`, tc.path)
+			if diff := cmp.Diff(expected, stderr); diff != "" {
+				t.Errorf("Unexpected output: %s", diff)
+			}
+			t.Log(stdout)
 		})
 	}
 }

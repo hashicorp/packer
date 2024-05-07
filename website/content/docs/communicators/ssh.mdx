@@ -9,7 +9,7 @@ page_title: Communicators - SSH
 
 Communicators are the mechanism Packer uses to upload files, execute scripts,
 etc. on the machine being created, and are configured within the
-[builder](/docs/templates/legacy_json_templates/builders) section.
+[builder](/packer/docs/templates/legacy_json_templates/builders) section.
 
 The SSH communicator does this by using the SSH protocol. It is the default
 communicator for a majority of builders.
@@ -31,7 +31,7 @@ the Packer template.
 However, if you are building from a brand-new and unconfigured operating system
 image, you will almost always have to perform some extra work to configure SSH
 on the guest machine. For most operating system distributions, this work will
-be performed by a [boot command](/plugins/builders/vmware/iso#boot-configuration)
+be performed by a [boot command](/packer/plugins/builders/vmware/iso#boot-configuration)
 that references a file which provides answers to the normally-interactive
 questions you get asked when installing an operating system. The name of this
 file varies by operating system; some common examples are the "preseed" file
@@ -42,7 +42,7 @@ rest of the documentation.
 
 If you are unfamiliar with how to use a preseed file for automatic
 bootstrapping of an image, please either take a look at our
-[quick guides](/guides/automatic-operating-system-installs) to
+[quick guides](/packer/guides/automatic-operating-system-installs) to
 image bootstrapping, or research automatic configuration for your specific
 guest operating system. Knowing how to automatically initalize your operating
 system is critical for being able to successfully use Packer.
@@ -79,4 +79,4 @@ Packer supports the following MACs:
 - `hmac-sha2-256-etm@openssh.com`
 
 For more information on the ciphers that Packer supports, check the docs for
-the [ssh_ciphers](/docs/communicators/ssh#ssh_ciphers) template option.
+the [ssh_ciphers](/packer/docs/communicators/ssh#ssh_ciphers) template option.

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: BUSL-1.1
+
 
 function install_go() {
 	local go_version=1.13

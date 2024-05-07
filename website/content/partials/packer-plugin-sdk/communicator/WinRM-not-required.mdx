@@ -5,10 +5,10 @@
 - `winrm_password` (string) - The password to use to connect to WinRM.
 
 - `winrm_host` (string) - The address for WinRM to connect to.
-
+  
   NOTE: If using an Amazon EBS builder, you can specify the interface
   WinRM connects to via
-  [`ssh_interface`](/plugins/builders/amazon/ebs#ssh_interface)
+  [`ssh_interface`](/packer/plugins/builders/amazon/ebs#ssh_interface)
 
 - `winrm_no_proxy` (bool) - Setting this to `true` adds the remote
   `host:port` to the `NO_PROXY` environment variable. This has the effect of
@@ -30,4 +30,6 @@
   for WinRM, rather than default (basic authentication), removing the
   requirement for basic authentication to be enabled within the target
   guest. Further reading for remote connection authentication can be found
-  [here](<https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx>).
+  [here](https://msdn.microsoft.com/en-us/library/aa384295(v=vs.85).aspx).
+
+<!-- End of code generated from the comments of the WinRM struct in communicator/config.go; -->

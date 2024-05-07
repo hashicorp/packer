@@ -1,5 +1,6 @@
 ---
 description: |
+  This data source has been deprecated, please use HCP Packer Version data source instead.
   The HCP Packer Iteration Data Source retrieves information about an
   iteration from the HCP Packer registry. This information can be used to
   query HCP for a source image for various Packer builders.
@@ -8,10 +9,11 @@ page_title: HCP Packer Iteration - Data Sources
 
 <BadgesHeader>
   <PluginBadge type="official" />
-  <PluginBadge type="hcp_packer_ready" />
 </BadgesHeader>
 
 # HCP Packer Iteration Data Source
+
+~> **Note:** This data source has been deprecated, please use [HCP Packer Version](/packer/docs/datasources/hcp/hcp-packer-version) data source instead.
 
 Type: `hcp-packer-iteration`
 
@@ -19,7 +21,7 @@ The `HCP Packer Iteration` Data Source retrieves information about an
 iteration from the HCP Packer registry. This information can be used to query
 HCP for a source image for various Packer builders.
 
-To get started with HCP Packer, refer to the [HCP Packer documentation](https://cloud.hashicorp.com/docs/packer) or try the [Get Started with HCP Packer tutorials](https://learn.hashicorp.com/collections/packer/hcp-get-started).
+To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/docs/packer) or try the [Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).
 
 ~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry. An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
 

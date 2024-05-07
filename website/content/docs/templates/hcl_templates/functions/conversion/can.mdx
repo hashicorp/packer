@@ -12,7 +12,7 @@ whether the expression produced a result without any errors.
 
 This is a special function that is able to catch errors produced when evaluating
 its argument. For most situations where you could use `can` it's better to use
-[`try`](/docs/templates/hcl_templates/functions/conversion/try) instead, because it allows for more concise definition of
+[`try`](/packer/docs/templates/hcl_templates/functions/conversion/try) instead, because it allows for more concise definition of
 fallback values for failing expressions.
 
 The `can` function can only catch and handle _dynamic_ errors resulting from
@@ -24,7 +24,7 @@ as a malformed resource reference.
 variable validation rules. Although it can technically accept any sort of
 expression and be used elsewhere in the configuration, we recommend against
 using it in other contexts. For error handling elsewhere in the configuration,
-prefer to use [`try`](/docs/templates/hcl_templates/functions/conversion/try).
+prefer to use [`try`](/packer/docs/templates/hcl_templates/functions/conversion/try).
 
 ## Examples
 
@@ -53,5 +53,5 @@ A local value with the name "nonexist" has not been declared.
 
 ## Related Functions
 
-- [`try`](/docs/templates/hcl_templates/functions/conversion/try), which tries evaluating a sequence of expressions and
+- [`try`](/packer/docs/templates/hcl_templates/functions/conversion/try), which tries evaluating a sequence of expressions and
   returns the result of the first one that succeeds.

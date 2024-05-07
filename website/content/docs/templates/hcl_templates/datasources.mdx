@@ -10,8 +10,8 @@ description: >-
 
 -> **Note:** Data Sources is a feature included in Packer 1.7 and later.
 
-Data sources allow data to be fetched or computed for use elsewhere in [locals](/docs/templates/hcl_templates/blocks/locals) and
-[sources](/docs/templates/hcl_templates/blocks/source) configuration.
+Data sources allow data to be fetched or computed for use elsewhere in [locals](/packer/docs/templates/hcl_templates/blocks/locals) and
+[sources](/packer/docs/templates/hcl_templates/blocks/source) configuration.
 Use of data sources allows a Builder to make use of information defined outside of Packer.
 
 # Using Data Sources
@@ -36,8 +36,8 @@ local name ("example"). The name is used to refer to this data source from elsew
 The data block creates a data instance of the given _type_ (first block label) and _name_ (second block label).
 The combination of the type and name must be unique within a configuration.
 
-Within the block (the `{ }`) is the configuration for the data instance. The configuration is dependent on the type,
-and is documented for each data source in the [data sources](/docs/datasources) section.
+Within the block (the `{ }`) is the configuration for the data instance. The configuration is dependent on the data source type,
+and is documented for each data source. For example the configuration of the `amazon-ami` data source can be found at [plugins/datasources/amazon/ami](/packer/plugins/datasources/amazon/ami#configuration-reference).
 
 A data source can output one or more attributes, which can be used by adding their key name to the data source unique
 identifier, like `data.<TYPE>.<NAME>.<ATTRIBUTE>`.
@@ -81,6 +81,6 @@ source "amazon-ebs" "basic-example" {
 
 ## Related
 
-- The list of available data sources can be found in the [data sources](/docs/datasources)
+- The list of available data sources can be found in the [data sources](/packer/docs/datasources)
   section.
-- Create your own [custom data source](/docs/plugins/creation/custom-datasources) !
+- Create your own [custom data source](/packer/docs/plugins/creation/custom-datasources) !

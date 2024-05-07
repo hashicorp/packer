@@ -7,17 +7,37 @@ page_title: packer init - Commands
 # `init` Command
 
 -> **Note:** Packer init does not work with legacy JSON templates. You can
-upgrade your JSON config files to HCL using the [hcl2_upgrade](/docs/commands/hcl2_upgrade) command.
+upgrade your JSON config files to HCL using the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) command.
 
 -> **Note:** Packer init will only work with multi-component plugins -- that is
 plugins that are named `packer-plugin-*`. To install a single-component plugin --
 that is `packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
-have to [install the plugin manually](/docs/plugins#installing-plugins).
+have to [install the plugin manually](/packer/docs/plugins#installing-plugins).
 
 The `packer init` command is used to download Packer plugin binaries. This is
 the first command that should be executed when working with a new or existing
 template. This command is always safe to run multiple times. Though subsequent
 runs may give errors, this command will never delete anything.
+
+You should invoke `packer init` on either an HCL2 template, or a directory that contains
+at least a valid HCL2 template, and eventually other related dependencies like varfiles
+for example.
+
+Example:
+
+```sh
+$ ls .
+template.pkr.hcl varfile.pkrvars.pkr.hcl
+
+$ packer init template.pkr.hcl # You can invoke packer init on a single template in this case
+                               # This works if the template is self-contained, but may fail if
+                               # the template is meant to be built as a bundle of partials.
+
+$ packer init .                # Alternatively, you can invoke packer init on a directory instead,
+                               # which behaves the same in a configuration like this one, but if
+                               # the target is a collection ofHCL2 templates, this is the
+                               # preferred way to invoke it.
+```
 
 Packer does not currently have the notion of a state like Terraform has. In other words,
 currently `packer init` is only in charge of installing Packer plugins.
@@ -36,7 +56,7 @@ for the ones that are missing.
 
 `packer init -upgrade` will try to get the latest versions for all plugins.
 
-Import a plugin using the [`required_plugin`](/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+Import a plugin using the [`required_plugin`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
 block :
 
 ```hcl
@@ -50,7 +70,7 @@ packer {
 }
 ```
 
-HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; as with all open source tools, please do your own due diligence when using a new tool.
+HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; as with all community tools, please do your own due diligence when using a new tool.
 
 ## Plugin Selection
 
@@ -61,23 +81,11 @@ is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the v
 Packer init will install the latest found version matching the version selection
 in the `required_plugins` section. Make sure to set a correct [version
 constraint
-string](/docs/templates/hcl_templates/blocks/packer#version-constraints). The
+string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints). The
 plugins will be installed in the [Plugin
-Directory](/docs/configure#packer-s-plugin-directory).
+Directory](/packer/docs/configure#packer-s-plugin-directory).
 
-See [Installing Plugins](/docs/plugins#installing-plugins) for more information on how plugin installation works.
-
-### Implicit required plugin
-
-This is part of a set of breaking changes made to decouple Packer releases from
-plugin releases. To make the transition easier, we will tag components of these
-plugins as "moved out". If one of the components of a moved out plugin is used
-in a config file, but there is no mention of that plugin in the
-"required_plugin" block, then Packer init will automatically download and
-install that plugin. Packer will then display a warning and suggest that you
-add the plugin to your required_plugin block. We recommend you use the
-required_plugin block even if you are only using official plugins, because it
-allows you to set the plugin version to avoid surprises in the future.
+See [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
 ## Options
 

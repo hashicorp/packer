@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 // This is the main package for the `packer` application.
 
 //go:generate go run ./scripts/generate-plugins.go
@@ -6,7 +9,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -62,13 +64,13 @@ func realMain() int {
 		return 1
 	}
 	if logWriter == nil {
-		logWriter = ioutil.Discard
+		logWriter = io.Discard
 	}
 
 	packersdk.LogSecretFilter.SetOutput(logWriter)
 
 	// Disable logging here
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 
 	// We always send logs to a temporary file that we use in case
 	// there is a panic. Otherwise, we delete it.
@@ -249,11 +251,21 @@ func wrappedMain() int {
 		Ui: ui,
 	}
 
+	//versionCLIHelper shortcuts "--version" and "-v" to just show the version
+	versionCLIHelper := &cli.CLI{
+		Args:    args,
+		Version: version.Version,
+	}
+	if versionCLIHelper.IsVersion() && versionCLIHelper.Version != "" {
+		// by default version flags ignore all other args so there is no need to persist the original args.
+		args = []string{"version"}
+	}
+
 	cli := &cli.CLI{
 		Args:         args,
 		Autocomplete: true,
 		Commands:     Commands,
-		HelpFunc:     excludeHelpFunc(Commands, []string{"plugin"}),
+		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin"}),
 		HelpWriter:   os.Stdout,
 		Name:         "packer",
 		Version:      version.Version,
@@ -317,80 +329,20 @@ func extractMachineReadable(args []string) ([]string, bool) {
 }
 
 func loadConfig() (*config, error) {
+	pluginDir, err := packer.PluginFolder()
+	if err != nil {
+		return nil, err
+	}
+
 	var config config
 	config.Plugins = &packer.PluginConfig{
-		PluginMinPort:      10000,
-		PluginMaxPort:      25000,
-		KnownPluginFolders: packer.PluginFolders("."),
-
-		// BuilderRedirects
-		BuilderRedirects: map[string]string{
-
-			//"amazon-chroot":       "github.com/hashicorp/amazon",
-			//"amazon-ebs":          "github.com/hashicorp/amazon",
-			//"amazon-ebssurrogate": "github.com/hashicorp/amazon",
-			//"amazon-ebsvolume":    "github.com/hashicorp/amazon",
-			//"amazon-instance":     "github.com/hashicorp/amazon",
-
-			//"azure-arm":    "github.com/hashicorp/azure",
-			//"azure-chroot": "github.com/hashicorp/azure",
-			//"azure-dtl":    "github.com/hashicorp/azure",
-
-			//"docker": "github.com/hashicorp/docker",
-
-			//"exoscale": "github.com/exoscale/exoscale",
-
-			//"googlecompute": "github.com/hashicorp/googlecompute",
-
-			//"parallels-iso": "github.com/hashicorp/parallels",
-			//"parallels-pvm": "github.com/hashicorp/parallels",
-
-			//"qemu": "github.com/hashicorp/qemu",
-
-			//"vagrant": "github.com/hashicorp/vagrant",
-
-			//"virtualbox-iso": "github.com/hashicorp/virtualbox",
-			//"virtualbox-ovf": "github.com/hashicorp/virtualbox",
-			//"virtualbox-vm":  "github.com/hashicorp/virtualbox",
-
-			//"vmware-iso": "github.com/hashicorp/vmware",
-			//"vmware-vmx": "github.com/hashicorp/vmware",
-
-			//"vsphere-iso":   "github.com/hashicorp/vsphere",
-			//"vsphere-clone": "github.com/hashicorp/vsphere",
-		},
-		DatasourceRedirects: map[string]string{
-			//"amazon-ami":            "github.com/hashicorp/amazon",
-			//"amazon-secretsmanager": "github.com/hashicorp/amazon",
-		},
-		ProvisionerRedirects: map[string]string{
-			//"ansible":       "github.com/hashicorp/ansible",
-			//"ansible-local": "github.com/hashicorp/ansible",
-
-			//"azure-dtlartifact": "github.com/hashicorp/azure",
-		},
-		PostProcessorRedirects: map[string]string{
-			//"amazon-import": "github.com/hashicorp/amazon",
-
-			//"docker-import": "github.com/hashicorp/docker",
-			//"docker-push":   "github.com/hashicorp/docker",
-			//"docker-save":   "github.com/hashicorp/docker",
-			//"docker-tag":    "github.com/hashicorp/docker",
-
-			//"googlecompute-export": "github.com/hashicorp/googlecompute",
-			//"googlecompute-import": "github.com/hashicorp/googlecompute",
-
-			//"exoscale-import": "github.com/exoscale/exoscale",
-
-			//"vagrant":       "github.com/hashicorp/vagrant",
-			//"vagrant-cloud": "github.com/hashicorp/vagrant",
-
-			//"vsphere":          "github.com/hashicorp/vsphere",
-			//"vsphere-template": "github.com/hashicorp/vsphere",
-		},
-	}
-	if err := config.Plugins.Discover(); err != nil {
-		return nil, err
+		PluginMinPort:   10000,
+		PluginMaxPort:   25000,
+		PluginDirectory: pluginDir,
+		Builders:        packer.MapOfBuilder{},
+		Provisioners:    packer.MapOfProvisioner{},
+		PostProcessors:  packer.MapOfPostProcessor{},
+		DataSources:     packer.MapOfDatasource{},
 	}
 
 	// Finally, try to use an internal plugin. Note that this will not override

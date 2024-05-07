@@ -34,7 +34,7 @@ hello everybody
 > regex_replace("hello world", "w.*d", "everybody")
 hello everybody
 
-> regex_replace("-ab-axxb-", "a(x*)b", "$1W)
+> regex_replace("-ab-axxb-", "a(x*)b", "$1W")
 ---
 
 > regex_replace("-ab-axxb-", "a(x*)b", "${1}W")
@@ -43,5 +43,5 @@ hello everybody
 
 ## Related Functions
 
-- [`replace`](/docs/templates/hcl_templates/functions/string/replace) searches a given string for another given
+- [`replace`](/packer/docs/templates/hcl_templates/functions/string/replace) searches a given string for another given
   substring, and replaces all occurrences with a given replacement string.

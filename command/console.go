@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package command
 
 import (
@@ -40,7 +43,7 @@ func (c *ConsoleCommand) Run(args []string) int {
 
 func (c *ConsoleCommand) ParseArgs(args []string) (*ConsoleArgs, int) {
 	var cfg ConsoleArgs
-	flags := c.Meta.FlagSet("console", FlagSetVars)
+	flags := c.Meta.FlagSet("console")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
@@ -82,6 +85,7 @@ Usage: packer console [options] [TEMPLATE]
 Options:
   -var 'key=value'       Variable for templates, can be used multiple times.
   -var-file=path         JSON or HCL2 file containing user variables.
+  -config-type           Set to 'hcl2' to run in HCL2 mode when no file is passed. Defaults to json.
 `
 
 	return strings.TrimSpace(helpText)

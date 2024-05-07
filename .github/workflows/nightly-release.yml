@@ -24,9 +24,9 @@ jobs:
     needs: build-artifacts
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Download built artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           path: out/
       # Set BUILD_OUTPUT_LIST to out\<project>-<version>.<fileext>\*,out\...
@@ -38,12 +38,12 @@ jobs:
           echo "BUILD_OUTPUT_LIST=$(cat tmp2.txt | tr '\n' ',' | perl -ple 'chop')" >> $GITHUB_ENV
           rm -rf tmp.txt && rm -rf tmp2.txt
       - name: Advance nightly tag
-        uses: actions/github-script@v3
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             try {
-                await github.git.deleteRef({
+                await github.rest.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   ref: "tags/nightly"
@@ -51,7 +51,7 @@ jobs:
             } catch (e) {
               console.log("Warning: The nightly tag doesn't exist yet, so there's nothing to do. Trace: " + e)
             }
-            await github.git.createRef({
+            await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: "refs/tags/nightly",
@@ -61,7 +61,8 @@ jobs:
       # If a release with this name already exists, it will overwrite the existing data
       - name: Create a nightly GitHub prerelease
         id: create_prerelease
-        uses: ncipollo/release-action@v1
+        continue-on-error: true
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
         with:
           name: nightly
           artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
@@ -72,12 +73,39 @@ jobs:
           removeArtifacts: true
           draft: false
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Store GitHub Release ID
+        if: steps.create_prerelease.outcome == 'success'
+        run: |
+          echo "prerelease_id=${{ steps.create_prerelease.outputs.id }}" >> $GITHUB_ENV
+      - name: Sleep before retry
+        id: sleep_before_retry
+        if: steps.create_prerelease.outcome == 'failure'
+        run : sleep 30m
+        shell: bash
+      - name: Retry failed nightly GitHub prerelease
+        id: create_prerelease_retry
+        if: steps.create_prerelease.outcome == 'failure'
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5 # v1.14.0
+        with:
+          name: nightly
+          artifacts: "${{ env.BUILD_OUTPUT_LIST }}"
+          tag: nightly
+          bodyFile: ".github/workflows/nightly-release-readme.md"
+          prerelease: true
+          allowUpdates: true
+          removeArtifacts: true
+          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Store Updated GitHub Release ID 
+        if: steps.create_prerelease_retry.outcome == 'success'
+        run: |
+          echo "prerelease_id=${{ steps.create_prerelease_retry.outputs.id }}" >> $GITHUB_ENV
       - name: Publish nightly GitHub prerelease
-        uses: eregon/publish-release@v1
+        uses: eregon/publish-release@01df127f5e9a3c26935118e22e738d95b59d10ce # v1.0.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_id: ${{ steps.create_prerelease.outputs.id }}
+          release_id: ${{ env.prerelease_id }}
   # Send a slack notification if either job defined above fails
   slack-notify:
     permissions:
@@ -89,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send slack notification on failure
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
         with:
           payload: |
             {

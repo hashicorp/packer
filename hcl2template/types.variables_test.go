@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package hcl2template
 
 import (
@@ -126,6 +129,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -290,6 +294,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -376,6 +381,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -439,6 +445,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -480,6 +487,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
@@ -535,9 +543,10 @@ func TestParse_variables(t *testing.T) {
 			},
 			false, false,
 			[]packersdk.Build{&packer.CoreBuild{
-				Type:     "null.null-builder",
-				Prepared: true,
-				Builder:  &null.Builder{},
+				Type:        "null.null-builder",
+				BuilderType: "null",
+				Prepared:    true,
+				Builder:     &null.Builder{},
 				Provisioners: []packer.CoreBuildProvisioner{
 					{
 						PType: "shell",
@@ -624,6 +633,7 @@ func TestParse_variables(t *testing.T) {
 			[]packersdk.Build{
 				&packer.CoreBuild{
 					Type:           "null.test",
+					BuilderType:    "null",
 					Builder:        &null.Builder{},
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},

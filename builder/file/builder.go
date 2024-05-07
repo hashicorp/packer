@@ -1,3 +1,6 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package file
 
 /*
@@ -9,7 +12,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -74,7 +76,7 @@ func (b *Builder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook)
 	} else {
 		// We're going to write Contents; if it's empty we'll just create an
 		// empty file.
-		err := ioutil.WriteFile(b.config.Target, []byte(b.config.Content), 0600)
+		err := os.WriteFile(b.config.Target, []byte(b.config.Content), 0600)
 		if err != nil {
 			return nil, err
 		}

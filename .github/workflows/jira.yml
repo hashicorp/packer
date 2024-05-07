@@ -11,11 +11,11 @@ jobs:
   sync:
     name: Sync to JIRA
     permissions:
-      issues: write # for actions-ecosytem/action-create-comment
+      issues: write # for actions/github-script to create comments
     runs-on: ubuntu-latest
     steps:    
       - name: Login
-        uses: atlassian/gajira-login@v3.0.1
+        uses: atlassian/gajira-login@45fd029b9f1d6d8926c6f04175aa80c0e42c9026 # v3.0.1
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
@@ -24,7 +24,7 @@ jobs:
       - name: Search
         if: github.event.action == 'labeled'
         id: search
-        uses: tomhjp/gh-action-jira-search@v0.2.1
+        uses: tomhjp/gh-action-jira-search@04700b457f317c3e341ce90da5a3ff4ce058f2fa # v0.2.2
         with:
           # cf[10089] is Issue Link (use JIRA API to retrieve)
           jql: 'project = "HPR" AND cf[10089] = "${{ github.event.issue.html_url }}"'
@@ -35,21 +35,21 @@ jobs:
         run: |
           # Questions are not tracked in JIRA at this time.
           if [[ "${{ contains(github.event.issue.labels.*.name, 'question') }}" == "true" ]]; then
-            echo "::set-output name=type::Invalid"
+            echo "type=Invalid" >> $GITHUB_OUTPUT
           else
             # Properly labeled GH issues are assigned the standard "GH Issue" type upon creation.
-            echo "::set-output name=type::GH Issue"
+            echo "type=GH Issue" >> $GITHUB_OUTPUT
           fi
 
       - name: Set labels
         id: set-ticket-labels 
         run: |
           if [[ "${{ contains(github.event.issue.labels.*.name, 'bug') }}" == "true" ]]; then
-            echo "::set-output name=labels::[\"bug\"]"
+            echo "labels=[\"bug\"]" >> $GITHUB_OUTPUT
           elif [[ "${{ contains(github.event.issue.labels.*.name, 'enhancement') }}" == "true" ]]; then
-            echo "::set-output name=labels::[\"enhancement\"]"
+            echo "labels=[\"enhancement\"]" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=labels::[]"
+            echo "labels=[]" >> $GITHUB_OUTPUT
           fi
 
       - name: Validate ticket
@@ -61,26 +61,26 @@ jobs:
       - name: Create ticket
         id: create-ticket
         if: steps.search.outputs.issue == '' && github.event.label.name == 'sync to jira' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: atlassian/gajira-create@v3.0.1
+        uses: atlassian/gajira-create@59e177c4f6451399df5b4911c2211104f171e669 # v3.0.1
         with:
           project: HPR
           issuetype: "${{ steps.set-ticket-type.outputs.type }}"
           summary: "${{ github.event.repository.name }}: ${{ github.event.issue.title }}"
           description: "${{ github.event.issue.body }}\n\n_Created from GitHub by ${{ github.actor }}._"
           # The field customfield_10089 refers to the Issue Link field in JIRA. 
-          fields: '{ "customfield_10089": "${{ github.event.issue.html_url }}", 
-                   "components": [{ "name": "OSS" }],
-                   "labels": ${{ steps.set-ticket-labels.outputs.labels }} }'
+          fields: '{ "customfield_10089": "${{ github.event.issue.html_url }}", "components": [{ "name": "core" }], "labels": ${{ steps.set-ticket-labels.outputs.labels }} }'
 
       - name: Add tracking comment
         if: steps.create-ticket.outputs.issue != '' && steps.set-ticket-type.outputs.type != 'Invalid'
-        uses: actions-ecosystem/action-create-comment@v1.0.0
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            This issue has been synced to JIRA for planning.
-
-            JIRA ID: [${{ steps.create-ticket.outputs.issue }}](https://hashicorp.atlassian.net/browse/${{steps.create-ticket.outputs.issue}})
-
-
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `
+                This issue has been synced to JIRA for planning.
+                JIRA ID: [${{ steps.create-ticket.outputs.issue }}](https://hashicorp.atlassian.net/browse/${{steps.create-ticket.outputs.issue}})`
+            })
 

@@ -1,0 +1,22 @@
+<!-- Code generated from the comments of the Config struct in datasource/hcp-packer-artifact/data.go; DO NOT EDIT MANUALLY -->
+
+- `bucket_name` (string) - The name of the bucket your artifact is in.
+
+- `channel_name` (string) - The name of the channel to use when retrieving your artifact.
+  Either `channel_name` or `version_fingerprint` MUST be set.
+  If using several artifacts from a single version, you may prefer sourcing a version first,
+  and referencing it for subsequent uses, as every `hcp_packer_artifact` with the channel set will generate a
+  potentially billable HCP Packer request, but if several `hcp_packer_artifact`s use a shared `hcp_packer_version`
+  that will only generate one potentially billable request.
+
+- `version_fingerprint` (string) - The fingerprint of the version to use when retrieving your artifact.
+  Either this or `channel_name` MUST be set.
+  Mutually exclusive with `channel_name`
+
+- `platform` (string) - The name of the platform that your artifact is for.
+  For example, "aws", "azure", or "gce".
+
+- `region` (string) - The name of the region your artifact is in.
+  For example "us-east-1".
+
+<!-- End of code generated from the comments of the Config struct in datasource/hcp-packer-artifact/data.go; -->

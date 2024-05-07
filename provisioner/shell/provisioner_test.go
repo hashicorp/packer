@@ -1,7 +1,9 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: BUSL-1.1
+
 package shell
 
 import (
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -120,7 +122,7 @@ func TestProvisionerPrepare_Script(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -146,7 +148,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 	}
 
 	// Test with both
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -165,7 +167,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 	config := testConfig()
 
 	// Test with both
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
@@ -191,7 +193,7 @@ func TestProvisionerPrepare_Scripts(t *testing.T) {
 	}
 
 	// Test with a good one
-	tf, err := ioutil.TempFile("", "packer")
+	tf, err := os.CreateTemp("", "packer")
 	if err != nil {
 		t.Fatalf("error tempfile: %s", err)
 	}
