@@ -56,15 +56,23 @@ func Test_PackerCoreSuite(t *testing.T) {
 	ts.pluginsDirectory = pluginsDirectory
 	ts.buildPluginBinaries(t)
 
-	t.Logf("Building test packer binary...")
-	packerPath, err := BuildTestPacker(t)
-	if err != nil {
-		t.Fatalf("failed to build Packer binary: %s", err)
+	packerPath := os.Getenv("PACKER_CUSTOM_PATH")
+	if packerPath == "" {
+		var err error
+		t.Logf("Building test packer binary...")
+		packerPath, err = BuildTestPacker(t)
+		if err != nil {
+			t.Fatalf("failed to build Packer binary: %s", err)
+		}
 	}
 	ts.packerPath = packerPath
 	t.Logf("Done")
 
 	defer func() {
+		if os.Getenv("PACKER_CUSTOM_PATH") != "" {
+			return
+		}
+
 		err := os.Remove(ts.packerPath)
 		if err != nil {
 			t.Logf("failed to cleanup compiled packer binary %q: %s. This will need manual aciton", packerPath, err)
