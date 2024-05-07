@@ -76,7 +76,7 @@ func (pc *packerCommand) Run() (string, string, error) {
 }
 
 func (pc *packerCommand) doRun() {
-	cmd := exec.Command("packer", pc.args...)
+	cmd := exec.Command(pc.packerPath, pc.args...)
 	for key, val := range pc.env {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
 	}
