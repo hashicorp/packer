@@ -112,7 +112,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.9
+        uses: hashicorp/actions-go-build@v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -150,7 +150,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.9
+        uses: hashicorp/actions-go-build@v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -220,7 +220,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v0.1.9
+        uses: hashicorp/actions-go-build@v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -246,7 +246,7 @@ jobs:
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v1
+        uses: hashicorp/actions-docker-build@v2
         with:
           version: ${{ env.version }}
           target: release-light
@@ -276,7 +276,7 @@ jobs:
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v1
+        uses: hashicorp/actions-docker-build@v2
         with:
           version: ${{ env.version }}
           target: release-full
