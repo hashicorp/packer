@@ -182,7 +182,22 @@ func (pr Requirement) getPluginBinaries(opts ListInstallationsOptions) ([]string
 		return nil, err
 	}
 
-	return matches, err
+	retMatches := make([]string, 0, len(matches))
+	// Don't keep plugins that are nested too deep in the hierarchy
+	for _, match := range matches {
+		dir := strings.Replace(filepath.Dir(match), opts.PluginDirectory, "", 1)
+		parts := strings.FieldsFunc(dir, func(r rune) bool {
+			return r == '/'
+		})
+		if len(parts) > 16 {
+			log.Printf("[WARN] plugin %q ignored, too many levels of depth: %d (max 16)", match, len(parts))
+			continue
+		}
+
+		retMatches = append(retMatches, match)
+	}
+
+	return retMatches, err
 }
 
 // ListInstallations lists unique installed versions of plugin Requirement pr
