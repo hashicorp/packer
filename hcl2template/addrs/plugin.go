@@ -218,7 +218,20 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 		})
 	}
 
-	return &Plugin{
+	plug := &Plugin{
 		Source: str,
-	}, diags
+	}
+	if len(plug.Parts()) > 16 {
+		return nil, diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Too many parts to source URL",
+			Detail: fmt.Sprintf("The source URL must have at most 16 components, and the one provided has %d.\n"+
+				"This is unsupported by Packer, please consider using a source that has less components to it.\n"+
+				"If this is a blocking issue for you, please open an issue to ask for supporting more "+
+				"components to the source URI.",
+				len(plug.Parts())),
+		})
+	}
+
+	return plug, diags
 }
