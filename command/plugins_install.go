@@ -137,9 +137,9 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 		opts.BinaryInstallationOptions.Ext = ".exe"
 	}
 
-	plugin, diags := addrs.ParsePluginSourceString(args.PluginIdentifier)
-	if diags.HasErrors() {
-		c.Ui.Error(diags.Error())
+	plugin, err := addrs.ParsePluginSourceString(args.PluginIdentifier)
+	if err != nil {
+		c.Ui.Errorf("Invalid source string %q: %s", args.PluginIdentifier, err)
 		return 1
 	}
 

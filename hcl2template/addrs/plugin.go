@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/hashicorp/hcl/v2"
 	"golang.org/x/net/idna"
 )
 
@@ -112,9 +111,7 @@ func IsPluginPartNormalized(str string) (bool, error) {
 //
 //	namespace/name
 //	hostname/namespace/name
-func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
-	var diags hcl.Diagnostics
-
+func ParsePluginSourceString(str string) (*Plugin, error) {
 	var errs []string
 
 	if strings.HasPrefix(str, "/") {
@@ -152,23 +149,14 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 			fmt.Fprintf(errsMsg, "* %s\n", err)
 		}
 
-		return nil, diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Malformed source URL",
-			Detail:   fmt.Sprintf("The provided source URL %q is invalid. The following errors have been discovered:\n%s\nA valid source looks like \"github.com/hashicorp/happycloud\"", str, errsMsg),
-		})
+		return nil, fmt.Errorf("The provided source URL is invalid.\nThe following errors have been discovered:\n%s\nA valid source looks like \"github.com/hashicorp/happycloud\"", errsMsg)
 	}
 
 	// check the 'name' portion, which is always the last part
 	_, givenName := path.Split(str)
 	_, err = ParsePluginPart(givenName)
 	if err != nil {
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid plugin type",
-			Detail:   fmt.Sprintf(`Invalid plugin type %q in source %q: %s"`, givenName, str, err),
-		})
-		return nil, diags
+		return nil, fmt.Errorf(`Invalid plugin type %q in source: %s"`, givenName, err)
 	}
 
 	// Due to how plugin executables are named and plugin git repositories
@@ -194,44 +182,33 @@ func ParsePluginSourceString(str string) (*Plugin, hcl.Diagnostics) {
 			// the suggestedType to end up invalid here.)
 			suggestedType := strings.Replace(givenName, userErrorPrefix, "", -1)
 			if _, err := ParsePluginPart(suggestedType); err == nil {
-				return nil, diags.Append(&hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Invalid plugin type",
-					Detail: fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't valid. "+
-						"Although that prefix is often used in the names of version control repositories for Packer plugins, "+
-						"plugin source strings should not include it.\n"+
-						"\nDid you mean %q?", str, userErrorPrefix, suggestedType),
-				})
+				return nil, fmt.Errorf("Plugin source has a type with the prefix %q, which isn't valid.\n"+
+					"Although that prefix is often used in the names of version control repositories "+
+					"for Packer plugins, plugin source strings should not include it.\n"+
+					"\nDid you mean %q?", userErrorPrefix, suggestedType)
 			}
 		}
 		// Otherwise, probably instead an incorrectly-named plugin, perhaps
 		// arising from a similar instinct to what causes there to be
 		// thousands of Python packages on PyPI with "python-"-prefixed
 		// names.
-		return nil, diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid plugin type",
-			Detail: fmt.Sprintf("Plugin source %q has a type with the prefix %q, which isn't allowed "+
-				"because it would be redundant to name a Packer plugin with that prefix. "+
-				"If you are the author of this plugin, rename it to not include the prefix.",
-				str, redundantPrefix),
-		})
+		return nil, fmt.Errorf("Plugin source has a type with the %q prefix, which isn't valid.\n"+
+			"If you are the author of this plugin, rename it to not include the prefix.\n"+
+			"Ex: %q",
+			redundantPrefix,
+			strings.Replace(givenName, redundantPrefix, "", 1))
 	}
 
 	plug := &Plugin{
 		Source: str,
 	}
 	if len(plug.Parts()) > 16 {
-		return nil, diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Too many parts to source URL",
-			Detail: fmt.Sprintf("The source URL must have at most 16 components, and the one provided has %d.\n"+
-				"This is unsupported by Packer, please consider using a source that has less components to it.\n"+
-				"If this is a blocking issue for you, please open an issue to ask for supporting more "+
-				"components to the source URI.",
-				len(plug.Parts())),
-		})
+		return nil, fmt.Errorf("The source URL must have at most 16 components, and the one provided has %d.\n"+
+			"This is unsupported by Packer, please consider using a source that has less components to it.\n"+
+			"If this is a blocking issue for you, please open an issue to ask for supporting more "+
+			"components to the source URI.",
+			len(plug.Parts()))
 	}
 
-	return plug, diags
+	return plug, nil
 }

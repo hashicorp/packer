@@ -142,9 +142,9 @@ func (c *PluginsRemoveCommand) RunContext(buildCtx context.Context, args []strin
 		opts.BinaryInstallationOptions.Ext = ".exe"
 	}
 
-	plugin, diags := addrs.ParsePluginSourceString(args[0])
-	if diags.HasErrors() {
-		c.Ui.Error(diags.Error())
+	plugin, err := addrs.ParsePluginSourceString(args[0])
+	if err != nil {
+		c.Ui.Errorf("Invalid source string %q: %s", args[0], err)
 		return 1
 	}
 
