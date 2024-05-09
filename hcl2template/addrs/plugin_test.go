@@ -33,15 +33,15 @@ func TestPluginParseSourceString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotDiags := ParsePluginSourceString(tt.source)
+			got, err := ParsePluginSourceString(tt.source)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ParsePluginSourceString() got = %v, want %v", got, tt.want)
 			}
-			if tt.wantDiags && len(gotDiags) == 0 {
-				t.Errorf("Expected diags, but got none")
+			if tt.wantDiags && err == nil {
+				t.Errorf("Expected error, but got none")
 			}
-			if !tt.wantDiags && len(gotDiags) != 0 {
-				t.Errorf("Unexpected diags: %s", gotDiags)
+			if !tt.wantDiags && err != nil {
+				t.Errorf("Unexpected error: %s", err)
 			}
 		})
 	}

@@ -166,15 +166,15 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 			}
 
 			rp.Source = source.AsString()
-			p, sourceDiags := addrs.ParsePluginSourceString(rp.Source)
+			p, err := addrs.ParsePluginSourceString(rp.Source)
 
-			if sourceDiags.HasErrors() {
-				for _, diag := range sourceDiags {
-					if diag.Subject == nil {
-						diag.Subject = attr.Expr.Range().Ptr()
-					}
-				}
-				diags = append(diags, sourceDiags...)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Subject:  &rp.Requirement.DeclRange,
+					Summary:  "Failed to parse source",
+					Detail:   err.Error(),
+				})
 				continue
 			} else {
 				rp.Type = p

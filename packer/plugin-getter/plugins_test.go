@@ -430,9 +430,9 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 
 			log.Printf("starting %s test", tt.name)
 
-			identifier, diags := addrs.ParsePluginSourceString("github.com/hashicorp/" + tt.fields.Identifier)
-			if len(diags) != 0 {
-				t.Fatalf("ParsePluginSourceString(%q): %v", tt.fields.Identifier, diags)
+			identifier, err := addrs.ParsePluginSourceString("github.com/hashicorp/" + tt.fields.Identifier)
+			if err != nil {
+				t.Fatalf("ParsePluginSourceString(%q): %v", tt.fields.Identifier, err)
 			}
 			cts, err := version.NewConstraint(tt.fields.VersionConstraints)
 			if err != nil {
