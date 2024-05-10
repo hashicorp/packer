@@ -3,6 +3,7 @@ package packer_test
 import (
 	"crypto/sha256"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -138,5 +139,28 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 				Grep("packer-plugin-tester_v1.0.10", grepInvert, grepStdout),
 				Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", grepStderr),
 				Grep(`Checksums \(\*sha256\.digest\) did not match.`, grepStderr))
+	})
+}
+
+func (ts *PackerTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
+	pluginDirOne, cleanup := ts.MakePluginDir("1.0.10")
+	defer cleanup()
+
+	pluginDirTwo, cleanup := ts.MakePluginDir("1.0.9")
+	defer cleanup()
+
+	pluginDirVal := fmt.Sprintf("%s%c%s", pluginDirOne, os.PathListSeparator, pluginDirTwo)
+	ts.Run("load plugin with two dirs - not supported anymore, should error", func() {
+		ts.PackerCommand().UsePluginDir(pluginDirVal).
+			SetArgs("plugins", "installed").
+			Assert(ts.T(), MustFail(),
+				Grep("Multiple paths are no longer supported for PACKER_PLUGIN_PATH"),
+				PipeChecker{
+					check: IntCompare(eq, 2),
+					pipers: []Pipe{
+						PipeGrep(`\* PACKER_PLUGIN_PATH=`),
+						LineCount(),
+					},
+				})
 	})
 }
