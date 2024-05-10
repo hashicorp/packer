@@ -1,4 +1,4 @@
-package test
+package packer_test
 
 import (
 	"fmt"

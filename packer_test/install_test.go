@@ -1,4 +1,4 @@
-package test
+package packer_test
 
 func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
 	tempPluginDir, cleanup := ts.MakePluginDir("1.0.0+metadata")
