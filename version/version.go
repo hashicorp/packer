@@ -27,7 +27,7 @@ var (
 	// for tests to work.
 	// A pre-release marker for the version can also be specified (e.g -dev). If this is omitted
 	// The main version number that is being run at the moment.
-	Version = "1.8.5-incognia.3"
+	Version = "v1.10.3-incognia.3"
 	// A pre-release marker for the version. If this is "" (empty string)
 	// then it means that it is a final release. Otherwise, this is a pre-release
 	// such as "dev" (in development), "beta", "rc1", etc.

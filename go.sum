@@ -333,8 +333,8 @@ github.com/huandu/xstrings v1.3.2/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq
 github.com/imdario/mergo v0.3.11/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
 github.com/imdario/mergo v0.3.12 h1:b6R2BslTbIEToALKP7LxUvijTsNI9TAe80pLWN2g/HU=
 github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=
-github.com/inloco/packer-plugin-sdk v0.5.3-incognia.1 h1:zy6/36PPQvUdlYAL83bByOoH588D1eefNiI96h5u5ec=
-github.com/inloco/packer-plugin-sdk v0.5.3-incognia.1/go.mod h1:/RlEnZJKM9ALCXABe2fgRnqOTcB/Rx+RveqxLqQtDLY=
+github.com/inloco/packer-plugin-sdk v0.5.3-incognia.2 h1:weoPib/P0Icjun4l4RvYXDcMtiqnG37xgEwkTHgU/6g=
+github.com/inloco/packer-plugin-sdk v0.5.3-incognia.2/go.mod h1:GPpU89SKTVVNcvLGG/DAhK/K0ML9MFVY8qgVlfCi9nM=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99/go.mod h1:1lJo3i6rXxKeerYnT8Nvf0QmHCRC1n8sfWVwXF2Frvo=
 github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869 h1:IPJ3dvxmJ4uczJe5YQdrYB16oTJlGSC/OyZDqUk9xX4=
