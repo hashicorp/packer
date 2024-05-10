@@ -4,9 +4,11 @@
 package packer
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/hashicorp/packer-plugin-sdk/pathing"
 )
@@ -14,6 +16,12 @@ import (
 // PluginFolder returns the known plugin folder based on system.
 func PluginFolder() (string, error) {
 	if packerPluginPath := os.Getenv("PACKER_PLUGIN_PATH"); packerPluginPath != "" {
+		if strings.ContainsRune(packerPluginPath, os.PathListSeparator) {
+			return "", fmt.Errorf("Multiple paths are no longer supported for PACKER_PLUGIN_PATH.\n"+
+				"This should be defined as one of the following options for your environment:"+
+				"\n* PACKER_PLUGIN_PATH=%v", strings.Join(strings.Split(packerPluginPath, ":"), "\n* PACKER_PLUGIN_PATH="))
+		}
+
 		return packerPluginPath, nil
 	}
 
