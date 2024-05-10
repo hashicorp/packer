@@ -25,8 +25,8 @@ type PackerTestSuite struct {
 func buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
 	waitgroup.Add(1)
 	go func() {
+		defer waitgroup.Done()
 		BuildSimplePlugin(versionString, t)
-		waitgroup.Done()
 	}()
 }
 

@@ -129,10 +129,10 @@ func BuildSimplePlugin(versionString string, t *testing.T) string {
 		t.Fatalf("failed to compile plugin binary: %s", err)
 	}
 
-	miniPluginDir := filepath.Join(testDir, "mini_plugin")
+	testerPluginDir := filepath.Join(testDir, "plugin_tester")
 	outBin := filepath.Join(PluginBinaryDir(), BinaryName(v))
 
-	compileCommand := exec.Command("go", "build", "-C", miniPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
+	compileCommand := exec.Command("go", "build", "-C", testerPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
 	logs, err := compileCommand.CombinedOutput()
 	if err != nil {
 		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
