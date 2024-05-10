@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"testing"
 )
 
 // Pipe is any command that allows piping two gadgets together
@@ -41,6 +42,16 @@ func LineCount() Pipe {
 			return r == '\n'
 		})
 		return fmt.Sprintf("%d\n", len(lines)), nil
+	})
+}
+
+// Tee pipes the output to stdout (as t.Logf) and forwards it, unaltered
+//
+// This is useful typically for troubleshooting a pipe that misbehaves
+func Tee(t *testing.T) Pipe {
+	return CustomPipe(func(s string) (string, error) {
+		t.Logf(s)
+		return s, nil
 	})
 }
 
