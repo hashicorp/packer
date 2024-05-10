@@ -7,12 +7,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"testing"
 )
 
 func (ts *PackerTestSuite) TestLoadingOrder() {
-	t := ts.T()
-
 	pluginDir, cleanup := ts.MakePluginDir("1.0.9", "1.0.10")
 	defer cleanup()
 
@@ -40,11 +37,11 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 		}
 
 		for _, tt := range tests {
-			t.Run(tt.name, func(t *testing.T) {
+			ts.Run(tt.name, func() {
 				ts.PackerCommand().
 					SetArgs(command, tt.templatePath).
 					UsePluginDir(pluginDir).
-					Assert(t, MustSucceed(), Grep(tt.grepStr))
+					Assert(ts.T(), MustSucceed(), Grep(tt.grepStr))
 			})
 		}
 	}
