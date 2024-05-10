@@ -17,6 +17,7 @@ type packerCommand struct {
 	stdout     *strings.Builder
 	workdir    string
 	err        error
+	t          *testing.T
 }
 
 // PackerCommand creates a skeleton of packer command with the ability to execute gadgets on the outputs of the command.
@@ -31,6 +32,7 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 		},
 		stderr: stderr,
 		stdout: stdout,
+		t:      ts.T(),
 	}
 }
 
@@ -90,7 +92,7 @@ func (pc *packerCommand) doRun() {
 	pc.err = cmd.Run()
 }
 
-func (pc *packerCommand) Assert(t *testing.T, checks ...Checker) {
+func (pc *packerCommand) Assert(checks ...Checker) {
 	stdout, stderr, err := pc.Run()
 
 	checks = append(checks, PanicCheck{})
@@ -99,7 +101,7 @@ func (pc *packerCommand) Assert(t *testing.T, checks ...Checker) {
 		checkErr := check.Check(stdout, stderr, err)
 		if checkErr != nil {
 			checkerName := InferName(check)
-			t.Errorf("check %q failed: %s", checkerName, checkErr)
+			pc.t.Errorf("check %q failed: %s", checkerName, checkErr)
 		}
 	}
 }
