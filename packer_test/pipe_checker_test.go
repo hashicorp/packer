@@ -125,7 +125,7 @@ func (op op) String() string {
 // If the input is not an int, this fails.
 func IntCompare(op op, value int) Tester {
 	return CustomTester(func(in string) error {
-		n, err := strconv.Atoi(in)
+		n, err := strconv.Atoi(strings.TrimSpace(in))
 		if err != nil {
 			return fmt.Errorf("not an integer %q: %s", in, err)
 		}
