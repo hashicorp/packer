@@ -41,7 +41,7 @@ func (ts *PackerTestSuite) TestLoadingOrder() {
 				ts.PackerCommand().
 					SetArgs(command, tt.templatePath).
 					UsePluginDir(pluginDir).
-					Assert(ts.T(), MustSucceed(), Grep(tt.grepStr))
+					Assert(MustSucceed(), Grep(tt.grepStr))
 			})
 		}
 	}
@@ -59,7 +59,7 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 		ts.Run("with required_plugins - expect prompt for packer init", func() {
 			ts.PackerCommand().UsePluginDir(pluginDir).
 				SetArgs("build", "templates/simple.pkr.hcl").
-				Assert(ts.T(), MustFail(),
+				Assert(MustFail(),
 					Grep("Did you run packer init for this project", grepStdout),
 					Grep("following plugins are required", grepStdout))
 		})
@@ -67,7 +67,7 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 		ts.Run("JSON template, without required_plugins: should say the component is unknown", func() {
 			ts.PackerCommand().UsePluginDir(pluginDir).
 				SetArgs("build", "templates/simple.json").
-				Assert(ts.T(), MustFail(),
+				Assert(MustFail(),
 					Grep("The builder tester-dynamic is unknown by Packer", grepStdout))
 		})
 	})
@@ -80,7 +80,7 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 	ts.Run("multiple plugins installed: one with no version in path, one with qualified name. Should pick-up the qualified one only.", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("build", "templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
 	})
 
 	wd, cleanup := TempWorkdir(ts.T(), "./templates/simple.pkr.hcl")
@@ -91,7 +91,7 @@ func (ts *PackerTestSuite) TestLoadWithLegacyPluginName() {
 	ts.Run("multiple plugins installed: 1.0.0 in plugin dir with sum, one in workdir (no version). Should load 1.0.0", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).SetWD(wd).
 			SetArgs("build", "simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", grepStderr))
 	})
 }
 
@@ -108,7 +108,7 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed(),
+			Assert(MustSucceed(),
 				Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", grepStdout),
 				Grep("packer-plugin-tester_v1.0.10", grepStdout, grepInvert),
 				Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", grepStderr))
@@ -131,7 +131,7 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed(),
+			Assert(MustSucceed(),
 				Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", grepStdout),
 				Grep("packer-plugin-tester_v1.0.10", grepInvert, grepStdout),
 				Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", grepStderr),
@@ -150,7 +150,7 @@ func (ts *PackerTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
 	ts.Run("load plugin with two dirs - not supported anymore, should error", func() {
 		ts.PackerCommand().UsePluginDir(pluginDirVal).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustFail(),
+			Assert(MustFail(),
 				Grep("Multiple paths are no longer supported for PACKER_PLUGIN_PATH"),
 				MkPipeCheck("All envvars are suggested",
 					PipeGrep(`\* PACKER_PLUGIN_PATH=`),

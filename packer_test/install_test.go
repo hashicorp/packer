@@ -7,19 +7,19 @@ func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
 	ts.Run("metadata plugin installed must not have metadata in its path", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("plugins", "installed").
-			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+]", grepStdout))
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+]", grepStdout))
 	})
 
 	ts.Run("plugin with metadata should work with validate", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("validate", "./templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
 	})
 
 	ts.Run("plugin with metadata should work with build", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
 			SetArgs("build", "./templates/simple.pkr.hcl").
-			Assert(ts.T(), MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.0[^+][^\\n]+plugin:", grepStderr))
 	})
 }
 
@@ -32,7 +32,7 @@ func (ts *PackerTestSuite) TestInstallPluginPrerelease() {
 	ts.Run("try install plugin with alpha1 prerelease - should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "install", "--path", pluginPath, "github.com/hashicorp/tester").
-			Assert(ts.T(), MustFail(), Grep("Packer can only install plugin releases with this command", grepStdout))
+			Assert(MustFail(), Grep("Packer can only install plugin releases with this command", grepStdout))
 	})
 }
 
@@ -43,12 +43,12 @@ func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
 	ts.Run("install latest version of a remote plugin with packer plugins install", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "install", "github.com/hashicorp/hashicups").
-			Assert(ts.T(), MustSucceed())
+			Assert(MustSucceed())
 	})
 
 	ts.Run("install dev version of a remote plugin with packer plugins install - must fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "v1.0.2-dev").
-			Assert(ts.T(), MustFail(), Grep("Remote installation of pre-release plugin versions is unsupported.", grepStdout))
+			Assert(MustFail(), Grep("Remote installation of pre-release plugin versions is unsupported.", grepStdout))
 	})
 }
