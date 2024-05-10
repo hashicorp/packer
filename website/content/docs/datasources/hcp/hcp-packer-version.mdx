@@ -64,7 +64,7 @@ data "hcp-packer-version" "hardened-source" {
 # region to disambiguate.
 data "hcp-packer-artifact" "example" {
   bucket_name         = "hardened-ubuntu-16-04"
-  version_fingerprint = data.hcp_packer_version.hardened-source.fingerprint
+  version_fingerprint = data.hcp-packer-version.hardened-source.fingerprint
   platform            = "aws"
   region              = "us-east-1"
 }
