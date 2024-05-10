@@ -167,6 +167,17 @@ func IntCompare(op op, value int) Tester {
 	})
 }
 
+// MkPipeCheck builds a new named PipeChecker
+//
+// Before it can be used, it will need a tester to be set, but this
+// function is meant to make initialisation simpler.
+func MkPipeCheck(name string, p ...Pipe) *PipeChecker {
+	return &PipeChecker{
+		name:   name,
+		pipers: p,
+	}
+}
+
 // PipeChecker is a kind of checker that essentially lets users write mini
 // gadgets that pipe inputs together, and compose those to end as a true/false
 // statement, which translates to an error.
@@ -186,9 +197,28 @@ type PipeChecker struct {
 	check  Tester
 }
 
+// SetTester sets the tester to use for a pipe checker
+//
+// This is required, otherwise running the pipe checker will fail
+func (pc *PipeChecker) SetTester(t Tester) *PipeChecker {
+	pc.check = t
+	return pc
+}
+
+// SetStream changes the stream(s) on which the PipeChecker will perform
+//
+// Defaults to BothStreams, i.e. stdout and stderr
+func (pc *PipeChecker) SetStream(s Stream) *PipeChecker {
+	pc.stream = s
+	return pc
+}
+
 func (pc PipeChecker) Check(stdout, stderr string, _ error) error {
 	if len(pc.pipers) == 0 {
 		return fmt.Errorf("%s - empty pipeline", pc.Name())
+	}
+	if pc.check == nil {
+		return fmt.Errorf("%s - missing tester", pc.Name())
 	}
 
 	var pipeStr string
