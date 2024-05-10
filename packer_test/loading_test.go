@@ -152,12 +152,10 @@ func (ts *PackerTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
 			SetArgs("plugins", "installed").
 			Assert(ts.T(), MustFail(),
 				Grep("Multiple paths are no longer supported for PACKER_PLUGIN_PATH"),
-				PipeChecker{
-					check: IntCompare(eq, 2),
-					pipers: []Pipe{
-						PipeGrep(`\* PACKER_PLUGIN_PATH=`),
-						LineCount(),
-					},
-				})
+				MkPipeCheck("All envvars are suggested",
+					PipeGrep(`\* PACKER_PLUGIN_PATH=`),
+					LineCount()).
+					SetStream(OnlyStderr).
+					SetTester(IntCompare(eq, 2)))
 	})
 }
