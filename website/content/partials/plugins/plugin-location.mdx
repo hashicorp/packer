@@ -1,25 +1,11 @@
-Upon the initialization of Packer, any externally installed plugin will be automatically
-discovered and loaded. 
+Upon initialization of Packer, all the installed plugins will be automatically discovered.
 
-Packer plugins will usually be located within a plugins sub-directory under Packer's main config directory
-[PACKER_CONFIG_DIR](/packer/docs/configure#packer-s-config-directory). If `PACKER_CONFIG_DIR` is
-either not set or empty, a default equal to `$HOME/.config/packer/plugins` on UNIX, or `%APPDATA%\packer.d\plugins` 
-for Windows, will be used.
+Packer plugins must be located under the `plugins` sub-directory under Packer's main config directory
+[PACKER_CONFIG_DIR](/packer/docs/configure#packer-s-config-directory).
+If `PACKER_CONFIG_DIR` is either unset or empty, a default value of `$HOME/.config/packer/plugins` on UNIX,
+or `%APPDATA%\packer.d\plugins` for Windows, will be used.
 
-Where applicable, some installation processes such as `packer init` may override the plugin loading process. 
-Refer to the specific installation guides for any plugin loading overrides.
+If the `PACKER_PLUGIN_PATH` environment variable is set, it will be used instead of `PACKER_CONFIG_DIR/plugins`.
 
-Packer uses the following process for loading the correct plugin:
-
-1. All directories under the `PACKER_PLUGIN_PATH` environment variable, if `PACKER_PLUGIN_PATH`
-is set. The `PACKER_PLUGIN_PATH` takes precedences over all other plugin directories; no other directories will be checked.
-1. The directory where `packer` is installed, or the executable directory.
-1. The current working directory, where `packer build` is being invoked. (`"."`)
-1. The `PACKER_CONFIG_DIR/plugins` directory. `PACKER_CONFIG_DIR` refers to *[Packer's config
-directory](/packer/docs/configure#packer-s-config-directory)*, if it could be found.
-
--> **Note:** The `PACKER_PLUGIN_PATH` environment variable can be set to more that one directories;
-for example, ~/custom-dir-1:~/custom-dir-2. Separate directories in the PATH string using a colon (:) on UNIX systems 
-and a semicolon (;) on Windows systems. The above example path would be able to find a single or multi-component plugin
-in either `~/custom-dir-1/packer/` or `~/custom-dir-2/`.
-
+-> **Note:** Prior to Packer 1.11 the `PACKER_PLUGIN_PATH` environment variable supported values containing
+   multiple directories. Starting with Packer 1.11 and later this variable only supports a single directory.
