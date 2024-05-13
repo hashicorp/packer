@@ -70,22 +70,23 @@ packer {
 }
 ```
 
-HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; as with all community tools, please do your own due diligence when using a new tool.
+HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; 
+as with all community tools, please do your own due diligence when using a new tool.
 
 ## Plugin Selection
 
-Plugin selection depends on the source and version constraints defined within the `required_plugins` block.
+Plugin selection depends on the [source](/packer/docs/templates/hcl_templates/blocks/packer#source-addresses) and [version constraints](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) defined within the `required_plugins` block.
 For each of the required plugins Packer will query the source repository `github.com/azr/happycloud` whose fully qualified address
 is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.
 
-Packer init will install the latest found version matching the version selection
-in the `required_plugins` section. Make sure to set a correct [version
-constraint
-string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints). The
-plugins will be installed in the [Plugin
-Directory](/packer/docs/configure#packer-s-plugin-directory).
+Packer init will install the latest plugin version matching the version selection in the `required_plugins` block. 
+Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
+pinning plugin versions for build reproducibility. 
 
-See [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
+By default `packer init` will install all required plugins in to the [Plugin Directory](/packer/docs/configure#packer-s-plugin-directory).
+You can override the default location by using the `PACKER_PLUGIN_PATH` environement variable to specify a different directory. 
+
+Refer to [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
 ## Options
 
