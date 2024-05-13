@@ -35,7 +35,7 @@ Usage: packer plugins remove <plugin> [<version constraint>]
 
   This command will remove one or more installed Packer plugins.
 
-  To remove a plugin matching a version contraint for the current OS and architecture.
+  To remove a plugin matching a version constraint for the current OS and architecture.
 
       packer plugins remove github.com/hashicorp/happycloud v1.2.3
 

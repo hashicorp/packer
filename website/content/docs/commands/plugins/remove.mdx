@@ -6,19 +6,40 @@ page_title: plugins Command
 
 # `plugins remove`
 
-The `plugins remove` subcommand removes a Packer plugin at a version constraint
+The `plugins remove` subcommand removes one or more versions of an installed Packer plugin.
 
+The command is flexible enough to remove all versions at once or just a single version at a time. 
+- If a plugin's source address is specified, without a version constraint, all the versions of that plugin will be removed.
+- If a version constraint is specified, only the specified version will be removed.
+- If a direct path to a plugin is specified, only the specified version will be removed.
+
+Refer to the examples below for details on usage.
 ```shell-session
-$ packer  plugins remove -h
-Usage: packer plugins remove <plugin> [<version constraint>]
+To remove a plugin matching a version constraint for the current OS and architecture.
 
-  This command will remove all Packer plugins matching the version constraint
-  for the current OS and architecture.
-  When the version is omitted all installed versions will be removed.
+  packer plugins remove github.com/hashicorp/happycloud v1.2.3
 
-  Ex: packer plugins remove github.com/hashicorp/happycloud v1.2.3
+To remove all versions of a plugin for the current OS and architecture omit the version constraint.
+
+  packer plugins remove github.com/hashicorp/happycloud
+
+To remove a single plugin binary from the Packer plugin directory specify the absolute path to an installed binary. This syntax does not allow for version matching.
+
+  packer plugins remove ~/.config/plugins/github.com/hashicorp/happycloud/packer-plugin-happycloud_v1.0.0_x5.0_linux_amd64
+```
+
+## Remove all installed plugins
+The `plugins remove` command can be used in conjunction with the `plugins installed` command to remove all
+Packer plugins by piping the results of `plugins installed` to `plugins removed`. 
+
+On a Unix based OS with xargs installed you can remove all plugin versions using the following command:
+```shell-session
+~>  packer plugins installed | xargs -n1 packer plugins remove
+~/.config/packer/plugins/github.com/hashicorp/amazon/packer-plugin-amazon_v1.3.2_x5.0_darwin_arm64
+~/.config/packer/plugins/github.com/hashicorp/azure/packer-plugin-azure_v2.1.3_x5.0_darwin_arm64
 ```
 
 ## Related
 
 - [`packer init`](/packer/docs/commands/init) will install all required plugins.
+- [`packer plugins install`](/packer/docs/commands/plugins/install) will install a single plugin.
