@@ -124,14 +124,9 @@ each can be found below:
   using the Packer's config file, see the [config file configuration
   reference](#packer-config-file-configuration-reference) for more.
 
-- `PACKER_PLUGIN_PATH` - a PATH variable for finding third-party packer
-  plugins. For example: `~/custom-dir-1:~/custom-dir-2`. Separate directories in
-  the PATH string using a colon (`:`) on POSIX systems and a semicolon (`;`) on
-  Windows systems. The above example path would be able to find a provisioner
-  named `packer-provisioner-foo` in either
-  `~/custom-dir-1/packer-provisioner-foo` or
-  `~/custom-dir-2/packer-provisioner-foo`. See the documentation on [plugin
-  directories](#packer-s-plugin-directory) for more.
+- `PACKER_PLUGIN_PATH` - a PATH variable for finding packer plugins.
+  This takes precedence over `PACKER_CONFIG_DIR/plugins` for plugin discovery
+  if defined.
 
 - `CHECKPOINT_DISABLE` - When Packer is invoked it sometimes calls out to
   [checkpoint.hashicorp.com](https://checkpoint.hashicorp.com/) to look for
