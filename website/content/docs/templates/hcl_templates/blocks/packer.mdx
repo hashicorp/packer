@@ -52,7 +52,7 @@ a minimum Packer version that has behavior expected by the configuration.
 later.
 
 The `required_plugins` block specifies all of the plugins required by the
-current config, mapping each local plugin name to a source address and a
+current template, mapping each local plugin name to a source address and a
 version constraint.
 
 ```hcl
@@ -60,13 +60,51 @@ packer {
   required_plugins {
     happycloud = {
       version = ">= 2.7.0"
-      source = "github.com/hashicorp/happycloud"
+      source = "github.com/azr/happycloud"
     }
   }
 }
 ```
 
-For more information, see [Plugins](/packer/docs/plugins).
+For more information, refer to [Plugins](/packer/docs/plugins).
+
+## Source Addresses
+
+A plugin's source address is its global identifier that provides users codified information on where a plugin is sourced and can be obtained. 
+When used in conjunction with the `packer init` command a source address tells Packer where to download the remote plugin from. 
+
+At minimum source addresses consist of three parts delimited by slashes (`/`), as
+follows:
+
+-> **Note:** In Packer 1.11 and later source addresses support one or more sub-folder paths
+after the hostname to support users who require source addresses with more than three parts. 
+While `packer init` only supports remote installation of GitHub source addresses, running `packer init` on 
+plugins with custom source addresses allows users to take advantages of version pinning features offered by the 
+`required_plugins` block. For details on installing plugins using custom source addresses refer to [packer plugins install](/packer/docs/commands/plugins/install).
+
+`<HOSTNAME>/<NAMESPACE>/<TYPE>`
+
+- **Hostname:** The hostname of the location/service that
+  distributes the plugin.
+
+- **Namespace:** An organizational namespace within the specified host.
+  This often is the organization that publishes the plugin.
+
+- **Type:** A short name for the platform or system the plugin manages. The
+  type is usually the plugin's preferred local name.
+
+For example, the fictional `myawesomecloud` plugin could belong to the
+`hashicorp` namespace on `github.com`, so its `source` could be
+`github.com/hashicorp/myawesomecloud`,
+
+-> Note: the actual _repository_ that myawesomecloud comes from must always have
+the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
+`required_plugins` block omits the redundant `packer-plugin-` repository prefix
+for brevity.
+
+The source address with all components given explicitly is called the
+plugin's _fully-qualified address_. You will see fully-qualified address in
+various outputs, like error messages.
 
 ## Version Constraints
 
