@@ -22,10 +22,10 @@ Packer files. The Packer config directory will be looked up on the following pat
 | --------------------------- | --------------------------- |
 | `${HOME}/.config/packer/`   | `%APPDATA%\packer.d\`       |
 
--> **Note:** On Unix systems, Packer defaults to using the XDG base directory specification. 
-When the environment variable `PACKER_CONFIG_DIR` is unset or empty a default equal to `$HOME/.config/packer` should be used. 
+-> **Note:** On Unix systems, Packer defaults to using the XDG base directory specification.
+When the environment variable `PACKER_CONFIG_DIR` is unset or empty a default equal to `$HOME/.config/packer` should be used.
 In all other cases, where there is an existing older style `.packer.d` directory (e.g `$HOME/.packer.d/`)  or PACKER_CONFIG_DIR is not empty
-the older configuration directory will be used. 
+the older configuration directory will be used.
 
 Examples:
 
