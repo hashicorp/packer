@@ -56,7 +56,7 @@ for the ones that are missing.
 
 `packer init -upgrade` will try to get the latest versions for all plugins.
 
-Import a plugin using the [`required_plugin`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
+Install a plugin using the [`required_plugin`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
 block :
 
 ```hcl
@@ -64,7 +64,7 @@ packer {
   required_plugins {
     happycloud = {
       version = ">= 2.7.0"
-      source = "github.com/azr/happycloud"
+      source = "github.com/hashicorp/happycloud"
     }
   }
 }
@@ -76,15 +76,15 @@ as with all community tools, please do your own due diligence when using a new t
 ## Plugin Selection
 
 Plugin selection depends on the [source](/packer/docs/templates/hcl_templates/blocks/packer#source-addresses) and [version constraints](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) defined within the `required_plugins` block.
-For each of the required plugins Packer will query the source repository `github.com/azr/happycloud` whose fully qualified address
-is `https://github.com/azr/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.
+For each of the required plugins Packer will query the source repository `github.com/hashicorp/happycloud` whose fully qualified address
+is `https://github.com/hashicorp/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.
 
-Packer init will install the latest plugin version matching the version selection in the `required_plugins` block. 
+Packer `init` will install the latest plugin version matching the version selection in the `required_plugins` block. 
 Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
 pinning plugin versions for build reproducibility. 
 
-By default `packer init` will install all required plugins in to the [Plugin Directory](/packer/docs/configure#packer-s-plugin-directory).
-You can override the default location by using the `PACKER_PLUGIN_PATH` environement variable to specify a different directory. 
+`packer init` will install all required plugins into the [Plugin Directory](/packer/docs/configure#packer-s-plugin-directory).
+You can override the default location by using the `PACKER_PLUGIN_PATH` environment variable to specify a different directory. 
 
 Refer to [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
