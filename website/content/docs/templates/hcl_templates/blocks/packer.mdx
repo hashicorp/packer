@@ -60,18 +60,28 @@ packer {
   required_plugins {
     happycloud = {
       version = ">= 2.7.0"
-      source = "github.com/azr/happycloud"
+      source = "github.com/hashicorp/happycloud"
     }
   }
 }
 ```
 
-For more information, refer to [Plugins](/packer/docs/plugins).
+Using the `required_plugins` block to codify the plugins required for invoking a 
+`packer build` on your template(s) is a great way to ensure consistent builds across
+different platforms or hosts.
+
+The block codifies two pieces of information that we've found critical to ensure reproducible builds:
+1. **The source of a required plugin** indicates to users where a plugin where a plugin was downloaded from
+and where to reach out if there are issues with the plugin. 
+1. **The version of a required plugin** indicates to users the exact or minimum version needed for the build. 
+This is a great way to pin approved versions of a plugin that can be installed across your environment or team.
+
+For more information on plugins, refer to [Plugins](/packer/docs/plugins).
 
 ## Source Addresses
 
-A plugin's source address is its global identifier that provides users codified information on where a plugin is sourced and can be obtained. 
-When used in conjunction with the `packer init` command a source address tells Packer where to download the remote plugin from. 
+A plugin's source address is conceptually where a plugin binary can be downloaded from. Packer also uses this source as a global unique identifier. 
+When used in conjunction with the `packer init` command a plugin's source address tells Packer where to download it. 
 
 At minimum source addresses consist of three parts delimited by slashes (`/`), as
 follows:
@@ -108,7 +118,7 @@ various outputs, like error messages.
 
 ### Non-GitHub Source Addresses
 As mentioned above a plugin's source address is its global identifier that provides users codified information on where a plugin is sourced and can be obtained. 
-In cases where a plugin source does not originate from a GitHub repository, such an internal proxy or plugin binary store, custom source addresses can help
+In cases where a plugin source does not originate from a GitHub repository, such as a plugin binary store, custom source addresses can help
 users taken advantage of plugin version pinning via required_plugins block and forego the use of `packer init` in favor of `packer plugins install --path`.
 
 For example if your organization has a need for pre-downloading approved Packer plugins into an internal artifact store (e.g mycompany.com/mirror/hashicorp/happycloud)
@@ -119,10 +129,10 @@ packer plugins install --path path/to/binary mycompany.com/mirror/hashicorp/happ
 ```
 
 The provided source address will translate directly to the file hierarchy in which the plugin binaries will be installed.
-After a successful installation the custom source address can be add to your template to take advantage of version pinning for the hashicorp/happycloud plugin. 
+After a successful installation the custom source address can be added to your template to take advantage of version pinning for the `mycompany.com/mirror/hashicorp/happycloud` plugin. 
 Invoking `packer init` on the template will respond without error and ensure that the correct version of the plugin is loaded. 
 
-If however, the plugin is not installed at the time you run `packer init` Packer will error indicationg that on GitHub source addresses are supported for remote installation. 
+If however, the plugin is not installed at the time you run `packer init` Packer will error indicating that only GitHub source addresses are supported for remote installation. 
 
 ## Version Constraints
 
