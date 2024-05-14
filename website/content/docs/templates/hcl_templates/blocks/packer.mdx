@@ -106,6 +106,24 @@ The source address with all components given explicitly is called the
 plugin's _fully-qualified address_. You will see fully-qualified address in
 various outputs, like error messages.
 
+### Non-GitHub Source Addresses
+As mentioned above a plugin's source address is its global identifier that provides users codified information on where a plugin is sourced and can be obtained. 
+In cases where a plugin source does not originate from a GitHub repository, such an internal proxy or plugin binary store, custom source addresses can help
+users taken advantage of plugin version pinning via required_plugins block and forego the use of `packer init` in favor of `packer plugins install --path`.
+
+For example if your organization has a need for pre-downloading approved Packer plugins into an internal artifact store (e.g mycompany.com/mirror/hashicorp/happycloud)
+you can use the `packer plugins install --path` command to install the binary with the custom source address and add an entry for it as a required plugin in your template. 
+
+```shellsession
+packer plugins install --path path/to/binary mycompany.com/mirror/hashicorp/happycloud
+```
+
+The provided source address will translate directly to the file hierarchy in which the plugin binaries will be installed.
+After a successful installation the custom source address can be add to your template to take advantage of version pinning for the hashicorp/happycloud plugin. 
+Invoking `packer init` on the template will respond without error and ensure that the correct version of the plugin is loaded. 
+
+If however, the plugin is not installed at the time you run `packer init` Packer will error indicationg that on GitHub source addresses are supported for remote installation. 
+
 ## Version Constraints
 
 Anywhere that Packer lets you specify a range of acceptable versions for
