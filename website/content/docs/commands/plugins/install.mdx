@@ -1,22 +1,36 @@
 ---
 description: |
-  The "plugins install" command can install a plugin at a version constraint.
+  The "plugins install" command installs a Packer plugin.
 page_title: plugins Command
 ---
 
 # `plugins install`
 
-The `plugins install` subcommand installs a Packer plugin at a version constraint
+The `plugins install` subcommand installs a Packer plugin.
+
+The requested plugin will be remotely installed by default at its latest version, unless a version
+constraint is specified.
+The command also supports installing plugins from a locally-sourced binary, along with its
+expected source location.
 
 ```shell-session
 $ packer plugins install -h
-Usage: packer plugins install <plugin> [<version constraint>]
+Usage: packer plugins install [OPTIONS...] <plugin> [<version constraint>]
 
   This command will install the most recent compatible Packer plugin matching
   version constraint. When the version constraint is omitted, the most recent
   version will be installed.
 
   Ex: packer plugins install github.com/hashicorp/happycloud v1.2.3
+      packer plugins install --path ./packer-plugin-happycloud "github.com/hashicorp/happycloud"
+
+Options:
+  -path <path>                  Install the plugin from a locally-sourced plugin binary.
+                                This installs the plugin where a normal invocation would, but will
+                                not try to download it from a remote location, and instead
+                                install the binary in the Packer plugins path. This option cannot
+                                be specified with a version constraint.
+  -force                        Forces reinstallation of plugins, even if already installed.
 ```
 
 ## Related
