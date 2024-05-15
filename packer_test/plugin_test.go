@@ -328,10 +328,6 @@ func ManualPluginInstall(t *testing.T, dest, srcPlugin, versionStr string) {
 
 	CopyFile(t, destPath, srcPlugin)
 
-	shaPath := destPath
-	if runtime.GOOS == "windows" {
-		shaPath = strings.Replace(destPath, ".exe", "", 1)
-	}
-	shaPath = fmt.Sprintf("%s_SHA256SUM", shaPath)
+	shaPath := fmt.Sprintf("%s_SHA256SUM", destPath)
 	WriteFile(t, shaPath, SHA256Sum(t, destPath))
 }

@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 )
 
 func (ts *PackerTestSuite) TestLoadingOrder() {
@@ -119,14 +117,9 @@ func (ts *PackerTestSuite) TestLoadWithSHAMismatches() {
 		defer cleanup()
 
 		pluginDestName := ExpectedInstalledName("1.0.10")
-		noExtDest := pluginDestName
-		if runtime.GOOS == "windows" {
-			noExtDest = strings.Replace(pluginDestName, ".exe", "", 1)
-		}
-
 		CopyFile(ts.T(), filepath.Join(pluginDir, "github.com", "hashicorp", "tester", pluginDestName), plugin)
 		WriteFile(ts.T(),
-			filepath.Join(pluginDir, "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", noExtDest)),
+			filepath.Join(pluginDir, "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", pluginDestName)),
 			fmt.Sprintf("%x", sha256.New().Sum([]byte("Not the plugin's contents for sure."))))
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
