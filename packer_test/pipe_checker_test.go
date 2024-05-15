@@ -214,9 +214,6 @@ func (pc *PipeChecker) SetStream(s Stream) *PipeChecker {
 }
 
 func (pc PipeChecker) Check(stdout, stderr string, _ error) error {
-	if len(pc.pipers) == 0 {
-		return fmt.Errorf("%s - empty pipeline", pc.Name())
-	}
 	if pc.check == nil {
 		return fmt.Errorf("%s - missing tester", pc.Name())
 	}
