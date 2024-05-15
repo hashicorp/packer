@@ -1,6 +1,8 @@
 package packer_test
 
-import "strings"
+import (
+	"strings"
+)
 
 func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
 	tempPluginDir, cleanup := ts.MakePluginDir("1.0.0+metadata")
@@ -91,5 +93,29 @@ func (ts *PackerTestSuite) TestRemovePluginWithLocalPath() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", "github.com/hashicorp/tester", "1.0.10").
 			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.10", grepStdout))
+	})
+}
+
+func (ts *PackerTestSuite) TestInitWithNonGithubSource() {
+	pluginPath, cleanup := ts.MakePluginDir()
+	defer cleanup()
+
+	ts.Run("try installing from a non-github source, should fail", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("init", "./templates/non_gh.pkr.hcl").
+			Assert(MustFail(), Grep(`doesn't appear to be a valid "github.com" source address`, grepStdout))
+	})
+
+	ts.Run("manually install plugin to the expected source", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "install", "--path", BuildSimplePlugin("1.0.10", ts.T()), "hubgit.com/hashicorp/tester").
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.10", grepStdout))
+	})
+
+	ts.Run("re-run packer init on same template, should succeed silently", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("init", "./templates/non_gh.pkr.hcl").
+			Assert(MustSucceed(),
+				MkPipeCheck("no output in stdout").SetTester(ExpectEmptyInput()).SetStream(OnlyStdout))
 	})
 }
