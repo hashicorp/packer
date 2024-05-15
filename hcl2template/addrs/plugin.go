@@ -122,8 +122,8 @@ func ParsePluginSourceString(str string) (*Plugin, error) {
 		errs = append(errs, "A source URL must not end with a '/' character.")
 	}
 
-	if !strings.Contains(str, "/") {
-		errs = append(errs, "A source URL must at least contain a host and a path.")
+	if strings.Count(str, "/") < 2 {
+		errs = append(errs, "A source URL must at least contain a host and a path with 2 components")
 	}
 
 	url, err := url.Parse(str)

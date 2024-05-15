@@ -18,7 +18,7 @@ func TestPluginParseSourceString(t *testing.T) {
 		wantDiags bool
 	}{
 		{"invalid: only one component, rejected", "potato", nil, true},
-		{"valid: two components in name", "hashicorp/azr", &Plugin{"hashicorp/azr"}, false},
+		{"invalid: two components in name", "hashicorp/azr", nil, true},
 		{"valid: three components, nothing superfluous", "github.com/hashicorp/azr", &Plugin{"github.com/hashicorp/azr"}, false},
 		{"valid: 16 components, nothing superfluous", "github.com/hashicorp/azr/a/b/c/d/e/f/g/h/i/j/k/l/m", &Plugin{"github.com/hashicorp/azr/a/b/c/d/e/f/g/h/i/j/k/l/m"}, false},
 		{"invalid: trailing slash", "github.com/hashicorp/azr/", nil, true},
