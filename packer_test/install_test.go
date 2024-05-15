@@ -1,5 +1,7 @@
 package packer_test
 
+import "strings"
+
 func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
 	tempPluginDir, cleanup := ts.MakePluginDir("1.0.0+metadata")
 	defer cleanup()
@@ -50,5 +52,44 @@ func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "v1.0.2-dev").
 			Assert(MustFail(), Grep("Remote installation of pre-release plugin versions is unsupported.", grepStdout))
+	})
+}
+
+func (ts *PackerTestSuite) TestRemovePluginWithLocalPath() {
+	pluginPath, cleanup := ts.MakePluginDir("1.0.9", "1.0.10")
+	defer cleanup()
+
+	// Get installed plugins
+	cmd := ts.PackerCommand().UsePluginDir(pluginPath).
+		SetArgs("plugins", "installed")
+	cmd.Assert(MustSucceed())
+	if ts.T().Failed() {
+		return
+	}
+
+	plugins, _, _ := cmd.Run()
+	pluginList := strings.Split(strings.TrimSpace(plugins), "\n")
+	if len(pluginList) != 2 {
+		ts.T().Fatalf("Not the expected installed plugins: %v; expected 2", pluginList)
+	}
+
+	ts.Run("remove one plugin version with its local path", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", pluginList[0]).
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.9", grepStdout))
+	})
+	ts.Run("ensure one plugin remaining only", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "installed").
+			Assert(
+				MustSucceed(),
+				Grep("packer-plugin-tester_v1.0.10", grepStdout),
+				Grep("packer-plugin-tester_v1.0.9", grepInvert, grepStdout),
+			)
+	})
+	ts.Run("remove plugin with version", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", "github.com/hashicorp/tester", "1.0.10").
+			Assert(MustSucceed(), Grep("packer-plugin-tester_v1.0.10", grepStdout))
 	})
 }
