@@ -195,3 +195,24 @@ func (ts *PackerTestSuite) TestLoadPluginWithMetadataInName() {
 				MkPipeCheck("no output in stdout").SetTester(ExpectEmptyInput()).SetStream(OnlyStdout))
 	})
 }
+
+func (ts *PackerTestSuite) TestLoadWithOnlyReleaseFlag() {
+	pluginPath, cleanup := ts.MakePluginDir("1.0.0", "1.0.1-dev")
+	defer cleanup()
+
+	for _, cmd := range []string{"validate", "build"} {
+		ts.Run(fmt.Sprintf("run %s without --ignore-prerelease flag - pick 1.0.1-dev by default", cmd), func() {
+			ts.PackerCommand().UsePluginDir(pluginPath).
+				SetArgs(cmd, "./templates/simple.pkr.hcl").
+				Assert(MustSucceed(),
+					Grep("packer-plugin-tester_v1.0.1-dev.*: plugin process exited", grepStderr))
+		})
+
+		ts.Run(fmt.Sprintf("run %s with --ignore-prerelease flag - pick 1.0.0", cmd), func() {
+			ts.PackerCommand().UsePluginDir(pluginPath).
+				SetArgs(cmd, "--ignore-prerelease-plugins", "./templates/simple.pkr.hcl").
+				Assert(MustSucceed(),
+					Grep("packer-plugin-tester_v1.0.0.*: plugin process exited", grepStderr))
+		})
+	}
+}
