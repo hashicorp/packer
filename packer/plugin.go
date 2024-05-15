@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -103,7 +102,7 @@ func (c *PluginConfig) Discover() error {
 	// We'll use that later to register the components for each plugin
 	pluginMap := map[string]string{}
 	for _, install := range installations {
-		pluginBasename := path.Base(install.BinaryPath)
+		pluginBasename := filepath.Base(install.BinaryPath)
 		matches := extractPluginBasename.FindStringSubmatch(pluginBasename)
 		if len(matches) != 2 {
 			log.Printf("[INFO] - plugin %q could not have its name matched, ignoring", pluginBasename)
