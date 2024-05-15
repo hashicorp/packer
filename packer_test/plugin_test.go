@@ -86,16 +86,17 @@ func BinaryName(version *version.Version) string {
 
 // ExpectedInstalledName is the expected full name of the plugin once installed.
 func ExpectedInstalledName(versionStr string) string {
-	v := version.Must(version.NewSemver(versionStr))
+	version.Must(version.NewVersion(versionStr))
+
+	versionStr = strings.ReplaceAll(versionStr, "v", "")
 
 	ext := ""
 	if runtime.GOOS == "windows" {
 		ext = ".exe"
 	}
 
-	return fmt.Sprintf("packer-plugin-tester_v%s%s_x%s.%s_%s_%s%s",
-		v.Core().String(),
-		v.Prerelease(),
+	return fmt.Sprintf("packer-plugin-tester_v%s_x%s.%s_%s_%s%s",
+		versionStr,
 		plugin.APIVersionMajor,
 		plugin.APIVersionMinor,
 		runtime.GOOS, runtime.GOARCH, ext)
