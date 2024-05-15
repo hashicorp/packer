@@ -280,6 +280,11 @@ func (pr Requirement) ListInstallations(opts ListInstallationsOptions) (InstallL
 			continue
 		}
 
+		if ver.Metadata() != "" {
+			log.Printf("found version %q with metadata in the name, this could introduce ambiguity and is not supported, ignoring it.", pluginVersionStr)
+			continue
+		}
+
 		descVersion, err := goversion.NewVersion(describeInfo.Version)
 		if err != nil {
 			log.Printf("malformed reported version string %q: %s, ignoring", describeInfo.Version, err)
