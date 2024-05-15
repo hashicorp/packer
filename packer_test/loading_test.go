@@ -159,3 +159,21 @@ func (ts *PackerTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
 					SetTester(IntCompare(eq, 2)))
 	})
 }
+
+func (ts *PackerTestSuite) TestInstallNonCanonicalPluginVersion() {
+	pluginPath, cleanup := ts.MakePluginDir()
+	defer cleanup()
+
+	ManualPluginInstall(ts.T(),
+		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
+		BuildSimplePlugin("1.0.10", ts.T()),
+		"001.00.010")
+
+	ts.Run("try listing plugins with non-canonical version installed - report none", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "installed").
+			Assert(MustSucceed(),
+				Grep(`version .* in path is non canonical`, grepStderr),
+				MkPipeCheck("no output in stdout").SetTester(ExpectEmptyInput()).SetStream(OnlyStdout))
+	})
+}
