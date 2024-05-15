@@ -2,6 +2,7 @@ package packer_test
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"sync"
@@ -29,6 +30,16 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 		packerPath: ts.packerPath,
 		env: map[string]string{
 			"PACKER_LOG": "1",
+			// Required for Windows, otherwise since we overwrite all
+			// the envvars for the test and Go relies on that envvar
+			// being set in order to return another path than
+			// C:\Windows by default
+			//
+			// If we don't have it, Packer immediately errors upon
+			// invocation as the temporary logfile that we write in
+			// case of Panic will fail to be created (unless tests
+			// are running as Administrator, but please don't).
+			"TMP": os.TempDir(),
 		},
 		stderr: stderr,
 		stdout: stdout,
