@@ -177,3 +177,21 @@ func (ts *PackerTestSuite) TestInstallNonCanonicalPluginVersion() {
 				MkPipeCheck("no output in stdout").SetTester(ExpectEmptyInput()).SetStream(OnlyStdout))
 	})
 }
+
+func (ts *PackerTestSuite) TestLoadPluginWithMetadataInName() {
+	pluginPath, cleanup := ts.MakePluginDir()
+	defer cleanup()
+
+	ManualPluginInstall(ts.T(),
+		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
+		BuildSimplePlugin("1.0.10+metadata", ts.T()),
+		"1.0.10+metadata")
+
+	ts.Run("try listing plugins with metadata in name - report none", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "installed").
+			Assert(MustSucceed(),
+				Grep("found version .* with metadata in the name", grepStderr),
+				MkPipeCheck("no output in stdout").SetTester(ExpectEmptyInput()).SetStream(OnlyStdout))
+	})
+}
