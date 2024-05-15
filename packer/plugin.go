@@ -75,11 +75,17 @@ func (c *PluginConfig) Discover() error {
 		c.PluginDirectory, _ = PluginFolder()
 	}
 
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+
 	installations, err := plugingetter.Requirement{}.ListInstallations(plugingetter.ListInstallationsOptions{
 		PluginDirectory: c.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
+			Ext:             ext,
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
