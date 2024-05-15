@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -21,6 +22,9 @@ func BuildTestPacker(t *testing.T) (string, error) {
 	packerCoreDir := filepath.Dir(testDir)
 
 	outBin := filepath.Join(os.TempDir(), fmt.Sprintf("packer_core-%d", rand.Int()))
+	if runtime.GOOS == "windows" {
+		outBin = fmt.Sprintf("%s.exe", outBin)
+	}
 
 	compileCommand := exec.Command("go", "build", "-C", packerCoreDir, "-o", outBin)
 	logs, err := compileCommand.CombinedOutput()
