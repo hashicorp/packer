@@ -75,7 +75,7 @@ func Test_PackerCoreSuite(t *testing.T) {
 
 		err := os.Remove(ts.packerPath)
 		if err != nil {
-			t.Logf("failed to cleanup compiled packer binary %q: %s. This will need manual aciton", packerPath, err)
+			t.Logf("failed to cleanup compiled packer binary %q: %s. This will need manual action", packerPath, err)
 		}
 	}()
 
