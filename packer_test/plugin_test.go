@@ -1,12 +1,14 @@
 package packer_test
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"testing"
 
@@ -296,4 +298,40 @@ func TempWorkdir(t *testing.T, files ...string) (string, func()) {
 			t.Logf("failed to remove temporary workdir %q: %s. This will need manual action.", tempDir, err)
 		}
 	}
+}
+
+// SHA256Sum computes the SHA256 digest for an input file
+//
+// The digest is returned as a hexstring
+func SHA256Sum(t *testing.T, file string) string {
+	fl, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatalf("failed to compute sha256sum for %q: %s", file, err)
+	}
+	sha := sha256.New()
+	sha.Write(fl)
+	return fmt.Sprintf("%x", sha.Sum([]byte{}))
+}
+
+// ManualPluginInstall emulates how Packer installs plugins with `packer plugins install`
+//
+// This is used for some tests if we want to install a plugin that cannot be installed
+// through the normal commands (typically because Packer rejects it).
+func ManualPluginInstall(t *testing.T, dest, srcPlugin, versionStr string) {
+	err := os.MkdirAll(dest, 0755)
+	if err != nil {
+		t.Fatalf("failed to create destination directories %q: %s", dest, err)
+	}
+
+	pluginName := ExpectedInstalledName(versionStr)
+	destPath := filepath.Join(dest, pluginName)
+
+	CopyFile(t, destPath, srcPlugin)
+
+	shaPath := destPath
+	if runtime.GOOS == "windows" {
+		shaPath = strings.Replace(destPath, ".exe", "", 1)
+	}
+	shaPath = fmt.Sprintf("%s_SHA256SUM", shaPath)
+	WriteFile(t, shaPath, SHA256Sum(t, destPath))
 }
