@@ -83,11 +83,16 @@ func (c *PluginsRequiredCommand) RunContext(buildCtx context.Context, cla *Plugi
 		return ret
 	}
 
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
 	opts := plugingetter.ListInstallationsOptions{
 		PluginDirectory: c.Meta.CoreConfig.Components.PluginConfig.PluginDirectory,
 		BinaryInstallationOptions: plugingetter.BinaryInstallationOptions{
 			OS:              runtime.GOOS,
 			ARCH:            runtime.GOARCH,
+			Ext:             ext,
 			APIVersionMajor: pluginsdk.APIVersionMajor,
 			APIVersionMinor: pluginsdk.APIVersionMinor,
 			Checksummers: []plugingetter.Checksummer{
