@@ -1,4 +1,4 @@
-## 1.11.0 (Upcoming)
+## 1.11.0-beta (May 16, 2024)
 
 ### NOTES:
 * A LICENSE.txt file has been added to the Packer release artifacts.
