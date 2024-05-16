@@ -1,6 +1,7 @@
 package packer_test
 
 import (
+	"path/filepath"
 	"strings"
 )
 
@@ -27,6 +28,24 @@ func (ts *PackerTestSuite) TestPluginsRemoveWithSourceAddress() {
 	if n := InstalledPlugins(ts, pluginPath); len(n) != 0 {
 		ts.T().Fatalf("Expected there to be 0 installed plugins but we got  %v", n)
 	}
+
+	ts.Run("plugins remove with incorrect source address exits non found error", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", "github.com/hashicorp/testerONE").
+			Assert(
+				MustFail(),
+				Grep("No installed plugin found matching the plugin constraints github.com/hashicorp/testerONE"),
+			)
+	})
+
+	ts.Run("plugins remove with invalid source address exits with non-zero code", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", "github.com/hashicorp/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/tester").
+			Assert(
+				MustFail(),
+				Grep("The source URL must have at most 16 components"),
+			)
+	})
 }
 
 func (ts *PackerTestSuite) TestPluginsRemoveWithSourceAddressAndVersion() {
@@ -94,6 +113,49 @@ func (ts *PackerTestSuite) TestPluginsRemoveWithLocalPath() {
 	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
 		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
 	}
+
+	ts.Run("plugins remove with incomplete local path exits with a non-zero code", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", filepath.Base(plugins[0])).
+			Assert(
+				MustFail(),
+				Grep("A source URL must at least contain a host and a path with 2 components", grepStdout),
+			)
+	})
+
+	ts.Run("plugins remove with fake local path exits with a non-zero code", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove", ts.T().TempDir()).
+			Assert(
+				MustFail(),
+				Grep("is not under the plugin directory inferred by Packer", grepStdout),
+			)
+	})
+}
+
+func (ts *PackerTestSuite) TestPluginsRemoveWithNoArguments() {
+	pluginPath, cleanup := ts.MakePluginDir("1.0.9")
+	defer cleanup()
+
+	// Get installed plugins
+	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
+		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
+	}
+
+	ts.Run("plugins remove with no options returns non-zero with help text", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugins", "remove").
+			Assert(
+				MustFail(),
+				Grep("Usage: packer plugins remove <plugin>", grepStdout),
+			)
+	})
+
+	// Get installed should remain the same
+	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
+		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
+	}
+
 }
 
 func InstalledPlugins(ts *PackerTestSuite, dir string) []string {
