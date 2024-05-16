@@ -158,3 +158,13 @@ func (c CustomCheck) Check(stdout, stderr string, err error) error {
 func (c CustomCheck) Name() string {
 	return fmt.Sprintf("custom check - %s", c.name)
 }
+
+// LineCountCheck builds a pipe checker to count the number of lines on stdout by default
+//
+// To change the stream(s) on which to perform the check, you can call SetStream on the
+// returned pipe checker.
+func LineCountCheck(lines int) *PipeChecker {
+	return MkPipeCheck(fmt.Sprintf("line count (%d)", lines), LineCount()).
+		SetTester(IntCompare(eq, lines)).
+		SetStream(OnlyStdout)
+}
