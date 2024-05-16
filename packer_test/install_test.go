@@ -1,8 +1,14 @@
 package packer_test
 
 func (ts *PackerTestSuite) TestInstallPluginWithMetadata() {
-	tempPluginDir, cleanup := ts.MakePluginDir("1.0.0+metadata")
+	tempPluginDir, cleanup := ts.MakePluginDir()
 	defer cleanup()
+
+	ts.Run("install plugin with metadata in version", func() {
+		ts.PackerCommand().UsePluginDir(tempPluginDir).
+			SetArgs("plugins", "install", "--path", BuildSimplePlugin("1.0.0+metadata", ts.T()), "github.com/hashicorp/tester").
+			Assert(MustSucceed(), Grep("Successfully installed plugin", grepStdout))
+	})
 
 	ts.Run("metadata plugin installed must not have metadata in its path", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
