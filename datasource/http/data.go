@@ -125,7 +125,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return cty.NullVal(cty.EmptyObject), fmt.Errorf("HTTP request error. Response code: %d", resp.StatusCode)
 	}
 
