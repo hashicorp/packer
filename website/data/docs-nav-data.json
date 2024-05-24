@@ -860,6 +860,15 @@
     ]
   },
   {
+    "title": "Upgrades",
+    "routes": [
+      {
+        "title": "Upgrade to v1.11",
+        "path": "upgrade/v1_11"
+      }
+    ]
+  },
+  {
     "divider": true
   },
   {
