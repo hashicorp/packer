@@ -1,0 +1,37 @@
+---
+page_title: Packer v1.111 release notes
+description: Learn about the changes in Packer v 1.11
+---
+
+# Packer v1.11 release notes
+
+This page describes changes to Packer in v1.11. Refer to the [Packer repository](https://github.com/hashicorp/packer/releases) for information about all releases.
+
+## New features
+
+This release includes the following updates.
+
+### Predictable plugin loading
+
+To boost stability, Packer no longer loads plugin binaries installed outside of its plugin directory. Additionally, Packer now only loads binaries that have accompanying SHA256SUM files. In previous versions, Packer automatically loads plugins placed in one of the known directories when the file is named according to one of the following naming conventions:
+
+`packer-plugin-<plugin-name>`
+`packer-plugin-<plugin-name>_v0.0.1_x5.0_darwin_arm64`
+
+Refer to [Installing Plugins](/packer/docs/plugins/install-plugins) for details about how to load plugins.
+
+## Deprecations
+
+The following features, workflows, and components are deprecated and are no longer supported.
+
+### Legacy single-component plugins
+
+Packer no longer loads single-component plugins, such as legacy plugins that follow the deprecated naming convention of `packer-builder-<name>` or `packer-provisioner-<name>-<name>`. Packer only supports multi-component plugins, such as the Docker plugin for Packer.
+
+### Loading plugin binaries named `packer-plugin-<name>`
+
+Packer no longer loads plugin binaries following the naming convention of `packer-plugin-<name>`. Packer loads only plugins stored under `PACKER_PLUGIN_PATH` using the expected namespaced directory and CHECKSUM files.
+
+## Bug fixes
+
+Fixed an issue with how Packer discovers plugins to ensure proper version ordering. Packer no longer orders plugin versions lexicographically. Instead, Packer now loads versions that have a greater semantic number.  For example, version `1.0.9` is lexicographically greater than `1.0.10`, but `1.0.10` is semantically greater than `1.0.9`. This fix results in Packer loading `1.0.10` instead of `1.0.9`. 
