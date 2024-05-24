@@ -851,6 +851,15 @@
     "path": "configure"
   },
   {
+    "title": "Release notes",
+    "routes": [
+      {
+        "title": "v1.11",
+        "path": "release-notes/v1_11"
+      }
+    ]
+  },
+  {
     "divider": true
   },
   {
