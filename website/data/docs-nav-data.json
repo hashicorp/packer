@@ -444,6 +444,14 @@
                     "path": "templates/hcl_templates/functions/encoding/urlencode"
                   },
                   {
+                    "title": "textencodebase64",
+                    "path": "templates/hcl_templates/functions/encoding/textencodebase64"
+                  },
+                  {
+                    "title": "textdecodebase64",
+                    "path": "templates/hcl_templates/functions/encoding/textdecodebase64"
+                  },
+                  {
                     "title": "yamldecode",
                     "path": "templates/hcl_templates/functions/encoding/yamldecode"
                   },
