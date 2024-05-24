@@ -6,234 +6,192 @@ page_title: Install Plugins
 
 # Installing Plugins
 
-Packer plugins are separate, standalone applications that perform tasks during each build.
+This topic describes how to install external plugins for Packer. Refer to [Packer Plugins Overview](/packer/docs/plugins) for additional information about plugins.
 
-This page explains how to install external plugins. Refer to [Integrations](/packer/integrations) for a list of available plugins and their documentation.
+## Overview
 
-Depending on the template type you're using (HCL2 or legacy JSON), the methods for installing plugins may differ.
+Specify one or more required plugins in a Packer template and run the initialization command. During initialization, Packer queries the source repository for plugins specified in the template that match the version constraints for the host operating system. Packer downloads and installs plugins and other dependencies specified in the template.
 
-If you're using HCL2, `packer init` is recommended as you can install all your requirements with one
-command, and those requirements are explicitly documented in the template.
+You can specify a remote project on GitHub for Packer to install the plugin from. Refer to [Requirements](#requirements) for additional information about installing plugins from a remote source.
 
-`packer plugins install` is also used to automate the installation from a source, and will need to
-be repeated for as many plugins as you need.
-We recommend this for JSON as the template cannot contain the information about the required plugins.
+When you run the Packer template, Packer first checks the directory for installed plugins that match the version requirements specified in the template. If a suitable version of the plugin is not installed, Packer prints an error. Packer downloads the required version from the `source` configuration.
 
-While `packer plugins install` is able to install plugins remotely, you can use
-the `--path` flag to install locally-sourced plugin binaries.
-This is typically useful in two general cases:
+### Manual installation method
 
-1. You are in an environment with restricted access to a plugin's source.
-1. You are trying to install a development version of a plugin for testing.
+You can manually install plugins if you are unable to specify plugins in an HCL template file. You may need to use the manual plugin installation method if the plugin source is a non-GitHub project or if your plugins are still in development.
 
-Refer to the [Installation Guides](#installation-guides) section of this page for information about
-each method, including usage examples.
+Manually install a plugin using the `packer plugins install` command. You specify a local or remote plugin source and include a path to the binary to generate the SHA256SUM file required to load the plugin during Packer builds. Refer to [Requirements](#requirements) for additional information about installing plugins from a remote source.
 
-The remainder of this document documents how Packer interacts with plugins.
-We encourage you to read this to get familiar with this process, as it will help you troubleshoot
-builds if you encounter problems with plugins.
+Note that Packer checks the plugin installation directory against the `required_plugins` block in the Packer template when you build artifacts using the template. Plugins specified in the template that have been installed manually must still comply with the version constraints set in the template.
 
-## Source Addresses
 
-A plugin's source address is conceptually where a plugin binary can be downloaded from.
-Packer also uses this source as a global unique identifier.
-This source translates directly to the file hierarchy in which the plugin binaries will be
-installed.
+### Installation directory
 
-Source addresses are a URL, without a scheme (e.g. `"https://"`), query (e.g. `?arg=val`), or
-fragment (e.g. `#anchor`).
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable. Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
 
-Example: `github.com/hashicorp/happycloud`
+## Requirements
 
-#### Github sources
+To install a plugin from a remote source, the plugin must meet the following requirements:
 
-Github sources all follow this convention: `<hostname>/<namespace>/<type>`.
+- The plugin project must be hosted on GitHub.
+- The repository must be named `packer-plugin-<name>`.
+- The project must have semantic version tags per the following format: `v<major>.<minor>.<patch>`.
+- The release linked to the tag must be available with a `shasums` file that indicates which files are available in the release.
 
-- **Hostname:** The hostname of the location/service that distributes the plugin.
+### GitHub API token
 
-- **Namespace:** An organizational namespace within the specified host.
-  This often is the organization that maintains the plugin.
+GitHub's public API limits the number of unauthenticated requests per hour from a single IP address. Refer to the [GitHub rate limits documentation](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits) for additional information.
 
-- **Type:** A short name for the platform or system the plugin manages. The
-  type is usually the plugin's preferred local name.
+If you expect to exceed the request rate limit, you can use a GitHub API token to authenticate requests and exceed the rate limit. We recommend setting a GitHub API token when running Packer from a continuous integration server to avoid potential rate limiting errors. Refer to [Authenticate requests to the GitHub API](#authenticate-requests-to-the-github-api) for instructions.
 
-For example, the fictional `happycloud` plugin could belong to the
-`hashicorp` namespace on `github.com`, so its `source` could be
-`github.com/hashicorp/happycloud`,
+## Install a plugin
 
--> Note: the actual _repository_ that happycloud comes from must always have
-the name format `github.com/hashicorp/packer-plugin-happycloud`, but the
-source voluntarily omits the redundant `packer-plugin-` prefix for brevity.
+1. In your Packer template file, add the `required_plugins` block to the `packer` block. 
+1. Specify the name of the plugin and its `version` and `source` parameters. Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
+pinning plugin versions for build reproducibility. Refer to the [`packer` block configuration reference](/packer/docs/templates/hcl_templates/blocks/packer) for additional information.
 
-The source address with all the components given explicitly is called the
-plugin's _fully-qualified address_. You will see fully-qualified addresses in
-various outputs, like error messages.
+    The following example configures Packer to install a plugin called `happycloud`. When the template is initialized, Packer downloads version 2.7.0 or newer of the plugin from GitHub:
 
-### Source and local hierarchy
-
-As mentioned above, each source URL will directly impact how Packer will install
-a plugin to the local plugin directory.
-Each component of the path described will become a subdirectory, and finally,
-plugin binaries are installed at the end of that hierarchy.
-Multiple versions can be installed along one another.
-
-In order for the binaries installed in this directory to be discovered and used
-by Packer, they must follow this set of rules:
-
-1. The name of the binary must be in the `packer-plugin-<name>_<version>_x<api_version>_<os>_<arch>(.exe)?` format
-1. The binary must be accompanied by a SHA256SUM file, which must contain the SHA256 hash of the binary
-1. The `describe` command of the binary must return informations that match the plugin's name, namely:
-
-    a. The plugin version must match the name
-
-    b. The API version must match the name's
-
-1. The version must be canonical: e.g. 1.0.1 (valid) vs. 01.000.01 (invalid)
-1. The version must be valid semver (e.g. 1.0.0)
-1. Pre-releases are accepted, but must be `-dev` only.
-1. Metadata shall not be in the name of the plugin binary, only metadata-free versions will be considered valid for discovery purposes.
-
-## Plugin Discovery Workflow
-
-At initialization, Packer attempts to discover the plugins installed locally. The
-logic follows what's described in Configuring Packer's
-[plugin directory](/packer/docs/configure#packer-s-plugin-directory)
-section.
-
-While Packer is not verbose during this step, you can peek into what it is discovering
-with `PACKER_LOG=1` enabled, where you can find log lines similar to the following:
-
-```shell
-[TRACE] discovering plugins in [...]
-[INFO] Discovered potential plugin: [...]
-```
-
-Once this discovery step has finished, each discovered plugin will be ready to use
-by Packer, on the highest available version.
-
-Example:
-
-```shell
-<packer_plugin_dir>
-└── github.com
-    └── hashicorp
-        └── happycloud
-            ├── packer-plugin-happycloud_v1.1.8_x5.0_linux_amd64
-            ├── packer-plugin-happycloud_v1.1.8_x5.0_linux_amd64_SHA256SUM
-            ├── packer-plugin-happycloud_v1.2.8_x5.0_linux_amd64
-            └── packer-plugin-happycloud_v1.2.8_x5.0_linux_amd64_SHA256SUM
-```
-
-In this example, the `happycloud` plugin will be the one and used to serve
-happycloud-related components, in version 1.2.8.
-
-### HCL2 and `required_plugins`
-
-The aforementioned logic is all that can apply to legacy JSON templates.
-HCL2 however introduces the concept of `required_plugins` blocks.
-These blocks allow you to declare what plugins your template needs in order
-to be able to build an artifact, along with version constraints.
-
-Example:
-
-```hcl2
-packer{
-  required_plugins {
-    happycloud = {
-      source  = "github.com/hashicorp/happycloud"
-      version = "= 1.1.8"
+    ```hcl
+    packer {
+      required_plugins {
+        happycloud = {
+          version = ">= 2.7.0"
+          source = "github.com/hashicorp/happycloud"
+        }
+      }
     }
-  }
-}
+    
+    ```
+
+1. Run the `packer init` command. Packer lists all installed plugins then installs the latest plugin version matching the version constraints specified in the `required_plugins` block. Refer to the [`init` command reference](/packer/docs/commands/init) for additional information.
+
+## Manually install plugins using the CLI
+
+You can use the `packer plugins install` command to manually install remote plugins. Include the `--path` flag and specify a local source so that Packer automatically calculates the SHA256SUM file and installs the files into the Packer plugin directory:
+
+```shell-session
+$ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name> 
 ```
 
-With this constraint specified, Packer will not only be able to remotely install
-the plugin you need with `packer init` (provided it is hosted on a remote that the command
-supports), but also restrict which versions can be used for building the template.
+The following example installs the `happycloud` plugin from GitHub:
 
-Using the aforementioned plugin hierarchy, a constraint like the one above will
-take precedence over the usual discovery process, this time yielding version 1.1.8
-of the happycloud plugin for serving its components.
+```shell-session
+$ packer plugins install --path happycloud github.com/hashicorp/happycloud
+```
 
-## Installation Guides
+Refer to the [`packer plugins install`](/packer/docs/commands/plugins/install) reference for additional information.
 
-### Packer init
 
--> Using `packer init` requires using HCL2 templates. If you are using JSON and
-   want to start using HCL2 templates in order to leverage this feature, please
-   refer to our [JSON to HCL](/packer/docs/templates/json_to_hcl) guide.
+## Upgrade plugins
 
-In order to use `packer init` for managing installation of your plugins, there are
-two steps required.
+To upgrade plugins that are already installed, run the `packer init` with the `--upgrade` flag. Packer retrieves the latest versions of installed plugins specified in the template configuration.
 
-First, add a [`required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block to your [packer block](/packer/docs/templates/hcl_templates/blocks/packer).
+The following example upgrades plugins according to the template in the current directory:
 
-Each block will tell Packer what version(s) of a particular plugin can be installed.
-Make sure to set a valid
-[version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints).
+```shell-session
+$ packer init --upgrade .
+```
 
-Here is an example `required_plugins` block:
+Refer to [`packer init` command](/packer/docs/commands/init) for additional information.
+
+## Install a plugin under development
+
+You can install and use plugins that are still under development and report as `dev` versions. But if a non-development version of the plugin binary is available, Packer installs the non-development version according to the version constraints configured in the Packer template and uses it in the build.
+
+If a development binary, such as a manually-built binary, is available at the specified source, Packer uses it in the build if it is the highest compatible version installed and if no final plugin version with the same version number is installed alongside it.
+
+In the following example, version `1.1.0` or newer is required:
 
 ```hcl
-packer {
-  required_plugins {
-    myawesomecloud = {
-      version = ">= 2.7.0"
-      source = "github.com/hashicorp/myawesomecloud"
+packer = {
+    required_plugins = {
+        amazon = {
+            source = "github.com/hashicorp/amazon"
+            version = ">= 1.1.0"
+        }
     }
-    happycloud = {
-      version = ">= 1.1.3"
-      source = "github.com/hashicorp/happycloud"
-    }
-  }
+
+. . . 
+
 }
 ```
 
-Once your template contains those `required_plugins`, run
-[`packer init`](/packer/docs/commands/init) to install all missing plugin
-binaries.
-Given the above example, Packer will try to look for a GitHub
-repository owned by user or organization `hashicorp` named
-`packer-plugin-myawesomecloud` and `packer-plugin-happycloud`.
+Packer uses the `-dev` version of the Amazon plugin if the following binaries are available:
 
--> Note: `packer init` tries to install plugins matching the version constraints required by the template.
-   Running `packer init` multiple times on the same template will result in no changes if all matching plugins
-   have already been installed.  If you want to update a plugin or force re-installation, you may use the
-   `--update` or `--force` arguments.
-
-### Packer plugins install
-
-Plugin installation via `packer plugins install` works similar to that of the `packer init` command, but
-no `required_plugins` block are required.
-
-```shell
-packer plugins install github.com/hashicorp/vagrant
+```shell-session
+/Users/dev/.packer.d/plugins
+└─ github.com
+   └─ hashicorp
+    	└── amazon
+          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64
+          ├── packer-plugin-amazon_v1.1.0_x5.0_darwin_arm64_SHA256SUM
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
+          └── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
 ```
 
--> You can only install one plugin per invocation of the command. If you need to install
-   a specific version of a plugin, you can specify a version to install as an optional
-   argument to the command line.
-   e.g.: `packer plugins install "github.com/hashicorp/vagrant" "v1.0.1"`
+When a non-development version of 1.1.1 becomes available, the binary takes precedence over the development binary:
 
-The command will install the plugin in the `PACKER_CONFIG_DIR` set, or its
-default location, which depends on the OS/environment, as documented in
-[Configuring Packer](/packer/docs/configure#packer-s-plugin-directory).
-
-#### Using packer plugins install to install a local copy of a binary
-
-If the plugin you want to install cannot be installed remotely, you can use the
-`--path` argument for `packer plugins install` in order to use the provided
-plugin binary as source.
-
-Example:
-
-```shell
-$ ls -l packer-plugin-happycloud
--rwxrwxr-x  1 root root 44745210 Jan 01 1979 packer-plugin-happycloud
-$ PACKER_PLUGIN_PATH=/root/plugins packer plugins install --path ./packer-plugin-happycloud "github.com/hashicorp/happycloud"
-Successfully installed plugin github.com/hashicorp/happycloud from /root/packer-plugin-happycloud to /root/plugins/github.com/hashicorp/happycloud/packer-plugin-happycloud_v1.2.8-dev_x5.0_linux_amd64
+```shell-session
+/Users/dev/.packer.d/plugins
+└─ github.com
+   └─ hashicorp
+    	└── amazon
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64
+          ├── packer-plugin-amazon_v1.1.1-dev_x5.0_darwin_arm64_SHA256SUM
+          ├── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64
+          └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
--> Note: the version does not need to be specified, Packer will automatically
-   determine which version to install based on the plugin's `describe` output.
+Refer to the documentation in the [Packer plugin scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding?tab=readme-ov-file#build-from-source) for additional information.
+
+### Example Docker plugin
+
+Complete the following steps to build and install a custom version of the Docker plugin as an example:
+
+1. Clone the plugin's GitHub repository.
+
+    ```shell-session
+    $ git clone https://github.com/hashicorp/packer-plugin-docker.git
+    ```
+   
+1. Change to the plugin directory root and run the `go build` command to build the plugin as a development binary.
+
+    ```shell-session
+    $ cd packer-plugin-docker
+    $ go build -ldflags="-X github.com/hashicorp/packer-plugin-docker/version.VersionPrerelease=dev" -o packer-plugin-docker-dev
+    ```
+
+1. Validate the release version.
+
+    ```shell-session
+    $ ./packer-plugin-docker-dev describe
+    {"version":"1.0.10-dev","sdk_version":"0.5.2","api_version":"x5.0","builders":["-packer-default-plugin-name-"],"post_processors":["import","push","save","tag"],"provisioners":[],"datasources":[]}
+    ```
+
+1. Use the `packer plugins install` command to install the development binary.
+
+    ```shell-session
+    packer plugins install --path packer-plugin-docker-dev github.com/hashicorp/docker
+    Successfully installed plugin github.com/hashicorp/docker from $HOME/Development/packer-plugin-docker/packer-plugin-docker-dev to ~/github.com/hashicorp/docker/packer-plugin-docker_v1.0.10-dev_x5.0_darwin_arm64
+    ```
+
+1. Run a `packer build` with the newly installed plugin.
+
+    ```shell-session
+    $ packer build .
+    ```
+
+For convenience, the makefile in the Packer plugin scaffolding repository builds and installs development binaries using `make dev`.
+
+## Authenticate requests to the GitHub API
+
+You can set the `PACKER_GITHUB_API_TOKEN` environment variable to send more requests per hour than the limits imposed by the GitHub API:
+
+1. Go to your personal [access token page](https://github.com/settings/tokens) to
+generate a new token.
+1. Set the `PACKER_GITHUB_API_TOKEN` environment variable to your token value:
+
+    ```shell-session
+    $ export PACKER_GITHUB_API_TOKEN=<token>
+    ```
