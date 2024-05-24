@@ -1,38 +1,54 @@
 ---
 description: |
-  The "plugins install" command installs a Packer plugin.
-page_title: plugins Command
+  Reference information about the `packer plugins install` command which downloads and installs Packer plugin binaries without a Packer template
+page_title: packer plugins install command reference
 ---
 
-# `plugins install`
+# `packer plugins install` command reference
 
-The `plugins install` subcommand installs a Packer plugin.
+The `packer plugins install` command downloads and installs the most recent version of a plugin binary. Refer to [Installing Plugins](/packer/docs/plugins/install) for additional information about installing plugins.
 
-The requested plugin will be remotely installed by default at its latest version, unless a version
-constraint is specified.
-The command also supports installing plugins from a locally-sourced binary, along with its
-expected source location.
+## Description
+
+Use the `packer plugins install` command to manually install plugins instead of specifying plugins in a template and initializing Packer. Refer to the [`packer init` command documentation](/packer/docs/commands/init) for information about installing plugins specified in a Packer template during initialization.
+
+### Third-party plugin verification
+
+HashiCorp only verifies plugins from GitHub under the`hashicorp/*` namespace. We recommend that you vet and verify any third-party plugins you want to install.
+
+### Installation directory
+
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable. Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
+
+## Usage
+
+Use the following syntax to run the `packer plugins install` command:
+
+## Examples
+
+Specify a version number to install a specific version of the plugin. The following example installs the version `1.0.1` of `my-plugin` from a remote source:
 
 ```shell-session
-$ packer plugins install -h
-Usage: packer plugins install [OPTIONS...] <plugin> [<version constraint>]
-
-  This command will install the most recent compatible Packer plugin matching
-  version constraint. When the version constraint is omitted, the most recent
-  version will be installed.
-
-  Ex: packer plugins install github.com/hashicorp/happycloud v1.2.3
-      packer plugins install --path ./packer-plugin-happycloud "github.com/hashicorp/happycloud"
-
-Options:
-  -path <path>                  Install the plugin from a locally-sourced plugin binary.
-                                This installs the plugin where a normal invocation would, but will
-                                not try to download it from a remote location, and instead
-                                install the binary in the Packer plugins path. This option cannot
-                                be specified with a version constraint.
-  -force                        Forces reinstallation of plugins, even if already installed.
+$ packer plugins install github.com/hashicorp/my-plugin 1.0.0
 ```
 
-## Related
+Use the `--path` option to specify a local plugin binary. The following example installs `my-plugin` from a local folder:
 
-- [`packer init`](/packer/docs/commands/init) will install all required plugins.
+```shell-session
+$ packer plugins install --path my-plugin github.com/hashicorp/my-plugin
+```
+
+## Arguments
+
+You can pass the following arguments:
+
+- `<plugin-binary-source>`: A local or remote source where the plugin binary is available. To download from a remote source, the plugin must be hosted on GitHub. For local binaries, you must also include the `--path` option. Refer to [Installing Plugins](/packer/docs/plugins/install) for additional information about installing plugins.
+- `<plugin version>`: A specific version of the plugin to download and install. Packer accepts semantic version numbers that follow the `<major>.<minor>.<patch>` format. If omitted, the command installs the latest plugin version.
+
+## Options
+
+You can use the following options:
+
+`--path`: Use this option to specify a local plugin binary. You must use this option to install plugins from a local source.
+`--force`: Use this option to force Packer to reinstall the plugin.
+
