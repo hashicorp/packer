@@ -1,87 +1,73 @@
 ---
 description: |
-  There are various ways to configure Packer. By default Packer will use known folders,
-  which can be changed by using environment variables.
+  Learn how to use environment variables when running Packer that configure global behaviors.
 page_title: Configuring Packer
 ---
 
 # Configuring Packer
 
--> **Note:** There are a few configuration settings that affect Packer globally
-by configuring the core of Packer. These settings all have reasonable defaults,
-so you generally don't have to worry about it until you want to tweak a
-configuration. If you're just getting started with Packer, don't worry about
-core configuration for now.
+This topic describes how to configure Packer. The default configurations are suitable for learning how to get started, but you should refer to this topic for guidance as you become more familiar with Packer.
 
-## Packer's config directory
+## Overview
 
-Packer's configuration directory can potentially contain plugins and internal
-Packer files. The Packer config directory will be looked up on the following paths:
+You can set Packer-specific environment variables in a configuration file to configure Packer behavior globally. Install configuration files in the Packer configuration directory to implement the configurations. You can also install plugin files and their SHA256SUM files to the plugins subdirectory under the configuration directory. Refer to [Installing Plugins](/plugins/install) for instructions.
 
-| Unix                        | Windows                     |
-| --------------------------- | --------------------------- |
-| `${HOME}/.config/packer/`   | `%APPDATA%\packer.d\`       |
+You can also define Packer settings in a JSON configuration file and add it to the execution path. This configuration method is deprecated.
 
--> **Note:** On Unix systems, Packer defaults to using the XDG base directory specification.
-When the environment variable `PACKER_CONFIG_DIR` is unset or empty a default equal to `$HOME/.config/packer` should be used.
-In all other cases, where there is an existing older style `.packer.d` directory (e.g `$HOME/.packer.d/`)  or PACKER_CONFIG_DIR is not empty
-the older configuration directory will be used.
+## Install a configuration file
 
-Examples:
+You can place internal configuration files into Packer's `config` directory. Packer checks the following paths for configuration files:
 
-- On a Unix system, if the `$PACKER_CONFIG_DIR` environment variable is set to
-  `/home/packer`, the config directory will be: `/home/packer/.packer.d/` and
-  other values will not be checked.
-- On a Windows system, if the `PACKER_CONFIG_DIR` environment variable is set to `C:/`,the
-  config directory will be: `C:/packer.d/` and other values will not be checked.
+| OS | Path | Notes |
+| --- | ---| --- |
+| Unix | `${HOME}/.config/packer/` | Packer follows the XDG base directory specification by default. As a result, Packer uses `$HOME/.config/packer` as the default directory when the `PACKER_CONFIG_DIR` environment variable is unset or empty. Packer ignores the XDG specification when the `PACKER_CONFIG_DIR` variable is set or when the installation uses `.packer.d`-style directories, for example `$HOME/.packer.d/`. Refer to the [XDG specification](https://specifications.freedesktop.org/basedir-spec/latest/) for additional information. |
+| Windows | `%APPDATA%\packer.d\` | |
+
+
+### Examples
+
+- **Unix**: If `$PACKER_CONFIG_DIR` is set to `/home/packer`, then the configuration directory is `/home/packer/.packer.d/`. Packer does not check other values.
+- **Windows**: If `PACKER_CONFIG_DIR` is set to `C:/`, then the configuration directory is `C:/packer.d/`. Packer does not check other values.
+
 
 <a id="packer-s-config-file"></a>
 
-## Packer's config file (deprecated)
+##  Install a JSON configuration file
 
-Packer can optionally read a JSON file for the end user to set core settings.
-The config file of Packer will be looked up on the following paths:
+This installation method is deprecated since 1.7. Instead, use the [HCL2
+`required_plugins` block](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) to configure how Packer installs plugins. 
+
+You use a JSON file to set core Packer settings. Packer checks the following paths for the configuration file:
 
 | Unix                             | Windows                           |
 | -------------------------------- | --------------------------------- |
 | `${PACKER_CONFIG}`               | `%PACKER_CONFIG%`                 |
 | `${HOME}/.packerconfig`          | `%APPDATA%\packer.config\`        |
 
-The format of the configuration file is basic JSON.
 
-### Packer config file configuration Reference
+### JSON configuration file reference 
 
-Below is the list of all available configuration parameters for the core
-configuration file. None of these are required, since all have defaults.
+Use basic JSON to configure the file. You can specify the configuration parameters for the core
+configuration file. All parameters are optional. None of these are required, since all have defaults.
 
-- `plugin_min_port` and `plugin_max_port` (number) - These are the minimum
-  and maximum ports that Packer uses for communication with plugins, since
-  plugin communication happens over TCP connections on your local host. By
-  default these are 10,000 and 25,000, respectively. Be sure to set a fairly
-  wide range here, since Packer can easily use over 25 ports on a single run.
+- `plugin_min_port`: Number that specifies the lowest port that Packer can use for communicating with plugins. Packer communicates with plugins over TCP connections on your local host. Default is `10000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
+- `plugin_max_port`: Number that specifies highest port that Packer can for communicating with plugins. Packer communicates with plugins over TCP connections on your local host. Default is `25000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
+- `builders`: Specifies a type of object that installs plugins. Refer to [Builders](/packer/docs/builders) for additional information. 
+- `commands`: Specifies a type of object that installs plugins. 
+- `post-processors`: Specifies a type of object that installs plugins. Refer to [Post-Processors](/packer/docs/post-processors) for additional information.
+- `provisioners`: Specifies a type of object that installs plugins. Refer to [Provisioners](/packer/docs/provisioners) for additional information. 
 
-- `builders`, `commands`, `post-processors`, and `provisioners` are objects
-  that are used to install plugins. The details of how exactly these are set is
-  covered in more detail in the [installing plugins documentation
-  page](/packer/docs/plugins/install-plugins). It is instead recommended to use [HCL2
-  `required_plugins`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-  and the [`packer init`](/packer/docs/commands/init) command to install plugins; if
-  you are using both, the `required_plugin` config will take precedence.
+The [`packer init`](/packer/docs/commands/init) command takes precedence over JSON-configure settings when installing plugins.
 
-## Packer's plugin directory
 
-@include "plugins/plugin-location.mdx"
+## Configure the cache directory
 
-## Packer's cache directory
+Packer uses a cache directory to download large files and for logistics around large file download. By default, Packer caches files in the `./packer_cache/` folder of the current directory. Use the `PACKER_CACHE_DIR` environment variable to configure the cache directory. Refer to [`PACKER_CACHE_DIR`](/packer/docs/configure#packer_config_dir) for details.
 
-Packer uses a cache directory to download large files and for logistics around
-large file download. By default, Packer caches things in the current directory,
-under: `./packer_cache/`. This can be changed by setting the `PACKER_CACHE_DIR`
-env var. It is recommended to share the same Packer cache directory across your
-builds if you have multiple builds doing similar things to avoid downloading the
-same ISO twice for example.
+We recommend using the same Packer cache directory across your builds if multiple builds perform similar actions. This is to avoid downloading the same large file, such as an ISO, multiple times.
 
-## Environment Variables usable for Packer
+
+## Configuration reference
 
 Packer uses a variety of environmental variables. A listing and description of
 each can be found below:
