@@ -1,99 +1,54 @@
 ---
 description: |
-  The `packer init` Packer command is used to download Packer plugin binaries.
-page_title: packer init - Commands
+    Reference information about the `packer init` command, which downloads and installs Packer one or more plugin binaries specified in a Packer template written in HCL.
+page_title: packer init command line reference
 ---
 
-# `init` Command
+# `init` command reference
 
--> **Note:** Packer init does not work with legacy JSON templates. You can
-upgrade your JSON template files to HCL using the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) command.
+The `packer init` command initializes Packer according to an HCL template configuration. Refer to [Installing Plugins](/packer/docs/plugins/install) for additional information about installing plugins.
 
--> **Note:** Packer init will only work with multi-component plugins -- that is
-plugins that are named `packer-plugin-*`. To install a single-component plugin --
-that is `packer-provisioner-*`, `packer-builder-*`, etc. -- nothing changes, you will
-have to [install the plugin manually](/packer/docs/plugins#installing-plugins).
+## Description
 
-The `packer init` command is used to download Packer plugin binaries. This is
-the first command that should be executed when working with a new or existing
-template. This command is always safe to run multiple times. Though subsequent
-runs may give errors, this command will never delete anything.
+Use the `packer init` command to download and install plugins according to the `required_plugins` block in Packer templates written in HCL. Refer to [Specifying plugin requirements](docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements) in the template configuration reference for additional information about configuring the `required_plugins` block.
 
-You should invoke `packer init` on either an HCL2 template, or a directory that contains
-at least a valid HCL2 template, and eventually other related dependencies like varfiles
-for example.
+Legacy JSON templates are not supported. You can convert your JSON template files to HCL using the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) command.
 
-Example:
+We recommend running the `packer init` command as the first step when working with a new or existing template. You can run the command multiple times. Subsequent runs may produce errors, but the command never deletes already-installed plugins.
 
-```sh
-$ ls .
-template.pkr.hcl varfile.pkrvars.pkr.hcl
+### Third-party plugin verification
 
-$ packer init template.pkr.hcl # You can invoke packer init on a single template in this case
-                               # This works if the template is self-contained, but may fail if
-                               # the template is meant to be built as a bundle of partials.
+HashiCorp only verifies plugins from GitHub under the`hashicorp/*` namespace. We recommend that you vet and verify any third-party plugins you want to install.
 
-$ packer init .                # Alternatively, you can invoke packer init on a directory instead,
-                               # which behaves the same in a configuration like this one, but if
-                               # the target is a collection ofHCL2 templates, this is the
-                               # preferred way to invoke it.
+### Installation location
+
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH` environment variable. Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
+
+## Usage
+Use the following syntax to run the `packer init` command:
+
+```shell-session
+$ packer init <path-to-template> 
 ```
 
-Packer does not currently have the notion of a state like Terraform has. In other words,
-currently `packer init` is only in charge of installing Packer plugins.
+The template must contain all dependencies when running the command on a single template file. The command fails if the template is intended to be built as a bundle of partials.
 
-Currently, `packer init` can only fetch binaries from public projects on **GitHub**. GitHub's public API, [limits the number of unauthenticated requests
-per hour one IP can
-do](https://docs.github.com/en/developers/apps/rate-limits-for-github-apps#normal-user-to-server-rate-limits).
-Packer will do its best to avoid hitting those limits and in an average local
-usage this should not be an issue. Otherwise you can set the
-`PACKER_GITHUB_API_TOKEN` env var in order to get more requests per hour. Go to
-your personal [access token page](https://github.com/settings/tokens) to
-generate a new token.
+## Examples
 
-`packer init` will list all installed plugins then download the latest versions
-for the ones that are missing.
+The following example installs the plugins specified in a template named `template.pkr.hcl`:
 
-`packer init -upgrade` will try to get the latest versions for all plugins.
-
-Install a plugin using the [`required_plugin`](/packer/docs/templates/hcl_templates/blocks/packer#specifying-plugin-requirements)
-block :
-
-```hcl
-packer {
-  required_plugins {
-    happycloud = {
-      version = ">= 2.7.0"
-      source = "github.com/hashicorp/happycloud"
-    }
-  }
-}
+```shell-session
+$ packer init template.pkr.hcl
 ```
 
-HashiCorp does not officially verify third party Packer plugins, plugins not under the HashiCorp namespace `hashicorp/*`; 
-as with all community tools, please do your own due diligence when using a new tool.
+## Arguments
 
-## Plugin Selection
+You can pass the following arguments:
 
-Plugin selection depends on the [source](/packer/docs/templates/hcl_templates/blocks/packer#source-addresses) and [version constraints](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) defined within the `required_plugins` block.
-For each of the required plugins Packer will query the source repository `github.com/hashicorp/happycloud` whose fully qualified address
-is `https://github.com/hashicorp/packer-plugin-happycloud` for a plugin matching the version constraints for the host operating system.
+- Packer template: Specify the path to either an HCL2 template or a directory containing at least one valid HCL2 template and related dependencies.
 
-Packer `init` will install the latest plugin version matching the version selection in the `required_plugins` block. 
-Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
-pinning plugin versions for build reproducibility. 
-
-`packer init` will install all required plugins into the [Plugin Directory](/packer/docs/configure#packer-s-plugin-directory).
-You can override the default location by using the `PACKER_PLUGIN_PATH` environment variable to specify a different directory. 
-
-Refer to [Installing Plugins](/packer/docs/plugins#installing-plugins) for more information on how plugin installation works.
 
 ## Options
 
-- `-upgrade` - On top of installing missing plugins, update installed plugins to
-  the latest available version, if there is a new higher one. Note that this
-  still takes into consideration the version constraint of the template.
-
-- `-force`   - Forces reinstallation of plugins, even if already installed. Note
-               that only the highest installed version matching the template version
-               constraint will be reinstalled, all other plugins will be left untouched.
+- `-upgrade`: Use this option to upgrade plugins that are already installed to the latest available version. Packer upgrades to the latest version in accordance with the version constraints specified in the template.
+- `-force`: Use this option to force Packer to reinstall plugins.
