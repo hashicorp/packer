@@ -381,7 +381,9 @@ func loadConfig() (*config, error) {
 		return nil, err
 	}
 
-	config.LoadExternalComponentsFromConfig()
+	if err := config.LoadExternalComponentsFromConfig(); err != nil {
+		return nil, fmt.Errorf("%s: %s", configFilePath, err)
+	}
 
 	return &config, nil
 }

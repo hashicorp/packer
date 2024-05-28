@@ -9,9 +9,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
-	"runtime"
-	"sort"
 	"strings"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -41,7 +38,7 @@ func decodeConfig(r io.Reader, c *config) error {
 }
 
 // LoadExternalComponentsFromConfig loads plugins defined in RawBuilders, RawProvisioners, and RawPostProcessors.
-func (c *config) LoadExternalComponentsFromConfig() {
+func (c *config) LoadExternalComponentsFromConfig() error {
 	// helper to build up list of plugin paths
 	extractPaths := func(m map[string]string) []string {
 		paths := make([]string, 0, len(m))
@@ -57,61 +54,20 @@ func (c *config) LoadExternalComponentsFromConfig() {
 	pluginPaths = append(pluginPaths, extractPaths(c.RawBuilders)...)
 	pluginPaths = append(pluginPaths, extractPaths(c.RawPostProcessors)...)
 
-	var externallyUsed = make([]string, 0, len(pluginPaths))
-	for _, pluginPath := range pluginPaths {
-		name, err := c.loadSingleComponent(pluginPath)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-
-		log.Printf("loaded plugin: %s = %s", name, pluginPath)
-		externallyUsed = append(externallyUsed, name)
+	if len(pluginPaths) == 0 {
+		return nil
 	}
 
-	if len(externallyUsed) > 0 {
-		sort.Strings(externallyUsed)
-		log.Printf("using external plugins %v", externallyUsed)
-	}
-}
-
-func (c *config) loadSingleComponent(path string) (string, error) {
-	pluginName := filepath.Base(path)
-
-	// On Windows, ignore any plugins that don't end in .exe.
-	// We could do a full PATHEXT parse, but this is probably good enough.
-	if runtime.GOOS == "windows" && strings.ToLower(filepath.Ext(pluginName)) != ".exe" {
-		return "", fmt.Errorf("error loading plugin %q, no exe extension", path)
+	componentList := &strings.Builder{}
+	for _, path := range pluginPaths {
+		fmt.Fprintf(componentList, "- %s\n", path)
 	}
 
-	if _, err := os.Stat(path); err != nil {
-		return "", fmt.Errorf("error loading plugin %q: %s", path, err)
-	}
-
-	// If the filename has a ".", trim up to there
-	if idx := strings.Index(pluginName, "."); idx >= 0 {
-		pluginName = pluginName[:idx]
-	}
-
-	switch {
-	case strings.HasPrefix(pluginName, "packer-builder-"):
-		pluginName = pluginName[len("packer-builder-"):]
-		c.Plugins.Builders.Set(pluginName, func() (packersdk.Builder, error) {
-			return c.Plugins.Client(path).Builder()
-		})
-	case strings.HasPrefix(pluginName, "packer-post-processor-"):
-		pluginName = pluginName[len("packer-post-processor-"):]
-		c.Plugins.PostProcessors.Set(pluginName, func() (packersdk.PostProcessor, error) {
-			return c.Plugins.Client(path).PostProcessor()
-		})
-	case strings.HasPrefix(pluginName, "packer-provisioner-"):
-		pluginName = pluginName[len("packer-provisioner-"):]
-		c.Plugins.Provisioners.Set(pluginName, func() (packersdk.Provisioner, error) {
-			return c.Plugins.Client(path).Provisioner()
-		})
-	}
-
-	return pluginName, nil
+	return fmt.Errorf("Your configuration file describes some legacy components: \n%s"+
+		"Packer does not support these mono-component plugins anymore.\n"+
+		"Please refer to our Installing Plugins docs for an overview of how to manage installation of local plugins:\n"+
+		"https://developer.hashicorp.com/packer/docs/plugins/install-plugins",
+		componentList.String())
 }
 
 // This is a proper packer.BuilderFunc that can be used to load packersdk.Builder
