@@ -13,7 +13,7 @@ This release includes the following updates.
 
 ### Predictable plugin loading
 
-To boost stability, Packer no longer loads plugin binaries installed outside of its plugin directory. Additionally, Packer now only loads binaries that have an accompanying SHA256SUM file. In previous versions, Packer automatically loads plugins placed in one of the known directories when the file is named according to one of the following naming conventions:
+Packer no longer loads plugin binaries installed outside of its plugin directory. Additionally, Packer now only loads binaries that have an accompanying SHA256SUM file. In previous versions, Packer automatically loads plugins placed in one of the known directories when the file is named according to one of the following naming conventions:
 
 `packer-plugin-<plugin-name>`
 `packer-plugin-<plugin-name>_v0.0.1_x5.0_darwin_arm64`
