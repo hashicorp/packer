@@ -880,7 +880,7 @@
       },
       {
         "title": "Installing Plugins",
-        "path": "plugins/install-plugins"
+        "path": "plugins/install"
       },
       {
         "title": "Developing Plugins",
