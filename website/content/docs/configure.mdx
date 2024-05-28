@@ -20,7 +20,7 @@ You can place internal configuration files into Packer's `config` directory. Pac
 
 | OS | Path | Notes |
 | --- | ---| --- |
-| Unix | `${HOME}/.config/packer/` | Packer follows the XDG base directory specification by default. As a result, Packer uses `$HOME/.config/packer` as the default directory when the `PACKER_CONFIG_DIR` environment variable is unset or empty. Packer ignores the XDG specification when the `PACKER_CONFIG_DIR` variable is set or when the installation uses `.packer.d`-style directories, for example `$HOME/.packer.d/`. Refer to the [XDG specification](https://specifications.freedesktop.org/basedir-spec/latest/) for additional information. |
+| Unix | `${HOME}/.config/packer/` | Packer follows the XDG base directory specification by default. As a result, Packer uses `$HOME/.config/packer` as the default directory when the `PACKER_CONFIG_DIR` environment variable is unset or empty. Packer ignores the XDG specification when the `PACKER_CONFIG_DIR` variable is set or when the installation uses legacy `.packer.d`-style directories, for example `$HOME/.packer.d/`. Refer to the [XDG specification](https://specifications.freedesktop.org/basedir-spec/latest/) for additional information. |
 | Windows | `%APPDATA%\packer.d\` | |
 
 
@@ -51,7 +51,7 @@ Use basic JSON to configure the file. You can specify the configuration paramete
 configuration file. All parameters are optional. None of these are required, since all have defaults.
 
 - `plugin_min_port`: Number that specifies the lowest port that Packer can use for communicating with plugins. Packer communicates with plugins over TCP connections on your local host. Default is `10000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
-- `plugin_max_port`: Number that specifies highest port that Packer can for communicating with plugins. Packer communicates with plugins over TCP connections on your local host. Default is `25000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
+- `plugin_max_port`: Number that specifies highest port that Packer can for communicating with plugins. Packer communicates with plugins over TCP  connections on your local Unix host. Default is `25000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
 - `builders`: Specifies a type of object that installs plugins. Refer to [Builders](/packer/docs/builders) for additional information. 
 - `commands`: Specifies a type of object that installs plugins. 
 - `post-processors`: Specifies a type of object that installs plugins. Refer to [Post-Processors](/packer/docs/post-processors) for additional information.

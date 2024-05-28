@@ -32,7 +32,7 @@ Specify a version number to install a specific version of the plugin. The follow
 $ packer plugins install github.com/hashicorp/my-plugin 1.0.0
 ```
 
-Use the `--path` option to specify a local plugin binary. The following example installs `my-plugin` from a local folder:
+Use the `--path` option to specify a local plugin binary. The following example installs `my-plugin` from a local binary:
 
 ```shell-session
 $ packer plugins install --path my-plugin github.com/hashicorp/my-plugin
@@ -42,7 +42,7 @@ $ packer plugins install --path my-plugin github.com/hashicorp/my-plugin
 
 You can pass the following arguments:
 
-- `<plugin-binary-source>`: A local or remote source where the plugin binary is available. To download from a remote source, the plugin must be hosted on GitHub. For local binaries, you must also include the `--path` option. Refer to [Installing Plugins](/packer/docs/plugins/install) for additional information about installing plugins.
+- `<plugin-binary-source>`: A remote source where the plugin binary is available. To remotely download from a source, the plugin must be hosted on GitHub. For locally-sourced binaries, you must also include the `--path` option. Refer to [Installing Plugins](/packer/docs/plugins/install) for additional information about installing plugins.
 - `<plugin version>`: A specific version of the plugin to download and install. Packer accepts semantic version numbers that follow the `<major>.<minor>.<patch>` format. If omitted, the command installs the latest plugin version.
 
 ## Options
