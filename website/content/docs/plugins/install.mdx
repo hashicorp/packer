@@ -50,8 +50,8 @@ If you expect to exceed the request rate limit, you can use a GitHub API token t
 1. Specify the name of the plugin and its `version` and `source` parameters. Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
 pinning plugin versions for build reproducibility. Refer to the [`packer` block configuration reference](/packer/docs/templates/hcl_templates/blocks/packer) for additional information.
 
-    The following example configures Packer to install a plugin called `happycloud`. When the template is initialized, Packer downloads version 2.7.0 or newer of the plugin from GitHub:
-
+   The following example configures Packer to install a plugin called `happycloud`. When the template is initialized, Packer downloads version 2.7.0 or newer of the plugin from GitHub:
+   
     ```hcl
     packer {
       required_plugins {
@@ -97,7 +97,7 @@ Refer to [`packer init` command](/packer/docs/commands/init) for additional info
 
 ## Install a plugin under development
 
-You can install and use plugins that are still under development and report as `dev` versions. But if a non-development version of the plugin binary is available, Packer installs the non-development version according to the version constraints configured in the Packer template and uses it in the build.
+You can install and use plugins that are still under development and report as `dev` versions. But if a final version of the plugin binary is available, Packer installs the final version according to the version constraints specified in the Packer template and uses it in the build.
 
 If a development binary, such as a manually-built binary, is available at the specified source, Packer uses it in the build if it is the highest compatible version installed and if no final plugin version with the same version number is installed alongside it.
 
