@@ -209,3 +209,31 @@ func (ts *PackerTestSuite) TestLoadWithOnlyReleaseFlag() {
 		})
 	}
 }
+
+func (ts *PackerTestSuite) TestWithLegacyConfigAndComponents() {
+	pluginDir, cleanup := ts.MakePluginDir("1.0.0")
+	defer cleanup()
+
+	workdir, cleanup := TempWorkdir(ts.T(), "./sample_config.json", "./templates/simple.json", "./templates/simple.pkr.hcl")
+	defer cleanup()
+
+	for _, cmd := range []string{"validate", "build"} {
+		ts.Run(fmt.Sprintf("%s simple JSON template with config.json and components defined", cmd), func() {
+			ts.PackerCommand().UsePluginDir(pluginDir).SetWD(workdir).
+				SetArgs(cmd, "simple.json").
+				AddEnv("PACKER_CONFIG", filepath.Join(workdir, "sample_config.json")).
+				Assert(MustFail(),
+					Grep("Your configuration file describes some legacy components", grepStderr),
+					Grep("packer-provisioner-super-shell", grepStderr))
+		})
+
+		ts.Run(fmt.Sprintf("%s simple HCL2 template with config.json and components defined", cmd), func() {
+			ts.PackerCommand().UsePluginDir(pluginDir).SetWD(workdir).
+				SetArgs(cmd, "simple.pkr.hcl").
+				AddEnv("PACKER_CONFIG", filepath.Join(workdir, "sample_config.json")).
+				Assert(MustFail(),
+					Grep("Your configuration file describes some legacy components", grepStderr),
+					Grep("packer-provisioner-super-shell", grepStderr))
+		})
+	}
+}
