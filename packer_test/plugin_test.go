@@ -276,7 +276,7 @@ func WriteFile(t *testing.T, dest string, content string) {
 // If any file cannot be found, this function will fail
 func TempWorkdir(t *testing.T, files ...string) (string, func()) {
 	var err error
-	tempDir, err := os.MkdirTemp("", "packer-test-workdir-%d")
+	tempDir, err := os.MkdirTemp("", "packer-test-workdir-")
 	if err != nil {
 		t.Fatalf("failed to create temporary working directory: %s", err)
 	}
