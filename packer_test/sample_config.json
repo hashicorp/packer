@@ -1,0 +1,7 @@
+{
+  "disable_checkpoint": true,
+  "disable_checkpoint_signature": true,
+  "provisioners": {
+    "super-shell": "packer-provisioner-super-shell"
+  }
+}
