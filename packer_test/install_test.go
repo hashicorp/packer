@@ -77,10 +77,24 @@ func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
 			SetArgs("plugins", "install", "github.com/hashicorp/hashicups").
 			Assert(MustSucceed())
 	})
+}
 
-	ts.Run("install dev version of a remote plugin with packer plugins install - must fail", func() {
+func (ts *PackerTestSuite) TestRemoteInstallOfPreReleasePlugin() {
+	pluginPath, cleanup := ts.MakePluginDir()
+	defer cleanup()
+
+	ts.Run("try to init with a pre-release constraint - should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
-			SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "v1.0.2-dev").
-			Assert(MustFail(), Grep("Remote installation of pre-release plugin versions is unsupported.", grepStdout))
+			SetArgs("init", "templates/pre-release_constraint.pkr.hcl").
+			Assert(MustFail(),
+				Grep("Invalid version constraint", grepStdout),
+				Grep("Unsupported prerelease for constraint", grepStdout))
+	})
+
+	ts.Run("try to plugins install with a pre-release version - should fail", func() {
+		ts.PackerCommand().UsePluginDir(pluginPath).
+			SetArgs("plugin", "install", "github.com/hashicorp/hashicups", "1.0.2-dev").
+			Assert(MustFail(),
+				Grep("Unsupported prerelease for constraint", grepStdout))
 	})
 }
