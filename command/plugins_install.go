@@ -160,6 +160,18 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			c.Ui.Error(err.Error())
 			return 1
 		}
+
+		hasPrerelease := false
+		for _, con := range constraints {
+			if con.Prerelease() {
+				hasPrerelease = true
+			}
+		}
+		if hasPrerelease {
+			c.Ui.Errorf("Unsupported prerelease for constraint %q", args.Version)
+			return 1
+		}
+
 		pluginRequirement.VersionConstraints = constraints
 	}
 
