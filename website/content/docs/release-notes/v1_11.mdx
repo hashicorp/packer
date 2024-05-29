@@ -13,10 +13,9 @@ This release includes the following updates.
 
 ### Predictable plugin loading
 
-Packer no longer loads plugin binaries installed outside of its plugin directory. Additionally, Packer now only loads binaries that have an accompanying SHA256SUM file. In previous versions, Packer automatically loads plugins placed in one of the known directories when the file is named according to one of the following naming conventions:
+We have simplified the way Packer discovers and loads plugins. Packer no longer loads plugin binaries installed outside its plugin directory. Additionally, Packer now only loads binaries that have an accompanying SHA256SUM file. We have also updated the commands for installing plugins so that most installation workflows can proceed without manually modifying the filesystem. We also focused on providing clear instructions so that you can understand the processes and how to address potential errors.
 
-`packer-plugin-<plugin-name>`
-`packer-plugin-<plugin-name>_v0.0.1_x5.0_darwin_arm64`
+Previous versions of Packer allowed you to install and load plugins in several locations, resulting in various inconsistencies. For example, configuring the `required_plugins` block in HCL2 templates resulted in limited plugin discoverability. This was not only confusing, the number of alternative paths to support also increased the maintenance burden. Because Packer checked several locations before starting to execute, many commands suffered unnecessary performance issues.
 
 Refer to [Installing Plugins](/packer/docs/plugins/install) for details about how to load plugins.
 
