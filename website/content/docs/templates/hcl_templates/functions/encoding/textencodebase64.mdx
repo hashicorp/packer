@@ -1,0 +1,28 @@
+---
+page_title: testencodebase64 - Functions - Configuration Language
+description: The testencodebase64 function converts a UTF-8 NFC input string to a base64 blob that encodes the target encoding's rendering of the input string.
+---
+
+# `textencodebase64` Function
+
+Encodes the input string to the destination encoding.
+The output is base64-encoded to account for HCL's string encoding limitations: they must be UTF-8, NFC-normalised.
+
+Packer uses the "standard" Base64 alphabet as defined in
+[RFC 4648 section 4](https://tools.ietf.org/html/rfc4648#section-4).
+
+The `encoding_name` argument must contain one of the encoding names or aliases recorded in
+[the IANA character encoding registry](https://www.iana.org/assignments/character-sets/character-sets.xhtml).
+
+## Examples
+
+```shell-session
+# Usage: textencodebase64(input_string, encoding_name)
+> textencodebase64("Hello World", "UTF-16LE")
+SABlAGwAbABvACAAVwBvAHIAbABkAA==
+```
+
+## Related Functions
+
+- [`base64encode`](/packer/docs/templates/hcl_templates/functions/encoding/base64encode) performs the opposite operation,
+  encoding the UTF-8 bytes for a string as Base64.
