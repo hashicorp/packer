@@ -141,6 +141,22 @@ func decodeRequiredPluginsBlock(block *hcl.Block) (*RequiredPlugins, hcl.Diagnos
 				})
 				continue
 			}
+
+			hadPrerelease := false
+			for _, constraint := range constraints {
+				if constraint.Prerelease() {
+					hadPrerelease = true
+				}
+			}
+			if hadPrerelease {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid version constraint",
+					Detail:   fmt.Sprintf("Unsupported prerelease for constraint %q", constraintStr),
+					Subject:  attr.Expr.Range().Ptr(),
+				})
+			}
+
 			vc.Required = constraints
 			rp.Requirement = vc
 
