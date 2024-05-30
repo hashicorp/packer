@@ -49,6 +49,8 @@ get_prs | while read line; do
     if [[ "$line" =~ "bad" ]]; then
         exit 1
     fi
+    echo "Press enter to continue with next entry."
+    vared -ch ok
 done
 
 #TODO: just generate it automatically using PR titles and tags
