@@ -1,4 +1,4 @@
-## 1.11.0 (Upcoming)
+## 1.11.0 (2024-05-30)
 
 ### NOTES:
 * A LICENSE.txt file has been added to the Packer release artifacts.
@@ -31,7 +31,13 @@
 * Packer users can now track Packer version and plugin versions used for each
      build artifact in HCP Packer.
      [GH-12866](https://github.com/hashicorp/packer/pull/12866)
-
+* hcl2: add textencodebase64 and textdecodebase64 funcs
+     For feature parity with Terraform, and since having access to strings
+     encoded in something that is not UTF-8 is required in some cases, we add
+     both the textencodebase64 and textdecodebase64 functions to HCL2 templates.
+     Please note these functions return base64 encoded byte slices because of how
+     cty/hcl defines strings (NFC normalised, UTF-8 encoded).
+     [GH-12997](https://github.com/hashicorp/packer/pull/12997)
 
 ### SECURITY:
 * Bump github.com/go-jose/go-jose/v3 to address GHSA-c5q2-7r4c-mv6g.
@@ -39,12 +45,20 @@
 * Bump golang.org/x/net to v0.24.0 to address GO-2024-2687.
      [GH-12924](https://github.com/hashicorp/packer/pull/12924)
 
-
 ### IMPROVEMENTS:
-* core: Bump github.com/hashicorp/hcp-sdk-go from 0.90.0 to 0.92.0.
+* core: Bump github.com/hashicorp/hcp-sdk-go from 0.90.0 to 0.96.0.
      [GH-12935](https://github.com/hashicorp/packer/pull/12935)
+     [GH-12942](https://github.com/hashicorp/packer/pull/12942)
+     [GH-12960](https://github.com/hashicorp/packer/pull/12960)
+     [GH-12979](https://github.com/hashicorp/packer/pull/12979)
 * core: Bump github.com/hashicorp/packer-plugin-sdk from 0.5.2 to 0.5.3
      [GH-12932](https://github.com/hashicorp/packer/pull/12932)
+* core: Bump go-getter/v2 from 2.2.1 to v2.2.2
+     [GH-12988](https://github.com/hashicorp/packer/pull/12988)
+* datasource/http: don't error on 2xx code
+     Previous versions of Packer only supported 200 as a success case for the http
+     datasource. This change makes any status code from 200 to 299 successful.
+     [GH-12989](https://github.com/hashicorp/packer/pull/12989)
 * core: Move to predictable plugin loading schema -  Packer will now only load
      plugins stored under the [Packer plugin directory](https://developer.hashicorp.com/packer/docs/configure#packer-s-plugin-directory) using the expected namespaced
      directory and CHECKSUM files.
@@ -77,7 +91,19 @@
      1.0.0-dev). Users are encouraged to notify plugin maintainers of any
      version mismatches.
      [GH-12915](https://github.com/hashicorp/packer/pull/12915), [GH-12953](https://github.com/hashicorp/packer/pull/12953), [GH-12972](https://github.com/hashicorp/packer/pull/12972)
-
+* core: don't load plugins with metadata in name
+     To avoid confusion with multiple plugins that report the same effective version,
+     plugins installed need to have no metadata in their name.
+     When installed through Packer commands, the metadata is scrubbed from the name of the
+     installed plugin binary, but manually it may still be possible, so we enforce
+     that scrubbing at load-time as well.
+     [GH-12980](https://github.com/hashicorp/packer/pull/12980)
+* core: Error when multiple paths are specified for PACKER_PLUGIN_PATH
+     Since Packer 1.11 removed the capability for PACKER_PLUGIN_PATH to specify
+     multiple directories separated by `:` or `;` (depending on the platform), we
+     are explicitly erroring when this is discovered, with suggestions as to how
+     to fix the problem.
+     [GH-12967](https://github.com/hashicorp/packer/pull/12967)
 * core: Version metadata support for plugins. Plugins may now formally have metadata
      in their versions, Packer supports it, and applies the semver recommendations on
      them, i.e. they are ignored for comparison/sorting purposes, but allowed for
@@ -133,7 +159,11 @@ If, however, a 1.1.1 release version of the plugin is available, it will have pr
 * core/hcp: fix potential race condition when storing plugin details to the HCP
      Packer metadata storage map.
      [GH-12936](https://github.com/hashicorp/packer/pull/12936)
-
+* core: fix plugin listing on Windows
+     This fix addresses bugs present in the alpha releases of 1.11, where
+     the discovery of Windows binaries were not matching against the
+     filename extension (.exe).
+     [GH-12981](https://github.com/hashicorp/packer/pull/12981)
 
 ## 1.10.3 (April 22, 2024)
 
