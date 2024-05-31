@@ -52,17 +52,13 @@ configuration file. All parameters are optional. None of these are required, sin
 
 - `plugin_min_port`: Number that specifies the lowest port that Packer can use for communicating with plugins. Packer communicates with plugins over TCP or Unix sockets on your local host. Default is `10000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
 - `plugin_max_port`: Number that specifies highest port that Packer can for communicating with plugins. Packer communicates with plugins over TCP  connections on your local Unix host. Default is `25000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
-- `builders`: Specifies a type of object that installs plugins. Refer to [Builders](/packer/docs/builders) for additional information. 
-- `commands`: Specifies a type of object that installs plugins. 
-- `post-processors`: Specifies a type of object that installs plugins. Refer to [Post-Processors](/packer/docs/post-processors) for additional information.
-- `provisioners`: Specifies a type of object that installs plugins. Refer to [Provisioners](/packer/docs/provisioners) for additional information. 
 
 The [`packer init`](/packer/docs/commands/init) command takes precedence over JSON-configure settings when installing plugins.
 
 
 ## Configure the cache directory
 
-Packer uses a cache directory to download large files and for logistics around large file download. By default, Packer caches files in the `./packer_cache/` folder of the current directory. Use the `PACKER_CACHE_DIR` environment variable to configure the cache directory. Refer to [`PACKER_CACHE_DIR`](/packer/docs/configure#packer_config_dir) for details.
+Packer uses a cache directory to download large files and for logistics around large file download. By default, Packer caches files in the `.packer_cache` folder of the current directory. Use the `PACKER_CACHE_DIR` environment variable to configure the cache directory. Refer to [`PACKER_CACHE_DIR`](/packer/docs/configure#packer_config_dir) for details.
 
 We recommend using the same Packer cache directory across your builds if multiple builds perform similar actions. This is to avoid downloading the same large file, such as an ISO, multiple times.
 
