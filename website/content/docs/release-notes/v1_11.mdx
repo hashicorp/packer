@@ -1,0 +1,39 @@
+---
+page_title: Packer v1.11 release notes
+description: Learn about the changes in Packer v 1.11
+---
+
+# Packer v1.11 release notes
+
+This page describes changes to Packer in v1.11. Refer to the [Packer repository](https://github.com/hashicorp/packer/releases) for information about all releases.
+
+## New features
+
+This release includes the following updates.
+
+### Predictable plugin loading
+
+We have simplified the way Packer discovers and loads plugins. Packer no longer loads plugin binaries installed outside its plugin directory. Additionally, Packer now only loads binaries that have an accompanying SHA256SUM file. We have also updated the commands for installing plugins so that most installation workflows can proceed without manually modifying the filesystem. We also focused on providing clear instructions so that you can understand the processes and how to address potential errors.
+
+Previous versions of Packer allowed you to install and load plugins in several locations, resulting in various inconsistencies. For example, configuring the `required_plugins` block in HCL2 templates resulted in limited plugin discoverability. This was not only confusing, the number of alternative paths to support also increased the maintenance burden. Because Packer checked several locations before starting to execute, many commands suffered unnecessary performance issues.
+
+Refer to the following topics for additional information:
+
+- [Installing Plugins](/packer/docs/plugins/install) for details about how to load plugins.
+- [Upgrade to v1.11](/packer/docs/upgrade/v1_11) for information about how these changes may affect your existing workflows.
+
+## Deprecations
+
+The following features, workflows, and components are deprecated and are no longer supported.
+
+### Legacy single-component plugins
+
+Packer no longer supports single-component plugins, such as legacy plugins that follow the deprecated naming convention of `packer-builder-<name>` or `packer-provisioner-<name>`. Packer only supports multi-component plugins, such as the Docker plugin for Packer.
+
+### Loading plugin binaries named `packer-plugin-<name>`
+
+Packer no longer loads plugin binaries following the naming convention of `packer-plugin-<name>`. Packer loads only plugins stored under `PACKER_PLUGIN_PATH` using the expected namespaced directory and CHECKSUM files.
+
+## Bug fixes
+
+Fixed an issue with how Packer discovers plugins to ensure proper version ordering. Packer no longer orders plugin versions lexicographically. Instead, Packer now loads versions that have a greater semantic number.  For example, version `1.0.9` is lexicographically greater than `1.0.10`, but `1.0.10` is semantically greater than `1.0.9`. This fix results in Packer loading `1.0.10` instead of `1.0.9`. 

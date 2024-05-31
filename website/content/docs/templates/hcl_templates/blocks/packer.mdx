@@ -1,8 +1,7 @@
 ---
-page_title: packer - Blocks
+page_title: packer block reference
 description: |-
-  The "packer" configuration section is used to configure some behaviors
-  of Packer itself.
+  Configuration reference for the `packer` block in Packer templates written in HCL.  
 ---
 
 # Packer Settings
@@ -78,61 +77,21 @@ This is a great way to pin approved versions of a plugin that can be installed a
 
 For more information on plugins, refer to [Plugins](/packer/docs/plugins).
 
-## Source Addresses
+### Define plugin source
+Specify the path to the plugin source code in the `source` field using the following format:
 
-A plugin's source address is conceptually where a plugin binary can be downloaded from. Packer also uses this source as a global unique identifier. 
-When used in conjunction with the `packer init` command a plugin's source address tells Packer where to download it. 
+`<HOSTNAME>/[SUBFOLDER/]<NAMESPACE>/<TYPE>`
 
-At minimum source addresses consist of three parts delimited by slashes (`/`), as
-follows:
+- `<Hostname>`: Specifies the hostname of the location or service that distributes the plugin. Packer only supports using `github.com` as the hostname when you install plugins using the `packer init` command. You can point to non-GitHub addresses, such as an internal proxy or plugin binary store, but Packer only pins the required version if you install the plugin using the `packer plugins install –path` command. Refer to the following documentation for additional information.
+  - [`init` command](/packer/docs/commands/init)
+  - [`plugins install`](/packer/docs/commands/plugins/install)
+- `<Subfolder>`: The subfolder path segment is an optional part of the address that enables you to download plugin sources from custom addresses. You can specify a source containing up to 13 total path segments.   
+- `<Namespace>`: An organizational namespace within the specified host. This often is the organization that publishes the plugin.
+  Type: A short name for the platform or system the plugin manages. The type is usually the plugin's preferred local name.
 
--> **Note:** In Packer 1.11 and later source addresses support one or more sub-folder paths
-after the hostname to support users who require source addresses with more than three parts. 
-While `packer init` only supports remote installation of GitHub source addresses, running `packer init` on 
-plugins with custom source addresses allows users to take advantages of version pinning features offered by the 
-`required_plugins` block. For details on installing plugins using custom source addresses refer to [packer plugins install](/packer/docs/commands/plugins/install).
+For example, the value of the `source` field for a plugin named `myawesomecloud` is `github.com/hashicorp/myawesomecloud` if it belongs to the `hashicorp` namespace on the host `github.com`.
 
-`<HOSTNAME>/<NAMESPACE>/<TYPE>`
-
-- **Hostname:** The hostname of the location/service that
-  distributes the plugin.
-
-- **Namespace:** An organizational namespace within the specified host.
-  This often is the organization that publishes the plugin.
-
-- **Type:** A short name for the platform or system the plugin manages. The
-  type is usually the plugin's preferred local name.
-
-For example, the fictional `myawesomecloud` plugin could belong to the
-`hashicorp` namespace on `github.com`, so its `source` could be
-`github.com/hashicorp/myawesomecloud`,
-
--> Note: the actual _repository_ that myawesomecloud comes from must always have
-the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the
-`required_plugins` block omits the redundant `packer-plugin-` repository prefix
-for brevity.
-
-The source address with all components given explicitly is called the
-plugin's _fully-qualified address_. You will see fully-qualified address in
-various outputs, like error messages.
-
-### Non-GitHub Source Addresses
-As mentioned above a plugin's source address is its global identifier that provides users codified information on where a plugin is sourced and can be obtained. 
-In cases where a plugin source does not originate from a GitHub repository, such as a plugin binary store, custom source addresses can help
-users taken advantage of plugin version pinning via required_plugins block and forego the use of `packer init` in favor of `packer plugins install --path`.
-
-For example if your organization has a need for pre-downloading approved Packer plugins into an internal artifact store (e.g mycompany.com/mirror/hashicorp/happycloud)
-you can use the `packer plugins install --path` command to install the binary with the custom source address and add an entry for it as a required plugin in your template. 
-
-```shellsession
-packer plugins install --path path/to/binary mycompany.com/mirror/hashicorp/happycloud
-```
-
-The provided source address will translate directly to the file hierarchy in which the plugin binaries will be installed.
-After a successful installation the custom source address can be added to your template to take advantage of version pinning for the `mycompany.com/mirror/hashicorp/happycloud` plugin. 
-Invoking `packer init` on the template will respond without error and ensure that the correct version of the plugin is loaded. 
-
-If however, the plugin is not installed at the time you run `packer init` Packer will error indicating that only GitHub source addresses are supported for remote installation. 
+The actual repository that `myawesomecloud` comes from must always have the name format `github.com/hashicorp/packer-plugin-myawesomecloud`, but the `required_plugins` block omits the redundant `packer-plugin-` repository prefix for brevity.
 
 ## Version Constraints
 
