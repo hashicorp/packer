@@ -1,4 +1,4 @@
-## 1.11.0 (2024-05-30)
+## 1.11.0 (2024-05-31)
 
 ### NOTES:
 * A LICENSE.txt file has been added to the Packer release artifacts.
