@@ -3,82 +3,73 @@ page_title: Upgrade to v1.11
 description: Learn how to upgrade your Packer installation to v1.11
 ---
 
-# Upgrade from v1.10
+# Upgrade to v1.11
 
-Modifications to existing templates are not required between Packer 1.10 and 1.11.
+This topic describes upgrade considerations for Packer v1.11. Refer to the [v1.11 release notes](/packer/docs/release-notes/v1_11) for details about changes in v1.11.
 
-However, plugin management may need to change as we removed support for some alternatives:
+## Overview
 
-* Single-component plugins (e.g. `packer-builder-hashicups-coffee`) are not supported anymore.
-  If you are still using those plugins, we urge you to update your dependencies to multi-component plugins (e.g. `packer-plugin-hashicups`)
+You can use the upgrade command for the package manage you installed Packer with or download and replace the existing binary to upgrade Packer. Refer to [Install Packer](/packer/install) for instructions
 
-* Plugins now all have to be installed in the plugins directory, under a hierarchy that matches the expected source, with a specific naming convention, and with an accompanying sumfile.
-  This method of installation is now the standard with all commands, including `packer init` and `packer plugins install`.
-  If you are managing plugin installation outside of Packer's plugin directory, we advise you to revisit your installation process
-  to work with `packer plugins install` or `packer init` for a consistent plugin management workflow.
+## Upgrade from 1.10 
 
-* Version standardization: version management for Packer plugins was permissive in previous versions.
-  Packer 1.11 standardizes on the use of semantic versioning for plugin versions within `packer init`,
-  with added support for `-dev` prereleases via the `packer plugins install --path` command.
+Take the following actions as a result of changes between v1.10 and v1.11.
 
-* Source relaxation: plugins that are available on non-Github hosts may now be installed through the `packer plugins install --path` command.
-  This will install the plugin in the Packer plugin directory, creating the file hierarchy that matches the supplied source.
-  This means you will now be able to use `required_plugins` in your templates with non-Github sources, and have Packer discover it as it would with Github sources.
-  This enables you to add version constraints on those plugins if you so choose.
-  **Note**:  while you can add non-GitHub sources to `required_plugins` for validation purposes, remote installation is still limited to Github-sourced plugins.
+### Review templates
 
-# Troubleshooting
+Packer v1.11 supports existing v1.10 templates. No action is required. 
+
+### Review plugin management processes
+
+Because we have made the following changes to how Packer manages plugins, you should review your plugin management processes and make changes accordingly:
+
+* Single-component plugins are no longer supported. Update your dependencies to multi-component plugins. For example, update `packer-builder-hashicups-coffee` to `packer-plugin-hashicups`.
+
+* Packer requires all plugins to be installed in the plugins directory. Plugins must follow the hierarchy that matches the expected source. Plugins must follow the `packer-plugin-<name>` naming convention. Plugins must be accompanied by a `SHA256SUM` file. If you manage plugin installations outside of Packer's plugin directory, modify your installation processes to meet these requirements. Refer to [Install Plugins](/packer/docs/plugins/install) for additional information.
+
+* Packer requires semantic versioning for plugins installed from Packer HCL2 templates. Refer to [Requirements](/packer/docs/plugins/install#requiremets) in the Packer plugin installation documentation for additional information.
+
+* You can use `-dev` pre-release versions of plugins in your builds using the `packer plugins install --path` command. Refer to [Use a plugin under development](/packer/docs/plugins/install#use-a-plugin-under-development).
+
+* You can use the `packer plugins install --path` command to install plugins from non-Github hosts. This command installs the plugin in the Packer plugin directory and creates the file hierarchy that matches the supplied source. As result, Packer is able to discover non-Github sources specified in the `required_plugins` blocks. This enables you to add version constraints on those plugins if you so choose.
+  Although you can add non-GitHub sources to `required_plugins` for validation purposes, remote installation is still limited to Github-sourced plugins. Refer to [Define plugin source](/packer/docs/templates/hcl_templates/blocks/packer#define-plugin-source) in the `required_plugins` reference documentation for additional information.
+
+## Troubleshooting
 
 This section provides guidance on potential issues you may experience after upgrading.
 
-## Missing plugins error
+### Missing plugins error
 
 Packer may report that you one or more plugins are missing after the upgrade.
-This might happen if you had installed the plugin using one of the now unsupported methods of installation:
+This may occur if you had used one of the following plugin installation methods that are longer supported:
 
-* in the directory Packer is invoked from
-* alongside the Packer binary
-* under the root of the `PACKER_PLUGIN_PATH` directory
+* Installed the plugin to the directory Packer is invoked from.
+* Installed the plugin alongside the Packer binary.
+* Installed the plugin under the root of the `PACKER_PLUGIN_PATH` directory.
 
 For any missing components, you may need to reinstall their respective plugins as described in [Installing Plugins](/packer/docs/plugins/install).
 
-## Plugin local installation
+### Use `required_plugins` message
 
-If you cannot remotely install a plugin for any reason (firewalls, Github blocked, etc.), you can use the local installation methods.
-After downloading the plugin binary, you can manually install the plugin binary using `packer plugins install --path` command.
-This will place the plugin binary in the location that Packer expects it to be, with the correct naming scheme and sumfile.
+Packer may print a message directing you to specify plugins in the `required_plugins` block in your template and install them using the `packer init` command.
+This is the preferred way to manage the plugins, but it is not required. You can still install plugins manually using the `packer plugins install` command. Refer to [Installing Plugins](/packer/docs/plugins/install)
 
-## Using `required_plugins`
+### Blocked remote access to plugin 
 
-In some cases, Packer will hint at using `required_plugins` block in your template.
-With such a block, this opens the possibility to use `packer init` to automatically install plugins, and check that your environment is ready to build your template.
-While this is the preferred way to manage the plugins you need in order to build your images, this is not a hard requirement.
-You can still install plugins independently of a template by using the `packer plugins install` command variants.
+If you cannot remotely install a plugin for any reason, such as a firewall configuration or GitHub is blocking access, you can use the local installation methods. Refer to [Installing Plugins](/packer/docs/plugins/install)
 
-For details on what each command offers you may refer to their respective command references:
-* [`packer init`](https://developer.hashicorp.com/packer/docs/commands/init)
-* [`packer plugins install`](https://developer.hashicorp.com/packer/docs/commands/plugins/install).
+### Install plugins from legacy JSON template 
 
-**Note**: Legacy JSON users must use `packer plugins install`, as the required_plugins block is only available within HCL templates.
+The `required_plugins` block is only available within HCL templates. Legacy JSON users must use `packer plugins install` 
 
 ## Installing plugins outside of namespace directories
 
-Previously Packer supported the use of plugins as `packer-plugin-<name>` under a single root directory.
-In Packer 1.11 this functionality was removed to enhance support for using non-GitHub and development prerelease plugin binaries within required_plugins block.
+Packer no longer supports installing plugins that are named `packer-plugin-<name>` under a single root directory.
+You can still use Packer CLI commands to install plugins and customise which root directory manages those plugins by setting the `PACKER_PLUGIN_PATH` environment variable so that it points to the custom directory.
+Once set, Packer automatically creates the subdirectories that match the sources of the plugins under that directory.
 
-If you want to use Packer commands like `packer init` or `packer plugins install`, and customise which root directory manages those plugins,
-you can set the `PACKER_PLUGIN_PATH` environment variable so it points to the directory of your choosing.
-Once set, Packer will automatically create the subdirectories that match the sources of the plugins you're requiring/using under that directory.
+## Reference
 
-Note: older versions of Packer supported defining multiple directories for `PACKER_PLUGIN_PATH`, this is no longer the case with Packer 1.11.
-
-## Remote installation and non-Github sources
-
-If you are installing plugins from sources that are not Github, you will not be able to automatically install them with `packer init`.
-You will still be able to install them with `packer plugins install --path` once you have downloaded a binary from the source.
-In cases like those, `required_plugins` have two advantages:
-
-1. Documentation: this lets users of your template know which plugins they should install in order to build.
-   This also lets users know where those plugins are found so they can download the expected binary.
-2. Validation: because `packer init` checks that the required plugins are installed in the expected versions, this makes sure
-   you do have the right versions of a plugin installed locally.
+Refer to the following topics for additional information about using the Packer CLI to install plugins:
+* [`packer init`](https://developer.hashicorp.com/packer/docs/commands/init)
+* [`packer plugins install`](https://developer.hashicorp.com/packer/docs/commands/plugins/install).
