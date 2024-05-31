@@ -1,21 +1,46 @@
 ---
 description: |
-  Packer plugins let you add Packer functionality without modifying
-  the core source code. Packer plugins are able to add new builders,
-  provisioners, hooks, and more.
+  This topic provides overview information about installing and loading Packer plugins
 page_title: Plugins
 ---
 
-# Packer Plugins
+# Plugin installation overview
 
-Packer plugins are separate, standalone applications that perform tasks during each build.
+This topic provides overview information about installing and loading Packer plugins. Plugins are standalone applications that perform additional tasks during each build.
 
-During a `packer build`, the process list shows `packer-` prefixed applications. One of those applications is the Packer binary, and the rest are plugins. Packer launches one plugin process for each component in the build.
+## Introduction
 
-The Packer binary has a set of built-in plugins that it can find and run automatically. You can also define a list of external plugins in your template for Packer to run and communicate with throughout the build. These external plugins extend Packer functionality without modifying the core source code.
+The Packer binary includes a set of built-in components that are automatically usable. You can also install external plugins for Packer to run and communicate with throughout the build. These external plugins extend Packer functionality without modifying the core source code. Packer launches one plugin process for each component in the build.
 
-Refer to the following plugin documentation:
-- **Built-in Plugins:** Use [builders](/packer/docs/builders) to create machines and images, [data sources](/packer/docs/datasources) to fetch data, [provisioners](/packer/docs/provisioners) to install and configure machine images, and [post-processors](/packer/docs/post-processors) to perform additional tasks after provisioning
-- **External Plugins:** Review the documentation for [available external plugins](/packer/plugins) not included with the Packer binary
-- **Installing Plugins:** [Installation Guides](/packer/docs/plugins/install-plugins) to add external plugins to your Packer template and install the binaries
-- **Developing Plugins:** Get started [creating custom external plugins](/packer/docs/plugins/creation)
+## Workflows
+
+To use a plugin with Packer, you must install the plugin code and its SHA256SUM file into the Packer plugins directory. Refer to [Installing Plugins](/packer/docs/plugins/install) for instructions.
+
+## Where Packer stores plugins
+
+Packer stores external plugins that are downloaded during initialization into the plugins directory. The default plugins directory is `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows. Refer to [`PACKER_PLUGIN_PATH`](/packer/docs/configure#packer_plugin_path) in the configuration reference for additional information.
+
+## Guidance
+
+Refer to the following plugin documentation for details about the plugin installation process:
+
+### Installing plugins
+
+Refer to [Installing Plugins](/packer/docs/plugins/install) for instructions on adding external plugins to your Packer template and installing the binaries.
+
+### External plugins
+
+Refer to the [Packer Integrations](/packer/integrations) documentation to learn about the available external plugins not included with the Packer binary.
+
+
+### Built-in plugins
+
+- Packer uses plugins called _builders_ to create machines and images. Refer to [Builders](/packer/docs/builders) for additional information.
+- The _data sources_ plugin fetches data to use in a template. Refer to [Data Sources](/packer/docs/datasources) for additional information.
+- Plugins called _provisioners_ install and configure machine images after booting. Refer to [Provisioners](/packer/docs/provisioners) for additional information.
+- _Post-processors_ perform additional tasks after provisioning. Refer to [Post-Processors](/packer/docs/post-processors) for additional information.
+
+
+### Developing plugins
+
+Refer to the [Developing Plugins](/packer/docs/plugins/creation) to learn how to create custom external plugins.

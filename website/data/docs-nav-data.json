@@ -851,6 +851,24 @@
     "path": "configure"
   },
   {
+    "title": "Release notes",
+    "routes": [
+      {
+        "title": "v1.11",
+        "path": "release-notes/v1_11"
+      }
+    ]
+  },
+  {
+    "title": "Upgrades",
+    "routes": [
+      {
+        "title": "Upgrade to v1.11",
+        "path": "upgrade/v1_11"
+      }
+    ]
+  },
+  {
     "divider": true
   },
   {
@@ -862,7 +880,7 @@
       },
       {
         "title": "Installing Plugins",
-        "path": "plugins/install-plugins"
+        "path": "plugins/install"
       },
       {
         "title": "Developing Plugins",
