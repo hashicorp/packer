@@ -59,7 +59,7 @@ configuration. The exact semantics of the merge are left to the builder author.
 
 We recommend that you use the
 [mapstructure](https://godoc.org/github.com/mitchellh/mapstructure) library to
-decode the interface{} into a meaningful structure. Mapstructure will take an
+decode the `interface{}` into a meaningful structure. Mapstructure will take an
 `interface{}` and decode it into an arbitrarily complex struct. If there are any
 errors, it generates very human friendly errors that can be returned directly
 from the prepare method. You can find many usage examples of this library within
