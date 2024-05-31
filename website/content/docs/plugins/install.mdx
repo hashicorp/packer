@@ -95,9 +95,8 @@ $ packer init --upgrade .
 
 Refer to [`packer init` command](/packer/docs/commands/init) for additional information.
 
-## Install a plugin under development
+## Use a plugin under development
 
-You can install and use plugins that are still under development and report as `dev` versions. But if a final version of the plugin binary is available, Packer installs the final version according to the version constraints specified in the Packer template and uses it in the build.
 
 If a development binary, such as a manually-built binary, is available at the specified source, Packer uses it in the build if it is the highest compatible version installed and if no final plugin version with the same version number is installed alongside it.
 
@@ -143,7 +142,6 @@ When a non-development version of 1.1.1 becomes available, the binary takes prec
           └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
 
-Refer to the documentation in the [Packer plugin scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding?tab=readme-ov-file#build-from-source) for additional information.
 
 ### Example Docker plugin
 
@@ -183,6 +181,8 @@ Complete the following steps to build and install a custom version of the Docker
     ```
 
 For convenience, the makefile in the Packer plugin scaffolding repository builds and installs development binaries using `make dev`.
+
+Refer to the documentation in the [Packer plugin scaffolding repository](https://github.com/hashicorp/packer-plugin-scaffolding?tab=readme-ov-file#build-from-source) for additional information.
 
 ## Authenticate requests to the GitHub API
 

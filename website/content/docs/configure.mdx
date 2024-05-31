@@ -50,7 +50,7 @@ You use a JSON file to set core Packer settings. Packer checks the following pat
 Use basic JSON to configure the file. You can specify the configuration parameters for the core
 configuration file. All parameters are optional. None of these are required, since all have defaults.
 
-- `plugin_min_port`: Number that specifies the lowest port that Packer can use for communicating with plugins. Packer communicates with plugins over TCP connections on your local Unix host. Default is `10000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
+- `plugin_min_port`: Number that specifies the lowest port that Packer can use for communicating with plugins. Packer communicates with plugins over TCP or Unix sockets on your local host. Default is `10000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
 - `plugin_max_port`: Number that specifies highest port that Packer can for communicating with plugins. Packer communicates with plugins over TCP  connections on your local Unix host. Default is `25000`. We recommend setting a wide range between `plugin_min_port` and `plugin_max_port` so that Packer has access to at least 25 ports on a single run.
 - `builders`: Specifies a type of object that installs plugins. Refer to [Builders](/packer/docs/builders) for additional information. 
 - `commands`: Specifies a type of object that installs plugins. 
