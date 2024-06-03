@@ -11,6 +11,6 @@ import (
 var ArtificePluginVersion *version.PluginVersion
 
 func init() {
-	ArtificePluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	ArtificePluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

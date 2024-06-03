@@ -11,6 +11,6 @@ import (
 var ManifestPluginVersion *version.PluginVersion
 
 func init() {
-	ManifestPluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	ManifestPluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

@@ -11,6 +11,6 @@ import (
 var ShellLocalPluginVersion *version.PluginVersion
 
 func init() {
-	ShellLocalPluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	ShellLocalPluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

@@ -11,6 +11,6 @@ import (
 var WindowsRestartPluginVersion *version.PluginVersion
 
 func init() {
-	WindowsRestartPluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	WindowsRestartPluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }
