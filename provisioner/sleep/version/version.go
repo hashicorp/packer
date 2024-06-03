@@ -11,6 +11,6 @@ import (
 var SleepProvisionerVersion *version.PluginVersion
 
 func init() {
-	SleepProvisionerVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	SleepProvisionerVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

@@ -11,6 +11,6 @@ import (
 var NullPluginVersion *version.PluginVersion
 
 func init() {
-	NullPluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	NullPluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

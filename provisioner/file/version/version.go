@@ -11,6 +11,6 @@ import (
 var FileProvisionerVersion *version.PluginVersion
 
 func init() {
-	FileProvisionerVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	FileProvisionerVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }

@@ -306,7 +306,7 @@ func TestHelperPlugins(t *testing.T) {
 	for _, mock := range allMocks {
 		plugin, found := mock[pluginName]
 		if found {
-			plugin.SetVersion(version.InitializePluginVersion("1.0.0", ""))
+			plugin.SetVersion(version.NewPluginVersion("1.0.0", "", ""))
 			err := plugin.RunCommand(args...)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)

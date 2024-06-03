@@ -11,6 +11,6 @@ import (
 var ChecksumPluginVersion *version.PluginVersion
 
 func init() {
-	ChecksumPluginVersion = version.InitializePluginVersion(
-		packerVersion.Version, packerVersion.VersionPrerelease)
+	ChecksumPluginVersion = version.NewPluginVersion(
+		packerVersion.Version, packerVersion.VersionPrerelease, packerVersion.VersionMetadata)
 }
