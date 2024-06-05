@@ -211,7 +211,7 @@ func (c *Compressor) BenchmarkLZ4Reader(b *testing.B) {
 }
 
 func (c *Compressor) BenchmarkXZWriter(b *testing.B) {
-	cw := xz.NewWriter(c.w)
+	cw, _ := xz.NewWriter(c.w)
 	b.ResetTimer()
 
 	_, err := io.Copy(cw, c.r)
@@ -223,7 +223,7 @@ func (c *Compressor) BenchmarkXZWriter(b *testing.B) {
 }
 
 func (c *Compressor) BenchmarkXZReader(b *testing.B) {
-	cr := xz.NewReader(c.w)
+	cr, _ := xz.NewReader(c.w)
 	b.ResetTimer()
 
 	_, err := io.Copy(io.Discard, cr)
