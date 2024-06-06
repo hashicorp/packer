@@ -894,10 +894,6 @@
             "path": "plugins/creation/custom-builders"
           },
           {
-            "title": "Plugin Loading - Specification",
-            "path": "plugins/creation/plugin-load-spec"
-          },
-          {
             "title": "Custom Post-Processors",
             "path": "plugins/creation/custom-post-processors"
           },
@@ -912,6 +908,10 @@
           {
             "title": "HCP Packer Support",
             "path": "plugins/creation/hcp-support"
+          },
+          {
+            "title": "Plugin Loading Specification",
+            "path": "plugins/creation/plugin-load-spec"
           }
         ]
       }
