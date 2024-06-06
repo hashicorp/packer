@@ -1,7 +1,7 @@
 ---
 description: |
   Packer needs plugins in order to build artifacts from a template.
-  This page explains how discovery/loading works in more detail.
+  This page explains how plugins are discovered and loaded by Packer.
 page_title: Plugin Loading - Specification
 ---
 
@@ -10,12 +10,12 @@ page_title: Plugin Loading - Specification
 This document aims to document how Packer discovers plugins on the local filesystem.
 This is not meant for beginners with Packer but instead serves as a technical reference for curiosity and troubleshooting purposes.
 
-If you've never worked with Packer before, you are advised to read the [Installing Plugins](/packer/docs/plugins/install) page instead.
+If you are new to Packer,  you are advised to start with the [Installing Plugins](/packer/docs/plugins/install) page for details on plugin installation.  
 
 ## Plugin sources
 
 A source is conceptually the distribution point for a plugin. It is a URL to that location. It is intended to document where to get a plugin binary, and for Packer to remotely install plugins from this source, if compatible.
-If Packer cannot install from that source remotely, it can still be installed with `packer plugins install --path <path-to-binary> <source>`.
+If Packer cannot install from that source remotely, a plugin can still be installed with `packer plugins install --path <path-to-binary> <source>`.
 
 As of Packer 1.11.0, sources are mandatory to install plugins.
 A source will also reflect where a plugin is installed on the local filesystem, as a series of directories.
@@ -31,7 +31,7 @@ There are some conventions to adopt when declaring a source:
 * The URL must contain at least a host and two parts to the URL.
 * The URL must not have over 15 parts, in addition to the host.
 * `/` is the only separator that can be used for the source.
-* What is in the URL needs to be compatible with the filesystem you are installing the plugin in (Packer does not check for that, but will error).
+* The full source URL needs to be compatible with the filesystem you are installing the plugin onto. Packer does not check for unsupported characters within the URL, but will error if a valid directory tree can not be created.
 
 The last part of the source URL is the plugin's name.
 It must always have the raw name of the plugin, without the `packer` or `packer-plugin` prefix.
@@ -61,6 +61,8 @@ If you want to change that behavior, there are two alternatives:
 
 **Note**: `PACKER_PLUGIN_PATH` has precedence over `PACKER_CONFIG_DIR`, if it is defined, `PACKER_CONFIG_DIR` will be ignored for plugin installation and loading.
 
+Refer to [Configuring Packer](/packer/docs/configure) for a full list of environment variables. 
+
 ## Plugin installation directories
 
 All plugins must be installed under a root plugin directory.
@@ -80,7 +82,7 @@ Each plugin version must have only one binary per version, accompanied by a matc
 
 ### Plugin binary naming convention
 
-Plugin binaries must conform to a naming convention for Packer to be able to discover and load them.:
+In order for Packer to discover and load a plugin binary it must conform to the following naming convention :
 
 `packer-plugin-<name>_<version>_<api_version>_<os>_<arch>[.exe]`
 
@@ -111,7 +113,7 @@ Explicitly required plugins are an HCL2 specificity.
 They are declared through `required_plugins` blocks.
 These allow you to specify an exact source and version constraints on that plugin requirement.
 
-Each of the plugins declared this way will have precedence over what the second phrase will gather.
+Each of the plugins declared this way will have precedence over what the second phase will gather.
 
 The second phase is optimistically attempting to discover the remainder of the plugins installed.
 The name of the plugins will be inferred from the binary's name, without the `packer-plugin-` part.
