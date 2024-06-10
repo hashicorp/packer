@@ -908,6 +908,10 @@
           {
             "title": "HCP Packer Support",
             "path": "plugins/creation/hcp-support"
+          },
+          {
+            "title": "Plugin Loading Specification",
+            "path": "plugins/creation/plugin-load-spec"
           }
         ]
       }

@@ -1,0 +1,167 @@
+---
+description: |
+  Packer needs plugins in order to build artifacts from a template.
+  This page explains how plugins are discovered and loaded by Packer.
+page_title: Plugin Loading - Specification
+---
+
+# Packer plugin loading
+
+This document aims to document how Packer discovers plugins on the local filesystem.
+This is not meant for beginners with Packer but instead serves as a technical reference for curiosity and troubleshooting purposes.
+
+If you are new to Packer,  you are advised to start with the [Installing Plugins](/packer/docs/plugins/install) page for details on plugin installation.  
+
+## Plugin sources
+
+A source is conceptually the distribution point for a plugin. It is a URL to that location. It is intended to document where to get a plugin binary, and for Packer to remotely install plugins from this source, if compatible.
+If Packer cannot install from that source remotely, a plugin can still be installed with `packer plugins install --path <path-to-binary> <source>`.
+
+As of Packer 1.11.0, sources are mandatory to install plugins.
+A source will also reflect where a plugin is installed on the local filesystem, as a series of directories.
+
+Example: `github.com/hashicorp/hashicups` will result in the following directory tree `$HOME/.config/packer/plugins/github.com/hashicorp/hashicups`.
+
+
+There are some conventions to adopt when declaring a source:
+
+* No schema (e.g. `https://`)
+* No fragment (e.g. `#section`)
+* No query (e.g. `?page=1`)
+* The URL must contain at least a host and two parts to the URL.
+* The URL must not have over 15 parts, in addition to the host.
+* `/` is the only separator that can be used for the source.
+* The full source URL needs to be compatible with the filesystem you are installing the plugin onto. Packer does not check for unsupported characters within the URL, but will error if a valid directory tree can not be created.
+
+The last part of the source URL is the plugin's name.
+It must always have the raw name of the plugin, without the `packer` or `packer-plugin` prefix.
+
+**Note**: If your plugin is on GitHub, the repository's name must look like `packer-plugin-<name>` for Packer to be able to find it. However, the source address specified in your template or on the CLI must exclude `packer-plugin-`.
+
+Example: `https://github.com/hashicorp/packer-plugin-hashicups` will become `github.com/hashicorp/hashicups` when declaring it as a source.
+
+## Root plugin directory
+
+The plugins need to be installed under a root plugin directory.
+This will default to either of the following:
+
+**UNIX**:
+
+* `$HOME/.packer.d/plugins`: this is the old-style installation directory for plugins. `~/.packer.d` will have precedence over the following if it exists.
+* `$HOME/.config/packer/plugins`: this replaces `~/.packer.d`, if no existing configuration directory exists, Packer will create this automatically at first use.
+
+**WINDOWS**:
+
+* `%APPDATA%/packer.d/plugins`: this is the only default for Windows systems.
+
+If you want to change that behavior, there are two alternatives:
+
+* `PACKER_CONFIG_DIR`: this environment variable allows you to customize where the configuration directory is. The plugins are installed in a `plugin` subdirectory of this configuration directory.
+* `PACKER_PLUGIN_PATH`: this environment variable allows you to customize where plugins are installed. This points to a root plugins directory, under which the normal directory hierarchy will be enforced.
+
+**Note**: `PACKER_PLUGIN_PATH` has precedence over `PACKER_CONFIG_DIR`, if it is defined, `PACKER_CONFIG_DIR` will be ignored for plugin installation and loading.
+
+Refer to [Configuring Packer](/packer/docs/configure) for a full list of environment variables. 
+
+## Plugin installation directories
+
+All plugins must be installed under a root plugin directory.
+Under this directory, the plugins are installed under a series of directories that match the source URL.
+
+Example: `github.com/hashicorp/hashicups` will translate to a hierarchy like the following:
+
+```shell-session
+<plugin-root-dir>
+└── github.com
+    └── hashicorp
+        └── hashicups
+```
+
+Plugins are installed in the leaf directory of that example.
+Each plugin version must have only one binary per version, accompanied by a matching SHA256SUM file for the said version. The SHA256SUM file's contents are the raw hexdigest of the sha256 sum from the contents of the plugin binary.
+
+### Plugin binary naming convention
+
+In order for Packer to discover and load a plugin binary it must conform to the following naming convention :
+
+`packer-plugin-<name>_<version>_<api_version>_<os>_<arch>[.exe]`
+
+The sha256sum file must follow the same convention, with a `SHA256SUM` suffix to the name:
+
+`packer-plugin-<name>_<version>_<api_version>_<os>_<arch>[.exe]_SHA256SUM`
+
+As for the components of the name, the convention is the following:
+
+* `name`: the raw name of the plugin, it should match the parent directory's name. Ex: `hashicups`.
+* `version`: the semver version of the plugin. It must follow the convention `v<major>.<minor>.<patch>[-<prerelease>]`. Metadata information must not be part of the version string.
+* `api_version`: the plugin API version that the plugin was compiled with. Typically it looks like `x<api_major>.<api_minor>`.
+* `os`: the OS the plugin was built for. Ex: `darwin` (macOS), `windows`, `linux`, etc.
+* `arch`: the micro-architecture the plugin was built for. Ex: `arm64`, `amd64`, `386`, etc.
+
+Note: the `.exe` suffix is only used for Windows plugins. Any other OS must not add the suffix to the plugin name, otherwise Packer will ignore it.
+
+## Loading process
+
+When running either `packer build` or `packer validate`, Packer will attempt to discover and load plugins to execute the command on a template.
+
+There are two phases to this:
+
+1. Load explicitly required plugins.
+2. Discover the remainder of the installed plugins.
+
+Explicitly required plugins are an HCL2 specificity.
+They are declared through `required_plugins` blocks.
+These allow you to specify an exact source and version constraints on that plugin requirement.
+
+Each of the plugins declared this way will have precedence over what the second phase will gather.
+
+The second phase is optimistically attempting to discover the remainder of the plugins installed.
+The name of the plugins will be inferred from the binary's name, without the `packer-plugin-` part.
+
+Ex: If the `github.com/hashicorp/hashicups` plugin is installed, and discovered during this phase, each of the uses of this plugin's components will have their name start with `hashicups`.
+
+When discovering a plugin, Packer will execute its `describe` command.
+The `describe` command showcases the capabilities of a plugin and gives information about its respective version and API version.
+
+Typically this is what you can see by invoking `describe` on a plugin:
+
+```shell-session
+> $HOME/.packer.d/plugins/github.com/hashicorp/hashicups/packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64 describe
+{"version":"1.0.2","sdk_version":"0.5.1","api_version":"x5.0","builders":["order"],"post_processors":["receipt"],"provisioners":["toppings"],"datasources":["coffees","ingredients"]}
+```
+
+**Note**: the information from the plugin's described output must match the version specified within the name of the plugin.
+
+To summarise, this is a list of the checks Packer performs before deciding if a plugin should be listed as a candidate:
+
+* The version reported by `describe` must match the version in the plugin name: i.e. if `describe` reports v1.0.2 while the binary is named `v1.0.1`, Packer rejects it.
+* The version must be canonical (the version must be its simplest expression): i.e. v1.00.01 is non-canonical, v1.0.1 would be. Any plugin with this version mismatch will be rejected.
+* The API version must match between what the plugin reports, and the name: i.e. if `describe` reports x5.1 and the binary contains `x5.0`, Packer rejects it.
+* The version may contain a pre-release fragment if this is non-final. It must however be `-dev`, anything else is rejected.
+
+When multiple plugins are installed, Packer always chooses the one with the highest version that matches a potential constraint.
+
+Final releases have precedence over pre-releases if the version radical is equivalent: `v1.0.0 < v1.0.1-dev < v1.0.1`.
+
+### Known limits
+
+While explicit discovery ensures you always get what you intend, automatic discovery can lead to cohesion issues.
+
+For example, if a plugin is installed twice, with a different source, Packer will discover both but the final plugin that will be executed when requesting a component from this plugin is undefined behavior.
+
+Example:
+
+```shell-session
+<plugin-root-dir>
+├── github.com
+│    └── hashicorp
+│       └── hashicups
+│          └── packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64
+└── gitlab.com
+     └── hashicorp
+        └── hashicups
+           └── packer-plugin-hashicups_v1.0.2_x5.0_linux_amd64
+```
+
+In this case, there's an ambiguity problem as both plugins are `hashicups`, and they define a series of components that may overlap.
+Therefore using the `hashicups-coffees` datasource without a `required_plugins` to resolve this ambiguity means one of the two plugins is executed, but there are no guarantees as to which one it will be.
