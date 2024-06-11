@@ -205,6 +205,13 @@ func GetVarsByType(block *hcl.Block, topLevelLabels ...string) []hcl.Traversal {
 		}
 	}
 
+	return FilterTraversalsByType(travs, topLevelLabels...)
+}
+
+// FilterTraversalsByType lets the caller filter the traversals per top-level type.
+//
+// This can then be used to detect dependencies between block types.
+func FilterTraversalsByType(travs []hcl.Traversal, topLevelLabels ...string) []hcl.Traversal {
 	var rets []hcl.Traversal
 	for _, t := range travs {
 		varRootname := t.RootName()
