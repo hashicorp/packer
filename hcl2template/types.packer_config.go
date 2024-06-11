@@ -217,14 +217,16 @@ func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 	return locals, diags
 }
 
-func (c *PackerConfig) evaluateAllLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
-	var diags hcl.Diagnostics
+func (c *PackerConfig) localByName(local string) (*LocalBlock, error) {
+	for _, loc := range c.LocalBlocks {
+		if loc.Name != local {
+			continue
+		}
 
-	for _, local := range locals {
-		diags = append(diags, c.evaluateLocalVariable(local)...)
+		return loc, nil
 	}
 
-	return diags
+	return nil, fmt.Errorf("local %s not found", local)
 }
 
 func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
@@ -238,23 +240,41 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 		c.LocalVariables = Variables{}
 	}
 
-	for foundSomething := true; foundSomething; {
-		foundSomething = false
-		for i := 0; i < len(locals); {
-			local := locals[i]
-			moreDiags := c.evaluateLocalVariable(local)
-			if moreDiags.HasErrors() {
-				i++
+	for _, local := range c.LocalBlocks {
+		// Note: when looking at the expressions, we only need to care about
+		// attributes, as HCL2 expressions are not allowed in a block's labels.
+		vars := FilterTraversalsByType(local.Expr.Variables(), "local")
+
+		var localDeps []*LocalBlock
+		for _, v := range vars {
+			// Some local variables may be locally aliased as
+			// `local`, which
+			if len(v) < 2 {
 				continue
 			}
-			foundSomething = true
-			locals = append(locals[:i], locals[i+1:]...)
+			varName := v[1].(hcl.TraverseAttr).Name
+			block, err := c.localByName(varName)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Missing variable dependency",
+					Detail: fmt.Sprintf("The expression for variable %q depends on local.%s, which is not defined.",
+						local.Name, varName),
+				})
+				continue
+			}
+			localDeps = append(localDeps, block)
 		}
+		local.dependencies = localDeps
 	}
 
-	if len(locals) != 0 {
-		// get errors from remaining variables
-		return c.evaluateAllLocalVariables(locals)
+	// Immediately return in case the dependencies couldn't be figured out.
+	if diags.HasErrors() {
+		return diags
+	}
+
+	for _, local := range c.LocalBlocks {
+		diags = diags.Extend(c.evaluateLocalVariable(local, 0))
 	}
 
 	return diags
@@ -281,10 +301,33 @@ func checkForDuplicateLocalDefinition(locals []*LocalBlock) hcl.Diagnostics {
 	return diags
 }
 
-func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
+func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock, depth int) hcl.Diagnostics {
+	// If the variable already was evaluated, we can return immediately
+	if local.evaluated {
+		return nil
+	}
+
+	if depth >= 10 {
+		return hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Max local recursion depth exceeded.",
+			Detail: "An error occured while recursively evaluating locals." +
+				"Your local variables likely have a cyclic dependency. " +
+				"Please simplify your config to continue. ",
+		}}
+	}
+
 	var diags hcl.Diagnostics
 
+	for _, dep := range local.dependencies {
+		localDiags := c.evaluateLocalVariable(dep, depth+1)
+		diags = diags.Extend(localDiags)
+	}
+
 	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
+
+	local.evaluated = true
+
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
 		return diags
