@@ -1,4 +1,4 @@
-package packer_test
+package lib
 
 import (
 	"fmt"

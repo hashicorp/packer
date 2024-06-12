@@ -1,11 +1,10 @@
-package packer_test
+package lib
 
 import (
 	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -35,25 +34,6 @@ func LoadPluginVersion(pluginVersion string) (string, bool) {
 
 	path, ok := compiledPlugins.pluginVersions[pluginVersion]
 	return path, ok
-}
-
-var tempPluginBinaryPath = struct {
-	path string
-	once sync.Once
-}{}
-
-// PluginBinaryDir returns the path to the directory where temporary binaries will be compiled
-func PluginBinaryDir() string {
-	tempPluginBinaryPath.once.Do(func() {
-		tempDir, err := os.MkdirTemp("", "packer-core-acc-test-")
-		if err != nil {
-			panic(fmt.Sprintf("failed to create temporary directory for compiled plugins: %s", err))
-		}
-
-		tempPluginBinaryPath.path = tempDir
-	})
-
-	return tempPluginBinaryPath.path
 }
 
 // LDFlags compiles the ldflags for the plugin to compile based on the information provided.
@@ -104,48 +84,6 @@ func ExpectedInstalledName(versionStr string) string {
 		runtime.GOOS, runtime.GOARCH, ext)
 }
 
-// BuildSimplePlugin creates a plugin that essentially does nothing.
-//
-// The plugin's code is contained in a subdirectory of this, and lets us
-// change the attributes of the plugin binary itself, like the SDK version,
-// the plugin's version, etc.
-//
-// The plugin is functional, and can be used to run builds with.
-// There won't be anything substantial created though, its goal is only
-// to validate the core functionality of Packer.
-//
-// The path to the plugin is returned, it won't be removed automatically
-// though, deletion is the caller's responsibility.
-func BuildSimplePlugin(versionString string, t *testing.T) string {
-	// Only build plugin binary if not already done beforehand
-	path, ok := LoadPluginVersion(versionString)
-	if ok {
-		return path
-	}
-
-	v := version.Must(version.NewSemver(versionString))
-
-	t.Logf("Building plugin in version %v", v)
-
-	testDir, err := currentDir()
-	if err != nil {
-		t.Fatalf("failed to compile plugin binary: %s", err)
-	}
-
-	testerPluginDir := filepath.Join(testDir, "plugin_tester")
-	outBin := filepath.Join(PluginBinaryDir(), BinaryName(v))
-
-	compileCommand := exec.Command("go", "build", "-C", testerPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
-	logs, err := compileCommand.CombinedOutput()
-	if err != nil {
-		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
-	}
-
-	StorePluginVersion(v.String(), outBin)
-
-	return outBin
-}
-
 // currentDir returns the directory in which the current file is located.
 //
 // Since we're in tests it's reliable as they're supposed to run on the same
@@ -171,7 +109,7 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 	t := ts.T()
 
 	for _, ver := range pluginVersions {
-		BuildSimplePlugin(ver, t)
+		ts.BuildSimplePlugin(ver, t)
 	}
 
 	var err error
