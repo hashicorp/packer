@@ -155,6 +155,10 @@ func (pc *packerCommand) Assert(checks ...Checker) {
 
 		if pc.t.Failed() {
 			pc.t.Errorf("attempt %d failed validation", attempt)
+
+			pc.t.Logf("dumping stdout: %s", stdout)
+			pc.t.Logf("dumping stdout: %s", stderr)
+
 			break
 		}
 	}
