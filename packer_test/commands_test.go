@@ -13,6 +13,7 @@ type packerCommand struct {
 	packerPath string
 	args       []string
 	env        map[string]string
+	stdin      string
 	stderr     *strings.Builder
 	stdout     *strings.Builder
 	workdir    string
@@ -89,6 +90,18 @@ func (pc *packerCommand) Runs(runs int) *packerCommand {
 	return pc
 }
 
+// Stdin changes the contents of the stdin for the command.
+//
+// Each run will be populated with a copy of this string, and wait for the
+// command to terminate.
+//
+// Note: this could lead to a deadlock if the command doesn't support stdin
+// closing after it's finished feeding the inputs.
+func (pc *packerCommand) Stdin(in string) *packerCommand {
+	pc.stdin = in
+	return pc
+}
+
 // Run executes the packer command with the args/env requested and returns the
 // output streams (stdout, stderr)
 //
@@ -110,6 +123,10 @@ func (pc *packerCommand) Run() (string, string, error) {
 	}
 	cmd.Stdout = pc.stdout
 	cmd.Stderr = pc.stderr
+
+	if pc.stdin != "" {
+		cmd.Stdin = strings.NewReader(pc.stdin)
+	}
 
 	if pc.workdir != "" {
 		cmd.Dir = pc.workdir
