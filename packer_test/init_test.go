@@ -1,6 +1,8 @@
 package packer_test
 
 func (ts *PackerTestSuite) TestPackerInitForce() {
+	ts.SkipNoAcc()
+
 	pluginPath, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
@@ -18,6 +20,8 @@ func (ts *PackerTestSuite) TestPackerInitForce() {
 }
 
 func (ts *PackerTestSuite) TestPackerInitUpgrade() {
+	ts.SkipNoAcc()
+
 	pluginPath, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
@@ -62,6 +66,8 @@ func (ts *PackerTestSuite) TestPackerInitWithNonGithubSource() {
 }
 
 func (ts *PackerTestSuite) TestPackerInitWithMixedVersions() {
+	ts.SkipNoAcc()
+
 	pluginPath, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
