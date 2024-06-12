@@ -69,6 +69,8 @@ func (ts *PackerTestSuite) TestInstallPluginPrerelease() {
 }
 
 func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
+	ts.SkipNoAcc()
+
 	pluginPath, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
@@ -80,6 +82,8 @@ func (ts *PackerTestSuite) TestRemoteInstallWithPluginsInstall() {
 }
 
 func (ts *PackerTestSuite) TestRemoteInstallOfPreReleasePlugin() {
+	ts.SkipNoAcc()
+
 	pluginPath, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
