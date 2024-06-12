@@ -22,7 +22,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.6.0
 	github.com/hashicorp/hcl/v2 v2.19.1
-	github.com/hashicorp/hcp-sdk-go v0.96.0
+	github.com/hashicorp/hcp-sdk-go v0.98.0
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.3
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
@@ -51,7 +51,7 @@ require (
 	golang.org/x/sync v0.4.0
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/term v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.14.0
 	google.golang.org/api v0.128.0 // indirect
 	google.golang.org/grpc v1.59.0
