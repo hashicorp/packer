@@ -25,20 +25,41 @@ We recommend that you vet and verify any third-party plugins you want to install
 By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH` environment variable. Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
 
 ## Usage
+
 Use the following syntax to run the `packer init` command:
 
 ```shell-session
-$ packer init <path-to-template> 
+$ packer init <path-to-template>
 ```
+The command will process any template file that ends with `pkr.hcl`.
 
 The template must contain all dependencies when running the command on a single template file. The command fails if the template is intended to be built as a bundle of partials.
 
+For variable definitions, it is recommended to use the extensions `.pkrvars.hcl` or `.auto.pkrvars.hcl`. When you run `packer init` in the directory, these variable definition files will be automatically excluded from processing.
+
 ## Examples
 
-The following example installs the plugins specified in a template named `template.pkr.hcl`:
+The following example installs the plugins specified in a template from the current directory:
 
 ```shell-session
+$ packer init .
+```
+
+The following example installs the plugins specified in a template named `template.pkr.hcl` from the current directory:
+```shell-session
 $ packer init template.pkr.hcl
+```
+
+The following example installs the plugins specified in the `builds/foo/` directory:
+
+```shell-session
+$ packer init builds/foo/.
+```
+
+The following example installs the plugins specified in a template from the `builds/foo/template.pkr.hcl` path:
+
+```shell-session
+$ packer init builds/foo/template.pkr.hcl
 ```
 
 ## Arguments
@@ -46,7 +67,6 @@ $ packer init template.pkr.hcl
 You can pass the following arguments:
 
 - Packer template: Specify the path to either an HCL2 template or a directory containing at least one valid HCL2 template and related dependencies.
-
 
 ## Options
 
