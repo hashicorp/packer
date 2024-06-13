@@ -280,24 +280,29 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 	return diags
 }
 
-func checkForDuplicateLocalDefinition(locals []*LocalBlock) hcl.Diagnostics {
+// checkForDuplicateLocalDefinition walks through the list of defined variables
+// in order to detect duplicate locals definitions.
+func (c *PackerConfig) checkForDuplicateLocalDefinition() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	// we could sort by name and then check contiguous names to use less memory,
-	// but using a map sounds good enough.
-	names := map[string]struct{}{}
-	for _, local := range locals {
-		if _, found := names[local.Name]; found {
-			diags = append(diags, &hcl.Diagnostic{
+	localNames := map[string]*LocalBlock{}
+
+	for _, block := range c.LocalBlocks {
+		loc, ok := localNames[block.Name]
+		if ok {
+			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate local definition",
-				Detail:   "Duplicate " + local.Name + " definition found.",
-				Subject:  local.Expr.Range().Ptr(),
+				Detail: fmt.Sprintf("Local variable %q is defined twice in your templates. Other definition found at %q",
+					block.Name, loc.Expr.Range()),
+				Subject: block.Expr.Range().Ptr(),
 			})
 			continue
 		}
-		names[local.Name] = struct{}{}
+
+		localNames[block.Name] = block
 	}
+
 	return diags
 }
 
