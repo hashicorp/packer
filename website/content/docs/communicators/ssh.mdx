@@ -58,15 +58,23 @@ The SSH communicator has the following options:
 
 @include "packer-plugin-sdk/communicator/SSH-not-required.mdx"
 
-~> Note: SSH communicator options: `ssh_keypair_name`, `ssh_agent_auth`,
-`temporary_key_pair_name` and `ssh_private_key_file` are also supported by
-the communicator. But they may not be supported for every builder. Please check
-the builder specific documentation for additional SSH supported options.
+@include "packer-plugin-sdk/communicator/SSH-Key-Pair-Name-not-required.mdx"
+
+@include "packer-plugin-sdk/communicator/SSH-Agent-Auth-not-required.mdx"
+
+@include "packer-plugin-sdk/communicator/SSH-Temporary-Key-Pair-not-required.mdx"
+
+@include "packer-plugin-sdk/communicator/SSH-Private-Key-File-not-required.mdx"
+
+~> Note: The options `ssh_keypair_name`, `ssh_agent_auth`,
+`temporary_key_pair_name`, and `ssh_private_key_file` are supported by the
+communicator; however, they may not be supported for every builder. Please refer
+to the builder documentation for supported options.
 
 ### SSH Communicator Details
 
 Packer will only use one authentication method, either `publickey` or if
-`ssh_password` is used packer will offer `password` and `keyboard-interactive`
+`ssh_password` is used Packer will offer `password` and `keyboard-interactive`
 both sending the password. In other words Packer will not work with _sshd_
 configured with more than one configured authentication method using
 `AuthenticationMethods`.
