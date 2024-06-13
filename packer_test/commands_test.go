@@ -38,6 +38,10 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 			// case of Panic will fail to be created (unless tests
 			// are running as Administrator, but please don't).
 			"TMP": os.TempDir(),
+			// Since those commands are used to run tests, we want to
+			// make them as self-contained and quick as possible.
+			// Removing telemetry here is probably for the best.
+			"CHECKPOINT_DISABLE": "1",
 		},
 		t: ts.T(),
 	}
