@@ -19,7 +19,7 @@ import (
 // Upon calling a service method a boolean is set to true to indicate that a method has been called.
 // To skip the setting of these booleans set TrackCalledServiceMethods to false; defaults to true in NewMockPackerClientService().
 type MockPackerClientService struct {
-	CreateBucketCalled, UpdateBucketCalled, BucketAlreadyExist                   bool
+	CreateBucketCalled, UpdateBucketCalled, GetBucketCalled, BucketNotFound      bool
 	CreateVersionCalled, GetVersionCalled, VersionAlreadyExist, VersionCompleted bool
 	CreateBuildCalled, UpdateBuildCalled, ListBuildsCalled, BuildAlreadyDone     bool
 	TrackCalledServiceMethods                                                    bool
@@ -55,14 +55,6 @@ func (svc *MockPackerClientService) PackerServiceCreateBucket(
 	params *hcpPackerService.PackerServiceCreateBucketParams, _ runtime.ClientAuthInfoWriter,
 	opts ...hcpPackerService.ClientOption,
 ) (*hcpPackerService.PackerServiceCreateBucketOK, error) {
-
-	if svc.BucketAlreadyExist {
-		return nil, status.Error(
-			codes.AlreadyExists,
-			fmt.Sprintf("Code:%d %s", codes.AlreadyExists, codes.AlreadyExists.String()),
-		)
-	}
-
 	if params.Body.Name == "" {
 		return nil, errors.New("no bucket name was passed in")
 	}
@@ -82,6 +74,19 @@ func (svc *MockPackerClientService) PackerServiceCreateBucket(
 	}
 
 	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceGetBucket(
+	params *hcpPackerService.PackerServiceGetBucketParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceGetBucketOK, error) {
+	if svc.TrackCalledServiceMethods {
+		svc.GetBucketCalled = true
+	}
+	if svc.BucketNotFound {
+		return nil, status.Error(codes.NotFound, fmt.Sprintf("Code:%d %s", codes.NotFound, codes.NotFound.String()))
+	}
+	return hcpPackerService.NewPackerServiceGetBucketOK(), nil
 }
 
 func (svc *MockPackerClientService) PackerServiceUpdateBucket(
