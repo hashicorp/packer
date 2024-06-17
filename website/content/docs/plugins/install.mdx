@@ -27,7 +27,9 @@ Note that Packer checks the plugin installation directory against the `required_
 
 ### Installation directory
 
-By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable. Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable. 
+Plugin installation requires access to temporary files under `TMPDIR`. If the system's temp directory is non-writable or non-executable, use TMPDIR to override the location of the temporary file store used by Packer.
+Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
 
 ## Requirements
 
