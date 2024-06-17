@@ -138,6 +138,12 @@ func (pc *packerCommand) Run() (string, string, error) {
 
 	pc.err = cmd.Run()
 
+	// Check that the command didn't panic, and if it did, we can immediately error
+	panicErr := PanicCheck{}.Check(pc.stdout.String(), pc.stderr.String(), pc.err)
+	if panicErr != nil {
+		pc.t.Fatalf("Packer panicked during execution: %s", panicErr)
+	}
+
 	return pc.stdout.String(), pc.stderr.String(), pc.err
 }
 
@@ -146,8 +152,6 @@ func (pc *packerCommand) Assert(checks ...Checker) {
 	for pc.runs > 0 {
 		attempt++
 		stdout, stderr, err := pc.Run()
-
-		checks = append(checks, PanicCheck{})
 
 		for _, check := range checks {
 			checkErr := check.Check(stdout, stderr, err)
