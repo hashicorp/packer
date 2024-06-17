@@ -122,7 +122,6 @@ func (bucket *Bucket) Initialize(
 	}
 
 	bucket.Destination = fmt.Sprintf("%s/%s", bucket.client.OrganizationID, bucket.client.ProjectID)
-
 	err := bucket.client.UpsertBucket(ctx, bucket.Name, bucket.Description, bucket.BucketLabels)
 	if err != nil {
 		return fmt.Errorf("failed to initialize bucket %q: %w", bucket.Name, err)
