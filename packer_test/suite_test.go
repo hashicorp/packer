@@ -42,6 +42,20 @@ func (ts *PackerTestSuite) buildPluginBinaries(t *testing.T) {
 	wg.Wait()
 }
 
+// SkipNoAcc is a pre-condition that skips the test if the PACKER_ACC environment
+// variable is unset, or set to "0".
+//
+// This allows us to build tests with a potential for long runs (or errors like
+// rate-limiting), so we can still test them, but only in a longer timeouted
+// context.
+func (ts *PackerTestSuite) SkipNoAcc() {
+	acc := os.Getenv("PACKER_ACC")
+	if acc == "" || acc == "0" {
+		ts.T().Logf("Skipping test as `PACKER_ACC` is unset.")
+		ts.T().Skip()
+	}
+}
+
 func Test_PackerCoreSuite(t *testing.T) {
 	ts := &PackerTestSuite{}
 

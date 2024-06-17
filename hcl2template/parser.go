@@ -190,6 +190,8 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 			diags = append(diags, morediags...)
 			cfg.LocalBlocks = append(cfg.LocalBlocks, moreLocals...)
 		}
+
+		diags = diags.Extend(cfg.checkForDuplicateLocalDefinition())
 	}
 
 	// parse var files
@@ -296,7 +298,6 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
 	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
-	diags = append(diags, checkForDuplicateLocalDefinition(cfg.LocalBlocks)...)
 	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
 
 	filterVarsFromLogs(cfg.InputVariables)
