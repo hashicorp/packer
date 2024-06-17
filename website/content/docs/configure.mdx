@@ -80,8 +80,9 @@ each can be found below:
   [Packer's home directory](#packer-s-home-directory) for more.
 
 - `PACKER_GITHUB_API_TOKEN` - When using Packer init on HCL2 templates, Packer
-  queries the public API from Github which limits the amount of queries on can
-  set the `PACKER_GITHUB_API_TOKEN` with a Github Token to make it higher.
+  queries the public API from GitHub which has rate-limits on its APIs.
+  You can set the `PACKER_GITHUB_API_TOKEN` environment variable
+  with a GitHub Token to make it higher.
 
 - `PACKER_LOG` - Setting this to any value other than "" (empty string) or
   "0" will enable the logger. See the [debugging
@@ -106,18 +107,20 @@ each can be found below:
   using the Packer's config file, see the [config file configuration
   reference](#packer-config-file-configuration-reference) for more.
 
-- `PACKER_PLUGIN_PATH` - a PATH variable for finding packer plugins.
-  This takes precedence over `PACKER_CONFIG_DIR/plugins` for plugin discovery
-  if defined.
+- `PACKER_PLUGIN_PATH` - a PATH variable for finding packer plugins. This takes
+     precedence over `PACKER_CONFIG_DIR/plugins` for plugin discovery if
+     defined. Plugin installation requires access to temporary files under
+     `TMPDIR`. If the system's temp directory is non-writable or non-executable,
+     refer to `TMPDIR` to override the location of the temporary file store used by
+     Packer.
 
 - `CHECKPOINT_DISABLE` - When Packer is invoked it sometimes calls out to
   [checkpoint.hashicorp.com](https://checkpoint.hashicorp.com/) to look for
   new versions of Packer. If you want to disable this for security or privacy
   reasons, you can set this environment variable to `1`.
 
-- `TMPDIR` (Unix) / `TMP` `TEMP` `USERPROFILE` (Windows) - The
-  location of the directory used for temporary files (defaults to `/tmp` on
-  Linux/Unix and `%USERPROFILE%\AppData\Local\Temp` on Windows Vista and above).
-  It might be necessary to customize it when working with large files since
-  `/tmp` is a memory-backed filesystem in some Linux distributions in which case
-  `/var/tmp` might be preferred.
+- TMPDIR (Unix) / TMP, TEMP, USERPROFILE (Windows) - This specifies the
+     directory for temporary files (defaulting to /tmp on Linux/Unix and
+     %USERPROFILE%\AppData\Local\Temp on Windows Vista and later). Customizing
+     this setting might be necessary for systems where the default temporary
+     directory is either non-writable or non-executable.
