@@ -4,11 +4,14 @@ package powershell
 
 import (
 	"fmt"
+	"strings"
 )
 
 const _ExecutionPolicyName = "bypassallsigneddefaultremotesignedrestrictedundefinedunrestrictednone"
 
 var _ExecutionPolicyIndex = [...]uint8{0, 6, 15, 22, 34, 44, 53, 65, 69}
+
+const _ExecutionPolicyLowerName = "bypassallsigneddefaultremotesignedrestrictedundefinedunrestrictednone"
 
 func (i ExecutionPolicy) String() string {
 	if i < 0 || i >= ExecutionPolicy(len(_ExecutionPolicyIndex)-1) {
@@ -17,17 +20,50 @@ func (i ExecutionPolicy) String() string {
 	return _ExecutionPolicyName[_ExecutionPolicyIndex[i]:_ExecutionPolicyIndex[i+1]]
 }
 
-var _ExecutionPolicyValues = []ExecutionPolicy{0, 1, 2, 3, 4, 5, 6, 7}
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _ExecutionPolicyNoOp() {
+	var x [1]struct{}
+	_ = x[ExecutionPolicyBypass-(0)]
+	_ = x[ExecutionPolicyAllsigned-(1)]
+	_ = x[ExecutionPolicyDefault-(2)]
+	_ = x[ExecutionPolicyRemotesigned-(3)]
+	_ = x[ExecutionPolicyRestricted-(4)]
+	_ = x[ExecutionPolicyUndefined-(5)]
+	_ = x[ExecutionPolicyUnrestricted-(6)]
+	_ = x[ExecutionPolicyNone-(7)]
+}
+
+var _ExecutionPolicyValues = []ExecutionPolicy{ExecutionPolicyBypass, ExecutionPolicyAllsigned, ExecutionPolicyDefault, ExecutionPolicyRemotesigned, ExecutionPolicyRestricted, ExecutionPolicyUndefined, ExecutionPolicyUnrestricted, ExecutionPolicyNone}
 
 var _ExecutionPolicyNameToValueMap = map[string]ExecutionPolicy{
-	_ExecutionPolicyName[0:6]:   0,
-	_ExecutionPolicyName[6:15]:  1,
-	_ExecutionPolicyName[15:22]: 2,
-	_ExecutionPolicyName[22:34]: 3,
-	_ExecutionPolicyName[34:44]: 4,
-	_ExecutionPolicyName[44:53]: 5,
-	_ExecutionPolicyName[53:65]: 6,
-	_ExecutionPolicyName[65:69]: 7,
+	_ExecutionPolicyName[0:6]:        ExecutionPolicyBypass,
+	_ExecutionPolicyLowerName[0:6]:   ExecutionPolicyBypass,
+	_ExecutionPolicyName[6:15]:       ExecutionPolicyAllsigned,
+	_ExecutionPolicyLowerName[6:15]:  ExecutionPolicyAllsigned,
+	_ExecutionPolicyName[15:22]:      ExecutionPolicyDefault,
+	_ExecutionPolicyLowerName[15:22]: ExecutionPolicyDefault,
+	_ExecutionPolicyName[22:34]:      ExecutionPolicyRemotesigned,
+	_ExecutionPolicyLowerName[22:34]: ExecutionPolicyRemotesigned,
+	_ExecutionPolicyName[34:44]:      ExecutionPolicyRestricted,
+	_ExecutionPolicyLowerName[34:44]: ExecutionPolicyRestricted,
+	_ExecutionPolicyName[44:53]:      ExecutionPolicyUndefined,
+	_ExecutionPolicyLowerName[44:53]: ExecutionPolicyUndefined,
+	_ExecutionPolicyName[53:65]:      ExecutionPolicyUnrestricted,
+	_ExecutionPolicyLowerName[53:65]: ExecutionPolicyUnrestricted,
+	_ExecutionPolicyName[65:69]:      ExecutionPolicyNone,
+	_ExecutionPolicyLowerName[65:69]: ExecutionPolicyNone,
+}
+
+var _ExecutionPolicyNames = []string{
+	_ExecutionPolicyName[0:6],
+	_ExecutionPolicyName[6:15],
+	_ExecutionPolicyName[15:22],
+	_ExecutionPolicyName[22:34],
+	_ExecutionPolicyName[34:44],
+	_ExecutionPolicyName[44:53],
+	_ExecutionPolicyName[53:65],
+	_ExecutionPolicyName[65:69],
 }
 
 // ExecutionPolicyString retrieves an enum value from the enum constants string name.
@@ -36,12 +72,23 @@ func ExecutionPolicyString(s string) (ExecutionPolicy, error) {
 	if val, ok := _ExecutionPolicyNameToValueMap[s]; ok {
 		return val, nil
 	}
+
+	if val, ok := _ExecutionPolicyNameToValueMap[strings.ToLower(s)]; ok {
+		return val, nil
+	}
 	return 0, fmt.Errorf("%s does not belong to ExecutionPolicy values", s)
 }
 
 // ExecutionPolicyValues returns all values of the enum
 func ExecutionPolicyValues() []ExecutionPolicy {
 	return _ExecutionPolicyValues
+}
+
+// ExecutionPolicyStrings returns a slice of all String values of the enum
+func ExecutionPolicyStrings() []string {
+	strs := make([]string, len(_ExecutionPolicyNames))
+	copy(strs, _ExecutionPolicyNames)
+	return strs
 }
 
 // IsAExecutionPolicy returns "true" if the value is listed in the enum definition. "false" otherwise

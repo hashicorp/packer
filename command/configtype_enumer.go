@@ -4,11 +4,14 @@ package command
 
 import (
 	"fmt"
+	"strings"
 )
 
 const _configTypeName = "jsonhcl2"
 
 var _configTypeIndex = [...]uint8{0, 4, 8}
+
+const _configTypeLowerName = "jsonhcl2"
 
 func (i configType) String() string {
 	if i < 0 || i >= configType(len(_configTypeIndex)-1) {
@@ -17,11 +20,26 @@ func (i configType) String() string {
 	return _configTypeName[_configTypeIndex[i]:_configTypeIndex[i+1]]
 }
 
-var _configTypeValues = []configType{0, 1}
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _configTypeNoOp() {
+	var x [1]struct{}
+	_ = x[ConfigTypeJSON-(0)]
+	_ = x[ConfigTypeHCL2-(1)]
+}
+
+var _configTypeValues = []configType{ConfigTypeJSON, ConfigTypeHCL2}
 
 var _configTypeNameToValueMap = map[string]configType{
-	_configTypeName[0:4]: 0,
-	_configTypeName[4:8]: 1,
+	_configTypeName[0:4]:      ConfigTypeJSON,
+	_configTypeLowerName[0:4]: ConfigTypeJSON,
+	_configTypeName[4:8]:      ConfigTypeHCL2,
+	_configTypeLowerName[4:8]: ConfigTypeHCL2,
+}
+
+var _configTypeNames = []string{
+	_configTypeName[0:4],
+	_configTypeName[4:8],
 }
 
 // configTypeString retrieves an enum value from the enum constants string name.
@@ -30,12 +48,23 @@ func configTypeString(s string) (configType, error) {
 	if val, ok := _configTypeNameToValueMap[s]; ok {
 		return val, nil
 	}
+
+	if val, ok := _configTypeNameToValueMap[strings.ToLower(s)]; ok {
+		return val, nil
+	}
 	return 0, fmt.Errorf("%s does not belong to configType values", s)
 }
 
 // configTypeValues returns all values of the enum
 func configTypeValues() []configType {
 	return _configTypeValues
+}
+
+// configTypeStrings returns a slice of all String values of the enum
+func configTypeStrings() []string {
+	strs := make([]string, len(_configTypeNames))
+	copy(strs, _configTypeNames)
+	return strs
 }
 
 // IsAconfigType returns "true" if the value is listed in the enum definition. "false" otherwise
