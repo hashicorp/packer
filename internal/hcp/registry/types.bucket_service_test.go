@@ -117,7 +117,7 @@ func TestInitialize_ExistingBucketNewVersion(t *testing.T) {
 		t.Errorf("expected call to GetBucket but it didn't happen")
 	}
 	if mockService.CreateBucketCalled {
-		t.Errorf("expected call to CreateBucket but it didn't happen")
+		t.Errorf("unexpected call to CreateBucket")
 	}
 
 	if !mockService.UpdateBucketCalled {
