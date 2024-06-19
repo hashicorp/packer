@@ -416,15 +416,15 @@ func copyOutput(r io.Reader, doneCh chan<- struct{}) {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		io.Copy(os.Stderr, stderrR)
+		_, _ = io.Copy(os.Stderr, stderrR)
 	}()
 	go func() {
 		defer wg.Done()
-		io.Copy(os.Stdout, stdoutR)
+		_, _ = io.Copy(os.Stdout, stdoutR)
 	}()
 	go func() {
 		defer wg.Done()
-		io.Copy(os.Stdout, defaultR)
+		_, _ = io.Copy(os.Stdout, defaultR)
 	}()
 
 	wg.Wait()

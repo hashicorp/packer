@@ -869,7 +869,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 							}
 							copyFrom, err = f.Open()
 							if err != nil {
-								multierror.Append(errs, fmt.Errorf("failed to open temp file: %w", err))
+								errs = multierror.Append(errs, fmt.Errorf("failed to open temp file: %w", err))
 								return nil, errs
 							}
 							break
