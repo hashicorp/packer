@@ -939,7 +939,6 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 				}
 			}
 		}
-		deleteKeys = []string{}
 	}
 
 	if !changed && shouldRetry {
