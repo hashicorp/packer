@@ -141,7 +141,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 	defer os.Remove(lockFilename)
 
 	// Read the current manifest file from disk
-	contents := []byte{}
+	var contents []byte
 	if contents, err = os.ReadFile(p.config.OutputPath); err != nil && !os.IsNotExist(err) {
 		return source, true, true, fmt.Errorf("Unable to open %s for reading: %s", p.config.OutputPath, err)
 	}
