@@ -19,41 +19,45 @@ const EnvLogFile = "PACKER_LOG_PATH" //Set to a file
 
 // logOutput determines where we should send logs (if anywhere).
 func logOutput() (logOutput io.Writer, err error) {
-	logOutput = nil
-	if os.Getenv(EnvLog) != "" && os.Getenv(EnvLog) != "0" {
-		logOutput = os.Stderr
-
-		if logPath := os.Getenv(EnvLogFile); logPath != "" {
-			var err error
-			logOutput, err = os.Create(logPath)
-			if err != nil {
-				return nil, err
-			}
-		} else {
-			// no path; do a little light filtering to avoid double-dipping UI
-			// calls.
-			r, w := io.Pipe()
-			scanner := bufio.NewScanner(r)
-			scanner.Split(ScanLinesSmallerThanBuffer)
-
-			go func(scanner *bufio.Scanner) {
-				for scanner.Scan() {
-					if strings.Contains(scanner.Text(), "ui:") {
-						continue
-					}
-					if strings.Contains(scanner.Text(), "ui error:") {
-						continue
-					}
-					os.Stderr.WriteString(fmt.Sprint(scanner.Text() + "\n"))
-				}
-				if err := scanner.Err(); err != nil {
-					os.Stderr.WriteString(err.Error())
-					w.Close()
-				}
-			}(scanner)
-			logOutput = w
+	if logPath := os.Getenv(EnvLogFile); logPath != "" {
+		var err error
+		logOutput, err = os.Create(logPath)
+		if err != nil {
+			return nil, err
 		}
+
+		return logOutput, nil
 	}
+
+	// If we don't output logs to a file, or it wasn't requested, we can
+	// return immediately without setting an output for logs.
+	if os.Getenv(EnvLog) == "" || os.Getenv(EnvLog) == "0" {
+		return
+	}
+
+	// no path; do a little light filtering to avoid double-dipping UI
+	// calls.
+	r, w := io.Pipe()
+	scanner := bufio.NewScanner(r)
+	scanner.Split(ScanLinesSmallerThanBuffer)
+
+	go func(scanner *bufio.Scanner) {
+		defer w.Close()
+
+		for scanner.Scan() {
+			if strings.Contains(scanner.Text(), "ui:") {
+				continue
+			}
+			if strings.Contains(scanner.Text(), "ui error:") {
+				continue
+			}
+			fmt.Fprintf(os.Stderr, scanner.Text()+"\n")
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintf(os.Stderr, "log output filter failed: %s\n", err)
+		}
+	}(scanner)
+	logOutput = w
 
 	return
 }
