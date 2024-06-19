@@ -203,7 +203,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 
 		// Write our contents to it
 		writer := bufio.NewWriter(tf)
-		writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
+		_, _ = writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
 		for _, command := range p.config.Inline {
 			p.config.ctx.Data = generatedData
 			command, err := interpolate.Render(command, &p.config.ctx)
