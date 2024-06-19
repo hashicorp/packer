@@ -371,7 +371,7 @@ func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteClose
 	if err != nil {
 		return nil, ErrInvalidCompressionLevel
 	}
-	gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+	_ = gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
 	return gzipWriter, nil
 }
 
