@@ -1,4 +1,4 @@
-package packer_test
+package lib
 
 import (
 	"fmt"
@@ -86,21 +86,21 @@ func (_ mustFail) Check(stdout, stderr string, err error) error {
 	return nil
 }
 
-type grepOpts int
+type GrepOpts int
 
 const (
 	// Invert the check, i.e. by default an empty grep fails, if this is set, a non-empty grep fails
-	grepInvert grepOpts = iota
+	GrepInvert GrepOpts = iota
 	// Only grep stderr
-	grepStderr
+	GrepStderr
 	// Only grep stdout
-	grepStdout
+	GrepStdout
 )
 
 // Grep returns a checker that performs a regexp match on the command's output and returns an error if it failed
 //
 // Note: by default both streams will be checked by the grep
-func Grep(expression string, opts ...grepOpts) Checker {
+func Grep(expression string, opts ...GrepOpts) Checker {
 	pc := PipeChecker{
 		name:   fmt.Sprintf("command | grep -E %q", expression),
 		stream: BothStreams,
@@ -111,11 +111,11 @@ func Grep(expression string, opts ...grepOpts) Checker {
 	}
 	for _, opt := range opts {
 		switch opt {
-		case grepInvert:
+		case GrepInvert:
 			pc.check = ExpectEmptyInput()
-		case grepStderr:
+		case GrepStderr:
 			pc.stream = OnlyStderr
-		case grepStdout:
+		case GrepStdout:
 			pc.stream = OnlyStdout
 		}
 	}
@@ -165,6 +165,6 @@ func (c CustomCheck) Name() string {
 // returned pipe checker.
 func LineCountCheck(lines int) *PipeChecker {
 	return MkPipeCheck(fmt.Sprintf("line count (%d)", lines), LineCount()).
-		SetTester(IntCompare(eq, lines)).
+		SetTester(IntCompare(Eq, lines)).
 		SetStream(OnlyStdout)
 }

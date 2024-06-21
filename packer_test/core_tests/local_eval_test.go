@@ -1,8 +1,12 @@
-package packer_test
+package core_test
 
-import "fmt"
+import (
+	"fmt"
 
-func (ts *PackerTestSuite) TestEvalLocalsOrder() {
+	"github.com/hashicorp/packer/packer_test/lib"
+)
+
+func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 	ts.SkipNoAcc()
 
 	pluginDir, cleanup := ts.MakePluginDir()
@@ -12,10 +16,11 @@ func (ts *PackerTestSuite) TestEvalLocalsOrder() {
 		Runs(10).
 		Stdin("local.test_local\n").
 		SetArgs("console", "./templates/locals_no_order.pkr.hcl").
-		Assert(MustSucceed(), Grep("\\[\\]", grepStdout, grepInvert))
+		Assert(lib.MustSucceed(),
+			lib.Grep("\\[\\]", lib.GrepStdout, lib.GrepInvert))
 }
 
-func (ts *PackerTestSuite) TestLocalDuplicates() {
+func (ts *PackerCoreTestSuite) TestLocalDuplicates() {
 	pluginDir, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
@@ -23,9 +28,9 @@ func (ts *PackerTestSuite) TestLocalDuplicates() {
 		ts.Run(fmt.Sprintf("duplicate local detection with %s command - expect error", cmd), func() {
 			ts.PackerCommand().UsePluginDir(pluginDir).
 				SetArgs(cmd, "./templates/locals_duplicate.pkr.hcl").
-				Assert(MustFail(),
-					Grep("Duplicate local definition"),
-					Grep("Local variable \"test\" is defined twice"))
+				Assert(lib.MustFail(),
+					lib.Grep("Duplicate local definition"),
+					lib.Grep("Local variable \"test\" is defined twice"))
 		})
 	}
 }
