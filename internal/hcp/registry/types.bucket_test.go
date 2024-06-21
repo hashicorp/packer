@@ -291,7 +291,6 @@ func TestBucket_PopulateVersion(t *testing.T) {
 			t.Setenv("HCP_PACKER_BUILD_FINGERPRINT", "test-run-"+strconv.Itoa(i))
 
 			mockService := hcpPackerAPI.NewMockPackerClientService()
-			mockService.BucketAlreadyExist = true
 			mockService.VersionAlreadyExist = true
 			mockService.BuildAlreadyDone = tt.buildCompleted
 

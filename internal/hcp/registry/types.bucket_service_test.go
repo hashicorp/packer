@@ -13,6 +13,7 @@ import (
 
 func TestInitialize_NewBucketNewVersion(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
+	mockService.BucketNotFound = true
 
 	b := &Bucket{
 		Name: "TestBucket",
@@ -34,10 +35,15 @@ func TestInitialize_NewBucketNewVersion(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
+	if !mockService.GetBucketCalled {
+		t.Errorf("expected a call to GetBucket but it didn't happen")
+	}
 	if !mockService.CreateBucketCalled {
 		t.Errorf("expected a call to CreateBucket but it didn't happen")
 	}
-
+	if mockService.UpdateBucketCalled {
+		t.Errorf("unexpected call to UpdateBucket")
+	}
 	if !mockService.CreateVersionCalled {
 		t.Errorf("expected a call to CreateVersion but it didn't happen")
 	}
@@ -65,8 +71,6 @@ func TestInitialize_NewBucketNewVersion(t *testing.T) {
 
 func TestInitialize_UnsetTemplateTypeError(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
-
 	b := &Bucket{
 		Name: "TestBucket",
 		client: &hcpPackerAPI.Client{
@@ -90,7 +94,6 @@ func TestInitialize_UnsetTemplateTypeError(t *testing.T) {
 
 func TestInitialize_ExistingBucketNewVersion(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
 
 	b := &Bucket{
 		Name: "TestBucket",
@@ -109,6 +112,12 @@ func TestInitialize_ExistingBucketNewVersion(t *testing.T) {
 	err = b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
 	if err != nil {
 		t.Errorf("unexpected failure: %v", err)
+	}
+	if !mockService.GetBucketCalled {
+		t.Errorf("expected call to GetBucket but it didn't happen")
+	}
+	if mockService.CreateBucketCalled {
+		t.Errorf("unexpected call to CreateBucket")
 	}
 
 	if !mockService.UpdateBucketCalled {
@@ -143,7 +152,6 @@ func TestInitialize_ExistingBucketNewVersion(t *testing.T) {
 
 func TestInitialize_ExistingBucketExistingVersion(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
 	mockService.VersionAlreadyExist = true
 
 	b := &Bucket{
@@ -175,12 +183,18 @@ func TestInitialize_ExistingBucketExistingVersion(t *testing.T) {
 		t.Errorf("unexpected call to CreateBucket")
 	}
 
+	if !mockService.GetBucketCalled {
+		t.Errorf("expected call to GetBucket but it didn't happen")
+	}
+	if mockService.CreateBucketCalled {
+		t.Errorf("unexpected call to CreateBucket")
+	}
 	if !mockService.UpdateBucketCalled {
 		t.Errorf("expected call to UpdateBucket but it didn't happen")
 	}
 
 	if mockService.CreateVersionCalled {
-		t.Errorf("unexpected a call to CreateVersion")
+		t.Errorf("unexpected call to CreateVersion")
 	}
 
 	if !mockService.GetVersionCalled {
@@ -188,7 +202,7 @@ func TestInitialize_ExistingBucketExistingVersion(t *testing.T) {
 	}
 
 	if mockService.CreateBuildCalled {
-		t.Errorf("unexpected a call to CreateBuild")
+		t.Errorf("unexpected call to CreateBuild")
 	}
 
 	if b.Version.ID != "version-id" {
@@ -212,7 +226,6 @@ func TestInitialize_ExistingBucketExistingVersion(t *testing.T) {
 
 func TestInitialize_ExistingBucketCompleteVersion(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
 	mockService.VersionAlreadyExist = true
 	mockService.VersionCompleted = true
 	mockService.BuildAlreadyDone = true
@@ -238,6 +251,15 @@ func TestInitialize_ExistingBucketCompleteVersion(t *testing.T) {
 		t.Errorf("unexpected failure: %v", err)
 	}
 
+	if !mockService.GetBucketCalled {
+		t.Errorf("expected call to GetBucket, but it didn't happen")
+	}
+	if !mockService.UpdateBucketCalled {
+		t.Errorf("expected call to UpdateBucket, but it didn't happen")
+	}
+	if mockService.CreateBucketCalled {
+		t.Errorf("unexpected call to CreateBucket")
+	}
 	if mockService.CreateVersionCalled {
 		t.Errorf("unexpected call to CreateVersion")
 	}
@@ -257,7 +279,6 @@ func TestInitialize_ExistingBucketCompleteVersion(t *testing.T) {
 
 func TestUpdateBuildStatus(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
 	mockService.VersionAlreadyExist = true
 
 	b := &Bucket{
@@ -310,9 +331,7 @@ func TestUpdateBuildStatus(t *testing.T) {
 
 func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 	mockService := hcpPackerAPI.NewMockPackerClientService()
-	mockService.BucketAlreadyExist = true
 	mockService.VersionAlreadyExist = true
-
 	b := &Bucket{
 		Name: "TestBucket",
 		client: &hcpPackerAPI.Client{

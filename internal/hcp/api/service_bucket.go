@@ -36,20 +36,24 @@ func (c *Client) DeleteBucket(
 	return c.Packer.PackerServiceDeleteBucket(deleteBktParams, nil)
 }
 
-// UpsertBucket tries to create a bucket on a HCP Packer Registry. If the bucket exists it will
-// handle the error and update the bucket with the provided details.
+// UpsertBucket will create or update a bucket. It calls GetBucket first, if the bucket is not found it creates that bucket
+// If GetBucket succeeded we then call UpdateBucket description and bucket labels in case they've changed.
+// GetBucket is used instead of CreateBucket since users with bucket level access to specific existing buckets can not create new buckets.
 func (c *Client) UpsertBucket(
 	ctx context.Context, bucketName, bucketDescription string, bucketLabels map[string]string,
 ) error {
 
-	// Create bucket if exist we continue as is, eventually we want to treat this like an upsert.
-	_, err := c.CreateBucket(ctx, bucketName, bucketDescription, bucketLabels)
-	if err != nil && !CheckErrorCode(err, codes.AlreadyExists) {
-		return err
-	}
+	getParams := hcpPackerService.NewPackerServiceGetBucketParamsWithContext(ctx)
+	getParams.LocationOrganizationID = c.OrganizationID
+	getParams.LocationProjectID = c.ProjectID
+	getParams.BucketName = bucketName
 
-	if err == nil {
-		return nil
+	_, err := c.Packer.PackerServiceGetBucket(getParams, nil)
+	if err != nil {
+		if CheckErrorCode(err, codes.NotFound) {
+			_, err = c.CreateBucket(ctx, bucketName, bucketDescription, bucketLabels)
+		}
+		return err
 	}
 
 	params := hcpPackerService.NewPackerServiceUpdateBucketParamsWithContext(ctx)
