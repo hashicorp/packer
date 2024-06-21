@@ -46,12 +46,12 @@ local fileserver for your virtual machine to be able to access. One very common
 use for this directory is to use it to provide your preseed file.
 
 You then reference the file using a `boot_command` to kick off the installation.
-In the example below, see how the `preseed/url` command line option is being
+In the example below, the `preseed/url` command line option is being
 used in the `/install/vmlinuz command`. The `{{ .HTTPIP }}` and
 `{{ .HTTPPort }}` options are special Packer template options that will get set
 by Packer to point to the HTTP server we create, so that your boot command can
-access it. For an example of a working boot_command, see the Examples section
-below. For more information on how boot_command works, see the
+access it. For an example of a working boot_command, refer to the Examples section
+below. For more information on how boot_command works, refer to the
 boot_command section of the docs for whatever builder you are using.
 
 ## What does Packer _need_ the preseed file to do?
@@ -171,6 +171,5 @@ containing the "http" directory.
   ],
 ```
 
-For more functional examples of a debian preseeded installation, you can see the
-Chef-maintained bento boxes for [Debian](https://github.com/chef/bento/tree/master/packer_templates/debian)
-and [Ubuntu](https://github.com/chef/bento/tree/master/packer_templates/ubuntu)
+For more functional examples of a Debian preseeded installation, you can refer to the Chef-maintained [bento](https://github.com/chef/bento#using-packer) box [preseed](https://github.com/chef/bento/blob/6fe9fa20d1f37e916a7babdee87c89ba38ce54a4/packer_templates/http/debian/preseed.cfg),
+the Ubuntu [autoinstall config](https://github.com/chef/bento/blob/6fe9fa20d1f37e916a7babdee87c89ba38ce54a4/packer_templates/http/ubuntu/user-data), their [builders](https://github.com/chef/bento/blob/6fe9fa20d1f37e916a7babdee87c89ba38ce54a4/packer_templates/pkr-builder.pkr.hcl).
