@@ -7,6 +7,10 @@
      principle does not have permission to create the bucket Packer will fail
      the build.[GH-13059](https://github.com/hashicorp/packer/pull/13059)
 
+### SECURITY:
+* core: Bump github.com/hashicorp/go-retryablehttp to address
+     CVE-2024-6104.[GH-13081](https://github.com/hashicorp/packer/pull/13081)
+
 ### IMPROVEMENTS:
 * core/hcl2: The issue is that local variables in templates are evaluated in a
      non-deterministic order, leading to inconsistent behavior. To fix this,
