@@ -1,3 +1,34 @@
+## 1.11.1 (Upcoming)
+
+### NOTES:
+* Future Scaffolding: This release contains additional changes that allow
+     Packer core to validate access a HCP Packer bucket before trying to
+     publish to it. If the bucket does not exist and the associated service
+     principle does not have permission to create the bucket Packer will fail
+     the build.[GH-13059](https://github.com/hashicorp/packer/pull/13059)
+
+### SECURITY:
+* core: Bump github.com/hashicorp/go-retryablehttp to address
+     CVE-2024-6104.[GH-13081](https://github.com/hashicorp/packer/pull/13081)
+
+### IMPROVEMENTS:
+* core/hcl2: The issue is that local variables in templates are evaluated in a
+     non-deterministic order, leading to inconsistent behavior. To fix this,
+     local variables will now build a list of direct dependencies, similar to
+     datasources, and evaluate these dependencies recursively. A caveat is that
+     there's a recursion cap of 10 to prevent infinite recursion; if this limit
+     is reached, an error is returned, prompting the user to fix their template.
+     [GH-13039](https://github.com/hashicorp/packer/pull/13039)
+* core: bump github.com/hashicorp/hcp-sdk-go from 0.96.0 to 0.99.0
+     [GH-13063](https://github.com/hashicorp/packer/pull/13063)
+* core: bump github.com/hashicorp/packer-plugin-sdk from 0.5.3 to 0.5.4
+     [GH-13061](https://github.com/hashicorp/packer/pull/13061)
+
+### BUG FIXES:
+* core/hcp: Change UpsertBucket to call GetBucket to address unauthorized error
+     from ustream API.
+     [GH-13059](https://github.com/hashicorp/packer/pull/13059)
+
 ## 1.11.0 (2024-05-31)
 
 ### NOTES:
