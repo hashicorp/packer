@@ -1,4 +1,4 @@
-## 1.11.1 (Upcoming)
+## 1.11.1 (July 1, 2024)
 
 ### NOTES:
 * Future Scaffolding: This release contains additional changes that allow
