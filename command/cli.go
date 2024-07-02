@@ -96,27 +96,26 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	ba.MetaArgs.AddFlagSets(flags)
 }
 
-// Args returns the list of arguments for HCP.
+// GetCleanedBuildArgs returns a map containing build flags specified to build for tracking within
+// the HCP Packer registry.
 //
 // Most of the arguments are kept as-is, except for the -var args, where only
 // the keys are kept to avoid leaking potential secrets.
-func (ba *BuildArgs) Args() map[string]interface{} {
-	cleanedArgs := make(map[string]interface{})
-	cleanedArgs["debug"] = ba.Debug
-	cleanedArgs["force"] = ba.Force
-
-	cleanedArgs["only"] = ba.Only
-	cleanedArgs["except"] = ba.Except
-
-	cleanedArgs["var-files"] = ba.VarFiles
-
-	var args []string
-	for k := range ba.Vars {
-		args = append(args, k)
+func GetCleanedBuildArgs(ba *BuildArgs) map[string]interface{} {
+	cleanedArgs := map[string]interface{}{
+		"debug":     ba.Debug,
+		"force":     ba.Force,
+		"only":      ba.Only,
+		"except":    ba.Except,
+		"var-files": ba.VarFiles,
+		"path":      ba.Path,
 	}
-	cleanedArgs["vars"] = args
 
-	cleanedArgs["path"] = ba.Path
+	var varNames []string
+	for k := range ba.Vars {
+		varNames = append(varNames, k)
+	}
+	cleanedArgs["vars"] = varNames
 
 	return cleanedArgs
 }

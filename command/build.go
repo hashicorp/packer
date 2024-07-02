@@ -113,7 +113,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if ret != 0 {
 		return ret
 	}
-	hcpRegistry.Metadata().Gather(cla.Args())
+	hcpRegistry.Metadata().Gather(GetCleanedBuildArgs(cla))
 
 	defer hcpRegistry.VersionStatusSummary()
 
