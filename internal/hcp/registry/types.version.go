@@ -179,7 +179,7 @@ func (version *Version) statusSummary(ui sdkpacker.Ui) {
 
 // AddMetadataToBuild adds metadata to a build in the HCP Packer registry.
 func (version *Version) AddMetadataToBuild(
-	ctx context.Context, buildName string, metadata packer.BuildMetadata,
+	ctx context.Context, buildName string, buildMetadata packer.BuildMetadata, globalMetadata *MetadataStore,
 ) error {
 	buildToUpdate, err := version.Build(buildName)
 	if err != nil {
@@ -187,10 +187,10 @@ func (version *Version) AddMetadataToBuild(
 	}
 
 	packerMetadata := make(map[string]interface{})
-	packerMetadata["version"] = metadata.PackerVersion
+	packerMetadata["version"] = buildMetadata.PackerVersion
 
 	var pluginsMetadata []map[string]interface{}
-	for _, plugin := range metadata.Plugins {
+	for _, plugin := range buildMetadata.Plugins {
 		pluginMetadata := map[string]interface{}{
 			"version": plugin.Description.Version,
 			"name":    plugin.Name,
@@ -198,7 +198,12 @@ func (version *Version) AddMetadataToBuild(
 		pluginsMetadata = append(pluginsMetadata, pluginMetadata)
 	}
 	packerMetadata["plugins"] = pluginsMetadata
+	packerMetadata["options"] = globalMetadata.PackerBuildCommandOptions
+	packerMetadata["os"] = globalMetadata.OperatingSystem
 
 	buildToUpdate.Metadata.Packer = packerMetadata
+	buildToUpdate.Metadata.Vcs = globalMetadata.Vcs
+	buildToUpdate.Metadata.Cicd = globalMetadata.Cicd
+
 	return nil
 }
