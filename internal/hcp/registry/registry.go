@@ -19,6 +19,7 @@ type Registry interface {
 	StartBuild(context.Context, sdkpacker.Build) error
 	CompleteBuild(ctx context.Context, build sdkpacker.Build, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
 	VersionStatusSummary()
+	Metadata() Metadata
 }
 
 // New instantiates the appropriate registry for the Packer configuration template type.
