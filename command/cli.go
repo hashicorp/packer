@@ -96,6 +96,31 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	ba.MetaArgs.AddFlagSets(flags)
 }
 
+// Args returns the list of arguments for HCP.
+//
+// Most of the arguments are kept as-is, except for the -var args, where only
+// the keys are kept to avoid leaking potential secrets.
+func (ba *BuildArgs) Args() map[string]interface{} {
+	cleanedArgs := make(map[string]interface{})
+	cleanedArgs["debug"] = ba.Debug
+	cleanedArgs["force"] = ba.Force
+
+	cleanedArgs["only"] = ba.Only
+	cleanedArgs["except"] = ba.Except
+
+	cleanedArgs["var-files"] = ba.VarFiles
+
+	var args []string
+	for k := range ba.Vars {
+		args = append(args, k)
+	}
+	cleanedArgs["vars"] = args
+
+	cleanedArgs["path"] = ba.Path
+
+	return cleanedArgs
+}
+
 // BuildArgs represents a parsed cli line for a `packer build`
 type BuildArgs struct {
 	MetaArgs
