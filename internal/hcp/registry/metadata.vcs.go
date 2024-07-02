@@ -1,0 +1,93 @@
+package registry
+
+import (
+	"log"
+	"os"
+
+	gt "github.com/go-git/go-git/v5"
+)
+
+type VCS interface {
+	Detect(wd string) error
+	Details() map[string]interface{}
+	Type() string
+}
+
+type Git struct {
+	repo *gt.Repository
+}
+
+func (g *Git) Detect(wd string) error {
+	repo, err := gt.PlainOpenWithOptions(wd, &gt.PlainOpenOptions{DetectDotGit: true})
+	if err != nil {
+		return err
+	}
+
+	g.repo = repo
+	return nil
+}
+
+func (g *Git) hasUncommittedChanges() bool {
+	worktree, err := g.repo.Worktree()
+	if err != nil {
+		log.Printf("[ERROR] failed to get the git worktree: %s", err)
+		return false
+	}
+
+	status, err := worktree.Status()
+	if err != nil {
+		log.Printf("[ERROR] failed to get the git worktree status: %s", err)
+		return false
+	}
+	return !status.IsClean()
+}
+
+func (g *Git) Type() string {
+	return "git"
+}
+
+func (g *Git) Details() map[string]interface{} {
+	resp := map[string]interface{}{}
+
+	headRef, err := g.repo.Head()
+	if err != nil {
+		log.Printf("[ERROR] failed to get the git branch name: %s", err)
+	} else {
+		resp["ref"] = headRef.Name().Short()
+	}
+
+	commit, err := g.repo.CommitObject(headRef.Hash())
+	if err != nil {
+		log.Printf("[ERROR] failed to get the git commit hash: %s", err)
+	} else {
+		resp["commit"] = commit.Hash.String()
+		resp["author"] = commit.Author.Name + " <" + commit.Author.Email + ">"
+	}
+
+	resp["has_uncommitted_changes"] = g.hasUncommittedChanges()
+	return resp
+}
+
+func GetVcsMetadata() map[string]interface{} {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("[ERROR] unable to retrieve current directory: %s", err)
+		return map[string]interface{}{}
+	}
+
+	vcsSystems := []VCS{
+		&Git{},
+	}
+
+	for _, vcs := range vcsSystems {
+		err := vcs.Detect(wd)
+		if err == nil {
+			return map[string]interface{}{
+				"type":    vcs.Type(),
+				"details": vcs.Details(),
+			}
+		}
+	}
+
+	return nil
+}
