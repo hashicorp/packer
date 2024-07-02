@@ -21,6 +21,7 @@ type HCLRegistry struct {
 	configuration *hcl2template.PackerConfig
 	bucket        *Bucket
 	ui            sdkpacker.Ui
+	metadata      *MetadataStore
 }
 
 const (
@@ -164,5 +165,10 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		configuration: config,
 		bucket:        bucket,
 		ui:            ui,
+		metadata:      &MetadataStore{},
 	}, nil
+}
+
+func (h *HCLRegistry) Metadata() Metadata {
+	return h.metadata
 }
