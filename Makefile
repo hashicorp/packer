@@ -50,7 +50,7 @@ install-build-deps: ## Install dependencies for bin build
 	@go install github.com/mitchellh/gox@v1.0.1
 
 install-gen-deps: ## Install dependencies for code generation
-	@GO111MODULE=on go install github.com/alvaroloes/enumer@master
+	@GO111MODULE=on go install github.com/dmarkham/enumer@master
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
 
 install-lint-deps: ## Install linter dependencies

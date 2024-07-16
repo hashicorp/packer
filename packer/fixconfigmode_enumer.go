@@ -4,11 +4,14 @@ package packer
 
 import (
 	"fmt"
+	"strings"
 )
 
 const _FixConfigModeName = "StdoutInplaceDiff"
 
 var _FixConfigModeIndex = [...]uint8{0, 6, 13, 17}
+
+const _FixConfigModeLowerName = "stdoutinplacediff"
 
 func (i FixConfigMode) String() string {
 	if i < 0 || i >= FixConfigMode(len(_FixConfigModeIndex)-1) {
@@ -17,12 +20,30 @@ func (i FixConfigMode) String() string {
 	return _FixConfigModeName[_FixConfigModeIndex[i]:_FixConfigModeIndex[i+1]]
 }
 
-var _FixConfigModeValues = []FixConfigMode{0, 1, 2}
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the stringer command to generate them again.
+func _FixConfigModeNoOp() {
+	var x [1]struct{}
+	_ = x[Stdout-(0)]
+	_ = x[Inplace-(1)]
+	_ = x[Diff-(2)]
+}
+
+var _FixConfigModeValues = []FixConfigMode{Stdout, Inplace, Diff}
 
 var _FixConfigModeNameToValueMap = map[string]FixConfigMode{
-	_FixConfigModeName[0:6]:   0,
-	_FixConfigModeName[6:13]:  1,
-	_FixConfigModeName[13:17]: 2,
+	_FixConfigModeName[0:6]:        Stdout,
+	_FixConfigModeLowerName[0:6]:   Stdout,
+	_FixConfigModeName[6:13]:       Inplace,
+	_FixConfigModeLowerName[6:13]:  Inplace,
+	_FixConfigModeName[13:17]:      Diff,
+	_FixConfigModeLowerName[13:17]: Diff,
+}
+
+var _FixConfigModeNames = []string{
+	_FixConfigModeName[0:6],
+	_FixConfigModeName[6:13],
+	_FixConfigModeName[13:17],
 }
 
 // FixConfigModeString retrieves an enum value from the enum constants string name.
@@ -31,12 +52,23 @@ func FixConfigModeString(s string) (FixConfigMode, error) {
 	if val, ok := _FixConfigModeNameToValueMap[s]; ok {
 		return val, nil
 	}
+
+	if val, ok := _FixConfigModeNameToValueMap[strings.ToLower(s)]; ok {
+		return val, nil
+	}
 	return 0, fmt.Errorf("%s does not belong to FixConfigMode values", s)
 }
 
 // FixConfigModeValues returns all values of the enum
 func FixConfigModeValues() []FixConfigMode {
 	return _FixConfigModeValues
+}
+
+// FixConfigModeStrings returns a slice of all String values of the enum
+func FixConfigModeStrings() []string {
+	strs := make([]string, len(_FixConfigModeNames))
+	copy(strs, _FixConfigModeNames)
+	return strs
 }
 
 // IsAFixConfigMode returns "true" if the value is listed in the enum definition. "false" otherwise
