@@ -1,7 +1,6 @@
-package registry
+package metadata
 
 import (
-	"bytes"
 	"log"
 	"os/exec"
 	"runtime"
@@ -15,22 +14,38 @@ type OSInfo struct {
 	Version string
 }
 
+// CommandExecutor is an interface for executing commands.
+type CommandExecutor interface {
+	Exec(name string, arg ...string) ([]byte, error)
+}
+
+// DefaultExecutor is the default implementation of CommandExecutor.
+type DefaultExecutor struct{}
+
+// Exec executes a command and returns the combined output.
+func (d DefaultExecutor) Exec(name string, arg ...string) ([]byte, error) {
+	cmd := exec.Command(name, arg...)
+	return cmd.CombinedOutput()
+}
+
+var executor CommandExecutor = DefaultExecutor{}
+
 func GetOSMetadata() map[string]interface{} {
 	var osInfo OSInfo
 
 	switch runtime.GOOS {
 	case "windows":
-		osInfo = GetInfoForWindows()
+		osInfo = GetInfoForWindows(executor)
 	case "darwin":
-		osInfo = GetInfo("-srm")
+		osInfo = GetInfo(executor, "-srm")
 	case "linux":
-		osInfo = GetInfo("-srio")
+		osInfo = GetInfo(executor, "-srio")
 	case "freebsd":
-		osInfo = GetInfo("-sri")
+		osInfo = GetInfo(executor, "-sri")
 	case "openbsd":
-		osInfo = GetInfo("-srm")
+		osInfo = GetInfo(executor, "-srm")
 	case "netbsd":
-		osInfo = GetInfo("-srm")
+		osInfo = GetInfo(executor, "-srm")
 	default:
 		osInfo = OSInfo{
 			Name: runtime.GOOS,
@@ -47,11 +62,11 @@ func GetOSMetadata() map[string]interface{} {
 	}
 }
 
-func GetInfo(flags string) OSInfo {
-	out, err := _uname(flags)
+func GetInfo(exec CommandExecutor, flags string) OSInfo {
+	out, err := _uname(exec, flags)
 	tries := 0
 	for strings.Contains(out, "broken pipe") && tries < 3 {
-		out, err = _uname(flags)
+		out, err = _uname(exec, flags)
 		time.Sleep(500 * time.Millisecond)
 		tries++
 	}
@@ -70,15 +85,9 @@ func GetInfo(flags string) OSInfo {
 	}
 }
 
-func _uname(flags string) (string, error) {
-	cmd := exec.Command("uname", flags)
-	cmd.Stdin = strings.NewReader("some input")
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return out.String(), err
+func _uname(exec CommandExecutor, flags string) (string, error) {
+	output, err := exec.Exec("uname", flags)
+	return string(output), err
 }
 
 func _retrieveCore(osStr string) string {
@@ -93,14 +102,8 @@ func _retrieveCore(osStr string) string {
 	return core
 }
 
-func GetInfoForWindows() OSInfo {
-	cmd := exec.Command("cmd", "ver")
-	cmd.Stdin = strings.NewReader("some input")
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
+func GetInfoForWindows(exec CommandExecutor) OSInfo {
+	out, err := exec.Exec("cmd", "ver")
 	if err != nil {
 		log.Printf("[ERROR] failed to get the OS info: %s", err)
 		return OSInfo{
@@ -109,7 +112,7 @@ func GetInfoForWindows() OSInfo {
 		}
 	}
 
-	osStr := strings.Replace(out.String(), "\n", "", -1)
+	osStr := strings.Replace(string(out), "\n", "", -1)
 	osStr = strings.Replace(osStr, "\r\n", "", -1)
 	tmp1 := strings.Index(osStr, "[Version")
 	tmp2 := strings.Index(osStr, "]")
