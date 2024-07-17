@@ -1,5 +1,7 @@
 package registry
 
+import "github.com/hashicorp/packer/internal/hcp/registry/metadata"
+
 // Metadata is the global metadata store, it is attached to a registry implementation
 // and keeps track of the environmental information.
 // This then can be sent to HCP Packer, so we can present it to users.
@@ -22,9 +24,9 @@ type MetadataStore struct {
 }
 
 func (ms *MetadataStore) Gather(args map[string]interface{}) {
-	ms.OperatingSystem = GetOSMetadata()
-	ms.Cicd = GetCicdMetadata()
-	ms.Vcs = GetVcsMetadata()
+	ms.OperatingSystem = metadata.GetOSMetadata()
+	ms.Cicd = metadata.GetCicdMetadata()
+	ms.Vcs = metadata.GetVcsMetadata()
 	ms.PackerBuildCommandOptions = args
 }
 

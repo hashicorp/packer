@@ -1,25 +1,22 @@
-package registry
+package metadata
 
 import (
 	"fmt"
 	"os"
 )
 
-type CICD interface {
-	Detect() bool
-	Env() map[string]string
-	Type() string
-}
-
 type GithubActions struct{}
 
-func (g *GithubActions) Detect() bool {
+func (g *GithubActions) Detect() error {
 	_, ok := os.LookupEnv("GITHUB_ACTIONS")
-	return ok
+	if !ok {
+		return fmt.Errorf("GITHUB_ACTIONS environment variable not found")
+	}
+	return nil
 }
 
-func (g *GithubActions) Env() map[string]string {
-	env := make(map[string]string)
+func (g *GithubActions) Details() map[string]interface{} {
+	env := make(map[string]interface{})
 	keys := []string{
 		"GITHUB_REPOSITORY",
 		"GITHUB_REPOSITORY_ID",
@@ -49,13 +46,16 @@ func (g *GithubActions) Type() string {
 
 type GitlabCI struct{}
 
-func (g *GitlabCI) Detect() bool {
+func (g *GitlabCI) Detect() error {
 	_, ok := os.LookupEnv("GITLAB_CI")
-	return ok
+	if !ok {
+		return fmt.Errorf("GITLAB_CI environment variable not found")
+	}
+	return nil
 }
 
-func (g *GitlabCI) Env() map[string]string {
-	env := make(map[string]string)
+func (g *GitlabCI) Details() map[string]interface{} {
+	env := make(map[string]interface{})
 	keys := []string{
 		"CI_PROJECT_NAME",
 		"CI_PROJECT_ID",
@@ -85,16 +85,17 @@ func (g *GitlabCI) Type() string {
 }
 
 func GetCicdMetadata() map[string]interface{} {
-	cicd := []CICD{
+	cicd := []MetadataProvider{
 		&GithubActions{},
 		&GitlabCI{},
 	}
 
 	for _, c := range cicd {
-		if c.Detect() {
+		err := c.Detect()
+		if err == nil {
 			return map[string]interface{}{
 				"type":    c.Type(),
-				"details": c.Env(),
+				"details": c.Details(),
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package registry
+package metadata
 
 import (
 	"log"
@@ -7,8 +7,8 @@ import (
 	gt "github.com/go-git/go-git/v5"
 )
 
-type VCS interface {
-	Detect(wd string) error
+type MetadataProvider interface {
+	Detect() error
 	Details() map[string]interface{}
 	Type() string
 }
@@ -17,7 +17,13 @@ type Git struct {
 	repo *gt.Repository
 }
 
-func (g *Git) Detect(wd string) error {
+func (g *Git) Detect() error {
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("[ERROR] unable to retrieve current directory: %s", err)
+		return err
+	}
+
 	repo, err := gt.PlainOpenWithOptions(wd, &gt.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
 		return err
@@ -69,18 +75,12 @@ func (g *Git) Details() map[string]interface{} {
 }
 
 func GetVcsMetadata() map[string]interface{} {
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Printf("[ERROR] unable to retrieve current directory: %s", err)
-		return map[string]interface{}{}
-	}
-
-	vcsSystems := []VCS{
+	vcsSystems := []MetadataProvider{
 		&Git{},
 	}
 
 	for _, vcs := range vcsSystems {
-		err := vcs.Detect(wd)
+		err := vcs.Detect()
 		if err == nil {
 			return map[string]interface{}{
 				"type":    vcs.Type(),
