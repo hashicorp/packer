@@ -21,13 +21,13 @@ func TestGetInfoForWindows(t *testing.T) {
 	tests := []struct {
 		name     string
 		stdout   string
-		err   error
+		err      error
 		expected OSInfo
 	}{
 		{
-			name:     "Valid version info",
-			stdout:   "Microsoft Windows [Version 10.0.19042.928]",
-			err: nil,
+			name:   "Valid version info",
+			stdout: "Microsoft Windows [Version 10.0.19042.928]",
+			err:    nil,
 			expected: OSInfo{
 				Name:    runtime.GOOS,
 				Arch:    runtime.GOARCH,
@@ -35,9 +35,9 @@ func TestGetInfoForWindows(t *testing.T) {
 			},
 		},
 		{
-			name:     "Invalid version info",
-			stdout:   "Invalid output",
-			err:   fmt.Errorf("Invalid output"),
+			name:   "Invalid version info",
+			stdout: "Invalid output",
+			err:    fmt.Errorf("Invalid output"),
 			expected: OSInfo{
 				Name:    runtime.GOOS,
 				Arch:    runtime.GOARCH,
@@ -51,7 +51,7 @@ func TestGetInfoForWindows(t *testing.T) {
 
 			mockExecutor := MockExecutor{
 				stdout: tt.stdout,
-				err: tt.err,
+				err:    tt.err,
 			}
 
 			result := GetInfoForWindows(mockExecutor)
