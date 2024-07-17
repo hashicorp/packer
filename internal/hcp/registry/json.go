@@ -97,7 +97,7 @@ func (h *JSONRegistry) CompleteBuild(
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
 	buildName := build.Name()
-	buildMetadata, envMetadata := build.(*packer.CoreBuild).GetMetadata(),  h.metadata
+	buildMetadata, envMetadata := build.(*packer.CoreBuild).GetMetadata(), h.metadata
 	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata, envMetadata)
 	if err != nil {
 		return nil, err
