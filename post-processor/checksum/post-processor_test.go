@@ -17,8 +17,6 @@ import (
 	"github.com/hashicorp/packer/builder/file"
 )
 
-const expectedFileContents = "Hello world!"
-
 func TestChecksumSHA1(t *testing.T) {
 	const config = `
 	{
