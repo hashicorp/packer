@@ -250,35 +250,6 @@ func TestMultiPlugin_defaultName_each_plugin_type(t *testing.T) {
 	}
 }
 
-func generateFakePlugins(dirname string, pluginNames []string) (string, []string, func(), error) {
-	dir, err := os.MkdirTemp("", dirname)
-	if err != nil {
-		return "", nil, nil, fmt.Errorf("failed to create temporary test directory: %v", err)
-	}
-
-	cleanUpFunc := func() {
-		os.RemoveAll(dir)
-	}
-
-	var suffix string
-	if runtime.GOOS == "windows" {
-		suffix = ".exe"
-	}
-
-	plugins := make([]string, len(pluginNames))
-	for i, plugin := range pluginNames {
-		plug := filepath.Join(dir, plugin+suffix)
-		plugins[i] = plug
-		_, err := os.Create(plug)
-		if err != nil {
-			cleanUpFunc()
-			return "", nil, nil, fmt.Errorf("failed to create temporary plugin file (%s): %v", plug, err)
-		}
-	}
-
-	return dir, plugins, cleanUpFunc, nil
-}
-
 // TestHelperProcess isn't a real test. It's used as a helper process
 // for multi-component plugin tests.
 func TestHelperPlugins(t *testing.T) {

@@ -18,19 +18,6 @@ func testConfig() map[string]interface{} {
 	}
 }
 
-func testConfigStruct(t *testing.T) *Config {
-	var c Config
-	warns, errs := c.Prepare(testConfig())
-	if len(warns) > 0 {
-		t.Fatalf("bad: %#v", len(warns))
-	}
-	if errs != nil {
-		t.Fatalf("bad: %#v", errs)
-	}
-
-	return &c
-}
-
 func testConfigErr(t *testing.T, warns []string, err error) {
 	if len(warns) > 0 {
 		t.Fatalf("bad: %#v", warns)
