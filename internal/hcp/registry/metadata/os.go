@@ -63,10 +63,10 @@ func GetOSMetadata() map[string]interface{} {
 }
 
 func GetInfo(exec CommandExecutor, flags string) OSInfo {
-	out, err := _uname(exec, flags)
+	out, err := uname(exec, flags)
 	tries := 0
 	for strings.Contains(out, "broken pipe") && tries < 3 {
-		out, err = _uname(exec, flags)
+		out, err = uname(exec, flags)
 		time.Sleep(500 * time.Millisecond)
 		tries++
 	}
@@ -77,7 +77,7 @@ func GetInfo(exec CommandExecutor, flags string) OSInfo {
 	if err != nil {
 		log.Printf("[ERROR] failed to get the OS info: %s", err)
 	}
-	core := _retrieveCore(out)
+	core := retrieveCore(out)
 	return OSInfo{
 		Name:    runtime.GOOS,
 		Arch:    runtime.GOARCH,
@@ -85,12 +85,12 @@ func GetInfo(exec CommandExecutor, flags string) OSInfo {
 	}
 }
 
-func _uname(exec CommandExecutor, flags string) (string, error) {
+func uname(exec CommandExecutor, flags string) (string, error) {
 	output, err := exec.Exec("uname", flags)
 	return string(output), err
 }
 
-func _retrieveCore(osStr string) string {
+func retrieveCore(osStr string) string {
 	osStr = strings.Replace(osStr, "\n", "", -1)
 	osStr = strings.Replace(osStr, "\r\n", "", -1)
 	osInfo := strings.Split(osStr, " ")
