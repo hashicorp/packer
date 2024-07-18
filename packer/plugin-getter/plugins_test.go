@@ -26,10 +26,6 @@ var (
 	pluginFolderOne = filepath.Join("testdata", "plugins")
 
 	pluginFolderTwo = filepath.Join("testdata", "plugins_2")
-
-	pluginFolderThree = filepath.Join("testdata", "plugins_3")
-
-	pluginFolderWrongChecksums = filepath.Join("testdata", "wrong_checksums")
 )
 
 func TestChecksumFileEntry_init(t *testing.T) {

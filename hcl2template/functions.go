@@ -6,7 +6,6 @@ package hcl2template
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 
 	"github.com/hashicorp/go-cty-funcs/cidr"
 	"github.com/hashicorp/go-cty-funcs/collection"
@@ -224,14 +223,5 @@ var TextDecodeBase64Func = function.New(&function.Spec{
 		}
 
 		return cty.StringVal(string(decoded)), nil
-	},
-})
-
-var unimplFunc = function.New(&function.Spec{
-	Type: func([]cty.Value) (cty.Type, error) {
-		return cty.DynamicPseudoType, fmt.Errorf("function not yet implemented")
-	},
-	Impl: func([]cty.Value, cty.Type) (cty.Value, error) {
-		return cty.DynamicVal, fmt.Errorf("function not yet implemented")
 	},
 })
