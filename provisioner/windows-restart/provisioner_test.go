@@ -210,17 +210,15 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 
 	// Block until cancel comes through
 	waitForCommunicator = func(context.Context, *Provisioner) error {
-		for {
-			select {
-			case <-waitDone:
-				waitContinue <- true
-			}
+		for range waitDone {
 		}
+		waitContinue <- true
+		return nil
 	}
 
 	go func() {
 		err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
-		waitDone <- true
+		close(waitDone)
 	}()
 	<-waitContinue
 
