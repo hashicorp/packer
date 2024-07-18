@@ -306,7 +306,6 @@ func (config *Config) detectFromFilename() {
 	// We didn't match a known compression format. Default to tar + pgzip
 	config.Algorithm = "pgzip"
 	config.Archive = "tar"
-	return
 }
 
 func makeBGZFWriter(output io.WriteCloser, compressionLevel int) (io.WriteCloser, error) {
@@ -371,7 +370,7 @@ func makePgzipWriter(output io.WriteCloser, compressionLevel int) (io.WriteClose
 	if err != nil {
 		return nil, ErrInvalidCompressionLevel
 	}
-	gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
+	_ = gzipWriter.SetConcurrency(500000, runtime.GOMAXPROCS(-1))
 	return gzipWriter, nil
 }
 

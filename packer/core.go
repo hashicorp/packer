@@ -891,7 +891,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 		for _, kv := range sortedMap {
 			// Interpolate the default
 			renderedV, err := interpolate.RenderRegex(kv.Value, ctx, renderFilter)
-			switch err.(type) {
+			switch err := err.(type) {
 			case nil:
 				// We only get here if interpolation has succeeded, so something is
 				// different in this loop than in the last one.
@@ -910,8 +910,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 					shouldRetry = true
 				}
 			case ttmp.ExecError:
-				castError := err.(ttmp.ExecError)
-				if strings.Contains(castError.Error(), interpolate.ErrVariableNotSetString) {
+				if strings.Contains(err.Error(), interpolate.ErrVariableNotSetString) {
 					shouldRetry = true
 					failedInterpolation = fmt.Sprintf(`"%s": "%s"; error: %s`, kv.Key, kv.Value, err)
 				} else {
@@ -939,7 +938,6 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 				}
 			}
 		}
-		deleteKeys = []string{}
 	}
 
 	if !changed && shouldRetry {

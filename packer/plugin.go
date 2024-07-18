@@ -20,11 +20,6 @@ import (
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 )
 
-var defaultChecksummer = plugingetter.Checksummer{
-	Type: "sha256",
-	Hash: sha256.New(),
-}
-
 // PluginConfig helps load and use packer plugins
 type PluginConfig struct {
 	PluginDirectory string

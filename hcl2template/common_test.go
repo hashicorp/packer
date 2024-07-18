@@ -205,17 +205,6 @@ var (
 		Datasource: "string",
 	}
 
-	basicMockBuilder = &MockBuilder{
-		Config: MockConfig{
-			NestedMockConfig: builderBasicNestedMockConfig,
-			Nested:           builderBasicNestedMockConfig,
-			NestedSlice: []NestedMockConfig{
-				builderBasicNestedMockConfig,
-				builderBasicNestedMockConfig,
-			},
-		},
-	}
-
 	basicMockProvisioner = &MockProvisioner{
 		Config: MockConfig{
 			NotSquashed:      "value <UNKNOWN>",
@@ -273,17 +262,6 @@ var (
 			NestedSlice: []NestedMockConfig{},
 		},
 	}
-	basicMockCommunicator = &MockCommunicator{
-		Config: MockConfig{
-			NestedMockConfig: basicNestedMockConfig,
-			Nested:           basicNestedMockConfig,
-			NestedSlice: []NestedMockConfig{
-				{
-					Tags: []MockTag{},
-				},
-			},
-		},
-	}
 
 	emptyMockBuilder = &MockBuilder{
 		Config: MockConfig{
@@ -292,13 +270,6 @@ var (
 			},
 			Nested:      NestedMockConfig{},
 			NestedSlice: []NestedMockConfig{},
-		},
-	}
-
-	emptyMockProvisioner = &MockProvisioner{
-		Config: MockConfig{
-			NestedMockConfig: NestedMockConfig{Tags: []MockTag{}},
-			NestedSlice:      []NestedMockConfig{},
 		},
 	}
 

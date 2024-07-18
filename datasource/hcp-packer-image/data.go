@@ -188,7 +188,7 @@ func (d *Datasource) Execute() (cty.Value, error) {
 			iteration.ID)
 	}
 
-	output := DatasourceOutput{}
+	var output DatasourceOutput
 
 	cloudAndRegions := map[string][]string{}
 	for _, build := range iteration.Builds {

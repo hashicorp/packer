@@ -151,7 +151,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifa
 				return nil, false, true, fmt.Errorf("unable to compute %s hash for %s", ct, art)
 			}
 			fr.Close()
-			fw.WriteString(fmt.Sprintf("%x\t%s\n", h.Sum(nil), filepath.Base(art)))
+			_, _ = fw.WriteString(fmt.Sprintf("%x\t%s\n", h.Sum(nil), filepath.Base(art)))
 			fw.Close()
 			h.Reset()
 		}

@@ -6,7 +6,6 @@
 package command
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -16,7 +15,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/packer-plugin-sdk/acctest"
 	"golang.org/x/mod/sumdb/dirhash"
 )
@@ -310,17 +308,6 @@ func (key skipInitTestUnlessEnVar) fn(t *testing.T, tc testCaseInit) {
 	// if os.Getenv(string(key)) == "" {
 	// 	t.Skipf("Acceptance test skipped unless env '%s' set", key)
 	// }
-}
-
-type initTestGoGetPlugin struct {
-	Src string
-	Dst string
-}
-
-func (opts initTestGoGetPlugin) fn(t *testing.T, _ testCaseInit) {
-	if _, err := getter.Get(context.Background(), opts.Dst, opts.Src); err != nil {
-		t.Fatalf("get: %v", err)
-	}
 }
 
 // TestInitCmd aims to test the init command, with output validation

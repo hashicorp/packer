@@ -16,7 +16,6 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
-	"github.com/hashicorp/packer-plugin-sdk/multistep"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
@@ -24,7 +23,6 @@ const BuilderId = "packer.file"
 
 type Builder struct {
 	config Config
-	runner multistep.Runner
 }
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
