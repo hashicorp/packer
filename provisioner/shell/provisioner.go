@@ -372,10 +372,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 
 	if p.config.PauseAfter != 0 {
 		ui.Say(fmt.Sprintf("Pausing %s after this provisioner...", p.config.PauseAfter))
-		select {
-		case <-time.After(p.config.PauseAfter):
-			return nil
-		}
+		time.Sleep(p.config.PauseAfter)
 	}
 
 	return nil

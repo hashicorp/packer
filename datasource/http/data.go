@@ -85,7 +85,7 @@ func isContentTypeText(contentType string) bool {
 	allowedContentTypes := []*regexp.Regexp{
 		regexp.MustCompile("^text/.+"),
 		regexp.MustCompile("^application/json$"),
-		regexp.MustCompile("^application/samlmetadata\\+xml"),
+		regexp.MustCompile(`^application/samlmetadata\+xml`),
 	}
 
 	for _, r := range allowedContentTypes {
@@ -131,9 +131,8 @@ func (d *Datasource) Execute() (cty.Value, error) {
 
 	contentType := resp.Header.Get("Content-Type")
 	if contentType == "" || isContentTypeText(contentType) == false {
-		fmt.Println(fmt.Sprintf(
-			"Content-Type is not recognized as a text type, got %q",
-			contentType))
+		fmt.Printf("Content-Type is not recognized as a text type, got %q\n",
+			contentType)
 		fmt.Println("If the content is binary data, Packer may not properly handle the contents of the response.")
 	}
 

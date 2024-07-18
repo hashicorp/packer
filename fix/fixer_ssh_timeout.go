@@ -12,7 +12,7 @@ type FixerSSHTimout struct{}
 
 func (FixerSSHTimout) DeprecatedOptions() map[string][]string {
 	return map[string][]string{
-		"*": []string{"ssh_wait_timeout"},
+		"*": {"ssh_wait_timeout"},
 	}
 }
 
@@ -35,12 +35,8 @@ func (FixerSSHTimout) Fix(input map[string]interface{}) (map[string]interface{},
 		}
 
 		if _, ok := builders["ssh_timeout"]; ok {
-
 			// drop ssh_wait_timeout if it is also included
-			if _, sshWaitTimeoutIncluded := builders["ssh_wait_timeout"]; sshWaitTimeoutIncluded {
-				delete(builders, "ssh_wait_timeout")
-			}
-
+			delete(builders, "ssh_wait_timeout")
 		} else {
 
 			// replace ssh_wait_timeout with ssh_timeout if it exists
