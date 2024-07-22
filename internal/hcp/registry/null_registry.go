@@ -30,3 +30,7 @@ func (r nullRegistry) CompleteBuild(
 }
 
 func (r nullRegistry) VersionStatusSummary() {}
+
+func (r nullRegistry) Metadata() Metadata {
+	return NilMetadata{}
+}

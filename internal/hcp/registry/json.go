@@ -20,6 +20,7 @@ type JSONRegistry struct {
 	configuration *packer.Core
 	bucket        *Bucket
 	ui            sdkpacker.Ui
+	metadata      *MetadataStore
 }
 
 func NewJSONRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONRegistry, hcl.Diagnostics) {
@@ -52,6 +53,7 @@ func NewJSONRegistry(config *packer.Core, ui sdkpacker.Ui) (*JSONRegistry, hcl.D
 		configuration: config,
 		bucket:        bucket,
 		ui:            ui,
+		metadata:      &MetadataStore{},
 	}, nil
 }
 
@@ -95,8 +97,8 @@ func (h *JSONRegistry) CompleteBuild(
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
 	buildName := build.Name()
-	buildMetadata := build.(*packer.CoreBuild).GetMetadata()
-	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata)
+	buildMetadata, envMetadata := build.(*packer.CoreBuild).GetMetadata(), h.metadata
+	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata, envMetadata)
 	if err != nil {
 		return nil, err
 	}
@@ -106,4 +108,9 @@ func (h *JSONRegistry) CompleteBuild(
 // VersionStatusSummary prints a status report in the UI if the version is not yet done
 func (h *JSONRegistry) VersionStatusSummary() {
 	h.bucket.Version.statusSummary(h.ui)
+}
+
+// Metadata gets the global metadata object that registers global settings
+func (h *JSONRegistry) Metadata() Metadata {
+	return h.metadata
 }
