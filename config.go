@@ -16,10 +16,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 )
 
-// PACKERSPACE is used to represent the spaces that separate args for a command
-// without being confused with spaces in the path to the command itself.
-const PACKERSPACE = "-PACKERSPACE-"
-
 type config struct {
 	DisableCheckpoint          bool              `json:"disable_checkpoint"`
 	DisableCheckpointSignature bool              `json:"disable_checkpoint_signature"`
@@ -109,10 +105,16 @@ func (c *config) discoverInternalComponents() error {
 	for builder := range command.Builders {
 		builder := builder
 		if !c.Plugins.Builders.Has(builder) {
-			bin := fmt.Sprintf("%s%sexecute%spacker-builder-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, builder)
 			c.Plugins.Builders.Set(builder, func() (packersdk.Builder, error) {
-				return c.Plugins.Client(bin).Builder()
+				args := []string{"execute"}
+
+				if packer.PackerUseProto {
+					args = append(args, "--protobuf")
+				}
+
+				args = append(args, fmt.Sprintf("packer-builder-%s", builder))
+
+				return c.Plugins.Client(packerPath, args...).Builder()
 			})
 		}
 	}
@@ -120,10 +122,16 @@ func (c *config) discoverInternalComponents() error {
 	for provisioner := range command.Provisioners {
 		provisioner := provisioner
 		if !c.Plugins.Provisioners.Has(provisioner) {
-			bin := fmt.Sprintf("%s%sexecute%spacker-provisioner-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, provisioner)
 			c.Plugins.Provisioners.Set(provisioner, func() (packersdk.Provisioner, error) {
-				return c.Plugins.Client(bin).Provisioner()
+				args := []string{"execute"}
+
+				if packer.PackerUseProto {
+					args = append(args, "--protobuf")
+				}
+
+				args = append(args, fmt.Sprintf("packer-provisioner-%s", provisioner))
+
+				return c.Plugins.Client(packerPath, args...).Provisioner()
 			})
 		}
 	}
@@ -131,10 +139,16 @@ func (c *config) discoverInternalComponents() error {
 	for postProcessor := range command.PostProcessors {
 		postProcessor := postProcessor
 		if !c.Plugins.PostProcessors.Has(postProcessor) {
-			bin := fmt.Sprintf("%s%sexecute%spacker-post-processor-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, postProcessor)
 			c.Plugins.PostProcessors.Set(postProcessor, func() (packersdk.PostProcessor, error) {
-				return c.Plugins.Client(bin).PostProcessor()
+				args := []string{"execute"}
+
+				if packer.PackerUseProto {
+					args = append(args, "--protobuf")
+				}
+
+				args = append(args, fmt.Sprintf("packer-post-processor-%s", postProcessor))
+
+				return c.Plugins.Client(packerPath, args...).PostProcessor()
 			})
 		}
 	}
@@ -142,10 +156,16 @@ func (c *config) discoverInternalComponents() error {
 	for dataSource := range command.Datasources {
 		dataSource := dataSource
 		if !c.Plugins.DataSources.Has(dataSource) {
-			bin := fmt.Sprintf("%s%sexecute%spacker-datasource-%s",
-				packerPath, PACKERSPACE, PACKERSPACE, dataSource)
 			c.Plugins.DataSources.Set(dataSource, func() (packersdk.Datasource, error) {
-				return c.Plugins.Client(bin).Datasource()
+				args := []string{"execute"}
+
+				if packer.PackerUseProto {
+					args = append(args, "--protobuf")
+				}
+
+				args = append(args, fmt.Sprintf("packer-datasource-%s", dataSource))
+
+				return c.Plugins.Client(packerPath, args...).Datasource()
 			})
 		}
 	}
