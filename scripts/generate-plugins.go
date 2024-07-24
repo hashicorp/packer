@@ -266,14 +266,15 @@ const source = `//
 package command
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
 packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer-plugin-sdk/rpc"
 
 IMPORTS
 )
@@ -292,18 +293,46 @@ DATASOURCES
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
 
-func (c *ExecuteCommand) Run(args []string) int {
-	// This is an internal call (users should not call this directly) so we're
-	// not going to do much input validation. If there's a problem we'll often
-	// just crash. Error handling should be added to facilitate debugging.
-	log.Printf("args: %#v", args)
-	if len(args) != 1 {
-		c.Ui.Error(c.Help())
-		return 1
+type ExecuteArgs struct {
+	UseProtobuf bool
+	CommandType string
+}
+
+func (ea *ExecuteArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.BoolVar(&ea.UseProtobuf, "protobuf", false, "Use protobuf for serialising data over the wire instead of gob")
+}
+
+func (c *ExecuteCommand) ParseArgs(args []string) (*ExecuteArgs, int) {
+	var cfg ExecuteArgs
+	flags := c.Meta.FlagSet("")
+	flags.Usage = func() { c.Ui.Say(c.Help()) }
+	cfg.AddFlagSets(flags)
+	if err := flags.Parse(args); err != nil {
+		return &cfg, 1
 	}
 
+	args = flags.Args()
+	if len(args) != 1 {
+		flags.Usage()
+		return &cfg, 1
+	}
+	cfg.CommandType = args[0]
+	return &cfg, 0
+}
+
+func (c *ExecuteCommand) Run(args []string) int {
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		return ret
+	}
+
+	return c.RunContext(cfg)
+}
+
+
+func (c *ExecuteCommand) RunContext(args *ExecuteArgs) int {
 	// Plugin will match something like "packer-builder-amazon-ebs"
-	parts := pluginRegexp.FindStringSubmatch(args[0])
+	parts := pluginRegexp.FindStringSubmatch(args.CommandType)
 	if len(parts) != 3 {
 		c.Ui.Error(c.Help())
 		return 1
@@ -315,6 +344,10 @@ func (c *ExecuteCommand) Run(args []string) int {
 	if err != nil {
 		c.Ui.Error(fmt.Sprintf("Error starting plugin server: %s", err))
 		return 1
+	}
+
+	if args.UseProtobuf {
+		server.UseProto = true
 	}
 
 	switch pluginType {
@@ -355,11 +388,15 @@ func (c *ExecuteCommand) Run(args []string) int {
 
 func (*ExecuteCommand) Help() string {
 	helpText := ` + "`" + `
-Usage: packer execute PLUGIN
+Usage: packer execute [options] PLUGIN
 
   Runs an internally-compiled version of a plugin from the packer binary.
 
   NOTE: this is an internal command and you should not call it yourself.
+
+Options:
+
+  --protobuf: use protobuf for serialising data over-the-wire instead of gob.
 ` + "`" + `
 
 	return strings.TrimSpace(helpText)

@@ -417,6 +417,7 @@ func (c *PluginClient) Client() (*packerrpc.Client, error) {
 		conn.Close()
 		return nil, err
 	}
+	client.UseProto = PackerUseProto
 
 	return client, nil
 }
