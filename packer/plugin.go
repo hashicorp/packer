@@ -30,6 +30,9 @@ type PluginConfig struct {
 	PostProcessors  PostProcessorSet
 	DataSources     DatasourceSet
 	ReleasesOnly    bool
+	// UseProtobuf is set if all the plugin candidates support protobuf, and
+	// the user has not forced usage of gob for serialisation.
+	UseProtobuf bool
 }
 
 // PACKERSPACE is used to represent the spaces that separate args for a command
@@ -118,6 +121,10 @@ func (c *PluginConfig) Discover() error {
 	return nil
 }
 
+const ForceGobEnvvar = "PACKER_FORCE_GOB"
+
+var PackerUseProto = true
+
 // DiscoverMultiPlugin takes the description from a multi-component plugin
 // binary and makes the plugins available to use in Packer. Each plugin found in the
 // binary will be addressable using `${pluginName}-${builderName}` for example.
@@ -130,6 +137,18 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 	if err != nil {
 		return fmt.Errorf("failed to get plugin description from executable %q: %s", pluginPath, err)
 	}
+
+	canProto := desc.ProtocolVersion == "v2"
+	if os.Getenv(ForceGobEnvvar) != "" && os.Getenv(ForceGobEnvvar) != "0" {
+		canProto = false
+	}
+
+	// Keeps track of whether or not the plugin had components registered
+	//
+	// If no components are registered, we don't need to clamp usage of
+	// protobuf regardless if the plugin supports it or not, as we won't
+	// use it at all.
+	registered := false
 
 	pluginPrefix := pluginName + "-"
 	pluginDetails := PluginDetails{
@@ -147,8 +166,17 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if c.Builders.Has(key) {
 			continue
 		}
+		registered = true
+
 		c.Builders.Set(key, func() (packersdk.Builder, error) {
-			return c.Client(pluginPath, "start", "builder", builderName).Builder()
+			args := []string{"start", "builder"}
+
+			if PackerUseProto {
+				args = append(args, "--protobuf")
+			}
+			args = append(args, builderName)
+
+			return c.Client(pluginPath, args...).Builder()
 		})
 		GlobalPluginsDetailsStore.SetBuilder(key, pluginDetails)
 	}
@@ -166,8 +194,17 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if c.PostProcessors.Has(key) {
 			continue
 		}
+		registered = true
+
 		c.PostProcessors.Set(key, func() (packersdk.PostProcessor, error) {
-			return c.Client(pluginPath, "start", "post-processor", postProcessorName).PostProcessor()
+			args := []string{"start", "post-processor"}
+
+			if PackerUseProto {
+				args = append(args, "--protobuf")
+			}
+			args = append(args, postProcessorName)
+
+			return c.Client(pluginPath, args...).PostProcessor()
 		})
 		GlobalPluginsDetailsStore.SetPostProcessor(key, pluginDetails)
 	}
@@ -185,8 +222,17 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if c.Provisioners.Has(key) {
 			continue
 		}
+		registered = true
+
 		c.Provisioners.Set(key, func() (packersdk.Provisioner, error) {
-			return c.Client(pluginPath, "start", "provisioner", provisionerName).Provisioner()
+			args := []string{"start", "provisioner"}
+
+			if PackerUseProto {
+				args = append(args, "--protobuf")
+			}
+			args = append(args, provisionerName)
+
+			return c.Client(pluginPath, args...).Provisioner()
 		})
 		GlobalPluginsDetailsStore.SetProvisioner(key, pluginDetails)
 
@@ -204,13 +250,30 @@ func (c *PluginConfig) DiscoverMultiPlugin(pluginName, pluginPath string) error 
 		if c.DataSources.Has(key) {
 			continue
 		}
+		registered = true
+
 		c.DataSources.Set(key, func() (packersdk.Datasource, error) {
-			return c.Client(pluginPath, "start", "datasource", datasourceName).Datasource()
+			args := []string{"start", "datasource"}
+
+			if PackerUseProto {
+				args = append(args, "--protobuf")
+			}
+			args = append(args, datasourceName)
+
+			return c.Client(pluginPath, args...).Datasource()
 		})
 		GlobalPluginsDetailsStore.SetDataSource(key, pluginDetails)
 	}
 	if len(desc.Datasources) > 0 {
 		log.Printf("found external %v datasource from %s plugin", desc.Datasources, pluginName)
+	}
+
+	// Only print the log once, for the plugin that triggers that
+	// limitation in functionality. Otherwise this could be a bit
+	// verbose to print it for each non-compatible plugin.
+	if registered && !canProto && PackerUseProto {
+		log.Printf("plugin %q does not support Protobuf, forcing use of Gob", pluginPath)
+		PackerUseProto = false
 	}
 
 	return nil
