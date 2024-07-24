@@ -105,6 +105,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	diags = packerStarter.Initialize(packer.InitializeOptions{
 		UseSequential: cla.UseSequential,
 	})
+
+	if packer.PackerUseProto {
+		log.Printf("[TRACE] Using protobuf for communication with plugins")
+	}
+
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
