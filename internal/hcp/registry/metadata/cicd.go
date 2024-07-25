@@ -41,7 +41,7 @@ func (g *GithubActions) Details() map[string]interface{} {
 }
 
 func (g *GithubActions) Type() string {
-	return "github-actions"
+	return "github"
 }
 
 type GitlabCI struct{}
@@ -81,7 +81,7 @@ func (g *GitlabCI) Details() map[string]interface{} {
 }
 
 func (g *GitlabCI) Type() string {
-	return "gitlab-ci"
+	return "gitlab"
 }
 
 func GetCicdMetadata() map[string]interface{} {
