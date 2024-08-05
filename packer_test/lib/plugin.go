@@ -15,24 +15,29 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )
 
-var compiledPlugins = struct {
+type compiledPlugins struct {
 	pluginVersions map[string]string
-	RWMutex        sync.RWMutex
-}{
-	pluginVersions: map[string]string{},
+	rwMutex        sync.RWMutex
 }
 
-func StorePluginVersion(pluginVersion, path string) {
-	compiledPlugins.RWMutex.Lock()
-	defer compiledPlugins.RWMutex.Unlock()
-	compiledPlugins.pluginVersions[pluginVersion] = path
+func (ts *PackerTestSuite) StorePluginVersion(pluginVersion, path string) {
+	ts.compiledPlugins.rwMutex.Lock()
+	defer ts.compiledPlugins.rwMutex.Unlock()
+	if ts.compiledPlugins.pluginVersions == nil {
+		ts.compiledPlugins.pluginVersions = map[string]string{}
+	}
+
+	ts.compiledPlugins.pluginVersions[pluginVersion] = path
 }
 
-func LoadPluginVersion(pluginVersion string) (string, bool) {
-	compiledPlugins.RWMutex.RLock()
-	defer compiledPlugins.RWMutex.RUnlock()
+func (ts *PackerTestSuite) LoadPluginVersion(pluginVersion string) (string, bool) {
+	ts.compiledPlugins.rwMutex.RLock()
+	defer ts.compiledPlugins.rwMutex.RUnlock()
+	if ts.compiledPlugins.pluginVersions == nil {
+		ts.compiledPlugins.pluginVersions = map[string]string{}
+	}
 
-	path, ok := compiledPlugins.pluginVersions[pluginVersion]
+	path, ok := ts.compiledPlugins.pluginVersions[pluginVersion]
 	return path, ok
 }
 
@@ -129,7 +134,7 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 	}
 
 	for _, pluginVersion := range pluginVersions {
-		path, ok := LoadPluginVersion(pluginVersion)
+		path, ok := ts.LoadPluginVersion(pluginVersion)
 		if !ok {
 			err = fmt.Errorf("failed to get path to version %q, was it compiled?", pluginVersion)
 		}
