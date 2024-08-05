@@ -88,6 +88,59 @@ func ExpectedInstalledName(versionStr string) string {
 		runtime.GOOS, runtime.GOARCH, ext)
 }
 
+// BuildCustomisation is a function that allows you to change things on a plugin's
+// local files, with a way to rollback those changes after the fact.
+//
+// The function is meant to take a path parameter to the directory for the plugin,
+// and returns a function that unravels those changes once the build process is done.
+type BuildCustomisation func(string) (error, func())
+
+const SDKModule = "github.com/hashicorp/packer-plugin-sdk"
+
+// UseDependency invokes go get and go mod tidy to update a package required
+// by the plugin, and use it to build the plugin with that change.
+func UseDependency(remoteModule, ref string) BuildCustomisation {
+	return func(path string) (error, func()) {
+		modPath := filepath.Join(path, "go.mod")
+
+		stat, err := os.Stat(modPath)
+		if err != nil {
+			return fmt.Errorf("cannot stat mod file %q: %s", modPath, err), nil
+		}
+
+		// Save old go.mod file from dir
+		oldGoMod, err := os.ReadFile(modPath)
+		if err != nil {
+			return fmt.Errorf("failed to read current mod file %q: %s", modPath, err), nil
+		}
+
+		modSpec := fmt.Sprintf("%s@%s", remoteModule, ref)
+		cmd := exec.Command("go", "get", modSpec)
+		cmd.Dir = path
+		err = cmd.Run()
+		if err != nil {
+			return fmt.Errorf("failed to run go get %s: %s", modSpec, err), nil
+		}
+
+		cmd = exec.Command("go", "mod", "tidy")
+		cmd.Dir = path
+		err = cmd.Run()
+		if err != nil {
+			return fmt.Errorf("failed to run go mod tidy: %s", err), nil
+		}
+
+		return nil, func() {
+			err = os.WriteFile(modPath, oldGoMod, stat.Mode())
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to reset modfile %q: %s; manual cleanup may be needed", modPath, err)
+			}
+			cmd := exec.Command("go", "mod", "tidy")
+			cmd.Dir = path
+			_ = cmd.Run()
+		}
+	}
+}
+
 // BuildSimplePlugin creates a plugin that essentially does nothing.
 //
 // The plugin's code is contained in a subdirectory of this, and lets us
@@ -100,7 +153,7 @@ func ExpectedInstalledName(versionStr string) string {
 //
 // The path to the plugin is returned, it won't be removed automatically
 // though, deletion is the caller's responsibility.
-func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T) string {
+func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T, customisations ...BuildCustomisation) string {
 	// Only build plugin binary if not already done beforehand
 	path, ok := ts.LoadPluginVersion(versionString)
 	if ok {
@@ -117,6 +170,14 @@ func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T)
 	}
 
 	testerPluginDir := filepath.Join(testDir, "plugin_tester")
+	for _, custom := range customisations {
+		err, cleanup := custom(testerPluginDir)
+		if err != nil {
+			t.Fatalf("failed to prepare plugin workdir: %s", err)
+		}
+		defer cleanup()
+	}
+
 	outBin := filepath.Join(ts.pluginsDirectory, BinaryName(v))
 
 	compileCommand := exec.Command("go", "build", "-C", testerPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
