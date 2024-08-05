@@ -24,6 +24,13 @@ type PackerTestSuite struct {
 	// Since we don't necessarily want to manually compile Packer beforehand,
 	// we compile it on demand, and use this executable for the tests.
 	packerPath string
+	// compiledPlugins is the map of each compiled plugin to its path.
+	//
+	// This used to be global, but should be linked to the suite instead, as
+	// we may have multiple suites that exist, each with its own repo of
+	// plugins compiled for the purposes of the test, so as they all run
+	// within the same process space, they should be separate instances.
+	compiledPlugins compiledPlugins
 }
 
 func (ts *PackerTestSuite) buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
@@ -58,7 +65,7 @@ func (ts *PackerTestSuite) CompileTestPluginVersions(t *testing.T, versions ...s
 // though, deletion is the caller's responsibility.
 func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T) string {
 	// Only build plugin binary if not already done beforehand
-	path, ok := LoadPluginVersion(versionString)
+	path, ok := ts.LoadPluginVersion(versionString)
 	if ok {
 		return path
 	}
@@ -81,7 +88,7 @@ func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T)
 		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
 	}
 
-	StorePluginVersion(v.String(), outBin)
+	ts.StorePluginVersion(v.String(), outBin)
 
 	return outBin
 }
