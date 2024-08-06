@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-version"
 )
 
 type Stream int
@@ -120,6 +123,57 @@ func Grep(expression string, opts ...GrepOpts) Checker {
 		}
 	}
 	return pc
+}
+
+type PluginVersionTuple struct {
+	Source  string
+	Version *version.Version
+}
+
+func NewPluginVersionTuple(src, pluginVersion string) PluginVersionTuple {
+	ver := version.Must(version.NewVersion(pluginVersion))
+	return PluginVersionTuple{
+		Source:  src,
+		Version: ver,
+	}
+}
+
+type pluginsUsed struct {
+	invert  bool
+	plugins []PluginVersionTuple
+}
+
+func (pu pluginsUsed) Check(stdout, stderr string, _ error) error {
+	var opts []GrepOpts
+	if !pu.invert {
+		opts = append(opts, GrepInvert)
+	}
+
+	var retErr error
+
+	for _, pvt := range pu.plugins {
+		// `error` is ignored for Grep, so we can pass in nil
+		err := Grep(
+			fmt.Sprintf("%s_v%s[^:]+\\\\s*plugin process exited", pvt.Source, pvt.Version.Core()),
+			opts...,
+		).Check(stdout, stderr, nil)
+		if err != nil {
+			retErr = multierror.Append(retErr, err)
+		}
+	}
+
+	return retErr
+}
+
+// PluginsUsed is a glorified `Grep` checker that looks for a bunch of plugins
+// used from the logs of a packer build or packer validate.
+//
+// Each tuple passed as parameter is looked for in the logs using Grep
+func PluginsUsed(invert bool, plugins ...PluginVersionTuple) Checker {
+	return pluginsUsed{
+		invert:  invert,
+		plugins: plugins,
+	}
 }
 
 func Dump(t *testing.T) Checker {
