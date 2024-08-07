@@ -70,15 +70,19 @@ pinning plugin versions for build reproducibility. Refer to the [`packer` block 
 
 ## Manually install plugins using the CLI
 
-You can use the `packer plugins install` command to manually install remote plugins. Include the `--path` flag and specify a local source so that Packer automatically calculates the SHA256SUM file and installs the files into the Packer plugin directory:
+You can use the `packer plugins install` command to manually install plugin binaries.
+Use the `--path` flag to specify a local source. Packer then automatically calculates the SHA256SUM file and installs the files into the Packer plugin directory:
 
 ```shell-session
-$ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name> 
+$ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name>
 ```
 
-The following example installs the `happycloud` plugin from GitHub:
+The following example installs the `happycloud` plugin from a locally-sourced binary:
 
 ```shell-session
+$ unzip packer-plugin-happycloud.zip
+$ ls -l
+-rwxr-xr-x [...] happycloud
 $ packer plugins install --path happycloud github.com/hashicorp/happycloud
 ```
 
