@@ -27,7 +27,7 @@ Note that Packer checks the plugin installation directory against the `required_
 
 ### Installation directory
 
-By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable. 
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable.
 Plugin installation requires access to temporary files under `TMPDIR`. If the system's temp directory is non-writable or non-executable, use TMPDIR to override the location of the temporary file store used by Packer.
 Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
 
@@ -48,12 +48,12 @@ If you expect to exceed the request rate limit, you can use a GitHub API token t
 
 ## Install a plugin
 
-1. In your Packer template file, add the `required_plugins` block to the `packer` block. 
+1. In your Packer template file, add the `required_plugins` block to the `packer` block.
 1. Specify the name of the plugin and its `version` and `source` parameters. Setting a correct [version constraint string](/packer/docs/templates/hcl_templates/blocks/packer#version-constraints) is important for
 pinning plugin versions for build reproducibility. Refer to the [`packer` block configuration reference](/packer/docs/templates/hcl_templates/blocks/packer) for additional information.
 
    The following example configures Packer to install a plugin called `happycloud`. When the template is initialized, Packer downloads version 2.7.0 or newer of the plugin from GitHub:
-   
+
     ```hcl
     packer {
       required_plugins {
@@ -63,22 +63,26 @@ pinning plugin versions for build reproducibility. Refer to the [`packer` block 
         }
       }
     }
-    
+
     ```
 
 1. Run the `packer init` command. Packer lists all installed plugins then installs the latest plugin version matching the version constraints specified in the `required_plugins` block. Refer to the [`init` command reference](/packer/docs/commands/init) for additional information.
 
 ## Manually install plugins using the CLI
 
-You can use the `packer plugins install` command to manually install remote plugins. Include the `--path` flag and specify a local source so that Packer automatically calculates the SHA256SUM file and installs the files into the Packer plugin directory:
+You can use the `packer plugins install` command to manually install plugin binaries.
+Use the `--path` flag to specify a local source. Packer then automatically calculates the SHA256SUM file and installs the files into the Packer plugin directory:
 
 ```shell-session
-$ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name> 
+$ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name>
 ```
 
-The following example installs the `happycloud` plugin from GitHub:
+The following example installs the `happycloud` plugin from a locally-sourced binary:
 
 ```shell-session
+$ unzip packer-plugin-happycloud.zip
+$ ls -l
+-rwxr-xr-x [...] happycloud
 $ packer plugins install --path happycloud github.com/hashicorp/happycloud
 ```
 
@@ -113,7 +117,7 @@ packer = {
         }
     }
 
-. . . 
+. . .
 
 }
 ```
@@ -154,7 +158,7 @@ Complete the following steps to build and install a custom version of the Docker
     ```shell-session
     $ git clone https://github.com/hashicorp/packer-plugin-docker.git
     ```
-   
+
 1. Change to the plugin directory root and run the `go build` command to build the plugin as a development binary.
 
     ```shell-session
