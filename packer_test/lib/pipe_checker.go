@@ -1,4 +1,4 @@
-package packer_test
+package lib
 
 import (
 	"fmt"
@@ -101,30 +101,30 @@ func ExpectEmptyInput() Tester {
 	})
 }
 
-type op int
+type Op int
 
 const (
-	eq op = iota
-	ne
-	gt
-	ge
-	lt
-	le
+	Eq Op = iota
+	Ne
+	Gt
+	Ge
+	Lt
+	Le
 )
 
-func (op op) String() string {
+func (op Op) String() string {
 	switch op {
-	case eq:
+	case Eq:
 		return "=="
-	case ne:
+	case Ne:
 		return "!="
-	case gt:
+	case Gt:
 		return ">"
-	case ge:
+	case Ge:
 		return ">="
-	case lt:
+	case Lt:
 		return "<"
-	case le:
+	case Le:
 		return "<="
 	}
 
@@ -134,7 +134,7 @@ func (op op) String() string {
 // IntCompare reads the input from the pipeline and compares it to a value using `op`
 //
 // If the input is not an int, this fails.
-func IntCompare(op op, value int) Tester {
+func IntCompare(op Op, value int) Tester {
 	return CustomTester(func(in string) error {
 		n, err := strconv.Atoi(strings.TrimSpace(in))
 		if err != nil {
@@ -143,17 +143,17 @@ func IntCompare(op op, value int) Tester {
 
 		var result bool
 		switch op {
-		case eq:
+		case Eq:
 			result = n == value
-		case ne:
+		case Ne:
 			result = n != value
-		case gt:
+		case Gt:
 			result = n > value
-		case ge:
+		case Ge:
 			result = n >= value
-		case lt:
+		case Lt:
 			result = n < value
-		case le:
+		case Le:
 			result = n <= value
 		default:
 			panic(fmt.Sprintf("Unsupported operator %d, make sure the operation is implemented for IntCompare", op))

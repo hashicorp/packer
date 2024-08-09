@@ -1,6 +1,7 @@
-package packer_test
+package lib
 
 import (
+	"fmt"
 	"os"
 	"sync"
 	"testing"
@@ -20,24 +21,29 @@ type PackerTestSuite struct {
 	// Since we don't necessarily want to manually compile Packer beforehand,
 	// we compile it on demand, and use this executable for the tests.
 	packerPath string
+	// compiledPlugins is the map of each compiled plugin to its path.
+	//
+	// This used to be global, but should be linked to the suite instead, as
+	// we may have multiple suites that exist, each with its own repo of
+	// plugins compiled for the purposes of the test, so as they all run
+	// within the same process space, they should be separate instances.
+	compiledPlugins compiledPlugins
 }
 
-func buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
+func (ts *PackerTestSuite) buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
 	waitgroup.Add(1)
 	go func() {
 		defer waitgroup.Done()
-		BuildSimplePlugin(versionString, t)
+		ts.BuildSimplePlugin(versionString, t)
 	}()
 }
 
-func (ts *PackerTestSuite) buildPluginBinaries(t *testing.T) {
+func (ts *PackerTestSuite) CompileTestPluginVersions(t *testing.T, versions ...string) {
 	wg := &sync.WaitGroup{}
 
-	buildPluginVersion(wg, "1.0.0", t)
-	buildPluginVersion(wg, "1.0.0+metadata", t)
-	buildPluginVersion(wg, "1.0.1-alpha1", t)
-	buildPluginVersion(wg, "1.0.9", t)
-	buildPluginVersion(wg, "1.0.10", t)
+	for _, ver := range versions {
+		ts.buildPluginVersion(wg, ver, t)
+	}
 
 	wg.Wait()
 }
@@ -56,19 +62,17 @@ func (ts *PackerTestSuite) SkipNoAcc() {
 	}
 }
 
-func Test_PackerCoreSuite(t *testing.T) {
+func PackerCoreSuite(t *testing.T) (*PackerTestSuite, func()) {
 	ts := &PackerTestSuite{}
 
-	pluginsDirectory := PluginBinaryDir()
-	defer func() {
-		err := os.RemoveAll(pluginsDirectory)
-		if err != nil {
-			t.Logf("failed to cleanup directory %q: %s. This will need manual action", pluginsDirectory, err)
-		}
-	}()
+	tempDir, err := os.MkdirTemp("", "packer-core-acc-test-")
+	if err != nil {
+		panic(fmt.Sprintf("failed to create temporary directory for compiled plugins: %s", err))
+	}
+	ts.pluginsDirectory = tempDir
 
-	ts.pluginsDirectory = pluginsDirectory
-	ts.buildPluginBinaries(t)
+	defer func() {
+	}()
 
 	packerPath := os.Getenv("PACKER_CUSTOM_PATH")
 	if packerPath == "" {
@@ -82,16 +86,19 @@ func Test_PackerCoreSuite(t *testing.T) {
 	ts.packerPath = packerPath
 	t.Logf("Done")
 
-	defer func() {
+	return ts, func() {
+		err := os.RemoveAll(ts.pluginsDirectory)
+		if err != nil {
+			t.Logf("failed to cleanup directory %q: %s. This will need manual action", ts.pluginsDirectory, err)
+		}
+
 		if os.Getenv("PACKER_CUSTOM_PATH") != "" {
 			return
 		}
 
-		err := os.Remove(ts.packerPath)
+		err = os.Remove(ts.packerPath)
 		if err != nil {
 			t.Logf("failed to cleanup compiled packer binary %q: %s. This will need manual action", packerPath, err)
 		}
-	}()
-
-	suite.Run(t, ts)
+	}
 }

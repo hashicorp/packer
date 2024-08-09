@@ -1,4 +1,4 @@
-package packer_test
+package lib
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ func BuildTestPacker(t *testing.T) (string, error) {
 		return "", fmt.Errorf("failed to compile packer binary: %s", err)
 	}
 
-	packerCoreDir := filepath.Dir(testDir)
+	packerCoreDir := filepath.Dir(filepath.Dir(testDir))
 
 	outBin := filepath.Join(os.TempDir(), fmt.Sprintf("packer_core-%d", rand.Int()))
 	if runtime.GOOS == "windows" {
