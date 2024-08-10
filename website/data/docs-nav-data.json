@@ -428,6 +428,10 @@
                     "path": "templates/hcl_templates/functions/encoding/base64encode"
                   },
                   {
+                    "title": "base64gzip",
+                    "path": "templates/hcl_templates/functions/encoding/base64gzip"
+                  },
+                  {
                     "title": "csvdecode",
                     "path": "templates/hcl_templates/functions/encoding/csvdecode"
                   },
