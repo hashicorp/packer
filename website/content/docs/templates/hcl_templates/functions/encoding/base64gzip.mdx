@@ -1,0 +1,32 @@
+---
+page_title: base64gzip - Functions - Configuration Language
+description: The base64encode function compresses the given string with gzip and then
+  encodes the result in Base64.
+---
+
+# `base64gzip` Function
+
+`base64gzip` compresses a string with gzip and then encodes the result in
+Base64 encoding.
+
+Packer uses the "standard" Base64 alphabet as defined in
+[RFC 4648 section 4](https://tools.ietf.org/html/rfc4648#section-4).
+
+Strings in the Packer language are sequences of unicode characters rather
+than bytes, so this function will first encode the characters from the string
+as UTF-8, and then apply Base64 encoding to the result.
+
+The Packer language applies Unicode normalization to all strings, and so
+passing a string through `base64decode` and then `base64encode` may not yield
+the original result exactly.
+
+While we do not recommend manipulating large, raw binary data in the Packer
+language, this function can be used to compress reasonably sized text strings
+generated within the Packer language. For example, the result of this
+function can be used to create a compressed object in Amazon S3 as part of
+an S3 website.
+
+## Related Functions
+
+- [`base64decode`](/packer/docs/templates/hcl_templates/functions/encoding/base64decode) performs the opposite operation,
+  decoding Base64 data and interpreting it as a UTF-8 string.
