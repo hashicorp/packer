@@ -38,6 +38,7 @@ func Functions(basedir string) map[string]function.Function {
 		"basename":           filesystem.BasenameFunc,
 		"base64decode":       encoding.Base64DecodeFunc,
 		"base64encode":       encoding.Base64EncodeFunc,
+		"base64gzip":         pkrfunction.Base64GzipFunc,
 		"bcrypt":             crypto.BcryptFunc,
 		"can":                tryfunc.CanFunc,
 		"ceil":               stdlib.CeilFunc,
