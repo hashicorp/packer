@@ -15,6 +15,10 @@ on:
       - release/**
       - feature/**
 
+concurrency:
+  group: ${{ github.ref  }}
+  cancel-in-progress: true
+
 env:
   REPO_NAME: "packer"
 
