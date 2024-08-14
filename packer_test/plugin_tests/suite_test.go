@@ -14,12 +14,7 @@ type PackerPluginTestSuite struct {
 func Test_PackerPluginSuite(t *testing.T) {
 	baseSuite, cleanup := lib.InitBaseSuite(t)
 	defer cleanup()
-
-	ts := &PackerPluginTestSuite{
-		baseSuite,
-	}
-	ts.PackerTestSuite.CompileTestPluginVersions(t,
-		"1.0.0",
+	baseSuite.CompileTestPluginVersions(t,
 		"1.0.0",
 		"1.0.0+metadata",
 		"1.0.1-alpha1",
@@ -31,6 +26,10 @@ func Test_PackerPluginSuite(t *testing.T) {
 		"1.0.1-dev",
 		"2.0.0",
 	)
+
+	ts := &PackerPluginTestSuite{
+		baseSuite,
+	}
 
 	suite.Run(t, ts)
 }
