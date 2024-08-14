@@ -52,7 +52,7 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithPath() {
 			SetArgs("plugins", "installed").
 			Assert(lib.MustSucceed(),
 				lib.Grep("plugin-tester_v1.0.0-dev[^+]", lib.GrepStdout),
-				lib.Grep("plugin-tester_v1.0.0-dev\\+", lib.GrepStdout, lib.GrepInvert),
+				lib.GrepInverted("plugin-tester_v1.0.0-dev\\+", lib.GrepStdout),
 				lib.LineCountCheck(1))
 	})
 }

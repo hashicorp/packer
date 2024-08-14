@@ -110,7 +110,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 			SetArgs("plugins", "installed").
 			Assert(lib.MustSucceed(),
 				lib.Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout, lib.GrepInvert),
+				lib.GrepInverted("packer-plugin-tester_v1.0.10", lib.GrepStdout),
 				lib.Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", lib.GrepStderr))
 	})
 
@@ -128,7 +128,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 			SetArgs("plugins", "installed").
 			Assert(lib.MustSucceed(),
 				lib.Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepInvert, lib.GrepStdout),
+				lib.GrepInverted("packer-plugin-tester_v1.0.10", lib.GrepStdout),
 				lib.Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", lib.GrepStderr),
 				lib.Grep(`Checksums \(\*sha256\.digest\) did not match.`, lib.GrepStderr))
 	})
