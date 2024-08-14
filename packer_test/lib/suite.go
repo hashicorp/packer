@@ -73,9 +73,6 @@ func InitBaseSuite(t *testing.T) (*PackerTestSuite, func()) {
 	}
 	ts.pluginsDirectory = tempDir
 
-	defer func() {
-	}()
-
 	packerPath := os.Getenv("PACKER_CUSTOM_PATH")
 	if packerPath == "" {
 		var err error
