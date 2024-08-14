@@ -12,7 +12,7 @@ type PackerPluginTestSuite struct {
 }
 
 func Test_PackerPluginSuite(t *testing.T) {
-	baseSuite, cleanup := lib.PackerCoreSuite(t)
+	baseSuite, cleanup := lib.InitBaseSuite(t)
 	defer cleanup()
 
 	ts := &PackerPluginTestSuite{
