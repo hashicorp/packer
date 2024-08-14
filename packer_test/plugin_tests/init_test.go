@@ -55,7 +55,7 @@ func (ts *PackerPluginTestSuite) TestPackerInitWithNonGithubSource() {
 
 	ts.Run("manually install plugin to the expected source", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
-			SetArgs("plugins", "install", "--path", ts.BuildSimplePlugin("1.0.10", ts.T()), "hubgit.com/hashicorp/tester").
+			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.10"), "hubgit.com/hashicorp/tester").
 			Assert(lib.MustSucceed(), lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout))
 	})
 

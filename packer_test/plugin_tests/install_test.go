@@ -8,7 +8,7 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithMetadata() {
 
 	ts.Run("install plugin with metadata in version", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
-			SetArgs("plugins", "install", "--path", ts.BuildSimplePlugin("1.0.0+metadata", ts.T()), "github.com/hashicorp/tester").
+			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.0+metadata"), "github.com/hashicorp/tester").
 			Assert(lib.MustSucceed(), lib.Grep("Successfully installed plugin", lib.GrepStdout))
 	})
 
@@ -37,13 +37,13 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithPath() {
 
 	ts.Run("install plugin with pre-release only", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
-			SetArgs("plugins", "install", "--path", ts.BuildSimplePlugin("1.0.0-dev", ts.T()), "github.com/hashicorp/tester").
+			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.0-dev"), "github.com/hashicorp/tester").
 			Assert(lib.MustSucceed(), lib.Grep("Successfully installed plugin", lib.GrepStdout))
 	})
 
 	ts.Run("install same plugin with pre-release + metadata", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
-			SetArgs("plugins", "install", "--path", ts.BuildSimplePlugin("1.0.0-dev+metadata", ts.T()), "github.com/hashicorp/tester").
+			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.0-dev+metadata"), "github.com/hashicorp/tester").
 			Assert(lib.MustSucceed(), lib.Grep("Successfully installed plugin", lib.GrepStdout))
 	})
 
@@ -58,7 +58,7 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithPath() {
 }
 
 func (ts *PackerPluginTestSuite) TestInstallPluginPrerelease() {
-	pluginPath := ts.BuildSimplePlugin("1.0.1-alpha1", ts.T())
+	pluginPath := ts.GetPluginPath(ts.T(), "1.0.1-alpha1")
 
 	pluginDir, cleanup := ts.MakePluginDir()
 	defer cleanup()

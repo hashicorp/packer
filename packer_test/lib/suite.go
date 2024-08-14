@@ -34,7 +34,7 @@ func (ts *PackerTestSuite) buildPluginVersion(waitgroup *sync.WaitGroup, version
 	waitgroup.Add(1)
 	go func() {
 		defer waitgroup.Done()
-		ts.BuildSimplePlugin(versionString, t)
+		ts.CompilePlugin(t, versionString)
 	}()
 }
 
