@@ -62,7 +62,7 @@ func (ts *PackerTestSuite) SkipNoAcc() {
 	}
 }
 
-func PackerCoreSuite(t *testing.T) (*PackerTestSuite, func()) {
+func InitBaseSuite(t *testing.T) (*PackerTestSuite, func()) {
 	ts := &PackerTestSuite{}
 
 	tempDir, err := os.MkdirTemp("", "packer-core-acc-test-")
