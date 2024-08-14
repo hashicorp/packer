@@ -11,7 +11,7 @@ type PackerCoreTestSuite struct {
 	*lib.PackerTestSuite
 }
 
-func Test_PackerPluginSuite(t *testing.T) {
+func Test_PackerCoreSuite(t *testing.T) {
 	baseSuite, cleanup := lib.InitBaseSuite(t)
 	defer cleanup()
 
