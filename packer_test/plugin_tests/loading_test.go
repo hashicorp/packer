@@ -51,7 +51,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 	pluginDir, cleanup := ts.MakePluginDir()
 	defer cleanup()
 
-	plugin := ts.BuildSimplePlugin("1.0.10", ts.T())
+	plugin := ts.GetPluginPath(ts.T(), "1.0.10")
 
 	lib.CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
 
@@ -96,7 +96,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 }
 
 func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
-	plugin := ts.BuildSimplePlugin("1.0.10", ts.T())
+	plugin := ts.GetPluginPath(ts.T(), "1.0.10")
 
 	ts.Run("move plugin with right name, but no SHA256SUM, should reject", func() {
 		pluginDir, cleanup := ts.MakePluginDir("1.0.9")
@@ -161,7 +161,7 @@ func (ts *PackerPluginTestSuite) TestInstallNonCanonicalPluginVersion() {
 
 	lib.ManualPluginInstall(ts.T(),
 		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
-		ts.BuildSimplePlugin("1.0.10", ts.T()),
+		ts.GetPluginPath(ts.T(), "1.0.10"),
 		"001.00.010")
 
 	ts.Run("try listing plugins with non-canonical version installed - report none", func() {
@@ -179,7 +179,7 @@ func (ts *PackerPluginTestSuite) TestLoadPluginWithMetadataInName() {
 
 	lib.ManualPluginInstall(ts.T(),
 		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
-		ts.BuildSimplePlugin("1.0.10+metadata", ts.T()),
+		ts.GetPluginPath(ts.T(), "1.0.10+metadata"),
 		"1.0.10+metadata")
 
 	ts.Run("try listing plugins with metadata in name - report none", func() {
