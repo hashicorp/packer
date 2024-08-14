@@ -17,7 +17,7 @@ func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 		Stdin("local.test_local\n").
 		SetArgs("console", "./templates/locals_no_order.pkr.hcl").
 		Assert(lib.MustSucceed(),
-			lib.Grep("\\[\\]", lib.GrepStdout, lib.GrepInvert))
+			lib.GrepInverted("\\[\\]", lib.GrepStdout))
 }
 
 func (ts *PackerCoreTestSuite) TestLocalDuplicates() {

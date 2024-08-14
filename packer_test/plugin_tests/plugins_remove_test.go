@@ -72,7 +72,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddressAndVersion() 
 				lib.MustSucceed(),
 				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepStdout),
 				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v2.0.0", lib.GrepInvert, lib.GrepStdout),
+				lib.GrepInverted("packer-plugin-tester_v2.0.0", lib.GrepStdout),
 			)
 	})
 
@@ -98,7 +98,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 			Assert(
 				lib.MustSucceed(),
 				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepInvert, lib.GrepStdout),
+				lib.GrepInverted("packer-plugin-tester_v1.0.10", lib.GrepStdout),
 			)
 	})
 	ts.Run("plugins installed after calling plugins remove outputs remaining installed plugins", func() {
@@ -107,7 +107,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 			Assert(
 				lib.MustSucceed(),
 				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepInvert, lib.GrepStdout),
+				lib.GrepInverted("packer-plugin-tester_v1.0.9", lib.GrepStdout),
 			)
 	})
 
