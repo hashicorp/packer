@@ -7,38 +7,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 	"testing"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 )
-
-type compiledPlugins struct {
-	pluginVersions map[string]string
-	mutex          sync.Mutex
-}
-
-func (ts *PackerTestSuite) StorePluginVersion(pluginVersion, path string) {
-	ts.compiledPlugins.mutex.Lock()
-	defer ts.compiledPlugins.mutex.Unlock()
-	if ts.compiledPlugins.pluginVersions == nil {
-		ts.compiledPlugins.pluginVersions = map[string]string{}
-	}
-
-	ts.compiledPlugins.pluginVersions[pluginVersion] = path
-}
-
-func (ts *PackerTestSuite) LoadPluginVersion(pluginVersion string) (string, bool) {
-	ts.compiledPlugins.mutex.Lock()
-	defer ts.compiledPlugins.mutex.Unlock()
-	if ts.compiledPlugins.pluginVersions == nil {
-		ts.compiledPlugins.pluginVersions = map[string]string{}
-	}
-
-	path, ok := ts.compiledPlugins.pluginVersions[pluginVersion]
-	return path, ok
-}
 
 // LDFlags compiles the ldflags for the plugin to compile based on the information provided.
 func LDFlags(version *version.Version) string {
@@ -102,9 +75,9 @@ func ExpectedInstalledName(versionStr string) string {
 // though, deletion is the caller's responsibility.
 func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T) string {
 	// Only build plugin binary if not already done beforehand
-	path, ok := ts.LoadPluginVersion(versionString)
+	path, ok := ts.compiledPlugins.Load(versionString)
 	if ok {
-		return path
+		return path.(string)
 	}
 
 	v := version.Must(version.NewSemver(versionString))
@@ -125,7 +98,7 @@ func (ts *PackerTestSuite) BuildSimplePlugin(versionString string, t *testing.T)
 		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
 	}
 
-	ts.StorePluginVersion(v.String(), outBin)
+	ts.compiledPlugins.Store(v.String(), outBin)
 
 	return outBin
 }
@@ -160,11 +133,11 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 	}
 
 	for _, pluginVersion := range pluginVersions {
-		path, ok := ts.LoadPluginVersion(pluginVersion)
+		path, ok := ts.compiledPlugins.Load(pluginVersion)
 		if !ok {
 			err = fmt.Errorf("failed to get path to version %q, was it compiled?", pluginVersion)
 		}
-		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
+		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path.(string), "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
 		cmd.Assert(MustSucceed())
 		out, stderr, cmdErr := cmd.Run()
 		if cmdErr != nil {

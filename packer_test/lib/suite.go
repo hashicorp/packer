@@ -27,7 +27,7 @@ type PackerTestSuite struct {
 	// we may have multiple suites that exist, each with its own repo of
 	// plugins compiled for the purposes of the test, so as they all run
 	// within the same process space, they should be separate instances.
-	compiledPlugins compiledPlugins
+	compiledPlugins sync.Map
 }
 
 func (ts *PackerTestSuite) buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
@@ -63,7 +63,9 @@ func (ts *PackerTestSuite) SkipNoAcc() {
 }
 
 func InitBaseSuite(t *testing.T) (*PackerTestSuite, func()) {
-	ts := &PackerTestSuite{}
+	ts := &PackerTestSuite{
+		compiledPlugins: sync.Map{},
+	}
 
 	tempDir, err := os.MkdirTemp("", "packer-core-acc-test-")
 	if err != nil {
