@@ -168,7 +168,7 @@ func InstalledPlugins(ts *PackerPluginTestSuite, dir string) []string {
 		SetAssertFatal()
 	cmd.Assert(check.MustSucceed())
 
-	out, _, _ := cmd.Run()
+	out, _, _ := cmd.Output()
 	// Output will be split on '\n' after trimming all other white space
 	out = strings.TrimSpace(out)
 	plugins := strings.Fields(out)

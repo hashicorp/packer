@@ -125,7 +125,7 @@ func (pc *packerCommand) SetAssertFatal() *packerCommand {
 // Note: while originally "Run" was designed to be idempotent, with the
 // introduction of multiple runs for a command, this is not the case anymore
 // and the function should not be considered thread-safe anymore.
-func (pc *packerCommand) Run() (string, string, error) {
+func (pc *packerCommand) run() (string, string, error) {
 	if pc.runs <= 0 {
 		return pc.stdout.String(), pc.stderr.String(), pc.err
 	}
@@ -160,11 +160,26 @@ func (pc *packerCommand) Run() (string, string, error) {
 	return pc.stdout.String(), pc.stderr.String(), pc.err
 }
 
+// Output returns the results of the latest Run that was executed.
+//
+// In general there is only one run of the command, but as it can be changed
+// through the Runs function, only the latest run will be returned.
+//
+// If the command was not run (through Assert), this will make the test fail
+// immediately.
+func (pc *packerCommand) Output() (string, string, error) {
+	if pc.runs > 0 {
+		pc.t.Fatalf("command was not run, invoke Assert first, then Output.")
+	}
+
+	return pc.stdout.String(), pc.stderr.String(), pc.err
+}
+
 func (pc *packerCommand) Assert(checks ...check.Checker) {
 	attempt := 0
 	for pc.runs > 0 {
 		attempt++
-		stdout, stderr, err := pc.Run()
+		stdout, stderr, err := pc.run()
 
 		for _, checker := range checks {
 			checkErr := checker.Check(stdout, stderr, err)
