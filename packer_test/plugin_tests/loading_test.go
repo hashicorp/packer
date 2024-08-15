@@ -11,8 +11,8 @@ import (
 )
 
 func (ts *PackerPluginTestSuite) TestLoadingOrder() {
-	pluginDir, cleanup := ts.MakePluginDir("1.0.9", "1.0.10")
-	defer cleanup()
+	pluginDir := ts.MakePluginDir().InstallPluginVersions("1.0.9", "1.0.10")
+	defer pluginDir.Cleanup()
 
 	for _, command := range []string{"build", "validate"} {
 		tests := []struct {
@@ -49,12 +49,12 @@ func (ts *PackerPluginTestSuite) TestLoadingOrder() {
 }
 
 func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
-	pluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginDir := ts.MakePluginDir()
+	defer pluginDir.Cleanup()
 
 	plugin := ts.GetPluginPath(ts.T(), "1.0.10")
 
-	common.CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
+	common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "packer-plugin-tester"), plugin)
 
 	ts.Run("only legacy plugins installed: expect build to fail", func() {
 		ts.Run("with required_plugins - expect prompt for packer init", func() {
@@ -73,10 +73,10 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 		})
 	})
 
-	pluginDir, cleanup = ts.MakePluginDir("1.0.0")
-	defer cleanup()
+	pluginDir = ts.MakePluginDir().InstallPluginVersions("1.0.0")
+	defer pluginDir.Cleanup()
 
-	common.CopyFile(ts.T(), filepath.Join(pluginDir, "packer-plugin-tester"), plugin)
+	common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "packer-plugin-tester"), plugin)
 
 	ts.Run("multiple plugins installed: one with no version in path, one with qualified name. Should pick-up the qualified one only.", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
@@ -100,12 +100,12 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 	plugin := ts.GetPluginPath(ts.T(), "1.0.10")
 
 	ts.Run("move plugin with right name, but no SHA256SUM, should reject", func() {
-		pluginDir, cleanup := ts.MakePluginDir("1.0.9")
-		defer cleanup()
+		pluginDir := ts.MakePluginDir().InstallPluginVersions("1.0.9")
+		defer pluginDir.Cleanup()
 
 		pluginDestName := common.ExpectedInstalledName("1.0.10")
 
-		common.CopyFile(ts.T(), filepath.Join(pluginDir, "github.com", "hashicorp", "tester", pluginDestName), plugin)
+		common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", pluginDestName), plugin)
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
 			SetArgs("plugins", "installed").
@@ -116,13 +116,13 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 	})
 
 	ts.Run("move plugin with right name, invalid SHA256SUM, should reject", func() {
-		pluginDir, cleanup := ts.MakePluginDir("1.0.9")
-		defer cleanup()
+		pluginDir := ts.MakePluginDir().InstallPluginVersions("1.0.9")
+		defer pluginDir.Cleanup()
 
 		pluginDestName := common.ExpectedInstalledName("1.0.10")
-		common.CopyFile(ts.T(), filepath.Join(pluginDir, "github.com", "hashicorp", "tester", pluginDestName), plugin)
+		common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", pluginDestName), plugin)
 		common.WriteFile(ts.T(),
-			filepath.Join(pluginDir, "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", pluginDestName)),
+			filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", pluginDestName)),
 			fmt.Sprintf("%x", sha256.New().Sum([]byte("Not the plugin's contents for sure."))))
 
 		ts.PackerCommand().UsePluginDir(pluginDir).
@@ -136,15 +136,15 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 }
 
 func (ts *PackerPluginTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
-	pluginDirOne, cleanup := ts.MakePluginDir("1.0.10")
-	defer cleanup()
+	pluginDirOne := ts.MakePluginDir().InstallPluginVersions("1.0.10")
+	defer pluginDirOne.Cleanup()
 
-	pluginDirTwo, cleanup := ts.MakePluginDir("1.0.9")
-	defer cleanup()
+	pluginDirTwo := ts.MakePluginDir().InstallPluginVersions("1.0.9")
+	defer pluginDirTwo.Cleanup()
 
-	pluginDirVal := fmt.Sprintf("%s%c%s", pluginDirOne, os.PathListSeparator, pluginDirTwo)
+	pluginDirVal := fmt.Sprintf("%s%c%s", pluginDirOne.Dir(), os.PathListSeparator, pluginDirTwo.Dir())
 	ts.Run("load plugin with two dirs - not supported anymore, should error", func() {
-		ts.PackerCommand().UsePluginDir(pluginDirVal).
+		ts.PackerCommand().UseRawPluginDir(pluginDirVal).
 			SetArgs("plugins", "installed").
 			Assert(check.MustFail(),
 				check.Grep("Multiple paths are no longer supported for PACKER_PLUGIN_PATH"),
@@ -157,11 +157,11 @@ func (ts *PackerPluginTestSuite) TestPluginPathEnvvarWithMultiplePaths() {
 }
 
 func (ts *PackerPluginTestSuite) TestInstallNonCanonicalPluginVersion() {
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	common.ManualPluginInstall(ts.T(),
-		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
+		filepath.Join(pluginPath.Dir(), "github.com", "hashicorp", "tester"),
 		ts.GetPluginPath(ts.T(), "1.0.10"),
 		"001.00.010")
 
@@ -175,11 +175,11 @@ func (ts *PackerPluginTestSuite) TestInstallNonCanonicalPluginVersion() {
 }
 
 func (ts *PackerPluginTestSuite) TestLoadPluginWithMetadataInName() {
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	common.ManualPluginInstall(ts.T(),
-		filepath.Join(pluginPath, "github.com", "hashicorp", "tester"),
+		filepath.Join(pluginPath.Dir(), "github.com", "hashicorp", "tester"),
 		ts.GetPluginPath(ts.T(), "1.0.10+metadata"),
 		"1.0.10+metadata")
 
@@ -193,8 +193,8 @@ func (ts *PackerPluginTestSuite) TestLoadPluginWithMetadataInName() {
 }
 
 func (ts *PackerPluginTestSuite) TestLoadWithOnlyReleaseFlag() {
-	pluginPath, cleanup := ts.MakePluginDir("1.0.0", "1.0.1-dev")
-	defer cleanup()
+	pluginPath := ts.MakePluginDir().InstallPluginVersions("1.0.0", "1.0.1-dev")
+	defer pluginPath.Cleanup()
 
 	for _, cmd := range []string{"validate", "build"} {
 		ts.Run(fmt.Sprintf("run %s without --ignore-prerelease flag - pick 1.0.1-dev by default", cmd), func() {
@@ -214,8 +214,8 @@ func (ts *PackerPluginTestSuite) TestLoadWithOnlyReleaseFlag() {
 }
 
 func (ts *PackerPluginTestSuite) TestWithLegacyConfigAndComponents() {
-	pluginDir, cleanup := ts.MakePluginDir("1.0.0")
-	defer cleanup()
+	pluginDir := ts.MakePluginDir().InstallPluginVersions("1.0.0")
+	defer pluginDir.Cleanup()
 
 	workdir, cleanup := common.TempWorkdir(ts.T(), "./sample_config.json", "./templates/simple.json", "./templates/simple.pkr.hcl")
 	defer cleanup()

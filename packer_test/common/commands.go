@@ -66,8 +66,14 @@ func (pc *packerCommand) SetWD(dir string) *packerCommand {
 }
 
 // UsePluginDir sets the plugin directory in the environment to `dir`
-func (pc *packerCommand) UsePluginDir(dir string) *packerCommand {
-	return pc.AddEnv("PACKER_PLUGIN_PATH", dir)
+func (pc *packerCommand) UsePluginDir(dir *PluginDirSpec) *packerCommand {
+	return pc.UseRawPluginDir(dir.dirPath)
+}
+
+// UseRawPluginDir is meant to be used for setting the plugin directory with a
+// raw directory path instead of a PluginDirSpec.
+func (pc *packerCommand) UseRawPluginDir(dirPath string) *packerCommand {
+	return pc.AddEnv("PACKER_PLUGIN_PATH", dirPath)
 }
 
 func (pc *packerCommand) SetArgs(args ...string) *packerCommand {

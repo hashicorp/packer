@@ -125,6 +125,11 @@ func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string) {
 	ts.compiledPlugins.Store(v.String(), outBin)
 }
 
+type PluginDirSpec struct {
+	dirPath string
+	suite   *PackerTestSuite
+}
+
 // MakePluginDir installs a list of plugins into a temporary directory and returns its path
 //
 // This can be set in the environment for a test through a function like t.SetEnv(), so
@@ -134,45 +139,63 @@ func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string) {
 //
 // Note: all of the plugin versions specified to be installed in this plugin directory
 // must have been compiled beforehand.
-func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDir string, cleanup func()) {
-	t := ts.T()
+func (ts *PackerTestSuite) MakePluginDir() *PluginDirSpec {
+	var err error
 
-	for _, version := range pluginVersions {
-		_ = ts.GetPluginPath(t, version)
+	pluginTempDir, err := os.MkdirTemp("", "packer-plugin-dir-temp-")
+	if err != nil {
+		return nil
 	}
+
+	return &PluginDirSpec{
+		dirPath: pluginTempDir,
+		suite:   ts,
+	}
+}
+
+// InstallPluginVersions installs several versions of the tester plugin under
+// github.com/hashicorp/tester.
+//
+// Each version of the plugin needs to have been pre-compiled.
+//
+// If a plugin is missing, the temporary directory will be removed.
+func (ps *PluginDirSpec) InstallPluginVersions(pluginVersions ...string) *PluginDirSpec {
+	t := ps.suite.T()
 
 	var err error
 
 	defer func() {
-		if err != nil {
-			if pluginTempDir != "" {
-				os.RemoveAll(pluginTempDir)
+		if err != nil || t.Failed() {
+			rmErr := os.RemoveAll(ps.dirPath)
+			if rmErr != nil {
+				t.Logf("failed to remove temporary plugin directory %q: %s. This may need manual intervention.", ps.dirPath, err)
 			}
-			t.Fatalf("failed to prepare temporary plugin directory %q: %s", pluginTempDir, err)
+			t.Fatalf("failed to install plugins to temporary plugin directory %q: %s", ps.dirPath, err)
 		}
 	}()
 
-	pluginTempDir, err = os.MkdirTemp("", "packer-plugin-dir-temp-")
-	if err != nil {
-		return
-	}
-
 	for _, pluginVersion := range pluginVersions {
-		path := ts.GetPluginPath(t, pluginVersion)
-		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
+		path := ps.suite.GetPluginPath(t, pluginVersion)
+		cmd := ps.suite.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", ps.dirPath)
 		cmd.Assert(check.MustSucceed())
 		out, stderr, cmdErr := cmd.run()
 		if cmdErr != nil {
 			err = fmt.Errorf("failed to install tester plugin version %q: %s\nCommand stdout: %s\nCommand stderr: %s", pluginVersion, err, out, stderr)
-			return
 		}
 	}
 
-	return pluginTempDir, func() {
-		err := os.RemoveAll(pluginTempDir)
-		if err != nil {
-			t.Logf("failed to remove temporary plugin directory %q: %s. This may need manual intervention.", pluginTempDir, err)
-		}
+	return ps
+}
+
+// Dir returns the temporary plugin dir for use in other functions
+func (ps PluginDirSpec) Dir() string {
+	return ps.dirPath
+}
+
+func (ps *PluginDirSpec) Cleanup() {
+	err := os.RemoveAll(ps.dirPath)
+	if err != nil {
+		ps.suite.T().Logf("failed to remove temporary plugin directory %q: %s. This may need manual intervention.", ps.dirPath, err)
 	}
 }
 

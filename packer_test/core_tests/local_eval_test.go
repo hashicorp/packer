@@ -9,8 +9,8 @@ import (
 func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 	ts.SkipNoAcc()
 
-	pluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginDir := ts.MakePluginDir()
+	defer pluginDir.Cleanup()
 
 	ts.PackerCommand().UsePluginDir(pluginDir).
 		Runs(10).
@@ -21,8 +21,8 @@ func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 }
 
 func (ts *PackerCoreTestSuite) TestLocalDuplicates() {
-	pluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginDir := ts.MakePluginDir()
+	defer pluginDir.Cleanup()
 
 	for _, cmd := range []string{"console", "validate", "build"} {
 		ts.Run(fmt.Sprintf("duplicate local detection with %s command - expect error", cmd), func() {
