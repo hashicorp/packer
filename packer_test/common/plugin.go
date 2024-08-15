@@ -1,4 +1,4 @@
-package lib
+package common
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/packer_test/common/check"
 )
 
 // LDFlags compiles the ldflags for the plugin to compile based on the information provided.
@@ -156,7 +157,7 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 	for _, pluginVersion := range pluginVersions {
 		path := ts.GetPluginPath(t, pluginVersion)
 		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
-		cmd.Assert(MustSucceed())
+		cmd.Assert(check.MustSucceed())
 		out, stderr, cmdErr := cmd.Run()
 		if cmdErr != nil {
 			err = fmt.Errorf("failed to install tester plugin version %q: %s\nCommand stdout: %s\nCommand stderr: %s", pluginVersion, err, out, stderr)
