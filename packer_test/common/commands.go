@@ -1,4 +1,4 @@
-package lib
+package common
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer_test/common/check"
 )
 
 type packerCommand struct {
@@ -139,7 +141,7 @@ func (pc *packerCommand) Run() (string, string, error) {
 	pc.err = cmd.Run()
 
 	// Check that the command didn't panic, and if it did, we can immediately error
-	panicErr := PanicCheck{}.Check(pc.stdout.String(), pc.stderr.String(), pc.err)
+	panicErr := check.PanicCheck{}.Check(pc.stdout.String(), pc.stderr.String(), pc.err)
 	if panicErr != nil {
 		pc.t.Fatalf("Packer panicked during execution: %s", panicErr)
 	}
@@ -147,16 +149,16 @@ func (pc *packerCommand) Run() (string, string, error) {
 	return pc.stdout.String(), pc.stderr.String(), pc.err
 }
 
-func (pc *packerCommand) Assert(checks ...Checker) {
+func (pc *packerCommand) Assert(checks ...check.Checker) {
 	attempt := 0
 	for pc.runs > 0 {
 		attempt++
 		stdout, stderr, err := pc.Run()
 
-		for _, check := range checks {
-			checkErr := check.Check(stdout, stderr, err)
+		for _, checker := range checks {
+			checkErr := checker.Check(stdout, stderr, err)
 			if checkErr != nil {
-				checkerName := InferName(check)
+				checkerName := check.InferName(checker)
 				pc.t.Errorf("check %q failed: %s", checkerName, checkErr)
 			}
 		}

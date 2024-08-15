@@ -3,16 +3,16 @@ package core_test
 import (
 	"testing"
 
-	"github.com/hashicorp/packer/packer_test/lib"
+	"github.com/hashicorp/packer/packer_test/common"
 	"github.com/stretchr/testify/suite"
 )
 
 type PackerCoreTestSuite struct {
-	*lib.PackerTestSuite
+	*common.PackerTestSuite
 }
 
 func Test_PackerCoreSuite(t *testing.T) {
-	baseSuite, cleanup := lib.InitBaseSuite(t)
+	baseSuite, cleanup := common.InitBaseSuite(t)
 	defer cleanup()
 
 	ts := &PackerCoreTestSuite{

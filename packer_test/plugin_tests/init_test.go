@@ -1,6 +1,6 @@
 package plugin_tests
 
-import "github.com/hashicorp/packer/packer_test/lib"
+import "github.com/hashicorp/packer/packer_test/common/check"
 
 func (ts *PackerPluginTestSuite) TestPackerInitForce() {
 	ts.SkipNoAcc()
@@ -11,13 +11,13 @@ func (ts *PackerPluginTestSuite) TestPackerInitForce() {
 	ts.Run("installs any missing plugins", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "--force", "./templates/init/hashicups.pkr.hcl").
-			Assert(lib.MustSucceed(), lib.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", lib.GrepStdout))
+			Assert(check.MustSucceed(), check.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", check.GrepStdout))
 	})
 
 	ts.Run("reinstalls plugins matching version constraints", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "--force", "./templates/init/hashicups.pkr.hcl").
-			Assert(lib.MustSucceed(), lib.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", lib.GrepStdout))
+			Assert(check.MustSucceed(), check.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", check.GrepStdout))
 	})
 }
 
@@ -29,7 +29,7 @@ func (ts *PackerPluginTestSuite) TestPackerInitUpgrade() {
 
 	cmd := ts.PackerCommand().UsePluginDir(pluginPath)
 	cmd.SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "1.0.1")
-	cmd.Assert(lib.MustSucceed(), lib.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.1", lib.GrepStdout))
+	cmd.Assert(check.MustSucceed(), check.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.1", check.GrepStdout))
 
 	_, _, err := cmd.Run()
 	if err != nil {
@@ -39,7 +39,7 @@ func (ts *PackerPluginTestSuite) TestPackerInitUpgrade() {
 	ts.Run("upgrades a plugin to the latest matching version constraints", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "--upgrade", "./templates/init/hashicups.pkr.hcl").
-			Assert(lib.MustSucceed(), lib.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", lib.GrepStdout))
+			Assert(check.MustSucceed(), check.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.2", check.GrepStdout))
 	})
 }
 
@@ -50,20 +50,20 @@ func (ts *PackerPluginTestSuite) TestPackerInitWithNonGithubSource() {
 	ts.Run("try installing from a non-github source, should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "./templates/init/non_gh.pkr.hcl").
-			Assert(lib.MustFail(), lib.Grep(`doesn't appear to be a valid "github.com" source address`, lib.GrepStdout))
+			Assert(check.MustFail(), check.Grep(`doesn't appear to be a valid "github.com" source address`, check.GrepStdout))
 	})
 
 	ts.Run("manually install plugin to the expected source", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.10"), "hubgit.com/hashicorp/tester").
-			Assert(lib.MustSucceed(), lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout))
+			Assert(check.MustSucceed(), check.Grep("packer-plugin-tester_v1.0.10", check.GrepStdout))
 	})
 
 	ts.Run("re-run packer init on same template, should succeed silently", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "./templates/init/non_gh.pkr.hcl").
-			Assert(lib.MustSucceed(),
-				lib.MkPipeCheck("no output in stdout").SetTester(lib.ExpectEmptyInput()).SetStream(lib.OnlyStdout))
+			Assert(check.MustSucceed(),
+				check.MkPipeCheck("no output in stdout").SetTester(check.ExpectEmptyInput()).SetStream(check.OnlyStdout))
 	})
 }
 
@@ -76,7 +76,7 @@ func (ts *PackerPluginTestSuite) TestPackerInitWithMixedVersions() {
 	ts.Run("skips the plugin installation with mixed versions before exiting with an error", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "./templates/init/mixed_versions.pkr.hcl").
-			Assert(lib.MustFail(),
-				lib.Grep("binary reported a pre-release version of 10.7.3-dev", lib.GrepStdout))
+			Assert(check.MustFail(),
+				check.Grep("binary reported a pre-release version of 10.7.3-dev", check.GrepStdout))
 	})
 }

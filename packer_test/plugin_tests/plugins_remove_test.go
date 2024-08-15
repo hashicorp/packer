@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/packer/packer_test/lib"
+	"github.com/hashicorp/packer/packer_test/common/check"
 )
 
 func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
@@ -19,10 +19,10 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
 	ts.Run("plugins remove with source address removes all installed plugin versions", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", "github.com/hashicorp/tester").
-			Assert(lib.MustSucceed(),
-				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v2.0.0", lib.GrepStdout),
+			Assert(check.MustSucceed(),
+				check.Grep("packer-plugin-tester_v1.0.9", check.GrepStdout),
+				check.Grep("packer-plugin-tester_v1.0.10", check.GrepStdout),
+				check.Grep("packer-plugin-tester_v2.0.0", check.GrepStdout),
 			)
 	})
 
@@ -35,8 +35,8 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", "github.com/hashicorp/testerONE").
 			Assert(
-				lib.MustFail(),
-				lib.Grep("No installed plugin found matching the plugin constraints github.com/hashicorp/testerONE"),
+				check.MustFail(),
+				check.Grep("No installed plugin found matching the plugin constraints github.com/hashicorp/testerONE"),
 			)
 	})
 
@@ -44,8 +44,8 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", "github.com/hashicorp/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/tester").
 			Assert(
-				lib.MustFail(),
-				lib.Grep("The source URL must have at most 16 components"),
+				check.MustFail(),
+				check.Grep("The source URL must have at most 16 components"),
 			)
 	})
 }
@@ -62,17 +62,17 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddressAndVersion() 
 	ts.Run("plugins remove with source address and version removes only the versioned plugin", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", "github.com/hashicorp/tester", ">= 2.0.0").
-			Assert(lib.MustSucceed(), lib.Grep("packer-plugin-tester_v2.0.0", lib.GrepStdout))
+			Assert(check.MustSucceed(), check.Grep("packer-plugin-tester_v2.0.0", check.GrepStdout))
 	})
 
 	ts.Run("plugins installed after single plugins remove outputs remaining installed plugins", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "installed").
 			Assert(
-				lib.MustSucceed(),
-				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepStdout),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout),
-				lib.GrepInverted("packer-plugin-tester_v2.0.0", lib.GrepStdout),
+				check.MustSucceed(),
+				check.Grep("packer-plugin-tester_v1.0.9", check.GrepStdout),
+				check.Grep("packer-plugin-tester_v1.0.10", check.GrepStdout),
+				check.GrepInverted("packer-plugin-tester_v2.0.0", check.GrepStdout),
 			)
 	})
 
@@ -96,18 +96,18 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", plugins[0]).
 			Assert(
-				lib.MustSucceed(),
-				lib.Grep("packer-plugin-tester_v1.0.9", lib.GrepStdout),
-				lib.GrepInverted("packer-plugin-tester_v1.0.10", lib.GrepStdout),
+				check.MustSucceed(),
+				check.Grep("packer-plugin-tester_v1.0.9", check.GrepStdout),
+				check.GrepInverted("packer-plugin-tester_v1.0.10", check.GrepStdout),
 			)
 	})
 	ts.Run("plugins installed after calling plugins remove outputs remaining installed plugins", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "installed").
 			Assert(
-				lib.MustSucceed(),
-				lib.Grep("packer-plugin-tester_v1.0.10", lib.GrepStdout),
-				lib.GrepInverted("packer-plugin-tester_v1.0.9", lib.GrepStdout),
+				check.MustSucceed(),
+				check.Grep("packer-plugin-tester_v1.0.10", check.GrepStdout),
+				check.GrepInverted("packer-plugin-tester_v1.0.9", check.GrepStdout),
 			)
 	})
 
@@ -120,8 +120,8 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", filepath.Base(plugins[0])).
 			Assert(
-				lib.MustFail(),
-				lib.Grep("A source URL must at least contain a host and a path with 2 components", lib.GrepStdout),
+				check.MustFail(),
+				check.Grep("A source URL must at least contain a host and a path with 2 components", check.GrepStdout),
 			)
 	})
 
@@ -129,8 +129,8 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove", ts.T().TempDir()).
 			Assert(
-				lib.MustFail(),
-				lib.Grep("is not under the plugin directory inferred by Packer", lib.GrepStdout),
+				check.MustFail(),
+				check.Grep("is not under the plugin directory inferred by Packer", check.GrepStdout),
 			)
 	})
 }
@@ -148,8 +148,8 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithNoArguments() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("plugins", "remove").
 			Assert(
-				lib.MustFail(),
-				lib.Grep("Usage: packer plugins remove <plugin>", lib.GrepStdout),
+				check.MustFail(),
+				check.Grep("Usage: packer plugins remove <plugin>", check.GrepStdout),
 			)
 	})
 
@@ -165,7 +165,7 @@ func InstalledPlugins(ts *PackerPluginTestSuite, dir string) []string {
 
 	cmd := ts.PackerCommand().UsePluginDir(dir).
 		SetArgs("plugins", "installed")
-	cmd.Assert(lib.MustSucceed())
+	cmd.Assert(check.MustSucceed())
 	if ts.T().Failed() {
 		ts.T().Fatalf("Failed to execute plugin installed for %q", dir)
 	}

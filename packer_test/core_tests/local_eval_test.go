@@ -3,7 +3,7 @@ package core_test
 import (
 	"fmt"
 
-	"github.com/hashicorp/packer/packer_test/lib"
+	"github.com/hashicorp/packer/packer_test/common/check"
 )
 
 func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
@@ -16,8 +16,8 @@ func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 		Runs(10).
 		Stdin("local.test_local\n").
 		SetArgs("console", "./templates/locals_no_order.pkr.hcl").
-		Assert(lib.MustSucceed(),
-			lib.GrepInverted("\\[\\]", lib.GrepStdout))
+		Assert(check.MustSucceed(),
+			check.GrepInverted("\\[\\]", check.GrepStdout))
 }
 
 func (ts *PackerCoreTestSuite) TestLocalDuplicates() {
@@ -28,9 +28,9 @@ func (ts *PackerCoreTestSuite) TestLocalDuplicates() {
 		ts.Run(fmt.Sprintf("duplicate local detection with %s command - expect error", cmd), func() {
 			ts.PackerCommand().UsePluginDir(pluginDir).
 				SetArgs(cmd, "./templates/locals_duplicate.pkr.hcl").
-				Assert(lib.MustFail(),
-					lib.Grep("Duplicate local definition"),
-					lib.Grep("Local variable \"test\" is defined twice"))
+				Assert(check.MustFail(),
+					check.Grep("Duplicate local definition"),
+					check.Grep("Local variable \"test\" is defined twice"))
 		})
 	}
 }

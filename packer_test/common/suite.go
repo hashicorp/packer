@@ -1,4 +1,4 @@
-package lib
+package common
 
 import (
 	"fmt"
