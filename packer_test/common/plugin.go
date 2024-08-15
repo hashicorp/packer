@@ -131,6 +131,9 @@ func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string) {
 // packer will be able to use that directory for running its functions.
 //
 // Deletion of the directory is the caller's responsibility.
+//
+// Note: all of the plugin versions specified to be installed in this plugin directory
+// must have been compiled beforehand.
 func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDir string, cleanup func()) {
 	t := ts.T()
 
@@ -158,7 +161,7 @@ func (ts *PackerTestSuite) MakePluginDir(pluginVersions ...string) (pluginTempDi
 		path := ts.GetPluginPath(t, pluginVersion)
 		cmd := ts.PackerCommand().SetArgs("plugins", "install", "--path", path, "github.com/hashicorp/tester").AddEnv("PACKER_PLUGIN_PATH", pluginTempDir)
 		cmd.Assert(check.MustSucceed())
-		out, stderr, cmdErr := cmd.Run()
+		out, stderr, cmdErr := cmd.run()
 		if cmdErr != nil {
 			err = fmt.Errorf("failed to install tester plugin version %q: %s\nCommand stdout: %s\nCommand stderr: %s", pluginVersion, err, out, stderr)
 			return
