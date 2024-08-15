@@ -164,11 +164,9 @@ func InstalledPlugins(ts *PackerPluginTestSuite, dir string) []string {
 	ts.T().Helper()
 
 	cmd := ts.PackerCommand().UsePluginDir(dir).
-		SetArgs("plugins", "installed")
+		SetArgs("plugins", "installed").
+		SetAssertFatal()
 	cmd.Assert(check.MustSucceed())
-	if ts.T().Failed() {
-		ts.T().Fatalf("Failed to execute plugin installed for %q", dir)
-	}
 
 	out, _, _ := cmd.Run()
 	// Output will be split on '\n' after trimming all other white space

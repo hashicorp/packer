@@ -11,16 +11,17 @@ import (
 )
 
 type packerCommand struct {
-	runs       int
-	packerPath string
-	args       []string
-	env        map[string]string
-	stdin      string
-	stderr     *strings.Builder
-	stdout     *strings.Builder
-	workdir    string
-	err        error
-	t          *testing.T
+	runs         int
+	packerPath   string
+	args         []string
+	env          map[string]string
+	stdin        string
+	stderr       *strings.Builder
+	stdout       *strings.Builder
+	workdir      string
+	err          error
+	t            *testing.T
+	fatalfAssert bool
 }
 
 // PackerCommand creates a skeleton of packer command with the ability to execute gadgets on the outputs of the command.
@@ -108,6 +109,16 @@ func (pc *packerCommand) Stdin(in string) *packerCommand {
 	return pc
 }
 
+// SetAssertFatal allows changing how Assert behaves when reporting an error.
+//
+// By default Assert will invoke t.Errorf with the error details, but this can be
+// changed to a t.Fatalf so that if the assertion fails, the test invoking it will
+// also immediately fail and stop execution.
+func (pc *packerCommand) SetAssertFatal() *packerCommand {
+	pc.fatalfAssert = true
+	return pc
+}
+
 // Run executes the packer command with the args/env requested and returns the
 // output streams (stdout, stderr)
 //
@@ -159,6 +170,7 @@ func (pc *packerCommand) Assert(checks ...check.Checker) {
 			checkErr := checker.Check(stdout, stderr, err)
 			if checkErr != nil {
 				checkerName := check.InferName(checker)
+
 				pc.t.Errorf("check %q failed: %s", checkerName, checkErr)
 			}
 		}
@@ -168,6 +180,10 @@ func (pc *packerCommand) Assert(checks ...check.Checker) {
 
 			pc.t.Logf("dumping stdout: %s", stdout)
 			pc.t.Logf("dumping stdout: %s", stderr)
+
+			if pc.fatalfAssert {
+				pc.t.Fatalf("stopping test now because of failures reported")
+			}
 
 			break
 		}
