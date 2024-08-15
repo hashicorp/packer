@@ -8,11 +8,11 @@ import (
 )
 
 func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
-	pluginPath, cleanup := ts.MakePluginDir("1.0.9", "1.0.10", "2.0.0")
-	defer cleanup()
+	pluginPath := ts.MakePluginDir().InstallPluginVersions("1.0.9", "1.0.10", "2.0.0")
+	defer pluginPath.Cleanup()
 
 	// Get installed plugins
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 3 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 3 {
 		ts.T().Fatalf("Expected there to be 3 installed plugins but we got  %v", n)
 	}
 
@@ -27,7 +27,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
 	})
 
 	// Get installed plugins after removal
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 0 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 0 {
 		ts.T().Fatalf("Expected there to be 0 installed plugins but we got  %v", n)
 	}
 
@@ -51,11 +51,11 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddress() {
 }
 
 func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddressAndVersion() {
-	pluginPath, cleanup := ts.MakePluginDir("1.0.9", "1.0.10", "2.0.0")
-	defer cleanup()
+	pluginPath := ts.MakePluginDir().InstallPluginVersions("1.0.9", "1.0.10", "2.0.0")
+	defer pluginPath.Cleanup()
 
 	// Get installed plugins
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 3 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 3 {
 		ts.T().Fatalf("Expected there to be 3 installed plugins but we got  %v", n)
 	}
 
@@ -77,17 +77,17 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithSourceAddressAndVersion() 
 	})
 
 	// Get installed plugins after removal
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 2 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 2 {
 		ts.T().Fatalf("Expected there to be 2 installed plugins but we got  %v", n)
 	}
 }
 
 func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
-	pluginPath, cleanup := ts.MakePluginDir("1.0.9", "1.0.10")
-	defer cleanup()
+	pluginPath := ts.MakePluginDir().InstallPluginVersions("1.0.9", "1.0.10")
+	defer pluginPath.Cleanup()
 
 	// Get installed plugins
-	plugins := InstalledPlugins(ts, pluginPath)
+	plugins := InstalledPlugins(ts, pluginPath.Dir())
 	if len(plugins) != 2 {
 		ts.T().Fatalf("Expected there to be 2 installed plugins but we got  %v", len(plugins))
 	}
@@ -112,7 +112,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 	})
 
 	// Get installed plugins after removal
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 1 {
 		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
 	}
 
@@ -136,11 +136,11 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithLocalPath() {
 }
 
 func (ts *PackerPluginTestSuite) TestPluginsRemoveWithNoArguments() {
-	pluginPath, cleanup := ts.MakePluginDir("1.0.9")
-	defer cleanup()
+	pluginPath := ts.MakePluginDir().InstallPluginVersions("1.0.9")
+	defer pluginPath.Cleanup()
 
 	// Get installed plugins
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 1 {
 		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
 	}
 
@@ -154,7 +154,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithNoArguments() {
 	})
 
 	// Get installed should remain the same
-	if n := InstalledPlugins(ts, pluginPath); len(n) != 1 {
+	if n := InstalledPlugins(ts, pluginPath.Dir()); len(n) != 1 {
 		ts.T().Fatalf("Expected there to be 1 installed plugins but we got  %v", n)
 	}
 
@@ -163,7 +163,7 @@ func (ts *PackerPluginTestSuite) TestPluginsRemoveWithNoArguments() {
 func InstalledPlugins(ts *PackerPluginTestSuite, dir string) []string {
 	ts.T().Helper()
 
-	cmd := ts.PackerCommand().UsePluginDir(dir).
+	cmd := ts.PackerCommand().UseRawPluginDir(dir).
 		SetArgs("plugins", "installed").
 		SetAssertFatal()
 	cmd.Assert(check.MustSucceed())
