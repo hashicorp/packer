@@ -1,6 +1,8 @@
 package plugin_tests
 
-import "github.com/hashicorp/packer/packer_test/common/check"
+import (
+	"github.com/hashicorp/packer/packer_test/common/check"
+)
 
 func (ts *PackerPluginTestSuite) TestPackerInitForce() {
 	ts.SkipNoAcc()
@@ -29,12 +31,8 @@ func (ts *PackerPluginTestSuite) TestPackerInitUpgrade() {
 
 	cmd := ts.PackerCommand().UsePluginDir(pluginPath)
 	cmd.SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "1.0.1")
+	cmd.SetAssertFatal()
 	cmd.Assert(check.MustSucceed(), check.Grep("Installed plugin github.com/hashicorp/hashicups v1.0.1", check.GrepStdout))
-
-	_, _, err := cmd.Run()
-	if err != nil {
-		ts.T().Fatalf("packer plugins install failed to install previous version of hashicups: %q", err)
-	}
 
 	ts.Run("upgrades a plugin to the latest matching version constraints", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
