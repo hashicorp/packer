@@ -3,8 +3,8 @@ package plugin_tests
 import "github.com/hashicorp/packer/packer_test/common/check"
 
 func (ts *PackerPluginTestSuite) TestInstallPluginWithMetadata() {
-	tempPluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	tempPluginDir := ts.MakePluginDir()
+	defer tempPluginDir.Cleanup()
 
 	ts.Run("install plugin with metadata in version", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
@@ -32,8 +32,8 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithMetadata() {
 }
 
 func (ts *PackerPluginTestSuite) TestInstallPluginWithPath() {
-	tempPluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	tempPluginDir := ts.MakePluginDir()
+	defer tempPluginDir.Cleanup()
 
 	ts.Run("install plugin with pre-release only", func() {
 		ts.PackerCommand().UsePluginDir(tempPluginDir).
@@ -60,8 +60,8 @@ func (ts *PackerPluginTestSuite) TestInstallPluginWithPath() {
 func (ts *PackerPluginTestSuite) TestInstallPluginPrerelease() {
 	pluginPath := ts.GetPluginPath(ts.T(), "1.0.1-alpha1")
 
-	pluginDir, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginDir := ts.MakePluginDir()
+	defer pluginDir.Cleanup()
 
 	ts.Run("try install plugin with alpha1 prerelease - should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginDir).
@@ -73,8 +73,8 @@ func (ts *PackerPluginTestSuite) TestInstallPluginPrerelease() {
 func (ts *PackerPluginTestSuite) TestRemoteInstallWithPluginsInstall() {
 	ts.SkipNoAcc()
 
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	ts.Run("install latest version of a remote plugin with packer plugins install", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
@@ -86,8 +86,8 @@ func (ts *PackerPluginTestSuite) TestRemoteInstallWithPluginsInstall() {
 func (ts *PackerPluginTestSuite) TestRemoteInstallOfPreReleasePlugin() {
 	ts.SkipNoAcc()
 
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	ts.Run("try to init with a pre-release constraint - should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).

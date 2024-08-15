@@ -7,8 +7,8 @@ import (
 func (ts *PackerPluginTestSuite) TestPackerInitForce() {
 	ts.SkipNoAcc()
 
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	ts.Run("installs any missing plugins", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
@@ -26,8 +26,8 @@ func (ts *PackerPluginTestSuite) TestPackerInitForce() {
 func (ts *PackerPluginTestSuite) TestPackerInitUpgrade() {
 	ts.SkipNoAcc()
 
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	cmd := ts.PackerCommand().UsePluginDir(pluginPath)
 	cmd.SetArgs("plugins", "install", "github.com/hashicorp/hashicups", "1.0.1")
@@ -42,8 +42,8 @@ func (ts *PackerPluginTestSuite) TestPackerInitUpgrade() {
 }
 
 func (ts *PackerPluginTestSuite) TestPackerInitWithNonGithubSource() {
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	ts.Run("try installing from a non-github source, should fail", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
@@ -68,8 +68,8 @@ func (ts *PackerPluginTestSuite) TestPackerInitWithNonGithubSource() {
 func (ts *PackerPluginTestSuite) TestPackerInitWithMixedVersions() {
 	ts.SkipNoAcc()
 
-	pluginPath, cleanup := ts.MakePluginDir()
-	defer cleanup()
+	pluginPath := ts.MakePluginDir()
+	defer pluginPath.Cleanup()
 
 	ts.Run("skips the plugin installation with mixed versions before exiting with an error", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
