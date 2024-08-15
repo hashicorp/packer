@@ -12,7 +12,7 @@ func (ts *PackerCoreTestSuite) TestEvalLocalsOrder() {
 	pluginDir := ts.MakePluginDir()
 	defer pluginDir.Cleanup()
 
-	ts.PackerCommand().UsePluginDir(pluginDir).
+	pluginDir.PackerCommand().
 		Runs(10).
 		Stdin("local.test_local\n").
 		SetArgs("console", "./templates/locals_no_order.pkr.hcl").
@@ -26,7 +26,7 @@ func (ts *PackerCoreTestSuite) TestLocalDuplicates() {
 
 	for _, cmd := range []string{"console", "validate", "build"} {
 		ts.Run(fmt.Sprintf("duplicate local detection with %s command - expect error", cmd), func() {
-			ts.PackerCommand().UsePluginDir(pluginDir).
+			pluginDir.PackerCommand().
 				SetArgs(cmd, "./templates/locals_duplicate.pkr.hcl").
 				Assert(check.MustFail(),
 					check.Grep("Duplicate local definition"),

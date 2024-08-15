@@ -39,9 +39,8 @@ func (ts *PackerPluginTestSuite) TestLoadingOrder() {
 
 		for _, tt := range tests {
 			ts.Run(tt.name, func() {
-				ts.PackerCommand().
+				pluginDir.PackerCommand().
 					SetArgs(command, tt.templatePath).
-					UsePluginDir(pluginDir).
 					Assert(check.MustSucceed(), check.Grep(tt.grepStr))
 			})
 		}
@@ -58,7 +57,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 
 	ts.Run("only legacy plugins installed: expect build to fail", func() {
 		ts.Run("with required_plugins - expect prompt for packer init", func() {
-			ts.PackerCommand().UsePluginDir(pluginDir).
+			pluginDir.PackerCommand().
 				SetArgs("build", "templates/simple.pkr.hcl").
 				Assert(check.MustFail(),
 					check.Grep("Did you run packer init for this project", check.GrepStdout),
@@ -66,7 +65,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 		})
 
 		ts.Run("JSON template, without required_plugins: should say the component is unknown", func() {
-			ts.PackerCommand().UsePluginDir(pluginDir).
+			pluginDir.PackerCommand().
 				SetArgs("build", "templates/simple.json").
 				Assert(check.MustFail(),
 					check.Grep("The builder tester-dynamic is unknown by Packer", check.GrepStdout))
@@ -79,7 +78,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 	common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "packer-plugin-tester"), plugin)
 
 	ts.Run("multiple plugins installed: one with no version in path, one with qualified name. Should pick-up the qualified one only.", func() {
-		ts.PackerCommand().UsePluginDir(pluginDir).
+		pluginDir.PackerCommand().
 			SetArgs("build", "templates/simple.pkr.hcl").
 			Assert(check.MustSucceed(), check.Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", check.GrepStderr))
 	})
@@ -90,7 +89,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithLegacyPluginName() {
 	common.CopyFile(ts.T(), filepath.Join(wd, "packer-plugin-tester"), plugin)
 
 	ts.Run("multiple plugins installed: 1.0.0 in plugin dir with sum, one in workdir (no version). Should load 1.0.0", func() {
-		ts.PackerCommand().UsePluginDir(pluginDir).SetWD(wd).
+		pluginDir.PackerCommand().SetWD(wd).
 			SetArgs("build", "simple.pkr.hcl").
 			Assert(check.MustSucceed(), check.Grep("packer-plugin-tester_v1\\.0\\.0[^\\n]+ plugin:", check.GrepStderr))
 	})
@@ -107,7 +106,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 
 		common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", pluginDestName), plugin)
 
-		ts.PackerCommand().UsePluginDir(pluginDir).
+		pluginDir.PackerCommand().
 			SetArgs("plugins", "installed").
 			Assert(check.MustSucceed(),
 				check.Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", check.GrepStdout),
@@ -125,7 +124,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 			filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", pluginDestName)),
 			fmt.Sprintf("%x", sha256.New().Sum([]byte("Not the plugin's contents for sure."))))
 
-		ts.PackerCommand().UsePluginDir(pluginDir).
+		pluginDir.PackerCommand().
 			SetArgs("plugins", "installed").
 			Assert(check.MustSucceed(),
 				check.Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", check.GrepStdout),

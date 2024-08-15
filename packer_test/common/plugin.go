@@ -187,6 +187,10 @@ func (ps *PluginDirSpec) InstallPluginVersions(pluginVersions ...string) *Plugin
 	return ps
 }
 
+func (ps *PluginDirSpec) PackerCommand() *packerCommand {
+	return ps.suite.PackerCommand().UsePluginDir(ps)
+}
+
 // Dir returns the temporary plugin dir for use in other functions
 func (ps PluginDirSpec) Dir() string {
 	return ps.dirPath
