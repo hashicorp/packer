@@ -474,8 +474,13 @@ func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnost
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
 	diags := cfg.InputVariables.ValidateValues()
-	diags = append(diags, cfg.evaluateDatasources(opts.SkipDatasourcesExecution)...)
-	diags = append(diags, cfg.evaluateLocalVariables(cfg.LocalBlocks)...)
+
+	if opts.UseSequential {
+		diags = diags.Extend(cfg.evaluateDatasources(opts.SkipDatasourcesExecution))
+		diags = diags.Extend(cfg.evaluateLocalVariables(cfg.LocalBlocks))
+	} else {
+		diags = diags.Extend(cfg.evaluateBuildPrereqs(opts.SkipDatasourcesExecution))
+	}
 
 	filterVarsFromLogs(cfg.InputVariables)
 	filterVarsFromLogs(cfg.LocalVariables)
