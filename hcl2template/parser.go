@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/internal/dag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -293,6 +295,181 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 			return true, nil
 		})
 	}
+}
+
+func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	for _, ds := range cfg.Datasources {
+		dependencies := GetVarsByType(ds.block, "data")
+		dependencies = append(dependencies, GetVarsByType(ds.block, "local")...)
+
+		for _, dep := range dependencies {
+			// If something is locally aliased as `local` or `data`, we'll falsely
+			// report it as a local variable, which is not necessarily what we
+			// want to process here, so we continue.
+			//
+			// Note: this is kinda brittle, we should understand scopes to accurately
+			// mark something from an expression as a reference to a local variable.
+			// No real good solution for this now, besides maybe forbidding something
+			// to be locally aliased as `local`.
+			if len(dep) < 2 {
+				continue
+			}
+			rs, err := NewRefStringFromDep(dep)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "failed to process datasource dependency",
+					Detail: fmt.Sprintf("An error occurred while processing a dependency for data source %s: %s",
+						ds.Name(), err),
+				})
+				continue
+			}
+
+			err = ds.RegisterDependency(rs)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "failed to register datasource dependency",
+					Detail: fmt.Sprintf("An error occurred while registering %q as a dependency for data source %s: %s",
+						rs, ds.Name(), err),
+				})
+			}
+		}
+
+	}
+
+	for _, loc := range cfg.LocalBlocks {
+		dependencies := FilterTraversalsByType(loc.Expr.Variables(), "data")
+		dependencies = append(dependencies, FilterTraversalsByType(loc.Expr.Variables(), "local")...)
+
+		for _, dep := range dependencies {
+			// If something is locally aliased as `local` or `data`, we'll falsely
+			// report it as a local variable, which is not necessarily what we
+			// want to process here, so we continue.
+			//
+			// Note: this is kinda brittle, we should understand scopes to accurately
+			// mark something from an expression as a reference to a local variable.
+			// No real good solution for this now, besides maybe forbidding something
+			// to be locally aliased as `local`.
+			if len(dep) < 2 {
+				continue
+			}
+			rs, err := NewRefStringFromDep(dep)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "failed to process local dependency",
+					Detail: fmt.Sprintf("An error occurred while processing a dependency for local variable %s: %s",
+						loc.Name, err),
+				})
+				continue
+			}
+
+			err = loc.RegisterDependency(rs)
+			if err != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "failed to register local dependency",
+					Detail: fmt.Sprintf("An error occurred while registering %q as a dependency for local variable %s: %s",
+						rs, loc.Name, err),
+				})
+			}
+		}
+	}
+
+	return diags
+}
+
+func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
+	retGraph := dag.AcyclicGraph{}
+
+	verticesMap := map[string]dag.Vertex{}
+
+	// Do a first pass to create all the vertices
+	for _, ds := range cfg.Datasources {
+		v := retGraph.Add(&ds)
+		verticesMap[fmt.Sprintf("data.%s", ds.Name())] = v
+	}
+	for _, local := range cfg.LocalBlocks {
+		v := retGraph.Add(local)
+		verticesMap[fmt.Sprintf("local.%s", local.Name)] = v
+	}
+
+	// Connect the vertices together
+	//
+	// Vertices that don't have dependencies will be connected to the
+	// root vertex of the graph
+	for _, ds := range cfg.Datasources {
+		dsName := fmt.Sprintf("data.%s", ds.Name())
+
+		for _, dep := range ds.Dependencies {
+			retGraph.Connect(
+				dag.BasicEdge(verticesMap[dsName],
+					verticesMap[dep.String()]))
+		}
+	}
+	for _, loc := range cfg.LocalBlocks {
+		locName := fmt.Sprintf("local.%s", loc.Name)
+
+		for _, dep := range loc.dependencies {
+			retGraph.Connect(
+				dag.BasicEdge(verticesMap[locName],
+					verticesMap[dep.String()]))
+		}
+	}
+
+	return &retGraph, nil
+}
+
+func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnostics {
+	diags := cfg.detectBuildPrereqDependencies()
+	if diags.HasErrors() {
+		return diags
+	}
+
+	graph, err := cfg.buildPrereqsDAG()
+	if err != nil {
+		return diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "failed to prepare execution graph",
+			Detail:   fmt.Sprintf("An error occurred while building the graph for datasources/locals: %s", err),
+		})
+	}
+
+	walkFunc := func(v dag.Vertex) hcl.Diagnostics {
+		var diags hcl.Diagnostics
+
+		switch bl := v.(type) {
+		case *DatasourceBlock:
+			diags = cfg.evaluateDatasource(*bl, skipDatasources)
+		case *LocalBlock:
+			diags = cfg.evaluateLocalVariable(bl)
+		default:
+			diags = diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "unsupported DAG node type",
+				Detail: fmt.Sprintf("A node of type %q was added to the DAG, but cannot be "+
+					"evaluated as it is unsupported. "+
+					"This is a Packer bug, please report it so we can investigate.",
+					reflect.TypeOf(v).String()),
+			})
+		}
+
+		// ("unsupported node of type %q")
+		if diags.HasErrors() {
+			return diags
+		}
+
+		return nil
+	}
+
+	if cfg.LocalVariables == nil {
+		cfg.LocalVariables = Variables{}
+	}
+
+	return diags.Extend(graph.Walk(walkFunc))
 }
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
