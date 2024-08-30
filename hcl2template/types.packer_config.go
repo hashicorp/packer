@@ -274,7 +274,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 	}
 
 	for _, local := range c.LocalBlocks {
-		diags = diags.Extend(c.evaluateLocalVariable(local, 0))
+		diags = diags.Extend(c.recursivelyEvaluateLocalVariable(local, 0))
 	}
 
 	return diags
@@ -306,7 +306,7 @@ func (c *PackerConfig) checkForDuplicateLocalDefinition() hcl.Diagnostics {
 	return diags
 }
 
-func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock, depth int) hcl.Diagnostics {
+func (c *PackerConfig) recursivelyEvaluateLocalVariable(local *LocalBlock, depth int) hcl.Diagnostics {
 	// If the variable already was evaluated, we can return immediately
 	if local.evaluated {
 		return nil
@@ -325,11 +325,17 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock, depth int) hcl.D
 	var diags hcl.Diagnostics
 
 	for _, dep := range local.dependencies {
-		localDiags := c.evaluateLocalVariable(dep, depth+1)
+		localDiags := c.recursivelyEvaluateLocalVariable(dep, depth+1)
 		diags = diags.Extend(localDiags)
 	}
 
-	value, moreDiags := local.Expr.Value(c.EvalContext(LocalContext, nil))
+	return diags.Extend(c.evaluateLocalVariable(local))
+}
+
+func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	value, moreDiags := local.Expr.Value(cfg.EvalContext(LocalContext, nil))
 
 	local.evaluated = true
 
@@ -337,7 +343,7 @@ func (c *PackerConfig) evaluateLocalVariable(local *LocalBlock, depth int) hcl.D
 	if moreDiags.HasErrors() {
 		return diags
 	}
-	c.LocalVariables[local.Name] = &Variable{
+	cfg.LocalVariables[local.Name] = &Variable{
 		Name:      local.Name,
 		Sensitive: local.Sensitive,
 		Values: []VariableAssignment{{
