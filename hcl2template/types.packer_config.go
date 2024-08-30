@@ -473,6 +473,44 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 	return dependencies, diags
 }
 
+func (cfg *PackerConfig) evaluateDatasource(ds DatasourceBlock, skipExecution bool) hcl.Diagnostics {
+	var diags hcl.Diagnostics
+
+	// If we've gotten here, then it means ref doesn't seem to have any further
+	// dependencies we need to evaluate first. Evaluate it, with the cfg's full
+	// data source context.
+	datasource, startDiags := cfg.startDatasource(ds)
+	if startDiags.HasErrors() {
+		diags = append(diags, startDiags...)
+		return diags
+	}
+
+	if skipExecution {
+		placeholderValue := cty.UnknownVal(hcldec.ImpliedType(datasource.OutputSpec()))
+		ds.value = placeholderValue
+		cfg.Datasources[ds.Ref()] = ds
+		return diags
+	}
+
+	opts, _ := decodeHCL2Spec(ds.block.Body, cfg.EvalContext(DatasourceContext, nil), datasource)
+	sp := packer.CheckpointReporter.AddSpan(ds.Ref().Type, "datasource", opts)
+	realValue, err := datasource.Execute()
+	sp.End(err)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Summary:  err.Error(),
+			Subject:  &cfg.Datasources[ds.Ref()].block.DefRange,
+			Severity: hcl.DiagError,
+		})
+		return diags
+	}
+
+	ds.value = realValue
+	cfg.Datasources[ds.Ref()] = ds
+
+	return diags
+}
+
 // getCoreBuildProvisioners takes a list of provisioner block, starts according
 // provisioners and sends parsed HCL2 over to it.
 func (cfg *PackerConfig) getCoreBuildProvisioners(source SourceUseBlock, blocks []*ProvisionerBlock, ectx *hcl.EvalContext) ([]packer.CoreBuildProvisioner, hcl.Diagnostics) {
