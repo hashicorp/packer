@@ -137,9 +137,9 @@ func TestParser_complete(t *testing.T) {
 				},
 				Datasources: Datasources{
 					DatasourceRef{Type: "amazon-ami", Name: "test"}: DatasourceBlock{
-						Type:  "amazon-ami",
-						Name:  "test",
-						value: cty.StringVal("foo"),
+						Type:   "amazon-ami",
+						DSName: "test",
+						value:  cty.StringVal("foo"),
 					},
 				},
 				Sources: map[SourceRef]SourceBlock{
