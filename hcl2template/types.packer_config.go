@@ -245,25 +245,27 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 		// attributes, as HCL2 expressions are not allowed in a block's labels.
 		vars := FilterTraversalsByType(local.Expr.Variables(), "local")
 
-		var localDeps []*LocalBlock
+		var localDeps []refString
 		for _, v := range vars {
 			// Some local variables may be locally aliased as
 			// `local`, which
 			if len(v) < 2 {
 				continue
 			}
-			varName := v[1].(hcl.TraverseAttr).Name
-			block, err := c.localByName(varName)
+
+			depRef, err := NewRefStringFromDep(v)
 			if err != nil {
 				diags = diags.Append(&hcl.Diagnostic{
 					Severity: hcl.DiagError,
-					Summary:  "Missing variable dependency",
-					Detail: fmt.Sprintf("The expression for variable %q depends on local.%s, which is not defined.",
-						local.Name, varName),
+					Summary:  "failed to extract dependency name from traversal ref",
+					Detail: fmt.Sprintf("while preparing for evaluation of local variable %q, "+
+						"a dependency was unable to be converted to a refString. "+
+						"This is likely a Packer bug, please consider reporting it.", local.Name),
 				})
 				continue
 			}
-			localDeps = append(localDeps, block)
+
+			localDeps = append(localDeps, depRef)
 		}
 		local.dependencies = localDeps
 	}
@@ -325,7 +327,17 @@ func (c *PackerConfig) recursivelyEvaluateLocalVariable(local *LocalBlock, depth
 	var diags hcl.Diagnostics
 
 	for _, dep := range local.dependencies {
-		localDiags := c.recursivelyEvaluateLocalVariable(dep, depth+1)
+		locBlock, err := c.getComponentByRef(dep)
+		if err != nil {
+			return diags.Append(&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "failed to get local variable",
+				Detail: fmt.Sprintf("While evaluating %q, its dependency %q was not found, is it defined?",
+					local.Name, dep.String()),
+			})
+		}
+
+		localDiags := c.recursivelyEvaluateLocalVariable(locBlock.(*LocalBlock), depth+1)
 		diags = diags.Extend(localDiags)
 	}
 

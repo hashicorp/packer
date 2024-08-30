@@ -35,7 +35,7 @@ type LocalBlock struct {
 	//
 	// Only `local`/`locals` will be referenced here as we execute all the
 	// same component types at once.
-	dependencies []*LocalBlock
+	dependencies []refString
 	// evaluated toggles to true if it has been evaluated.
 	//
 	// We use this to determine if we're ready to get the value of the

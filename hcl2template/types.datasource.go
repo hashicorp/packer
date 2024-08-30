@@ -17,6 +17,7 @@ import (
 type DatasourceBlock struct {
 	Type         string
 	DSName       string
+	Dependencies []refString
 
 	value cty.Value
 	block *hcl.Block
