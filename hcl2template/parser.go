@@ -420,6 +420,10 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 		}
 	}
 
+	if err := retGraph.Validate(); err != nil {
+		return nil, err
+	}
+
 	return &retGraph, nil
 }
 

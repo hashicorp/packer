@@ -127,13 +127,8 @@ func (g *AcyclicGraph) TransitiveReduction() {
 	}
 }
 
-// Validate validates the DAG. A DAG is valid if it has a single root
-// with no cycles.
+// Validate validates the DAG. A DAG is valid if it has no cycles or self-referencing vertex.
 func (g *AcyclicGraph) Validate() error {
-	if _, err := g.Root(); err != nil {
-		return err
-	}
-
 	// Look for cycles of more than 1 component
 	var err error
 	cycles := g.Cycles()
