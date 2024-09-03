@@ -461,11 +461,6 @@ func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnost
 			})
 		}
 
-		// ("unsupported node of type %q")
-		if diags.HasErrors() {
-			return diags
-		}
-
 		return nil
 	}
 
@@ -473,7 +468,15 @@ func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnost
 		cfg.LocalVariables = Variables{}
 	}
 
-	return diags.Extend(graph.Walk(walkFunc))
+	for _, vtx := range graph.ReverseTopologicalOrder() {
+		vtxDiags := walkFunc(vtx)
+		if vtxDiags.HasErrors() {
+			diags = diags.Extend(vtxDiags)
+			return diags
+		}
+	}
+
+	return nil
 }
 
 func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnostics {
