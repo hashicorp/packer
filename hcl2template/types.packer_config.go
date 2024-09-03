@@ -207,8 +207,8 @@ func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 			diags = append(diags, moreDiags...)
 			for name, attr := range attrs {
 				locals = append(locals, &LocalBlock{
-					Name: name,
-					Expr: attr.Expr,
+					LocalName: name,
+					Expr:      attr.Expr,
 				})
 			}
 		}
@@ -219,7 +219,7 @@ func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 
 func (c *PackerConfig) localByName(local string) (*LocalBlock, error) {
 	for _, loc := range c.LocalBlocks {
-		if loc.Name != local {
+		if loc.LocalName != local {
 			continue
 		}
 
@@ -260,7 +260,7 @@ func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnost
 					Summary:  "failed to extract dependency name from traversal ref",
 					Detail: fmt.Sprintf("while preparing for evaluation of local variable %q, "+
 						"a dependency was unable to be converted to a refString. "+
-						"This is likely a Packer bug, please consider reporting it.", local.Name),
+						"This is likely a Packer bug, please consider reporting it.", local.Name()),
 				})
 				continue
 			}
@@ -290,19 +290,19 @@ func (c *PackerConfig) checkForDuplicateLocalDefinition() hcl.Diagnostics {
 	localNames := map[string]*LocalBlock{}
 
 	for _, block := range c.LocalBlocks {
-		loc, ok := localNames[block.Name]
+		loc, ok := localNames[block.LocalName]
 		if ok {
 			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Duplicate local definition",
 				Detail: fmt.Sprintf("Local variable %q is defined twice in your templates. Other definition found at %q",
-					block.Name, loc.Expr.Range()),
+					block.LocalName, loc.Expr.Range()),
 				Subject: block.Expr.Range().Ptr(),
 			})
 			continue
 		}
 
-		localNames[block.Name] = block
+		localNames[block.LocalName] = block
 	}
 
 	return diags
@@ -333,7 +333,7 @@ func (c *PackerConfig) recursivelyEvaluateLocalVariable(local *LocalBlock, depth
 				Severity: hcl.DiagError,
 				Summary:  "failed to get local variable",
 				Detail: fmt.Sprintf("While evaluating %q, its dependency %q was not found, is it defined?",
-					local.Name, dep.String()),
+					local.Name(), dep.String()),
 			})
 		}
 
@@ -355,8 +355,8 @@ func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostic
 	if moreDiags.HasErrors() {
 		return diags
 	}
-	cfg.LocalVariables[local.Name] = &Variable{
-		Name:      local.Name,
+	cfg.LocalVariables[local.LocalName] = &Variable{
+		Name:      local.LocalName,
 		Sensitive: local.Sensitive,
 		Values: []VariableAssignment{{
 			Value: value,
