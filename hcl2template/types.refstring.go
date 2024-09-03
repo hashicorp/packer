@@ -100,7 +100,7 @@ func (cfg *PackerConfig) getComponentByRef(rs refString) (interface{}, error) {
 		return nil, fmt.Errorf("failed to get datasource '%s.%s': component unknown", rs.Type, rs.Name)
 	case "local":
 		for _, loc := range cfg.LocalBlocks {
-			if loc.Name != rs.Name {
+			if loc.LocalName != rs.Name {
 				continue
 			}
 			return loc, nil

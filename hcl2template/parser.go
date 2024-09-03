@@ -362,7 +362,7 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 					Summary:  "failed to process local dependency",
 					Detail: fmt.Sprintf("An error occurred while processing a dependency for local variable %s: %s",
-						loc.Name, err),
+						loc.LocalName, err),
 				})
 				continue
 			}
@@ -373,7 +373,7 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 					Severity: hcl.DiagError,
 					Summary:  "failed to register local dependency",
 					Detail: fmt.Sprintf("An error occurred while registering %q as a dependency for local variable %s: %s",
-						rs, loc.Name, err),
+						rs, loc.LocalName, err),
 				})
 			}
 		}
@@ -394,7 +394,7 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 	}
 	for _, local := range cfg.LocalBlocks {
 		v := retGraph.Add(local)
-		verticesMap[fmt.Sprintf("local.%s", local.Name)] = v
+		verticesMap[fmt.Sprintf("local.%s", local.LocalName)] = v
 	}
 
 	// Connect the vertices together
@@ -411,7 +411,7 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 		}
 	}
 	for _, loc := range cfg.LocalBlocks {
-		locName := fmt.Sprintf("local.%s", loc.Name)
+		locName := fmt.Sprintf("local.%s", loc.LocalName)
 
 		for _, dep := range loc.dependencies {
 			retGraph.Connect(
