@@ -338,6 +338,7 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 			}
 		}
 
+		cfg.Datasources[ds.Ref()] = ds
 	}
 
 	for _, loc := range cfg.LocalBlocks {
@@ -388,10 +389,24 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 	verticesMap := map[string]dag.Vertex{}
 
 	// Do a first pass to create all the vertices
-	for _, ds := range cfg.Datasources {
+	for ref := range cfg.Datasources {
+		// We keep a reference to the datasource separately from where it
+		// is used to avoid getting bit by the loop semantics.
+		//
+		// This `ds` local variable is the same object for every loop
+		// so if we directly use the address of this object, we'll end
+		// up referencing the last node of the loop for each vertex,
+		// leading to implicit cycles.
+		//
+		// However by capturing it locally in this loop, we have a
+		// reference to the actual datasource block, so it ends-up being
+		// the right instance for each vertex.
+		ds := cfg.Datasources[ref]
 		v := retGraph.Add(&ds)
 		verticesMap[fmt.Sprintf("data.%s", ds.Name())] = v
 	}
+	// Note: locals being references to the objects already, we can safely
+	// use the reference returned by the local loop.
 	for _, local := range cfg.LocalBlocks {
 		v := retGraph.Add(local)
 		verticesMap[fmt.Sprintf("local.%s", local.LocalName)] = v
