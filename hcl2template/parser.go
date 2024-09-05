@@ -464,7 +464,19 @@ func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnost
 		case *DatasourceBlock:
 			diags = cfg.evaluateDatasource(*bl, skipDatasources)
 		case *LocalBlock:
-			diags = cfg.evaluateLocalVariable(bl)
+			var val *Variable
+			if cfg.LocalVariables == nil {
+				cfg.LocalVariables = make(Variables)
+			}
+			val, diags = cfg.evaluateLocalVariable(bl)
+			// Note: clumsy a bit, but we won't add the variable as `nil` here
+			// unless no errors have been reported during evaluation.
+			//
+			// This prevents Packer from panicking down the line, as initialisation
+			// doesn't stop if there are diags, so if `val` is nil, it crashes.
+			if !diags.HasErrors() {
+				cfg.LocalVariables[bl.LocalName] = val
+			}
 		default:
 			diags = diags.Append(&hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -476,11 +488,11 @@ func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnost
 			})
 		}
 
-		return nil
-	}
+		if diags.HasErrors() {
+			return diags
+		}
 
-	if cfg.LocalVariables == nil {
-		cfg.LocalVariables = Variables{}
+		return nil
 	}
 
 	for _, vtx := range graph.ReverseTopologicalOrder() {

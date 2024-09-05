@@ -114,6 +114,10 @@ func TestParse_datasource(t *testing.T) {
 					}: {
 						Type:   "null",
 						DSName: "baz",
+						Dependencies: []refString{
+							{"data", "null", "foo"},
+							{"data", "null", "bar"},
+						},
 					},
 					{
 						Type: "null",
@@ -121,6 +125,9 @@ func TestParse_datasource(t *testing.T) {
 					}: {
 						Type:   "null",
 						DSName: "bang",
+						Dependencies: []refString{
+							{"data", "null", "baz"},
+						},
 					},
 					{
 						Type: "null",
@@ -128,6 +135,9 @@ func TestParse_datasource(t *testing.T) {
 					}: {
 						Type:   "null",
 						DSName: "yummy",
+						Dependencies: []refString{
+							{"data", "null", "bang"},
+						},
 					},
 				},
 			},
@@ -219,6 +229,9 @@ func TestParse_datasource(t *testing.T) {
 					}: {
 						Type:   "null",
 						DSName: "gummy",
+						Dependencies: []refString{
+							{"data", "null", "bear"},
+						},
 					},
 					{
 						Type: "null",
@@ -226,6 +239,9 @@ func TestParse_datasource(t *testing.T) {
 					}: {
 						Type:   "null",
 						DSName: "bear",
+						Dependencies: []refString{
+							{"data", "null", "gummy"},
+						},
 					},
 				},
 			},

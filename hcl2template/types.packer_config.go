@@ -341,10 +341,15 @@ func (c *PackerConfig) recursivelyEvaluateLocalVariable(local *LocalBlock, depth
 		diags = diags.Extend(localDiags)
 	}
 
-	return diags.Extend(c.evaluateLocalVariable(local))
+	val, locDiags := c.evaluateLocalVariable(local)
+	if !locDiags.HasErrors() {
+		c.LocalVariables[local.LocalName] = val
+	}
+
+	return diags.Extend(locDiags)
 }
 
-func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostics {
+func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) (*Variable, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	value, moreDiags := local.Expr.Value(cfg.EvalContext(LocalContext, nil))
@@ -353,9 +358,9 @@ func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostic
 
 	diags = append(diags, moreDiags...)
 	if moreDiags.HasErrors() {
-		return diags
+		return nil, diags
 	}
-	cfg.LocalVariables[local.LocalName] = &Variable{
+	return &Variable{
 		Name:      local.LocalName,
 		Sensitive: local.Sensitive,
 		Values: []VariableAssignment{{
@@ -364,9 +369,7 @@ func (cfg *PackerConfig) evaluateLocalVariable(local *LocalBlock) hcl.Diagnostic
 			From:  "default",
 		}},
 		Type: value.Type(),
-	}
-
-	return diags
+	}, diags
 }
 
 func (cfg *PackerConfig) evaluateDatasources(skipExecution bool) hcl.Diagnostics {
