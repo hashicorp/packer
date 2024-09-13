@@ -53,13 +53,14 @@ func (g *Git) Type() string {
 }
 
 func (g *Git) Details() map[string]interface{} {
-	resp := map[string]interface{}{}
-
 	headRef, err := g.repo.Head()
 	if err != nil {
-		log.Printf("[ERROR] failed to get the git branch name: %s", err)
-	} else {
-		resp["ref"] = headRef.Name().Short()
+		log.Printf("[ERROR] failed to get reference to git HEAD: %s", err)
+		return nil
+	}
+
+	resp := map[string]interface{}{
+		"ref": headRef.Name().Short(),
 	}
 
 	commit, err := g.repo.CommitObject(headRef.Hash())
