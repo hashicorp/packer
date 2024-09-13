@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -130,6 +131,49 @@ func (ts *PackerTestSuite) GetPluginPath(t *testing.T, version string) string {
 	return path.(string)
 }
 
+type CompilationResult struct {
+	Error   error
+	Version string
+}
+
+// Ready processes a series of CompilationResults, as returned by CompilePlugin
+//
+// If any of the jobs requested failed, the test will fail also.
+func Ready(t *testing.T, results []chan CompilationResult) {
+	for _, res := range results {
+		jobErr := <-res
+		empty := CompilationResult{}
+		if jobErr != empty {
+			t.Errorf("failed to compile plugin at version %s: %s", jobErr.Version, jobErr.Error)
+		}
+	}
+
+	if t.Failed() {
+		t.Fatalf("some plugins failed to be compiled, see logs for more info")
+	}
+}
+
+type compilationJob struct {
+	versionString  string
+	suite          *PackerTestSuite
+	done           bool
+	resultCh       chan CompilationResult
+	customisations []BuildCustomisation
+}
+
+// CompilationJobs keeps a queue of compilation jobs for plugins
+//
+// This approach allows us to avoid conflicts between compilation jobs.
+// Typically building the plugin with different ldflags is safe to perform
+// in parallel on the same file set, however customisations tend to be more
+// conflictual, as two concurrent compilation jobs may end-up compiling the
+// wrong plugin, which may cause some tests to misbehave, or even compilation
+// jobs to fail.
+//
+// The solution to this approach is to have a global queue for every plugin
+// compilation to be performed safely.
+var CompilationJobs = make(chan compilationJob, 10)
+
 // CompilePlugin builds a tester plugin with the specified version.
 //
 // The plugin's code is contained in a subdirectory of this file, and lets us
@@ -146,7 +190,49 @@ func (ts *PackerTestSuite) GetPluginPath(t *testing.T, version string) string {
 // Note: each tester plugin may only be compiled once for a specific version in
 // a test suite. The version may include core (mandatory), pre-release and
 // metadata. Unlike Packer core, metadata does matter for the version being built.
-func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string, customisations ...BuildCustomisation) {
+//
+// Note: the compilation will process asynchronously, and should be waited upon
+// before tests that use this plugin may proceed. Refer to the `Ready` function
+// for doing that.
+func (ts *PackerTestSuite) CompilePlugin(versionString string, customisations ...BuildCustomisation) chan CompilationResult {
+	resultCh := make(chan CompilationResult)
+
+	CompilationJobs <- compilationJob{
+		versionString:  versionString,
+		suite:          ts,
+		customisations: customisations,
+		done:           false,
+		resultCh:       resultCh,
+	}
+
+	return resultCh
+}
+
+func init() {
+	// Run a processor coroutine for the duration of the test.
+	//
+	// It's simpler to have this occurring on the side at all times, without
+	// trying to manage its lifecycle based on the current amount of queued
+	// tasks, since this is linked to the test lifecycle, and as it's a single
+	// coroutine, we can leave it run until the process exits.
+	go func() {
+		for job := range CompilationJobs {
+			log.Printf("compiling plugin on version %s", job.versionString)
+			err := compilePlugin(job.suite, job.versionString, job.customisations...)
+			if err != nil {
+				job.resultCh <- CompilationResult{
+					Error:   err,
+					Version: job.versionString,
+				}
+			}
+			close(job.resultCh)
+		}
+	}()
+}
+
+// compilePlugin performs the actual compilation procedure for the plugin, and
+// registers it to the test suite instance passed as a parameter.
+func compilePlugin(ts *PackerTestSuite, versionString string, customisations ...BuildCustomisation) error {
 	// Fail to build plugin if already built.
 	//
 	// Especially with customisations being a thing, relying on cache to get and
@@ -154,23 +240,21 @@ func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string, cus
 	// and therefore we cannot rely on it being called twice and producing the
 	// same result, so we forbid it.
 	if _, ok := ts.compiledPlugins.Load(versionString); ok {
-		t.Fatalf("plugin version %q was already built, use GetTestPlugin instead", versionString)
+		return fmt.Errorf("plugin version %q was already built, use GetTestPlugin instead", versionString)
 	}
 
 	v := version.Must(version.NewSemver(versionString))
 
-	t.Logf("Building tester plugin in version %v", v)
-
 	testDir, err := currentDir()
 	if err != nil {
-		t.Fatalf("failed to compile plugin binary: %s", err)
+		return fmt.Errorf("failed to compile plugin binary: %s", err)
 	}
 
 	testerPluginDir := filepath.Join(testDir, "plugin_tester")
 	for _, custom := range customisations {
 		err, cleanup := custom(testerPluginDir)
 		if err != nil {
-			t.Fatalf("failed to prepare plugin workdir: %s", err)
+			return fmt.Errorf("failed to prepare plugin workdir: %s", err)
 		}
 		defer cleanup()
 	}
@@ -180,10 +264,11 @@ func (ts *PackerTestSuite) CompilePlugin(t *testing.T, versionString string, cus
 	compileCommand := exec.Command("go", "build", "-C", testerPluginDir, "-o", outBin, "-ldflags", LDFlags(v), ".")
 	logs, err := compileCommand.CombinedOutput()
 	if err != nil {
-		t.Fatalf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
+		return fmt.Errorf("failed to compile plugin binary: %s\ncompiler logs: %s", err, logs)
 	}
 
 	ts.compiledPlugins.Store(v.String(), outBin)
+	return nil
 }
 
 type PluginDirSpec struct {
