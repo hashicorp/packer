@@ -28,6 +28,7 @@ import (
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
+	hcp_sbomprovisioner "github.com/hashicorp/packer/provisioner/hcp_sbom"
 	powershellprovisioner "github.com/hashicorp/packer/provisioner/powershell"
 	shellprovisioner "github.com/hashicorp/packer/provisioner/shell"
 	shelllocalprovisioner "github.com/hashicorp/packer/provisioner/shell-local"
@@ -48,6 +49,7 @@ var Builders = map[string]packersdk.Builder{
 var Provisioners = map[string]packersdk.Provisioner{
 	"breakpoint":      new(breakpointprovisioner.Provisioner),
 	"file":            new(fileprovisioner.Provisioner),
+	"hcp_sbom":        new(hcp_sbomprovisioner.Provisioner),
 	"powershell":      new(powershellprovisioner.Provisioner),
 	"shell":           new(shellprovisioner.Provisioner),
 	"shell-local":     new(shelllocalprovisioner.Provisioner),
