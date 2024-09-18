@@ -25,7 +25,7 @@ require (
 	github.com/hashicorp/hcp-sdk-go v0.131.0
 	github.com/hashicorp/packer-plugin-sdk v0.6.0
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.13.6
 	github.com/klauspost/pgzip v1.2.5
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -57,10 +57,12 @@ require (
 )
 
 require (
+	github.com/CycloneDX/cyclonedx-go v0.9.1
 	github.com/go-openapi/strfmt v0.21.10
 	github.com/oklog/ulid v1.3.1
 	github.com/pierrec/lz4/v4 v4.1.18
 	github.com/shirou/gopsutil/v3 v3.23.4
+	github.com/spdx/tools-golang v0.5.5
 )
 
 require (
@@ -77,6 +79,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/anchore/go-struct-converter v0.0.0-20221118182256-c68fdcfa2092 // indirect
 	github.com/apparentlymart/go-cidr v1.0.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
