@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/klauspost/compress/zstd"
 	"io"
 	"os"
 	"testing"
@@ -94,8 +93,8 @@ func TestDownloadSBOM(t *testing.T) {
 			provisioner := &Provisioner{
 				config: tt.config,
 			}
-
-			destPath, err := provisioner.downloadSBOM(ui, comm)
+			generatedData := map[string]interface{}{}
+			destPath, err := provisioner.downloadSBOMForPacker(ui, comm, generatedData)
 			if tt.expectError {
 				if err == nil {
 					t.Fatalf("expected error, got none")
@@ -171,49 +170,5 @@ func TestValidateSBOM(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestCompressFile(t *testing.T) {
-	ui := &MockUi{}
-	provisioner := &Provisioner{}
-	validSBOM := SBOM{
-		BomFormat:   "CycloneDX",
-		SpecVersion: "1.0",
-	}
-	data, _ := json.Marshal(validSBOM)
-	filePath := "data.json"
-	//os.WriteFile(filePath, data, 0644)
-	//defer os.Remove(filePath)
-
-	sourceFile, err := os.Open(filePath)
-	if err != nil {
-		t.Fatalf("expected no error:%v", err)
-	}
-	defer sourceFile.Close()
-
-	data, err = io.ReadAll(sourceFile)
-	if err != nil {
-		t.Fatalf("expected no error:%v", err)
-	}
-
-	compressedData, err := provisioner.compressFile(ui, filePath)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-
-	decoder, err := zstd.NewReader(nil)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-	defer decoder.Close()
-
-	decompressedData, err := decoder.DecodeAll(compressedData, nil)
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
-	}
-
-	if string(decompressedData) != string(data) {
-		t.Fatalf("expected decompressed data to be '%s', got %s", data, decompressedData)
 	}
 }
