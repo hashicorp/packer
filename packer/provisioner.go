@@ -6,7 +6,10 @@ package packer
 import (
 	"context"
 	"fmt"
+	"github.com/klauspost/compress/zstd"
+	"io"
 	"log"
+	"os"
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -233,4 +236,76 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 	}
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
+}
+
+// SBOMInternalProvisioner is a Provisioner implementation that waits until a key
+// press before the provisioner is actually run.
+type SBOMInternalProvisioner struct {
+	Provisioner    packersdk.Provisioner
+	TempFileLoc    string
+	CompressedData []byte
+}
+
+func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
+func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
+func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *SBOMInternalProvisioner) Provision(
+	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
+	generatedData map[string]interface{},
+) error {
+	// Get the current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current working directory for Packer SBOM: %s", err)
+	}
+
+	// Create a temporary file in the current working directory
+	tmpFile, err := os.CreateTemp(cwd, "packer-sbom-*.json")
+	if err != nil {
+		return fmt.Errorf("failed to create internal temporary file for Packer SBOM: %s", err)
+	}
+	generatedData["dst"] = tmpFile.Name()
+	p.TempFileLoc = tmpFile.Name()
+	ctx = context.WithValue(ctx, "sbomFilePath", tmpFile.Name())
+	tmpFile.Close()
+
+	err = p.Provisioner.Provision(ctx, ui, comm, generatedData)
+	if err != nil {
+		return err
+	}
+
+	compressedData, err := p.compressFile(p.TempFileLoc)
+	if err != nil {
+		return err
+	}
+	p.CompressedData = compressedData
+	os.Remove(p.TempFileLoc)
+	return nil
+}
+
+func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) {
+	sourceFile, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer sourceFile.Close()
+
+	data, err := io.ReadAll(sourceFile)
+	if err != nil {
+		return nil, err
+	}
+
+	encoder, err := zstd.NewWriter(nil)
+	if err != nil {
+		return nil, err
+	}
+	defer encoder.Close()
+
+	compressedData := encoder.EncodeAll(data, nil)
+
+	fmt.Printf(fmt.Sprintf("SBOM file compressed successfully. Size: %d bytes", len(compressedData)))
+	return compressedData, nil
 }
