@@ -516,6 +516,12 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		}
 	}
 
+	if pb.PType == "hcp_sbom" {
+		provisioner = &packer.SBOMInternalProvisioner{
+			Provisioner: provisioner,
+		}
+	}
+
 	return packer.CoreBuildProvisioner{
 		PType:       pb.PType,
 		PName:       pb.PName,
