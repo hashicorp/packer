@@ -3,10 +3,11 @@ package hcp_sbom
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/packer-plugin-sdk/packer"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type MockUi struct {

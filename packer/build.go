@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"path/filepath"
 	"sync"
 
 	"github.com/hashicorp/packer-plugin-sdk/common"
@@ -52,19 +51,13 @@ type CoreBuild struct {
 	l             sync.Mutex
 	prepareCalled bool
 
-	SBOMFileName       string
-	SBOMFileCompressed []byte
-}
-
-type SBOM struct {
-	FileName       string
-	CompressedData []byte
+	SBOMFilesCompressed [][]byte
 }
 
 type BuildMetadata struct {
 	PackerVersion string
 	Plugins       map[string]PluginDetails
-	SBOM          SBOM
+	SBOMs         [][]byte
 }
 
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
@@ -98,10 +91,7 @@ func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
 		Plugins:       b.getPluginsMetadata(),
-		SBOM: SBOM{
-			FileName:       b.SBOMFileName,
-			CompressedData: b.SBOMFileCompressed,
-		},
+		SBOMs:         b.SBOMFilesCompressed,
 	}
 	return metadata
 }
@@ -320,11 +310,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 			if !ok {
 				continue
 			}
-			b.SBOMFileName = filepath.Base(sbomInternalProvisioner.TempFileLoc)
-			b.SBOMFileCompressed = sbomInternalProvisioner.CompressedData
-
-			fmt.Printf("==== SBOM File Name: %v ====\n", b.SBOMFileName)
-			fmt.Printf("==== SBOM Compressed Data: %v ====\n", len(sbomInternalProvisioner.CompressedData))
+			b.SBOMFilesCompressed = append(b.SBOMFilesCompressed, sbomInternalProvisioner.CompressedData)
 		}
 	}
 
