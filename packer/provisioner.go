@@ -6,10 +6,12 @@ package packer
 import (
 	"context"
 	"fmt"
-	"github.com/klauspost/compress/zstd"
 	"io"
 	"log"
 	"os"
+
+	"github.com/klauspost/compress/zstd"
+
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -267,10 +269,16 @@ func (p *SBOMInternalProvisioner) Provision(
 	if err != nil {
 		return fmt.Errorf("failed to create internal temporary file for Packer SBOM: %s", err)
 	}
+	defer tmpFile.Close()
+	defer func(name string) {
+		fileRemoveErr := os.Remove(name)
+		if fileRemoveErr != nil {
+			log.Printf("Error removing SBOM temporary file %s: %s", name, fileRemoveErr)
+		}
+	}(p.TempFileLoc)
+
 	generatedData["dst"] = tmpFile.Name()
 	p.TempFileLoc = tmpFile.Name()
-	ctx = context.WithValue(ctx, "sbomFilePath", tmpFile.Name())
-	tmpFile.Close()
 
 	err = p.Provisioner.Provision(ctx, ui, comm, generatedData)
 	if err != nil {
@@ -282,7 +290,6 @@ func (p *SBOMInternalProvisioner) Provision(
 		return err
 	}
 	p.CompressedData = compressedData
-	os.Remove(p.TempFileLoc)
 	return nil
 }
 
