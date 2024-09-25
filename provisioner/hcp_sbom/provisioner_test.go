@@ -31,7 +31,7 @@ func (m *MockCommunicator) Download(src string, dst io.Writer) error {
 	return err
 }
 
-func TestDownloadSBOM(t *testing.T) {
+func TestDownloadSBOMForPacker(t *testing.T) {
 	ui := &MockUi{}
 	comm := &MockCommunicator{}
 
@@ -54,7 +54,7 @@ func TestDownloadSBOM(t *testing.T) {
 				Source:      "mock-source/sbom.json",
 				Destination: "test-dir/",
 			},
-			expectError: true,
+			expectError: false,
 		},
 		{
 			name: "Source is a json file, Destination is a json file",
@@ -78,7 +78,7 @@ func TestDownloadSBOM(t *testing.T) {
 				Source:      "mock-source/sbom.json",
 				Destination: "test-output-data",
 			},
-			expectError: true,
+			expectError: false,
 		},
 		{
 			name: "Source is a json file, Destination is empty",
@@ -94,7 +94,22 @@ func TestDownloadSBOM(t *testing.T) {
 			provisioner := &Provisioner{
 				config: tt.config,
 			}
-			generatedData := map[string]interface{}{}
+
+			cwd, err := os.Getwd()
+			if err != nil {
+				t.Fatalf("failed to get current working directory for Packer SBOM: %s", err)
+			}
+
+			tmpFile, err := os.CreateTemp(cwd, "packer-sbom-*.json")
+			if err != nil {
+				t.Fatalf("failed to create internal temporary file for Packer SBOM: %s", err)
+			}
+			generatedData := map[string]interface{}{
+				"dst": tmpFile.Name(),
+			}
+			defer tmpFile.Close()
+			defer os.Remove(tmpFile.Name())
+
 			destPath, err := provisioner.downloadSBOMForPacker(ui, comm, generatedData)
 			if tt.expectError {
 				if err == nil {
