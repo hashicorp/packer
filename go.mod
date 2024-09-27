@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.4
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.13.6
 	github.com/klauspost/pgzip v1.2.5
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -193,3 +193,5 @@ require (
 go 1.21.0
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
+
+replace github.com/hashicorp/hcp-sdk-go => /Users/jgoldstrich/workspace/hcp-sdk-go-internal

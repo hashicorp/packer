@@ -20,6 +20,8 @@ type Build struct {
 	Artifacts     map[string]packerSDKRegistry.Image
 	Status        hcpPackerModels.HashicorpCloudPacker20230101BuildStatus
 	Metadata      hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata
+
+	CompressedSboms [][]byte
 }
 
 // NewBuildFromCloudPackerBuild converts a HashicorpCloudPackerBuild to a local build that can be tracked and
