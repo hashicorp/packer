@@ -55,6 +55,7 @@ type CoreBuild struct {
 }
 
 type SBOM struct {
+	Name           string
 	Format         string
 	CompressedData []byte
 }
@@ -313,6 +314,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
 		if ok {
 			sbom := SBOM{
+				Name:           sbomInternalProvisioner.SBOMName,
 				Format:         sbomInternalProvisioner.SBOMFormat,
 				CompressedData: sbomInternalProvisioner.CompressedData,
 			}
