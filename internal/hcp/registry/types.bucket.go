@@ -12,7 +12,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
+
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
 	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
@@ -220,6 +223,35 @@ func (bucket *Bucket) UpdateBuildStatus(
 	buildToUpdate.Status = status
 	bucket.Version.StoreBuild(name, buildToUpdate)
 	return nil
+}
+
+func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom packer.SBOM) error {
+	buildToUpdate, err := bucket.Version.Build(buildName)
+	if err != nil {
+		return err
+	}
+
+	log.Println(
+		"[TRACE] jennajenna uploadsbom called", buildToUpdate.ID,
+	)
+	if buildToUpdate.ID == "" {
+		return fmt.Errorf("the build for the component %q does not have a valid id", buildName)
+	}
+	_, err = bucket.client.Packer.PackerServiceUploadSbom(
+		&packer_service.PackerServiceUploadSbomParams{
+			Context:     ctx,
+			BucketName:  bucket.Name,
+			Fingerprint: bucket.Version.Fingerprint,
+			BuildID:     buildToUpdate.ID,
+			Body: &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
+				CompressedSbom: sbom.CompressedData,
+				Name:           sbom.Name,
+				Format:         sbom.Format,
+			},
+		},
+		nil,
+	)
+	return err
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
@@ -670,6 +702,13 @@ func (bucket *Bucket) completeBuild(
 	if len(build.Artifacts) == 0 {
 		return packerSDKArtifacts, &NotAHCPArtifactError{
 			fmt.Errorf("No HCP Packer-compatible artifacts were found for the build"),
+		}
+	}
+
+	for _, sbom := range build.CompressedSboms {
+		err = bucket.uploadSbom(ctx, buildName, sbom)
+		if err != nil {
+			return packerSDKArtifacts, fmt.Errorf("Failed to upload sboms %s", err)
 		}
 	}
 
