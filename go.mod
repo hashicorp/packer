@@ -196,3 +196,5 @@ require (
 go 1.21.0
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
+
+replace github.com/hashicorp/hcp-sdk-go => /Users/jgoldstrich/workspace/hcp-sdk-go-internal
