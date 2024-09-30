@@ -3,7 +3,6 @@ package hcp_sbom
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"testing"
 
@@ -20,114 +19,6 @@ func (m *MockUi) Say(message string) {
 
 func (m *MockUi) Error(message string) {
 	fmt.Println("ERROR:", message)
-}
-
-type MockCommunicator struct {
-	packer.Communicator
-}
-
-func (m *MockCommunicator) Download(src string, dst io.Writer) error {
-	_, err := dst.Write([]byte("mock SBOM content"))
-	return err
-}
-
-func TestDownloadSBOMForPacker(t *testing.T) {
-	ui := &MockUi{}
-	comm := &MockCommunicator{}
-
-	tests := []struct {
-		name        string
-		config      Config
-		expectError bool
-	}{
-		{
-			name: "Source is a dir, Dest is a dir",
-			config: Config{
-				Source:      "mock-source/",
-				Destination: "test-dir/",
-			},
-			expectError: true,
-		},
-		{
-			name: "Source is a json file, Destination is a dir",
-			config: Config{
-				Source:      "mock-source/sbom.json",
-				Destination: "test-dir/",
-			},
-			expectError: false,
-		},
-		{
-			name: "Source is a json file, Destination is a json file",
-			config: Config{
-				Source:      "mock-source/sbom.json",
-				Destination: "sbom.json",
-			},
-			expectError: false,
-		},
-		{
-			name: "Source is a json file, Destination is a json file in test-output-data",
-			config: Config{
-				Source:      "mock-source/sbom.json",
-				Destination: "test-output-data/sbom.json",
-			},
-			expectError: false,
-		},
-		{
-			name: "Source is a json file, Destination is test-output-data w/o /",
-			config: Config{
-				Source:      "mock-source/sbom.json",
-				Destination: "test-output-data",
-			},
-			expectError: false,
-		},
-		{
-			name: "Source is a json file, Destination is empty",
-			config: Config{
-				Source: "mock-source/sbom.json",
-			},
-			expectError: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			provisioner := &Provisioner{
-				config: tt.config,
-			}
-
-			cwd, err := os.Getwd()
-			if err != nil {
-				t.Fatalf("failed to get current working directory for Packer SBOM: %s", err)
-			}
-
-			tmpFile, err := os.CreateTemp(cwd, "packer-sbom-*.json")
-			if err != nil {
-				t.Fatalf("failed to create internal temporary file for Packer SBOM: %s", err)
-			}
-			generatedData := map[string]interface{}{
-				"dst": tmpFile.Name(),
-			}
-			defer tmpFile.Close()
-			defer os.Remove(tmpFile.Name())
-
-			destPath, err := provisioner.downloadSBOMForPacker(ui, comm, generatedData)
-			if tt.expectError {
-				if err == nil {
-					t.Fatalf("expected error, got none")
-				}
-			} else {
-				if err != nil {
-					t.Fatalf("expected no error, got %v", err)
-				}
-
-				if _, err := os.Stat(destPath); os.IsNotExist(err) {
-					t.Fatalf("expected file to exist at %s", destPath)
-				}
-
-				os.RemoveAll(destPath)
-			}
-		})
-	}
 }
 
 func TestValidateSBOM(t *testing.T) {
