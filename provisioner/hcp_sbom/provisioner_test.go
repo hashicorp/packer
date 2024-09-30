@@ -136,35 +136,35 @@ func TestValidateSBOM(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		sbom        SBOM
+		sbom        map[string]interface{}
 		expectError bool
 		errorMsg    string
 	}{
 		{
 			name: "Valid SBOM",
-			sbom: SBOM{
-				BomFormat:   "CycloneDX",
-				SpecVersion: "1.0",
+			sbom: map[string]interface{}{
+				"bomFormat":   "CycloneDX",
+				"specVersion": "1.0",
 			},
 			expectError: false,
 		},
 		{
 			name: "Invalid BomFormat",
-			sbom: SBOM{
-				BomFormat:   "InvalidFormat",
-				SpecVersion: "1.0",
+			sbom: map[string]interface{}{
+				"bomFormat":   "InvalidFormat",
+				"specVersion": "1.0",
 			},
 			expectError: true,
-			errorMsg:    "invalid bomFormat: InvalidFormat",
+			errorMsg:    "invalid bomFormat: InvalidFormat, expected CycloneDX",
 		},
 		{
 			name: "Empty SpecVersion",
-			sbom: SBOM{
-				BomFormat:   "CycloneDX",
-				SpecVersion: "",
+			sbom: map[string]interface{}{
+				"bomFormat":   "CycloneDX",
+				"specVersion": "",
 			},
 			expectError: true,
-			errorMsg:    "specVersion is required",
+			errorMsg:    "failed to decode CycloneDX SBOM: invalid specification version",
 		},
 	}
 

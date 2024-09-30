@@ -304,12 +304,9 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 		return nil, err
 	}
 
-	if len(b.Provisioners) > 0 {
-		for _, p := range b.Provisioners {
-			sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
-			if !ok {
-				continue
-			}
+	for _, p := range b.Provisioners {
+		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
+		if ok {
 			b.SBOMFilesCompressed = append(b.SBOMFilesCompressed, sbomInternalProvisioner.CompressedData)
 		}
 	}
