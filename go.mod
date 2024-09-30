@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/packer-plugin-amazon v1.2.1
 	github.com/hashicorp/packer-plugin-sdk v0.5.4
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
-	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/klauspost/compress v1.13.6
 	github.com/klauspost/pgzip v1.2.5
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -40,7 +40,7 @@ require (
 	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
 	github.com/pkg/sftp v1.13.2 // indirect
 	github.com/posener/complete v1.2.3
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/ulikunitz/xz v0.5.10
 	github.com/zclconf/go-cty v1.13.3
 	github.com/zclconf/go-cty-yaml v1.0.1
@@ -58,6 +58,7 @@ require (
 )
 
 require (
+	github.com/CycloneDX/cyclonedx-go v0.9.1
 	github.com/go-openapi/strfmt v0.21.10
 	github.com/oklog/ulid v1.3.1
 	github.com/pierrec/lz4/v4 v4.1.18

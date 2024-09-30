@@ -6,7 +6,6 @@ package packer
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
@@ -244,7 +243,6 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 // press before the provisioner is actually run.
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
-	TempFileLoc    string
 	CompressedData []byte
 }
 
@@ -269,23 +267,28 @@ func (p *SBOMInternalProvisioner) Provision(
 	if err != nil {
 		return fmt.Errorf("failed to create internal temporary file for Packer SBOM: %s", err)
 	}
-	defer tmpFile.Close()
+
+	// Close the file handle before passing the name to the underlying provisioner
+	tmpFileName := tmpFile.Name()
+	if err = tmpFile.Close(); err != nil {
+		return fmt.Errorf("failed to close temporary file for Packer SBOM %s: %s", tmpFileName, err)
+	}
+
 	defer func(name string) {
 		fileRemoveErr := os.Remove(name)
 		if fileRemoveErr != nil {
 			log.Printf("Error removing SBOM temporary file %s: %s", name, fileRemoveErr)
 		}
-	}(p.TempFileLoc)
+	}(tmpFile.Name())
 
 	generatedData["dst"] = tmpFile.Name()
-	p.TempFileLoc = tmpFile.Name()
 
 	err = p.Provisioner.Provision(ctx, ui, comm, generatedData)
 	if err != nil {
 		return err
 	}
 
-	compressedData, err := p.compressFile(p.TempFileLoc)
+	compressedData, err := p.compressFile(tmpFile.Name())
 	if err != nil {
 		return err
 	}
@@ -294,25 +297,18 @@ func (p *SBOMInternalProvisioner) Provision(
 }
 
 func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) {
-	sourceFile, err := os.Open(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, err
-	}
-	defer sourceFile.Close()
-
-	data, err := io.ReadAll(sourceFile)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
 	}
 
-	encoder, err := zstd.NewWriter(nil)
+	encoder, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedBestCompression))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create zstd encoder: %w", err)
 	}
-	defer encoder.Close()
 
 	compressedData := encoder.EncodeAll(data, nil)
 
-	fmt.Printf(fmt.Sprintf("SBOM file compressed successfully. Size: %d bytes", len(compressedData)))
+	log.Printf("SBOM file compressed successfully. Size: %d bytes\n", len(compressedData))
 	return compressedData, nil
 }
