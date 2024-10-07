@@ -38,6 +38,14 @@ type InitializeOptions struct {
 	// When set, the execution of datasources will be skipped and the datasource will provide
 	// an output spec that will be used for validation only.
 	SkipDatasourcesExecution bool
+	// UseSequential changes the way data sources and locals are evaluated.
+	//
+	// In this mode, instead of using two separate phases to evaluate datasources first, then
+	// local variables, here we instead use a DAG so both are evaluated at once, based on the
+	// dependencies between them.
+	//
+	// This is optional and defaults to false for now, but this may become a default later.
+	UseSequential bool
 }
 
 type PluginBinaryDetector interface {

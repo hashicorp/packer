@@ -15,8 +15,9 @@ import (
 
 // DatasourceBlock references an HCL 'data' block.
 type DatasourceBlock struct {
-	Type string
-	Name string
+	Type         string
+	DSName       string
+	Dependencies []refString
 
 	value cty.Value
 	block *hcl.Block
@@ -29,10 +30,14 @@ type DatasourceRef struct {
 
 type Datasources map[DatasourceRef]DatasourceBlock
 
+func (data DatasourceBlock) Name() string {
+	return fmt.Sprintf("%s.%s", data.Type, data.DSName)
+}
+
 func (data *DatasourceBlock) Ref() DatasourceRef {
 	return DatasourceRef{
 		Type: data.Type,
-		Name: data.Name,
+		Name: data.DSName,
 	}
 }
 
@@ -100,7 +105,7 @@ func (cfg *PackerConfig) startDatasource(ds DatasourceBlock) (packersdk.Datasour
 	}
 	if datasource == nil {
 		diags = append(diags, &hcl.Diagnostic{
-			Summary:  fmt.Sprintf("failed to start datasource plugin %q.%q", ds.Type, ds.Name),
+			Summary:  fmt.Sprintf("failed to start datasource plugin %q", ds.Name()),
 			Subject:  &block.DefRange,
 			Severity: hcl.DiagError,
 		})
@@ -135,9 +140,9 @@ func (cfg *PackerConfig) startDatasource(ds DatasourceBlock) (packersdk.Datasour
 func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	r := &DatasourceBlock{
-		Type:  block.Labels[0],
-		Name:  block.Labels[1],
-		block: block,
+		Type:   block.Labels[0],
+		DSName: block.Labels[1],
+		block:  block,
 	}
 
 	if !hclsyntax.ValidIdentifier(r.Type) {
@@ -148,7 +153,7 @@ func (p *Parser) decodeDataBlock(block *hcl.Block) (*DatasourceBlock, hcl.Diagno
 			Subject:  &block.LabelRanges[0],
 		})
 	}
-	if !hclsyntax.ValidIdentifier(r.Name) {
+	if !hclsyntax.ValidIdentifier(r.DSName) {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Invalid data resource name",
