@@ -92,16 +92,10 @@ func (p *Provisioner) Provision(
 	}
 	p.config.ctx.Data = generatedData
 
-	// Download the file for Packer
-	destPath, downloadErr := p.downloadSBOMForPacker(ui, comm, generatedData)
+	// Download the files
+	destPath, downloadErr := p.downloadSBOM(ui, comm, generatedData)
 	if downloadErr != nil {
-		return fmt.Errorf("failed to download Packer SBOM file: %w", downloadErr)
-	}
-
-	// Download the file for user
-	downloadErr = p.downloadSBOMForUser(ui, comm)
-	if downloadErr != nil {
-		return fmt.Errorf("failed to download User SBOM file: %w", downloadErr)
+		return fmt.Errorf("failed to download SBOM file: %w", downloadErr)
 	}
 
 	// Validate the file
@@ -114,64 +108,58 @@ func (p *Provisioner) Provision(
 	return nil
 }
 
-// downloadSBOMForPacker downloads SBOM from a specified source to a local
-// destination set by internal SBOM provisioner. It works with all communicators
-// from packersdk.
-func (p *Provisioner) downloadSBOMForPacker(
+// downloadSBOM handles downloading SBOM files for the User and Packer.
+func (p *Provisioner) downloadSBOM(
 	ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{},
 ) (string, error) {
+	// Interpolate the source path
 	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
 	if err != nil {
-		return p.config.Destination, fmt.Errorf("error interpolating source: %s", err)
+		return "", fmt.Errorf("error interpolating source: %s", err)
 	}
 
-	// Download the file for Packer
-	dst, ok := generatedData["dst"].(string) // this has been set by HCPSBOMInternalProvisioner.Provision
-	if !ok || dst == "" {
-		return "", fmt.Errorf("destination path for Packer SBOM file is not valid")
-	}
-
-	// Ensure the destination directory exists
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
-		return dst, fmt.Errorf("failed to create destination directory for Packer SBOM: %w", err)
-	}
-
-	// Open the destination file
-	f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	// Attempt to download SBOM for User
+	dst, err := p.getUserDestination()
 	if err != nil {
-		return dst, fmt.Errorf("failed to open destination file for Packer SBOM: %s", err)
-	}
-	defer f.Close()
-
-	// Download the file
-	ui.Say(fmt.Sprintf("Downloading SBOM file %s for Packer => %s", src, dst))
-	if err = comm.Download(src, f); err != nil {
-		ui.Error(fmt.Sprintf("download failed for Packer SBOM file: %s", err))
-		return dst, err
+		return "", fmt.Errorf("failed to determine user SBOM destination: %s", err)
 	}
 
+	// If User SBOM destination is valid, try to download the SBOM file
+	if dst != "" {
+		ui.Say(fmt.Sprintf("Attempting to download SBOM file for User: %s", src))
+		err = p.downloadToFile(ui, comm, src, dst)
+		if err != nil {
+			return "", fmt.Errorf("user SBOM download failed: %s", err)
+		}
+		ui.Say(fmt.Sprintf("User SBOM file successfully downloaded to: %s", dst))
+	}
+
+	// Attempt to download SBOM for Packer
+	dst, err = p.getPackerDestination(generatedData)
+	if err != nil {
+		return "", fmt.Errorf("failed to get Packer SBOM destination: %s", err)
+	}
+
+	err = p.downloadToFile(ui, comm, src, dst)
+	if err != nil {
+		return "", fmt.Errorf("failed to download Packer SBOM: %s", err)
+	}
+
+	ui.Say(fmt.Sprintf("Packer SBOM file successfully downloaded to: %s", dst))
 	return dst, nil
 }
 
-// downloadSBOMForUser downloads a Software Bill of Materials (SBOM) file from a specified source
-// to a local destination path on the machine.
-func (p *Provisioner) downloadSBOMForUser(
-	ui packersdk.Ui, comm packersdk.Communicator,
-) error {
+// getUserDestination determines and returns the destination path for the user SBOM file.
+func (p *Provisioner) getUserDestination() (string, error) {
 	dst := p.config.Destination
 	if dst == "" {
 		log.Println("skipped downloading user SBOM file because 'Destination' is not provided")
-		return nil
+		return "", nil
 	}
 
 	dst, err := interpolate.Render(dst, &p.config.ctx)
 	if err != nil {
-		return fmt.Errorf("error interpolating SBOM file destination from user: %s\n", err)
-	}
-
-	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
-	if err != nil {
-		return fmt.Errorf("error interpolating source: %s", err)
+		return "", fmt.Errorf("error interpolating SBOM file destination for user: %s", err)
 	}
 
 	// Check if the destination exists and determine its type
@@ -181,35 +169,55 @@ func (p *Provisioner) downloadSBOMForUser(
 			// If destination doesn't exist, assume it's a file path and ensure parent directories are created
 			dir := filepath.Dir(dst)
 			if err := os.MkdirAll(dir, 0755); err != nil {
-				return fmt.Errorf("failed to create destination directory for user SBOM: %s\n", err)
+				return "", fmt.Errorf("failed to create destination directory for user SBOM: %s\n", err)
 			}
 		} else {
-			return fmt.Errorf("failed to stat destination for user SBOM: %s\n", err)
+			return "", fmt.Errorf("failed to stat destination for user SBOM: %s\n", err)
 		}
 	} else if info.IsDir() {
 		// If the destination is a directory, create a temporary file inside it
 		tmpFile, err := os.CreateTemp(dst, "packer-user-sbom-*.json")
 		if err != nil {
-			return fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
+			return "", fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
 		}
 		dst = tmpFile.Name()
 		tmpFile.Close()
 	}
 
+	return dst, nil
+}
+
+// getPackerDestination retrieves the destination path for the Packer SBOM file.
+func (p *Provisioner) getPackerDestination(generatedData map[string]interface{}) (string, error) {
+	dst, ok := generatedData["dst"].(string) // This has been set by HCPSBOMInternalProvisioner.Provision
+	if !ok || dst == "" {
+		return "", fmt.Errorf("destination path for Packer SBOM file is not valid")
+	}
+
+	// Ensure the destination directory exists
+	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+		return "", fmt.Errorf("failed to create destination directory for Packer SBOM: %w", err)
+	}
+
+	return dst, nil
+}
+
+// downloadToFile performs the actual download operation to the specified file destination.
+func (p *Provisioner) downloadToFile(ui packersdk.Ui, comm packersdk.Communicator, src, dst string) error {
 	// Open the destination file
 	f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to open destination file for user SBOM: %s", err)
+		return fmt.Errorf("failed to open destination file for SBOM: %s", err)
 	}
 	defer f.Close()
 
 	// Download the file
-	ui.Say(fmt.Sprintf("Downloading SBOM file for user %s => %s", src, dst))
+	ui.Say(fmt.Sprintf("Downloading SBOM file %s => %s", src, dst))
 	if err = comm.Download(src, f); err != nil {
-		return fmt.Errorf("download failed for user SBOM file: %s", err)
+		ui.Error(fmt.Sprintf("download failed for SBOM file: %s", err))
+		return err
 	}
 
-	ui.Say(fmt.Sprintf("User SBOM file successfully downloaded to: %s\n", dst))
 	return nil
 }
 
