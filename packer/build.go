@@ -51,13 +51,18 @@ type CoreBuild struct {
 	l             sync.Mutex
 	prepareCalled bool
 
-	SBOMFilesCompressed [][]byte
+	SBOMs []SBOM
+}
+
+type SBOM struct {
+	Format         string
+	CompressedData []byte
 }
 
 type BuildMetadata struct {
 	PackerVersion string
 	Plugins       map[string]PluginDetails
-	SBOMs         [][]byte
+	SBOMs []SBOM
 }
 
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
@@ -91,7 +96,7 @@ func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
 		Plugins:       b.getPluginsMetadata(),
-		SBOMs:         b.SBOMFilesCompressed,
+		SBOMs: b.SBOMs,
 	}
 	return metadata
 }
@@ -307,7 +312,11 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	for _, p := range b.Provisioners {
 		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
 		if ok {
-			b.SBOMFilesCompressed = append(b.SBOMFilesCompressed, sbomInternalProvisioner.CompressedData)
+			sbom := SBOM{
+				Format:         string(sbomInternalProvisioner.SBOMFormat),
+				CompressedData: sbomInternalProvisioner.CompressedData,
+			}
+			b.SBOMs = append(b.SBOMs, sbom)
 		}
 	}
 

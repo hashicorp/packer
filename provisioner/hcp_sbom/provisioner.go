@@ -9,18 +9,15 @@ package hcp_sbom
 import (
 	"context"
 	"errors"
-
 	"fmt"
 	"log"
 	"os"
 
-	"github.com/CycloneDX/cyclonedx-go"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-
 	"path/filepath"
 )
 
@@ -93,16 +90,9 @@ func (p *Provisioner) Provision(
 	p.config.ctx.Data = generatedData
 
 	// Download the files
-	destPath, downloadErr := p.downloadSBOM(ui, comm, generatedData)
+	downloadErr := p.downloadSBOM(ui, comm, generatedData)
 	if downloadErr != nil {
 		return fmt.Errorf("failed to download SBOM file: %w", downloadErr)
-	}
-
-	// Validate the file
-	log.Printf(fmt.Sprintf("Validating SBOM file: %s\n", destPath))
-	validationErr := p.validateSBOM(ui, destPath)
-	if validationErr != nil {
-		return fmt.Errorf("failed to validate SBOM file: %w", validationErr)
 	}
 
 	return nil
@@ -111,17 +101,17 @@ func (p *Provisioner) Provision(
 // downloadSBOM handles downloading SBOM files for the User and Packer.
 func (p *Provisioner) downloadSBOM(
 	ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{},
-) (string, error) {
+) error {
 	// Interpolate the source path
 	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
 	if err != nil {
-		return "", fmt.Errorf("error interpolating source: %s", err)
+		return fmt.Errorf("error interpolating source: %s", err)
 	}
 
 	// Attempt to download SBOM for User
 	dst, err := p.getUserDestination()
 	if err != nil {
-		return "", fmt.Errorf("failed to determine user SBOM destination: %s", err)
+		return fmt.Errorf("failed to determine user SBOM destination: %s", err)
 	}
 
 	// If User SBOM destination is valid, try to download the SBOM file
@@ -129,7 +119,7 @@ func (p *Provisioner) downloadSBOM(
 		ui.Say(fmt.Sprintf("Attempting to download SBOM file for User: %s", src))
 		err = p.downloadToFile(ui, comm, src, dst)
 		if err != nil {
-			return "", fmt.Errorf("user SBOM download failed: %s", err)
+			return fmt.Errorf("user SBOM download failed: %s", err)
 		}
 		ui.Say(fmt.Sprintf("User SBOM file successfully downloaded to: %s", dst))
 	}
@@ -137,16 +127,16 @@ func (p *Provisioner) downloadSBOM(
 	// Attempt to download SBOM for Packer
 	dst, err = p.getPackerDestination(generatedData)
 	if err != nil {
-		return "", fmt.Errorf("failed to get Packer SBOM destination: %s", err)
+		return fmt.Errorf("failed to get Packer SBOM destination: %s", err)
 	}
 
 	err = p.downloadToFile(ui, comm, src, dst)
 	if err != nil {
-		return "", fmt.Errorf("failed to download Packer SBOM: %s", err)
+		return fmt.Errorf("failed to download Packer SBOM: %s", err)
 	}
 
 	ui.Say(fmt.Sprintf("Packer SBOM file successfully downloaded to: %s", dst))
-	return dst, nil
+	return nil
 }
 
 // getUserDestination determines and returns the destination path for the user SBOM file.
@@ -216,30 +206,6 @@ func (p *Provisioner) downloadToFile(ui packersdk.Ui, comm packersdk.Communicato
 	if err = comm.Download(src, f); err != nil {
 		ui.Error(fmt.Sprintf("download failed for SBOM file: %s", err))
 		return err
-	}
-
-	return nil
-}
-
-// validateSBOM validates CycloneDX SBOM files
-func (p *Provisioner) validateSBOM(ui packersdk.Ui, filePath string) error {
-	sourceFile, err := os.Open(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to open file %s: %w", filePath, err)
-	}
-	defer sourceFile.Close()
-
-	decoder := cyclonedx.NewBOMDecoder(sourceFile, cyclonedx.BOMFileFormatJSON)
-	bom := new(cyclonedx.BOM)
-	if err := decoder.Decode(bom); err != nil {
-		return fmt.Errorf("failed to decode CycloneDX SBOM: %w", err)
-	}
-
-	if bom.BOMFormat != "CycloneDX" {
-		return fmt.Errorf("invalid bomFormat: %s, expected CycloneDX", bom.BOMFormat)
-	}
-	if bom.SpecVersion.String() == "" {
-		return fmt.Errorf("specVersion is required")
 	}
 
 	return nil

@@ -6,8 +6,11 @@ package packer
 import (
 	"context"
 	"fmt"
+	"github.com/CycloneDX/cyclonedx-go"
+	spdxjson "github.com/spdx/tools-golang/json"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/klauspost/compress/zstd"
 
@@ -244,6 +247,7 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
+	SBOMFormat SBOMFormat
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -288,11 +292,17 @@ func (p *SBOMInternalProvisioner) Provision(
 		return err
 	}
 
+	format, err := p.validateSBOM(tmpFile.Name())
+	if err != nil {
+		return err
+	}
+
 	compressedData, err := p.compressFile(tmpFile.Name())
 	if err != nil {
 		return err
 	}
 	p.CompressedData = compressedData
+	p.SBOMFormat = format
 	return nil
 }
 
@@ -311,4 +321,121 @@ func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) 
 
 	log.Printf("SBOM file compressed successfully. Size: %d bytes\n", len(compressedData))
 	return compressedData, nil
+}
+
+type SBOMFormat string
+
+const (
+	CycloneDX SBOMFormat = "CycloneDX"
+	SPDX      SBOMFormat = "SPDX"
+)
+
+// SBOMValidator defines the interface for SBOM validation.
+type SBOMValidator interface {
+	Validate(file *os.File) error
+}
+
+// CycloneDxValidator validates CycloneDx SBOM files.
+type CycloneDxValidator struct{}
+
+// Validate performs validation for CycloneDX files.
+func (v *CycloneDxValidator) Validate(file *os.File) error {
+	decoder := cyclonedx.NewBOMDecoder(file, cyclonedx.BOMFileFormatJSON)
+	bom := new(cyclonedx.BOM)
+	if err := decoder.Decode(bom); err != nil {
+		return fmt.Errorf("failed to decode CycloneDX SBOM: %w", err)
+	}
+
+	if bom.BOMFormat != "CycloneDX" {
+		return fmt.Errorf("invalid bomFormat: %s, expected CycloneDX", bom.BOMFormat)
+	}
+	if bom.SpecVersion.String() == "" {
+		return fmt.Errorf("specVersion is required")
+	}
+
+	return nil
+}
+
+// SPDXValidator validates SPDX SBOM files.
+type SPDXValidator struct{}
+
+// Validate performs validation for SPDX files in JSON format.
+func (v *SPDXValidator) Validate(file *os.File) error {
+	doc, err := spdxjson.Read(file)
+	if err != nil {
+		return fmt.Errorf("error parsing SPDX JSON file: %w", err)
+	}
+
+	if doc.SPDXVersion == "" {
+		return fmt.Errorf("SPDX validation error: missing SPDXVersion")
+	}
+
+	return nil
+}
+
+// detectSBOMFormat reads the file and detects whether it is a CycloneDX or SPDX file.
+func detectSBOMFormat(file *os.File) (SBOMFormat, error) {
+	// Read a few bytes of the file to determine its type
+	buffer := make([]byte, 512)
+	if _, err := file.Read(buffer); err != nil {
+		return "", fmt.Errorf("failed to read SBOM file: %w", err)
+	}
+
+	if strings.Contains(string(buffer), "CycloneDX") {
+		return CycloneDX, nil
+	}
+
+	if strings.Contains(string(buffer), "SPDX-") {
+		return SPDX, nil
+	}
+
+	return "", fmt.Errorf("unsupported or unknown SBOM format")
+}
+
+// NewSBOMValidator is a factory function that returns the appropriate validator based on the file format.
+func NewSBOMValidator(format SBOMFormat) (SBOMValidator, error) {
+	switch format {
+	case CycloneDX:
+		return &CycloneDxValidator{}, nil
+	case SPDX:
+		return &SPDXValidator{}, nil
+	default:
+		return nil, fmt.Errorf("unsupported SBOM format: %s", format)
+	}
+}
+
+// validateSBOM validates the SBOM file against supported formats (CycloneDx, SPDX).
+func (p *SBOMInternalProvisioner) validateSBOM(filePath string) (SBOMFormat, error) {
+	// Open the SBOM file for reading
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open SBOM file %s: %w", filePath, err)
+	}
+	defer file.Close()
+
+	// Detect the format of the SBOM
+	format, err := detectSBOMFormat(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to detect SBOM format: %w", err)
+	}
+
+	// Create the appropriate validator
+	validator, err := NewSBOMValidator(format)
+	if err != nil {
+		return "", err
+	}
+
+	// Seek back to the beginning of the file for validation
+	if _, err := file.Seek(0, 0); err != nil {
+		return "", fmt.Errorf("failed to seek SBOM file: %w", err)
+	}
+
+	// Perform validation using the selected validator
+	err = validator.Validate(file)
+	if err != nil {
+		return "", fmt.Errorf("validation failed for %s format: %w", format, err)
+	}
+
+	log.Printf(fmt.Sprintf("SBOM file %s is valid for format: %s", filePath, format))
+	return format, nil
 }
