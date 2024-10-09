@@ -6,11 +6,12 @@ package packer
 import (
 	"context"
 	"fmt"
-	"github.com/CycloneDX/cyclonedx-go"
-	spdxjson "github.com/spdx/tools-golang/json"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/CycloneDX/cyclonedx-go"
+	spdxjson "github.com/spdx/tools-golang/json"
 
 	"github.com/klauspost/compress/zstd"
 
@@ -247,7 +248,7 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
-	SBOMFormat SBOMFormat
+	SBOMFormat     SBOMFormat
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }

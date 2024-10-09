@@ -62,7 +62,7 @@ type SBOM struct {
 type BuildMetadata struct {
 	PackerVersion string
 	Plugins       map[string]PluginDetails
-	SBOMs []SBOM
+	SBOMs         []SBOM
 }
 
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
@@ -96,7 +96,7 @@ func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
 		Plugins:       b.getPluginsMetadata(),
-		SBOMs: b.SBOMs,
+		SBOMs:         b.SBOMs,
 	}
 	return metadata
 }
