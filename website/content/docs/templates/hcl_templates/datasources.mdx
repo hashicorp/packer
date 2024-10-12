@@ -70,7 +70,7 @@ locals {
 ```hcl
 // in a source
 source "amazon-ebs" "basic-example" {
-  source_ami = locals.source_ami
+  source_ami = local.source_ami
   // ...
 }
 ```
