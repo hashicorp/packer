@@ -7,6 +7,7 @@
 package hcp_sbom
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -79,19 +80,14 @@ func (p *Provisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
-	log.Printf(
-		fmt.Sprintf("Starting to provision with hcp-sbom using source: %s",
-			p.config.Source,
-		),
-	)
+	log.Println("Starting to provision with `hcp_sbom` provisioner")
 
 	if generatedData == nil {
 		generatedData = make(map[string]interface{})
 	}
 	p.config.ctx.Data = generatedData
 
-	// Download the files
-	downloadErr := p.downloadSBOM(ui, comm, generatedData)
+	downloadErr := p.downloadAndValidateSBOM(ui, comm, generatedData)
 	if downloadErr != nil {
 		return fmt.Errorf("failed to download SBOM file: %w", downloadErr)
 	}
@@ -99,44 +95,53 @@ func (p *Provisioner) Provision(
 	return nil
 }
 
-// downloadSBOM handles downloading SBOM files for the User and Packer.
-func (p *Provisioner) downloadSBOM(
+// downloadAndValidateSBOM handles downloading SBOM files for the User and Packer.
+func (p *Provisioner) downloadAndValidateSBOM(
 	ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{},
 ) error {
-	// Interpolate the source path
 	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
 	if err != nil {
 		return fmt.Errorf("error interpolating source: %s", err)
 	}
 
-	// Attempt to download SBOM for User
-	dst, err := p.getUserDestination()
-	if err != nil {
-		return fmt.Errorf("failed to determine user SBOM destination: %s", err)
+	var buf bytes.Buffer
+	if err = comm.Download(src, &buf); err != nil {
+		ui.Error(fmt.Sprintf("download failed for SBOM file: %s", err))
+		return err
 	}
 
-	// If User SBOM destination is valid, try to download the SBOM file
-	if dst != "" {
-		ui.Say(fmt.Sprintf("Attempting to download SBOM file for User: %s", src))
-		err = p.downloadToFile(ui, comm, src, dst)
-		if err != nil {
-			return fmt.Errorf("user SBOM download failed: %s", err)
-		}
-		ui.Say(fmt.Sprintf("User SBOM file successfully downloaded to: %s", dst))
+	pkrBuf := bytes.NewBuffer(buf.Bytes())
+	usrBuf := bytes.NewBuffer(buf.Bytes())
+	if _, err = ValidateSBOM(&buf); err != nil {
+		ui.Error(fmt.Sprintf("validation failed for SBOM file: %s", err))
+		return err
 	}
 
-	// Attempt to download SBOM for Packer
-	dst, err = p.getPackerDestination(generatedData)
+	// SBOM for Packer
+	pkrDst, err := p.getPackerDestination(generatedData)
 	if err != nil {
 		return fmt.Errorf("failed to get Packer SBOM destination: %s", err)
 	}
 
-	err = p.downloadToFile(ui, comm, src, dst)
+	err = p.writeToFile(pkrBuf, pkrDst)
 	if err != nil {
 		return fmt.Errorf("failed to download Packer SBOM: %s", err)
 	}
+	log.Printf("Packer SBOM file successfully downloaded to: %s\n", pkrDst)
 
-	ui.Say(fmt.Sprintf("Packer SBOM file successfully downloaded to: %s", dst))
+	// SBOM for User
+	usrDst, err := p.getUserDestination()
+	if err != nil {
+		return fmt.Errorf("failed to determine user SBOM destination: %s", err)
+	}
+
+	if usrDst != "" {
+		err = p.writeToFile(usrBuf, usrDst)
+		if err != nil {
+			return fmt.Errorf("failed to download User SBOM: %s", err)
+		}
+		log.Printf("User SBOM file successfully downloaded to: %s\n", usrDst)
+	}
 	return nil
 }
 
@@ -193,8 +198,7 @@ func (p *Provisioner) getPackerDestination(generatedData map[string]interface{})
 	return dst, nil
 }
 
-// downloadToFile performs the actual download operation to the specified file destination.
-func (p *Provisioner) downloadToFile(ui packersdk.Ui, comm packersdk.Communicator, src, dst string) error {
+func (p *Provisioner) writeToFile(buf *bytes.Buffer, dst string) error {
 	// Open the destination file
 	f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
@@ -202,10 +206,8 @@ func (p *Provisioner) downloadToFile(ui packersdk.Ui, comm packersdk.Communicato
 	}
 	defer f.Close()
 
-	// Download the file
-	ui.Say(fmt.Sprintf("Downloading SBOM file %s => %s", src, dst))
-	if err = comm.Download(src, f); err != nil {
-		ui.Error(fmt.Sprintf("download failed for SBOM file: %s", err))
+	// Write the buffer content to the destination file
+	if _, err = buf.WriteTo(f); err != nil {
 		return err
 	}
 
