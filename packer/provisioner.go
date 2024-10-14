@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
-	"github.com/CycloneDX/cyclonedx-go"
-	spdxjson "github.com/spdx/tools-golang/json"
+	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp_sbom"
 
 	"github.com/klauspost/compress/zstd"
 
@@ -243,12 +241,14 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
-// SBOMInternalProvisioner is a Provisioner implementation that waits until a key
-// press before the provisioner is actually run.
+// SBOMInternalProvisioner is a wrapper provisioner for the `hcp_sbom` provisioner
+// that sets the path for SBOM file download and, after the successful execution of
+// the `hcp_sbom` provisioner, compresses the SBOM and prepares the data for API
+// integration.
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
-	SBOMFormat     SBOMFormat
+	SBOMFormat     string
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -261,19 +261,16 @@ func (p *SBOMInternalProvisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
-	// Get the current working directory
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current working directory for Packer SBOM: %s", err)
 	}
 
-	// Create a temporary file in the current working directory
 	tmpFile, err := os.CreateTemp(cwd, "packer-sbom-*.json")
 	if err != nil {
 		return fmt.Errorf("failed to create internal temporary file for Packer SBOM: %s", err)
 	}
 
-	// Close the file handle before passing the name to the underlying provisioner
 	tmpFileName := tmpFile.Name()
 	if err = tmpFile.Close(); err != nil {
 		return fmt.Errorf("failed to close temporary file for Packer SBOM %s: %s", tmpFileName, err)
@@ -282,7 +279,7 @@ func (p *SBOMInternalProvisioner) Provision(
 	defer func(name string) {
 		fileRemoveErr := os.Remove(name)
 		if fileRemoveErr != nil {
-			log.Printf("Error removing SBOM temporary file %s: %s", name, fileRemoveErr)
+			log.Printf("Error removing SBOM temporary file %s: %s\n", name, fileRemoveErr)
 		}
 	}(tmpFile.Name())
 
@@ -293,7 +290,7 @@ func (p *SBOMInternalProvisioner) Provision(
 		return err
 	}
 
-	format, err := p.validateSBOM(tmpFile.Name())
+	sbomFormat, err := p.getSBOMFormat(tmpFile.Name())
 	if err != nil {
 		return err
 	}
@@ -303,7 +300,7 @@ func (p *SBOMInternalProvisioner) Provision(
 		return err
 	}
 	p.CompressedData = compressedData
-	p.SBOMFormat = format
+	p.SBOMFormat = sbomFormat
 	return nil
 }
 
@@ -324,119 +321,17 @@ func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) 
 	return compressedData, nil
 }
 
-type SBOMFormat string
-
-const (
-	CycloneDX SBOMFormat = "CycloneDX"
-	SPDX      SBOMFormat = "SPDX"
-)
-
-// SBOMValidator defines the interface for SBOM validation.
-type SBOMValidator interface {
-	Validate(file *os.File) error
-}
-
-// CycloneDxValidator validates CycloneDx SBOM files.
-type CycloneDxValidator struct{}
-
-// Validate performs validation for CycloneDX files.
-func (v *CycloneDxValidator) Validate(file *os.File) error {
-	decoder := cyclonedx.NewBOMDecoder(file, cyclonedx.BOMFileFormatJSON)
-	bom := new(cyclonedx.BOM)
-	if err := decoder.Decode(bom); err != nil {
-		return fmt.Errorf("failed to decode CycloneDX SBOM: %w", err)
-	}
-
-	if bom.BOMFormat != "CycloneDX" {
-		return fmt.Errorf("invalid bomFormat: %s, expected CycloneDX", bom.BOMFormat)
-	}
-	if bom.SpecVersion.String() == "" {
-		return fmt.Errorf("specVersion is required")
-	}
-
-	return nil
-}
-
-// SPDXValidator validates SPDX SBOM files.
-type SPDXValidator struct{}
-
-// Validate performs validation for SPDX files in JSON format.
-func (v *SPDXValidator) Validate(file *os.File) error {
-	doc, err := spdxjson.Read(file)
-	if err != nil {
-		return fmt.Errorf("error parsing SPDX JSON file: %w", err)
-	}
-
-	if doc.SPDXVersion == "" {
-		return fmt.Errorf("SPDX validation error: missing SPDXVersion")
-	}
-
-	return nil
-}
-
-// detectSBOMFormat reads the file and detects whether it is a CycloneDX or SPDX file.
-func detectSBOMFormat(file *os.File) (SBOMFormat, error) {
-	// Read a few bytes of the file to determine its type
-	buffer := make([]byte, 512)
-	if _, err := file.Read(buffer); err != nil {
-		return "", fmt.Errorf("failed to read SBOM file: %w", err)
-	}
-
-	if strings.Contains(string(buffer), "CycloneDX") {
-		return CycloneDX, nil
-	}
-
-	if strings.Contains(string(buffer), "SPDX-") {
-		return SPDX, nil
-	}
-
-	return "", fmt.Errorf("unsupported or unknown SBOM format")
-}
-
-// NewSBOMValidator is a factory function that returns the appropriate validator based on the file format.
-func NewSBOMValidator(format SBOMFormat) (SBOMValidator, error) {
-	switch format {
-	case CycloneDX:
-		return &CycloneDxValidator{}, nil
-	case SPDX:
-		return &SPDXValidator{}, nil
-	default:
-		return nil, fmt.Errorf("unsupported SBOM format: %s", format)
-	}
-}
-
-// validateSBOM validates the SBOM file against supported formats (CycloneDx, SPDX).
-func (p *SBOMInternalProvisioner) validateSBOM(filePath string) (SBOMFormat, error) {
-	// Open the SBOM file for reading
+func (p *SBOMInternalProvisioner) getSBOMFormat(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open SBOM file %s: %w", filePath, err)
 	}
 	defer file.Close()
 
-	// Detect the format of the SBOM
-	format, err := detectSBOMFormat(file)
+	format, err := hcpSbomProvisioner.ValidateSBOM(file)
 	if err != nil {
 		return "", fmt.Errorf("failed to detect SBOM format: %w", err)
 	}
 
-	// Create the appropriate validator
-	validator, err := NewSBOMValidator(format)
-	if err != nil {
-		return "", err
-	}
-
-	// Seek back to the beginning of the file for validation
-	if _, err := file.Seek(0, 0); err != nil {
-		return "", fmt.Errorf("failed to seek SBOM file: %w", err)
-	}
-
-	// Perform validation using the selected validator
-	err = validator.Validate(file)
-	if err != nil {
-		return "", fmt.Errorf("validation failed for %s format: %w", format, err)
-	}
-
-	log.Printf(fmt.Sprintf("SBOM file %s is valid for format: %s", filePath, format))
 	return format, nil
 }

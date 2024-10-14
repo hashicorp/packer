@@ -313,7 +313,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
 		if ok {
 			sbom := SBOM{
-				Format:         string(sbomInternalProvisioner.SBOMFormat),
+				Format:         sbomInternalProvisioner.SBOMFormat,
 				CompressedData: sbomInternalProvisioner.CompressedData,
 			}
 			b.SBOMs = append(b.SBOMs, sbom)
