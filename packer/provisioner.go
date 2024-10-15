@@ -9,7 +9,7 @@ import (
 	"log"
 	"os"
 
-	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp_sbom"
+	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
 
 	"github.com/klauspost/compress/zstd"
 
@@ -241,9 +241,9 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
 }
 
-// SBOMInternalProvisioner is a wrapper provisioner for the `hcp_sbom` provisioner
+// SBOMInternalProvisioner is a wrapper provisioner for the `hcp-sbom` provisioner
 // that sets the path for SBOM file download and, after the successful execution of
-// the `hcp_sbom` provisioner, compresses the SBOM and prepares the data for API
+// the `hcp-sbom` provisioner, compresses the SBOM and prepares the data for API
 // integration.
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner

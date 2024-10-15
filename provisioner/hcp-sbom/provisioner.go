@@ -80,7 +80,7 @@ func (p *Provisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
-	log.Println("Starting to provision with `hcp_sbom` provisioner")
+	log.Println("Starting to provision with `hcp-sbom` provisioner")
 
 	if generatedData == nil {
 		generatedData = make(map[string]interface{})
