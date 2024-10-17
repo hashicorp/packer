@@ -49,7 +49,9 @@ func (c *InspectCommand) RunContext(ctx context.Context, cla *InspectArgs) int {
 	}
 
 	// here we ignore init diags to allow unknown variables to be used
-	_ = packerStarter.Initialize(packer.InitializeOptions{})
+	_ = packerStarter.Initialize(packer.InitializeOptions{
+		UseSequential: cla.UseSequential,
+	})
 
 	return packerStarter.InspectConfig(packer.InspectConfigOptions{
 		Ui: c.Ui,
@@ -66,7 +68,8 @@ Usage: packer inspect TEMPLATE
 
 Options:
 
-  -machine-readable  Machine-readable output
+  -machine-readable             Machine-readable output
+  -use-sequential-evaluation    Fallback to using a sequential approach for local/datasource evaluation.
 `
 
 	return strings.TrimSpace(helpText)
