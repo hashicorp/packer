@@ -873,7 +873,7 @@ func (c *Core) renderVarsRecursively() (*interpolate.Context, error) {
 		Key   string
 		Value string
 	}
-	sortedMap := make([]keyValue, len(repeatMap))
+	sortedMap := make([]keyValue, 0, len(repeatMap))
 	for _, k := range allKeys {
 		sortedMap = append(sortedMap, keyValue{k, repeatMap[k]})
 	}
