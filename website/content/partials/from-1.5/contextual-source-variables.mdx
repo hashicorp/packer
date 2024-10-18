@@ -1,6 +1,6 @@
 # Source Variables
 
-It is possible to access the `name` and `type` of your `source` from
+It is possible to access the `name` of your `source` from
 provisioners and post-processors:
 
 ```hcl
@@ -23,14 +23,14 @@ build {
   sources = ["null.first-example"]
 
   provisioner "shell-local" {
-    inline = ["echo ${source.name} and ${source.type}"]
+    inline = ["echo ${source.name}"]
   }
 }
 
 # This will echo something like:
 #
-# roles.null.consul: consul and null
-# roles.null.nomad: nomad and null
-# roles.null.vault: vault and null
-# roles.null.first-example: first-example and null
+# roles.null.consul: consul
+# roles.null.nomad: nomad
+# roles.null.vault: vault
+# roles.null.first-example: first-example
 ```
