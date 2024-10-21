@@ -279,7 +279,7 @@ func (p *SBOMInternalProvisioner) Provision(
 	defer func(name string) {
 		fileRemoveErr := os.Remove(name)
 		if fileRemoveErr != nil {
-			log.Printf("Error removing SBOM temporary file %s: %s\n", name, fileRemoveErr)
+			log.Printf("Error removing SBOM temporary file %s: %s", name, fileRemoveErr)
 		}
 	}(tmpFile.Name())
 
