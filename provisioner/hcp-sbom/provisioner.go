@@ -116,7 +116,10 @@ func (p *Provisioner) downloadAndValidateSBOM(
 		ui.Errorf("validation failed for SBOM file: %s", err)
 		return err
 	}
-	reader.Seek(0, io.SeekStart)
+	_, err = reader.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 
 	// SBOM for Packer
 	pkrDst, err := p.getPackerDestination(generatedData)
@@ -128,7 +131,10 @@ func (p *Provisioner) downloadAndValidateSBOM(
 	if err != nil {
 		return fmt.Errorf("failed to download Packer SBOM: %s", err)
 	}
-	reader.Seek(0, io.SeekStart)
+	_, err = reader.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
 	log.Printf("Packer SBOM file successfully downloaded to: %s\n", pkrDst)
 
 	// SBOM for User
