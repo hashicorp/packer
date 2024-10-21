@@ -22,11 +22,16 @@ build {
       "apt-get update && apt-get -y install curl",
       "bash -c \"$(curl -sSL \"https://install.mondoo.com/sh\")\"",
       "cnquery sbom --output cyclonedx-json >/tmp/sbom_cyclonedx.json",
+      "cnquery sbom --output spdx-json > /tmp/sbom_spdx.json",
     ]
   }
 
-  provisioner "hcp_sbom" {
+  provisioner "hcp-sbom" {
     source      = "/tmp/sbom_cyclonedx.json"
     destination = "sbom_cyclonedx.json"
+  }
+
+  provisioner "hcp-sbom" {
+    source      = "/tmp/sbom_spdx.json"
   }
 }
