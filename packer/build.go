@@ -50,11 +50,19 @@ type CoreBuild struct {
 	onError       string
 	l             sync.Mutex
 	prepareCalled bool
+
+	SBOMs []SBOM
+}
+
+type SBOM struct {
+	Format         string
+	CompressedData []byte
 }
 
 type BuildMetadata struct {
 	PackerVersion string
 	Plugins       map[string]PluginDetails
+	SBOMs         []SBOM
 }
 
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
@@ -88,6 +96,7 @@ func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
 		Plugins:       b.getPluginsMetadata(),
+		SBOMs:         b.SBOMs,
 	}
 	return metadata
 }
@@ -298,6 +307,17 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	ts.End(err)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, p := range b.Provisioners {
+		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
+		if ok {
+			sbom := SBOM{
+				Format:         sbomInternalProvisioner.SBOMFormat,
+				CompressedData: sbomInternalProvisioner.CompressedData,
+			}
+			b.SBOMs = append(b.SBOMs, sbom)
+		}
 	}
 
 	// If there was no result, don't worry about running post-processors
