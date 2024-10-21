@@ -297,7 +297,7 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 		}
 	}
 
-	if rawP.Type == "hcp_sbom" {
+	if rawP.Type == "hcp-sbom" {
 		provisioner = &SBOMInternalProvisioner{
 			Provisioner: provisioner,
 		}
