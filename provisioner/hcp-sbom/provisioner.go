@@ -11,6 +11,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -101,21 +102,21 @@ func (p *Provisioner) downloadAndValidateSBOM(
 ) error {
 	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
 	if err != nil {
-		return fmt.Errorf("error interpolating source: %s", err)
+		return fmt.Errorf("error interpolating SBOM source: %s", err)
 	}
 
 	var buf bytes.Buffer
 	if err = comm.Download(src, &buf); err != nil {
-		ui.Error(fmt.Sprintf("download failed for SBOM file: %s", err))
+		ui.Errorf("download failed for SBOM file: %s", err)
 		return err
 	}
 
-	pkrBuf := bytes.NewBuffer(buf.Bytes())
-	usrBuf := bytes.NewBuffer(buf.Bytes())
-	if _, err = ValidateSBOM(&buf); err != nil {
-		ui.Error(fmt.Sprintf("validation failed for SBOM file: %s", err))
+	reader := bytes.NewReader(buf.Bytes())
+	if _, err = ValidateSBOM(reader); err != nil {
+		ui.Errorf("validation failed for SBOM file: %s", err)
 		return err
 	}
+	reader.Seek(0, io.SeekStart)
 
 	// SBOM for Packer
 	pkrDst, err := p.getPackerDestination(generatedData)
@@ -123,10 +124,11 @@ func (p *Provisioner) downloadAndValidateSBOM(
 		return fmt.Errorf("failed to get Packer SBOM destination: %s", err)
 	}
 
-	err = p.writeToFile(pkrBuf, pkrDst)
+	err = p.writeToFile(reader, pkrDst)
 	if err != nil {
 		return fmt.Errorf("failed to download Packer SBOM: %s", err)
 	}
+	reader.Seek(0, io.SeekStart)
 	log.Printf("Packer SBOM file successfully downloaded to: %s\n", pkrDst)
 
 	// SBOM for User
@@ -136,7 +138,7 @@ func (p *Provisioner) downloadAndValidateSBOM(
 	}
 
 	if usrDst != "" {
-		err = p.writeToFile(usrBuf, usrDst)
+		err = p.writeToFile(reader, usrDst)
 		if err != nil {
 			return fmt.Errorf("failed to download User SBOM: %s", err)
 		}
@@ -198,7 +200,7 @@ func (p *Provisioner) getPackerDestination(generatedData map[string]interface{})
 	return dst, nil
 }
 
-func (p *Provisioner) writeToFile(buf *bytes.Buffer, dst string) error {
+func (p *Provisioner) writeToFile(buf *bytes.Reader, dst string) error {
 	// Open the destination file
 	f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
