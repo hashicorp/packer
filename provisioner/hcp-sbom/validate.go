@@ -3,8 +3,10 @@ package hcp_sbom
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/CycloneDX/cyclonedx-go"
 	spdxjson "github.com/spdx/tools-golang/json"
+
 	"io"
 )
 
