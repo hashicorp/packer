@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
@@ -223,7 +225,7 @@ func (bucket *Bucket) UpdateBuildStatus(
 	return nil
 }
 
-func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, compressedSbom []byte) error {
+func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom packer.SBOM) error {
 	buildToUpdate, err := bucket.Version.Build(buildName)
 	if err != nil {
 		return err
@@ -242,7 +244,7 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, compress
 			Fingerprint: bucket.Version.Fingerprint,
 			BuildID:     buildToUpdate.ID,
 			Body: &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
-				CompressedSbom: compressedSbom,
+				CompressedSbom: sbom.CompressedData,
 			},
 		},
 		nil,
