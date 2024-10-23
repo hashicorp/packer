@@ -24,6 +24,9 @@ var testDatasourceEmptyUrl string
 //go:embed test-fixtures/404_url.pkr.hcl
 var testDatasource404Url string
 
+//go:embed test-fixtures/invalid_method.pkr.hcl
+var testDatasourceInvalidMethod string
+
 func TestHttpDataSource(t *testing.T) {
 	tests := []struct {
 		Name    string
@@ -47,6 +50,14 @@ func TestHttpDataSource(t *testing.T) {
 			Error: true,
 			Outputs: map[string]string{
 				"error": "the `url` must be specified",
+			},
+		},
+		{
+			Name:  "method_is_invalid",
+			Path:  testDatasourceInvalidMethod,
+			Error: true,
+			Outputs: map[string]string{
+				"error": "the `method` must be one of [HEAD GET POST PUT DELETE OPTIONS PATCH]",
 			},
 		},
 		{

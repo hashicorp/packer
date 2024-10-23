@@ -19,7 +19,9 @@ type FlatConfig struct {
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
 	Url                 *string           `mapstructure:"url" required:"true" cty:"url" hcl:"url"`
+	Method              *string           `mapstructure:"method" required:"false" cty:"method" hcl:"method"`
 	RequestHeaders      map[string]string `mapstructure:"request_headers" required:"false" cty:"request_headers" hcl:"request_headers"`
+	RequestBody         *string           `mapstructure:"request_body" required:"false" cty:"request_body" hcl:"request_body"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -43,7 +45,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"packer_user_variables":      &hcldec.AttrSpec{Name: "packer_user_variables", Type: cty.Map(cty.String), Required: false},
 		"packer_sensitive_variables": &hcldec.AttrSpec{Name: "packer_sensitive_variables", Type: cty.List(cty.String), Required: false},
 		"url":                        &hcldec.AttrSpec{Name: "url", Type: cty.String, Required: false},
+		"method":                     &hcldec.AttrSpec{Name: "method", Type: cty.String, Required: false},
 		"request_headers":            &hcldec.AttrSpec{Name: "request_headers", Type: cty.Map(cty.String), Required: false},
+		"request_body":               &hcldec.AttrSpec{Name: "request_body", Type: cty.String, Required: false},
 	}
 	return s
 }
