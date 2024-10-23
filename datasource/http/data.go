@@ -24,10 +24,14 @@ import (
 
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
-	// The URL to request data from. This URL must respond with a `200 OK` response and a `text/*` or `application/json` Content-Type.
+	// The URL to request data from. This URL must respond with a `2xx` range response code and a `text/*` or `application/json` Content-Type.
 	Url string `mapstructure:"url" required:"true"`
+	// HTTP method used for the request. Supported methods are `HEAD`, `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`, `PATCH`. Default is `GET`.
+	Method string `mapstructure:"method" required:"false"`
 	// A map of strings representing additional HTTP headers to include in the request.
 	RequestHeaders map[string]string `mapstructure:"request_headers" required:"false"`
+	// HTTP request payload send with the request. Default is empty.
+	RequestBody string `mapstructure:"request_body" required:"false"`
 }
 
 type Datasource struct {
@@ -60,6 +64,26 @@ func (d *Datasource) Configure(raws ...interface{}) error {
 		errs = packersdk.MultiErrorAppend(
 			errs,
 			fmt.Errorf("the `url` must be specified"))
+	}
+
+	// Default to GET if no method is specified
+	if d.config.Method == "" {
+		d.config.Method = "GET"
+	}
+
+	// Check if the input is in the list of allowed methods
+	validMethod := false
+	allowedMethods := []string{"HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
+	for _, method := range allowedMethods {
+		if method == d.config.Method {
+			validMethod = true
+			break
+		}
+	}
+	if !validMethod {
+		errs = packersdk.MultiErrorAppend(
+			errs,
+			fmt.Errorf("the `method` must be one of %v", allowedMethods))
 	}
 
 	if errs != nil && len(errs.Errors) > 0 {
@@ -102,10 +126,16 @@ func isContentTypeText(contentType string) bool {
 // https://github.com/hashicorp/terraform-provider-http/blob/main/internal/provider/data_source.go
 func (d *Datasource) Execute() (cty.Value, error) {
 	ctx := context.TODO()
-	url, headers := d.config.Url, d.config.RequestHeaders
+	url, method, headers := d.config.Url, d.config.Method, d.config.RequestHeaders
 	client := &http.Client{}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	// Create request body if it is provided
+	var requestBody io.Reader
+	if d.config.RequestBody != "" {
+		requestBody = strings.NewReader(d.config.RequestBody)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, url, requestBody)
 	// TODO: How to make a test case for this?
 	if err != nil {
 		fmt.Println("Error creating http request")
