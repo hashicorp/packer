@@ -16,6 +16,6 @@ build {
   sources = ["source.docker.ubuntu"]
 
   provisioner "hcp-sbom" {
-      source = "/tmp"
+    source = "/tmp"
   }
 }

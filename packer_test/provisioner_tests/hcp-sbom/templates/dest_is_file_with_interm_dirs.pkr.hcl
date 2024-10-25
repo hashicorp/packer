@@ -31,6 +31,6 @@ build {
 
   provisioner "hcp-sbom" {
     source      = "/tmp/sbom_cyclonedx.json"
-    destination = "./sbom/sbom_cyclonedx.json"
+    destination = "./sbom/sbom_cyclonedx"
   }
 }

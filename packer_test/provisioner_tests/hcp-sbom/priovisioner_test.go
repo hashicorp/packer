@@ -55,7 +55,7 @@ func (ts *PackerHCPSbomTestSuite) TestDestFile_NoIntermediateDirs() {
 
 	ts.PackerCommand().UsePluginDir(dir).
 		SetArgs("build", "./templates/dest_is_file_no_interm_dirs.pkr.hcl").
-		Assert(check.MustSucceed(), check.FileExists("sbom/sbom_cyclonedx", false))
+		Assert(check.MustSucceed(), check.FileExists("sbom/sbom_cyclonedx.json", false))
 
 	os.RemoveAll("sbom")
 }
@@ -75,11 +75,65 @@ func (ts *PackerHCPSbomTestSuite) TestDestFile_WithIntermediateDirs() {
 
 	ts.PackerCommand().UsePluginDir(dir).
 		SetArgs("build", "./templates/dest_is_file_no_interm_dirs.pkr.hcl").
-		Assert(check.MustSucceed(), check.FileExists("sbom/sbom_cyclonedx", false))
+		Assert(check.MustSucceed(), check.FileExists("sbom/sbom_cyclonedx.json", false))
 
 	os.RemoveAll("sbom")
 }
 
 // * output directory (without trailing slash) - directory exists
+func (ts *PackerHCPSbomTestSuite) TestDestDir_NoTrailingSlash() {
+	ts.SkipNoAcc()
+
+	dir := ts.MakePluginDir()
+	defer dir.Cleanup()
+
+	os.MkdirAll("sbom", 0755)
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("plugins", "install", "github.com/hashicorp/docker").
+		Assert(check.MustSucceed())
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("build", "./templates/dest_is_dir.pkr.hcl").
+		Assert(check.MustSucceed(), check.FileInDir("sbom", "packer-user-sbom-.*.json"))
+
+	os.RemoveAll("sbom")
+}
+
 // * output directory (with trailing slash) - directory exists
+func (ts *PackerHCPSbomTestSuite) TestDestDir_WithTrailingSlash() {
+	ts.SkipNoAcc()
+
+	dir := ts.MakePluginDir()
+	defer dir.Cleanup()
+
+	os.MkdirAll("sbom", 0755)
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("plugins", "install", "github.com/hashicorp/docker").
+		Assert(check.MustSucceed())
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("build", "./templates/dest_is_dir_with_trailing_slash.pkr.hcl").
+		Assert(check.MustSucceed(), check.FileInDir("sbom", "packer-user-sbom-.*.json"))
+
+	os.RemoveAll("sbom")
+}
+
 // * output directory (with trailing slash) - directory doesn't exist
+func (ts *PackerHCPSbomTestSuite) TestDestDir_WithTrailingSlash_NoDir() {
+	ts.SkipNoAcc()
+
+	dir := ts.MakePluginDir()
+	defer dir.Cleanup()
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("plugins", "install", "github.com/hashicorp/docker").
+		Assert(check.MustSucceed())
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("build", "./templates/dest_is_dir_with_trailing_slash.pkr.hcl").
+		Assert(check.MustFail())
+
+	os.RemoveAll("sbom")
+}
