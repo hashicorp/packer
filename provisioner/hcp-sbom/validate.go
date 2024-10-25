@@ -3,6 +3,7 @@ package hcp_sbom
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/CycloneDX/cyclonedx-go"
 	spdxjson "github.com/spdx/tools-golang/json"
@@ -10,22 +11,13 @@ import (
 	"io"
 )
 
-// ErrorType represents the type of validation error.
-type ErrorType string
-
-const (
-	ParsingErr    ErrorType = "parsing"
-	ValidationErr ErrorType = "validation"
-)
-
 // ValidationError represents an error encountered while validating an SBOM.
 type ValidationError struct {
-	Type ErrorType
-	Err  error
+	Err error
 }
 
 func (e *ValidationError) Error() string {
-	return fmt.Sprintf(" %s error: %v", e.Type, e.Err)
+	return e.Err.Error()
 }
 
 func (e *ValidationError) Unwrap() error {
@@ -37,22 +29,17 @@ func ValidateCycloneDX(content io.Reader) error {
 	decoder := cyclonedx.NewBOMDecoder(content, cyclonedx.BOMFileFormatJSON)
 	bom := new(cyclonedx.BOM)
 	if err := decoder.Decode(bom); err != nil {
-		return &ValidationError{
-			Type: ParsingErr,
-			Err:  fmt.Errorf("error parsing CycloneDX SBOM: %w", err),
-		}
+		return fmt.Errorf("error parsing CycloneDX SBOM: %w", err)
 	}
 
-	if bom.BOMFormat != "CycloneDX" {
+	if !strings.EqualFold(bom.BOMFormat, "CycloneDX") {
 		return &ValidationError{
-			Type: ValidationErr,
-			Err:  fmt.Errorf("invalid bomFormat: %s, expected CycloneDX", bom.BOMFormat),
+			Err: fmt.Errorf("invalid bomFormat: %q, expected CycloneDX", bom.BOMFormat),
 		}
 	}
 	if bom.SpecVersion.String() == "" {
 		return &ValidationError{
-			Type: ValidationErr,
-			Err:  fmt.Errorf("specVersion is required"),
+			Err: fmt.Errorf("specVersion is required"),
 		}
 	}
 
@@ -63,16 +50,12 @@ func ValidateCycloneDX(content io.Reader) error {
 func ValidateSPDX(content io.Reader) error {
 	doc, err := spdxjson.Read(content)
 	if err != nil {
-		return &ValidationError{
-			Type: ParsingErr,
-			Err:  fmt.Errorf("error parsing SPDX JSON file: %w", err),
-		}
+		return fmt.Errorf("error parsing SPDX JSON file: %w", err)
 	}
 
 	if doc.SPDXVersion == "" {
 		return &ValidationError{
-			Type: ValidationErr,
-			Err:  fmt.Errorf("missing SPDXVersion"),
+			Err: fmt.Errorf("missing SPDXVersion"),
 		}
 	}
 
@@ -92,8 +75,10 @@ func ValidateSBOM(content io.Reader) (string, error) {
 	spdxErr := ValidateSPDX(reader)
 	if spdxErr == nil {
 		return "spdx", nil
-	} else if vErr, ok := spdxErr.(*ValidationError); ok && vErr.Type == ValidationErr {
-		return "", spdxErr
+	}
+
+	if vErr, ok := spdxErr.(*ValidationError); ok {
+		return "", vErr
 	}
 
 	// Reset the reader's position
@@ -104,8 +89,10 @@ func ValidateSBOM(content io.Reader) (string, error) {
 	cycloneDxErr := ValidateCycloneDX(reader)
 	if cycloneDxErr == nil {
 		return "cyclonedx", nil
-	} else if vErr, ok := cycloneDxErr.(*ValidationError); ok && vErr.Type == ValidationErr {
-		return "", spdxErr
+	}
+
+	if vErr, ok := cycloneDxErr.(*ValidationError); ok {
+		return "", vErr
 	}
 
 	return "", fmt.Errorf("error validating SBOM file: invalid SBOM format")
