@@ -168,19 +168,35 @@ func (p *Provisioner) getUserDestination() (string, error) {
 
 	// Check if the destination exists and determine its type
 	info, err := os.Stat(dst)
-	if err != nil {
-		if os.IsNotExist(err) {
-			// If destination doesn't exist, assume it's a file path and ensure parent directories are created
-			dir := filepath.Dir(dst)
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				return "", fmt.Errorf("failed to create destination directory for user SBOM: %s\n", err)
+	if err == nil {
+		if info.IsDir() {
+			// If the destination is a directory, create a temporary file inside it
+			tmpFile, err := os.CreateTemp(dst, "packer-user-sbom-*.json")
+			if err != nil {
+				return "", fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
 			}
-		} else {
-			return "", fmt.Errorf("failed to stat destination for user SBOM: %s\n", err)
+			dst = tmpFile.Name()
+			tmpFile.Close()
 		}
-	} else if info.IsDir() {
-		// If the destination is a directory, create a temporary file inside it
-		tmpFile, err := os.CreateTemp(dst, "packer-user-sbom-*.json")
+		return dst, nil
+	}
+
+	outDir := filepath.Dir(dst)
+	// In case the destination does not exist, we'll get the dirpath,
+	// and create it if it doesn't already exist
+	err = os.MkdirAll(outDir, 0755)
+	if err != nil {
+		return "", fmt.Errorf("failed to create destination directory for user SBOM: %s\n", err)
+	}
+
+	// Check if the destination is a directory after the previous step.
+	//
+	// This happens if the path specified ends with a `/`, in which case the
+	// destination is a directory, and we must create a temporary file in
+	// this destination directory.
+	destStat, statErr := os.Stat(dst)
+	if statErr == nil && destStat.IsDir() {
+		tmpFile, err := os.CreateTemp(outDir, "packer-user-sbom-*.json")
 		if err != nil {
 			return "", fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
 		}

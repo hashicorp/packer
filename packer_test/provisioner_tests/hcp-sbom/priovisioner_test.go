@@ -133,7 +133,7 @@ func (ts *PackerHCPSbomTestSuite) TestDestDir_WithTrailingSlash_NoDir() {
 
 	ts.PackerCommand().UsePluginDir(dir).
 		SetArgs("build", "./templates/dest_is_dir_with_trailing_slash.pkr.hcl").
-		Assert(check.MustFail())
+		Assert(check.MustSucceed(), check.FileGlob("./sbom/packer-user-sbom-*.json"))
 
 	os.RemoveAll("sbom")
 }
