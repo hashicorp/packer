@@ -3,7 +3,7 @@ package check
 import (
 	"fmt"
 	"os"
-	"regexp"
+	"path/filepath"
 )
 
 type fileExists struct {
@@ -35,31 +35,24 @@ func FileExists(filePath string, isDir bool) Checker {
 	}
 }
 
-type fileInDir struct {
-	filename string
-	dirPath  string
+type fileGlob struct {
+	filepath string
 }
 
-func (fe fileInDir) Check(_, _ string, _ error) error {
-	files, err := os.ReadDir(fe.dirPath)
+func (fe fileGlob) Check(_, _ string, _ error) error {
+	matches, err := filepath.Glob(fe.filepath)
 	if err != nil {
-		return fmt.Errorf("failed to read dir %q: %s", fe.dirPath, err)
+		return fmt.Errorf("error finding file %q: %q", fe.filepath, err)
 	}
 
-	pattern := regexp.MustCompile(fe.filename)
-
-	for _, file := range files {
-		if !file.IsDir() && pattern.MatchString(file.Name()) {
-			return nil
-		}
+	if len(matches) == 0 {
+		return fmt.Errorf("file %q not found", fe.filepath)
 	}
-
-	return fmt.Errorf("file %q not found in dir %q", fe.filename, fe.dirPath)
+	return nil
 }
 
-func FileInDir(dirPath string, filename string) Checker {
-	return fileInDir{
-		filename: filename,
-		dirPath:  dirPath,
+func FileGlob(filename string) Checker {
+	return fileGlob{
+		filepath: filename,
 	}
 }
