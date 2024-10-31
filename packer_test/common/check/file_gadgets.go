@@ -42,12 +42,13 @@ type fileGlob struct {
 func (fe fileGlob) Check(_, _ string, _ error) error {
 	matches, err := filepath.Glob(fe.filepath)
 	if err != nil {
-		return fmt.Errorf("error finding file %q: %q", fe.filepath, err)
+		return fmt.Errorf("error evaluating file glob pattern %q: %v", fe.filepath, err)
 	}
 
 	if len(matches) == 0 {
-		return fmt.Errorf("file %q not found", fe.filepath)
+		return fmt.Errorf("no matches found for glob expression %q", fe.filepath)
 	}
+
 	return nil
 }
 
