@@ -46,7 +46,7 @@ func (fe fileGlob) Check(_, _ string, _ error) error {
 	}
 
 	if len(matches) == 0 {
-		return fmt.Errorf("no matches found for glob expression %q", fe.filepath)
+		return fmt.Errorf("no matches found for file glob pattern %q", fe.filepath)
 	}
 
 	return nil
