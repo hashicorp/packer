@@ -1,0 +1,130 @@
+---
+description: |
+  The `hcp-sbom` Packer provisioner downloads an SBOM file from the guest VM and
+  sends it to HCP Packer when the build is done.
+page_title: HCP SBOM - Provisioners
+---
+
+<BadgesHeader>
+  <PluginBadge type="official"/>
+</BadgesHeader>
+
+# HCP SBOM Provisioner
+
+Type: `hcp-sbom`
+
+The `hcp-sbom` Packer provisioner downloads an SBOM file from the guest machine
+and sends it to HCP Packer when the build is complete (only if the template is
+HCP-enabled). The SBOM file is automatically removed at the end of the process.
+If you want to retain a copy of the SBOM file, you can specify the
+`destination` option in the provisioner.
+
+Currently, we support `CycloneDX` and `SPDX` SBOM formats in `JSON`.
+
+## Basic Example
+
+
+In HCL2:
+
+```hcl
+provisioner "hcp-sbom" {
+  source = "/tmp/sbom_cyclonedx.json"
+  destination = "./sbom/sbom_cyclonedx.json"
+}
+```
+
+In JSON:
+
+```json
+{
+  "type": "hcp-sbom",
+  "source": "/tmp/sbom_cyclonedx.json",
+  "destination": "./sbom/sbom_cyclonedx.json"
+}
+```
+
+
+
+## Configuration Reference
+
+Required Parameters:
+
+@include 'provisioner/hcp-sbom/Config-required.mdx'
+
+Optional Parameters:
+
+@include '/provisioner/hcp-sbom/Config-not-required.mdx'
+
+## Example Usage
+
+
+In HCL2:
+
+```hcl
+packer {
+  required_plugins {
+    docker = {
+      version = ">= 1.0.0"
+      source  = "github.com/hashicorp/docker"
+    }
+  }
+}
+
+source "docker" "ubuntu" {
+  image  = "ubuntu:20.04"
+  commit = true
+}
+
+build {
+  sources = ["source.docker.ubuntu"]
+
+  hcp_packer_registry {
+    bucket_name = "test-bucket"
+  }
+
+
+  provisioner "shell" {
+    inline = [
+      "apt-get update -y",
+      "apt-get install -y curl gpg",
+      "bash -c \"$(curl -sSL https://install.mondoo.com/sh)\"",
+      "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json",
+    ]
+  }
+
+  provisioner "hcp-sbom" {
+    source      = "/tmp/sbom_cyclonedx.json"
+    destination = "./sbom"
+  }
+}
+```
+
+In JSON:
+
+```json
+{
+  "builders": [
+    {
+      "type": "docker",
+      "image": "ubuntu:20.04",
+      "commit": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "apt-get update -y",
+        "apt-get install -y curl",
+        "bash -c \"$(curl -sSL https://install.mondoo.com/sh)\"",
+        "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json"
+      ]
+    },
+    {
+      "type": "hcp-sbom",
+      "source": "/tmp/sbom_cyclonedx.json",
+      "destination": "./sbom"
+    }
+  ]
+}
+```
