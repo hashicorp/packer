@@ -1,0 +1,14 @@
+<!-- Code generated from the comments of the Config struct in provisioner/hcp-sbom/provisioner.go; DO NOT EDIT MANUALLY -->
+
+- `destination` (string) - The path on the local machine to store a copy of the SBOM file.
+  You can specify an absolute or a path relative to the working directory
+  when you execute the Packer build. If the file already exists on the
+  local machine, Packer overwrites the file. If the destination is a
+  directory, the directory must already exist.
+
+- `sbom_name` (string) - The name of the SBOM file stored in HCP Packer.
+  If omitted, HCP Packer uses the build fingerprint as the file name.
+  This value must be between three and 36 characters from the following set: `[A-Za-z0-9_-]`.
+  You must specify a unique name for each build in an artifact version.
+
+<!-- End of code generated from the comments of the Config struct in provisioner/hcp-sbom/provisioner.go; -->

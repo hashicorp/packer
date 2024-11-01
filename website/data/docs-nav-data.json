@@ -777,6 +777,10 @@
         "path": "provisioners/file"
       },
       {
+        "title": "HCP SBOM",
+        "path": "provisioners/hcp-sbom"
+      },
+      {
         "title": "PowerShell",
         "path": "provisioners/powershell"
       },
