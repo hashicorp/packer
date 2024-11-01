@@ -30,29 +30,21 @@ import (
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	// Source is a required field that specifies the path to the SBOM file that
-	// needs to be downloaded.
-	// It can be a file path or a URL.
+	// The file path or URL to the SBOM file in the Packer artifact.
+	// This file must either be in the SPDX or CycloneDX format.
 	Source string `mapstructure:"source" required:"true"`
-	// Destination is an optional field that specifies the path where the SBOM
-	// file will be downloaded to for the user.
-	// The 'Destination' must be a writable location. If the destination is a file,
-	// the SBOM will be saved or overwritten at that path. If the destination is
-	// a directory, a file will be created within the directory to store the SBOM.
-	// Any parent directories for the destination must already exist and be
-	// writable by the provisioning user (generally not root), otherwise,
-	// a "Permission Denied" error will occur. If the source path is a file,
-	// it is recommended that the destination path be a file as well.
+
+	// The path on the local machine to store a copy of the SBOM file.
+	// You can specify an absolute or a path relative to the working directory
+	// when you execute the Packer build. If the file already exists on the
+	// local machine, Packer overwrites the file. If the destination is a
+	// directory, the directory must already exist.
 	Destination string `mapstructure:"destination"`
-	// The name to give the SBOM when uploaded on HCP Packer
-	//
-	// By default this will be generated, but if you prefer to have a name
-	// of your choosing, you can enter it here.
-	// The name must match the following regexp: `[a-zA-Z0-9_-]{3,36}`
-	//
-	// Note: it must be unique for a single build, otherwise the build will
-	// fail when uploading the SBOMs to HCP Packer, and so will the Packer
-	// build command.
+
+	// The name of the SBOM file stored in HCP Packer.
+	// If omitted, HCP Packer uses the build fingerprint as the file name.
+	// This value must be between three and 36 characters from the following set: `[A-Za-z0-9_-]`.
+	// You must specify a unique name for each build in an artifact version.
 	SbomName string `mapstructure:"sbom_name"`
 	ctx      interpolate.Context
 }
