@@ -57,7 +57,7 @@ func TestHttpDataSource(t *testing.T) {
 			Path:  testDatasourceInvalidMethod,
 			Error: true,
 			Outputs: map[string]string{
-				"error": "the `method` must be one of [HEAD GET POST PUT DELETE OPTIONS PATCH]",
+				"error": "the `method` must be one of \\[HEAD GET POST PUT DELETE OPTIONS PATCH\\]",
 			},
 		},
 		{
