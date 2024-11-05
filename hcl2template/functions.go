@@ -60,6 +60,7 @@ func Functions(basedir string) map[string]function.Function {
 		"distinct":           stdlib.DistinctFunc,
 		"element":            stdlib.ElementFunc,
 		"file":               filesystem.MakeFileFunc(basedir, false),
+		"filebase64":         pkrfunction.Filebase64,
 		"fileexists":         filesystem.MakeFileExistsFunc(basedir),
 		"fileset":            filesystem.MakeFileSetFunc(basedir),
 		"flatten":            stdlib.FlattenFunc,
