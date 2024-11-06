@@ -31,6 +31,7 @@ type Config struct {
 	// needs to be downloaded.
 	// It can be a file path or a URL.
 	Source string `mapstructure:"source" required:"true"`
+
 	// Destination is an optional field that specifies the path where the SBOM
 	// file will be downloaded to for the user.
 	// The 'Destination' must be a writable location. If the destination is a file,
@@ -41,7 +42,9 @@ type Config struct {
 	// a "Permission Denied" error will occur. If the source path is a file,
 	// it is recommended that the destination path be a file as well.
 	Destination string `mapstructure:"destination"`
-	ctx         interpolate.Context
+
+	Name string
+	ctx  interpolate.Context
 }
 
 type Provisioner struct {

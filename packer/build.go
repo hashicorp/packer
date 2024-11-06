@@ -57,6 +57,7 @@ type CoreBuild struct {
 type SBOM struct {
 	Format         string
 	CompressedData []byte
+	Name           string
 }
 
 type BuildMetadata struct {
@@ -315,6 +316,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 			sbom := SBOM{
 				Format:         sbomInternalProvisioner.SBOMFormat,
 				CompressedData: sbomInternalProvisioner.CompressedData,
+				Name:           sbomInternalProvisioner.Name,
 			}
 			b.SBOMs = append(b.SBOMs, sbom)
 		}

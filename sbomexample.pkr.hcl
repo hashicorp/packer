@@ -29,6 +29,7 @@ build {
   provisioner "hcp-sbom" {
     source      = "/tmp/sbom_cyclonedx.json"
     destination = "sbom_cyclonedx.json"
+    name = "aaa"
   }
 
   provisioner "hcp-sbom" {
