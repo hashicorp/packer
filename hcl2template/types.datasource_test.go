@@ -48,8 +48,8 @@ func TestParse_datasource(t *testing.T) {
 						Type: "amazon-ami",
 						Name: "test",
 					}: {
-						Type: "amazon-ami",
-						Name: "test",
+						Type:   "amazon-ami",
+						DSName: "test",
 					},
 				},
 			},
@@ -98,36 +98,46 @@ func TestParse_datasource(t *testing.T) {
 						Type: "null",
 						Name: "foo",
 					}: {
-						Type: "null",
-						Name: "foo",
+						Type:   "null",
+						DSName: "foo",
 					},
 					{
 						Type: "null",
 						Name: "bar",
 					}: {
-						Type: "null",
-						Name: "bar",
+						Type:   "null",
+						DSName: "bar",
 					},
 					{
 						Type: "null",
 						Name: "baz",
 					}: {
-						Type: "null",
-						Name: "baz",
+						Type:   "null",
+						DSName: "baz",
+						Dependencies: []refString{
+							{"data", "null", "foo"},
+							{"data", "null", "bar"},
+						},
 					},
 					{
 						Type: "null",
 						Name: "bang",
 					}: {
-						Type: "null",
-						Name: "bang",
+						Type:   "null",
+						DSName: "bang",
+						Dependencies: []refString{
+							{"data", "null", "baz"},
+						},
 					},
 					{
 						Type: "null",
 						Name: "yummy",
 					}: {
-						Type: "null",
-						Name: "yummy",
+						Type:   "null",
+						DSName: "yummy",
+						Dependencies: []refString{
+							{"data", "null", "bang"},
+						},
 					},
 				},
 			},
@@ -177,8 +187,8 @@ func TestParse_datasource(t *testing.T) {
 						Type: "nonexistent",
 						Name: "test",
 					}: {
-						Type: "nonexistent",
-						Name: "test",
+						Type:   "nonexistent",
+						DSName: "test",
 					},
 				},
 			},
@@ -197,8 +207,8 @@ func TestParse_datasource(t *testing.T) {
 						Type: "amazon-ami",
 						Name: "test",
 					}: {
-						Type: "amazon-ami",
-						Name: "test",
+						Type:   "amazon-ami",
+						DSName: "test",
 					},
 				},
 			},
@@ -217,15 +227,21 @@ func TestParse_datasource(t *testing.T) {
 						Type: "null",
 						Name: "gummy",
 					}: {
-						Type: "null",
-						Name: "gummy",
+						Type:   "null",
+						DSName: "gummy",
+						Dependencies: []refString{
+							{"data", "null", "bear"},
+						},
 					},
 					{
 						Type: "null",
 						Name: "bear",
 					}: {
-						Type: "null",
-						Name: "bear",
+						Type:   "null",
+						DSName: "bear",
+						Dependencies: []refString{
+							{"data", "null", "gummy"},
+						},
 					},
 				},
 			},

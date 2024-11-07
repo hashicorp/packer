@@ -1,4 +1,14 @@
-## 1.11.2 (Upcoming)
+## 1.11.2 (July 30, 2024)
+
+### FEATURES
+
+* core/hcp: export Packer options, OS, CI and VCS metadata for a build.
+     Following up on the introduction of metadata for builds in Packer 1.11.0,
+     this version introduces more metadata. In addition to the version of Packer
+     core, and the plugins used, we now capture CI-specific environment variables
+     (gitlab-ci and github-actions for now), Git-specific information, OS details
+     like architecture and kernel version, and the command-line options passed
+     to packer build.
 
 ## 1.11.1 (July 1, 2024)
 

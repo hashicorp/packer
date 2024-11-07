@@ -1,4 +1,4 @@
-package packer_test
+package common
 
 import (
 	"fmt"
@@ -6,19 +6,22 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/packer/packer_test/common/check"
 )
 
 type packerCommand struct {
-	runs       int
-	packerPath string
-	args       []string
-	env        map[string]string
-	stdin      string
-	stderr     *strings.Builder
-	stdout     *strings.Builder
-	workdir    string
-	err        error
-	t          *testing.T
+	runs         int
+	packerPath   string
+	args         []string
+	env          map[string]string
+	stdin        string
+	stderr       *strings.Builder
+	stdout       *strings.Builder
+	workdir      string
+	err          error
+	t            *testing.T
+	fatalfAssert bool
 }
 
 // PackerCommand creates a skeleton of packer command with the ability to execute gadgets on the outputs of the command.
@@ -63,8 +66,14 @@ func (pc *packerCommand) SetWD(dir string) *packerCommand {
 }
 
 // UsePluginDir sets the plugin directory in the environment to `dir`
-func (pc *packerCommand) UsePluginDir(dir string) *packerCommand {
-	return pc.AddEnv("PACKER_PLUGIN_PATH", dir)
+func (pc *packerCommand) UsePluginDir(dir *PluginDirSpec) *packerCommand {
+	return pc.UseRawPluginDir(dir.dirPath)
+}
+
+// UseRawPluginDir is meant to be used for setting the plugin directory with a
+// raw directory path instead of a PluginDirSpec.
+func (pc *packerCommand) UseRawPluginDir(dirPath string) *packerCommand {
+	return pc.AddEnv("PACKER_PLUGIN_PATH", dirPath)
 }
 
 func (pc *packerCommand) SetArgs(args ...string) *packerCommand {
@@ -106,13 +115,23 @@ func (pc *packerCommand) Stdin(in string) *packerCommand {
 	return pc
 }
 
+// SetAssertFatal allows changing how Assert behaves when reporting an error.
+//
+// By default Assert will invoke t.Errorf with the error details, but this can be
+// changed to a t.Fatalf so that if the assertion fails, the test invoking it will
+// also immediately fail and stop execution.
+func (pc *packerCommand) SetAssertFatal() *packerCommand {
+	pc.fatalfAssert = true
+	return pc
+}
+
 // Run executes the packer command with the args/env requested and returns the
 // output streams (stdout, stderr)
 //
 // Note: while originally "Run" was designed to be idempotent, with the
 // introduction of multiple runs for a command, this is not the case anymore
 // and the function should not be considered thread-safe anymore.
-func (pc *packerCommand) Run() (string, string, error) {
+func (pc *packerCommand) run() (string, string, error) {
 	if pc.runs <= 0 {
 		return pc.stdout.String(), pc.stderr.String(), pc.err
 	}
@@ -139,7 +158,7 @@ func (pc *packerCommand) Run() (string, string, error) {
 	pc.err = cmd.Run()
 
 	// Check that the command didn't panic, and if it did, we can immediately error
-	panicErr := PanicCheck{}.Check(pc.stdout.String(), pc.stderr.String(), pc.err)
+	panicErr := check.PanicCheck{}.Check(pc.stdout.String(), pc.stderr.String(), pc.err)
 	if panicErr != nil {
 		pc.t.Fatalf("Packer panicked during execution: %s", panicErr)
 	}
@@ -147,16 +166,32 @@ func (pc *packerCommand) Run() (string, string, error) {
 	return pc.stdout.String(), pc.stderr.String(), pc.err
 }
 
-func (pc *packerCommand) Assert(checks ...Checker) {
+// Output returns the results of the latest Run that was executed.
+//
+// In general there is only one run of the command, but as it can be changed
+// through the Runs function, only the latest run will be returned.
+//
+// If the command was not run (through Assert), this will make the test fail
+// immediately.
+func (pc *packerCommand) Output() (string, string, error) {
+	if pc.runs > 0 {
+		pc.t.Fatalf("command was not run, invoke Assert first, then Output.")
+	}
+
+	return pc.stdout.String(), pc.stderr.String(), pc.err
+}
+
+func (pc *packerCommand) Assert(checks ...check.Checker) {
 	attempt := 0
 	for pc.runs > 0 {
 		attempt++
-		stdout, stderr, err := pc.Run()
+		stdout, stderr, err := pc.run()
 
-		for _, check := range checks {
-			checkErr := check.Check(stdout, stderr, err)
+		for _, checker := range checks {
+			checkErr := checker.Check(stdout, stderr, err)
 			if checkErr != nil {
-				checkerName := InferName(check)
+				checkerName := check.InferName(checker)
+
 				pc.t.Errorf("check %q failed: %s", checkerName, checkErr)
 			}
 		}
@@ -166,6 +201,10 @@ func (pc *packerCommand) Assert(checks ...Checker) {
 
 			pc.t.Logf("dumping stdout: %s", stdout)
 			pc.t.Logf("dumping stdout: %s", stderr)
+
+			if pc.fatalfAssert {
+				pc.t.Fatalf("stopping test now because of failures reported")
+			}
 
 			break
 		}

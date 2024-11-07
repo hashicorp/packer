@@ -102,7 +102,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	diags = packerStarter.Initialize(packer.InitializeOptions{})
+	diags = packerStarter.Initialize(packer.InitializeOptions{
+		UseSequential: cla.UseSequential,
+	})
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -439,6 +441,7 @@ Options:
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
   -warn-on-undeclared-var       Display warnings for user variable files containing undeclared variables.
   -ignore-prerelease-plugins    Disable the loading of prerelease plugin binaries (x.y.z-dev).
+  -use-sequential-evaluation    Fallback to using a sequential approach for local/datasource evaluation.
 `
 
 	return strings.TrimSpace(helpText)

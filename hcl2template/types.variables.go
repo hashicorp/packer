@@ -25,8 +25,8 @@ const badIdentifierDetail = "A name must start with a letter or underscore and m
 // The "locals" block itself is not represented, because it serves only to
 // provide context for us to interpret its contents.
 type LocalBlock struct {
-	Name string
-	Expr hcl.Expression
+	LocalName string
+	Expr      hcl.Expression
 	// When Sensitive is set to true Packer will try its best to hide/obfuscate
 	// the variable from the output stream. By replacing the text.
 	Sensitive bool
@@ -35,12 +35,16 @@ type LocalBlock struct {
 	//
 	// Only `local`/`locals` will be referenced here as we execute all the
 	// same component types at once.
-	dependencies []*LocalBlock
+	dependencies []refString
 	// evaluated toggles to true if it has been evaluated.
 	//
 	// We use this to determine if we're ready to get the value of the
 	// expression.
 	evaluated bool
+}
+
+func (l LocalBlock) Name() string {
+	return fmt.Sprintf("local.%s", l.LocalName)
 }
 
 // VariableAssignment represents a way a variable was set: the expression
@@ -303,7 +307,7 @@ func decodeLocalBlock(block *hcl.Block) (*LocalBlock, hcl.Diagnostics) {
 	}
 
 	l := &LocalBlock{
-		Name: name,
+		LocalName: name,
 	}
 
 	if attr, exists := content.Attributes["sensitive"]; exists {

@@ -181,7 +181,12 @@ func (c *HCL2UpgradeCommand) RunContext(_ context.Context, cla *HCL2UpgradeArgs)
 	}
 
 	core := hdl.(*packer.Core)
-	if err := core.Initialize(packer.InitializeOptions{}); err != nil {
+	if err := core.Initialize(packer.InitializeOptions{
+		// Note: this is always true here as the DAG is only usable for
+		// HCL2 configs, so since the command only works on JSON templates,
+		// we can safely use the phased approach, which changes nothing.
+		UseSequential: true,
+	}); err != nil {
 		c.Ui.Error(fmt.Sprintf("Ignoring following initialization error: %v", err))
 	}
 	tpl := core.Template

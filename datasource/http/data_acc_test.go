@@ -24,18 +24,21 @@ var testDatasourceEmptyUrl string
 //go:embed test-fixtures/404_url.pkr.hcl
 var testDatasource404Url string
 
+//go:embed test-fixtures/invalid_method.pkr.hcl
+var testDatasourceInvalidMethod string
+
 func TestHttpDataSource(t *testing.T) {
 	tests := []struct {
-		Name    string
-		Path    string
-		Error   bool
-		Outputs map[string]string
+		Name            string
+		Path            string
+		Error           bool
+		ExpectedOutputs map[string]string
 	}{
 		{
 			Name:  "basic_test",
 			Path:  testDatasourceBasic,
 			Error: false,
-			Outputs: map[string]string{
+			ExpectedOutputs: map[string]string{
 				"url": "url is https://www.packer.io/",
 				// Check that body is not empty
 				"body": "body is true",
@@ -45,8 +48,16 @@ func TestHttpDataSource(t *testing.T) {
 			Name:  "url_is_empty",
 			Path:  testDatasourceEmptyUrl,
 			Error: true,
-			Outputs: map[string]string{
+			ExpectedOutputs: map[string]string{
 				"error": "the `url` must be specified",
+			},
+		},
+		{
+			Name:  "method_is_invalid",
+			Path:  testDatasourceInvalidMethod,
+			Error: true,
+			ExpectedOutputs: map[string]string{
+				"error": "the `method` must be one of \\[HEAD GET POST PUT DELETE OPTIONS PATCH\\]",
 			},
 		},
 		{
@@ -77,7 +88,7 @@ func TestHttpDataSource(t *testing.T) {
 						}
 					}
 
-					if tt.Outputs != nil {
+					if tt.ExpectedOutputs != nil {
 						logs, err := os.Open(logfile)
 						if err != nil {
 							return fmt.Errorf("Unable find %s", logfile)
@@ -90,7 +101,7 @@ func TestHttpDataSource(t *testing.T) {
 						}
 						logsString := string(logsBytes)
 
-						for key, val := range tt.Outputs {
+						for key, val := range tt.ExpectedOutputs {
 							if matched, _ := regexp.MatchString(val+".*", logsString); !matched {
 								t.Fatalf(
 									"logs doesn't contain expected log %v with value %v in %q",
