@@ -14,6 +14,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"path/filepath"
 
@@ -41,7 +43,17 @@ type Config struct {
 	// a "Permission Denied" error will occur. If the source path is a file,
 	// it is recommended that the destination path be a file as well.
 	Destination string `mapstructure:"destination"`
-	ctx         interpolate.Context
+	// The name to give the SBOM when uploaded on HCP Packer
+	//
+	// By default this will be generated, but if you prefer to have a name
+	// of your choosing, you can enter it here.
+	// The name must match the following regexp: `[a-zA-Z0-9_-]{3,36}`
+	//
+	// Note: it must be unique for a single build, otherwise the build will
+	// fail when uploading the SBOMs to HCP Packer, and so will the Packer
+	// build command.
+	SbomName string `mapstructure:"sbom_name"`
+	ctx      interpolate.Context
 }
 
 type Provisioner struct {
@@ -51,6 +63,8 @@ type Provisioner struct {
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.config.FlatMapstructure().HCL2Spec()
 }
+
+var sbomFormatRegexp = regexp.MustCompile("^[0-9A-Za-z_-]{3,36}$")
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -65,16 +79,34 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		return err
 	}
 
-	var errs *packersdk.MultiError
+	var errs error
+
 	if p.config.Source == "" {
 		errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified"))
 	}
 
-	if errs != nil && len(errs.Errors) > 0 {
-		return errs
+	if p.config.SbomName != "" && !sbomFormatRegexp.MatchString(p.config.SbomName) {
+		// Ugly but a bit of a problem with interpolation since Provisioners
+		// are prepared twice in HCL2.
+		//
+		// If the information used for interpolating is populated in-between the
+		// first call to Prepare (at the start of the build), and when the
+		// Provisioner is actually called, the first call will fail, as
+		// the value won't contain the actual interpolated value, but a
+		// placeholder which doesn't match the regex.
+		//
+		// Since we don't have a way to discriminate between the calls
+		// in the context of the provisioner, we ignore them, and later the
+		// HCP Packer call will fail because of the broken regex.
+		if strings.Contains(p.config.SbomName, "<no value>") {
+			log.Printf("[WARN] interpolation incomplete for `sbom_name`, will possibly retry later with data populated into context, otherwise will fail when uploading to HCP Packer.")
+		} else {
+			errs = packersdk.MultiErrorAppend(errs, fmt.Errorf("`sbom_name` %q doesn't match the expected format, it must "+
+				"contain between 3 and 36 characters, all from the following set: [A-Za-z0-9_-]", p.config.SbomName))
+		}
 	}
 
-	return nil
+	return errs
 }
 
 // PackerSBOM is the type we write to the temporary JSON dump of the SBOM to
@@ -86,6 +118,10 @@ type PackerSBOM struct {
 	//
 	// Supported values: `spdx` or `cyclonedx`
 	Format string `json:"format"`
+	// Name is the name of the SBOM to be set on HCP Packer
+	//
+	// If unset, HCP Packer will generate one
+	Name string `json:"name,omitempty"`
 }
 
 func (p *Provisioner) Provision(

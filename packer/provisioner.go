@@ -250,6 +250,7 @@ type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
 	SBOMFormat     string
+	SBOMName       string
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
@@ -308,6 +309,7 @@ func (p *SBOMInternalProvisioner) Provision(
 	}
 	p.CompressedData = encoder.EncodeAll(provisionerOut.RawSBOM, nil)
 	p.SBOMFormat = provisionerOut.Format
+	p.SBOMName = provisionerOut.Name
 
 	return nil
 }
