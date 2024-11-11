@@ -11,7 +11,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 
@@ -113,25 +112,15 @@ func (p *Provisioner) downloadAndValidateSBOM(
 		return err
 	}
 
-	reader := bytes.NewReader(buf.Bytes())
-	if _, err := ValidateSBOM(reader); err != nil {
+	if _, err := ValidateSBOM(buf.Bytes()); err != nil {
 		ui.Errorf("validation failed for SBOM file: %s", err)
 		return err
 	}
-	_, err := reader.Seek(0, io.SeekStart)
-	if err != nil {
-		return err
-	}
 
-	err = p.writeToFile(reader, pkrDst)
+	err := p.writeToFile(bytes.NewReader(buf.Bytes()), pkrDst)
 	if err != nil {
-		return fmt.Errorf("failed to download Packer SBOM: %s", err)
+		return fmt.Errorf("failed to write HCP's SBOM: %s", err)
 	}
-	_, err = reader.Seek(0, io.SeekStart)
-	if err != nil {
-		return err
-	}
-	log.Printf("Packer SBOM file successfully downloaded to: %s\n", pkrDst)
 
 	// SBOM for User
 	usrDst, err := p.getUserDestination()
@@ -140,7 +129,7 @@ func (p *Provisioner) downloadAndValidateSBOM(
 	}
 
 	if usrDst != "" {
-		err = p.writeToFile(reader, usrDst)
+		err = p.writeToFile(bytes.NewReader(buf.Bytes()), usrDst)
 		if err != nil {
 			return fmt.Errorf("failed to download User SBOM: %s", err)
 		}

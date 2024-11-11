@@ -7,8 +7,6 @@ import (
 
 	"github.com/CycloneDX/cyclonedx-go"
 	spdxjson "github.com/spdx/tools-golang/json"
-
-	"io"
 )
 
 // ValidationError represents an error encountered while validating an SBOM.
@@ -25,8 +23,8 @@ func (e *ValidationError) Unwrap() error {
 }
 
 // ValidateCycloneDX is a validation for CycloneDX in JSON format.
-func ValidateCycloneDX(content io.Reader) error {
-	decoder := cyclonedx.NewBOMDecoder(content, cyclonedx.BOMFileFormatJSON)
+func ValidateCycloneDX(content []byte) error {
+	decoder := cyclonedx.NewBOMDecoder(bytes.NewBuffer(content), cyclonedx.BOMFileFormatJSON)
 	bom := new(cyclonedx.BOM)
 	if err := decoder.Decode(bom); err != nil {
 		return fmt.Errorf("error parsing CycloneDX SBOM: %w", err)
@@ -47,8 +45,8 @@ func ValidateCycloneDX(content io.Reader) error {
 }
 
 // ValidateSPDX is a validation for SPDX in JSON format.
-func ValidateSPDX(content io.Reader) error {
-	doc, err := spdxjson.Read(content)
+func ValidateSPDX(content []byte) error {
+	doc, err := spdxjson.Read(bytes.NewBuffer(content))
 	if err != nil {
 		return fmt.Errorf("error parsing SPDX JSON file: %w", err)
 	}
@@ -63,16 +61,9 @@ func ValidateSPDX(content io.Reader) error {
 }
 
 // ValidateSBOM validates the SBOM file and returns the format of the SBOM.
-func ValidateSBOM(content io.Reader) (string, error) {
-	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, content); err != nil {
-		return "", fmt.Errorf("failed to copy content: %s", err)
-	}
-
-	reader := bytes.NewReader(buf.Bytes())
-
+func ValidateSBOM(content []byte) (string, error) {
 	// Try validating as SPDX
-	spdxErr := ValidateSPDX(reader)
+	spdxErr := ValidateSPDX(content)
 	if spdxErr == nil {
 		return "spdx", nil
 	}
@@ -81,12 +72,7 @@ func ValidateSBOM(content io.Reader) (string, error) {
 		return "", vErr
 	}
 
-	// Reset the reader's position
-	if _, err := reader.Seek(0, io.SeekStart); err != nil {
-		return "", fmt.Errorf("failed to reset reader: %s", err)
-	}
-
-	cycloneDxErr := ValidateCycloneDX(reader)
+	cycloneDxErr := ValidateCycloneDX(content)
 	if cycloneDxErr == nil {
 		return "cyclonedx", nil
 	}

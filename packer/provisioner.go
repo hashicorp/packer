@@ -322,13 +322,12 @@ func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) 
 }
 
 func (p *SBOMInternalProvisioner) getSBOMFormat(filePath string) (string, error) {
-	file, err := os.Open(filePath)
+	fileContent, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open SBOM file %s: %w", filePath, err)
 	}
-	defer file.Close()
 
-	format, err := hcpSbomProvisioner.ValidateSBOM(file)
+	format, err := hcpSbomProvisioner.ValidateSBOM(fileContent)
 	if err != nil {
 		return "", fmt.Errorf("failed to detect SBOM format: %w", err)
 	}
