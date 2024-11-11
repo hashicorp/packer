@@ -100,31 +100,27 @@ func (p *Provisioner) Provision(
 func (p *Provisioner) downloadAndValidateSBOM(
 	ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{},
 ) error {
-	src, err := interpolate.Render(p.config.Source, &p.config.ctx)
-	if err != nil {
-		return fmt.Errorf("error interpolating SBOM source: %s", err)
+	src := p.config.Source
+
+	pkrDst := generatedData["dst"].(string)
+	if pkrDst == "" {
+		return fmt.Errorf("packer destination path missing from configs: this is an internal error, which should be reported to be fixed.")
 	}
 
 	var buf bytes.Buffer
-	if err = comm.Download(src, &buf); err != nil {
+	if err := comm.Download(src, &buf); err != nil {
 		ui.Errorf("download failed for SBOM file: %s", err)
 		return err
 	}
 
 	reader := bytes.NewReader(buf.Bytes())
-	if _, err = ValidateSBOM(reader); err != nil {
+	if _, err := ValidateSBOM(reader); err != nil {
 		ui.Errorf("validation failed for SBOM file: %s", err)
 		return err
 	}
-	_, err = reader.Seek(0, io.SeekStart)
+	_, err := reader.Seek(0, io.SeekStart)
 	if err != nil {
 		return err
-	}
-
-	// SBOM for Packer
-	pkrDst, err := p.getPackerDestination(generatedData)
-	if err != nil {
-		return fmt.Errorf("failed to get Packer SBOM destination: %s", err)
 	}
 
 	err = p.writeToFile(reader, pkrDst)
@@ -202,21 +198,6 @@ func (p *Provisioner) getUserDestination() (string, error) {
 		}
 		dst = tmpFile.Name()
 		tmpFile.Close()
-	}
-
-	return dst, nil
-}
-
-// getPackerDestination retrieves the destination path for the Packer SBOM file.
-func (p *Provisioner) getPackerDestination(generatedData map[string]interface{}) (string, error) {
-	dst, ok := generatedData["dst"].(string) // This has been set by HCPSBOMInternalProvisioner.Provision
-	if !ok || dst == "" {
-		return "", fmt.Errorf("destination path for Packer SBOM file is not valid")
-	}
-
-	// Ensure the destination directory exists
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
-		return "", fmt.Errorf("failed to create destination directory for Packer SBOM: %w", err)
 	}
 
 	return dst, nil
