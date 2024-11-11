@@ -9,6 +9,7 @@ package hcp_sbom
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -76,6 +77,17 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+// PackerSBOM is the type we write to the temporary JSON dump of the SBOM to
+// be consumed by Packer core
+type PackerSBOM struct {
+	// RawSBOM is the raw data from the SBOM downloaded from the guest
+	RawSBOM []byte `json:"raw_sbom"`
+	// Format is the format detected by the provisioner
+	//
+	// Supported values: `spdx` or `cyclonedx`
+	Format string `json:"format"`
+}
+
 func (p *Provisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
@@ -87,18 +99,6 @@ func (p *Provisioner) Provision(
 	}
 	p.config.ctx.Data = generatedData
 
-	downloadErr := p.downloadAndValidateSBOM(ui, comm, generatedData)
-	if downloadErr != nil {
-		return fmt.Errorf("failed to download SBOM file: %w", downloadErr)
-	}
-
-	return nil
-}
-
-// downloadAndValidateSBOM handles downloading SBOM files for the User and Packer.
-func (p *Provisioner) downloadAndValidateSBOM(
-	ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{},
-) error {
 	src := p.config.Source
 
 	pkrDst := generatedData["dst"].(string)
@@ -112,44 +112,46 @@ func (p *Provisioner) downloadAndValidateSBOM(
 		return err
 	}
 
-	if _, err := ValidateSBOM(buf.Bytes()); err != nil {
-		ui.Errorf("validation failed for SBOM file: %s", err)
-		return err
+	format, err := ValidateSBOM(buf.Bytes())
+	if err != nil {
+		return fmt.Errorf("validation failed for SBOM file: %s", err)
 	}
 
-	err := p.writeToFile(bytes.NewReader(buf.Bytes()), pkrDst)
+	outFile, err := os.Create(pkrDst)
 	if err != nil {
-		return fmt.Errorf("failed to write HCP's SBOM: %s", err)
+		return fmt.Errorf("failed to open/create output file %q: %s", pkrDst, err)
+	}
+	defer outFile.Close()
+
+	err = json.NewEncoder(outFile).Encode(PackerSBOM{
+		RawSBOM: buf.Bytes(),
+		Format:  format,
+		Name:    p.config.SbomName,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to write sbom file to %q: %s", pkrDst, err)
+	}
+
+	if p.config.Destination == "" {
+		return nil
 	}
 
 	// SBOM for User
 	usrDst, err := p.getUserDestination()
 	if err != nil {
-		return fmt.Errorf("failed to determine user SBOM destination: %s", err)
+		return fmt.Errorf("failed to compute destination path %q: %s", p.config.Destination, err)
+	}
+	err = os.WriteFile(usrDst, buf.Bytes(), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write SBOM to destination %q: %s", usrDst, err)
 	}
 
-	if usrDst != "" {
-		err = p.writeToFile(bytes.NewReader(buf.Bytes()), usrDst)
-		if err != nil {
-			return fmt.Errorf("failed to download User SBOM: %s", err)
-		}
-		log.Printf("User SBOM file successfully downloaded to: %s\n", usrDst)
-	}
 	return nil
 }
 
 // getUserDestination determines and returns the destination path for the user SBOM file.
 func (p *Provisioner) getUserDestination() (string, error) {
 	dst := p.config.Destination
-	if dst == "" {
-		log.Println("skipped downloading user SBOM file because 'Destination' is not provided")
-		return "", nil
-	}
-
-	dst, err := interpolate.Render(dst, &p.config.ctx)
-	if err != nil {
-		return "", fmt.Errorf("error interpolating SBOM file destination for user: %s", err)
-	}
 
 	// Check if the destination exists and determine its type
 	info, err := os.Stat(dst)
@@ -190,20 +192,4 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	}
 
 	return dst, nil
-}
-
-func (p *Provisioner) writeToFile(buf *bytes.Reader, dst string) error {
-	// Open the destination file
-	f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to open destination file for SBOM: %s", err)
-	}
-	defer f.Close()
-
-	// Write the buffer content to the destination file
-	if _, err = buf.WriteTo(f); err != nil {
-		return err
-	}
-
-	return nil
 }
