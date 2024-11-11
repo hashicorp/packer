@@ -148,7 +148,7 @@ func (p *Provisioner) Provision(
 		return err
 	}
 
-	format, err := ValidateSBOM(buf.Bytes())
+	format, err := validateSBOM(buf.Bytes())
 	if err != nil {
 		return fmt.Errorf("validation failed for SBOM file: %s", err)
 	}
