@@ -23,7 +23,7 @@ func (e *ValidationError) Unwrap() error {
 }
 
 // ValidateCycloneDX is a validation for CycloneDX in JSON format.
-func ValidateCycloneDX(content []byte) error {
+func validateCycloneDX(content []byte) error {
 	decoder := cyclonedx.NewBOMDecoder(bytes.NewBuffer(content), cyclonedx.BOMFileFormatJSON)
 	bom := new(cyclonedx.BOM)
 	if err := decoder.Decode(bom); err != nil {
@@ -44,8 +44,8 @@ func ValidateCycloneDX(content []byte) error {
 	return nil
 }
 
-// ValidateSPDX is a validation for SPDX in JSON format.
-func ValidateSPDX(content []byte) error {
+// validateSPDX is a validation for SPDX in JSON format.
+func validateSPDX(content []byte) error {
 	doc, err := spdxjson.Read(bytes.NewBuffer(content))
 	if err != nil {
 		return fmt.Errorf("error parsing SPDX JSON file: %w", err)
@@ -60,10 +60,10 @@ func ValidateSPDX(content []byte) error {
 	return nil
 }
 
-// ValidateSBOM validates the SBOM file and returns the format of the SBOM.
-func ValidateSBOM(content []byte) (string, error) {
+// validateSBOM validates the SBOM file and returns the format of the SBOM.
+func validateSBOM(content []byte) (string, error) {
 	// Try validating as SPDX
-	spdxErr := ValidateSPDX(content)
+	spdxErr := validateSPDX(content)
 	if spdxErr == nil {
 		return "spdx", nil
 	}
@@ -72,7 +72,7 @@ func ValidateSBOM(content []byte) (string, error) {
 		return "", vErr
 	}
 
-	cycloneDxErr := ValidateCycloneDX(content)
+	cycloneDxErr := validateCycloneDX(content)
 	if cycloneDxErr == nil {
 		return "cyclonedx", nil
 	}
