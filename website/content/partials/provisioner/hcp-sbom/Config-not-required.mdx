@@ -10,4 +10,14 @@
   a "Permission Denied" error will occur. If the source path is a file,
   it is recommended that the destination path be a file as well.
 
+- `sbom_name` (string) - The name to give the SBOM when uploaded on HCP Packer
+  
+  By default this will be generated, but if you prefer to have a name
+  of your choosing, you can enter it here.
+  The name must match the following regexp: `[a-zA-Z0-9_-]{3,36}`
+  
+  Note: it must be unique for a single build, otherwise the build will
+  fail when uploading the SBOMs to HCP Packer, and so will the Packer
+  build command.
+
 <!-- End of code generated from the comments of the Config struct in provisioner/hcp-sbom/provisioner.go; -->
