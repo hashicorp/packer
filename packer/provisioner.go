@@ -5,6 +5,7 @@ package packer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -290,47 +291,23 @@ func (p *SBOMInternalProvisioner) Provision(
 		return err
 	}
 
-	sbomFormat, err := p.getSBOMFormat(tmpFile.Name())
+	packerSbom, err := os.Open(tmpFileName)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to open Packer SBOM file %q: %s", tmpFileName, err)
 	}
 
-	compressedData, err := p.compressFile(tmpFile.Name())
+	provisionerOut := &hcpSbomProvisioner.PackerSBOM{}
+	err = json.NewDecoder(packerSbom).Decode(provisionerOut)
 	if err != nil {
-		return err
-	}
-	p.CompressedData = compressedData
-	p.SBOMFormat = sbomFormat
-	return nil
-}
-
-func (p *SBOMInternalProvisioner) compressFile(filePath string) ([]byte, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
+		return fmt.Errorf("malformed packer SBOM output from file %q: %s", tmpFileName, err)
 	}
 
 	encoder, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedBestCompression))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create zstd encoder: %w", err)
+		return fmt.Errorf("failed to create zstd encoder: %s", err)
 	}
+	p.CompressedData = encoder.EncodeAll(provisionerOut.RawSBOM, nil)
+	p.SBOMFormat = provisionerOut.Format
 
-	compressedData := encoder.EncodeAll(data, nil)
-
-	log.Printf("SBOM file compressed successfully. Size: %d bytes\n", len(compressedData))
-	return compressedData, nil
-}
-
-func (p *SBOMInternalProvisioner) getSBOMFormat(filePath string) (string, error) {
-	fileContent, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open SBOM file %s: %w", filePath, err)
-	}
-
-	format, err := hcpSbomProvisioner.ValidateSBOM(fileContent)
-	if err != nil {
-		return "", fmt.Errorf("failed to detect SBOM format: %w", err)
-	}
-
-	return format, nil
+	return nil
 }
