@@ -639,17 +639,6 @@ func (bucket *Bucket) completeBuild(
 	packerSDKArtifacts []packerSDK.Artifact,
 	buildErr error,
 ) ([]packerSDK.Artifact, error) {
-	doneCh, ok := bucket.RunningBuilds[buildName]
-	if !ok {
-		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
-
-	} else {
-		log.Printf("[TRACE] signal stopping heartbeats")
-		// Stop heartbeating
-		doneCh <- struct{}{}
-		log.Printf("[TRACE] stopped heartbeats")
-	}
-
 	if buildErr != nil {
 		status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED
 		if ctx.Err() != nil {
@@ -660,6 +649,33 @@ func (bucket *Bucket) completeBuild(
 			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
 		}
 		return packerSDKArtifacts, fmt.Errorf("build failed, not uploading artifacts")
+	}
+
+	artifacts, err := bucket.doCompleteBuild(ctx, buildName, packerSDKArtifacts, buildErr)
+	if err != nil {
+		err := bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED)
+		if err != nil {
+			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
+		}
+	}
+
+	return artifacts, err
+}
+
+func (bucket *Bucket) doCompleteBuild(
+	ctx context.Context,
+	buildName string,
+	packerSDKArtifacts []packerSDK.Artifact,
+	buildErr error,
+) ([]packerSDK.Artifact, error) {
+	doneCh, ok := bucket.RunningBuilds[buildName]
+	if !ok {
+		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
+	} else {
+		log.Printf("[TRACE] signal stopping heartbeats")
+		// Stop heartbeating
+		doneCh <- struct{}{}
+		log.Printf("[TRACE] stopped heartbeats")
 	}
 
 	for _, art := range packerSDKArtifacts {
