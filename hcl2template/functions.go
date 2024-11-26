@@ -103,6 +103,7 @@ func Functions(basedir string) map[string]function.Function {
 		"slice":              stdlib.SliceFunc,
 		"sort":               stdlib.SortFunc,
 		"split":              stdlib.SplitFunc,
+		"strcontains":        pkrfunction.StrContains,
 		"strrev":             stdlib.ReverseFunc,
 		"substr":             stdlib.SubstrFunc,
 		"textdecodebase64":   TextDecodeBase64Func,
