@@ -286,6 +286,10 @@
                     "path": "templates/hcl_templates/functions/string/split"
                   },
                   {
+                    "title": "strcontains",
+                    "path": "templates/hcl_templates/functions/string/strcontains"
+                  },
+                  {
                     "title": "strrev",
                     "path": "templates/hcl_templates/functions/string/strrev"
                   },
