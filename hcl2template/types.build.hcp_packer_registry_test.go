@@ -20,6 +20,47 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 	defaultParser := getBasicParser()
 
 	tests := []parseTest{
+		{"bucket_name left empty",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/empty_bucket.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+				Builds: Builds{
+					{
+						Name:              "bucket-slug",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{Slug: ""},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]packersdk.Build{
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+			},
+			false,
+		},
 		{"bucket_name as variable",
 			defaultParser,
 			parseTestArgs{"testdata/hcp_par/variable-for-bucket_name.pkr.hcl", nil, nil},
