@@ -2,11 +2,6 @@
 
 # release configuration
 
-# web presence
+# web presence and education
 
-/website/                                @hashicorp/web-presence @hashicorp/packer
-
-# education
-
-/website/content/                        @hashicorp/team-docs-packer-and-terraform @hashicorp/web-presence @hashicorp/packer
-/website/public/                         @hashicorp/team-docs-packer-and-terraform @hashicorp/web-presence @hashicorp/packer
+/website/       @hashicorp/team-docs-packer-and-terraform @hashicorp/web-presence @hashicorp/packer
