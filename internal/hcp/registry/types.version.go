@@ -205,5 +205,8 @@ func (version *Version) AddMetadataToBuild(
 	buildToUpdate.Metadata.Vcs = globalMetadata.Vcs
 	buildToUpdate.Metadata.Cicd = globalMetadata.Cicd
 
+	// TODO IMO this shouldn't be metadata
+	buildToUpdate.CompressedSboms = buildMetadata.SBOMs
+
 	return nil
 }
