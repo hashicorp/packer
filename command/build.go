@@ -315,6 +315,15 @@ Check that you are using an HCP Ready integration before trying again:
 					artifacts.Unlock()
 				}
 			}
+
+			// If the build succeeded but uploading to HCP failed,
+			// Packer should exit non-zero, so we re-assign the
+			// error to account for this case.
+			if hcperr != nil && err == nil {
+				errs.Lock()
+				errs.m[name] = hcperr
+				errs.Unlock()
+			}
 		}()
 
 		if cla.Debug {
