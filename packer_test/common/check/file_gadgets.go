@@ -3,6 +3,7 @@ package check
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type fileExists struct {
@@ -31,5 +32,28 @@ func FileExists(filePath string, isDir bool) Checker {
 	return fileExists{
 		filepath: filePath,
 		isDir:    isDir,
+	}
+}
+
+type fileGlob struct {
+	filepath string
+}
+
+func (fe fileGlob) Check(_, _ string, _ error) error {
+	matches, err := filepath.Glob(fe.filepath)
+	if err != nil {
+		return fmt.Errorf("error evaluating file glob pattern %q: %v", fe.filepath, err)
+	}
+
+	if len(matches) == 0 {
+		return fmt.Errorf("no matches found for file glob pattern %q", fe.filepath)
+	}
+
+	return nil
+}
+
+func FileGlob(filename string) Checker {
+	return fileGlob{
+		filepath: filename,
 	}
 }
