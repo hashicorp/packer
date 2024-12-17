@@ -20,7 +20,6 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/hcl/v2/hclwrite"
-	awscommon "github.com/hashicorp/packer-plugin-amazon/builder/common"
 	hcl2shim "github.com/hashicorp/packer-plugin-sdk/hcl2helper"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer/packer"
@@ -1170,10 +1169,52 @@ func (p *AmazonAmiDatasourceParser) Parse(_ *template.Template) error {
 	return nil
 }
 
+type AssumeRoleConfig struct {
+	AssumeRoleARN               string            `mapstructure:"role_arn" required:"false"`
+	AssumeRoleDurationSeconds   int               `mapstructure:"duration_seconds" required:"false"`
+	AssumeRoleExternalID        string            `mapstructure:"external_id" required:"false"`
+	AssumeRolePolicy            string            `mapstructure:"policy" required:"false"`
+	AssumeRolePolicyARNs        []string          `mapstructure:"policy_arns" required:"false"`
+	AssumeRoleSessionName       string            `mapstructure:"session_name" required:"false"`
+	AssumeRoleTags              map[string]string `mapstructure:"tags" required:"false"`
+	AssumeRoleTransitiveTagKeys []string          `mapstructure:"transitive_tag_keys" required:"false"`
+}
+
+type VaultAWSEngineOptions struct {
+	Name       string `mapstructure:"name"`
+	RoleARN    string `mapstructure:"role_arn"`
+	TTL        string `mapstructure:"ttl" required:"false"`
+	EngineName string `mapstructure:"engine_name"`
+}
+
+type AWSPollingConfig struct {
+	MaxAttempts  int `mapstructure:"max_attempts" required:"false"`
+	DelaySeconds int `mapstructure:"delay_seconds" required:"false"`
+}
+
+type AwsAccessConfig struct {
+	AccessKey             string                `mapstructure:"access_key" required:"true"`
+	AssumeRole            AssumeRoleConfig      `mapstructure:"assume_role" required:"false"`
+	CustomEndpointEc2     string                `mapstructure:"custom_endpoint_ec2" required:"false"`
+	CredsFilename         string                `mapstructure:"shared_credentials_file" required:"false"`
+	DecodeAuthZMessages   bool                  `mapstructure:"decode_authorization_messages" required:"false"`
+	InsecureSkipTLSVerify bool                  `mapstructure:"insecure_skip_tls_verify" required:"false"`
+	MaxRetries            int                   `mapstructure:"max_retries" required:"false"`
+	MFACode               string                `mapstructure:"mfa_code" required:"false"`
+	ProfileName           string                `mapstructure:"profile" required:"false"`
+	RawRegion             string                `mapstructure:"region" required:"true"`
+	SecretKey             string                `mapstructure:"secret_key" required:"true"`
+	SkipMetadataApiCheck  bool                  `mapstructure:"skip_metadata_api_check"`
+	SkipCredsValidation   bool                  `mapstructure:"skip_credential_validation"`
+	Token                 string                `mapstructure:"token" required:"false"`
+	VaultAWSEngine        VaultAWSEngineOptions `mapstructure:"vault_aws_engine" required:"false"`
+	PollingConfig         *AWSPollingConfig     `mapstructure:"aws_polling" required:"false"`
+}
+
 func copyAWSAccessConfig(sourceAmi map[string]interface{}, builder map[string]interface{}) (map[string]interface{}, error) {
 	// Transform access config to a map
 	accessConfigMap := map[string]interface{}{}
-	if err := mapstructure.Decode(awscommon.AccessConfig{}, &accessConfigMap); err != nil {
+	if err := mapstructure.Decode(AwsAccessConfig{}, &accessConfigMap); err != nil {
 		return sourceAmi, err
 	}
 
