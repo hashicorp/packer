@@ -327,6 +327,10 @@
                 "title": "Collection Functions",
                 "routes": [
                   {
+                    "title": "alltrue",
+                    "path": "templates/hcl_templates/functions/collection/alltrue"
+                  },
+                  {
                     "title": "chunklist",
                     "path": "templates/hcl_templates/functions/collection/chunklist"
                   },
