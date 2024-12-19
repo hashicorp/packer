@@ -35,6 +35,7 @@ func Functions(basedir string) map[string]function.Function {
 		"abs":                stdlib.AbsoluteFunc,
 		"abspath":            filesystem.AbsPathFunc,
 		"alltrue":            pkrfunction.AllTrue,
+		"anytrue":            pkrfunction.AnyTrue,
 		"aws_secretsmanager": pkrfunction.AWSSecret,
 		"basename":           filesystem.BasenameFunc,
 		"base64decode":       encoding.Base64DecodeFunc,
