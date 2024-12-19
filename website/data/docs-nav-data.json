@@ -331,6 +331,10 @@
                     "path": "templates/hcl_templates/functions/collection/alltrue"
                   },
                   {
+                    "title": "anytrue",
+                    "path": "templates/hcl_templates/functions/collection/anytrue"
+                  },
+                  {
                     "title": "chunklist",
                     "path": "templates/hcl_templates/functions/collection/chunklist"
                   },
