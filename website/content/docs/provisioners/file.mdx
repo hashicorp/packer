@@ -30,6 +30,16 @@ The file provisioner can upload both single files and complete directories.
 ## Basic Example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "file" {
+  source = "app.tar.gz"
+  destination = "/tmp/app.tar.gz"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -37,16 +47,6 @@ The file provisioner can upload both single files and complete directories.
   "type": "file",
   "source": "app.tar.gz",
   "destination": "/tmp/app.tar.gz"
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "file" {
-  source = "app.tar.gz"
-  destination = "/tmp/app.tar.gz"
 }
 ```
 
