@@ -33,6 +33,16 @@ a third-party post-processor.
 ## Basic example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "checksum" {
+  checksum_types = ["sha1", "sha256"]
+  output = "packer_{{.BuildName}}_{{.ChecksumType}}.checksum"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -40,16 +50,6 @@ a third-party post-processor.
   "type": "checksum",
   "checksum_types": ["sha1", "sha256"],
   "output": "packer_{{.BuildName}}_{{.ChecksumType}}.checksum"
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "checksum" {
-  checksum_types = ["sha1", "sha256"]
-  output = "packer_{{.BuildName}}_{{.ChecksumType}}.checksum"
 }
 ```
 

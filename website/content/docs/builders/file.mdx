@@ -25,17 +25,6 @@ Below is a fully functioning example. It create a file at `target` with the
 specified `content`.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "file",
-  "content": "Lorem ipsum dolor sit amet",
-  "target": "dummy_artifact"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -46,6 +35,17 @@ source "file" "basic-example" {
 
 build {
   sources = ["sources.file.basic-example"]
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "file",
+  "content": "Lorem ipsum dolor sit amet",
+  "target": "dummy_artifact"
 }
 ```
 

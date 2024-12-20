@@ -27,6 +27,30 @@ and between every provisioner.
 ## Basic Example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "shell-local" {
+    inline = ["echo hi"]
+  }
+  provisioner "breakpoint" {
+    disable = false
+    note    = "this is a breakpoint"
+  }
+  provisioner "shell-local" {
+    inline = ["echo hi 2"]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -52,30 +76,6 @@ and between every provisioner.
       "inline": "echo hi 2"
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "null" "example" {
-  communicator = "none"
-}
-
-build {
-  sources = ["source.null.example"]
-
-  provisioner "shell-local" {
-    inline = ["echo hi"]
-  }
-  provisioner "breakpoint" {
-    disable = false
-    note    = "this is a breakpoint"
-  }
-  provisioner "shell-local" {
-    inline = ["echo hi 2"]
-  }
 }
 ```
 
