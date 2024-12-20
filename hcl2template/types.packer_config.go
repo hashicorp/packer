@@ -156,8 +156,7 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := f.Body.Content(configSchema)
 
 	// for input variables we allow to use env in the default value section.
 	ectx := &hcl.EvalContext{
@@ -188,8 +187,7 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := f.Body.Content(configSchema)
 
 	var locals []*LocalBlock
 
