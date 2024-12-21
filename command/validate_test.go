@@ -36,6 +36,9 @@ func TestValidateCommand(t *testing.T) {
 		// wrong version field
 		{path: filepath.Join(testFixture("version_req", "wrong_field_name")), exitCode: 1},
 
+		// wrong packer block type
+		{path: filepath.Join(testFixture("validate", "invalid_block_type.pkr.hcl")), exitCode: 1},
+
 		// wrong packer block
 		{path: filepath.Join(testFixture("validate", "invalid_packer_block.pkr.hcl")), exitCode: 1},
 

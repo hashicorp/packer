@@ -15,8 +15,7 @@ import (
 func (cfg *PackerConfig) decodeRequiredPluginsBlock(f *hcl.File) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := f.Body.Content(configSchema)
 
 	for _, block := range content.Blocks {
 		switch block.Type {
