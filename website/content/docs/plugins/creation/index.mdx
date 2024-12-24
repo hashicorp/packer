@@ -218,10 +218,10 @@ generate: install-packer-sdc
     @rm -r ".docs"
 ```
 
-By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation, 
+By opening an integration request, you are asking a member of the Packer team to review your plugin integration configuration, plugin documentation, 
 and, finally, to open an internal pull-request to finalize the integration setup. 
 
-Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your the plugin. 
+Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your plugin. 
 
 Plugin integrations, once deployed, can be updated manually, or automatically upon a new release, by the plugin authors. Changes to the defined documentation structure 
 or parent repository should be communicated to the Packer team to ensure a working integration pipeline. 
@@ -253,7 +253,7 @@ Making your unpublished plugin available to Packer is possible by either:
 - Starting Packer from the directory where the plugin binary is located.
 - Putting the plugin binary in the same directory as Packer.
 
-In both these cases, if the binary is called `packer-plugin-myawesomecloud` and
+In both these of cases, if the binary is called `packer-plugin-myawesomecloud` and
 defines an `ebs` builder then you will be able to use an `myawesomecloud-ebs`
 builder or source without needing to have a `required_plugin` block.
 
