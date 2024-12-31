@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-operation/stable/2020-05-05/client/operation_service"
 	packerSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	organizationSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/organization_service"
 	projectSvc "github.com/hashicorp/hcp-sdk-go/clients/cloud-resource-manager/stable/2019-12-10/client/project_service"
@@ -25,6 +26,7 @@ type Client struct {
 	Packer       packerSvc.ClientService
 	Organization organizationSvc.ClientService
 	Project      projectSvc.ClientService
+	Operation    operation_service.ClientService
 
 	// OrganizationID  is the organization unique identifier on HCP.
 	OrganizationID string
@@ -65,6 +67,7 @@ func NewClient() (*Client, error) {
 		Packer:       packerSvc.New(cl, nil),
 		Organization: organizationSvc.New(cl, nil),
 		Project:      projectSvc.New(cl, nil),
+		Operation:    operation_service.New(cl, nil),
 	}
 	// A client.Config.hcpConfig is set when calling Canonicalize on basic HCP httpclient, as on line 52.
 	// If a user sets HCP_* env. variables they will be loaded into the client via the SDK and used for any client calls.

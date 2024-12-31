@@ -4,6 +4,8 @@
 package packer
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,8 +13,6 @@ import (
 	"os"
 
 	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
-
-	"github.com/klauspost/compress/zstd"
 
 	"time"
 
@@ -303,11 +303,25 @@ func (p *SBOMInternalProvisioner) Provision(
 		return fmt.Errorf("malformed packer SBOM output from file %q: %s", tmpFileName, err)
 	}
 
-	encoder, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedBestCompression))
+	// Create a buffer to hold the zip file in memory
+	buf := new(bytes.Buffer)
+	// Create a new zip archive
+	w := zip.NewWriter(buf)
+	f, err := w.Create(fmt.Sprintf("packer-sbom-%s.json", provisionerOut.Name))
 	if err != nil {
-		return fmt.Errorf("failed to create zstd encoder: %s", err)
+		log.Fatal(err)
 	}
-	p.CompressedData = encoder.EncodeAll(provisionerOut.RawSBOM, nil)
+	_, err = f.Write([]byte(provisionerOut.RawSBOM))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Close the zip writer to finalize the archive
+	if err := w.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	sbomZip := buf.Bytes()
+	p.CompressedData = sbomZip
 	p.SBOMFormat = provisionerOut.Format
 	p.SBOMName = provisionerOut.Name
 

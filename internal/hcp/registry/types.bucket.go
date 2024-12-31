@@ -4,10 +4,13 @@
 package registry
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 	"time"
@@ -15,8 +18,10 @@ import (
 	"github.com/hashicorp/packer/packer"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/hcp-sdk-go/clients/cloud-operation/stable/2020-05-05/client/operation_service"
 	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	sharedmodels "github.com/hashicorp/hcp-sdk-go/clients/cloud-shared/v1/models"
 	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
 	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 	"github.com/hashicorp/packer/hcl2template"
@@ -100,7 +105,6 @@ func (bucket *Bucket) connect() error {
 	if bucket.client != nil {
 		return nil
 	}
-
 	registryClient, err := hcpPackerAPI.NewClient()
 	if err != nil {
 		return errors.New("Failed to create client connection to artifact registry: " + err.Error())
@@ -226,6 +230,8 @@ func (bucket *Bucket) UpdateBuildStatus(
 }
 
 func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom packer.SBOM) error {
+	shaSum := fmt.Sprintf("%x", sha256.Sum256(sbom.CompressedData))
+
 	buildToUpdate, err := bucket.Version.Build(buildName)
 	if err != nil {
 		return err
@@ -237,21 +243,138 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom pac
 	if buildToUpdate.ID == "" {
 		return fmt.Errorf("the build for the component %q does not have a valid id", buildName)
 	}
-	_, err = bucket.client.Packer.PackerServiceUploadSbom(
-		&packer_service.PackerServiceUploadSbomParams{
+	resp, err := bucket.client.Packer.PackerServiceStartUploadSbom(
+		&packer_service.PackerServiceStartUploadSbomParams{
 			Context:     ctx,
 			BucketName:  bucket.Name,
 			Fingerprint: bucket.Version.Fingerprint,
 			BuildID:     buildToUpdate.ID,
-			Body: &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
-				CompressedSbom: sbom.CompressedData,
-				Name:           sbom.Name,
-				Format:         sbom.Format,
+			Body: &hcpPackerModels.HashicorpCloudPacker20230101StartUploadSbomBody{
+				Name:   sbom.Name,
+				Format: sbom.Format,
+				Sha256: shaSum,
 			},
 		},
 		nil,
 	)
+	if err != nil {
+		return err
+	}
+	log.Println(
+		"[TRACE] jennajenna uploading sbom",
+	)
+	err = upload(resp.Payload.UploadURL, sbom.CompressedData)
+	if err != nil {
+		return err
+	}
+
+	log.Print(
+		resp.Payload.UploadURL,
+	)
+	err = WaitForOperation(ctx, bucket.client.Operation, "upload-sbom", &sharedmodels.HashicorpCloudLocationLocation{
+		OrganizationID: bucket.client.OrganizationID,
+		ProjectID:      bucket.client.ProjectID,
+	}, resp.Payload.Operation.ID,
+	)
+
 	return err
+}
+
+// maxConsecutiveWaitErrors is the maximum number of consecutive http response errors
+// from the operation wait endpoint.
+const maxConsecutiveWaitErrors = 4
+
+const operationWaitTimeout = time.Minute * 3
+
+// WaitForOperation will poll the operation wait endpoint until an operation
+// is DONE, ctx is canceled, or consecutive errors occur waiting for operation to complete.
+func WaitForOperation(ctx context.Context, operationClient operation_service.ClientService, operationName string, loc *sharedmodels.HashicorpCloudLocationLocation, operationID string) error {
+	// Construct operation wait params.
+	waitTimeout := operationWaitTimeout.String()
+	waitParams := operation_service.NewWaitParams()
+	waitParams.Context = ctx
+	waitParams.ID = operationID
+	waitParams.Timeout = &waitTimeout
+	waitParams.LocationOrganizationID = loc.OrganizationID
+	waitParams.LocationProjectID = loc.ProjectID
+
+	// Start with no consecutive errors.
+	consecutiveErrors := 0
+
+	for {
+		// Use the function to improve break logic of for loop and case statements.
+		shouldBreak, err := func() (bool, error) {
+			// Prevent the loop from running faster than our timeout, in the case where an error causes the api to respond early.
+			notSoonerThan, cancel := context.WithTimeout(context.Background(), operationWaitTimeout)
+			defer cancel()
+
+			log.Printf("[INFO] Waiting for %s operation (%s)", operationName, operationID)
+			waitResponse, err := operationClient.Wait(waitParams, nil)
+			if err != nil {
+				// Increment consecutive errors - intermittent network errors shouldn't
+				// cause a all-out failure when waiting for an operation to complete.
+				consecutiveErrors++
+
+				// Terminate wait if the number of consecutive errors has exceeded the threshold.
+				if consecutiveErrors >= maxConsecutiveWaitErrors {
+					return true, err
+				}
+
+				log.Printf("[WARN] Error waiting for %s operation (%s), will retry if possible: %s", operationName, operationID, err.Error())
+			} else {
+				// Reset consecutive errors after a successful response.
+				consecutiveErrors = 0
+
+				log.Printf("[INFO] Received state of %s operation (%s): %s", operationName, operationID, *waitResponse.Payload.Operation.State)
+				if *waitResponse.Payload.Operation.State == sharedmodels.HashicorpCloudOperationOperationStateDONE {
+					if waitResponse.Payload.Operation.Error != nil {
+						err := fmt.Errorf("%s operation (%s) failed [code=%d, message=%s]",
+							operationName, waitResponse.Payload.Operation.ID, waitResponse.Payload.Operation.Error.Code, waitResponse.Payload.Operation.Error.Message)
+						return true, err
+					}
+
+					return true, nil
+				}
+			}
+
+			// Ensure we don't retry fast if the api responds faster than timeout.
+			select {
+			case <-ctx.Done():
+				return true, fmt.Errorf("context canceled waiting for %s operation (%s) to complete", operationName, operationID)
+			case <-notSoonerThan.Done():
+				return false, nil
+			}
+		}()
+		if err != nil {
+			return err
+		}
+
+		// Finish loop checking operation state.
+		if shouldBreak {
+			break
+		}
+	}
+
+	return nil
+}
+
+func upload(url string, b []byte) error {
+	reader := bytes.NewReader(b)
+	req, err := http.NewRequest("PUT", url, reader)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "multipart/form-data")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to upload SBOM to HCP Packer AWS account, status code %d", res.StatusCode)
+	}
+	return nil
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
