@@ -12,6 +12,7 @@ import (
 
 	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
 
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/klauspost/compress/zstd"
 
 	"time"
@@ -249,7 +250,7 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
-	SBOMFormat     string
+	SBOMFormat     hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
 	SBOMName       string
 }
 
