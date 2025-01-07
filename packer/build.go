@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
@@ -56,7 +57,7 @@ type CoreBuild struct {
 
 type SBOM struct {
 	Name           string
-	Format         string
+	Format         hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
 	CompressedData []byte
 }
 

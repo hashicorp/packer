@@ -246,7 +246,7 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom pac
 			Body: &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
 				CompressedSbom: sbom.CompressedData,
 				Name:           sbom.Name,
-				Format:         sbom.Format,
+				Format:         &sbom.Format,
 			},
 		},
 		nil,
