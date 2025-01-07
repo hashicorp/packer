@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/CycloneDX/cyclonedx-go"
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	spdxjson "github.com/spdx/tools-golang/json"
 )
 
@@ -61,11 +62,11 @@ func validateSPDX(content []byte) error {
 }
 
 // validateSBOM validates the SBOM file and returns the format of the SBOM.
-func validateSBOM(content []byte) (string, error) {
+func validateSBOM(content []byte) (hcpPackerModels.HashicorpCloudPacker20230101SbomFormat, error) {
 	// Try validating as SPDX
 	spdxErr := validateSPDX(content)
 	if spdxErr == nil {
-		return "spdx", nil
+		return hcpPackerModels.HashicorpCloudPacker20230101SbomFormatSPDX, nil
 	}
 
 	if vErr, ok := spdxErr.(*ValidationError); ok {
@@ -74,7 +75,7 @@ func validateSBOM(content []byte) (string, error) {
 
 	cycloneDxErr := validateCycloneDX(content)
 	if cycloneDxErr == nil {
-		return "cyclonedx", nil
+		return hcpPackerModels.HashicorpCloudPacker20230101SbomFormatCYCLONEDX, nil
 	}
 
 	if vErr, ok := cycloneDxErr.(*ValidationError); ok {
