@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
@@ -116,8 +117,8 @@ type PackerSBOM struct {
 	RawSBOM []byte `json:"raw_sbom"`
 	// Format is the format detected by the provisioner
 	//
-	// Supported values: `spdx` or `cyclonedx`
-	Format string `json:"format"`
+	// Supported values: `SPDX` or `CYCLONEDX`
+	Format hcpPackerModels.HashicorpCloudPacker20230101SbomFormat `json:"format"`
 	// Name is the name of the SBOM to be set on HCP Packer
 	//
 	// If unset, HCP Packer will generate one
