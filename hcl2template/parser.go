@@ -165,6 +165,14 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		return cfg, diags
 	}
 
+	// Looks for invalid arguments or unsupported block types
+	{
+		for _, file := range files {
+			_, moreDiags := file.Body.Content(configSchema)
+			diags = append(diags, moreDiags...)
+		}
+	}
+
 	// Decode required_plugins blocks.
 	//
 	// Note: using `latest` ( or actually an empty string ) in a config file
@@ -585,8 +593,7 @@ func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 	var diags hcl.Diagnostics
 
 	body := file.Body
-	content, moreDiags := body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := body.Content(configSchema)
 
 	for _, block := range content.Blocks {
 		switch block.Type {
