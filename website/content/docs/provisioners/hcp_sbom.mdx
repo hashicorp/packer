@@ -1,0 +1,39 @@
+---
+page_title: hcp_sbom provisioner reference
+description: |-
+ The hcp-sbom Packer provisioner uploads a CycloneDX or SPDX JSON-formatted software bill of materials record to HCP Packer.
+---
+
+<BadgesHeader>
+  <PluginBadge type="official" />
+</BadgesHeader>
+
+# `hcp-sbom` provisioner reference
+
+The `hcp-sbom` provisioner uploads software bill of materials (SBOM) files from artifacts built by Packer to HCP Packer. You must format  SBOM files you want to upload as JSON and follow either the [SPDX](https://spdx.github.io/spdx-spec/latest) or [CycloneDX](https://cyclonedx.org/) specification. HCP Packer ties these SBOM files to the version of the artifact that Packer builds.
+
+## Example
+
+The following example uploads an SBOM from the local `/tmp` directory and stores a copy in the `/sboms-catalog` directory on the local machine:
+
+```hcl
+provisioner "hcp-sbom" {
+    source = "/tmp/sbom_cyclonedx.json"
+    sbom_name = "my_sbom"
+    destination = "./sbom_cyclonedx.json"
+}
+```
+
+## Configuration reference
+
+You can specify the following configuration options.
+
+Required parameters:
+
+- `source` (string) - The path to the SBOM file in the Packer artifact. This file must either be in the SPDX or CycloneDX format.
+
+Optional parameters:
+
+- `sbom_name` (string) - The name of the SBOM file stored in HCP Packer. If omitted, HCP Packer uses the build fingerprint as the file name. This value must be between three and 36 characters from the following set: `[A-Za-z0-9_-]`.
+
+- `destination` (string) - The path on the local machine to store a copy of the SBOM file. You can specify an absolute or a path relative to the working directory when you execute the Packer build.

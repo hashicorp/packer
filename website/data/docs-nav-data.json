@@ -805,6 +805,10 @@
         "path": "provisioners/windows-restart"
       },
       {
+        "title": "HCP Software Bill of Materials",
+        "path": "provisioners/hcp_sbom"
+      },
+      {
         "title": "Custom",
         "path": "provisioners/custom"
       },
