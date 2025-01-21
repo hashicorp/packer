@@ -45,8 +45,6 @@ func (ts *PackerTestSuite) PackerCommand() *packerCommand {
 			// make them as self-contained and quick as possible.
 			// Removing telemetry here is probably for the best.
 			"CHECKPOINT_DISABLE": "1",
-			"HOME":               os.Getenv("HOME"),
-			"PATH":               os.Getenv("PATH"),
 		},
 		t: ts.T(),
 	}
