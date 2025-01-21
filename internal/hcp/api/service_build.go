@@ -6,6 +6,7 @@ import (
 
 	hcpPackerAPI "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/hashicorp/packer/packer"
 )
 
 func (c *Client) CreateBuild(
@@ -92,4 +93,28 @@ func (c *Client) UpdateBuild(
 	}
 
 	return resp.Payload.Build.ID, nil
+}
+
+func (c *Client) UploadSbom(
+	ctx context.Context,
+	bucketName, fingerprint string,
+	buildID string,
+	sbom packer.SBOM,
+) error {
+
+	params := hcpPackerAPI.NewPackerServiceUploadSbomParamsWithContext(ctx)
+	params.BuildID = buildID
+	params.LocationOrganizationID = c.OrganizationID
+	params.LocationProjectID = c.ProjectID
+	params.BucketName = bucketName
+	params.Fingerprint = fingerprint
+
+	params.Body = &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
+		CompressedSbom: sbom.CompressedData,
+		Format:         &sbom.Format,
+		Name:           sbom.Name,
+	}
+
+	_, err := c.Packer.PackerServiceUploadSbom(params, nil)
+	return err
 }
