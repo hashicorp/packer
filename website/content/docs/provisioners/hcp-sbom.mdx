@@ -1,7 +1,6 @@
 ---
 description: |
-  The `hcp-sbom` Packer provisioner downloads an SBOM file from the guest VM and
-  sends it to HCP Packer when the build is done.
+  The hcp-sbom Packer provisioner uploads a CycloneDX or SPDX JSON-formatted software bill of materials record to HCP Packer.
 page_title: HCP SBOM - Provisioners
 ---
 
@@ -13,52 +12,54 @@ page_title: HCP SBOM - Provisioners
 
 Type: `hcp-sbom`
 
-The `hcp-sbom` Packer provisioner downloads an SBOM file from the guest machine
-and sends it to HCP Packer when the build is complete (only if the template is
-HCP-enabled). The SBOM file is automatically removed at the end of the process.
-If you want to retain a copy of the SBOM file, you can specify the
-`destination` option in the provisioner.
+The `hcp-sbom` provisioner uploads software bill of materials (SBOM) files from artifacts built by Packer to HCP Packer. You must format  SBOM files you want to upload as JSON and follow either the [SPDX](https://spdx.github.io/spdx-spec/latest) or [CycloneDX](https://cyclonedx.org/) specification. HCP Packer ties these SBOM files to the version of the artifact that Packer builds.
 
-Currently, we support `CycloneDX` and `SPDX` SBOM formats in `JSON`.
+## Example
 
-## Basic Example
+The following example uploads an SBOM from the local `/tmp` directory and stores a copy at `./sbom/sbom_cyclonedx.json` on the local machine.
 
-
-In HCL2:
+<Tabs>
+<Tab heading="HCL2">
 
 ```hcl
 provisioner "hcp-sbom" {
-  source = "/tmp/sbom_cyclonedx.json"
+  source      = "/tmp/sbom_cyclonedx.json"
   destination = "./sbom/sbom_cyclonedx.json"
+  sbom_name   = "sbom-cyclonedx"
 }
 ```
 
-In JSON:
+</Tab>
+<Tab heading="JSON">
 
 ```json
 {
   "type": "hcp-sbom",
   "source": "/tmp/sbom_cyclonedx.json",
-  "destination": "./sbom/sbom_cyclonedx.json"
+  "destination": "./sbom/sbom_cyclonedx.json",
+  "sbom_name": "sbom-cyclonedx"
 }
 ```
 
+</Tab>
+</Tabs>
 
+## Configuration reference
 
-## Configuration Reference
+You can specify the following configuration options.
 
-Required Parameters:
+Required parameters:
 
 @include 'provisioner/hcp-sbom/Config-required.mdx'
 
-Optional Parameters:
+Optional parameters:
 
 @include '/provisioner/hcp-sbom/Config-not-required.mdx'
 
-## Example Usage
+## Example usage
 
-
-In HCL2:
+<Tabs>
+<Tab heading="HCL2">
 
 ```hcl
 packer {
@@ -95,11 +96,13 @@ build {
   provisioner "hcp-sbom" {
     source      = "/tmp/sbom_cyclonedx.json"
     destination = "./sbom"
+    sbom_name   = "sbom-cyclonedx"
   }
 }
 ```
 
-In JSON:
+</Tab>
+<Tab heading="JSON">
 
 ```json
 {
@@ -123,8 +126,12 @@ In JSON:
     {
       "type": "hcp-sbom",
       "source": "/tmp/sbom_cyclonedx.json",
-      "destination": "./sbom"
+      "destination": "./sbom",
+      "sbom_name": "sbom-cyclonedx"
     }
   ]
 }
 ```
+
+</Tab>
+</Tabs>
