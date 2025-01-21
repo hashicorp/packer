@@ -15,7 +15,6 @@ import (
 	"github.com/hashicorp/packer/packer"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
 	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
@@ -231,27 +230,10 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom pac
 		return err
 	}
 
-	log.Println(
-		"[TRACE] jennajenna uploadsbom called", buildToUpdate.ID,
-	)
 	if buildToUpdate.ID == "" {
 		return fmt.Errorf("the build for the component %q does not have a valid id", buildName)
 	}
-	_, err = bucket.client.Packer.PackerServiceUploadSbom(
-		&packer_service.PackerServiceUploadSbomParams{
-			Context:     ctx,
-			BucketName:  bucket.Name,
-			Fingerprint: bucket.Version.Fingerprint,
-			BuildID:     buildToUpdate.ID,
-			Body: &hcpPackerModels.HashicorpCloudPacker20230101UploadSbomBody{
-				CompressedSbom: sbom.CompressedData,
-				Name:           sbom.Name,
-				Format:         &sbom.Format,
-			},
-		},
-		nil,
-	)
-	return err
+	return bucket.client.UploadSbom(ctx, bucket.Name, bucket.Version.Fingerprint, buildToUpdate.ID, sbom)
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
