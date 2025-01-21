@@ -1,3 +1,131 @@
+## 1.12.0 (January 22, 2025)
+
+### FEATURES:
+
+* core: add support for a DAG-based evaluation on locals and datasources.
+      A long-standing odditiy of Packer has been the order of evaluation for
+      locals and data sources. In previous versions of Packer, the
+      data sources were evaluated first, then the local variables were, making
+      it impossible to have a datasource that referenced a local variable as
+      part of its configuration.
+      This change introduces a Directed Acyclic Graph (DAG) to evaluate those
+      resources, instead of the phased approach of old, which makes the order
+      of evaluation not dependent on the type of resource, but instead of the
+      detected dependencies between them.
+      **Note**: While we are confident this should be robust enough for general
+      use, we do recognise that it is possible some users might encounter issues.
+      To give those users a way to continue using the old evaluation method, we
+      introduced a `-use-sequential-evaluation` command-line flag to the build,
+      validate, console and inspect subcommands, to force using the sequential
+      evaluation approach for those entities.
+      [GH-13155](https://github.com/hashicorp/packer/pull/13155)
+
+* core/hcp: support for uploading SBOMs to HCP Packer.
+      Software Bill of Materials (SBOM) are a standardised way to export the various
+      software packages linked to an artifact. As some users have expressed a
+      need to produce and access those for images they build, we now add the
+      feature to Packer itself.
+      While the generation of the SBOM itself is not done directly by
+      Packer, instead we recommend using known scanners to produce them, we add
+      the capacity to upload this SBOM file to HCP Packer, and link it to a
+      build artifact.
+      [GH-13171](https://github.com/hashicorp/packer/pull/13171)
+
+* core: support for alternate serialisation formats for plugin communication.
+      Packer relies on plugins to do most of the actual workload related to
+      building and provisioing artifacts, while Packer is mostly an orchestrator
+      for those plugins to perform their work.
+      This separation of concerns implies that both entities have to
+      communicate on multiple occasions during the course of a build.
+      Before v1.12.0 of Packer, and v0.6.0 of the plugin SDK, we used Gob to
+      do most of the serialisation for those steps.
+      This is however a bit of a problem recently, as go-cty, the library we
+      use for dynamic objects lifted from HCL templates, dropped support for
+      this a while back.
+      Therefore now, we introduce an alternative: protobuf/msgpack, which are
+      both usable and maintained by the projects around Packer, so we can begin
+      our transition away from gob with this change.
+      **Note**: as with the introduction of the DAG for locals/datasources, this
+      is a feature that we are reasonably confident you will not encounter bugs
+      with, however we cannot rule-out this possibility, therefore we introduce
+      a new environment variable: `PACKER_FORCE_GOB`, which if set to '1', forces
+      the use of Gob instead of protobuf/msgpack.
+      [GH-13120](https://github.com/hashicorp/packer/pull/13120)
+
+### IMPROVEMENTS:
+
+* hcl2/json: add `aws_secretsmanager_raw` funcion.
+      When using the AWS secretsmanager function with a non-text secret, one could
+      only get a secret once at a time.
+      This could get cumbersome if wanting to get multiple through one request,
+      which led people to encode their JSON/Object secrets as a big base64
+      encoded string that they could get once, and then manipulate through JSON
+      functions.
+      While the workaround works, it is one extra layer of manipulations to do so,
+      therefore a new function to always get the raw textual version of a secret
+      is now added to Packer.
+      [GH-13242](https://github.com/hashicorp/packer/pull/13242)
+* hcl2: add `alltrue` and `anytrue` functions.
+      As with Terraform, Packer now supports the HCL functions `alltrue` and
+      `anytrue`, which returns whether or not a collection only consists of
+      `true` values, or if any is.
+      [GH-13237](https://github.com/hashicorp/packer/pull/13237)
+* hcl2: add `strcontains` function.
+      As with Terraform, Packer now supports the HCL function `strcontains`,
+      which returns whether or not a string contains a substring within it.
+      [GH-13217](https://github.com/hashicorp/packer/pull/13217)
+      [GH-13222](https://github.com/hashicorp/packer/pull/13222)
+* datasource/http: Support other methods than GET.
+      The HTTP datasource used to always use GET requests for getting data
+      from a remote HTTP server, which was not always enough since some endpoints
+      may only support other methods. This change allows for most of the HTTP
+      methods to perform those requests.
+      [GH-13190](https://github.com/hashicorp/packer/pull/13190)
+* hcl2: add `base64gzip` function.
+      In some cases, small blobs may need to be kept in memory, and injected in
+      a template somewhere else, but if the blob needs to be minimised, the
+      base64gzip function can be invoked to compress the blob and expose it
+      as a valid HCL2 string for use later.
+      [GH-13142](https://github.com/hashicorp/packer/pull/13142)
+
+### BUG FIXES:
+
+* hcl2: Fix duplicate error messages on top-level HCL violations.
+      A parsing quirk for HCL templates caused Packer to produce the same parsing
+      error multiple times if the error was caused by a top-level violation.
+      [GH-13245](https://github.com/hashicorp/packer/pull/13245)
+* build: Include LC_UUID in Darwin binaries.
+      A change in how Apple authorises a plugin to access the network caused
+      Packer to break on recent (14.7 and above) macOS versions, as Packer uses
+      the local network to communicate with plugins.
+      The fix is to include an additional UUID into the metadata of the produced
+      binary, so it is authorised by macOS to use the local network, which prompts
+      an update to the version of Go used for building Packer (1.22.9), as it is
+      when this addition is supported by an LDFLAG.
+      [GH-13214](https://github.com/hashicorp/packer/pull/13214)
+* hcl2: Don't error on empty bucker slug.
+      As reported by members of our community, using a hcp_packer_registry
+      block without a bucket slug, even if provided by external means, would cause
+      Packer to fail with an invalid bucket slug error. This is most definitely
+      a bug, which is addressed in this release.
+      [GH-13210](https://github.com/hashicorp/packer/pull/13210)
+* hcp: fix bug when trying to extract HEAD SHA from empty Git repo.
+      [GH-13165](https://github.com/hashicorp/packer/pull/13165)
+
+### SECURITY:
+
+* Bump to go-crypto v0.31.0
+      [GH-13233](https://github.com/hashicorp/packer/pull/13233)
+
+### NOTES:
+
+* docs: fix UUIDv4 example. A community user has found discrepancies in the
+      UUIDv4 examples which were used in our docs, as they do not match the
+      standard.
+      [GH-13229](https://github.com/hashicorp/packer/pull/13229)
+* hcl2: fix slice initialisation method during variable evaluation phase.
+      [GH-13175](https://github.com/hashicorp/packer/pull/13175)
+
 ## 1.11.2 (July 30, 2024)
 
 ### FEATURES
