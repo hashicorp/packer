@@ -1,15 +1,14 @@
 ---
+page_title: Data sources overview
 description: |
-  Data sources allow data to be fetched for use in Packer configuration. Use of data sources
-  allows a build to use information defined outside of Packer.
-page_title: Data Sources
+  A data source holds data you want to use in the Packer configuration. Define a data source in your configuration so that Packer can use external data during builds.
 ---
 
-# Data Sources
+# Data sources
 
 Data sources let Packer fetch data to use in a template, including information defined outside of Packer.
 
 Refer to the [`data`](/packer/docs/templates/hcl_templates/datasources) block documentation to learn more about working with data sources. The documentation also contains details about each type of data source.
 
--> **Note:** Data sources is a feature exclusively available to HCL2 templates included in Packer `v1.7.0` (and newer).
+Data sources are only available in HCL2 templates and require Packer `v1.7.0` and newer.
 

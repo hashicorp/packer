@@ -740,7 +740,7 @@
     ]
   },
   {
-    "title": "Data Sources",
+    "title": "Data sources reference",
     "routes": [
       {
         "title": "Overview",
@@ -754,25 +754,35 @@
             "path": "datasources/hcp"
           },
           {
-            "title": "Version",
+            "title": "hcp-packer-version",
             "path": "datasources/hcp/hcp-packer-version"
           },
           {
-            "title": "Artifact",
+            "title": "hcp-packer-artifact",
             "path": "datasources/hcp/hcp-packer-artifact"
           },
           {
-            "title": "Iteration",
-            "path": "datasources/hcp/hcp-packer-iteration"
+            "title": "hcp-packer-iteration",
+            "path": "datasources/hcp/hcp-packer-iteration",
+            "badge" : {
+              "text": "DEPRECATED",
+              "type": "outlined",
+              "color": "neutral"
+            }
           },
           {
-            "title": "Image",
-            "path": "datasources/hcp/hcp-packer-image"
+            "title": "hcp-packer-image",
+            "path": "datasources/hcp/hcp-packer-image",
+            "badge" : {
+              "text": "DEPRECATED",
+              "type": "outlined",
+              "color": "neutral"
+            }
           }
         ]
       },
       {
-        "title": "HTTP",
+        "title": "http",
         "path": "datasources/http"
       }
     ]
