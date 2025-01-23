@@ -1,0 +1,47 @@
+---
+page_title: Upgrade to v1.12
+description: Learn how to upgrade your Packer installation to v1.12
+---
+
+# Upgrade to v1.12
+
+The topic describes upgrade considerations for Packer v1.12. Refer to the [v1.12 release notes](/packer/docs/release-notes/v1_12) for details about changes in v1.12.
+
+## Overview
+
+You can use the upgrade command for the package manager you installed Packer with or download and replace the existing binary to upgrade Packer. Refer to [Install Packer](https://developer.hashicorp.com/packer/install) for instructions.
+
+## Upgrade from 1.11
+
+Packer 1.12's notable changes can be summarised by the following points:
+
+1. Protocol changes for Packer/plugin communication
+2. Introduction of a Directed Acyclic Graph (DAG) for Data Sources and Locals
+
+**Note**: These are not breaking changes, and your templates should continue working as-is.
+
+## Protocol changes
+
+When initialising, Packer is now able to pick between two different protocols for communication with plugins: gob (legacy), and protobuf/msgpack.
+
+The protobuf/msgpack protocol will become the standard approach after this release, but in order to avoid breaking retro-compatibility, Packer only chooses this protocol if the following conditions are true:
+
+1. All the plugin candidates for a build support the new protocol
+2. Packer supports the protocol
+
+This is an internal Packer change and should be completely transparent to you.
+However, if you start seeing errors with Packer/plugin communication like serialization errors, please [report it to us](https://github.com/hashicorp/packer/issues) so we can fix it in a later version.
+You can set the `PACKER_FORCE_GOB` environment variable to force Packer and plugins to use the legacy serialization format for communication.
+
+Example: `export PACKER_FORCE_GOB=1` will force using gob for serialization.
+
+## Data Source and Locals DAG support
+
+In order to allow more flexibility in how you define data sources and locals, we introduced a graph-based approach to scheduling the evaluation of those components.
+With this change, you can use a local variable in a data source, and vice-versa. You are not bound to a strict evaluation order.
+
+If your templates worked with older versions of Packer, this change should be transparent to you.
+However, if you are experiencing errors with your data sources or locals, typically errors due to unkown values, or other dependency problems, please [report it to us](https://github.com/hashicorp/packer/issues) so we can fix it in a later version.
+You can use the `--use-sequential-evaluation` command-line option can be used to revert back to the evaluation scheduler that Packer used prior to v1.12.0.
+
+Example: `packer build --use-sequential-evaluation <TEMPLATE>` will force Packer to use the sequential evaluation methods.
