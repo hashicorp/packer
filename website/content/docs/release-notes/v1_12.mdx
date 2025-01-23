@@ -1,0 +1,71 @@
+---
+page_title: Packer v1.12 release notes
+description: Learn about the changes in Packer v 1.12
+---
+
+# Packer v1.12 release notes
+
+This page describes changes to Packer in v1.12. Refer to the [Packer repository](https://github.com/hashicorp/packer/releases) for information about all releases.
+
+## New features
+
+This release includes the following updates.
+
+### HCP Packer SBOM Support
+
+In Packer 1.12, you can upload software bill of materials (SBOMs) to HCP Packer and associate it with an artifact version.
+SBOMs are a standardized way to export information about a system.
+In Packer's case, the generally useful information that you may find in a SBOM for an artifact is the list of installed packages, along with extra information on the system built: OS, version, kernel, architecture, etc.
+
+While we support uploading SBOMs to HCP Packer as part of a build, we do not offer a special-purpose provisioner or tooling to produce them.
+Instead we encourage you to use a third-party scanner to produce the SBOM on the VM you are provisioning, and then you can use the [`hcp-sbom` provisioner](https://developer.hashicorp.com/packer/docs/provisioners/hcp-sbom) to upload it when your Packer build completes.
+
+### Data source and Locals evaluation order changes
+
+Older versions of Packer used a phase-based approach, where it evaluated data sources first, then local variables.
+This made it impossible for a data source to reference a local variable.
+
+Packer 1.12 introduces a Directed Acyclic Graph (DAG) approach to evaluating data sources and locals.
+This loosens the dependency order between those components, and now you can reference them from both contexts.
+
+This change is a step in the direction of a complete pivot to using a DAG for evaluating everything in a Packer build, along with the other improvements this can yield in future releases.
+
+### Serialisation format upgrades for Packer-Plugin communication
+
+More than one year ago, a dependency of ours (`go-cty`) dropped support for `gob` encoding.
+This made it impossible for plugin developers to upgrade to more recent versions of the HCL2 libraries, because otherwise their plugin became incapable to commuinicate with Packer.
+We temporarily addressed this issue by forking the `go-cty` repository, and introduced replacement directives to every Packer plugin.
+While this fix was functional, it was not desirable as a long-term solution, and instead we were looking for a more permanent fix.
+
+Now, when Packer communicates with plugins, it swaps to using a protobuf/msgpack hybrid approach instead of relying on `gob`.
+We are introducing this change now in a non-breaking way: all the currently supported plugins are expected to continue working with Packer for the time being, and changing to using this new serialization approach will be transparent to you.
+
+### New HCL2 functions
+
+As part of Packer 1.12, we have introduced more functions that can be used in HCL2 templates, and one (`aws_secretsmanager_raw`) that can be used both in legacy JSON and HCL2 templates.
+
+* `anytrue`: check that a collection contains at least one `true` value.
+* `alltrue`: check that a collection contains only `true` values.
+* `aws_secretsmanager_raw`: get a raw secret from AWS Secrets Manager. Unlike `aws_secretsmanager`, this works with all types.
+* `base64gzip`: gzip compress a binary blob and expose it as a base64-encoded `string` to be used elsewhere in a template.
+* `strcontains`: checks that a string contains another.
+
+### `HTTP` data source support methods other than `GET`
+
+The HTTP data source, embedded with Packer, lets you retrieve data over HTTP from a remote server.
+Previous versions of Packer only supported `GET` to do so. Packer 1.12 loosens this by allowing for: `HEAD`, `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS` and `PATCH`.
+
+## Bug fixes
+
+### Include LC_UUID in macOS binaries
+
+Users of macOS started having permission-related problems when using Packer, after upgrading their OS versions.
+This problem was caused by an update to macOS's network-usage policies, where binaries that want to use the local loop interface to communicate over the network must now include a valid UUID.
+Starting with Packer 1.12, all macOS binaries include a valid LC_UUID, fixing this.
+
+### Less duplication of error messages in HCL2 templates
+
+If a template has an error in its top-level HCL2 template, Packer produces a parsing error.
+This is expected behavior when you write a Packer template: the tool helps you by pointing out grammar violations so you can remediate them.
+However, for a subset of HCL-related errors, older versions of Packer displayed the same message up to five times.
+Thanks to a community contribution, starting with Packer 1.12 we now no longer experience this.
