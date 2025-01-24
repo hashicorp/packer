@@ -91,6 +91,11 @@ module.exports = [
     destination: '/packer/docs/plugins/install',
     permanent: true,
   },
+  {
+    source: '/packer/docs/provisioners/custom',
+    destination: '/packer/docs/plugins/creation/custom-provisioners',
+    permanent: true,
+  }
   /**
    * END EMPTY PAGE REDIRECTS
    */

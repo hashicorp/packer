@@ -1,23 +1,18 @@
 ---
 description: |
-  The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
-  It assumes that the communicator in use is WinRM.
-page_title: PowerShell - Provisioners
+  The `powershell` Packer provisioner runs PowerShell scripts on Windows machines.
+  Learn how to use the provisioner with WinRM and SSH communicators.
+page_title: powershell provisioner reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# PowerShell Provisioner
+# `powershell` provisioner
 
-Type: `powershell`
-
-The PowerShell Packer provisioner runs PowerShell scripts on Windows machines.
-It assumes that the communicator in use is WinRM. However, the provisioner can
-work equally well (with a few caveats) when combined with the SSH communicator.
-See the [section
-below](#combining-the-powershell-provisioner-with-the-ssh-communicator) for
+The `powershell` Packer provisioner runs PowerShell scripts on Windows machines.
+The provisioner is designed for machines using WinRM as the communicator, but you can also use the provisioner with the SSH communicator. Refer to the [Combining the PowerShell Provisioner with the SSH Communicator](#combining-the-powershell-provisioner-with-the-ssh-communicator) for
 details.
 
 `@include 'path/separator-note.mdx'`

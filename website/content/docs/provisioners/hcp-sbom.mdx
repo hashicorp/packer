@@ -1,16 +1,14 @@
 ---
 description: |
-  The hcp-sbom Packer provisioner uploads a CycloneDX or SPDX JSON-formatted software bill of materials record to HCP Packer.
-page_title: HCP SBOM - Provisioners
+  The `hcp-sbom` Packer provisioner uploads a CycloneDX- or SPDX JSON-formatted software bill of materials record to HCP Packer. Learn how to use the `hcp-sbom` provisioner.
+page_title: hcp-sbom provisioner reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official"/>
 </BadgesHeader>
 
-# HCP SBOM Provisioner
-
-Type: `hcp-sbom`
+# `hcp-sbom` provisioner
 
 The `hcp-sbom` provisioner uploads software bill of materials (SBOM) files from artifacts built by Packer to HCP Packer. You must format  SBOM files you want to upload as JSON and follow either the [SPDX](https://spdx.github.io/spdx-spec/latest) or [CycloneDX](https://cyclonedx.org/) specification. HCP Packer ties these SBOM files to the version of the artifact that Packer builds.
 

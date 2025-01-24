@@ -795,40 +795,40 @@
         "path": "provisioners"
       },
       {
-        "title": "Breakpoint",
+        "title": "breakpoint",
         "path": "provisioners/breakpoint"
       },
       {
-        "title": "File",
+        "title": "file",
         "path": "provisioners/file"
       },
       {
-        "title": "HCP SBOM",
+        "title": "hcp-sbom",
         "path": "provisioners/hcp-sbom"
       },
       {
-        "title": "PowerShell",
+        "title": "powershell",
         "path": "provisioners/powershell"
       },
       {
-        "title": "Shell",
+        "title": "shell",
         "path": "provisioners/shell"
       },
       {
-        "title": "Shell (Local)",
+        "title": "shell-Local",
         "path": "provisioners/shell-local"
       },
       {
-        "title": "Windows Shell",
+        "title": "windows-shell",
         "path": "provisioners/windows-shell"
       },
       {
-        "title": "Windows Restart",
+        "title": "windows-restart",
         "path": "provisioners/windows-restart"
       },
       {
         "title": "Custom",
-        "path": "provisioners/custom"
+        "href": "/packer/docs/plugins/creation/custom-provisioners"
       },
       {
         "title": "Community-Supported",
