@@ -1,14 +1,22 @@
 ---
 description: |
-  Community-maintained builders are not part of the core Packer binary, but
-  can run alongside Packer with minimal extra effort.
-page_title: Community - Builders
+  Community-supported builders are developed and maintained by third-parties and not HashiCorp. Use them with Packer to extend Packer functionality.
+page_title: Community-supported builders
 ---
 
-# Community Builders
+# Community-supported builders
 
 The following builders are developed and maintained by various members of the
 Packer community, not by HashiCorp. For more information on how to use community
-builders, see our docs on [extending Packer](/packer/docs/plugins/creation).
+builders, refer to our docs on [extending Packer](/packer/docs/plugins/creation).
 
-@include 'builders/community_builders.mdx'
+- ARM builders
+
+  - [packer-plugin-arm-image](https://github.com/solo-io/packer-plugin-arm-image): Lets you extend onto existing system images.
+  - [packer-builder-arm](https://github.com/mkaczanowski/packer-builder-arm): Lets you extend or build new images with a variety of options, such as custom partition tables.
+
+- [Exoscale builder](https://github.com/exoscale/packer-plugin-exoscale) - Creates Exoscale custom templates based on a compute instance snapshot.
+
+- [Citrix XenServer/Citrix Hypervisor](https://github.com/xenserver/packer-builder-xenserver) - Plugin for creating [Citrix XenServer/Citrix Hypervisor](https://xenserver.org/) images from an ISO image or from an existing template.
+
+- [XCP-NG/Citrix XenServer/Citrix Hypervisor/Updated Fork](https://github.com/ddelnano/packer-plugin-xenserver) - Plugin for creating [XCP-NG/Citrix XenServer/Citrix Hypervisor](https://xcp-ng.org/) images from an ISO image or from an existing template. This is a fork of the orginal and reccomended by the developers of XCP-NG.
