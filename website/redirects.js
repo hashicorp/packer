@@ -94,4 +94,15 @@ module.exports = [
   /**
    * END EMPTY PAGE REDIRECTS
    */
+  {
+    source: '/packer/docs/builders/custom',
+    destination: '/packer/docs/plugins/creation/custom-builders',
+    permanent: true,
+  },
+  {
+    source: '/packer/docs/install',
+    destination: '/packer/install',
+    permanent: true,
+  }
+
 ]

@@ -722,19 +722,19 @@
         "path": "builders"
       },
       {
-        "title": "File",
+        "title": "file",
         "path": "builders/file"
       },
       {
-        "title": "Null",
+        "title": "null",
         "path": "builders/null"
       },
       {
-        "title": "Custom",
-        "path": "builders/custom"
+        "title": "Custom builders",
+        "href": "/packer/docs/plugins/creation/custom-builders"
       },
       {
-        "title": "Community-Supported",
+        "title": "Community builders",
         "path": "builders/community-supported"
       }
     ]
@@ -874,7 +874,7 @@
   },
   {
     "title": "Installing Packer",
-    "path": "install"
+    "href": "/packer/install"
   },
   {
     "title": "Configuring Packer",
