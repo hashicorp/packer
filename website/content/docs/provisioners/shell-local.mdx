@@ -1,24 +1,18 @@
 ---
 description: |
-  shell-local will run a shell script of your choosing on the machine where
-  Packer is being run - in other words, shell-local will run the shell script on
-  your build server, or your desktop, etc., rather than the remote/guest machine
-  being provisioned by Packer.
-page_title: Shell (Local) - Provisioners
+  The `shell-local` Packer provisioner runs shell scripts on the machine where Packer is running. Learn how to use the `shell-local` provisioner to run a shell script on your build server, desktop, or other local machine.
+page_title: shell-local provisioner reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# Local Shell Provisioner
+# `shell-local` provisioner
 
-Type: `shell-local`
-
-shell-local will run a shell script of your choosing on the machine where
-Packer is being run - in other words, shell-local will run the shell script on
-your build server, or your desktop, etc., rather than the remote/guest machine
-being provisioned by Packer.
+The `shell-local` provisioner runs shell scripts on the machine where
+Packer is running. Use the provisioner to run a shell script on your build server, desktop, or other local machine instead of the remote or guest machine you are 
+using Packer to provision.
 
 The [remote shell](/packer/docs/provisioners/shell) provisioner executes shell
 scripts on a remote machine.
