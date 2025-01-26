@@ -12,6 +12,17 @@ GOOS=$(shell go env GOOS)
 GOARCH=$(shell go env GOARCH)
 GOPATH=$(shell go env GOPATH)
 
+# SRC_ROOT is the top of the source tree.
+SRC_ROOT := $(shell git rev-parse --show-toplevel)
+
+TOOLS_MOD_DIR   := $(SRC_ROOT)/internal/tools
+TOOLS_BIN_DIR   := $(SRC_ROOT)/.tools/bin
+TOOLS_MOD_REGEX := "\s+_\s+\".*\""
+TOOLS_PKG_NAMES := $(shell grep -E $(TOOLS_MOD_REGEX) < $(TOOLS_MOD_DIR)/tools.go | tr -d " _\"" | grep -vE '/v[0-9]+$$')
+TOOLS_BIN_NAMES := $(addprefix $(TOOLS_BIN_DIR)/, $(notdir $(shell echo $(TOOLS_PKG_NAMES))))
+
+GOLANGCI_LINT := $(TOOLS_BIN_DIR)/golangci-lint
+
 # Get the git commit
 GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
 GIT_COMMIT=$(shell git rev-parse --short HEAD)
@@ -46,6 +57,15 @@ package:
 	$(if $(VERSION),,@echo 'VERSION= needed to release; Use make package skip compilation'; exit 1)
 	@sh -c "$(CURDIR)/scripts/dist.sh $(VERSION)"
 
+.PHONY: install-tools
+install-tools: $(TOOLS_BIN_NAMES)
+$(TOOLS_BIN_DIR):
+	@mkdir -p $@
+$(TOOLS_BIN_NAMES): $(TOOLS_BIN_DIR) $(TOOLS_MOD_DIR)/go.mod
+	$(eval MODULE_PATH=$(filter %/$(notdir $@),$(TOOLS_PKG_NAMES)))
+	@echo "==> Installing $(MODULE_PATH) at $@..."
+	cd $(TOOLS_MOD_DIR) && go build -o $@ -trimpath $(MODULE_PATH)
+
 install-build-deps: ## Install dependencies for bin build
 	@go install github.com/mitchellh/gox@v1.0.1
 
@@ -53,9 +73,7 @@ install-gen-deps: ## Install dependencies for code generation
 	@GO111MODULE=on go install github.com/dmarkham/enumer@master
 	@go install github.com/hashicorp/packer-plugin-sdk/cmd/packer-sdc@latest
 
-install-lint-deps: ## Install linter dependencies
-	@echo "==> Updating linter dependencies..."
-	@curl -sSfL -q https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOPATH)/bin v1.54.0
+install-lint-deps: $(GOLANGCI_LINT) ## Install linter dependencies
 
 dev: ## Build and install a development build
 	@grep 'const VersionPrerelease = ""' version/version.go > /dev/null ; if [ $$? -eq 0 ]; then \
@@ -91,15 +109,15 @@ docker-dev:
 lint: install-lint-deps ## Lint Go code
 	@if [ ! -z  $(PKG_NAME) ]; then \
 		echo "golangci-lint run ./$(PKG_NAME)/..."; \
-		golangci-lint run ./$(PKG_NAME)/...; \
+		$(GOLANGCI_LINT) run ./$(PKG_NAME)/...; \
 	else \
 		echo "golangci-lint run ./..."; \
-		golangci-lint run ./...; \
+		$(GOLANGCI_LINT) run ./...; \
 	fi
 
 ci-lint: install-lint-deps ## On ci only lint newly added Go source files
 	@echo "==> Running linter on newly added Go source files..."
-	GO111MODULE=on golangci-lint run --new-from-rev=$(shell git merge-base origin/main HEAD) ./...
+	GO111MODULE=on $(GOLANGCI_LINT) run --new-from-rev=$(shell git merge-base origin/main HEAD) ./...
 
 fmt: ## Format Go code
 	@go fmt ./...
