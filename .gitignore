@@ -30,3 +30,4 @@ Thumbs.db
 .project
 cache
 /.vscode/
+.tools/
