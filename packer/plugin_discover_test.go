@@ -377,7 +377,7 @@ func createMockChecksumFile(t testing.TB, filePath string) {
 	t.Helper()
 	cs, err := generateMockChecksumFile(filePath)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatal(err)
 	}
 	t.Logf("created fake plugin checksum file %s", cs)
 }
