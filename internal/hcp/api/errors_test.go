@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"errors"
 	"testing"
 
 	"google.golang.org/grpc/codes"
@@ -48,7 +48,7 @@ func TestCheckErrorCode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			found := CheckErrorCode(fmt.Errorf(tt.codeString), tt.expectCode)
+			found := CheckErrorCode(errors.New(tt.codeString), tt.expectCode)
 			if found != tt.expectSuccess {
 				t.Errorf("check error code returned %t, expected %t", found, tt.expectSuccess)
 			}

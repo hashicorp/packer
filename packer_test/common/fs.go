@@ -58,7 +58,7 @@ func WriteFile(t *testing.T, dest string, content string) {
 	}
 	defer outFile.Close()
 
-	_, err = fmt.Fprintf(outFile, content)
+	_, err = fmt.Fprint(outFile, content)
 	if err != nil {
 		t.Fatalf("failed to write to file %q: %s", dest, err)
 	}

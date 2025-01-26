@@ -27,7 +27,7 @@ var testHCPBuild string
 // environment because the template this test uses does not set them.
 func TestAccDatasource_HCPPackerIteration(t *testing.T) {
 	if os.Getenv(env.HCPClientID) == "" && os.Getenv(env.HCPClientSecret) == "" {
-		t.Skipf(fmt.Sprintf("Acceptance tests skipped unless envs %q and %q are set", env.HCPClientID, env.HCPClientSecret))
+		t.Skipf("Acceptance tests skipped unless envs %q and %q are set", env.HCPClientID, env.HCPClientSecret)
 		return
 	}
 
