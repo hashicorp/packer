@@ -1,17 +1,17 @@
 ---
 description: >
-  The variable block, also called the input-variable block, defines variables
-  within your Packer configuration.
-page_title: variable - Blocks
+  The `variable` and `input-variable` blocks define variables in your Packer configuration. Learn how to use these blocks to declare variables in your template.
+page_title: variable block reference
 ---
 
-# The `variable` block
+# `variable` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the `variable` block.
 
-The `variable` block, also called the `input-variable` block, defines variables
-within your Packer configuration. An input-variable cannot be used in another
-input variable: we recommend using [locals](/packer/docs/templates/hcl_templates/blocks/locals) for that instead.
+## Description
+
+The `variable` and `input-variable` blocks define variables
+within your Packer configuration. You cannot use the `input-variable` block in another `input-variable` block. We recommend using the [`locals`](/packer/docs/templates/hcl_templates/blocks/locals) to nest variables instead.
 
 `@include 'from-1.5/variables/foo-block.mdx'`
 
