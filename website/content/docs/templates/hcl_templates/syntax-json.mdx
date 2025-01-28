@@ -1,21 +1,16 @@
 ---
-page_title: JSON Configuration Syntax - Configuration Language
+page_title: JSON syntax reference
 description: |-
-  In addition to the native syntax that is most commonly used with Packer,
-  the HCL language can also be expressed in a JSON-compatible syntax.
+  A JSON configuration expresses HCL Packer templates as JSON-compatible syntax. Learn about the JSON syntax for creating HCL Packer templates.  
 ---
 
-# JSON Configuration Syntax
+# JSON syntax reference
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the JSON syntax you can use to express HCL Packer templates as JSON. For information about the HCL syntax, refer to [HCL syntax reference](/packer/docs/templates/hcl_templates/syntax).
 
-Most Packer configurations are written in [the native HCL
-syntax](/packer/docs/templates/hcl_templates/syntax), which is designed to be easy for humans to read and
-update.
+## Introduction
 
-Packer also supports an alternative syntax that is JSON-compatible. This
-syntax is useful when generating portions of a configuration programmatically,
-since existing JSON libraries can be used to prepare the generated
+Packer supports templates written in JSON, which is useful when generating portions of a configuration programmatically. This is because you can use existing JSON libraries to prepare the generated
 configuration files.
 
 This syntax is not to be confused with the pre-version-1.5 "legacy" Packer

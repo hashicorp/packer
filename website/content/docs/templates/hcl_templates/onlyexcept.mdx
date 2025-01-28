@@ -1,21 +1,22 @@
 ---
-page_title: Only Except - HCL Configuration Language
+page_title: only and except keywords reference
 description: >-
-  Only and Except can be used as a command line argument to selectively run
-  builds. Only and Except can also be used in a provisioner to not run it for a
-  source.
+  The `only` and `except` keywords are filters for Packer builds. Learn how to use `only` and `except` to selectively run provisioners and post-processors.  
 ---
 
-# Only and Except
+# `only` and `except` keywords
 
-`only` and `except` are keywords used to filter what runs in your Packer build,
-they can be seen as a command line argument:
+The `only` and `except` keywords are filters that let you selectively run provisioners and post-processors in your Packer build. You can use the keywords in your Packer templates and as flags on the Packer CLI.
+
+## Command line flags
 
 `@include 'commands/except.mdx'`
 
 `@include 'commands/only.mdx'`
 
-They can also be seen in a template to run or skip provisioners and/or
+## Templates 
+
+You can add the `only` and `except` keywords to run or skip provisioners and
 post-processors for a specific source:
 
 ```hcl
@@ -63,7 +64,7 @@ build {
 #  amazon-ebs.third-example
 ```
 
-Note that cli arguments can be used with a glob operator, using the previous
+Note that CLI arguments can be used with a glob operator, using the previous
 configuration:
 
 - `packer build -only 'my_build.*' dir`: will only run the builds in blocks
