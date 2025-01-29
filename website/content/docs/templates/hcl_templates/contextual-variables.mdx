@@ -1,17 +1,16 @@
 ---
-page_title: Contextual Variables - HCL Configuration Language
+page_title: Contextual variables reference
 description: >-
-  Special variables provide connection information and basic instance state
-  information.
-
-  This page covers all existing special variables.
+  Source variables, build variables, and other special variables are context dependent. Learn about contextual variables that return connection and instance state information.
 ---
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+# Contextual variables
+
+This topic provides reference information about special variables that return connection and basic instance state information based on the configuration context. 
 
 `@include 'from-1.5/contextual-source-variables.mdx'`
 
-# Build Variables
+## Build Variables
 
 Build variables will allow you to access connection information and basic instance state information for a builder.
 All special build variables are stored in the `build` variable:
@@ -86,7 +85,7 @@ For builder-specific builder variables, please also refer to the builder docs:
 The HCL2 Special Build Variables is in beta; please report any issues or requests on the Packer
 issue tracker on GitHub.
 
-# Packer Version
+## Packer Version
 
 This variable is set to the Packer version currently running.
 
@@ -130,7 +129,7 @@ Make sure to wrap your variable in single quotes in order to escape the
 string that is returned; if you are running a dev version of packer the
 parenthesis may through off your shell escaping otherwise.
 
-# HCP Packer Iteration ID
+## HCP Packer Iteration ID
 
 ~> **Note**: The `packer.iterationID` variable is now deprecated and will be removed in a future version of Packer. HCP Packer Versions should be accessed with their fingerprint instead. The `packer.versionFingerprint` variable is now exposed to be used in its stead with the new HCP Packer data sources.
 
@@ -176,7 +175,7 @@ build {
     mybuild.null.example: data is 01HN3KCRPVKR5PBQ28TS6B12W0
 ```
 
-# HCP Packer Version Fingerprint
+## HCP Packer Version Fingerprint
 
 If your build is pushing metadata to the HCP Packer registry, this variable is
 set to the value of the Version Fingerprint associated with this run.

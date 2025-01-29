@@ -1,27 +1,24 @@
 ---
 description: |
-  The post-processor section within a template configures any post-processing
-  that will be done to images built by the builders. Examples of post-processing
-  would be compressing files, uploading artifacts, etc.
-page_title: Post-Processors - Templates
+  The `post-processor` block defines actions to perform on images after Packer builds them. Learn how to configure the `post-processor` block in JSON templates.
+page_title: post-processors reference for JSON templates
 ---
+
+# `post-processors` reference for JSON templates
+
+This documentation describes how to configure a `post-processor` block in JSON
+templates. Refer to the documentation for each post-processor type for their specific configuration options.
 
 `@include 'from-1.5/legacy-json-warning.mdx'`
 
-# Template Post-Processors
+## Description
 
-The post-processor section within a template configures any post-processing
-that will be done to images built by the builders. Examples of post-processing
-would be compressing files, uploading artifacts, etc.
+The `post-processor` block defines additional actions to perform on the images built by the builders. For example, you can configure the `post-processor` to compress files and upload artifacts.
 
 Post-processors are _optional_. If no post-processors are defined within a
 template, then no post-processing will be done to the image. The resulting
 artifact of a build is just the image outputted by the builder.
 
-This documentation page will cover how to configure a post-processor in a
-template. The specific configuration options available for each post-processor,
-however, must be referenced from the documentation for that specific
-post-processor.
 
 Within a template, a section of post-processor definitions looks like this:
 

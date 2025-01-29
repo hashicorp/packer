@@ -1,25 +1,20 @@
 ---
 description: >
-  The JSON templates are JSON files that configure the various components
-  of Packer in order to create one or more machine images. Templates are
-  portable, static, and readable and writable by both humans and computers.
-  This has the added benefit of being able to not only create and modify
-  templates by hand, but also write scripts to dynamically create or modify
-  templates.
-page_title: JSON Templates
+  JSON templates are files that configure the Packer components that create one or more machine images. Learn how to configure JSON templates.
+page_title: JSON templates configuration reference
 ---
+
+# JSON templates configuration reference
+
+This topic provides reference information for creating JSON templates for Packer.
 
 `@include 'from-1.5/legacy-json-warning.mdx'`
 
-# JSON Templates
+## Introduction
 
-These Packer templates are JSON files that configure the various components
+You can create Packer templates as JSON files that configure the various components
 of Packer in order to create one or more machine images. Templates are portable,
-static, and readable and writable by both humans and computers.
-
-Templates are given to commands such as `packer build`, which will take the
-template and actually run the builds within it, producing any resulting machine
-images.
+static, and readable and writable by both humans and computers. Use the Packer CLI to run builds described in the template to produce any resulting machine images.
 
 ## JSON Template Structure
 

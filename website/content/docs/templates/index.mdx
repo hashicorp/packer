@@ -1,31 +1,26 @@
 ---
 description: |
-  This section describes the configuration language used to create Packer
-  templates.
-page_title: Templates
+  Packer templates are configuration files that determine Packer behavior. Learn about the Packer template configuration language.
+page_title: Packer templates reference overview
 ---
 
-# Packer Templates
+# Packer templates reference overview
 
-Packer's behavior is determined by the Packer template, which consists of a
-series of declarations and commands for Packer to follow. This template tells
-Packer what plugins (builders, provisioners, post-processors) to use, how to
-configure each of those plugins, and what order to run them in.
+This topic provides overview information about Packer templates, which are configuration files that determine Packer behavior.
+
+## Introduction
+
+A Packer template contains a series of declarations and commands for Packer to follow. Templates define the following instructions for Packer:
+
+- Which plugins, such as builders, provisioners, and post-processors to use 
+- How to configure the plugins
+- In what order to run them
 
 The template contains flexible variable injection tools, as well as built-in
 functions to help you customize your builds.
 
-Historically, Packer has used a JSON template for its configuration, but Packer
-is transitioning to a new template configuration format that uses HCL2 -- the
-same configuration language used by Terraform and HashiCorp's other products.
-This format is more flexible, more modular, and more concise than the original
-JSON template format. While the JSON format is still supported, certain
-new features in the Packer core will only be implemented for the newer HCL
-format. Please use the side bar to find documentation for the different
-template formats.
+## Template language
 
-From version **1.7.0**, HCL2 becomes officially the preferred way to write Packer
-configuration(s).
+Packer supports templates written in [HCL2](/packer/docs/templates/hcl_templates) or [JSON](/packer/docs/templates/legacy_json_templates). Since v1.7.0, HCL2 is the official format for Packer configurations.
 
-If you need help upgrading a JSON template to an HCL template, check
-our upgrade guide [here](/packer/tutorials/configuration-language/hcl2-upgrade).
+HCL2 is also the configuration language used in configurations for other HashiCorp products, such as Terraform. HCL is more flexible, modular, and concise than the JSON template format. Refer to [Upgrade Packer JSON template to HCL2](/packer/tutorials/configuration-language/hcl2-upgrade) for a tutorial on upgrading JSON templates to HCL templates.
