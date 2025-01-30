@@ -95,7 +95,7 @@ module.exports = [
     source: '/packer/docs/provisioners/custom',
     destination: '/packer/docs/plugins/creation/custom-provisioners',
     permanent: true,
-  }
+  },
   /**
    * END EMPTY PAGE REDIRECTS
    */
