@@ -1,14 +1,20 @@
 ---
 description: |
-  The provisioner block defines how a provisioner is configured.
-page_title: provisioner - build - Blocks
+  The `provisioner` block defines how to configure a provisioner. Learn how to configure `provisioner` blocks in your templates.
+page_title: provisioner block reference
 ---
 
-# The `provisioner` block
+# `provisioner` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic providers reference information about the `provisioner` block.
 
-The `provisioner` block defines how a provisioner is configured.
+## Description
+
+The `provisioner` block defines how to configure a provisioner. Provisioners use builtin and third-party software to install and configure the
+machine image after booting. Provisioners prepare the system for use.
+
+The list of available provisioners can be found in the
+[Provisioners](/packer/docs/provisioners) section.
 
 ```hcl
 # builds.pkr.hcl
@@ -22,12 +28,6 @@ build {
   }
 }
 ```
-
-Provisioners use builtin and third-party software to install and configure the
-machine image after booting. Provisioners prepare the system for use.
-
-The list of available provisioners can be found in the
-[provisioners](/packer/docs/provisioners) section.
 
 ## Run on Specific Sources
 

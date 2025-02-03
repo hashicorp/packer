@@ -1,16 +1,14 @@
 ---
-page_title: setintersection - Functions - Configuration Language
+page_title: setintersection function reference
 description: |-
-  The setintersection function takes multiple sets and produces a single set
-  containing only the elements that all of the given sets have in common.
+  The `setintersection` function creates one set from multiple sets that contains only elements common to all input sets. Learn how to use `setintersection` in Packer templates.
 ---
 
 # `setintersection` Function
 
 The `setintersection` function takes multiple sets and produces a single set
 containing only the elements that all of the given sets have in common.
-In other words, it computes the
-[intersection](<https://en.wikipedia.org/wiki/Intersection_(set_theory)>) of the sets.
+The new set is referred to as the _intersection_. 
 
 ```hcl
 setintersection(sets...)

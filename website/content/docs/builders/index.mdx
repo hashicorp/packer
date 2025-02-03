@@ -1,21 +1,20 @@
 ---
 description: |
-  Builders are responsible for creating machines and generating images from them
-  for various platforms.
-page_title: Builders
+  Builders create machines and generate images from them for various platforms. Learn about the types of builders you can use in your Packer templates.
+page_title: Builders overview
 ---
 
-# Builders
+# Builders overview
 
-Builders create machines and generate images from those machines for various platforms. Packer also has some builders that perform helper tasks, like running provisioners.
+Builders create machines and generate images from those machines for various platforms. Some builders in Packer perform helper tasks, such as running provisioners.
 
 Packer has the following types of builders:
 
-- [Plugin](/packer/plugins): Each plugin has its own associated set of builders. For example, there are separate builders for EC2, VMware, VirtualBox, etc.
-- [File](/packer/docs/builders/file): The `file` builder creates an artifact from a file.
-- [Null](/packer/docs/builders/null): The `null` builder sets up an SSH connection and runs the provisioners.
+- [Plugins](/packer/plugins): Plugins that you install have their own associated set of builders. For example, EC2, VMware, and VirtualBox use their own separate sets of builders.
+- [`file`](/packer/docs/builders/file): The `file` builder creates an artifact from a file.
+- [`null`](/packer/docs/builders/null): The `null` builder sets up an SSH connection and runs the provisioners.
 - [Custom](/packer/docs/plugins/creation/custom-builders): You can write new builders for new or existing platforms.
-- [Community-Supported](/packer/docs/builders/community-supported): The Packer community develops and maintains builders for several additional platforms.
+- [Community-supported](/packer/docs/builders/community-supported): The Packer community develops and maintains builders for several additional platforms.
 
 Refer to the [`source`](/packer/docs/templates/hcl_templates/blocks/source) block documentation to learn more about configuring builders in the Packer templating language.
 

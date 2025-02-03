@@ -1,13 +1,10 @@
 ---
 description: |
-  HCP Packer support allows plugins to manage image metadata that can be stored in a HCP Packer registry.
-page_title: HCP Packer Support
+  You can create or modify custom plugins to support HCP Packer. Add support for HCP Packer to let plugins manage image metadata stored in the HCP Packer registry.
+page_title: Enable HCP Packer support for custom plugins
 ---
 
-# HCP Packer Support
-
-~> **Note:** HCP Packer is under active development, and we suggest plugin maintainers to keep up with the SDK changes
-for more on HCP Packer support.
+# Enable HCP Packer Support for Custom Plugins
 
 This page explains how to update a custom plugin so that it can publish image metadata to the [HCP Packer registry](/hcp/docs/packer). Refer to [Custom Builders](/packer/docs/plugins/creation/custom-builders) and [Custom Post-Processors](/packer/docs/plugins/creation/custom-post-processors) for details about creating an external Packer plugin.
 
@@ -15,6 +12,8 @@ Before pushing metadata to the HCP Packer registry, Packer uses the [`par.artifa
 to query a builder artifact for the image metadata that a particular component would like to have stored in the registry.
 
 For details and examples of how to manage image metadata, refer to the [HCP Packer GitHub documentation](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer/registry/image).
+
+HCP Packer is under active development, and we suggest plugin maintainers to keep up with the SDK changes for more on HCP Packer support.
 
 ## Builder Artifact
 
@@ -110,6 +109,8 @@ The following plugins currently support HCP Packer and are great references for 
 
 ## HCP Packer
 
-To get to know HCP Packer, visit the
-[HCP Packer documentation](/hcp/docs/packer) or try the
-[Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).
+Refer to the following resources to learn about HCP Packer:
+
+- [HCP Packer documentation](/hcp/docs/packer) 
+- [HCP Packer tutorials](/packer/tutorials/hcp-get-started).
+- [Log into the HCP portal](https://portal.cloud.hashicorp.com)

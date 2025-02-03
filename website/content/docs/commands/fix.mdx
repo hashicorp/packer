@@ -1,20 +1,18 @@
 ---
 description: |
-  The `packer fix` command takes a template and finds backwards incompatible
-  parts of it and brings it up to date so it can be used with the latest version
-  of Packer. After you update to a new Packer release, you should run the fix
-  command to make sure your templates work with the new release.
-page_title: packer fix - Commands
+  The `packer fix` command updates backward incompatible templates for the running version of Packer. 
+page_title: packer fix command reference
 ---
 
-# `fix` Command
+# `packer fix` command reference
 
--> **Note** This command is not available on HCL2 templates yet, it will be added when we need to introduce the first 'fix'.
 
-The `packer fix` command takes a template and finds backwards incompatible
+The `packer fix` command takes a template and finds backward incompatible
 parts of it and brings it up to date so it can be used with the latest version
 of Packer. After you update to a new Packer release, you should run the fix
 command to make sure your templates work with the new release.
+
+-> **JSON template-only command**: You cannot use the `packer fix` command to update HCL2 templates.
 
 The fix command will output the changed template to standard out, so you should
 redirect standard out using standard OS-specific techniques if you want to save it
