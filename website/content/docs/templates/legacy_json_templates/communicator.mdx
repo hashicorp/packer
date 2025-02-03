@@ -1,19 +1,19 @@
 ---
 description: |
-  Communicators are the mechanism Packer uses to upload files, execute scripts,
-  etc. with the machine being created.
-page_title: Communicators - Templates
+  Packer uses communicators to upload files, execute scripts, and perform actions on the machine it creates. Learn how to configure communicators in JSON templates.
+page_title: Communicators reference for JSON templates 
 ---
+
+# Communicators reference for JSON templates
+
+This topic describes how to use communicators in Packer templates written in JSON format. 
 
 `@include 'from-1.5/legacy-json-warning.mdx'`
 
-# Template Communicators
+## Description
 
-Communicators are the mechanism Packer uses to upload files, execute scripts,
-etc. with the machine being created.
-
-Communicators are configured within the
-[builder](/packer/docs/templates/legacy_json_templates/builders) section.
+Packer uses communicators to upload files, execute scripts, and perform other actions on the machine being created. Configure communicators in the
+[`builder`](/packer/docs/templates/legacy_json_templates/builders) section.
 
 All communicators have the following options:
 

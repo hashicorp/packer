@@ -1,9 +1,9 @@
 ---
 description: |
-  The HCP Packer Version Data Source retrieves information about
-  HCP Packer Version from the HCP Packer Registry. This information can be used to
-  query HCP for a source external identifier for various Packer builders.
-page_title: HCP Packer Version - Data Sources
+  The `hcp-packer-version` data source retrieves information about
+  an HCP Packer version from the HCP Packer registry. Use this information to
+  get a source's external identifier.
+page_title: hcp-packer-version data source reference
 ---
 
 <BadgesHeader>
@@ -11,20 +11,17 @@ page_title: HCP Packer Version - Data Sources
   <PluginBadge type="hcp_packer_ready" />
 </BadgesHeader>
 
-# HCP Packer Version Data Source
+# `hcp-packer-version`
 
-Type: `hcp-packer-version`
-
-The `HCP Packer Version` Data Source retrieves information about
-HCP Packer Version from the HCP Packer Registry. This information can be used to
-query HCP for a source external identifier for various Packer builders.
+The `hcp-packer-version` dsata source retrieves information about
+an HCP Packer version from the HCP Packer registry. You can use the version information to
+query HCP for a source's external identifier so that you can use it in various Packer builders.
 
 To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/docs/packer) or try the
 [Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).
 
-~> **Note:** You will receive an error if you try to reference metadata from a deactivated or deleted registry.
-An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries
-with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
+Packer prints an error if you try to reference metadata from a deactivated or deleted registry.
+An administrator can manually deactivate or delete a registry, and HCP Packer automatically deactivates registries with billing issues. Contact [HashiCorp Support](https://support.hashicorp.com/) with questions.
 
 ## Revoked Versions
 

@@ -1,30 +1,22 @@
 ---
-page_title: Local Variables - HCL Configuration Language
+page_title: Local variables
 description: >-
-  Local variables assign a name to an expression that you can use multiple
-  times within a folder.
+  The `local` and `locals` blocks define local variables that assign a name to an expression. Learn how to configure local variables.
 ---
 
-# Local Variables
+# Local variables
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the `local` and `locals` blocks, which define local variables that you can use in your Packer templates. To learn about input variables, refer to
+[Input variables](/packer/docs/templates/hcl_templates/variables).
 
-There are two kinds of variables in HCL Packer templates: Input variables,
-sometimes simply called "variables", and Local variables, also known as
-"locals". Input variables may have defaults, but those defaults can be
-overridden using command line options, environment variables, or variable
-definitions files. Local variables can not be overridden.
-
-This page is about local variables. To learn about input variables, see the
-[input variables](/packer/docs/templates/hcl_templates/variables) page.
+## Introduction
 
 Local variables assign a name to an expression, which you can use multiple
 times within a folder. The expression is evaluated at run time, and can
 reference input variables, other local variables, data sources, and HCL
-functions.
+functions. You cannot overwrite local variables.
 
-Input variable and local variable usage are introduced in the [_Variables
-Guide_](/packer/guides/hcl/variables).
+Refer to [Input Variables and local variables](/packer/guides/hcl/variables) for additional information about variables in Packer. 
 
 ## Examples
 
@@ -126,7 +118,7 @@ _unrelated_ local variables in _separate_ blocks, and consider annotating each
 block with a comment describing any context common to all of the enclosed
 locals.
 
-## Known Limitations
+## Known limitations
 `@include 'datasources/local-dependency-limitation.mdx'`
 
 

@@ -1,20 +1,15 @@
 ---
 page_title: Data Sources
 description: >-
-  Data sources allow data to be fetched or computed for use elsewhere in local variables and
-  build sources configuration. Use of data sources
-  allows a Builder to make use of information defined outside of Packer.
+  A `data` block defines a data source that instructs Packer to query data defined outside of Packer for use in builds and sources. Learn how to configure `data` blocks to define data sources.
 ---
 
-# Data Sources
+# Data sources reference
 
--> **Note:** Data Sources is a feature included in Packer 1.7 and later.
+This topic describes how to use the `data` block to configure data sources in your HCL Packer templates. The `data` block instructs Packer to fetch or compute data for use in [`locals` blocks](/packer/docs/templates/hcl_templates/blocks/locals) and
+[`source` blocks](/packer/docs/templates/hcl_templates/blocks/source) so that builders can use of information defined outside of Packer.
 
-Data sources allow data to be fetched or computed for use elsewhere in [locals](/packer/docs/templates/hcl_templates/blocks/locals) and
-[sources](/packer/docs/templates/hcl_templates/blocks/source) configuration.
-Use of data sources allows a Builder to make use of information defined outside of Packer.
-
-# Using Data Sources
+## Using data sources
 
 A data source is declared using a data block, and the configuration looks like the following:
 
@@ -30,8 +25,8 @@ data "amazon-ami" "example" {
 }
 ```
 
-A data block requests that Packer read from a given data source ("amazon-ami") and export the result under the given
-local name ("example"). The name is used to refer to this data source from elsewhere in the same Packer configuration.
+A `data` block requests that Packer read from a given data source (`"amazon-ami"`) and export the result under the given
+local name (`"example"`). The name is used to refer to this data source from elsewhere in the same Packer configuration.
 
 The data block creates a data instance of the given _type_ (first block label) and _name_ (second block label).
 The combination of the type and name must be unique within a configuration.
@@ -75,7 +70,7 @@ source "amazon-ebs" "basic-example" {
 }
 ```
 
-## Known Limitations
+## Known limitations
 `@include 'datasources/local-dependency-limitation.mdx'`
 
 
