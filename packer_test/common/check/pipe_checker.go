@@ -50,7 +50,7 @@ func LineCount() Pipe {
 // This is useful typically for troubleshooting a pipe that misbehaves
 func Tee(t *testing.T) Pipe {
 	return CustomPipe(func(s string) (string, error) {
-		t.Logf(s)
+		t.Log(s)
 		return s, nil
 	})
 }
