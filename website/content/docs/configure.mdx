@@ -79,6 +79,12 @@ each can be found below:
 - `PACKER_CONFIG_DIR` - The location for the home directory of Packer. See
   [Packer's home directory](#packer-s-home-directory) for more.
 
+- `PACKER_GETTER_READ_TIMEOUT` - Override the timeout when a packer plugin
+  tries to fetch a ISO. The default is `30m`. This is specified as a string with
+  a duration suffix.  The plugin needs to be built on 
+  [v0.6.0](https://github.com/hashicorp/packer-plugin-sdk/releases/tag/v0.6.0)
+  and above of the SDK to be compatible with this variable.
+
 - `PACKER_GITHUB_API_TOKEN` - When using Packer init on HCL2 templates, Packer
   queries the public API from GitHub which has rate-limits on its APIs.
   You can set the `PACKER_GITHUB_API_TOKEN` environment variable
