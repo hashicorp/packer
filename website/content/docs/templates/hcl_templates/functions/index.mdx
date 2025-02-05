@@ -1,16 +1,16 @@
 ---
-page_title: Functions - Configuration Language
+page_title: Built-in functions reference overview
 description: |-
-  The HCL language has a number of built-in functions that can be called
-  from within expressions to transform and combine values.
+  Functions built into HCL language can transform and combine values. Learn about using built-in functions in your Packer templates. 
 ---
 
-# Built-in Functions
+# Built-in functions overview
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides an overview of the built-in HashiCorp configuration language (HCL) functions you can use in your Packer templates. 
 
-The HCL language includes a number of built-in functions that you can
-call from within expressions to transform and combine values. The general
+## Functions syntax
+
+You can use functions in Packer templates to transform and combine values. The 
 syntax for function calls is a function name followed by comma-separated
 arguments in parentheses:
 
@@ -19,8 +19,7 @@ max(5, 12, 9)
 ```
 
 For information on invoking functions in string literals, refer to the
-[String Literals](https://developer.hashicorp.com/packer/docs/templates/hcl_templates/expressions#string-literals) section
-in the HCL2 expressions documentation.
+[string literals reference](/packer/docs/templates/hcl_templates/expressions#string-literals) section.
 
-The HCL language does not support user-defined functions, and so only
-the functions built in to the language are available for use. The documentation includes all of the available built-in functions.
+HCL does not support user-defined functions. You can only call
+the functions built into the language. 

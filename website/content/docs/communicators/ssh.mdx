@@ -1,26 +1,29 @@
 ---
 description: |
-  The SSH communicator uses SSH to upload files, execute scripts, etc. on
-  the machine being created.
-page_title: Communicators - SSH
+  The `ssh` communicator establishes an SSH connection so that Packer can perform actions, such as upload files and execute scripts, on the machine it creates. 
+page_title: Establish an SSH connection
 ---
 
-# SSH Communicator
+# Establish an SSH Connection
+
+This topic describes how to use the `ssh` communicator to establish an SSH connection to the machine it creates so that Packer can perform actions, such as upload files and execute scripts. 
+
+## Introduction
 
 Communicators are the mechanism Packer uses to upload files, execute scripts,
 etc. on the machine being created, and are configured within the
 [builder](/packer/docs/templates/legacy_json_templates/builders) section.
 
-The SSH communicator does this by using the SSH protocol. It is the default
+The `ssh` communicator does this by using the SSH protocol. It is the default
 communicator for a majority of builders.
 
 If you have an SSH agent configured on the host running Packer, and SSH agent
 authentication is enabled in the communicator config, Packer will automatically
 forward the SSH agent to the remote host.
 
-## Getting Ready to Use the SSH Communicator
+## Getting Ready to Use the `ssh` Communicator
 
-The SSH communicator is the default communicator for a majority of builders, but
+The `ssh` communicator is the default communicator for a majority of builders, but
 depending on your builder it may not work "out of the box".
 
 If you are building from a cloud image (for example, building on Amazon), there
@@ -47,14 +50,14 @@ image bootstrapping, or research automatic configuration for your specific
 guest operating system. Knowing how to automatically initalize your operating
 system is critical for being able to successfully use Packer.
 
-## SSH Communicator
+## `ssh` Communicator Reference
 
-The SSH communicator connects to the host via SSH. If you have an SSH agent
+The `ssh` communicator connects to the host via SSH. If you have an SSH agent
 configured on the host running Packer, and SSH agent authentication is enabled
 in the communicator config, Packer will automatically forward the SSH agent to
 the remote host.
 
-The SSH communicator has the following options:
+The `ssh` communicator has the following options:
 
 @include "packer-plugin-sdk/communicator/SSH-not-required.mdx"
 
@@ -71,7 +74,7 @@ The SSH communicator has the following options:
 communicator; however, they may not be supported for every builder. Please refer
 to the builder documentation for supported options.
 
-### SSH Communicator Details
+### `ssh` Communicator Details
 
 Packer will only use one authentication method, either `publickey` or if
 `ssh_password` is used Packer will offer `password` and `keyboard-interactive`

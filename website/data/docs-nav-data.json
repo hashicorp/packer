@@ -667,7 +667,7 @@
             "path": "templates/legacy_json_templates"
           },
           {
-            "title": "Builders",
+            "title": "builders",
             "path": "templates/legacy_json_templates/builders"
           },
           {
@@ -679,15 +679,15 @@
             "path": "templates/legacy_json_templates/engine"
           },
           {
-            "title": "Post-Processors",
+            "title": "post-processors",
             "path": "templates/legacy_json_templates/post-processors"
           },
           {
-            "title": "Provisioners",
+            "title": "provisioners",
             "path": "templates/legacy_json_templates/provisioners"
           },
           {
-            "title": "User Variables",
+            "title": "variables",
             "path": "templates/legacy_json_templates/user-variables"
           }
         ]
@@ -722,25 +722,25 @@
         "path": "builders"
       },
       {
-        "title": "File",
+        "title": "file",
         "path": "builders/file"
       },
       {
-        "title": "Null",
+        "title": "null",
         "path": "builders/null"
       },
       {
-        "title": "Custom",
-        "path": "builders/custom"
+        "title": "Custom builders",
+        "href": "/packer/docs/plugins/creation/custom-builders"
       },
       {
-        "title": "Community-Supported",
+        "title": "Community builders",
         "path": "builders/community-supported"
       }
     ]
   },
   {
-    "title": "Data Sources",
+    "title": "Data sources reference",
     "routes": [
       {
         "title": "Overview",
@@ -754,25 +754,35 @@
             "path": "datasources/hcp"
           },
           {
-            "title": "Version",
+            "title": "hcp-packer-version",
             "path": "datasources/hcp/hcp-packer-version"
           },
           {
-            "title": "Artifact",
+            "title": "hcp-packer-artifact",
             "path": "datasources/hcp/hcp-packer-artifact"
           },
           {
-            "title": "Iteration",
-            "path": "datasources/hcp/hcp-packer-iteration"
+            "title": "hcp-packer-iteration",
+            "path": "datasources/hcp/hcp-packer-iteration",
+            "badge" : {
+              "text": "DEPRECATED",
+              "type": "outlined",
+              "color": "neutral"
+            }
           },
           {
-            "title": "Image",
-            "path": "datasources/hcp/hcp-packer-image"
+            "title": "hcp-packer-image",
+            "path": "datasources/hcp/hcp-packer-image",
+            "badge" : {
+              "text": "DEPRECATED",
+              "type": "outlined",
+              "color": "neutral"
+            }
           }
         ]
       },
       {
-        "title": "HTTP",
+        "title": "http",
         "path": "datasources/http"
       }
     ]
@@ -785,40 +795,40 @@
         "path": "provisioners"
       },
       {
-        "title": "Breakpoint",
+        "title": "breakpoint",
         "path": "provisioners/breakpoint"
       },
       {
-        "title": "File",
+        "title": "file",
         "path": "provisioners/file"
       },
       {
-        "title": "HCP SBOM",
+        "title": "hcp-sbom",
         "path": "provisioners/hcp-sbom"
       },
       {
-        "title": "PowerShell",
+        "title": "powershell",
         "path": "provisioners/powershell"
       },
       {
-        "title": "Shell",
+        "title": "shell",
         "path": "provisioners/shell"
       },
       {
-        "title": "Shell (Local)",
+        "title": "shell-Local",
         "path": "provisioners/shell-local"
       },
       {
-        "title": "Windows Shell",
+        "title": "windows-shell",
         "path": "provisioners/windows-shell"
       },
       {
-        "title": "Windows Restart",
+        "title": "windows-restart",
         "path": "provisioners/windows-restart"
       },
       {
         "title": "Custom",
-        "path": "provisioners/custom"
+        "href": "/packer/docs/plugins/creation/custom-provisioners"
       },
       {
         "title": "Community-Supported",
@@ -864,7 +874,7 @@
   },
   {
     "title": "Installing Packer",
-    "path": "install"
+    "href": "/packer/install"
   },
   {
     "title": "Configuring Packer",

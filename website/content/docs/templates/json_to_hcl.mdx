@@ -1,20 +1,23 @@
 ---
 description: |
-  This section highlights the differences between JSON and HCL2 templates and explains the parallels between the specifications.
-page_title: JSON to HCL
+  Learn about the differences between JSON and HCL2 templates and how converting templates to HCL affects plugins.
+page_title: Differences between HCL2 and JSON templates
 ---
 
-# Packer templates
+# Differences between HCL2 and JSON templates
 
-Packer uses templates to orchestrate builds for one or more images.
-In [legacy JSON templates](/packer/docs/templates/legacy_json_templates), you would declare a series of builders, provisioners and post-processors to build images.
-In [HCL2 templates](/packer/docs/templates/hcl_templates), things are different, as the configuration language allows you to specify builders through sources, and weave them in build blocks.
+This document explains the differences between JSON to HCL2 templates, including how converting JSON templates to HCL2 affects builder, provisioner, and post-processor behavior.
 
-This document aims to explain the parallels between the two configuration template types, and what you
-should expect when moving a template away from JSON to HCL2.
+## Introduction
 
-In addition to this document, you may find the `packer hcl2_upgrade` command useful when converting your existing JSON templates to HCL2.
-Refer to the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) page for more information on its usage.
+Packer uses JSON or HCL2 templates to orchestrate builds for one or more artifacts.
+
+In [legacy JSON templates](/packer/docs/templates/legacy_json_templates), declare a series of builders, provisioners, and post-processors to build images.
+
+In [HCL2 templates](/packer/docs/templates/hcl_templates), you can specify builders through sources and collect them into build blocks.
+
+You can use the `packer hcl2_upgrade` command when converting your existing JSON templates to HCL2. Refer to the [hcl2_upgrade](/packer/docs/commands/hcl2_upgrade) page for more information on its usage.
+
 
 ## Builders
 

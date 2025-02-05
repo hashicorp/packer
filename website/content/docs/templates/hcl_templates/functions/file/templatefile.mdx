@@ -1,25 +1,20 @@
 ---
-page_title: templatefile - Functions - Configuration Language
+page_title: templatefile function reference
 description: |-
-  The templatefile function reads the file at the given path and renders its
-  content as a template using a supplied set of template variables.
+  The `templatefile` function reads a file and renders its
+  content as a template using a set of template variables. Learn how to use the `templatefile` function.
 ---
 
 # `templatefile` Function
 
--> _Recommendation:_ we recommend using the `.pkrtpl.hcl` file extension when
-using the `templatefile` function. Template files _are_ hcl treated as files but
-also templates and therefore have slightly different set of features
-than the ones offered in a `.pkr.hcl` Packer template. While you are not
-required to use this extension, doing so will enable syntax highlighters to
-properly understand your file.
-
-`templatefile` reads the file at the given path and renders its content as a
+The `templatefile` function reads the file at the given path and renders its content as a
 template using a supplied set of template variables.
 
 ```hcl
 templatefile(path, vars)
 ```
+
+We recommend using the `.pkrtpl.hcl` file extension when using the `templatefile` function to create templates. Packer treats HCL templates as combination of file and template. As a result, HCL template files have slightly different set of features than the templates with a `.pkr.hcl` extension. Using the `.pkr.hcl` extension also enables syntax highlighters to properly understand your file.
 
 The template syntax is the same as for string templates in the main HCL2
 language, including interpolation sequences delimited with `${ ... }`. This

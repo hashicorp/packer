@@ -1,21 +1,13 @@
 ---
 description: >
-  Packer Provisioners are the components of Packer that install and configure
+  Provisioners install and configure software prior to turning a machine into an image. Learn how to create custom provisioners that extend Packer functionality. 
 
-  software into a running machine prior to turning that machine into an image.
-  An
-
-  example of a provisioner is the shell provisioner, which runs shell scripts
-
-  within the machines.
-page_title: Custom Provisioners - Extending
+page_title: Create custom provisioners
 ---
 
-# Custom Provisioners
+# Create Custom Provisioners
 
-Packer provisioners install and configure software into a running machine prior to turning that machine into an image. For example, the [shell
-provisioner](/packer/docs/provisioners/shell), which runs shell scripts within
-the machines.
+Packer provisioners install and configure software into a running machine prior to turning that machine into an image. For example, the [shell provisioner](/packer/docs/provisioners/shell) runs shell scripts within machines.
 
 Provisioner plugins implement the [`packer.Provisioner`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/packer#Provisioner) interface and are served
 using the `plugin.ServeProvisioner` function.
@@ -43,7 +35,7 @@ type Provisioner interface {
 }
 ```
 
-### The "Prepare" Method
+### The `Prepare` Method
 
 The `Prepare` method for each provisioner is called prior to any runs with the
 configuration that was given in the template. This is passed in as an array of
@@ -69,14 +61,14 @@ validate the configuration.
 The `Prepare` method is called very early in the build process so that errors
 may be displayed to the user before anything actually happens.
 
-### The "ConfigSpec" Method
+### The `ConfigSpec` Method
 
-This method returns a hcldec.ObjectSpec, which is a spec necessary for using
+This method returns a `hcldec.ObjectSpec`, which is a spec necessary for using
 HCL2 templates with Packer. For information on how to use and implement this
 function, check our
 [object spec docs](/packer/guides/hcl/component-object-spec)
 
-### The "Provision" Method
+### The `Provision` Method
 
 The `Provision` method is called when a machine is running and ready to be
 provisioned. The provisioner should do its real work here.

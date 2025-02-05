@@ -1,7 +1,12 @@
-# Source Variables
+## Source Variables
 
-It is possible to access the `name` and `type` of your `source` from
-provisioners and post-processors:
+Use the following syntax to access the `name` and `type` of your `source` from provisioners and post-processors:
+
+```
+<build-name>.<source-type>.<source-name>
+```
+
+The following example queries source names used in the build:
 
 ```hcl
 source "null" "first-example" {
@@ -26,11 +31,11 @@ build {
     inline = ["echo ${source.name} and ${source.type}"]
   }
 }
-
-# This will echo something like:
-#
-# roles.null.consul: consul and null
-# roles.null.nomad: nomad and null
-# roles.null.vault: vault and null
-# roles.null.first-example: first-example and null
 ```
+
+The example returns the following values:
+
+- `roles.null.consul`: Returns `consul` and `null`
+- `roles.null.nomad`: Returns `nomad` and `null`
+- `roles.null.vault`: Returns `vault` and `null`
+- `roles.null.first-example`: Returns `first-example` and `null`
