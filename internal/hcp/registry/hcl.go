@@ -19,9 +19,11 @@ import (
 // HCLRegistry is a HCP handler made for handling HCL configurations
 type HCLRegistry struct {
 	configuration *hcl2template.PackerConfig
-	bucket        *Bucket
 	ui            sdkpacker.Ui
 	metadata      *MetadataStore
+
+	bucketsByName      map[string]*Bucket
+	bucketsByBuildName map[string]*Bucket
 }
 
 const (
@@ -35,30 +37,32 @@ const (
 	buildLabel string = "build"
 )
 
-// PopulateVersion creates the metadata in HCP Packer Registry for a build
+// PopulateVersion creates the metadata in HCP Packer Registry for a build on all buckets
 func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
-	err := h.bucket.Initialize(ctx, hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
-	if err != nil {
-		return err
-	}
+	for _, bucket := range h.bucketsByName {
+		err := bucket.Initialize(ctx, hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2)
+		if err != nil {
+			return err
+		}
 
-	err = h.bucket.populateVersion(ctx)
-	if err != nil {
-		return err
-	}
+		err = bucket.populateVersion(ctx)
+		if err != nil {
+			return err
+		}
 
-	versionID := h.bucket.Version.ID
-	versionFingerprint := h.bucket.Version.Fingerprint
+		versionID := bucket.Version.ID
+		versionFingerprint := bucket.Version.Fingerprint
 
-	// FIXME: Remove
-	h.configuration.HCPVars["iterationID"] = cty.StringVal(versionID)
-	h.configuration.HCPVars["versionFingerprint"] = cty.StringVal(versionFingerprint)
+		// FIXME: Remove
+		h.configuration.HCPVars["iterationID"] = cty.StringVal(versionID)
+		h.configuration.HCPVars["versionFingerprint"] = cty.StringVal(versionFingerprint)
 
-	sha, err := getGitSHA(h.configuration.Basedir)
-	if err != nil {
-		log.Printf("failed to get GIT SHA from environment, won't set as build labels")
-	} else {
-		h.bucket.Version.AddSHAToBuildLabels(sha)
+		sha, err := getGitSHA(h.configuration.Basedir)
+		if err != nil {
+			log.Printf("failed to get GIT SHA from environment, won't set as build labels")
+		} else {
+			bucket.Version.AddSHAToBuildLabels(sha)
+		}
 	}
 
 	return nil
@@ -73,7 +77,7 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 		name = fmt.Sprintf("%s.%s", cb.BuildName, cb.Type)
 	}
 
-	return h.bucket.startBuild(ctx, name)
+	return h.bucketsByBuildName[name].startBuild(ctx, name)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
@@ -91,16 +95,18 @@ func (h *HCLRegistry) CompleteBuild(
 	}
 
 	buildMetadata, envMetadata := cb.GetMetadata(), h.metadata
-	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata, envMetadata)
+	err := h.bucketsByBuildName[buildName].Version.AddMetadataToBuild(ctx, buildName, buildMetadata, envMetadata)
 	if err != nil {
 		return nil, err
 	}
-	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
+	return h.bucketsByBuildName[buildName].completeBuild(ctx, buildName, artifacts, buildErr)
 }
 
-// VersionStatusSummary prints a status report in the UI if the version is not yet done
+// VersionStatusSummary prints a status report for each bucket in the UI if the version is not yet done
 func (h *HCLRegistry) VersionStatusSummary() {
-	h.bucket.Version.statusSummary(h.ui)
+	for _, bucket := range h.bucketsByName {
+		bucket.Version.statusSummary(h.ui)
+	}
 }
 
 func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
@@ -129,38 +135,53 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		diags = append(diags, dsDiags...)
 	}
 
-	build := config.Builds[0]
-	bucket, bucketDiags := createConfiguredBucket(
-		config.Basedir,
-		withPackerEnvConfiguration,
-		withHCLBucketConfiguration(build),
-		withDeprecatedDatasourceConfiguration(vals, ui),
-		withDatasourceConfiguration(vals),
-	)
-	if bucketDiags != nil {
-		diags = append(diags, bucketDiags...)
+	bucketsByName := map[string]*Bucket{}
+	for _, build := range config.Builds {
+		bucketName := build.HCPPackerRegistry.Slug
+		if _, ok := bucketsByName[bucketName]; ok {
+			continue
+		}
+
+		bucket, bucketDiags := createConfiguredBucket(
+			config.Basedir,
+			withPackerEnvConfiguration,
+			withHCLBucketConfiguration(build),
+			withDeprecatedDatasourceConfiguration(vals, ui),
+			withDatasourceConfiguration(vals),
+		)
+		if bucketDiags != nil {
+			diags = append(diags, bucketDiags...)
+		}
+
+		if diags.HasErrors() {
+			return nil, diags
+		}
+		bucketsByName[bucketName] = bucket
+		ui.Say(fmt.Sprintf(
+			"Tracking build on HCP Packer bucket '%s' with fingerprint %q",
+			bucketName,
+			bucket.Version.Fingerprint,
+		))
 	}
 
-	if diags.HasErrors() {
-		return nil, diags
-	}
-
+	bucketsByBuildName := map[string]*Bucket{}
 	for _, build := range config.Builds {
 		for _, source := range build.Sources {
 
 			// We prepend each source with builder block name to prevent conflict
 			buildName := fmt.Sprintf("%s.%s", build.Name, source.String())
-			bucket.RegisterBuildForComponent(buildName)
+			bucketsByBuildName[buildName] = bucketsByName[build.HCPPackerRegistry.Slug]
+			bucketsByBuildName[buildName].RegisterBuildForComponent(buildName)
 		}
 	}
 
-	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Version.Fingerprint))
-
 	return &HCLRegistry{
 		configuration: config,
-		bucket:        bucket,
 		ui:            ui,
 		metadata:      &MetadataStore{},
+
+		bucketsByName:      bucketsByName,
+		bucketsByBuildName: bucketsByBuildName,
 	}, nil
 }
 
