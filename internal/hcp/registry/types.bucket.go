@@ -132,16 +132,15 @@ func (bucket *Bucket) Initialize(
 	return bucket.initializeVersion(ctx, templateType)
 }
 
-func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {
+func (bucket *Bucket) RegisterBuildForComponent(buildName string) {
 	if bucket == nil {
 		return
 	}
 
-	if ok := bucket.Version.HasBuild(sourceName); ok {
+	if ok := bucket.Version.HasBuild(buildName); ok {
 		return
 	}
-
-	bucket.Version.expectedBuilds = append(bucket.Version.expectedBuilds, sourceName)
+	bucket.Version.expectedBuilds = append(bucket.Version.expectedBuilds, buildName)
 }
 
 // CreateInitialBuildForVersion will create a build entry on the HCP Packer Registry for the named componentType.
@@ -658,7 +657,7 @@ func (bucket *Bucket) doCompleteBuild(
 	ctx context.Context,
 	buildName string,
 	packerSDKArtifacts []packerSDK.Artifact,
-	buildErr error,
+	_ error,
 ) ([]packerSDK.Artifact, error) {
 	for _, art := range packerSDKArtifacts {
 		var sdkImages []packerSDKRegistry.Image

@@ -69,7 +69,8 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	name := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
-		name = cb.Type
+		// We prepend type with builder block name to prevent conflict
+		name = fmt.Sprintf("%s.%s", cb.BuildName, cb.Type)
 	}
 
 	return h.bucket.startBuild(ctx, name)
@@ -85,7 +86,8 @@ func (h *HCLRegistry) CompleteBuild(
 	buildName := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
-		buildName = cb.Type
+		// We prepend type with builder block name to prevent conflict
+		buildName = fmt.Sprintf("%s.%s", cb.BuildName, cb.Type)
 	}
 
 	buildMetadata, envMetadata := cb.GetMetadata(), h.metadata
@@ -103,18 +105,6 @@ func (h *HCLRegistry) VersionStatusSummary() {
 
 func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	if len(config.Builds) > 1 {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Multiple " + buildLabel + " blocks",
-			Detail: fmt.Sprintf("For HCP Packer Registry enabled builds, only one " + buildLabel +
-				" block can be defined. Please remove any additional " + buildLabel +
-				" block(s). If this " + buildLabel + " is not meant for the HCP Packer registry please " +
-				"clear any HCP_PACKER_* environment variables."),
-		})
-
-		return nil, diags
-	}
 
 	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
 		return func(bucket *Bucket) hcl.Diagnostics {
@@ -155,8 +145,13 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		return nil, diags
 	}
 
-	for _, source := range build.Sources {
-		bucket.RegisterBuildForComponent(source.String())
+	for _, build := range config.Builds {
+		for _, source := range build.Sources {
+
+			// We prepend each source with builder block name to prevent conflict
+			buildName := fmt.Sprintf("%s.%s", build.Name, source.String())
+			bucket.RegisterBuildForComponent(buildName)
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Version.Fingerprint))
