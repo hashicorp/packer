@@ -15,3 +15,5 @@
 /website/data/          @hashicorp/team-docs-packer-and-terraform @hashicorp/packer
 /website/public/        @hashicorp/team-docs-packer-and-terraform @hashicorp/packer
 /website/content/       @hashicorp/team-docs-packer-and-terraform @hashicorp/packer
+/website/README.md      @hashicorp/team-docs-packer-and-terraform @hashicorp/packer
+/website/redirects.js   @hashicorp/team-docs-packer-and-terraform @hashicorp/packer
