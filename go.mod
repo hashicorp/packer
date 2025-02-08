@@ -1,19 +1,17 @@
 module github.com/hashicorp/packer
 
 require (
-	cloud.google.com/go v0.110.8 // indirect
+	github.com/CycloneDX/cyclonedx-go v0.9.1
 	github.com/biogo/hts v1.4.3
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/dsnet/compress v0.0.1
 	github.com/go-git/go-git/v5 v5.13.0
 	github.com/go-openapi/runtime v0.26.2
+	github.com/go-openapi/strfmt v0.21.10
 	github.com/gobwas/glob v0.2.3
-	github.com/gofrs/flock v0.8.1 // indirect
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/go-checkpoint v0.0.0-20171009173528-1545e56e46de
 	github.com/hashicorp/go-cty-funcs v0.0.0-20200930094925-2721b1e36840
@@ -28,44 +26,31 @@ require (
 	github.com/klauspost/compress v1.13.6
 	github.com/klauspost/pgzip v1.2.5
 	github.com/masterzen/winrm v0.0.0-20210623064412-3b76017826b0
-	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mattn/go-tty v0.0.0-20191112051231-74040eebce08
 	github.com/mitchellh/cli v1.1.5
-	github.com/mitchellh/go-fs v0.0.0-20180402235330-b7b9ca407fff // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/mitchellh/panicwrap v1.0.0
 	github.com/mitchellh/prefixedio v0.0.0-20151214002211-6e6954073784
-	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
-	github.com/pkg/sftp v1.13.2 // indirect
+	github.com/oklog/ulid v1.3.1
+	github.com/pierrec/lz4/v4 v4.1.18
 	github.com/posener/complete v1.2.3
+	github.com/shirou/gopsutil/v3 v3.23.4
+	github.com/spdx/tools-golang v0.5.5
 	github.com/stretchr/testify v1.10.0
 	github.com/ulikunitz/xz v0.5.10
 	github.com/zclconf/go-cty v1.13.3
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/mod v0.19.0
 	golang.org/x/net v0.33.0
 	golang.org/x/oauth2 v0.15.0
 	golang.org/x/sync v0.10.0
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/text v0.21.0
 	golang.org/x/tools v0.23.0
-	google.golang.org/api v0.150.0 // indirect
 	google.golang.org/grpc v1.59.0
 )
 
 require (
-	github.com/CycloneDX/cyclonedx-go v0.9.1
-	github.com/go-openapi/strfmt v0.21.10
-	github.com/oklog/ulid v1.3.1
-	github.com/pierrec/lz4/v4 v4.1.18
-	github.com/shirou/gopsutil/v3 v3.23.4
-	github.com/spdx/tools-golang v0.5.5
-)
-
-require (
+	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/compute v1.23.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.3 // indirect
@@ -112,8 +97,11 @@ require (
 	github.com/go-openapi/spec v0.20.12 // indirect
 	github.com/go-openapi/swag v0.22.5 // indirect
 	github.com/go-openapi/validate v0.22.4 // indirect
+	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
@@ -148,15 +136,20 @@ require (
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
+	github.com/mitchellh/go-fs v0.0.0-20180402235330-b7b9ca407fff // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
+	github.com/packer-community/winrmcp v0.0.0-20180921211025-c76d91c1e7db // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pkg/sftp v1.13.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
@@ -180,9 +173,13 @@ require (
 	go.opentelemetry.io/otel v1.17.0 // indirect
 	go.opentelemetry.io/otel/metric v1.17.0 // indirect
 	go.opentelemetry.io/otel/trace v1.17.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/term v0.27.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
+	google.golang.org/api v0.150.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20231016165738-49dd2c1f3d0b // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20231016165738-49dd2c1f3d0b // indirect
