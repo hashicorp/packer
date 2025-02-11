@@ -69,7 +69,8 @@ func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) err
 	name := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
-		name = cb.Type
+		// We prepend type with builder block name to prevent conflict
+		name = prependIfNotEmpty(cb.BuildName, cb.Type)
 	}
 
 	return h.bucket.startBuild(ctx, name)
@@ -85,7 +86,8 @@ func (h *HCLRegistry) CompleteBuild(
 	buildName := build.Name()
 	cb, ok := build.(*packer.CoreBuild)
 	if ok {
-		buildName = cb.Type
+		// We prepend type with builder block name to prevent conflict
+		buildName = prependIfNotEmpty(cb.BuildName, cb.Type)
 	}
 
 	buildMetadata, envMetadata := cb.GetMetadata(), h.metadata
@@ -103,32 +105,21 @@ func (h *HCLRegistry) VersionStatusSummary() {
 
 func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	if len(config.Builds) > 1 {
+
+	if len(config.Builds) > 1 && config.HCPPackerRegistry == nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Multiple " + buildLabel + " blocks",
 			Detail: fmt.Sprintf("For HCP Packer Registry enabled builds, only one " + buildLabel +
-				" block can be defined. Please remove any additional " + buildLabel +
-				" block(s). If this " + buildLabel + " is not meant for the HCP Packer registry please " +
-				"clear any HCP_PACKER_* environment variables."),
+				" block can be defined. Please declare HCP registry configuration at root level "),
 		})
 
 		return nil, diags
 	}
 
-	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
+	withHCLBucketConfiguration := func(cfg *hcl2template.PackerConfig) bucketConfigurationOpts {
 		return func(bucket *Bucket) hcl.Diagnostics {
-			bucket.ReadFromHCLBuildBlock(bb)
-			// If at this point the bucket.Name is still empty,
-			// last try is to use the build.Name if present
-			if bucket.Name == "" && bb.Name != "" {
-				bucket.Name = bb.Name
-			}
-
-			// If the description is empty, use the one from the build block
-			if bucket.Description == "" && bb.Description != "" {
-				bucket.Description = bb.Description
-			}
+			bucket.ReadFromHCLRoot(cfg)
 			return nil
 		}
 	}
@@ -139,11 +130,10 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		diags = append(diags, dsDiags...)
 	}
 
-	build := config.Builds[0]
 	bucket, bucketDiags := createConfiguredBucket(
 		config.Basedir,
 		withPackerEnvConfiguration,
-		withHCLBucketConfiguration(build),
+		withHCLBucketConfiguration(config),
 		withDeprecatedDatasourceConfiguration(vals, ui),
 		withDatasourceConfiguration(vals),
 	)
@@ -154,9 +144,48 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 	if diags.HasErrors() {
 		return nil, diags
 	}
+	buildNames := make(map[string]struct{})
 
-	for _, source := range build.Sources {
-		bucket.RegisterBuildForComponent(source.String())
+	for _, build := range config.Builds {
+		if config.HCPPackerRegistry != nil && build.HCPPackerRegistry != nil {
+			var diags hcl.Diagnostics
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Ambiguous HCP Packer registry configuration",
+				Detail: "Cannot use root declared HCP Packer configuration at the same time " +
+					"as build block nested HCP Packer configuration",
+			})
+
+			return nil, diags
+
+		}
+		if build.HCPPackerRegistry != nil {
+			diags = append(diags, &hcl.Diagnostic{
+				Severity: hcl.DiagWarning,
+				Summary:  buildLabel + " HCP registry configuration is deprecated",
+				Detail:   "Please use root level HCP registry configuration",
+			})
+
+		}
+		for _, source := range build.Sources {
+
+			// We prepend each source with builder block name to prevent conflict
+			buildName := prependIfNotEmpty(build.Name, source.String())
+			if _, ok := buildNames[buildName]; ok {
+
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Ambiguous build name",
+					Detail: "build name " +
+						"Two or more build blocks resolve to the same build name (" + buildName + ") " +
+						"Please use the Name attribute in the build block to fix this",
+				})
+
+				return nil, diags
+			}
+			buildNames[buildName] = struct{}{}
+			bucket.RegisterBuildForComponent(buildName)
+		}
 	}
 
 	ui.Say(fmt.Sprintf("Tracking build on HCP Packer with fingerprint %q", bucket.Version.Fingerprint))
@@ -171,4 +200,11 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 
 func (h *HCLRegistry) Metadata() Metadata {
 	return h.metadata
+}
+
+func prependIfNotEmpty(prefix string, suffix string) string {
+	if prefix != "" {
+		return fmt.Sprintf("%s.%s", prefix, suffix)
+	}
+	return suffix
 }
