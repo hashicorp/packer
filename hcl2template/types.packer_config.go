@@ -55,6 +55,9 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
+	// HCPPackerRegistry contains the configuration for publishing the artifacts to the HCP Packer Registry.
+	HCPPackerRegistry *HCPPackerRegistryBlock
+
 	// HCPVars is the list of HCP-set variables for use later in a template
 	HCPVars map[string]cty.Value
 

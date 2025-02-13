@@ -39,6 +39,9 @@ func IsHCPEnabled(cfg packer.Handler) bool {
 
 	switch config := cfg.(type) {
 	case *hcl2template.PackerConfig:
+		if config.HCPPackerRegistry != nil {
+			mode = HCPConfigEnabled
+		}
 		for _, build := range config.Builds {
 			if build.HCPPackerRegistry != nil {
 				mode = HCPConfigEnabled

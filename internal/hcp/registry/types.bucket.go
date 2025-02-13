@@ -93,6 +93,27 @@ func (bucket *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
 	}
 }
 
+// ReadFromRoot reads the information for initialising a Bucket from a HCL2 root
+func (bucket *Bucket) ReadFromHCLRoot(cfg *hcl2template.PackerConfig) {
+	if bucket == nil {
+		return
+	}
+
+	registryBlock := cfg.HCPPackerRegistry
+	if registryBlock == nil {
+		return
+	}
+
+	bucket.Description = registryBlock.Description
+	bucket.BucketLabels = registryBlock.BucketLabels
+	bucket.BuildLabels = registryBlock.BuildLabels
+	// If there's already a Name this was set from env variable.
+	// In Packer, env variable overrides config values so we keep it that way for consistency.
+	if bucket.Name == "" && registryBlock.Slug != "" {
+		bucket.Name = registryBlock.Slug
+	}
+}
+
 // connect initializes a client connection to a remote HCP Packer Registry service on HCP.
 // Upon a successful connection the initialized client is persisted on the Bucket b for later usage.
 func (bucket *Bucket) connect() error {
@@ -132,16 +153,15 @@ func (bucket *Bucket) Initialize(
 	return bucket.initializeVersion(ctx, templateType)
 }
 
-func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {
+func (bucket *Bucket) RegisterBuildForComponent(buildName string) {
 	if bucket == nil {
 		return
 	}
 
-	if ok := bucket.Version.HasBuild(sourceName); ok {
+	if ok := bucket.Version.HasBuild(buildName); ok {
 		return
 	}
-
-	bucket.Version.expectedBuilds = append(bucket.Version.expectedBuilds, sourceName)
+	bucket.Version.expectedBuilds = append(bucket.Version.expectedBuilds, buildName)
 }
 
 // CreateInitialBuildForVersion will create a build entry on the HCP Packer Registry for the named componentType.
@@ -658,7 +678,7 @@ func (bucket *Bucket) doCompleteBuild(
 	ctx context.Context,
 	buildName string,
 	packerSDKArtifacts []packerSDK.Artifact,
-	buildErr error,
+	_ error,
 ) ([]packerSDK.Artifact, error) {
 	for _, art := range packerSDKArtifacts {
 		var sdkImages []packerSDKRegistry.Image

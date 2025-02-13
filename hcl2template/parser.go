@@ -20,15 +20,16 @@ import (
 )
 
 const (
-	packerLabel       = "packer"
-	sourceLabel       = "source"
-	variablesLabel    = "variables"
-	variableLabel     = "variable"
-	localsLabel       = "locals"
-	localLabel        = "local"
-	dataSourceLabel   = "data"
-	buildLabel        = "build"
-	communicatorLabel = "communicator"
+	packerLabel            = "packer"
+	sourceLabel            = "source"
+	variablesLabel         = "variables"
+	variableLabel          = "variable"
+	localsLabel            = "locals"
+	localLabel             = "local"
+	dataSourceLabel        = "data"
+	buildLabel             = "build"
+	hcpPackerRegistryLabel = "hcp_packer_registry"
+	communicatorLabel      = "communicator"
 )
 
 var configSchema = &hcl.BodySchema{
@@ -41,6 +42,7 @@ var configSchema = &hcl.BodySchema{
 		{Type: localLabel, LabelNames: []string{"name"}},
 		{Type: dataSourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: buildLabel},
+		{Type: hcpPackerRegistryLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
 }
@@ -549,6 +551,22 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 
 	for _, block := range content.Blocks {
 		switch block.Type {
+
+		case buildHCPPackerRegistryLabel:
+			if cfg.HCPPackerRegistry != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Only one " + buildHCPPackerRegistryLabel + " is allowed"),
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block, cfg)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			cfg.HCPPackerRegistry = hcpPackerRegistry
 		case sourceLabel:
 			source, moreDiags := p.decodeSource(block)
 			diags = append(diags, moreDiags...)
