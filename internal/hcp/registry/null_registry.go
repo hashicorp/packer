@@ -7,6 +7,7 @@ import (
 	"context"
 
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/packer"
 )
 
 // nullRegistry is a special handler that does nothing
@@ -16,13 +17,13 @@ func (r nullRegistry) PopulateVersion(context.Context) error {
 	return nil
 }
 
-func (r nullRegistry) StartBuild(context.Context, sdkpacker.Build) error {
+func (r nullRegistry) StartBuild(context.Context, *packer.CoreBuild) error {
 	return nil
 }
 
 func (r nullRegistry) CompleteBuild(
 	ctx context.Context,
-	build sdkpacker.Build,
+	build *packer.CoreBuild,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {

@@ -65,30 +65,19 @@ func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
 }
 
 // StartBuild is invoked when one build for the configuration is starting to be processed
-func (h *HCLRegistry) StartBuild(ctx context.Context, build sdkpacker.Build) error {
-	name := build.Name()
-	cb, ok := build.(*packer.CoreBuild)
-	if ok {
-		name = cb.Type
-	}
-
-	return h.bucket.startBuild(ctx, name)
+func (h *HCLRegistry) StartBuild(ctx context.Context, build *packer.CoreBuild) error {
+	return h.bucket.startBuild(ctx, build.Type)
 }
 
 // CompleteBuild is invoked when one build for the configuration has finished
 func (h *HCLRegistry) CompleteBuild(
 	ctx context.Context,
-	build sdkpacker.Build,
+	build *packer.CoreBuild,
 	artifacts []sdkpacker.Artifact,
 	buildErr error,
 ) ([]sdkpacker.Artifact, error) {
-	buildName := build.Name()
-	cb, ok := build.(*packer.CoreBuild)
-	if ok {
-		buildName = cb.Type
-	}
-
-	buildMetadata, envMetadata := cb.GetMetadata(), h.metadata
+	buildName := build.Type
+	buildMetadata, envMetadata := build.GetMetadata(), h.metadata
 	err := h.bucket.Version.AddMetadataToBuild(ctx, buildName, buildMetadata, envMetadata)
 	if err != nil {
 		return nil, err
