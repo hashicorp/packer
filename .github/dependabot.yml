@@ -7,3 +7,9 @@ updates:
   allow:
     - dependency-name: "github.com/hashicorp/packer-plugin-sdk"
     - dependency-name: "github.com/hashicorp/hcp-sdk-go"
+- package-ecosystem: gomod
+  directory: /internal/tools
+  schedule:
+    interval: weekly
+  allow:
+    - dependency-type: "direct"
