@@ -122,7 +122,7 @@ func TestProvisionerPrepare_DebugMode(t *testing.T) {
 
 	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
 	if p.config.ExecuteCommand != command {
-		t.Fatalf(fmt.Sprintf(`Expected command should be '%s' but got '%s'`, command, p.config.ExecuteCommand))
+		t.Fatalf(`Expected command should be '%s' but got '%s'`, command, p.config.ExecuteCommand)
 	}
 }
 
