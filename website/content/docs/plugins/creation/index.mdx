@@ -1,7 +1,7 @@
 ---
 description: |
   Learn about extending Packer by creating custom plugins for builders, provisioners, and
-  post-processors. 
+  post-processors.
 page_title: Create custom plugins to extend Packer overview
 ---
 
@@ -48,7 +48,7 @@ danger of colliding dependencies.
 
 - [`github.com/hashicorp/packer-plugin-sdk/plugin`](https://pkg.go.dev/github.com/hashicorp/packer-plugin-sdk/plugin) - Contains the code to serve the plugin. This handles all the inter-process communication.
 
-Basic examples of serving your component are shown below. 
+Basic examples of serving your component are shown below.
 
 ```go
 // main.go
@@ -174,7 +174,7 @@ Here's what you need to create releases using GitHub Actions:
 
 To help with the discovery of Packer plugins, plugins maintainers can choose to register their plugin as a [Packer Integration](https://developer.hashicorp.com/packer/integrations).
 
-The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) to be added to your plugin repository for configuring the Packer integration pipeline and 
+The registration process requires [metadata configuration](https://github.com/hashicorp/integration-template#metadata-configuration) to be added to your plugin repository for configuring the Packer integration pipeline and
 a specific directory structure for plugin documentation to be rendered on the [Packer Integrations](https://developer.hashicorp.com/packer/integrations) portal.
 
 You can execute the following steps to register your plugin as an integration:
@@ -182,13 +182,13 @@ You can execute the following steps to register your plugin as an integration:
 1.  Update your plugin documentation structure to match the [Scaffolding example layout](https://github.com/hashicorp/packer-plugin-scaffolding/tree/main/.web-docs).
 New plugins generated from this template have the necessary structure in place. If so you can jump to step 3.
 1. For the integrations library, only one top-level README per integration is supported. Any top-level index.mdx files that exist
-within a plugin's existing documentation will need to migrate to a top-level README. 
+within a plugin's existing documentation will need to migrate to a top-level README.
 1. Update your top-level integration README to include a description, plugin installation steps, available components section, and, any, additional sections
-needed to inform users on how to work with your integration. Refer to [Packer scaffolding plugin](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/docs/README.md) for an example. 
+needed to inform users on how to work with your integration. Refer to [Packer scaffolding plugin](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/docs/README.md) for an example.
 1. Update the top-level README for each of the components within your integration to follow the structure defined in the scaffolding template.
 1. Add the integration configuration file [metadata.hcl](https://github.com/hashicorp/packer-plugin-scaffolding/blob/main/.web-docs/metadata.hcl) to the plugins `.web-docs` directory.
 1. Open a request for integration issue with the Packer team - [Open Request](https://github.com/hashicorp/packer/issues/new?labels=new-plugin-contribution&template=plugin_integration.md).
-Provide all the requested information to help expedite the integration request. 
+Provide all the requested information to help expedite the integration request.
 
 #### [Example] Add integration files to existing plugin repository
 
@@ -217,13 +217,13 @@ generate: install-packer-sdc
     @rm -r ".docs"
 ```
 
-By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation, 
-and, finally, to open an internal pull-request to finalize the integration setup. 
+By opening an integration request, you are asking a member of the to Packer team to review your plugin integration configuration, plugin documentation,
+and, finally, to open an internal pull-request to finalize the integration setup.
 
-Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your the plugin. 
+Plugin integrations will be listed as a [Packer Integration](https://developer.hashicorp.com/packer/integrations), with details on how to install and use your the plugin.
 
-Plugin integrations, once deployed, can be updated manually, or automatically upon a new release, by the plugin authors. Changes to the defined documentation structure 
-or parent repository should be communicated to the Packer team to ensure a working integration pipeline. 
+Plugin integrations, once deployed, can be updated manually, or automatically upon a new release, by the plugin authors. Changes to the defined documentation structure
+or parent repository should be communicated to the Packer team to ensure a working integration pipeline.
 
 ## Plugin Development Tips and FAQs
 
@@ -258,4 +258,3 @@ platform-specific. If you have created your plugin from the
 [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
 repo, simply tagging a commit and pushing the tag to GitHub will correctly build
 and release the binaries using GoReleaser.
-
