@@ -91,6 +91,11 @@ directly.
 This behavior was adopted from the standard behavior of rsync. Note that under
 the covers, rsync may or may not be used.
 
+**Note:** Packer does not infer behaviors based on the guest operating system,
+as this would add unnecessary complexity and reduce maintainability. To ensure
+consistent behavior across all platforms, use a trailing forward slash when
+specifying directories, even when working with Windows guests.
+
 ## Uploading files that don't exist before Packer starts
 
 In general, local files used as the source **must** exist before Packer is run.
