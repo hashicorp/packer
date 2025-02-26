@@ -247,16 +247,25 @@ scope of a plugin.
 
 ### Testing Plugins
 
-Making your unpublished plugin available to Packer is possible by either:
+To install a dev version of a plugin based out of [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding), you can use the following command:
+```shell-session
+  $ make dev
+```
+This command creates the dev binary of the plugin and also installs it for packer to use.
 
-- Starting Packer from the directory where the plugin binary is located.
-- Putting the plugin binary in the same directory as Packer.
+To install plugins from local source, you can also use the following command:
 
-In both these cases, if the binary is called `packer-plugin-myawesomecloud` and
-defines an `ebs` builder then you will be able to use an `myawesomecloud-ebs`
-builder or source without needing to have a `required_plugin` block.
+```shell-session
+  $ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name>
+```
+#### Plugin installation example
+For example lets install happycloud plugin from a locally sourced binary
 
-This is extremely useful during development.
+```shell-session
+$ packer plugins install --path happycloud github.com/hashicorp/happycloud
+```
+
+For further information on how Packer discovers and loads plugins, you may refer to our [documentation](/packer/docs/plugins/creation/plugin-load-spec) on the subject.
 
 ### Distributing Plugins
 
@@ -266,3 +275,4 @@ platform-specific. If you have created your plugin from the
 [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
 repo, simply tagging a commit and pushing the tag to GitHub will correctly build
 and release the binaries using GoReleaser.
+
