@@ -247,60 +247,25 @@ scope of a plugin.
 
 ### Testing Plugins
 
-To install a dev version of plugin that are based out of [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding), you can use the following command:
-
+To install a dev version of a plugin based out of [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding), you can use the following command:
 ```shell-session
   $ make dev
 ```
 This command creates the dev binary of the plugin and also installs it for packer to use.
 
-To install plugins from local source,  we can also use the following command:
+To install plugins from local source, you can also use the following command:
 
 ```shell-session
-  $ packer plugins install --path /path/to/plugin/binary
+  $ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name>
 ```
-For example lets use the packer amazon plugin to build a custom binary and install it.
+#### Plugin installation example
+For example lets install happycloud plugin from a locally sourced binary
 
-### Example Amazon plugin
+```shell-session
+$ packer plugins install --path happycloud github.com/hashicorp/happycloud
+```
 
-Complete the following steps to build and install a custom version of the Amazon plugin as an example:
-
-1. Clone the plugin's GitHub repository.
-
-    ```shell-session
-    $ git clone https://github.com/hashicorp/packer-plugin-amazon.git
-    ```
-
-1. Change to the plugin directory root and run the `go build` command to build the plugin as a development binary.
-
-    ```shell-session
-    $ cd packer-plugin-amazon
-    $ go build -ldflags="-X github.com/hashicorp/packer-plugin-amazon/version.VersionPrerelease=dev" -o packer-plugin-amazon-dev
-    ```
-
-1. Validate the release version.
-
-    ```shell-session
-    $ ./packer-plugin-amazon-dev describe
-   {"version":"1.3.5-dev","sdk_version":"0.5.4","api_version":"x5.0","builders":["chroot","ebs","ebssurrogate","ebsvolume","instance"],"post_processors":["import"],"provisioners":[],"datasources":["ami","parameterstore","secretsmanager"]}
-
-    ```
-
-1. Use the `packer plugins install` command to install the development binary.
-
-    ```shell-session
-    packer plugins install --path packer-plugin-amazon-dev github.com/hashicorp/amazon
-    Successfully installed plugin github.com/hashicorp/amazon from $HOME/Development/packer-plugin-amazon/packer-plugin-amazon-dev to ~/github.com/hashicorp/amazon/packer-plugin-amazon_v1.3.5-dev_x5.0_darwin_arm64
-    ```
-
-1. Run a `packer build` with the newly installed plugin.
-
-    ```shell-session
-    $ packer build .
-    ```
-
-Also, refer to the following documentation that describes how packer loads and installs plugins [plugin load spec](/packer/docs/plugins/creation/plugin-load-spec).
-
+For further information on how Packer discovers and loads plugins, you may refer to our [documentation](/packer/docs/plugins/creation/plugin-load-spec) on the subject.
 
 ### Distributing Plugins
 
