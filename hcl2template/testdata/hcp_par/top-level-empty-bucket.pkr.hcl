@@ -2,11 +2,10 @@ source "null" "test" {
   communicator = "none"
 }
 
+hcp_packer_registry {
+}
+
 build {
   name = "bucket-slug"
-  hcp_packer_registry {
-    bucket_name = "ba"
-  }
-
   sources = ["null.test"]
 }

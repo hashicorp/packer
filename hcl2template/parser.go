@@ -551,12 +551,11 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 
 	for _, block := range content.Blocks {
 		switch block.Type {
-
 		case buildHCPPackerRegistryLabel:
 			if cfg.HCPPackerRegistry != nil {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
-					Summary:  fmt.Sprintf("Only one " + buildHCPPackerRegistryLabel + " is allowed"),
+					Summary:  "Only one " + buildHCPPackerRegistryLabel + " is allowed",
 					Subject:  block.DefRange.Ptr(),
 				})
 				continue
@@ -567,6 +566,7 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 				continue
 			}
 			cfg.HCPPackerRegistry = hcpPackerRegistry
+
 		case sourceLabel:
 			source, moreDiags := p.decodeSource(block)
 			diags = append(diags, moreDiags...)

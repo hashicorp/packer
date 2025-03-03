@@ -3,9 +3,15 @@ source "null" "test" {
 }
 
 build {
-  name = "bucket-slug"
+  name = "build1"
+
+  sources = ["null.test"]
+}
+
+build {
+  name = "build2"
   hcp_packer_registry {
-    bucket_name = "invalid_bucket"
+    bucket_name = "ok-Bucket-name-1"
   }
 
   sources = ["null.test"]
