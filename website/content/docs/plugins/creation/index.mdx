@@ -247,19 +247,21 @@ scope of a plugin.
 
 ### Testing Plugins
 
-To install plugins from local source, you can use the following command:
+To install plugins from local source, you can use the `packer plugins install` command with the `--path` flag:
 
-```shell
+```shell-session
 $ packer plugins install --path <path-to-binary> <hostname>/<namespace>/<plugin-name>
 ```
+
 For example lets install happycloud plugin from a locally sourced binary
-```shell
+
+```shell-session
 $ packer plugins install --path packer-plugin-happycloud github.com/hashicorp/happycloud
 ```
 This will install the happycloud plugin from the `packer-plugin-happycloud` binary so Packer can discover it.
 If you want to use this in an HCL2 template, you can optionally add it to the `required_plugins` section like so:
 
-```shell
+```hcl
   required_plugins {
     happycloud = {
       source = "github.com/hashicorp/happycloud"
@@ -279,4 +281,3 @@ platform-specific. If you have created your plugin from the
 [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
 repo, simply tagging a commit and pushing the tag to GitHub will correctly build
 and release the binaries using GoReleaser.
-
