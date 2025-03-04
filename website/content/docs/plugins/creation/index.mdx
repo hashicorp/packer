@@ -247,22 +247,16 @@ scope of a plugin.
 
 ### Testing Plugins
 
-To install a dev version of a plugin based out of [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding), you can use the following command:
-```shell-session
-  $ make dev
-```
-This command creates the dev binary of the plugin and also installs it for packer to use.
-
 To install plugins from local source, you can also use the following command:
 
 ```shell-session
-  $ packer plugins install --path <path-to-downloaded-extracted-binary> <hostname>/<namespace>/<plugin-name>
+  $ packer plugins install --path <path-to-binary> <hostname>/<namespace>/<plugin-name>
 ```
 #### Plugin installation example
 For example lets install happycloud plugin from a locally sourced binary
 
 ```shell-session
-$ packer plugins install --path happycloud github.com/hashicorp/happycloud
+$ packer plugins install --path packer-plugin-happycloud github.com/hashicorp/happycloud
 ```
 
 For further information on how Packer discovers and loads plugins, you may refer to our [documentation](/packer/docs/plugins/creation/plugin-load-spec) on the subject.
@@ -275,4 +269,3 @@ platform-specific. If you have created your plugin from the
 [packer-plugin-scaffolding](https://github.com/hashicorp/packer-plugin-scaffolding)
 repo, simply tagging a commit and pushing the tag to GitHub will correctly build
 and release the binaries using GoReleaser.
-
