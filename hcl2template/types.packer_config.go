@@ -679,10 +679,6 @@ func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, h
 		}
 	}
 
-	if diags.HasErrors() {
-		return nil, diags
-	}
-
 	if block != nil && cfg.HCPPackerRegistry != nil {
 		diags = diags.Append(multipleRegistryDiag(block))
 	}

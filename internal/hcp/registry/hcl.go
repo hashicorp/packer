@@ -106,8 +106,22 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		return nil, diags
 	}
 
-	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
-		return func(bucket *Bucket) hcl.Diagnostics {
+	registryConfig, rcDiags := config.GetHCPPackerRegistryBlock()
+	diags = diags.Extend(rcDiags)
+	if diags.HasErrors() {
+		return nil, diags
+	}
+
+	withHCLBucketConfiguration := func(bucket *Bucket) hcl.Diagnostics {
+		bucket.ReadFromHCPPackerRegistryBlock(registryConfig)
+		return nil
+	}
+
+	// we must use the old strategy when there is only a single build block because
+	// we used to rely on the parent build block for setting some default data
+	if len(config.Builds) == 1 && config.HCPPackerRegistry == nil {
+		withHCLBucketConfiguration = func(bucket *Bucket) hcl.Diagnostics {
+			bb := config.Builds[0]
 			bucket.ReadFromHCLBuildBlock(bb)
 			// If at this point the bucket.Name is still empty,
 			// last try is to use the build.Name if present
@@ -129,11 +143,10 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		diags = append(diags, dsDiags...)
 	}
 
-	build := config.Builds[0]
 	bucket, bucketDiags := createConfiguredBucket(
 		config.Basedir,
 		withPackerEnvConfiguration,
-		withHCLBucketConfiguration(build),
+		withHCLBucketConfiguration,
 		withDeprecatedDatasourceConfiguration(vals, ui),
 		withDatasourceConfiguration(vals),
 	)
