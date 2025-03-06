@@ -250,6 +250,7 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			},
 			false,
 			&getHCPPackerRegistry{
+				wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
 				wantDiag:         true,
 				wantDiagHasError: true,
 			},
