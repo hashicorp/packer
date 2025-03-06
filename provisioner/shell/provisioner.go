@@ -112,7 +112,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	if p.config.InlineShebang == "" {
-		p.config.InlineShebang = "/bin/sh -e"
+		if p.config.Inline != nil && len(p.config.Inline) > 0 && strings.HasPrefix(p.config.Inline[0], "#!") {
+			p.config.InlineShebang = strings.TrimPrefix(p.config.Inline[0], "#!")
+		} else {
+			p.config.InlineShebang = "/bin/sh -e"
+		}
 	}
 
 	if p.config.StartRetryTimeout == 0 {
