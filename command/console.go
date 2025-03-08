@@ -46,6 +46,7 @@ func (c *ConsoleCommand) ParseArgs(args []string) (*ConsoleArgs, int) {
 	flags := c.Meta.FlagSet("console")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	cfg.AddFlagSets(flags)
+	cfg.MetaArgs.AddFlagSets(flags)
 	if err := flags.Parse(args); err != nil {
 		return &cfg, 1
 	}

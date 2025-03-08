@@ -156,6 +156,10 @@ type PluginsRequiredArgs struct {
 	MetaArgs
 }
 
+func (ca *ConsoleArgs) AddFlagSets(flags *flag.FlagSet) {
+	flags.BoolVar(&ca.MetaArgs.UseSequential, "use-sequential-evaluation", false, "Fallback to using a sequential approach for local/datasource evaluation.")
+}
+
 // ConsoleArgs represents a parsed cli line for a `packer console`
 type ConsoleArgs struct {
 	MetaArgs
