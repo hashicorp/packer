@@ -14,12 +14,13 @@ variable "build_labels" {
   }
 }
 
+hcp_packer_registry {
+  bucket_name   = "bucket-slug"
+  bucket_labels = var.bucket_labels
+  build_labels  = var.build_labels
+}
+
 build {
-  hcp_packer_registry {
-    bucket_name   = "bucket-slug"
-    bucket_labels = var.bucket_labels
-    build_labels  = var.build_labels
-  }
   sources = [
     "source.virtualbox-iso.ubuntu-1204",
   ]

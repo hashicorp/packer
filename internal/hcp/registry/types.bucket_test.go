@@ -380,7 +380,7 @@ func TestReadFromHCLBuildBlock(t *testing.T) {
 		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
 			bucket := &Bucket{}
-			bucket.ReadFromHCLBuildBlock(tt.buildBlock)
+			bucket.ReadFromHCPPackerRegistryBlock(tt.buildBlock.HCPPackerRegistry)
 
 			diff := cmp.Diff(bucket, tt.expectedBucket, cmp.AllowUnexported(Bucket{}))
 			if diff != "" {
