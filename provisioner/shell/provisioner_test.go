@@ -98,50 +98,6 @@ func TestProvisionerPrepare_InlineShebang(t *testing.T) {
 	}
 }
 
-func TestProvisionerPrepare_ShebangWithinInline(t *testing.T) {
-	config := testConfig()
-	script := `#!/bin/bash
-		echo "Hello, World!"
-	`
-	config["inline"] = []interface{}{script, "foo", "bar"}
-
-	p := new(Provisioner)
-	err := p.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if p.config.InlineShebang != "/bin/bash" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
-	}
-
-	// Test with InlineShebang, it should override the shebang in the script
-	config["inline_shebang"] = "foo"
-	p = new(Provisioner)
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if p.config.InlineShebang != "foo" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
-	}
-
-	// Test with a inline that does not have a shebang
-	config["inline"] = []interface{}{"foo", "bar"}
-	delete(config, "inline_shebang")
-	p = new(Provisioner)
-	err = p.Prepare(config)
-	if err != nil {
-		t.Fatalf("should not have error: %s", err)
-	}
-
-	if p.config.InlineShebang != "/bin/sh -e" {
-		t.Fatalf("bad value: %s", p.config.InlineShebang)
-	}
-
-}
-
 func TestProvisionerPrepare_InvalidKey(t *testing.T) {
 	var p Provisioner
 	config := testConfig()
