@@ -167,7 +167,6 @@ type ConsoleArgs struct {
 
 func (fa *FixArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&fa.Validate, "validate", true, "")
-	flags.BoolVar(&fa.MetaArgs.UseSequential, "use-sequential-evaluation", false, "Fallback to using a sequential approach for local/datasource evaluation.")
 
 	fa.MetaArgs.AddFlagSets(flags)
 }
