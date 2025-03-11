@@ -421,6 +421,7 @@ func TestParser_complete(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 	}
 	testParse(t, tests)
@@ -570,6 +571,7 @@ func TestParser_no_init(t *testing.T) {
 			false, false,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 
 		{"duplicate required plugin accessor fails",
@@ -579,6 +581,7 @@ func TestParser_no_init(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_inexplicit_source.pkr.hcl",
 			defaultParser,
@@ -599,6 +602,7 @@ func TestParser_no_init(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_short_source.pkr.hcl",
 			defaultParser,
@@ -619,6 +623,7 @@ func TestParser_no_init(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_inexplicit_source_2.pkr.hcl",
 			defaultParser,
@@ -639,6 +644,7 @@ func TestParser_no_init(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 	}
 	testParse_only_Parse(t, tests)
