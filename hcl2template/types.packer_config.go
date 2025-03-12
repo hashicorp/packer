@@ -650,25 +650,10 @@ func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, h
 	var block *HCPPackerRegistryBlock
 	var diags hcl.Diagnostics
 
-	multipleRegistryDiag := func(block *HCPPackerRegistryBlock) *hcl.Diagnostic {
-		return &hcl.Diagnostic{
-			Summary:  "Multiple HCP Packer registry block declaration",
-			Subject:  block.HCL2Ref.DefRange.Ptr(),
-			Severity: hcl.DiagError,
-			Detail: "Multiple " + buildHCPPackerRegistryLabel + " blocks have been found, only one can be defined " +
-				"in HCL2 templates. Starting with Packer 1.12.1, it is recommended to move it to the " +
-				"top-level configuration instead of within a build block.",
-		}
-	}
-	// We start by looking in the build blocks
-	for _, build := range cfg.Builds {
-		if build.HCPPackerRegistry != nil {
-			if block != nil {
-				// error multiple build block
-				diags = diags.Append(multipleRegistryDiag(build.HCPPackerRegistry))
-				continue
-			}
-			block = build.HCPPackerRegistry
+	// build block leveled hcp registry is only tolerated when there is only one build block
+	if len(cfg.Builds) <= 1 {
+		if cfg.Builds[0].HCPPackerRegistry != nil {
+			block = cfg.Builds[0].HCPPackerRegistry
 			diags = diags.Append(&hcl.Diagnostic{
 				Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are deprecated",
 				Subject:  &block.DefRange,
@@ -677,10 +662,30 @@ func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, h
 					"top-level configuration instead of within a build block.",
 			})
 		}
+	} else {
+		// else we make sure no HCPPackerRegistry has been declared
+		for _, build := range cfg.Builds {
+			if build.HCPPackerRegistry != nil {
+				diags = diags.Append(&hcl.Diagnostic{
+					Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are illegal in multiple builds",
+					Subject:  &build.HCPPackerRegistry.DefRange,
+					Severity: hcl.DiagError,
+					Detail: "When using multiple builds block with HCP, it is mandatory to move " +
+						"it to the top-level configuration instead of within a build block",
+				})
+			}
+		}
 	}
-
 	if block != nil && cfg.HCPPackerRegistry != nil {
-		diags = diags.Append(multipleRegistryDiag(block))
+		diags = diags.Append(
+			&hcl.Diagnostic{
+				Summary:  "Multiple HCP Packer registry block declaration",
+				Subject:  block.HCL2Ref.DefRange.Ptr(),
+				Severity: hcl.DiagError,
+				Detail: "Multiple " + buildHCPPackerRegistryLabel + " blocks have been found, only one can be defined " +
+					"in HCL2 templates. Starting with Packer 1.12.1, it is recommended to move it to the " +
+					"top-level configuration instead of within a build block.",
+			})
 	}
 
 	if cfg.HCPPackerRegistry != nil {
