@@ -670,8 +670,8 @@ func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, h
 					Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are illegal in multiple builds",
 					Subject:  &build.HCPPackerRegistry.DefRange,
 					Severity: hcl.DiagError,
-					Detail: "When using multiple builds block with HCP, it is mandatory to move " +
-						"it to the top-level configuration instead of within a build block",
+					Detail: "When using multiple builds block with HCP Packer, it is mandatory to move " +
+						"hcp_packer_registry to the top-level configuration instead of within a build block",
 				})
 			}
 		}
