@@ -93,18 +93,6 @@ func (h *HCLRegistry) VersionStatusSummary() {
 
 func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
-	if len(config.Builds) > 1 {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Multiple " + buildLabel + " blocks",
-			Detail: fmt.Sprintf("For HCP Packer Registry enabled builds, only one " + buildLabel +
-				" block can be defined. Please remove any additional " + buildLabel +
-				" block(s). If this " + buildLabel + " is not meant for the HCP Packer registry please " +
-				"clear any HCP_PACKER_* environment variables."),
-		})
-
-		return nil, diags
-	}
 
 	registryConfig, rcDiags := config.GetHCPPackerRegistryBlock()
 	diags = diags.Extend(rcDiags)
