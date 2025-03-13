@@ -38,11 +38,10 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
-const wrapPowershellString_1 string = `
+const wrapPowershellString string = `
 try {
     $results = & {
-`
-const wrapPowershellString_2 string = `
+	{{.Payload}}
 }
 } catch {
     Write-Host "Error caught in catch block"
@@ -276,19 +275,23 @@ func extractScript(p *Provisioner) (string, error) {
 	writer := bufio.NewWriter(temp)
 	defer writer.Flush() // Ensures everything is written before closing
 
-	var scriptBuilder strings.Builder
-	scriptBuilder.WriteString(wrapPowershellString_1 + "\n")
-
 	// Add inline PowerShell commands
+	var payloadBuilder strings.Builder
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		scriptBuilder.WriteString(command + "\n")
+		payloadBuilder.WriteString(command + "\n")
+	}
+	ctxData := p.generatedData
+	ctxData["Payload"] = payloadBuilder.String()
+	p.config.ctx.Data = ctxData
+
+	data, err := interpolate.Render(wrapPowershellString, &p.config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error processing command: %s", err)
 	}
 
-	scriptBuilder.WriteString(wrapPowershellString_2 + "\n")
-
 	log.Printf("Writing PowerShell script to file: %s", temp.Name())
-	if _, err := writer.WriteString(scriptBuilder.String()); err != nil {
+	if _, err := writer.WriteString(data); err != nil {
 		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
 	}
 
