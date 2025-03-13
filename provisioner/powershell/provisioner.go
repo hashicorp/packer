@@ -275,24 +275,24 @@ func extractScript(p *Provisioner) (string, error) {
 		return "", err
 	}
 	defer temp.Close()
+
 	writer := bufio.NewWriter(temp)
-	log.Printf("Writing wrap 1 : %s", wrapPowershellString_1)
-	if _, err := writer.WriteString(wrapPowershellString_1 + "\n"); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
-	}
+	defer writer.Flush() // Ensures everything is written before closing
+
+	var scriptBuilder strings.Builder
+	scriptBuilder.WriteString(wrapPowershellString_1 + "\n")
+
+	// Add inline PowerShell commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := writer.WriteString(command + "\n"); err != nil {
-			return "", fmt.Errorf("Error preparing powershell script: %s", err)
-		}
-	}
-	log.Printf("Writing wrap 2 : %s", wrapPowershellString_2)
-	if _, err := writer.WriteString(wrapPowershellString_2 + "\n"); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+		scriptBuilder.WriteString(command + "\n")
 	}
 
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+	scriptBuilder.WriteString(wrapPowershellString_2 + "\n")
+
+	log.Printf("Writing PowerShell script to file: %s", temp.Name())
+	if _, err := writer.WriteString(scriptBuilder.String()); err != nil {
+		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
 	}
 
 	return temp.Name(), nil
