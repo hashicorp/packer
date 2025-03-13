@@ -9,6 +9,7 @@ package shell
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -66,6 +67,11 @@ type Config struct {
 	// name of the tmp environment variable file, if UseEnvVarFile is true
 	envVarFile string
 
+	// Set true if user provided a shebang for inline scripts.
+	// This is used to determine if the default shebang must be used
+	// or should be taken from inline commands
+	inlineShebangDefined bool
+
 	ctx interpolate.Context
 }
 
@@ -113,6 +119,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.InlineShebang == "" {
 		p.config.InlineShebang = "/bin/sh -e"
+	} else {
+		p.config.inlineShebangDefined = true
 	}
 
 	if p.config.StartRetryTimeout == 0 {
@@ -202,20 +210,38 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		scripts = append(scripts, tf.Name())
 
 		// Write our contents to it
-		writer := bufio.NewWriter(tf)
-		_, _ = writer.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang))
+		fileWriter := bufio.NewWriter(tf)
+		commandBuffer := &bytes.Buffer{}
 		for _, command := range p.config.Inline {
 			p.config.ctx.Data = generatedData
 			command, err := interpolate.Render(command, &p.config.ctx)
 			if err != nil {
 				return fmt.Errorf("Error interpolating Inline: %s", err)
 			}
-			if _, err := writer.WriteString(command + "\n"); err != nil {
+			if _, err := commandBuffer.WriteString(command + "\n"); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
 
-		if err := writer.Flush(); err != nil {
+		firstLine, err := commandBuffer.ReadString('\n')
+		if err != nil && err != io.EOF {
+			return fmt.Errorf("Error preparing shell script: %s", err)
+		}
+		// If the user has defined an inline shebang, use that.
+		// Or If command does not start with a shebang, use the default shebang.
+		// else command already has a shebang, so do not write it.
+		if p.config.inlineShebangDefined || !strings.HasPrefix(firstLine, "#!") {
+			if _, err := fileWriter.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang)); err != nil {
+				return fmt.Errorf("Error preparing shell script: %s", err)
+			}
+		}
+
+		// Write the collected commands to the file buffer
+		if _, err := fileWriter.Write(commandBuffer.Bytes()); err != nil {
+			return fmt.Errorf("Error preparing shell script: %s", err)
+		}
+
+		if err := fileWriter.Flush(); err != nil {
 			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
 
