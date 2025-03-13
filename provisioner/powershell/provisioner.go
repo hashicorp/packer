@@ -39,23 +39,20 @@ var psEscape = strings.NewReplacer(
 )
 
 const wrapPowershellString_1 string = `
-$global:LASTEXITCODE = 0
-$global:lastcmdlet = $null
-
-$results = {
+try {
+    $results = & {
 `
 const wrapPowershellString_2 string = `
-$global:lastcmdlet = $?
-}.invokereturnasis()
-$exitstatus = 1
-if ($lastcmdlet) {
-	$exitstatus = 0
 }
-if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
- $exitstatus = $LASTEXITCODE
+} catch {
+    Write-Host "Error caught in catch block"
+    $errorMessage = $_.Exception.Message
+    throw "Script failed with error: $errorMessage"
+
 }
 Write-Host $results
-exit $exitstatus
+exit 0
+
 `
 
 type Config struct {
@@ -132,7 +129,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
 
-	baseCmd += `. {{.Vars}}; &'{{.Path}}' exit $LASTEXITCODE }`
+	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
