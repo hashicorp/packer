@@ -67,7 +67,9 @@ type Config struct {
 	// name of the tmp environment variable file, if UseEnvVarFile is true
 	envVarFile string
 
-	// If user provided a shebang for inline scripts
+	// Set true if user provided a shebang for inline scripts.
+	// This is used to determine if the default shebang must be used
+	// or should be taken from inline commands
 	inlineShebangDefined bool
 
 	ctx interpolate.Context
