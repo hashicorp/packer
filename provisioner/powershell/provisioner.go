@@ -38,6 +38,26 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
+const wrapPowershellString_1 string = `
+$global:LASTEXITCODE = 0
+$global:lastcmdlet = $null
+
+$results = {
+`
+const wrapPowershellString_2 string = `
+$global:lastcmdlet = $?
+}.invokereturnasis()
+$exitstatus = 1
+if ($lastcmdlet) {
+	$exitstatus = 0
+}
+if ( $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0 ) {
+ $exitstatus = $LASTEXITCODE
+}
+Write-Host $results
+exit $exitstatus
+`
+
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
@@ -112,7 +132,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
 
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+	baseCmd += `. {{.Vars}}; &'{{.Path}}' exit $LASTEXITCODE }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
@@ -256,11 +276,19 @@ func extractScript(p *Provisioner) (string, error) {
 	}
 	defer temp.Close()
 	writer := bufio.NewWriter(temp)
+	log.Printf("Writing wrap 1 : %s", wrapPowershellString_1)
+	if _, err := writer.WriteString(wrapPowershellString_1 + "\n"); err != nil {
+		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+	}
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
 		if _, err := writer.WriteString(command + "\n"); err != nil {
 			return "", fmt.Errorf("Error preparing powershell script: %s", err)
 		}
+	}
+	log.Printf("Writing wrap 2 : %s", wrapPowershellString_2)
+	if _, err := writer.WriteString(wrapPowershellString_2 + "\n"); err != nil {
+		return "", fmt.Errorf("Error preparing powershell script: %s", err)
 	}
 
 	if err := writer.Flush(); err != nil {
