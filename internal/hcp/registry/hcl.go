@@ -164,9 +164,9 @@ func (h *HCLRegistry) registerAllComponents() hcl.Diagnostics {
 
 	conflictSources := map[string]struct{}{}
 
-	// we currently support only one build block but it will change in the near future
 	for _, build := range h.configuration.Builds {
 		for _, source := range build.Sources {
+
 			// If we encounter the same source twice, we'll defer
 			// its addition to later, using both the build name
 			// and the source type as the name used for HCP Packer.
@@ -193,23 +193,46 @@ func (h *HCLRegistry) registerAllComponents() hcl.Diagnostics {
 	// If that happens, we then use a combination of both the build name, and
 	// the source type.
 	for _, build := range h.configuration.Builds {
+		// this set is used to catch duplicate sources in the same block
+		sources := map[string]struct{}{}
 		for _, source := range build.Sources {
+			if _, ok := sources[source.String()]; !ok {
+				sources[source.String()] = struct{}{}
+			} else {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Source conflicts",
+					Subject:  &build.HCL2Ref.DefRange,
+					Detail: fmt.Sprintf("Two or more sources are identical inside the same "+
+						"build block, there should be only one instance of %s", source.String()),
+				})
+				continue
+			}
 			if _, ok := conflictSources[source.String()]; !ok {
 				continue
 			}
 
-			buildName := source.String()
-			if build.Name != "" {
-				buildName = fmt.Sprintf("%s.%s", build.Name, buildName)
+			if build.Name == "" {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Missing mandatory build name",
+					Subject:  &build.HCL2Ref.DefRange,
+					Detail: "A build name is required when using the same source in two or" +
+						" more different builds",
+				})
+				continue
 			}
+
+			buildName := fmt.Sprintf("%s.%s", build.Name, source.String())
 
 			if _, ok := h.buildNames[buildName]; ok {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Build name conflicts",
 					Subject:  &build.HCL2Ref.DefRange,
-					Detail: fmt.Sprintf("Two sources are used in the same build block, causing "+
-						"a conflict, there must only be one instance of %s", source.String()),
+					Detail: fmt.Sprintf("Two sources are used in the same build block or "+
+						"two builds have the same name, causing a conflict, there must only "+
+						"be one instance of %s", source.String()),
 				})
 			}
 			h.buildNames[buildName] = struct{}{}
