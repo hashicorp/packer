@@ -164,7 +164,6 @@ func (h *HCLRegistry) registerAllComponents() hcl.Diagnostics {
 
 	conflictSources := map[string]struct{}{}
 
-	// we currently support only one build block but it will change in the near future
 	for _, build := range h.configuration.Builds {
 		for _, source := range build.Sources {
 			// If we encounter the same source twice, we'll defer
@@ -198,18 +197,26 @@ func (h *HCLRegistry) registerAllComponents() hcl.Diagnostics {
 				continue
 			}
 
-			buildName := source.String()
-			if build.Name != "" {
-				buildName = fmt.Sprintf("%s.%s", build.Name, buildName)
+			if build.Name == "" {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Build name conflicts",
+					Subject:  &build.HCL2Ref.DefRange,
+					Detail:   "build name is required when using the same source in two different builds",
+				})
+				continue
 			}
+
+			buildName := fmt.Sprintf("%s.%s", build.Name, source.String())
 
 			if _, ok := h.buildNames[buildName]; ok {
 				diags = append(diags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Build name conflicts",
 					Subject:  &build.HCL2Ref.DefRange,
-					Detail: fmt.Sprintf("Two sources are used in the same build block, causing "+
-						"a conflict, there must only be one instance of %s", source.String()),
+					Detail: fmt.Sprintf("Two sources are used in the same build block or "+
+						"two build has the same name causing a conflict, there must only "+
+						"be one instance of %s", source.String()),
 				})
 			}
 			h.buildNames[buildName] = struct{}{}

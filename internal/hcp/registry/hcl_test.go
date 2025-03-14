@@ -237,8 +237,8 @@ func TestNewRegisterProperBuildName(t *testing.T) {
 			},
 		},
 		"multiple build block with same source but with only one declared build name": {
-			expectErr:      false,
-			expectedBuilds: []string{"docker.ubuntu", "build.docker.ubuntu"},
+			expectErr: true,
+			// expectedBuilds: []string{"docker.ubuntu", "build.docker.ubuntu"},
 			builds: hcl2template.Builds{
 				&hcl2template.BuildBlock{
 					Name: "build",
