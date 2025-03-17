@@ -38,20 +38,26 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
+// throw "Script failed with error: $errorMessage"
 const wrapPowershellString string = `
 try {
-    $results = & {
+    $results = . {
+	$global:LastExitCode = 0
 	{{.Payload}}
 }
 } catch {
     Write-Host "Error caught in catch block"
     $errorMessage = $_.Exception.Message
-    throw "Script failed with error: $errorMessage"
-
+	throw "Script failed with error: $errorMessage"
+	
 }
-Write-Host $results
-exit 0
 
+Write-Host $results
+if ($global:LastExitCode -ne 0) {
+	Write-Host "Script failed with exit code: $global:LastExitCode"
+	exit $global:LastExitCode
+}
+exit 0
 `
 
 type Config struct {
@@ -128,7 +134,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
 
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+	baseCmd += `. {{.Vars}}; ($LastExitCode=0); . {{.Path}}; if ($? -eq $false) {exit 1} exit $LastExitCode; };`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
@@ -263,7 +269,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-// Takes the inline scripts, concatenates them into a temporary file and
+// Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
 func extractScript(p *Provisioner) (string, error) {
 	temp, err := tmp.File("powershell-provisioner")
@@ -273,9 +279,8 @@ func extractScript(p *Provisioner) (string, error) {
 	defer temp.Close()
 
 	writer := bufio.NewWriter(temp)
-	defer writer.Flush() // Ensures everything is written before closing
+	defer writer.Flush()
 
-	// Add inline PowerShell commands
 	var payloadBuilder strings.Builder
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
@@ -284,7 +289,7 @@ func extractScript(p *Provisioner) (string, error) {
 	ctxData := p.generatedData
 	ctxData["Payload"] = payloadBuilder.String()
 	p.config.ctx.Data = ctxData
-
+	log.Printf("Wrapping powershell script block")
 	data, err := interpolate.Render(wrapPowershellString, &p.config.ctx)
 	if err != nil {
 		return "", fmt.Errorf("Error processing command: %s", err)
