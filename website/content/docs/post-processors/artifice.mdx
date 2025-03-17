@@ -69,16 +69,17 @@ The configuration allows you to specify which files comprise your artifact.
 
 ### Example Configuration
 
-This minimal example:
+You can use Packer to deploy HashiCorp Consul, which is a service discovery and service mesh solution. Refer to the [Consul website](https://www.hashicorp.com/en/products/consul) for additional information. 
 
-1.  Spins up a cloned VMware virtual machine
-2.  Installs a [consul](https://www.consul.io/) release
-3.  Downloads the consul binary
-4.  Packages it into a `.tar.gz` file
-5.  Uploads it to S3.
+In this example, Packer uses a minimal configuration to perform the following actions:
 
-VMX is a fast way to build and test locally, but you can easily substitute
-another builder.
+1. Spins up a cloned VMware virtual machine
+1. Installs a Consul release. 
+1. Downloads the Consul binary.
+1. Packages Consul into a `.tar.gz` file.
+1. Uploads Consul to S3.
+
+VMX is a fast way to build and test locally, but you can substitute a different builder.
 
 ```json
 {

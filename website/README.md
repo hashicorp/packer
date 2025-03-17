@@ -1,6 +1,6 @@
 # Packer Documentation Website
 
-This subdirectory contains the content for the [Packer Website](https://packer.io/).
+This subdirectory contains the content for the [Packer documentation website](https://developer.hashicorp.com/packer/docs).
 
 <!--
   This readme file contains several blocks of generated text, to make it easier to share common information
