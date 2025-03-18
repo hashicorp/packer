@@ -122,8 +122,6 @@ func TestProvisionerPrepare_DebugMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
-	// powershell -executionpolicy bypass "& { if (" +
-	//		"Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
 
 	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };"`
 	if p.config.ExecuteCommand != command {
