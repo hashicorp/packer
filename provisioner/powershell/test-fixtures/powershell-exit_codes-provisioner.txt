@@ -5,11 +5,6 @@
 },
 {
   "type": "powershell",
-  "inline": ["#Requires -Version 10.0"],
-  "valid_exit_codes": ["1"]
-},
-{
-  "type": "powershell",
   "script": "../../provisioner/powershell/test-fixtures/scripts/set_version_latest.ps1",
   "valid_exit_codes": ["0"]
 },

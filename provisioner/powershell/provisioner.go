@@ -42,11 +42,9 @@ var psEscape = strings.NewReplacer(
 const wrapPowershellString string = `
 try {
     $results = . {
-	$global:LastExitCode = 0
 	{{.Payload}}
 }
 } catch {
-    Write-Host "Error caught in catch block"
     $errorMessage = $_.Exception.Message
 	throw "Script failed with error: $errorMessage"
 	
@@ -55,7 +53,7 @@ try {
 Write-Host $results
 if ($global:LastExitCode -ne 0) {
 	Write-Host "Script failed with exit code: $global:LastExitCode"
-	exit $global:LastExitCode
+	throw "Script failed with exit code: $global:LastExitCode"
 }
 exit 0
 `
@@ -127,14 +125,15 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
-	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	baseCmd := "& { if (Test-Path variable:global:ProgressPreference)" +
+		"{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};"
 
 	if p.config.DebugMode != 0 {
-		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+		baseCmd += fmt.Sprintf("Set-PsDebug -Trace %d;", p.config.DebugMode)
 	}
 
-	baseCmd += `. {{.Vars}}; ($LastExitCode=0); . {{.Path}}; if ($? -eq $false) {exit 1} exit $LastExitCode; };`
+	baseCmd += ". {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };"
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
 		return baseCmd
@@ -272,6 +271,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 // Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
 func extractScript(p *Provisioner) (string, error) {
+
 	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
