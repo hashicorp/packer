@@ -43,7 +43,7 @@ const wrapPowershellString string = `
 try {
     $results = . {
 	{{.Payload}}
-}
+	}
 } catch {
     $errorMessage = $_.Exception.Message
 	throw "Script failed with error: $errorMessage"
@@ -287,6 +287,7 @@ func extractScript(p *Provisioner) (string, error) {
 		payloadBuilder.WriteString(command + "\n")
 	}
 	ctxData := p.generatedData
+
 	ctxData["Payload"] = payloadBuilder.String()
 	p.config.ctx.Data = ctxData
 	log.Printf("Wrapping powershell script block")

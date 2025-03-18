@@ -23,6 +23,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	config := testConfig()
 	p := new(Provisioner)
 	_ = p.Prepare(config)
+	p.generatedData = generatedData()
 	file, err := extractScript(p)
 	defer os.Remove(file)
 	if err != nil {
@@ -35,13 +36,15 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
 	readFile, err := os.ReadFile(file)
-	expectedContents := "foo\nbar\n"
+	expectedContents := "\ntry {\n    $results = . {\n\tfoo\nbar\n\n\t}\n} catch {\n    $errorMessage = $_.Exception.Message\n\tthrow \"Script failed with error: $errorMessage\"\n\t\n}\n\nWrite-Host $results\nif ($global:LastExitCode -ne 0) {\n\tWrite-Host \"Script failed with exit code: $global:LastExitCode\"\n\tthrow \"Script failed with exit code: $global:LastExitCode\"\n}\nexit 0\n"
+	normalizedExpectedContent := normalizeWhiteSpace(expectedContents)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
 	}
 	s := string(readFile[:])
-	if s != expectedContents {
-		t.Fatalf("Expected generated inlineScript to equal '%s', got '%s'", expectedContents, s)
+	normalizedString := normalizeWhiteSpace(s)
+	if normalizedString != normalizedExpectedContent {
+		t.Fatalf("Expected generated inlineScript to equal '%s', got '%s'", normalizedExpectedContent, normalizedString)
 	}
 }
 
@@ -74,11 +77,11 @@ func TestProvisionerPrepare_Defaults(t *testing.T) {
 		t.Error("expected elevated_password to be empty")
 	}
 
-	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
-		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ExecuteCommand)
+	if p.config.ExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };"` {
+		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };', but got '%s'`, p.config.ExecuteCommand)
 	}
 
-	if p.config.ElevatedExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"` {
+	if p.config.ElevatedExecuteCommand != `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };"` {
 		t.Fatalf(`Default command should be 'powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"', but got '%s'`, p.config.ElevatedExecuteCommand)
 	}
 
@@ -119,8 +122,10 @@ func TestProvisionerPrepare_DebugMode(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %s", err)
 	}
+	// powershell -executionpolicy bypass "& { if (" +
+	//		"Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
 
-	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"`
+	command := `powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};Set-PsDebug -Trace 1;. {{.Vars}}; Set-Variable -Name LastExitCode -Value 0 -Scope Global; . {{.Path}}; exit $global:LastExitCode; };"`
 	if p.config.ExecuteCommand != command {
 		t.Fatalf(fmt.Sprintf(`Expected command should be '%s' but got '%s'`, command, p.config.ExecuteCommand))
 	}
@@ -483,7 +488,8 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/inlineScript.ps1; exit \$global:LastExitCode; };"`)
+
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -503,7 +509,7 @@ func TestProvisionerProvision_Inline(t *testing.T) {
 	}
 
 	cmd = comm.StartCmd.Command
-	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/inlineScript.ps1'; exit \$LastExitCode }"`)
+	re = regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/inlineScript.ps1; exit \$global:LastExitCode; };"`)
 	matched = re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -533,7 +539,7 @@ func TestProvisionerProvision_Scripts(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/script.ps1; exit \$global:LastExitCode; };"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -570,7 +576,7 @@ func TestProvisionerProvision_ScriptsWithEnvVars(t *testing.T) {
 	}
 
 	cmd := comm.StartCmd.Command
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/script.ps1; exit \$global:LastExitCode; };"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -595,11 +601,11 @@ func TestProvisionerProvision_SkipClean(t *testing.T) {
 	}{
 		{
 			SkipClean:                true,
-			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`,
+			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/script.ps1; exit \$global:LastExitCode; };"`,
 		},
 		{
 			SkipClean:                false,
-			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/packer-cleanup-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1'; exit \$LastExitCode }"`,
+			LastExecutedCommandRegex: `powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/packer-cleanup-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; exit \$global:LastExitCode; };"`,
 		},
 	}
 
@@ -917,7 +923,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.generatedData = make(map[string]interface{})
 	cmd, _ := p.createCommandText()
 
-	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; &'c:/Windows/Temp/script.ps1'; exit \$LastExitCode }"`)
+	re := regexp.MustCompile(`powershell -executionpolicy bypass "& { if \(Test-Path variable:global:ProgressPreference\){set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};\. c:/Windows/Temp/packer-ps-env-vars-[[:alnum:]]{8}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{4}-[[:alnum:]]{12}\.ps1; Set-Variable -Name LastExitCode -Value 0 -Scope Global; \. c:/Windows/Temp/script.ps1; exit \$global:LastExitCode; };"`)
 	matched := re.MatchString(cmd)
 	if !matched {
 		t.Fatalf("Got unexpected command: %s", cmd)
@@ -975,4 +981,19 @@ func generatedData() map[string]interface{} {
 		"PackerHTTPIP":   commonsteps.HttpIPNotImplemented,
 		"PackerHTTPPort": commonsteps.HttpPortNotImplemented,
 	}
+}
+
+func normalizeWhiteSpace(s string) string {
+	// Replace multiple spaces/tabs with a single space
+	re := regexp.MustCompile(`[\t ]+`)
+	s = re.ReplaceAllString(s, " ")
+
+	// Trim leading/trailing spaces and newlines
+	s = strings.TrimSpace(s)
+
+	// Normalize line breaks (remove excessive empty lines)
+	s = strings.ReplaceAll(s, "\r\n", "\n") // Convert Windows line endings to Unix
+	s = strings.ReplaceAll(s, "\r", "\n")   // Convert old Mac line endings to Unix
+
+	return s
 }
