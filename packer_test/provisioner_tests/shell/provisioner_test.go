@@ -80,3 +80,18 @@ func (ts *PackerShellProvisionerTestSuite) TestInvalidShebangAsOption() {
 		SetArgs("build", "templates/shebang_as_option_invalid.pkr.hcl").
 		Assert(check.MustFail())
 }
+
+func (ts *PackerShellProvisionerTestSuite) TestEmptyInlineCommands() {
+	dir := ts.MakePluginDir()
+	defer dir.Cleanup()
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("plugins", "install", "github.com/hashicorp/docker").
+		Assert(check.MustSucceed())
+
+	ts.PackerCommand().UsePluginDir(dir).
+		AddEnv("HOME", os.Getenv("HOME")).
+		AddEnv("PATH", os.Getenv("PATH")).
+		SetArgs("build", "templates/empty_inline_list.pkr.hcl").
+		Assert(check.MustFail())
+}
