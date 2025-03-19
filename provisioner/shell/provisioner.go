@@ -9,7 +9,6 @@ package shell
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -209,39 +208,30 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		// Set the path to the temporary file
 		scripts = append(scripts, tf.Name())
 
-		// Write our contents to it
-		fileWriter := bufio.NewWriter(tf)
-		commandBuffer := &bytes.Buffer{}
+		// Write all inline commands to this buffer
+		commandBuffer := strings.Builder{}
 		for _, command := range p.config.Inline {
 			p.config.ctx.Data = generatedData
 			command, err := interpolate.Render(command, &p.config.ctx)
 			if err != nil {
 				return fmt.Errorf("Error interpolating Inline: %s", err)
 			}
-			if _, err := commandBuffer.WriteString(command + "\n"); err != nil {
+			if _, err := fmt.Fprintf(&commandBuffer, "%s\n", command); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
 
-		firstLine, err := commandBuffer.ReadString('\n')
-		if err != nil && err != io.EOF {
-			return fmt.Errorf("Error preparing shell script: %s", err)
-		}
 		// If the user has defined an inline shebang, use that.
 		// Or If command does not start with a shebang, use the default shebang.
 		// else command already has a shebang, so do not write it.
-		if p.config.inlineShebangDefined || !strings.HasPrefix(firstLine, "#!") {
-			if _, err := fileWriter.WriteString(fmt.Sprintf("#!%s\n", p.config.InlineShebang)); err != nil {
+		if p.config.inlineShebangDefined || !strings.HasPrefix(commandBuffer.String(), "#!") {
+			if _, err := fmt.Fprintf(tf, "#!%s\n", p.config.InlineShebang); err != nil {
 				return fmt.Errorf("Error preparing shell script: %s", err)
 			}
 		}
 
-		// Write the collected commands to the file buffer
-		if _, err := fileWriter.Write(commandBuffer.Bytes()); err != nil {
-			return fmt.Errorf("Error preparing shell script: %s", err)
-		}
-
-		if err := fileWriter.Flush(); err != nil {
+		// Write the collected commands to the file
+		if _, err := tf.WriteString(commandBuffer.String()); err != nil {
 			return fmt.Errorf("Error preparing shell script: %s", err)
 		}
 
