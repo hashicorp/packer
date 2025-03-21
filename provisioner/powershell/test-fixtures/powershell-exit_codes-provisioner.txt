@@ -49,4 +49,9 @@
   "type": "powershell",
   "inline": "sc.exe start command",
   "valid_exit_codes": ["1060"]
+},
+{
+  "type": "powershell",
+  "inline": "echo 'Hi testing echo'; invalid command!; echo 'Another valid command';",
+  "valid_exit_codes": ["1"]
 }
