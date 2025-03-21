@@ -38,6 +38,34 @@ var psEscape = strings.NewReplacer(
 	"'", "`'",
 )
 
+// wraps the content in try catch block and exits with a status.
+const wrapPowershellString string = `
+	if (Test-Path variable:global:ProgressPreference) {
+	  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
+	}
+	set-variable -name variable:global:ErrorActionPreference -value 'Continue'
+	{{if .DebugMode}}
+	Set-PsDebug -Trace {{.DebugMode}}
+	{{- end}}
+	$exitCode = 0
+	{{.Vars}}
+	try {
+	{{.Payload}}
+	$exitCode = 0
+	} catch {
+	Write-Error "An error occurred: $_"
+	$exitCode = 1
+	}
+	
+	if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {
+		$exitCode = $LASTEXITCODE
+	}
+	
+	Write-Host $result
+	exit $exitCode
+
+`
+
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
 
@@ -105,23 +133,15 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
-	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
-
-	if p.config.DebugMode != 0 {
-		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
-	}
-
-	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
-		return baseCmd
+		return `-file {{.Path}}`
 	}
 
 	if p.config.UsePwsh {
-		return fmt.Sprintf(`pwsh -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`pwsh -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
 	} else {
-		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`powershell -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
 	}
 
 }
@@ -247,24 +267,44 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-// Takes the inline scripts, concatenates them into a temporary file and
+// Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
 func extractScript(p *Provisioner) (string, error) {
 	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
 	}
+
 	defer temp.Close()
 	writer := bufio.NewWriter(temp)
+	var inlineCommandsStringBuilder strings.Builder
+
+	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := writer.WriteString(command + "\n"); err != nil {
-			return "", fmt.Errorf("Error preparing powershell script: %s", err)
+		if _, err := inlineCommandsStringBuilder.WriteString(command); err != nil {
+			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
 
+	// injecting all the variables in the string
+	ctxData := p.generatedData
+	ctxData["Vars"] = p.createFlattenedEnvVars(p.config.ElevatedUser != "")
+	ctxData["Payload"] = inlineCommandsStringBuilder.String()
+	ctxData["DebugMode"] = p.config.DebugMode
+	p.config.ctx.Data = ctxData
+
+	data, err := interpolate.Render(wrapPowershellString, &p.config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error building powershell wrapper: %w", err)
+	}
+
+	log.Printf("Writing PowerShell script to file: %s", temp.Name())
+	if _, err := writer.WriteString(data); err != nil {
+		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
+	}
 	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+		return "", fmt.Errorf("Error preparing powershell script: %w", err)
 	}
 
 	return temp.Name(), nil
