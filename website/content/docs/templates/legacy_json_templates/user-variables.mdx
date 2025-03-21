@@ -121,10 +121,8 @@ environment variables, as specified in the
 
 ## Vault variables
 
-Secrets can be read from [Vault](https://www.vaultproject.io/) and used within
-your template as user variables. the `vault` function is available _only_
-within the default value of a user variable, allowing you to default a user
-variable to a vault secret.
+Packer can read secrets read from HashiCorp Vault and add them to your template as user variables. You can only use the `vault` function 
+in the default value of a user variable. This allows you to default a user variable to a Vault secret. Refer to the [Vault documentation](https://developer.hashicorp.com/vault/docs/secrets) for additional information about integrating with Vault secrets engines. 
 
 An example of using a v2 kv engine:
 

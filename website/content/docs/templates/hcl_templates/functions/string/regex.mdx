@@ -136,12 +136,6 @@ aaabbbccc
   "01",
 ]
 
-> regex("^(?:(?P<scheme>[^:/?#]+):)?(?://(?P<authority>[^/?#]*))?", "https://packer.io/docs/")
-{
-  "packer" = "packer.io"
-  "scheme" = "https"
-}
-
 > regex("[a-z]+", "53453453.34534523454")
 
 Error: Error in function call

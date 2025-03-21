@@ -1,6 +1,6 @@
 # Packer Documentation Website
 
-This subdirectory contains the content for the [Packer Website](https://packer.io/).
+This subdirectory contains the content for the [Packer documentation website](https://developer.hashicorp.com/packer/docs).
 
 <!--
   This readme file contains several blocks of generated text, to make it easier to share common information
@@ -418,7 +418,7 @@ For plugins in separate repositories, additional configuration is required.
 
 #### Setting up remote plugin docs
 
-Some setup is required to include docs from remote plugin repositories on the [packer.io/docs](https://www.packer.io/docs) site.
+Some setup is required to include docs from remote plugin repositories on the [developer.hashicorp.com/packer/docs](https://developer.hashicorp.com/packer) site.
 
 1. The plugin repository needs to include a `docs.zip` asset in its release
 2. The `packer` repository must have a corresponding entry in `website/data/docs-remote-plugins.json` which points to the plugin repository.
@@ -518,7 +518,7 @@ https://docs.google.com/document/d/1kYvbyd6njHFSscoE1dtDNHQ3U8IzaMdcjOS0jg87rHg/
 
 ## Link Validation
 
-The Packer GitHub repository is configured to run a [Markdown Link Check](https://github.com/gaurav-nelson/github-action-markdown-link-check#github-action---markdown-link-check-%EF%B8%8F) on a nightly basis to check for potential broken links within the Packer documentation. All checks on master will be executed using the BASE_URL set to https://packer.io/.
+The Packer GitHub repository is configured to run a [Markdown Link Check](https://github.com/gaurav-nelson/github-action-markdown-link-check#github-action---markdown-link-check-%EF%B8%8F) on a nightly basis to check for potential broken links within the Packer documentation. All checks on master will be executed using the BASE_URL set to https://developer.hashicorp.com.
 
 There is also a GitHub action that will check any modified `website/content/**/*.mdx` files on new pull-requests. The link checker action for pull-requests will only run when there is a new Vercel deployment; checks will be executed against the Vercel deployment URL. If no deployment is made the check will run but will timeout after 3 minutes since it needs a valid Vercel deployment URL.
 
@@ -526,7 +526,7 @@ The master configuration file for the markdown-link-checker is called `mlc_confi
 The configuration helps with relative links in the documentation that will be valid once deployed, and configures a few ignored URLs which are valid but may not return a valid 200 HTTP response code due to permissions or DDoS protection settings on the domain.
 
 **Potential False Negatives**
-The link checker will prepend the BASEURL `https://packer.io/` to any relative links found within the documentation, which can be an issue when adding new `/docs` or `/guides` documents as the pages have not been deployed. To help mitigate this issue check the site preview to ensure newly added documentation pages work as expected.
+The link checker will prepend the BASEURL `https://developer.hashicorp.com` to any relative links found within the documentation, which can be an issue when adding new `/packer/docs` or `/packer/guides` documents as the pages have not been deployed. To help mitigate this issue check the site preview to ensure newly added documentation pages work as expected.
 
 ## Redirects
 
