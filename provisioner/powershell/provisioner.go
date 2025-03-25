@@ -8,7 +8,6 @@
 package powershell
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -276,7 +275,7 @@ func extractScript(p *Provisioner) (string, error) {
 	}
 
 	defer temp.Close()
-	writer := bufio.NewWriter(temp)
+
 	var inlineCommandsStringBuilder strings.Builder
 
 	// we concatenate all the inline commands
@@ -300,11 +299,8 @@ func extractScript(p *Provisioner) (string, error) {
 	}
 
 	log.Printf("Writing PowerShell script to file: %s", temp.Name())
-	if _, err := writer.WriteString(data); err != nil {
+	if _, err := temp.WriteString(data); err != nil {
 		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
-	}
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %w", err)
 	}
 
 	return temp.Name(), nil
