@@ -276,12 +276,12 @@ func extractScript(p *Provisioner) (string, error) {
 
 	defer temp.Close()
 
-	var inlineCommandsStringBuilder strings.Builder
+	var commandBuilder strings.Builder
 
 	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := inlineCommandsStringBuilder.WriteString(command); err != nil {
+		if _, err := commandBuilder.WriteString(command); err != nil {
 			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
@@ -289,7 +289,7 @@ func extractScript(p *Provisioner) (string, error) {
 	// injecting all the variables in the string
 	ctxData := p.generatedData
 	ctxData["Vars"] = p.createFlattenedEnvVars(p.config.ElevatedUser != "")
-	ctxData["Payload"] = inlineCommandsStringBuilder.String()
+	ctxData["Payload"] = commandBuilder.String()
 	ctxData["DebugMode"] = p.config.DebugMode
 	p.config.ctx.Data = ctxData
 
