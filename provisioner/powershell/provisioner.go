@@ -42,7 +42,6 @@ const wrapPowershellString string = `
 	if (Test-Path variable:global:ProgressPreference) {
 	  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
 	}
-	set-variable -name variable:global:ErrorActionPreference -value 'Continue'
 	{{if .DebugMode}}
 	Set-PsDebug -Trace {{.DebugMode}}
 	{{- end}}
