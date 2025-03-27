@@ -136,6 +136,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 		{"duplicate variable",
 			defaultParser,
@@ -157,6 +158,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"duplicate variable in variables",
 			defaultParser,
@@ -178,6 +180,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"duplicate local block",
 			defaultParser,
@@ -201,6 +204,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid default type",
 			defaultParser,
@@ -222,6 +226,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 
 		{"unknown key",
@@ -241,6 +246,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 
 		{"unset used variable",
@@ -259,6 +265,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			true,
+			nil,
 		},
 
 		{"unset unused variable",
@@ -301,6 +308,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 
 		{"locals within another locals usage in different files",
@@ -388,6 +396,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 		{"recursive locals",
 			defaultParser,
@@ -400,6 +409,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 
 		{"set variable from var-file",
@@ -452,6 +462,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 
 		{"unknown variable from var-file",
@@ -494,6 +505,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 
 		{"provisioner variable decoding",
@@ -585,6 +597,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 
 		{"valid validation block",
@@ -641,6 +654,7 @@ func TestParse_variables(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 
 		{"valid validation block - invalid default",
@@ -665,6 +679,7 @@ func TestParse_variables(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 	}
 	testParse(t, tests)

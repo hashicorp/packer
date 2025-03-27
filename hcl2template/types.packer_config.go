@@ -54,6 +54,9 @@ type PackerConfig struct {
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
 
+	// HCPPackerRegistry contains the configuration for publishing the artifacts to the HCP Packer Registry.
+	HCPPackerRegistry *HCPPackerRegistryBlock
+
 	// HCPVars is the list of HCP-set variables for use later in a template
 	HCPVars map[string]cty.Value
 
@@ -637,6 +640,54 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 	}
 
 	return res, diags
+}
+
+// GetHCPPackerRegistryBlock return the HCP registry configuration block
+// that can should be used for the current build. Right now, it should
+// use the block at the top level but support the block inside the first
+// build block with a deprecation diagnostic
+func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, hcl.Diagnostics) {
+	var block *HCPPackerRegistryBlock
+	var diags hcl.Diagnostics
+
+	multipleRegistryDiag := func(block *HCPPackerRegistryBlock) *hcl.Diagnostic {
+		return &hcl.Diagnostic{
+			Summary:  "Multiple HCP Packer registry block declaration",
+			Subject:  block.HCL2Ref.DefRange.Ptr(),
+			Severity: hcl.DiagError,
+			Detail: "Multiple " + buildHCPPackerRegistryLabel + " blocks have been found, only one can be defined " +
+				"in HCL2 templates. Starting with Packer 1.12.1, it is recommended to move it to the " +
+				"top-level configuration instead of within a build block.",
+		}
+	}
+	// We start by looking in the build blocks
+	for _, build := range cfg.Builds {
+		if build.HCPPackerRegistry != nil {
+			if block != nil {
+				// error multiple build block
+				diags = diags.Append(multipleRegistryDiag(build.HCPPackerRegistry))
+				continue
+			}
+			block = build.HCPPackerRegistry
+			diags = diags.Append(&hcl.Diagnostic{
+				Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are deprecated",
+				Subject:  &block.DefRange,
+				Severity: hcl.DiagWarning,
+				Detail: "Starting with Packer 1.12.1, it is recommended to move it to the " +
+					"top-level configuration instead of within a build block.",
+			})
+		}
+	}
+
+	if block != nil && cfg.HCPPackerRegistry != nil {
+		diags = diags.Append(multipleRegistryDiag(block))
+	}
+
+	if cfg.HCPPackerRegistry != nil {
+		block = cfg.HCPPackerRegistry
+	}
+
+	return block, diags
 }
 
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
