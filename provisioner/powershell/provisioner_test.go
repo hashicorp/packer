@@ -938,6 +938,28 @@ func TestProvision_createCommandText(t *testing.T) {
 	}
 }
 
+func TestProvision_createCommandTextNoneExecutionPolicy(t *testing.T) {
+	config := testConfig()
+	config["remote_path"] = "c:/Windows/Temp/script.ps1"
+	p := new(Provisioner)
+
+	comm := new(packersdk.MockCommunicator)
+	p.communicator = comm
+	config["execution_policy"] = ExecutionPolicyNone
+	_ = p.Prepare(config)
+
+	// Non-elevated
+	p.generatedData = make(map[string]interface{})
+
+	cmd, _ := p.createCommandText()
+	re := regexp.MustCompile(`-file c:/Windows/Temp/script.ps1`)
+	matched := re.MatchString(cmd)
+	if !matched {
+		t.Fatalf("Got unexpected command: %s", cmd)
+	}
+
+}
+
 func TestProvision_uploadEnvVars(t *testing.T) {
 	p := new(Provisioner)
 	comm := new(packersdk.MockCommunicator)
