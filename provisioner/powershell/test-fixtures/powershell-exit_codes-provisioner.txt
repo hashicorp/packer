@@ -59,6 +59,18 @@
   "type": "powershell",
   "inline": ["$ErrorActionPreference='Stop'", "Get-Item 'C:\\nonexistent.txt'"],
   "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": [    
+                "try {",
+                " invalid command",
+                "} catch {",
+                "    exit 1",
+                "}"
+            ],
+  "valid_exit_codes": ["1"]
 }
+
 
 
