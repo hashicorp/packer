@@ -54,4 +54,11 @@
   "type": "powershell",
   "inline": "echo 'Hi testing echo'; invalid command!; echo 'Another valid command';",
   "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["$ErrorActionPreference='Stop'", "Get-Item 'C:\\nonexistent.txt'"],
+  "valid_exit_codes": ["1"]
 }
+
+
