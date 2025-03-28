@@ -195,6 +195,20 @@ func (d dump) Check(stdout, stderr string, err error) error {
 	return nil
 }
 
+func DumpCommand(t *testing.T, command string) Checker {
+	return &dumpCommand{t, command}
+}
+
+type dumpCommand struct {
+	t       *testing.T
+	command string
+}
+
+func (d dumpCommand) Check(_, _ string, _ error) error {
+	d.t.Logf("ran command %s", d.command)
+	return nil
+}
+
 type PanicCheck struct{}
 
 func (_ PanicCheck) Check(stdout, stderr string, _ error) error {

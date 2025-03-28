@@ -135,6 +135,17 @@ func (pc *packerCommand) Dump() *packerCommand {
 	return pc
 }
 
+func (pc *packerCommand) commandString() string {
+	buf := &strings.Builder{}
+
+	fmt.Fprintf(buf, "%q", pc.packerPath)
+	for _, arg := range pc.args {
+		fmt.Fprintf(buf, " %q", arg)
+	}
+
+	return buf.String()
+}
+
 // Run executes the packer command with the args/env requested and returns the
 // output streams (stdout, stderr)
 //
@@ -194,6 +205,7 @@ func (pc *packerCommand) Output() (string, string, error) {
 func (pc *packerCommand) Assert(checks ...check.Checker) {
 	if pc.dump {
 		tmpChecks := []check.Checker{
+			check.DumpCommand(pc.t, pc.commandString()),
 			check.Dump(pc.t),
 		}
 
