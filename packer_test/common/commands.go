@@ -22,6 +22,7 @@ type packerCommand struct {
 	err          error
 	t            *testing.T
 	fatalfAssert bool
+	dump         bool
 }
 
 // PackerCommand creates a skeleton of packer command with the ability to execute gadgets on the outputs of the command.
@@ -125,6 +126,15 @@ func (pc *packerCommand) SetAssertFatal() *packerCommand {
 	return pc
 }
 
+// Dump enables a verbose mode for the test, when Assert is called, the test
+// proceeds normally, and the command-line that was invoked, along with the
+// contents of stdout/stderr will also be output in addition to the test
+// results. This is mostly useful for debugging a test.
+func (pc *packerCommand) Dump() *packerCommand {
+	pc.dump = true
+	return pc
+}
+
 // Run executes the packer command with the args/env requested and returns the
 // output streams (stdout, stderr)
 //
@@ -182,6 +192,14 @@ func (pc *packerCommand) Output() (string, string, error) {
 }
 
 func (pc *packerCommand) Assert(checks ...check.Checker) {
+	if pc.dump {
+		tmpChecks := []check.Checker{
+			check.Dump(pc.t),
+		}
+
+		checks = append(tmpChecks, checks...)
+	}
+
 	attempt := 0
 	for pc.runs > 0 {
 		attempt++
