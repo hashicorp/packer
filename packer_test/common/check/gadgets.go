@@ -198,7 +198,7 @@ func (d dump) Check(stdout, stderr string, err error) error {
 type PanicCheck struct{}
 
 func (_ PanicCheck) Check(stdout, stderr string, _ error) error {
-	if strings.Contains(stdout, "= PACKER CRASH =") || strings.Contains(stderr, "= PACKER CRASH =") {
+	if strings.Contains(stdout, "! PACKER CRASH !") || strings.Contains(stderr, "! PACKER CRASH !") {
 		return fmt.Errorf("packer has crashed: this is never normal and should be investigated")
 	}
 	return nil
