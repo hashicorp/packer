@@ -46,8 +46,8 @@ const wrapPowershellString string = `
 	Set-PsDebug -Trace {{.DebugMode}}
 	{{- end}}
 	$exitCode = 0
-	{{.Vars}}
 	try {
+	{{.Vars}}
 	{{.Payload}}
 	$exitCode = 0
 	} catch {
