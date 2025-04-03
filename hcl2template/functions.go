@@ -109,6 +109,7 @@ func Functions(basedir string) map[string]function.Function {
 		"strcontains":            pkrfunction.StrContains,
 		"strrev":                 stdlib.ReverseFunc,
 		"substr":                 stdlib.SubstrFunc,
+		"sum":                    pkrfunction.SumFunc,
 		"textdecodebase64":       TextDecodeBase64Func,
 		"textencodebase64":       TextEncodeBase64Func,
 		"timestamp":              pkrfunction.TimestampFunc,
