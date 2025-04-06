@@ -124,6 +124,24 @@ func TestBuild(t *testing.T) {
 			},
 			fileCheck: fileCheck{expected: []string{"apple.txt"}},
 		},
+		{
+			name: "var-args: banana json var file then hcl var file sets apple env var",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "banana.json"),
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.hcl"),
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"apple.txt"}},
+		},
+		{
+			name: "var-args:  apple hcl var file then banana json var file sets banana env var",
+			args: []string{
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "apple.hcl"),
+				"-var-file=" + filepath.Join(testFixture("var-arg"), "banana.json"),
+				testFixture("var-arg"),
+			},
+			fileCheck: fileCheck{expected: []string{"banana.txt"}},
+		},
 
 		{
 			name: "var-args: hcl - arg sets a tomato env var",
