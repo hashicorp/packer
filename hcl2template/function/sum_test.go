@@ -2,9 +2,10 @@ package function
 
 import (
 	"fmt"
-	"github.com/zclconf/go-cty/cty"
 	"math"
 	"testing"
+
+	"github.com/zclconf/go-cty/cty"
 )
 
 func TestSum(t *testing.T) {

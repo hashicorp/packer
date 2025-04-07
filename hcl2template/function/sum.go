@@ -2,10 +2,11 @@ package function
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/function"
-	"math/big"
 )
 
 var SumFunc = function.New(&function.Spec{
