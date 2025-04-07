@@ -235,6 +235,10 @@
                   {
                     "title": "signum",
                     "path": "templates/hcl_templates/functions/numeric/signum"
+                  },
+                  {
+                    "title": "sum",
+                    "path": "templates/hcl_templates/functions/numeric/sum"
                   }
                 ]
               },
