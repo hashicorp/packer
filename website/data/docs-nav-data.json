@@ -250,6 +250,10 @@
                     "path": "templates/hcl_templates/functions/string/chomp"
                   },
                   {
+                    "title": "endswith",
+                    "path": "templates/hcl_templates/functions/string/endswith"
+                  },
+                  {
                     "title": "format",
                     "path": "templates/hcl_templates/functions/string/format"
                   },
@@ -288,6 +292,10 @@
                   {
                     "title": "split",
                     "path": "templates/hcl_templates/functions/string/split"
+                  },
+                  {
+                    "title": "startswith",
+                    "path": "templates/hcl_templates/functions/string/startswith"
                   },
                   {
                     "title": "strcontains",
