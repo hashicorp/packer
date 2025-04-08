@@ -230,11 +230,13 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 			case ".json":
 				f, moreDiags = p.ParseJSONFile(file)
 			default:
-				diags = append(moreDiags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Could not guess format of " + file,
-					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
-				})
+				moreDiags = hcl.Diagnostics{
+					&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Could not guess format of " + file,
+						Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+					},
+				}
 			}
 
 			diags = append(diags, moreDiags...)
