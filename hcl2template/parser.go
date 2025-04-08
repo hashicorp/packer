@@ -211,14 +211,14 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
 
-		// Merge all variable files into a single slice in the correct order of precedence.
-		// The order is: auto-loaded HCL files, auto-loaded JSON files, then explicitly specified varFiles.
-		// This ordering ensures that manually specified variables (varFiles) can override values
-		// defined in auto-loaded files and also maintain the order in which the user has specified them.
+		// Combine all variable files into a single list, preserving the intended precedence and order.
+		// The order is: auto-loaded HCL files, auto-loaded JSON files, followed by user-specified varFiles.
+		// This ensures that user-specified files can override values from auto-loaded files,
+		// and that their relative order is preserved exactly as specified by the user.
 		variableFileNames := append(append(hclVarFiles, jsonVarFiles...), varFiles...)
 
 		var variableFiles []*hcl.File
-		fmt.Printf("Parsing variable files %s\n", variableFileNames)
+
 		for _, file := range variableFileNames {
 			var (
 				f         *hcl.File
@@ -226,10 +226,8 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 			)
 			switch filepath.Ext(file) {
 			case ".hcl":
-				fmt.Printf("Parsing %s as HCL\n", file)
 				f, moreDiags = p.ParseHCLFile(file)
 			case ".json":
-				fmt.Printf("Parsing %s as JSON\n", file)
 				f, moreDiags = p.ParseJSONFile(file)
 			default:
 				diags = append(moreDiags, &hcl.Diagnostic{
