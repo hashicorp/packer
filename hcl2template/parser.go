@@ -211,44 +211,26 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
 
+		// Merge all variable files into a single slice in the correct order of precedence.
+		// The order is: auto-loaded HCL files, auto-loaded JSON files, then explicitly specified varFiles.
+		// This ordering ensures that manually specified variables (varFiles) can override values
+		// defined in auto-loaded files and also maintain the order in which the user has specified them.
+		variableFileNames := append(append(hclVarFiles, jsonVarFiles...), varFiles...)
+
 		var variableFiles []*hcl.File
-
-		for _, jsonFile := range jsonVarFiles {
-			f, moreDiags := p.ParseJSONFile(jsonFile)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			variableFiles = append(variableFiles, f)
-		}
-
-		for _, hclFile := range hclVarFiles {
-			f, moreDiags := p.ParseHCLFile(hclFile)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			variableFiles = append(variableFiles, f)
-		}
-
-		// We are trying to maintain the user given order for the var files with this for loop.
-		for _, file := range varFiles {
+		fmt.Printf("Parsing variable files %s\n", variableFileNames)
+		for _, file := range variableFileNames {
+			var (
+				f         *hcl.File
+				moreDiags hcl.Diagnostics
+			)
 			switch filepath.Ext(file) {
 			case ".hcl":
-				f, moreDiags := p.ParseHCLFile(file)
-				diags = append(diags, moreDiags...)
-				if moreDiags.HasErrors() {
-					continue
-				}
-				variableFiles = append(variableFiles, f)
+				fmt.Printf("Parsing %s as HCL\n", file)
+				f, moreDiags = p.ParseHCLFile(file)
 			case ".json":
-				f, moreDiags := p.ParseJSONFile(file)
-				diags = append(diags, moreDiags...)
-				if moreDiags.HasErrors() {
-					continue
-				}
-				variableFiles = append(variableFiles, f)
-
+				fmt.Printf("Parsing %s as JSON\n", file)
+				f, moreDiags = p.ParseJSONFile(file)
 			default:
 				diags = append(moreDiags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
@@ -256,6 +238,13 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
 				})
 			}
+
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			variableFiles = append(variableFiles, f)
+
 		}
 
 		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), variableFiles, argVars)...)
