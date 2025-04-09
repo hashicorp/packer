@@ -11,67 +11,56 @@ func TestEndsWith(t *testing.T) {
 	tests := []struct {
 		String, Suffix cty.Value
 		Want           cty.Value
-		WantError      string
 	}{
 		{
 			cty.StringVal("hello world"),
 			cty.StringVal("world"),
 			cty.True,
-			``,
 		},
 		{
 			cty.StringVal("hey world"),
 			cty.StringVal("worldss"),
 			cty.False,
-			``,
 		},
 		{
 			cty.StringVal(""),
 			cty.StringVal(""),
 			cty.True,
-			``,
 		},
 		{
 			cty.StringVal("a"),
 			cty.StringVal(""),
 			cty.True,
-			``,
 		},
 		{
 			cty.StringVal("hello world"),
 			cty.StringVal(" "),
 			cty.False,
-			``,
 		},
 		{
 			cty.StringVal(" "),
 			cty.StringVal(""),
 			cty.True,
-			``,
 		},
 		{
 			cty.StringVal(" "),
 			cty.StringVal("hello"),
 			cty.False,
-			``,
 		},
 		{
 			cty.StringVal(""),
 			cty.StringVal("a"),
 			cty.False,
-			``,
 		},
 		{
 			cty.UnknownVal(cty.String),
 			cty.StringVal("a"),
 			cty.UnknownVal(cty.Bool).RefineNotNull(),
-			``,
 		},
 		{
 			cty.UnknownVal(cty.String),
 			cty.StringVal(""),
 			cty.UnknownVal(cty.Bool).RefineNotNull(),
-			``,
 		},
 	}
 
@@ -79,13 +68,7 @@ func TestEndsWith(t *testing.T) {
 		t.Run(fmt.Sprintf("EndsWith(%#v, %#v)", test.String, test.Suffix), func(t *testing.T) {
 			got, err := EndsWithFunc.Call([]cty.Value{test.String, test.Suffix})
 
-			if test.WantError != "" {
-				gotErr := fmt.Sprintf("%s", err)
-				if gotErr != test.WantError {
-					t.Errorf("wrong error\ngot:  %s\nwant: %s", gotErr, test.WantError)
-				}
-				return
-			} else if err != nil {
+			if err != nil {
 				t.Fatalf("unexpected error: %s", err)
 			}
 

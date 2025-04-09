@@ -26,10 +26,6 @@ var EndsWithFunc = function.New(&function.Spec{
 		str := args[0].AsString()
 		suffix := args[1].AsString()
 
-		if strings.HasSuffix(str, suffix) {
-			return cty.True, nil
-		}
-
-		return cty.False, nil
+		return cty.BoolVal(strings.HasSuffix(str, suffix)), nil
 	},
 })
