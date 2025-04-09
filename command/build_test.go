@@ -100,16 +100,16 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "var-args: hcl - auto varfile sets a peanut env var",
+			name: "var-args: hcl - auto varfile sets a chocolate env var",
 			args: []string{
 				testFixture("var-arg"),
 			},
-			fileCheck: fileCheck{expected: []string{"peanut.txt"}},
+			fileCheck: fileCheck{expected: []string{"chocolate.txt"}},
 		},
 		{
 			name: "var-args: hcl - auto varfile and json -auto varfile sets the value in json auto varfile",
 			args: []string{
-				testFixture("var-arg"),
+				testFixture("var-arg", "var-arg-tests"),
 			},
 			fileCheck: fileCheck{expected: []string{"peanut.txt"}},
 		},
