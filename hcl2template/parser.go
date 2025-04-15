@@ -210,39 +210,44 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
-		for _, file := range varFiles {
+
+		// Combine all variable files into a single list, preserving the intended precedence and order.
+		// The order is: auto-loaded HCL files, auto-loaded JSON files, followed by user-specified varFiles.
+		// This ensures that user-specified files can override values from auto-loaded files,
+		// and that their relative order is preserved exactly as specified by the user.
+		variableFileNames := append(append(hclVarFiles, jsonVarFiles...), varFiles...)
+
+		var variableFiles []*hcl.File
+
+		for _, file := range variableFileNames {
+			var (
+				f         *hcl.File
+				moreDiags hcl.Diagnostics
+			)
 			switch filepath.Ext(file) {
 			case ".hcl":
-				hclVarFiles = append(hclVarFiles, file)
+				f, moreDiags = p.ParseHCLFile(file)
 			case ".json":
-				jsonVarFiles = append(jsonVarFiles, file)
+				f, moreDiags = p.ParseJSONFile(file)
 			default:
-				diags = append(moreDiags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Could not guess format of " + file,
-					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
-				})
+				moreDiags = hcl.Diagnostics{
+					&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Could not guess format of " + file,
+						Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+					},
+				}
 			}
-		}
-		var varFiles []*hcl.File
-		for _, filename := range hclVarFiles {
-			f, moreDiags := p.ParseHCLFile(filename)
+
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			varFiles = append(varFiles, f)
-		}
-		for _, filename := range jsonVarFiles {
-			f, moreDiags := p.ParseJSONFile(filename)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			varFiles = append(varFiles, f)
+			variableFiles = append(variableFiles, f)
+
 		}
 
-		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), variableFiles, argVars)...)
 	}
 
 	return cfg, diags
