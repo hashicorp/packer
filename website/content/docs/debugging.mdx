@@ -147,15 +147,3 @@ Failed to initialize build 'docker': error initializing builder 'docker': plugin
 
 you should try setting your temp directory to something shorter. This can be
 done through the `TMPDIR` environment variable.
-
-## Issues when temp directory does not allow execution
-
-Sometimes, Packer runs into trouble (eg: when installing a plugin ) because the
-system's temporary directory (/tmp) is restricted and doesn't allow programs to run there.
-The temp directory may have been mounted with noexec option. This may lead to `permisson denied` errors.
-
-```text
-Continuing to next available version: failed to describe plugin binary "/tmp/packer-plugin-virtualbox_v1.1.1_x5.0_linux_arm64": fork/exec /tmp/packer-plugin-virtualbox_v1.1.1_x5.0_linux_arm64: permission denied
-```
-
-To resolve this, set the `TMPDIR` environment variable to a directory that allows execution.
