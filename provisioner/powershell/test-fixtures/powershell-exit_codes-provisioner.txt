@@ -1,0 +1,76 @@
+{
+  "type": "powershell",
+  "inline": ["invalid-cmdlet"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["#Requires -Version 10.0"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["exit 1"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["}}"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["$LASTEXITCODE=1"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["throw 'XXX'"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "script": "../../provisioner/powershell/test-fixtures/scripts/set_version_latest.ps1",
+  "valid_exit_codes": ["0"]
+},
+{
+  "type": "powershell",
+  "elevated_user": "Administrator",
+  "elevated_password": "{{.WinRMPassword}}",
+  "inline": "Get-ItemProperty -Path HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion",
+  "valid_exit_codes": ["0"]
+},
+{
+  "type": "powershell",
+  "inline": "ping invalidhost",
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": "sc.exe start command",
+  "valid_exit_codes": ["1060"]
+},
+{
+  "type": "powershell",
+  "inline": "echo 'Hi testing echo'; invalid command!; echo 'Another valid command';",
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": ["$ErrorActionPreference='Stop'", "Get-Item 'C:\\nonexistent.txt'"],
+  "valid_exit_codes": ["1"]
+},
+{
+  "type": "powershell",
+  "inline": [    
+                "try {",
+                " invalid command",
+                "} catch {",
+                "    exit 1",
+                "}"
+            ],
+  "valid_exit_codes": ["1"]
+}
+
+
+
