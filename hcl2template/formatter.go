@@ -107,6 +107,58 @@ func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
 	return bytesModified, diags
 }
 
+// FormatNew all HCL2 files in path and return the total bytes formatted.
+// If any error is encountered, zero bytes will be returned.
+//
+// Path can be a directory or a file.
+func (f *HCL2Formatter) FormatNew(paths []string) (int, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+	var bytesModified int
+
+	if f.parser == nil {
+		f.parser = hclparse.NewParser()
+	}
+
+	fmt.Println(fmt.Sprintf("1... Formatting paths %s", strings.Join(paths, " ")))
+	for _, path := range paths {
+		if s, err := os.Stat(path); err != nil || !s.IsDir() {
+			bytesModified, diags = f.formatFile(path, diags, bytesModified)
+		} else {
+			fileInfos, err := os.ReadDir(path)
+			if err != nil {
+				diag := &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Cannot read hcl directory",
+					Detail:   err.Error(),
+				}
+				diags = append(diags, diag)
+				return bytesModified, diags
+			}
+
+			for _, fileInfo := range fileInfos {
+				filename := filepath.Join(path, fileInfo.Name())
+				if fileInfo.IsDir() {
+					if f.Recursive {
+						var tempDiags hcl.Diagnostics
+						var tempBytesModified int
+						var newPaths []string
+						newPaths = append(newPaths, path)
+						tempBytesModified, tempDiags = f.FormatNew(newPaths)
+						bytesModified += tempBytesModified
+						diags = diags.Extend(tempDiags)
+					}
+					continue
+				}
+				if isHcl2FileOrVarFile(filename) {
+					bytesModified, diags = f.formatFile(filename, diags, bytesModified)
+				}
+			}
+		}
+	}
+
+	return bytesModified, diags
+}
+
 // processFile formats the source contents of filename and return the formatted data.
 // overwriting the contents of the original when the f.Write is true; a diff of the changes
 // will be outputted if f.ShowDiff is true.
