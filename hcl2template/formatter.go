@@ -119,10 +119,34 @@ func (f *HCL2Formatter) FormatNew(paths []string) (int, hcl.Diagnostics) {
 		f.parser = hclparse.NewParser()
 	}
 
-	fmt.Println(fmt.Sprintf("1... Formatting paths %s", strings.Join(paths, " ")))
 	for _, path := range paths {
-		if s, err := os.Stat(path); err != nil || !s.IsDir() {
-			bytesModified, diags = f.formatFile(path, diags, bytesModified)
+		s, err := os.Stat(path)
+		if err != nil {
+			diag := &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("No file or directory at %s", path),
+				Detail:   err.Error(),
+			}
+			diags = append(diags, diag)
+			return 0, diags
+		}
+
+		if !s.IsDir() {
+			fmtd := false
+			if isHcl2FileOrVarFile(path) {
+				bytesModified, diags = f.formatFile(path, diags, bytesModified)
+
+				fmtd = true
+			}
+
+			if !fmtd {
+				diag := &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Only .pkr.hcl and .pkrvars.hcl files can be processed with packer fmt",
+				}
+				diags = append(diags, diag)
+				continue
+			}
 		} else {
 			fileInfos, err := os.ReadDir(path)
 			if err != nil {
@@ -136,13 +160,17 @@ func (f *HCL2Formatter) FormatNew(paths []string) (int, hcl.Diagnostics) {
 			}
 
 			for _, fileInfo := range fileInfos {
-				filename := filepath.Join(path, fileInfo.Name())
+				name := fileInfo.Name()
+				if f.shouldIgnoreFile(name) {
+					continue
+				}
+				filename := filepath.Join(path, name)
 				if fileInfo.IsDir() {
 					if f.Recursive {
 						var tempDiags hcl.Diagnostics
 						var tempBytesModified int
 						var newPaths []string
-						newPaths = append(newPaths, path)
+						newPaths = append(newPaths, filename)
 						tempBytesModified, tempDiags = f.FormatNew(newPaths)
 						bytesModified += tempBytesModified
 						diags = diags.Extend(tempDiags)
@@ -225,6 +253,14 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 	}
 
 	return outSrc, nil
+}
+
+// shouldIgnoreFile returns true if the given filename (which must not have a
+// directory path ahead of it) should be ignored as e.g. an editor swap file.
+func (f *HCL2Formatter) shouldIgnoreFile(name string) bool {
+	return strings.HasPrefix(name, ".") || // Unix-like hidden files
+		strings.HasSuffix(name, "~") || // vim
+		strings.HasPrefix(name, "#") && strings.HasSuffix(name, "#") // emacs
 }
 
 // bytesDiff returns the unified diff of b1 and b2
