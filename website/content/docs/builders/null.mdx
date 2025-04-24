@@ -1,24 +1,16 @@
 ---
 description: |
-  The null Packer builder is not really a builder, it just sets up an SSH
-  connection and runs the provisioners. It can be used to debug provisioners
-  without incurring high wait times. It does not create any kind of image or
-  artifact.
-page_title: Null - Builders
+  The `null` builder creates an SSH connection and runs provisioners. Use the `null` builder to debug provisioners without incurring long wait times. 
+page_title: null builder reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# Null Builder
+# `null` builder
 
-Type: `null`
-
-The `null` Packer builder is not really a builder, it just sets up an SSH
-connection and runs the provisioners. It can be used to debug provisioners
-without incurring high wait times. It does not create any kind of image or
-artifact.
+The `null` builder sets up an SSH connection and runs provisioners. You can use it to debug provisioners without incurring long wait times. It does not create a images or artifacts.
 
 ## Basic Example
 
@@ -26,18 +18,6 @@ Below is a fully functioning example. It doesn't do anything useful, since no
 provisioners are defined, but it will connect to the specified host via ssh.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "null",
-  "ssh_host": "127.0.0.1",
-  "ssh_username": "foo",
-  "ssh_password": "bar"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -49,6 +29,18 @@ source "null" "basic-example" {
 
 build {
   sources = ["sources.null.basic-example"]
+}
+```
+
+</Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "null",
+  "ssh_host": "127.0.0.1",
+  "ssh_username": "foo",
+  "ssh_password": "bar"
 }
 ```
 

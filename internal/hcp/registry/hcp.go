@@ -44,6 +44,9 @@ func IsHCPEnabled(cfg packer.Handler) bool {
 				mode = HCPConfigEnabled
 			}
 		}
+		if config.HCPPackerRegistry != nil {
+			mode = HCPConfigEnabled
+		}
 	}
 
 	// HCP_PACKER_BUCKET_NAME is set or HCP_PACKER_REGISTRY not toggled off

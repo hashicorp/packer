@@ -1,17 +1,15 @@
 ---
 description: >
-  The manifest post-processor writes a JSON file with the build artifacts and
-  IDs from a packer run.
-page_title: Manifest - Post-Processors
+  The `manifest` post-processor creates a JSON file that contains data about a Packer build's artifacts, letting you track a run's outputs.
+page_title: manifest post-processor reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# Manifest Post-Processor
+# `manifest` post-processor
 
-Type: `manifest`
 Artifact BuilderId: `packer.post-processor.manifest`
 
 The manifest post-processor writes a JSON file with a list of all of the
@@ -48,6 +46,13 @@ is not a behavior anyone should ever expect.
 The minimal way to use the manifest post-processor is by just writing its definition, like:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "manifest" {}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -61,18 +66,24 @@ The minimal way to use the manifest post-processor is by just writing its defini
 ```
 
 </Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "manifest" {}
-```
-
-</Tab>
 </Tabs>
 
 A more complete example:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+post-processor "manifest" {
+    output = "manifest.json"
+    strip_path = true
+    custom_data = {
+      my_custom_data = "example"
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -87,19 +98,6 @@ A more complete example:
       }
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-post-processor "manifest" {
-    output = "manifest.json"
-    strip_path = true
-    custom_data = {
-      my_custom_data = "example"
-    }
 }
 ```
 
@@ -139,6 +137,29 @@ artifacts from the manifest by using `packer_run_uuid`.
 The above manifest was generated with the following template:
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "docker" "docker"{
+    image = "ubuntu:latest"
+    export_path = "packer_example"
+    run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
+}
+
+build {
+    sources = ["docker.docker"]
+
+    post-processor "manifest" {
+        output = "manifest.json"
+        strip_path = true
+        custom_data = {
+          my_custom_data = "example"
+        }
+    }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -161,29 +182,6 @@ The above manifest was generated with the following template:
       }
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "docker" "docker"{
-    image = "ubuntu:latest"
-    export_path = "packer_example"
-    run_command = ["-d", "-i", "-t", "--entrypoint=/bin/bash", "{{.Image}}"]
-}
-
-build {
-    sources = ["docker.docker"]
-
-    post-processor "manifest" {
-        output = "manifest.json"
-        strip_path = true
-        custom_data = {
-          my_custom_data = "example"
-        }
-    }
 }
 ```
 

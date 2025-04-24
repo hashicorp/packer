@@ -1,0 +1,25 @@
+---
+page_title: strcontains function reference
+description: |-
+  The `strcontains` function searches for a substring within a string. 
+---
+
+# `strcontains` Function
+
+The `strcontains` function searches for a substring within a string.
+
+```hcl
+strcontains(string, substr)
+```
+
+## Examples
+
+```
+> strcontains("hello world", "wor")
+true
+```
+
+```
+> strcontains("hello world", "wod")
+false
+```

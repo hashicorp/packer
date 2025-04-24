@@ -6,6 +6,8 @@ package registry
 import (
 	"fmt"
 
+	"github.com/hashicorp/packer/packer"
+
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	packerSDKRegistry "github.com/hashicorp/packer-plugin-sdk/packer/registry/image"
 )
@@ -20,6 +22,8 @@ type Build struct {
 	Artifacts     map[string]packerSDKRegistry.Image
 	Status        hcpPackerModels.HashicorpCloudPacker20230101BuildStatus
 	Metadata      hcpPackerModels.HashicorpCloudPacker20230101BuildMetadata
+
+	CompressedSboms []packer.SBOM
 }
 
 // NewBuildFromCloudPackerBuild converts a HashicorpCloudPackerBuild to a local build that can be tracked and

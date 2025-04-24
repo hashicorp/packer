@@ -54,7 +54,12 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 		return nil, diags
 	}
 
-	if !bucketNameRegexp.MatchString(b.Slug) {
+	// No need to check the bucket name here if it's empty, since it can
+	// be set through the `HCP_PACKER_BUCKET_NAME` environment var.
+	//
+	// If both are unset, creating the build on HCP Packer will fail, and
+	// so will the packer build command.
+	if b.Slug != "" && !bucketNameRegexp.MatchString(b.Slug) {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  fmt.Sprintf("%s.bucket_name can only contain between 3 and 36 ASCII letters, numbers and hyphens", buildHCPPackerRegistryLabel),

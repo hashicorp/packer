@@ -30,22 +30,14 @@ type PackerTestSuite struct {
 	compiledPlugins sync.Map
 }
 
-func (ts *PackerTestSuite) buildPluginVersion(waitgroup *sync.WaitGroup, versionString string, t *testing.T) {
-	waitgroup.Add(1)
-	go func() {
-		defer waitgroup.Done()
-		ts.CompilePlugin(t, versionString)
-	}()
-}
-
+// CompileTestPluginVersions batch compiles a series of plugins
 func (ts *PackerTestSuite) CompileTestPluginVersions(t *testing.T, versions ...string) {
-	wg := &sync.WaitGroup{}
-
+	results := []chan CompilationResult{}
 	for _, ver := range versions {
-		ts.buildPluginVersion(wg, ver, t)
+		results = append(results, ts.CompilePlugin(ver))
 	}
 
-	wg.Wait()
+	Ready(t, results)
 }
 
 // SkipNoAcc is a pre-condition that skips the test if the PACKER_ACC environment

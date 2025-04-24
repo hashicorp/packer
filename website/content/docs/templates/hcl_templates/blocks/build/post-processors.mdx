@@ -1,17 +1,16 @@
 ---
 description: >
-  The post-processors block allows to define lists of post-processors to apply
-  to an artifact.
-page_title: post-processors - build - Blocks
+  Add the `post-processors` block to a `build` block to define a list of post-processors to apply to an artifact. Learn how to configure nested `post-processors` blocks.
+page_title: post-processors block reference
 ---
 
-# The `post-processors` block
+# `post-processors` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the `post-processors` block.
 
-The `post-processors` block allows to define lists of
-[`post-processors`](/packer/docs/templates/hcl_templates/blocks/build/post-processor), that will run
-from the artifact of each build.
+## Description
+
+Add a `post-processors` block to your `build` block to include a list of [post-processor](/packer/docs/templates/hcl_templates/blocks/build/post-processor) configurations. Packer runs the post-processors for an artifact after each build. 
 
 ```hcl
 # builds.pkr.hcl

@@ -1,19 +1,16 @@
 ---
 description: |
-  The shell-local Packer post processor enables users to do some post processing
-  after artifacts have been built.
-page_title: Local Shell - Post-Processors
+  The `shell-local` post-processor starts a local shell, letting you automate post-build actions after Packer builds your artifacts.
+page_title: shell-local post-processor reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# Local Shell Post Processor
+# `shell-local` post-processor
 
-Type: `shell-local`
-
-The local shell post processor executes scripts locally during the post
+The `shell-local` post processor executes scripts locally during the post
 processing stage. Shell local provides a convenient way to automate executing
 some task with packer outputs and variables.
 

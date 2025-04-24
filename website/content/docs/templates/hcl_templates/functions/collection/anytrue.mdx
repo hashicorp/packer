@@ -1,0 +1,28 @@
+---
+page_title: anytrue function reference
+description: |-
+  The `anytrue` function returns `true` if any element of a collection
+  is `true` or `"true"`. Learn how to use the `anytrue` function in Packer templates.
+---
+
+# `anytrue` Function
+
+`anytrue` returns `true` if any element in a given collection is `true`
+or `"true"`. It also returns `false` if the collection is empty.
+
+```hcl
+anytrue(list)
+```
+
+## Examples
+
+```command
+> anytrue(["true"])
+true
+> anytrue([true])
+true
+> anytrue([true, false])
+true
+> anytrue([])
+false
+```

@@ -1,6 +1,3 @@
-~> **Note:** If possible, try to always use a forward slash `/` as the path separator,
-especially when dealing with relative paths. A backward slash `\` will work on
-Windows and is the official Windows path separator, but when building from any
-system that is not Windows, Packer will only treat slashes `/` as path
-separators, and treat backslashes as plain text. Which could lead to pathing
-errors.
+Separate paths with a forward slash (`/`), especially when using relative paths in your configuration. 
+Windows uses backward slashes (`\`) to separate paths, but Packer only recognizes `/` as path
+separators when it creates builds from any non-Windows system. Packer also treat backslashes as plain text, which could lead to errors.

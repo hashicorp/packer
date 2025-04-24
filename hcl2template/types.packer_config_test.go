@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-version"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	. "github.com/hashicorp/packer/hcl2template/internal"
@@ -205,7 +204,7 @@ func TestParser_complete(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:        "virtualbox-iso.ubuntu-1204",
 					BuilderType: "virtualbox-iso",
@@ -422,6 +421,7 @@ func TestParser_complete(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 	}
 	testParse(t, tests)
@@ -569,8 +569,9 @@ func TestParser_no_init(t *testing.T) {
 				Builds:  nil,
 			},
 			false, false,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 
 		{"duplicate required plugin accessor fails",
@@ -578,8 +579,9 @@ func TestParser_no_init(t *testing.T) {
 			parseTestArgs{"testdata/init/duplicate_required_plugins", nil, nil},
 			nil,
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_inexplicit_source.pkr.hcl",
 			defaultParser,
@@ -598,8 +600,9 @@ func TestParser_no_init(t *testing.T) {
 				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_short_source.pkr.hcl",
 			defaultParser,
@@ -618,8 +621,9 @@ func TestParser_no_init(t *testing.T) {
 				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 		{"invalid_inexplicit_source_2.pkr.hcl",
 			defaultParser,
@@ -638,8 +642,9 @@ func TestParser_no_init(t *testing.T) {
 				Basedir:                 filepath.Clean("testdata/init"),
 			},
 			true, true,
-			[]packersdk.Build{},
+			[]*packer.CoreBuild{},
 			false,
+			nil,
 		},
 	}
 	testParse_only_Parse(t, tests)

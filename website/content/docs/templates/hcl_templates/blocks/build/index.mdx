@@ -1,15 +1,18 @@
 ---
 description: |
-  The source block defines what builders are started.
-page_title: build - Blocks
+  The `build` block contains instructions for Packer to follow during a build. Learn how to configure the `build` block in your Packer templates.
+page_title: build block reference
 ---
 
-# The `build` block
+# `build` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the `build` block.
 
-The `build` block defines what builders are started, how to `provision` them
-and if necessary what to do with their artifacts using `post-process`.
+
+## Description 
+
+The `build` block specifies which builders Packer should run, how to provision them,
+and any post-processing actions Packer should perform on the resulting artifacts.
 
 To use builders in a `build` block you can either:
 
@@ -91,7 +94,5 @@ this is soon going to be possible. So here "a.\*" will match nothing.
 
 ## Related
 
-- A list of [community
-  builders](https://packer.io/community-tools#community-builders) is available.
-
-- Create your own [custom builder](/packer/docs/plugins/creation/custom-builders) !
+- Refer to the [community builders reference](/packer/docs/community-tools#community-builders) for information about builders maintained by the community.
+- Refer to [Create Custom Builders](/packer/docs/plugins/creation/custom-builders) for instructions on how to create your own builders.

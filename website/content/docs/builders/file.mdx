@@ -1,23 +1,18 @@
 ---
 description: |
-  The file Packer builder is not really a builder, it just creates an artifact
-  from a file. It can be used to debug post-processors without incurring high
-  wait times.
-page_title: File - Builders
+  The `file` builder creates an artifact from a file. Use the `file` builder to debug post-processors without incurring long wait times.
+page_title: file builder reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# File Builder
+# `file` builder
 
-Type: `file`
-Artifact BuilderId: `packer.file`
+The `file` builder creates an artifact from a file. You can use it to debug post-processors without incurring long wait times.
 
-The `file` Packer builder is not really a builder, it just creates an artifact
-from a file. It can be used to debug post-processors without incurring high
-wait times.
+Artifact `BuilderId`: `packer.file`
 
 ## Basic Example
 
@@ -25,17 +20,6 @@ Below is a fully functioning example. It create a file at `target` with the
 specified `content`.
 
 <Tabs>
-<Tab heading="JSON">
-
-```json
-{
-  "type": "file",
-  "content": "Lorem ipsum dolor sit amet",
-  "target": "dummy_artifact"
-}
-```
-
-</Tab>
 <Tab heading="HCL2">
 
 ```hcl
@@ -50,6 +34,17 @@ build {
 ```
 
 </Tab>
+<Tab heading="JSON">
+
+```json
+{
+  "type": "file",
+  "content": "Lorem ipsum dolor sit amet",
+  "target": "dummy_artifact"
+}
+```
+
+</Tab>
 </Tabs>
 
 ## Configuration Reference
@@ -60,12 +55,12 @@ described.
 
 Any [communicator](/packer/docs/templates/legacy_json_templates/communicator) defined is ignored.
 
-### Required:
+### Required
 
 - `target` (string) - The path for the artifact file that will be created. If
   the path contains directories that don't exist, Packer will create them, too.
 
-### Optional:
+### Optional
 
 You can only define one of `source` or `content`. If none of them is defined
 the artifact will be empty.

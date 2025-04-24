@@ -1,18 +1,20 @@
 ---
 description: |
-  All strings within templates are processed by a common Packer templating
-  engine, where variables and functions can be used to modify the value of a
-  configuration parameter at runtime.
-page_title: Template Engine - Templates
+  The JSON template engine processes strings in JSON templates. Learn how to use JSON template engine functions and variables.
+page_title: JSON template engine reference
 ---
 
-# Template Engine
+# JSON template engine reference 
 
-All strings within templates are processed by a common Packer templating
-engine, where variables and functions can be used to modify the value of a
-configuration parameter at runtime.
+This topic describes the Packer engine that processes JSON templates. 
 
 `@include 'from-1.5/legacy-json-warning.mdx'`
+
+## Description
+
+All strings within templates are processed by a common Packer templating
+engine. The engine uses variables and functions to modify the value of a
+configuration parameter at runtime.
 
 The syntax of templates uses the following conventions:
 
@@ -234,9 +236,9 @@ respectively.
 user variables. See the [user variable](/packer/docs/templates/legacy_json_templates/user-variables)
 documentation for more information on user variables.
 
-# isotime Function Format Reference
+## `isotime` Function Format Reference
 
-The isotime template engine uses Go to generate timestamps. If you're
+The `isotime` template engine uses Go to generate timestamps. If you're
 unfamiliar with Go, then the way you format the timestamp is going to
 feel a bit unusual compared to how you may be used to formatting
 datetime strings.
@@ -331,7 +333,7 @@ _The values in parentheses are the abbreviated, or 24-hour clock values_
 Note that "-0700" is always formatted into "+0000" because `isotime` is always
 UTC time.
 
-# split Function Format Reference
+## `split` Function Format Reference
 
 The function `split` takes an input string, a seperator string, and a numeric
 component value and returns the requested substring.
@@ -370,9 +372,9 @@ this case, on the `fixed-string` value):
 }
 ```
 
-# replace Function Format Reference
+## `replace` Function Format Reference
 
-Here are some examples using the replace options:
+Here are some examples using the `replace` options:
 
 ```liquid
 build_name = foo-bar-provider

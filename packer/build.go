@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/packerbuilderdata"
@@ -50,11 +51,20 @@ type CoreBuild struct {
 	onError       string
 	l             sync.Mutex
 	prepareCalled bool
+
+	SBOMs []SBOM
+}
+
+type SBOM struct {
+	Name           string
+	Format         hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
+	CompressedData []byte
 }
 
 type BuildMetadata struct {
 	PackerVersion string
 	Plugins       map[string]PluginDetails
+	SBOMs         []SBOM
 }
 
 func (b *CoreBuild) getPluginsMetadata() map[string]PluginDetails {
@@ -88,6 +98,7 @@ func (b *CoreBuild) GetMetadata() BuildMetadata {
 	metadata := BuildMetadata{
 		PackerVersion: version.FormattedVersion(),
 		Plugins:       b.getPluginsMetadata(),
+		SBOMs:         b.SBOMs,
 	}
 	return metadata
 }
@@ -298,6 +309,18 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	ts.End(err)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, p := range b.Provisioners {
+		sbomInternalProvisioner, ok := p.Provisioner.(*SBOMInternalProvisioner)
+		if ok {
+			sbom := SBOM{
+				Name:           sbomInternalProvisioner.SBOMName,
+				Format:         sbomInternalProvisioner.SBOMFormat,
+				CompressedData: sbomInternalProvisioner.CompressedData,
+			}
+			b.SBOMs = append(b.SBOMs, sbom)
+		}
 	}
 
 	// If there was no result, don't worry about running post-processors

@@ -20,15 +20,16 @@ import (
 )
 
 const (
-	packerLabel       = "packer"
-	sourceLabel       = "source"
-	variablesLabel    = "variables"
-	variableLabel     = "variable"
-	localsLabel       = "locals"
-	localLabel        = "local"
-	dataSourceLabel   = "data"
-	buildLabel        = "build"
-	communicatorLabel = "communicator"
+	packerLabel            = "packer"
+	sourceLabel            = "source"
+	variablesLabel         = "variables"
+	variableLabel          = "variable"
+	localsLabel            = "locals"
+	localLabel             = "local"
+	dataSourceLabel        = "data"
+	buildLabel             = "build"
+	hcpPackerRegistryLabel = "hcp_packer_registry"
+	communicatorLabel      = "communicator"
 )
 
 var configSchema = &hcl.BodySchema{
@@ -41,6 +42,7 @@ var configSchema = &hcl.BodySchema{
 		{Type: localLabel, LabelNames: []string{"name"}},
 		{Type: dataSourceLabel, LabelNames: []string{"type", "name"}},
 		{Type: buildLabel},
+		{Type: hcpPackerRegistryLabel},
 		{Type: communicatorLabel, LabelNames: []string{"type", "name"}},
 	},
 }
@@ -165,6 +167,14 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 		return cfg, diags
 	}
 
+	// Looks for invalid arguments or unsupported block types
+	{
+		for _, file := range files {
+			_, moreDiags := file.Body.Content(configSchema)
+			diags = append(diags, moreDiags...)
+		}
+	}
+
 	// Decode required_plugins blocks.
 	//
 	// Note: using `latest` ( or actually an empty string ) in a config file
@@ -200,39 +210,44 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
-		for _, file := range varFiles {
+
+		// Combine all variable files into a single list, preserving the intended precedence and order.
+		// The order is: auto-loaded HCL files, auto-loaded JSON files, followed by user-specified varFiles.
+		// This ensures that user-specified files can override values from auto-loaded files,
+		// and that their relative order is preserved exactly as specified by the user.
+		variableFileNames := append(append(hclVarFiles, jsonVarFiles...), varFiles...)
+
+		var variableFiles []*hcl.File
+
+		for _, file := range variableFileNames {
+			var (
+				f         *hcl.File
+				moreDiags hcl.Diagnostics
+			)
 			switch filepath.Ext(file) {
 			case ".hcl":
-				hclVarFiles = append(hclVarFiles, file)
+				f, moreDiags = p.ParseHCLFile(file)
 			case ".json":
-				jsonVarFiles = append(jsonVarFiles, file)
+				f, moreDiags = p.ParseJSONFile(file)
 			default:
-				diags = append(moreDiags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Could not guess format of " + file,
-					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
-				})
+				moreDiags = hcl.Diagnostics{
+					&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Could not guess format of " + file,
+						Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+					},
+				}
 			}
-		}
-		var varFiles []*hcl.File
-		for _, filename := range hclVarFiles {
-			f, moreDiags := p.ParseHCLFile(filename)
+
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			varFiles = append(varFiles, f)
-		}
-		for _, filename := range jsonVarFiles {
-			f, moreDiags := p.ParseJSONFile(filename)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			varFiles = append(varFiles, f)
+			variableFiles = append(variableFiles, f)
+
 		}
 
-		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), variableFiles, argVars)...)
 	}
 
 	return cfg, diags
@@ -541,6 +556,22 @@ func (p *Parser) parseConfig(f *hcl.File, cfg *PackerConfig) hcl.Diagnostics {
 
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case buildHCPPackerRegistryLabel:
+			if cfg.HCPPackerRegistry != nil {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Only one " + buildHCPPackerRegistryLabel + " is allowed",
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
+			hcpPackerRegistry, moreDiags := p.decodeHCPRegistry(block, cfg)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			cfg.HCPPackerRegistry = hcpPackerRegistry
+
 		case sourceLabel:
 			source, moreDiags := p.decodeSource(block)
 			diags = append(diags, moreDiags...)
@@ -585,8 +616,7 @@ func (p *Parser) decodeDatasources(file *hcl.File, cfg *PackerConfig) hcl.Diagno
 	var diags hcl.Diagnostics
 
 	body := file.Body
-	content, moreDiags := body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := body.Content(configSchema)
 
 	for _, block := range content.Blocks {
 		switch block.Type {

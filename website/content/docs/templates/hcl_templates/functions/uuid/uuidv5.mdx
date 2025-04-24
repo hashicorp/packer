@@ -1,8 +1,7 @@
 ---
-page_title: uuidv5 - Functions - Configuration Language
+page_title: uuidv5 function reference
 description: |-
-  The uuidv5 function generates a uuid v5 string representation of the value in
-  the specified namespace.
+  The `uuidv5` function generates a unique name-based ID for the value according to RFC 4122 version 5. 
 ---
 
 # `uuidv5` Function
@@ -39,10 +38,10 @@ Use the namespace keywords where possible, to make the intent more obvious to
 a future reader:
 
 ```shell-session
-> uuidv5("dns", "www.packer.io")
+> uuidv5("dns", "developer.hashicorp.com")
 a5008fae-b28c-5ba5-96cd-82b4c53552d6
 
-> uuidv5("url", "https://www.packer.io/")
+> uuidv5("url", "https://developer.hashicorp.com/")
 9db6f67c-dd95-5ea0-aa5b-e70e5c5f7cf5
 
 > uuidv5("oid", "1.3.6.1.4")
@@ -57,7 +56,7 @@ UUIDs, and in some special cases it may be more appropriate to use the
 UUID form:
 
 ```shell-session
-> uuidv5("6ba7b810-9dad-11d1-80b4-00c04fd430c8", "www.packer.io")
+> uuidv5("6ba7b810-9dad-11d1-80b4-00c04fd430c8", "developer.hashicorp.com")
 a5008fae-b28c-5ba5-96cd-82b4c53552d6
 ```
 

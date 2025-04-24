@@ -1,26 +1,21 @@
 ---
 description: |
-  The file Packer provisioner uploads files to machines built by Packer. The
-  recommended usage of the file provisioner is to use it to upload files, and
-  then use shell provisioner to move them to the proper place, set permissions,
-  etc.
-page_title: File - Provisioners
+  The `file` Packer provisioner uploads files to machines built by Packer. Learn how to use the `file` provisioner and about the Packer provisioner workflow.
+page_title: file provisioner reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# File Provisioner
+# `file` provisioner
 
-Type: `file`
+The `file` Packer provisioner uploads files to machines built by Packer. We recommend implementing the following workflow:
 
-The file Packer provisioner uploads files to machines built by Packer. The
-recommended usage of the file provisioner is to use it to upload files, and
-then use [shell provisioner](/packer/docs/provisioners/shell) to move them to the
-proper place, set permissions, etc.
+1. Use the `file` provisionerto upload files
+1. Use the [`shell` provisioner](/packer/docs/provisioners/shell) to move the files imto the proper place, set permissions, and perform other tasks.
 
-Warning: You can only upload files to locations that the provisioning user
+You can only upload files to locations that the provisioning user
 (generally not root) has permission to access. Creating files in /tmp and
 using a shell provisioner to move them into the final location is the only
 way to upload files to root owned locations.
@@ -30,6 +25,16 @@ The file provisioner can upload both single files and complete directories.
 ## Basic Example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+provisioner "file" {
+  source = "app.tar.gz"
+  destination = "/tmp/app.tar.gz"
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -37,16 +42,6 @@ The file provisioner can upload both single files and complete directories.
   "type": "file",
   "source": "app.tar.gz",
   "destination": "/tmp/app.tar.gz"
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-provisioner "file" {
-  source = "app.tar.gz"
-  destination = "/tmp/app.tar.gz"
 }
 ```
 
@@ -95,6 +90,11 @@ directly.
 
 This behavior was adopted from the standard behavior of rsync. Note that under
 the covers, rsync may or may not be used.
+
+**Note:** Packer does not infer behaviors based on the guest operating system,
+as this would add unnecessary complexity and reduce maintainability. To ensure
+consistent behavior across all platforms, use a trailing forward slash when
+specifying directories, even when working with Windows guests.
 
 ## Uploading files that don't exist before Packer starts
 

@@ -105,6 +105,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	diags = packerStarter.Initialize(packer.InitializeOptions{
 		UseSequential: cla.UseSequential,
 	})
+
+	if packer.PackerUseProto {
+		log.Printf("[TRACE] Using protobuf for communication with plugins")
+	}
+
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
@@ -157,7 +162,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		packer.UiColorYellow,
 		packer.UiColorBlue,
 	}
-	buildUis := make(map[packersdk.Build]packersdk.Ui)
+	buildUis := make(map[*packer.CoreBuild]packersdk.Ui)
 	for i := range builds {
 		ui := c.Ui
 		if cla.Color {
@@ -314,6 +319,15 @@ Check that you are using an HCP Ready integration before trying again:
 					artifacts.m[name] = runArtifacts
 					artifacts.Unlock()
 				}
+			}
+
+			// If the build succeeded but uploading to HCP failed,
+			// Packer should exit non-zero, so we re-assign the
+			// error to account for this case.
+			if hcperr != nil && err == nil {
+				errs.Lock()
+				errs.m[name] = hcperr
+				errs.Unlock()
 			}
 		}()
 

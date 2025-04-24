@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/packer/packer"
+
 	"github.com/hashicorp/go-multierror"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -72,11 +74,19 @@ func (bucket *Bucket) Validate() error {
 
 // ReadFromHCLBuildBlock reads the information for initialising a Bucket from a HCL2 build block
 func (bucket *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
+	registryBlock := build.HCPPackerRegistry
+	if registryBlock == nil {
+		return
+	}
+	bucket.ReadFromHCPPackerRegistryBlock(build.HCPPackerRegistry)
+}
+
+// ReadFromHCPPackerRegistryBlock reads the information for initialising a Bucket from a HCL2 Packer registry block
+func (bucket *Bucket) ReadFromHCPPackerRegistryBlock(registryBlock *hcl2template.HCPPackerRegistryBlock) {
 	if bucket == nil {
 		return
 	}
 
-	registryBlock := build.HCPPackerRegistry
 	if registryBlock == nil {
 		return
 	}
@@ -220,6 +230,18 @@ func (bucket *Bucket) UpdateBuildStatus(
 	buildToUpdate.Status = status
 	bucket.Version.StoreBuild(name, buildToUpdate)
 	return nil
+}
+
+func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom packer.SBOM) error {
+	buildToUpdate, err := bucket.Version.Build(buildName)
+	if err != nil {
+		return err
+	}
+
+	if buildToUpdate.ID == "" {
+		return fmt.Errorf("the build for the component %q does not have a valid id", buildName)
+	}
+	return bucket.client.UploadSbom(ctx, bucket.Name, bucket.Version.Fingerprint, buildToUpdate.ID, sbom)
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
@@ -610,7 +632,6 @@ func (bucket *Bucket) completeBuild(
 	doneCh, ok := bucket.RunningBuilds[buildName]
 	if !ok {
 		log.Print("[ERROR] done build does not have an entry in the heartbeat table, state will be inconsistent.")
-
 	} else {
 		log.Printf("[TRACE] signal stopping heartbeats")
 		// Stop heartbeating
@@ -630,6 +651,23 @@ func (bucket *Bucket) completeBuild(
 		return packerSDKArtifacts, fmt.Errorf("build failed, not uploading artifacts")
 	}
 
+	artifacts, err := bucket.doCompleteBuild(ctx, buildName, packerSDKArtifacts, buildErr)
+	if err != nil {
+		err := bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED)
+		if err != nil {
+			log.Printf("[ERROR] failed to update build %q status to FAILED: %s", buildName, err)
+		}
+	}
+
+	return artifacts, err
+}
+
+func (bucket *Bucket) doCompleteBuild(
+	ctx context.Context,
+	buildName string,
+	packerSDKArtifacts []packerSDK.Artifact,
+	buildErr error,
+) ([]packerSDK.Artifact, error) {
 	for _, art := range packerSDKArtifacts {
 		var sdkImages []packerSDKRegistry.Image
 		decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -670,6 +708,13 @@ func (bucket *Bucket) completeBuild(
 	if len(build.Artifacts) == 0 {
 		return packerSDKArtifacts, &NotAHCPArtifactError{
 			fmt.Errorf("No HCP Packer-compatible artifacts were found for the build"),
+		}
+	}
+
+	for _, sbom := range build.CompressedSboms {
+		err = bucket.uploadSbom(ctx, buildName, sbom)
+		if err != nil {
+			return packerSDKArtifacts, fmt.Errorf("Failed to upload sboms %s", err)
 		}
 	}
 

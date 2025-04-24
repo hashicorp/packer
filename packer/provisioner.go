@@ -5,8 +5,16 @@ package packer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+
+	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
+
+	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	"github.com/klauspost/compress/zstd"
+
 	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -233,4 +241,76 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 	}
 
 	return p.Provisioner.Provision(ctx, ui, comm, generatedData)
+}
+
+// SBOMInternalProvisioner is a wrapper provisioner for the `hcp-sbom` provisioner
+// that sets the path for SBOM file download and, after the successful execution of
+// the `hcp-sbom` provisioner, compresses the SBOM and prepares the data for API
+// integration.
+type SBOMInternalProvisioner struct {
+	Provisioner    packersdk.Provisioner
+	CompressedData []byte
+	SBOMFormat     hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
+	SBOMName       string
+}
+
+func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
+func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
+func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *SBOMInternalProvisioner) Provision(
+	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
+	generatedData map[string]interface{},
+) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current working directory for Packer SBOM: %s", err)
+	}
+
+	tmpFile, err := os.CreateTemp(cwd, "packer-sbom-*.json")
+	if err != nil {
+		return fmt.Errorf("failed to create internal temporary file for Packer SBOM: %s", err)
+	}
+
+	tmpFileName := tmpFile.Name()
+	if err = tmpFile.Close(); err != nil {
+		return fmt.Errorf("failed to close temporary file for Packer SBOM %s: %s", tmpFileName, err)
+	}
+
+	defer func(name string) {
+		fileRemoveErr := os.Remove(name)
+		if fileRemoveErr != nil {
+			log.Printf("Error removing SBOM temporary file %s: %s", name, fileRemoveErr)
+		}
+	}(tmpFile.Name())
+
+	generatedData["dst"] = tmpFile.Name()
+
+	err = p.Provisioner.Provision(ctx, ui, comm, generatedData)
+	if err != nil {
+		return err
+	}
+
+	packerSbom, err := os.Open(tmpFileName)
+	if err != nil {
+		return fmt.Errorf("failed to open Packer SBOM file %q: %s", tmpFileName, err)
+	}
+
+	provisionerOut := &hcpSbomProvisioner.PackerSBOM{}
+	err = json.NewDecoder(packerSbom).Decode(provisionerOut)
+	if err != nil {
+		return fmt.Errorf("malformed packer SBOM output from file %q: %s", tmpFileName, err)
+	}
+
+	encoder, err := zstd.NewWriter(nil, zstd.WithEncoderLevel(zstd.SpeedBestCompression))
+	if err != nil {
+		return fmt.Errorf("failed to create zstd encoder: %s", err)
+	}
+	p.CompressedData = encoder.EncodeAll(provisionerOut.RawSBOM, nil)
+	p.SBOMFormat = provisionerOut.Format
+	p.SBOMName = provisionerOut.Name
+
+	return nil
 }

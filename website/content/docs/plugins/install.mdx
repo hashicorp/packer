@@ -1,10 +1,10 @@
 ---
 description: |
-  Install external Packer plugins that extend Packer functionality.
+  You can install plugins to extend Packer functionality. Learn how to install external plugins.
 page_title: Install Plugins
 ---
 
-# Installing Plugins
+# Install Plugins
 
 This topic describes how to install external plugins for Packer. Refer to [Packer Plugins Overview](/packer/docs/plugins) for additional information about plugins.
 
@@ -27,8 +27,9 @@ Note that Packer checks the plugin installation directory against the `required_
 
 ### Installation directory
 
-By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable.
-Plugin installation requires access to temporary files under `TMPDIR`. If the system's temp directory is non-writable or non-executable, use TMPDIR to override the location of the temporary file store used by Packer.
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH` environment variable.
+
+~> Note: Plugin installation requires access to temporary files under `TMPDIR`. If the system's temp directory is non-writable or non-executable, use TMPDIR to override the location of the temporary file store used by Packer.
 Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
 
 ## Requirements

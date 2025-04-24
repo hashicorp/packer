@@ -1,25 +1,25 @@
 ---
 description: >
-  A source block nested in a build block allows you to use an already defined
-  source and to set specific fields which aren't already set in the top-level
-  source block.
-page_title: source - build - Blocks
+  A `source` block nested in a `build` block reuses a builder defined
+  elsewhere in the configuration. Learn how to configure a nested `source` block.
+page_title: source block reference
 ---
 
-# The `source` block
+# `source` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about `source` blocks nested in a `build` block.
 
-A `source` block nested in a `build` block allows you to use an already defined
-source and to "fill in" those fields _which aren't already set in the top-level
-source block_.
+## Description
+
+Add a `source` block to your `build` block to reuse a builder defined elsewhere in the configuration. Packer fills in the source fields that are not already set in the top-level `source` block.
 
 Build-level source blocks are implemented by merging their contents with the
-corresponding top-level source block, and a packer build will fail when it
+corresponding top-level source block, and a `packer build` command fails when it
 encounters the ambiguity that arises when a source parameter is defined twice.
-For example, in the below example, if the top-level "lxd.arch" source block
-also defined an `output_image` field (or if one of the build-level source blocks
-redefined and image field), Packer would error.
+
+For example, in the below example, if the top-level `lxd.arch` source block
+also defined an `output_image` field or if one of the build-level source blocks
+redefined and image field, Packer would error.
 
 ```hcl
 # file: builds.pkr.hcl

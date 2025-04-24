@@ -1,16 +1,15 @@
 ---
-page_title: Blocks - Configuration Language
-description: The HCL language has a number of blocks that can be used to configure builds.
+page_title: Built-in blocks overview
+description: A block is a container for configuration in a Packer template. Learn about the types of configration blocks built into HCL for Packer. 
 ---
 
-# Built-in Blocks
+# Built-in blocks overview
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides an overview of the configuration blocks built into the Packer language that you can use to write Packer templates in HCL2.
 
-The Packer - HCL2 language includes a number of built-in blocks that you can
-use to configure builds. A block is a container for configuration.
+## Introduction
 
-The most important blocks can be broken into a couple of major types:
+A block is a container for configuration. You can use the following types of blocks in your Packer templates:
 
 - `build` blocks contain configuration for a specific combination of builders,
   provisioners, and post-processors used to create a specific image artifact.
@@ -29,8 +28,8 @@ The most important blocks can be broken into a couple of major types:
 
 The documentation contains information for each block type.
 
-Other blocks, such as the "packer" block, provide information to the Packer core
-about what version it is allowed to run. The "required_plugins" block helps the
+Other blocks, such as the `packer` block, provide information to the Packer core
+about what version it is allowed to run. The `required_plugins` block helps the
 Packer core
 
 Blocks can be defined in multiple files and `packer build folder` will build
@@ -39,7 +38,7 @@ using solely the files from a directory named `folder`.
 Packer does not support user-defined blocks and so only the blocks built in to
 the language are available for use. The documentation includes all of the available built-in HCL2 blocks.
 
-## Config example:
+## Configuration examples
 
 `@include 'from-1.5/variables/foo-block.mdx'`
 

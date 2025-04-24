@@ -1,24 +1,26 @@
 ---
 description: |
-  The top-level source block defines reusable builder configuration blocks
-page_title: source - Blocks
+  The `source` block defines reusable builder configuration blocks. Learn how to define reusable builders using the `source` block.
+page_title: source block reference
 ---
 
-# The `source` block
+# `source` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic providers reference information about the `source` block.
 
-The top-level `source` block defines reusable builder configuration blocks:
+## Description
+
+The `source` block defines reusable builder configuration blocks. Builders are commonly used in custom plugins.
+
+## Example 
+
+The following example defines a source for a builder type called `happycloud` with the name `foo`:
 
 `@include 'from-1.5/sources/example-block.mdx'`
 
-The first label — `happycloud` here — is the builder type. The second label is
-the unique name or identifier you want to give to the source. There can be only one
-`source.happycloud.foo` top-level source block; but it can be used more than
-once. Builders are usually found in plugins, except for the `file` and the
-`null` builders that will remain in Packer core.
+There is only one `source.happycloud.foo` top-level source block, but it can be used more than once. 
 
-You can start builders by referring to those source blocks from a [`build`
+You can start builders by referring to `source` blocks from a [`build`
 block](/packer/docs/templates/hcl_templates/blocks/build) :
 
 ```hcl
@@ -52,10 +54,8 @@ build {
 
 ## Related
 
-- The list of available builders can be found in the [builders](/packer/docs/builders)
-  section.
+- Refer to the [builders reference overview](/packer/docs/builders) for information about Packer builders.
 
-- A list of [community
-  builders](https://packer.io/community-tools#community-builders) is available.
+- Refer to the [community builders reference](/packer/docs/community-tools#community-builders) for information about builders maintained by the community.
 
-- Create your own [custom builder](/packer/docs/plugins/creation/custom-builders) !
+- Refer to [Create Custom Builders](/packer/docs/plugins/creation/custom-builders) for instructions on how to create your own builders.

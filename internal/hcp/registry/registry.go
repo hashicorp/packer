@@ -16,8 +16,8 @@ import (
 // Registry is an entity capable to orchestrate a Packer build and upload metadata to HCP
 type Registry interface {
 	PopulateVersion(context.Context) error
-	StartBuild(context.Context, sdkpacker.Build) error
-	CompleteBuild(ctx context.Context, build sdkpacker.Build, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
+	StartBuild(context.Context, *packer.CoreBuild) error
+	CompleteBuild(ctx context.Context, build *packer.CoreBuild, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
 	VersionStatusSummary()
 	Metadata() Metadata
 }

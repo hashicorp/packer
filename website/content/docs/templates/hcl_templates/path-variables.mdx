@@ -1,13 +1,16 @@
 ---
-page_title: Path Variables - HCL Configuration Language
+page_title: Path variables reference
 description: |-
-  Special variables provide directory information. This page covers all path
-  variables.
+  Path variables are special variables that enable you to provide directory information. Learn how to use path variables in Packer templates.
 ---
 
-`@include 'path/separator-note.mdx'`
-
 # Path variables
+
+This topic provides reference information about path variables for Packer templates written in HCL.
+
+## Description
+
+Use the following variables to build paths:  
 
 - `path.cwd`: the directory from where Packer was started.
 
@@ -23,7 +26,11 @@ locals {
 }
 ```
 
-## Related Functions
+## Path separators
+
+`@include 'path/separator-note.mdx'`
+
+## Related functions
 
 - [`abspath`](/packer/docs/templates/hcl_templates/functions/file/abspath) takes a string containing
   a filesystem path and converts it to an absolute path.

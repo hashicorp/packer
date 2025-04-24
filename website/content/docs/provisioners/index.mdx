@@ -1,11 +1,11 @@
 ---
 description: |
   Provisioners use builtin and third-party software to install and configure the
-  machine image after booting.
-page_title: Provisioners
+  machine image after booting. Learn about Packer provisioners.
+page_title: Provisioners overview
 ---
 
-# Provisioners
+# Provisioners overview
 
 Provisioners use built-in and third-party software to install and configure the machine image after
 booting. Provisioners prepare the system, so you may want to use them for the following use cases:
@@ -17,17 +17,19 @@ booting. Provisioners prepare the system, so you may want to use them for the fo
 
 The following provisioners are included with Packer:
 
-- [Breakpoint](/packer/docs/provisioners/breakpoint) - pause until the user presses `Enter` to resume
+- [`breakpoint`](/packer/docs/provisioners/breakpoint) - pause until the user presses `Enter` to resume
   a build.
-- [File](/packer/docs/provisioners/file) - upload files to machines image during a build.
-- [Shell](/packer/docs/provisioners/shell) - run shell scripts on the machines image during a build.
-- [Local Shell](/packer/docs/provisioners/shell-local) - run shell scripts on the host running Packer
+- [`file`](/packer/docs/provisioners/file) - upload files to machines image during a build.
+- [`hcp-sbom`](/packer/docs/provisioners/hcp-sbom) - upload an SBOM and associate it with an artifact 
+   version in the HCP Packer registry.
+- [`shell`](/packer/docs/provisioners/shell) - run shell scripts on the machines image during a build.
+- [`shell-local`](/packer/docs/provisioners/shell-local) - run shell scripts on the host running Packer
   during a build.
-- [PowerShell](/packer/docs/provisioners/powershell) - run PowerShell scripts on Windows machine
+- [`powershell`](/packer/docs/provisioners/powershell) - run PowerShell scripts on Windows machine
   images during a build.
-- [Windows Shell](/packer/docs/provisioners/windows-shell) - run commands using `cmd` on Windows
+- [`windows-shell`](/packer/docs/provisioners/windows-shell) - run commands using `cmd` on Windows
   machine images during a build.
-- [Windows Restart](/packer/docs/provisioners/windows-restart) - initiate a reboot on a Windows
+- [`windows-restart`](/packer/docs/provisioners/windows-restart) - initiate a reboot on a Windows
   machine images during a build.
 
 Additional [Community Supported](/packer/docs/provisioners/community-supported) provisioners are

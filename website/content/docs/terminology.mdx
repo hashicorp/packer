@@ -1,64 +1,47 @@
 ---
 description: >
-  There are a handful of terms used throughout the Packer documentation where
-  the
-
-  meaning may not be immediately obvious if you haven't used Packer before.
-
-  Luckily, there are relatively few. This page documents all the terminology
-
-  required to understand and use Packer. The terminology is in alphabetical
-  order
-
-  for quick referencing.
-page_title: Terminology
+  Packer and the Packer documentation uses a vocabulary of terms that have specific meaning. Learn about Packer terminology in this glossary. 
+page_title: Packer terminology
 ---
 
-# Packer Terminology
+# Packer terminology
 
-There are a handful of terms used throughout the Packer documentation where the
-meaning may not be immediately obvious if you haven't used Packer before.
-Luckily, there are relatively few. This page documents all the terminology
-required to understand and use Packer. The terminology is in alphabetical order
-for quick referencing.
+This page documents terminology we use throughout this documentation that have a specific meaning in Packer. These terms may not be immediately obvious if you have not used Packer before.
 
-- `Artifacts` are the results of a single build, and are usually a set of IDs
+- _Artifacts_ are the results of a single build, and are usually a set of IDs
   or files to represent a machine image. Every builder produces a single
   artifact. As an example, in the case of the Amazon EC2 builder, the
   artifact is a set of AMI IDs (one per region). For the VMware builder, the
   artifact is a directory of files comprising the created virtual machine.
 
-- `Builds` are a single task that eventually produces an artifact for a single
+- _Builds_ are a single task that eventually produces an artifact for a single
   platform. Multiple builds run in parallel. Example usage in a sentence:
   "The Packer build produced an AMI to run our web application." Or: "Packer
   is running the builds now for VMware, AWS, and VirtualBox."
 
-- `Builders` are components of Packer that are able to create a machine image
+- _Builders_ are components of Packer that are able to create a machine image
   for a single platform. Builders read in some configuration and use that to
   run and generate a machine image. A builder is invoked as part of a build
   in order to create the actual resulting artifacts. Example builders include
   VirtualBox, VMware, and Amazon EC2.
 
-- `Commands` are sub-commands for the `packer` program that perform some job.
+- _Commands_ are sub-commands for the `packer` program that perform a job.
   An example command is "build", which is invoked as `packer build`. Packer
   ships with a set of commands out of the box in order to define its
   command-line interface.
 
-- `Data Sources` are components of Packer that fetch data from outside Packer
+- _Data sources_ are components of Packer that fetch data from outside Packer
   and make it available to use within the template.
   Example of data sources include Amazon AMI, and Amazon Secrets Manager.
 
-- `Post-processors` are components of Packer that take the result of a
+- _Post-processors_ are components of Packer that take the result of a
   builder or another post-processor and process that to create a new
   artifact. Examples of post-processors are compress to compress artifacts,
   upload to upload artifacts, etc.
 
-- `Provisioners` are components of Packer that install and configure software
+- _Provisioners_ are components of Packer that install and configure software
   within a running machine prior to that machine being turned into a static
   artifact. They perform the major work of making the artifact contain useful
   software. Example provisioners include shell scripts, Chef, Puppet, etc.
 
-- `Templates` are either [HCL](https://packer.io/templates/hcl_templates) or JSON files which
-  define one or more builds by configuring the various components of Packer.
-  Packer is able to read a template and use that information to create
-  multiple machine images in parallel.
+- _Templates_ are files that define one or more builds by configuring various Packer components. Packer reads a template and uses the information to create multiple machine images in parallel. You can write templates in HCL or JSON files format. 

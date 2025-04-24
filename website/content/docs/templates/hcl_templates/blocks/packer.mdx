@@ -1,18 +1,16 @@
 ---
 page_title: packer block reference
 description: |-
-  Configuration reference for the `packer` block in Packer templates written in HCL.  
+  The `packer` block configures Packer behavior. Learn how to configure the `packer` in Packer templates written in HCL.  
 ---
 
-# Packer Settings
+# `packer` block
 
-`@include 'from-1.5/beta-hcl2-note.mdx'`
+This topic provides reference information about the `packer` block. 
 
--> **Note:** The `packer` block is only available in Packer v1.6.5 and later.
+## Description
 
-The `packer` configuration block type is used to configure some
-behaviors of Packer itself, such as the minimum required Packer version needed to
-apply your configuration.
+The `packer` block configures Packer version requirements and specifies which plugins to install upon initialization.
 
 ## Packer Block Syntax
 

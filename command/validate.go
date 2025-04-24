@@ -5,6 +5,7 @@ package command
 
 import (
 	"context"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/packer/packer"
@@ -74,6 +75,10 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	ret = writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
+	}
+
+	if packer.PackerUseProto {
+		log.Printf("[TRACE] Using protobuf for communication with plugins")
 	}
 
 	diags = packerStarter.Initialize(packer.InitializeOptions{

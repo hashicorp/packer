@@ -1,20 +1,21 @@
 ---
 description: >
-  Within the template, the builders section contains an array of all the
-  builders
-
-  that Packer should use to generate machine images for the template.
-page_title: Builders - Templates
+  The `builders` block contains builders that create machines and generate images. Learn how to configure the `builders` block in JSON templates for Packer.
+page_title: builders reference for JSON templates
 ---
+
+# `builders` reference for JSON templates
+
+This topic provides reference information about the `builders` block in JSON templates.
 
 `@include 'from-1.5/legacy-json-warning.mdx'`
 
-# Template Builders
+## Introduction
 
-Within the template, the builders section contains an array of all the builders
+The `builders` block contains an array of all the builders
 that Packer should use to generate machine images for the template.
 
-Builders are responsible for creating machines and generating images from them
+Builders create machines and generate images from them
 for various platforms. For example, there are separate builders for EC2,
 VMware, VirtualBox, etc. Packer comes with many builders by default, and can
 also be extended to add new builders.

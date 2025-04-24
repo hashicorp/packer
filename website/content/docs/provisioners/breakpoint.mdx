@@ -1,32 +1,46 @@
 ---
 description: >
-  The breakpoint provisioner will pause until the user presses "enter" to resume
-
-  the build. This is intended for debugging purposes, and allows you to halt at
-  a
-
-  particular part of the provisioning process.
-page_title: breakpoint - Provisioners
+  The `breakpoint` provisioner pauses a build until you press the Enter key. Use the `breakpoint` provisioner to help you debug errors.
+page_title: breakpoint provisioner reference
 ---
 
 <BadgesHeader>
   <PluginBadge type="official" />
 </BadgesHeader>
 
-# Breakpoint Provisioner
+# `breakpoint` provisioner
 
-Type: `breakpoint`
+The `breakpoint` provisioner pauses the build operation until you press the Enter key to resume the build. Use the `breakpoint` provisioner to help you debug errors.
 
-The breakpoint provisioner will pause until the user presses "enter" to resume
-the build. This is intended for debugging purposes, and allows you to halt at a
-particular part of the provisioning process.
-
-This is independent of the `-debug` flag, which will instead halt at every step
-and between every provisioner.
+Alternatively, you can add the [`-debug` flag](/packer/docs/commands/build#debug) when running your build to halt the operation at every step and between every provisioner. 
 
 ## Basic Example
 
 <Tabs>
+<Tab heading="HCL2">
+
+```hcl
+source "null" "example" {
+  communicator = "none"
+}
+
+build {
+  sources = ["source.null.example"]
+
+  provisioner "shell-local" {
+    inline = ["echo hi"]
+  }
+  provisioner "breakpoint" {
+    disable = false
+    note    = "this is a breakpoint"
+  }
+  provisioner "shell-local" {
+    inline = ["echo hi 2"]
+  }
+}
+```
+
+</Tab>
 <Tab heading="JSON">
 
 ```json
@@ -52,30 +66,6 @@ and between every provisioner.
       "inline": "echo hi 2"
     }
   ]
-}
-```
-
-</Tab>
-<Tab heading="HCL2">
-
-```hcl
-source "null" "example" {
-  communicator = "none"
-}
-
-build {
-  sources = ["source.null.example"]
-
-  provisioner "shell-local" {
-    inline = ["echo hi"]
-  }
-  provisioner "breakpoint" {
-    disable = false
-    note    = "this is a breakpoint"
-  }
-  provisioner "shell-local" {
-    inline = ["echo hi 2"]
-  }
 }
 ```
 

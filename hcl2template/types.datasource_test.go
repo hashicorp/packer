@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/builder/null"
 	"github.com/hashicorp/packer/packer"
 )
@@ -54,7 +53,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -65,6 +64,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 		{"recursive datasources",
 			defaultParser,
@@ -142,7 +142,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false, false,
-			[]packersdk.Build{
+			[]*packer.CoreBuild{
 				&packer.CoreBuild{
 					Type:           "null.test",
 					BuilderType:    "null",
@@ -153,6 +153,7 @@ func TestParse_datasource(t *testing.T) {
 				},
 			},
 			false,
+			nil,
 		},
 		{"untyped datasource",
 			defaultParser,
@@ -164,6 +165,7 @@ func TestParse_datasource(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 		{"unnamed source",
 			defaultParser,
@@ -175,6 +177,7 @@ func TestParse_datasource(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 		{"nonexistent source",
 			defaultParser,
@@ -195,6 +198,7 @@ func TestParse_datasource(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 		{"duplicate source",
 			defaultParser,
@@ -215,6 +219,7 @@ func TestParse_datasource(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 		{"cyclic dependency between data sources",
 			defaultParser,
@@ -248,6 +253,7 @@ func TestParse_datasource(t *testing.T) {
 			true, true,
 			nil,
 			false,
+			nil,
 		},
 	}
 

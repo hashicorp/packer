@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
-	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -54,6 +53,9 @@ type PackerConfig struct {
 
 	// Builds is the list of Build blocks defined in the config files.
 	Builds Builds
+
+	// HCPPackerRegistry contains the configuration for publishing the artifacts to the HCP Packer Registry.
+	HCPPackerRegistry *HCPPackerRegistryBlock
 
 	// HCPVars is the list of HCP-set variables for use later in a template
 	HCPVars map[string]cty.Value
@@ -156,8 +158,7 @@ func (cfg *PackerConfig) EvalContext(ctx BlockContext, variables map[string]cty.
 func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := f.Body.Content(configSchema)
 
 	// for input variables we allow to use env in the default value section.
 	ectx := &hcl.EvalContext{
@@ -188,8 +189,7 @@ func (c *PackerConfig) decodeInputVariables(f *hcl.File) hcl.Diagnostics {
 func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	content, moreDiags := f.Body.Content(configSchema)
-	diags = append(diags, moreDiags...)
+	content, _ := f.Body.Content(configSchema)
 
 	var locals []*LocalBlock
 
@@ -575,6 +575,12 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		}
 	}
 
+	if pb.PType == "hcp-sbom" {
+		provisioner = &packer.SBOMInternalProvisioner{
+			Provisioner: provisioner,
+		}
+	}
+
 	return packer.CoreBuildProvisioner{
 		PType:       pb.PType,
 		PName:       pb.PName,
@@ -636,11 +642,59 @@ func (cfg *PackerConfig) getCoreBuildPostProcessors(source SourceUseBlock, block
 	return res, diags
 }
 
+// GetHCPPackerRegistryBlock return the HCP registry configuration block
+// that can should be used for the current build. Right now, it should
+// use the block at the top level but support the block inside the first
+// build block with a deprecation diagnostic
+func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, hcl.Diagnostics) {
+	var block *HCPPackerRegistryBlock
+	var diags hcl.Diagnostics
+
+	multipleRegistryDiag := func(block *HCPPackerRegistryBlock) *hcl.Diagnostic {
+		return &hcl.Diagnostic{
+			Summary:  "Multiple HCP Packer registry block declaration",
+			Subject:  block.HCL2Ref.DefRange.Ptr(),
+			Severity: hcl.DiagError,
+			Detail: "Multiple " + buildHCPPackerRegistryLabel + " blocks have been found, only one can be defined " +
+				"in HCL2 templates. Starting with Packer 1.12.1, it is recommended to move it to the " +
+				"top-level configuration instead of within a build block.",
+		}
+	}
+	// We start by looking in the build blocks
+	for _, build := range cfg.Builds {
+		if build.HCPPackerRegistry != nil {
+			if block != nil {
+				// error multiple build block
+				diags = diags.Append(multipleRegistryDiag(build.HCPPackerRegistry))
+				continue
+			}
+			block = build.HCPPackerRegistry
+			diags = diags.Append(&hcl.Diagnostic{
+				Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are deprecated",
+				Subject:  &block.DefRange,
+				Severity: hcl.DiagWarning,
+				Detail: "Starting with Packer 1.12.1, it is recommended to move it to the " +
+					"top-level configuration instead of within a build block.",
+			})
+		}
+	}
+
+	if block != nil && cfg.HCPPackerRegistry != nil {
+		diags = diags.Append(multipleRegistryDiag(block))
+	}
+
+	if cfg.HCPPackerRegistry != nil {
+		block = cfg.HCPPackerRegistry
+	}
+
+	return block, diags
+}
+
 // GetBuilds returns a list of packer Build based on the HCL2 parsed build
 // blocks. All Builders, Provisioners and Post Processors will be started and
 // configured.
-func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]packersdk.Build, hcl.Diagnostics) {
-	res := []packersdk.Build{}
+func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.CoreBuild, hcl.Diagnostics) {
+	res := []*packer.CoreBuild{}
 	var diags hcl.Diagnostics
 	possibleBuildNames := []string{}
 
