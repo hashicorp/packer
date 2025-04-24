@@ -144,6 +144,8 @@ func (p *Provisioner) getEncoding() encoding.Encoding {
 		return charmap.ISO8859_1
 	case "windows-1252":
 		return charmap.Windows1252
+	case "utf-8-bom":
+		return unicode.UTF8BOM
 	default:
 		return unicode.UTF8 // Fallback to UTF-8
 	}
