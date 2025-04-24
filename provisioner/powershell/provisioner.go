@@ -99,7 +99,7 @@ type Config struct {
 	UsePwsh bool `mapstructure:"use_pwsh"`
 
 	// The encoding of the script file. This is used to set the encoding of the powershell file that gets written by
-	//packer. The default is UTF-8.
+	// packer. The default is UTF-8. Currently only "utf-8-bom" and utf-8 are supported.
 	FileEncoding string `mapstructure:"file_encoding"`
 
 	ctx interpolate.Context
