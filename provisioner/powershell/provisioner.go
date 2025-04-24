@@ -30,7 +30,6 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -138,12 +137,6 @@ func (p *Provisioner) getEncoding() encoding.Encoding {
 	encName := p.config.FileEncoding
 
 	switch encName {
-	case "utf-16":
-		return unicode.UTF16(unicode.LittleEndian, unicode.UseBOM)
-	case "iso-8859-1":
-		return charmap.ISO8859_1
-	case "windows-1252":
-		return charmap.Windows1252
 	case "utf-8-bom":
 		return unicode.UTF8BOM
 	default:
