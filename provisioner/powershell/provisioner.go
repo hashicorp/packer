@@ -29,6 +29,9 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	"github.com/hashicorp/packer-plugin-sdk/tmp"
 	"github.com/hashicorp/packer-plugin-sdk/uuid"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
 var psEscape = strings.NewReplacer(
@@ -95,6 +98,10 @@ type Config struct {
 	// Run pwsh.exe instead of powershell.exe - latest version of powershell.
 	UsePwsh bool `mapstructure:"use_pwsh"`
 
+	// The encoding of the script file. This is used to set the encoding of the powershell file that gets written by
+	// packer. The default is UTF-8. Currently only "utf-8-bom" and utf-8 are supported.
+	FileEncoding string `mapstructure:"file_encoding"`
+
 	ctx interpolate.Context
 }
 
@@ -124,6 +131,17 @@ func (p *Provisioner) defaultExecuteCommand() string {
 		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
 	}
 
+}
+
+func (p *Provisioner) getEncoding() encoding.Encoding {
+	encName := p.config.FileEncoding
+
+	switch encName {
+	case "utf-8-bom":
+		return unicode.UTF8BOM
+	default:
+		return unicode.UTF8 // Fallback to UTF-8
+	}
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
@@ -255,7 +273,9 @@ func extractScript(p *Provisioner) (string, error) {
 		return "", err
 	}
 	defer temp.Close()
-	writer := bufio.NewWriter(temp)
+	enc := p.getEncoding()
+	log.Printf("Using encoding: %s", enc)
+	writer := bufio.NewWriter(transform.NewWriter(temp, enc.NewEncoder()))
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
 		if _, err := writer.WriteString(command + "\n"); err != nil {
