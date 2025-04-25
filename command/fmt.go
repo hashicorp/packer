@@ -40,7 +40,7 @@ func (c *FormatCommand) ParseArgs(args []string) (*FormatArgs, int) {
 		flags.Usage()
 		return &cfg, 1
 	}
-	
+
 	cfg.Paths = args
 	return &cfg, 0
 }
