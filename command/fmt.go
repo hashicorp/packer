@@ -36,10 +36,10 @@ func (c *FormatCommand) ParseArgs(args []string) (*FormatArgs, int) {
 	}
 
 	args = flags.Args()
-	/*if len(args) != 1 {
+	if len(args) == 0 {
 		flags.Usage()
 		return &cfg, 1
-	}*/
+	}
 
 	//cfg.Path = args[0]
 	cfg.Paths = args

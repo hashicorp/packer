@@ -121,7 +121,7 @@ func (f *HCL2Formatter) FormatNew(paths []string) (int, hcl.Diagnostics) {
 
 	for _, path := range paths {
 		s, err := os.Stat(path)
-		if err != nil {
+		/*if err != nil {
 			diag := &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  fmt.Sprintf("No file or directory at %s", path),
@@ -129,24 +129,24 @@ func (f *HCL2Formatter) FormatNew(paths []string) (int, hcl.Diagnostics) {
 			}
 			diags = append(diags, diag)
 			return 0, diags
-		}
+		}*/
 
-		if !s.IsDir() {
-			fmtd := false
+		if err != nil || !s.IsDir() {
+			bytesModified, diags = f.formatFile(path, diags, bytesModified)
+			/*formatted := false
 			if isHcl2FileOrVarFile(path) {
 				bytesModified, diags = f.formatFile(path, diags, bytesModified)
 
-				fmtd = true
+				formatted = true
 			}
 
-			if !fmtd {
+			if !formatted {
 				diag := &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  "Only .pkr.hcl and .pkrvars.hcl files can be processed with packer fmt",
 				}
 				diags = append(diags, diag)
-				continue
-			}
+			}*/
 		} else {
 			fileInfos, err := os.ReadDir(path)
 			if err != nil {
