@@ -196,6 +196,10 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 		f.Output = os.Stdout
 	}
 
+	if !(filename == "-") && !isHcl2FileOrVarFile(filename) {
+		return nil, fmt.Errorf("file %s is not a HCL file", filename)
+	}
+
 	var in io.Reader
 	var err error
 
