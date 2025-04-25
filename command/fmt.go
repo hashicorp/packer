@@ -40,8 +40,7 @@ func (c *FormatCommand) ParseArgs(args []string) (*FormatArgs, int) {
 		flags.Usage()
 		return &cfg, 1
 	}
-
-	//cfg.Path = args[0]
+	
 	cfg.Paths = args
 	return &cfg, 0
 }
@@ -58,8 +57,7 @@ func (c *FormatCommand) RunContext(ctx context.Context, cla *FormatArgs) int {
 		Recursive: cla.Recursive,
 	}
 
-	//bytesModified, diags := formatter.Format(cla.Path)
-	bytesModified, diags := formatter.FormatNew(cla.Paths)
+	bytesModified, diags := formatter.Format(cla.Paths)
 	ret := writeDiags(c.Ui, nil, diags)
 	if ret != 0 {
 		return ret
