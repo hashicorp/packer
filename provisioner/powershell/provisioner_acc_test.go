@@ -111,3 +111,26 @@ func TestAccPowershellProvisioner_Script(t *testing.T) {
 
 	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
 }
+
+func TestAccPowershellProvisioner_ExitCodes(t *testing.T) {
+	templateString, err := LoadProvisionerFragment("powershell-exit_codes-provisioner.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
+	}
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: powershellIsCompatible,
+		Name:         "powershell-provisioner-script",
+		Template:     templateString,
+		Type:         TestProvisionerType,
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+				}
+			}
+			return nil
+		},
+	}
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
+
+}
