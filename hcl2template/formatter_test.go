@@ -23,6 +23,8 @@ func TestHCL2Formatter_Format(t *testing.T) {
 		{Name: "Unformatted vars file", Paths: []string{"testdata/format/unformatted.pkrvars.hcl"}, FormatExpected: true},
 		{Name: "Formatted file", Paths: []string{"testdata/format/formatted.pkr.hcl"}},
 		{Name: "Directory", Paths: []string{"testdata/format"}, FormatExpected: true},
+		{Name: "No file", Paths: []string{}, FormatExpected: false},
+		{Name: "Multi File", Paths: []string{"testdata/format/unformatted.pkr.hcl", "testdata/format/unformatted.pkrvars.hcl"}, FormatExpected: true},
 	}
 
 	for _, tc := range tt {
@@ -112,4 +114,25 @@ func TestHCL2Formatter_Format_ShowDiff(t *testing.T) {
 		t.Errorf("expected buf to contain a file diff, but instead we got %s", buf.String())
 	}
 
+}
+
+func TestHCL2Formatter_FormatNegativeCases(t *testing.T) {
+	tt := []struct {
+		Name        string
+		Paths       []string
+		errExpected bool
+	}{
+		{Name: "Unformatted file", Paths: []string{"testdata/format/test.json"}, errExpected: true},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+		var buf bytes.Buffer
+		f := NewHCL2Formatter()
+		f.Output = &buf
+		_, diags := f.Format(tc.Paths)
+		if tc.errExpected && !diags.HasErrors() {
+			t.Fatalf("Expected error but got none")
+		}
+	}
 }
