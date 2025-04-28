@@ -509,6 +509,10 @@
                     "path": "templates/hcl_templates/functions/file/file"
                   },
                   {
+                    "title": "filebase64",
+                    "path": "templates/hcl_templates/functions/file/filebase64"
+                  },
+                  {
                     "title": "fileexists",
                     "path": "templates/hcl_templates/functions/file/fileexists"
                   },
