@@ -64,6 +64,7 @@ func Functions(basedir string) map[string]function.Function {
 		"element":                stdlib.ElementFunc,
 		"endswith":               pkrfunction.EndsWithFunc,
 		"file":                   filesystem.MakeFileFunc(basedir, false),
+		"filebase64":             pkrfunction.Filebase64,
 		"fileexists":             filesystem.MakeFileExistsFunc(basedir),
 		"fileset":                filesystem.MakeFileSetFunc(basedir),
 		"flatten":                stdlib.FlattenFunc,
