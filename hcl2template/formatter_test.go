@@ -134,5 +134,9 @@ func TestHCL2Formatter_FormatNegativeCases(t *testing.T) {
 		if tc.errExpected && !diags.HasErrors() {
 			t.Fatalf("Expected error but got none")
 		}
+
+		if diags[0].Detail != "file testdata/format/test.json is not a HCL file" {
+			t.Fatalf("Expected error messge did not received")
+		}
 	}
 }
