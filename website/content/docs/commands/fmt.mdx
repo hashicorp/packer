@@ -32,6 +32,15 @@ my-template.pkr.hcl
 
 ```
 
+Format multiple configuration files, writing the changes back to respective original files.
+
+```shell-session
+$ packer fmt my-template.pkr.hcl my-varfile.pkrvars.hcl
+my-template.pkr.hcl
+my-varfile.pkrvars.hcl
+
+```
+
 Format a configuration file, reading from stdin and writing to stdout.
 
 ```shell-session

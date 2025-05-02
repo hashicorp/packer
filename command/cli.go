@@ -66,6 +66,7 @@ type MetaArgs struct {
 	// TODO(azr): in the future, I want to allow passing multiple path to
 	// merge HCL confs together; but this will probably need an RFC first.
 	Path         string
+	Paths        []string
 	Only, Except []string
 	Vars         map[string]string
 	VarFiles     []string

@@ -55,52 +55,53 @@ func (f *HCL2Formatter) formatFile(path string, diags hcl.Diagnostics, bytesModi
 // If any error is encountered, zero bytes will be returned.
 //
 // Path can be a directory or a file.
-func (f *HCL2Formatter) Format(path string) (int, hcl.Diagnostics) {
+func (f *HCL2Formatter) Format(paths []string) (int, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	var bytesModified int
-
-	if path == "" {
-		diags = append(diags, &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "path is empty, cannot format",
-			Detail:   "path is empty, cannot format",
-		})
-		return bytesModified, diags
-	}
 
 	if f.parser == nil {
 		f.parser = hclparse.NewParser()
 	}
 
-	if s, err := os.Stat(path); err != nil || !s.IsDir() {
-		return f.formatFile(path, diags, bytesModified)
-	}
+	for _, path := range paths {
+		s, err := os.Stat(path)
 
-	fileInfos, err := os.ReadDir(path)
-	if err != nil {
-		diag := &hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Cannot read hcl directory",
-			Detail:   err.Error(),
-		}
-		diags = append(diags, diag)
-		return bytesModified, diags
-	}
-
-	for _, fileInfo := range fileInfos {
-		filename := filepath.Join(path, fileInfo.Name())
-		if fileInfo.IsDir() {
-			if f.Recursive {
-				var tempDiags hcl.Diagnostics
-				var tempBytesModified int
-				tempBytesModified, tempDiags = f.Format(filename)
-				bytesModified += tempBytesModified
-				diags = diags.Extend(tempDiags)
+		if err != nil || !s.IsDir() {
+			bytesModified, diags = f.formatFile(path, diags, bytesModified)
+		} else {
+			fileInfos, err := os.ReadDir(path)
+			if err != nil {
+				diag := &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Cannot read hcl directory",
+					Detail:   err.Error(),
+				}
+				diags = append(diags, diag)
+				return bytesModified, diags
 			}
-			continue
-		}
-		if isHcl2FileOrVarFile(filename) {
-			bytesModified, diags = f.formatFile(filename, diags, bytesModified)
+
+			for _, fileInfo := range fileInfos {
+				name := fileInfo.Name()
+				if f.shouldIgnoreFile(name) {
+					continue
+				}
+				filename := filepath.Join(path, name)
+				if fileInfo.IsDir() {
+					if f.Recursive {
+						var tempDiags hcl.Diagnostics
+						var tempBytesModified int
+						var newPaths []string
+						newPaths = append(newPaths, filename)
+						tempBytesModified, tempDiags = f.Format(newPaths)
+						bytesModified += tempBytesModified
+						diags = diags.Extend(tempDiags)
+					}
+					continue
+				}
+				if isHcl2FileOrVarFile(filename) {
+					bytesModified, diags = f.formatFile(filename, diags, bytesModified)
+				}
+			}
 		}
 	}
 
@@ -114,6 +115,10 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 
 	if f.Output == nil {
 		f.Output = os.Stdout
+	}
+
+	if !(filename == "-") && !isHcl2FileOrVarFile(filename) {
+		return nil, fmt.Errorf("file %s is not a HCL file", filename)
 	}
 
 	var in io.Reader
@@ -173,6 +178,14 @@ func (f *HCL2Formatter) processFile(filename string) ([]byte, error) {
 	}
 
 	return outSrc, nil
+}
+
+// shouldIgnoreFile returns true if the given filename (which must not have a
+// directory path ahead of it) should be ignored as e.g. an editor swap file.
+func (f *HCL2Formatter) shouldIgnoreFile(name string) bool {
+	return strings.HasPrefix(name, ".") || // Unix-like hidden files
+		strings.HasSuffix(name, "~") || // vim
+		strings.HasPrefix(name, "#") && strings.HasSuffix(name, "#") // emacs
 }
 
 // bytesDiff returns the unified diff of b1 and b2
