@@ -67,7 +67,7 @@ func TestColoredUi(t *testing.T) {
 
 	ui.Message("foo")
 	result = readWriter(bufferUi)
-	if result != "\033[0;33mfoo\033[0m\n" {
+	if result != "\033[1;33mfoo\033[0m\n" {
 		t.Fatalf("invalid output: %s", result)
 	}
 
@@ -126,7 +126,7 @@ func TestTargetedUI(t *testing.T) {
 
 	targetedUi.Message("foo")
 	actual = readWriter(bufferUi)
-	expected = "    foo: foo\n"
+	expected = "==> foo: foo\n"
 	if actual != expected {
 		t.Fatalf("bad: %#v", actual)
 	}
