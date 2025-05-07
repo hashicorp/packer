@@ -19,13 +19,13 @@ type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 	// The desired length of password.
 	Length int64 `mapstructure:"length" required:"true"`
-	// Include special characters in the result. These are `!@#$%&*()-_=+[]{}<>:?`. Default value is true
+	// Include special characters in the result. These are `!@#$%&*()-_=+[]{}<>:?`.
 	Special bool `mapstructure:"special" required:"false"`
-	// Include uppercase alphabet characters in the result. Default value is true
+	// Include uppercase alphabet characters in the result.
 	Upper bool `mapstructure:"upper" required:"false"`
-	// Include lowercase alphabet characters in the result. Default value is true
+	// Include lowercase alphabet characters in the result.
 	Lower bool `mapstructure:"lower" required:"false"`
-	// Include numeric characters in the result. Default value is true
+	// Include numeric characters in the result.
 	Numeric bool `mapstructure:"numeric" required:"false"`
 	// Minimum number of numeric characters in the result. Default value is 0
 	MinNumeric int64 `mapstructure:"min_numeric" required:"false"`
