@@ -1,0 +1,9 @@
+<!-- Code generated from the comments of the DatasourceOutput struct in datasource/password/data.go; DO NOT EDIT MANUALLY -->
+
+- `result` (string) - The result of the password generation. This is the final password string.
+
+- `bcrypt_hash` (string) - A bcrypt hash of the generated random string
+  **NOTE**: If the generated random string is greater than 72 bytes in length,
+  `bcrypt_hash` will contain a hash of the first 72 bytes
+
+<!-- End of code generated from the comments of the DatasourceOutput struct in datasource/password/data.go; -->
