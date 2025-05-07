@@ -60,8 +60,6 @@ func (d *Datasource) ConfigSpec() hcldec.ObjectSpec {
 
 func (d *Datasource) Configure(raws ...interface{}) error {
 
-	d.config = fetchDefaultPasswordParameters()
-
 	err := config.Decode(&d.config, nil, raws...)
 	if err != nil {
 		return err
@@ -124,17 +122,4 @@ func (d *Datasource) Execute() (cty.Value, error) {
 	}
 
 	return hcl2helper.HCL2ValueFromConfig(output, d.OutputSpec()), nil
-}
-
-func fetchDefaultPasswordParameters() Config {
-	return Config{
-		Special:    true,
-		Lower:      true,
-		Upper:      true,
-		Numeric:    true,
-		MinLower:   int64(0),
-		MinUpper:   int64(0),
-		MinNumeric: int64(0),
-		MinSpecial: int64(0),
-	}
 }
