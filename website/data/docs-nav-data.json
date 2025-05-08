@@ -784,6 +784,10 @@
       {
         "title": "http",
         "path": "datasources/http"
+      },
+      {
+        "title": "password",
+        "path": "datasources/password"
       }
     ]
   },
