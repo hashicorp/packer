@@ -11,6 +11,11 @@ updates:
     - dependency-name: "*"
       update-types:
         - "version-update:semver-major"
+    groups:
+      # Group all GitHub Actions updates into a single PR
+      actions:
+        patterns:
+          - "*"
 
 - package-ecosystem: gomod
   directory: /
