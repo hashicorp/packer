@@ -6,9 +6,10 @@ package password
 import (
 	"crypto/rand"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 	"math/big"
 	"sort"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type StringParams struct {
