@@ -121,6 +121,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 
 		pluginDestName := common.ExpectedInstalledName("1.0.10")
 		common.CopyFile(ts.T(), filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", pluginDestName), plugin)
+
 		common.WriteFile(ts.T(),
 			filepath.Join(pluginDir.Dir(), "github.com", "hashicorp", "tester", fmt.Sprintf("%s_SHA256SUM", pluginDestName)),
 			fmt.Sprintf("%x", sha256.New().Sum([]byte("Not the plugin's contents for sure."))))
@@ -131,7 +132,7 @@ func (ts *PackerPluginTestSuite) TestLoadWithSHAMismatches() {
 				check.Grep("packer-plugin-tester_v1\\.0\\.9[^\\n]+", check.GrepStdout),
 				check.GrepInverted("packer-plugin-tester_v1.0.10", check.GrepStdout),
 				check.Grep("v1.0.10[^\\n]+ignoring possibly unsafe binary", check.GrepStderr),
-				check.Grep(`Checksums \(\*sha256\.digest\) did not match.`, check.GrepStderr))
+				check.Grep(`Checksums \(\*sha256\.[dD]igest\) did not match.`, check.GrepStderr))
 	})
 }
 
