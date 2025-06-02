@@ -485,8 +485,7 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 		// Escape chars special to PS in each env var value
 		escapedEnvVarValue := psEscape.Replace(keyValue[1])
 		if escapedEnvVarValue != keyValue[1] {
-			log.Printf("Env var %s converted to %s after escaping chars special to PS", keyValue[1],
-				escapedEnvVarValue)
+			log.Printf("Env var %s was converted after escaping chars special to PS", keyValue[0])
 		}
 		envVars[keyValue[0]] = escapedEnvVarValue
 	}
