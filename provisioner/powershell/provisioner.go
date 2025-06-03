@@ -313,7 +313,7 @@ func extractInlineScript(p *Provisioner) (string, error) {
 	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := commandBuilder.WriteString(command); err != nil {
+		if _, err := commandBuilder.WriteString(command + "\n"); err != nil {
 			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
@@ -344,9 +344,11 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	p.generatedData = generatedData
 
 	var scripts []string
-
+	// maps temp script paths to original script paths
+	tempToOriginalScriptMap := make(map[string]string)
 	if p.config.Inline != nil {
 		temp, err := extractInlineScript(p)
+		tempToOriginalScriptMap[temp] = temp
 		if err != nil {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
@@ -354,8 +356,6 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		// Remove temp script containing the inline commands when done
 		defer os.Remove(temp)
 	}
-	// maps temp script paths to original script paths
-	tempToOriginalScriptMap := make(map[string]string, len(p.config.Scripts))
 
 	if len(p.config.Scripts) > 0 {
 
