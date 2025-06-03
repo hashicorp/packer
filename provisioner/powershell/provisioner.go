@@ -11,6 +11,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -265,9 +266,41 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+func extractScript(p *Provisioner, script string) (string, error) {
+	temp, err := tmp.File(script)
+	if err != nil {
+		return "", err
+	}
+
+	defer temp.Close()
+
+	baseString := `if (Test-Path variable:global:ProgressPreference)` +
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	if p.config.DebugMode != 0 {
+		baseString += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+	}
+
+	if _, err := temp.WriteString(baseString); err != nil {
+		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
+	}
+
+	f, err := os.Open(script)
+	if err != nil {
+		return "", fmt.Errorf("Error opening powershell script: %s", err)
+	}
+	defer f.Close()
+	if _, err := io.Copy(temp, f); err != nil {
+		return "", fmt.Errorf("Error copying script contents: %w", err)
+	}
+
+	return temp.Name(), nil
+
+}
+
 // Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
-func extractScript(p *Provisioner) (string, error) {
+func extractInlineScript(p *Provisioner) (string, error) {
 	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
@@ -311,16 +344,30 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	p.generatedData = generatedData
 
 	scripts := make([]string, len(p.config.Scripts))
-	copy(scripts, p.config.Scripts)
+	//copy(scripts, p.config.Scripts)
 
 	if p.config.Inline != nil {
-		temp, err := extractScript(p)
+		temp, err := extractInlineScript(p)
 		if err != nil {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
 		scripts = append(scripts, temp)
 		// Remove temp script containing the inline commands when done
 		defer os.Remove(temp)
+	}
+
+	if len(p.config.Scripts) > 0 {
+		log.Printf("RUNNING THE FOR LOOP FOR SCRIPTS")
+		for _, script := range p.config.Scripts {
+			temp, err := extractScript(p, script)
+			log.Printf("EXTRACTED SCRIPT: %s", temp)
+			if err != nil {
+				ui.Error(fmt.Sprintf("Unable to extract script into a file: %s", err))
+			}
+			scripts = append(scripts, temp)
+			// Remove temp script containing the inline commands when done
+			defer os.Remove(temp)
+		}
 	}
 
 	// every provisioner run will only have one env var script file so lets add it first

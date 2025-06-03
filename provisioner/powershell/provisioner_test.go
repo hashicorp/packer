@@ -24,7 +24,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	p.generatedData = generatedData()
-	file, err := extractScript(p)
+	file, err := extractInlineScript(p)
 	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
