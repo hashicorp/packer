@@ -20,6 +20,10 @@
   This enhancement allows users to format several files in a single command invocation.
   [GH-13362](https://github.com/hashicorp/packer/pull/13362)
 
+* hcl2: Added top level hcp_packer_registry block (this configuration was previously nested inside the build block and is still valid but deprecated)
+  [GH-13314](https://github.com/hashicorp/packer/pull/13314)
+  
+
 
 ### BUG FIXES:
 
