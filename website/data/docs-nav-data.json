@@ -906,6 +906,10 @@
       {
         "title": "v1.12",
         "path": "release-notes/v1_12"
+      },
+      {
+        "title": "v1.13",
+        "path": "release-notes/v1_13"
       }
     ]
   },
@@ -919,6 +923,10 @@
       {
         "title": "Upgrade to v1.12",
         "path": "upgrade/v1_12"
+      },
+      {
+        "title": "Upgrade to v1.13",
+        "path": "upgrade/v1_13"
       }
     ]
   },
