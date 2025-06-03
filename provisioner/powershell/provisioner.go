@@ -266,6 +266,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+// extractScript prepares a temporary PowerShell script by prepending environment setup and debug config.
+// It copies the contents of the provided script file into the temp script and returns its path.
 func extractScript(p *Provisioner, script string) (string, error) {
 	temp, err := tmp.File("powershell-provisioner-script")
 	if err != nil {
