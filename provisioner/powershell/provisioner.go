@@ -267,7 +267,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 }
 
 func extractScript(p *Provisioner, script string) (string, error) {
-	temp, err := tmp.File(script)
+	temp, err := tmp.File("powershell-provisioner-script")
 	if err != nil {
 		return "", err
 	}
@@ -280,7 +280,7 @@ func extractScript(p *Provisioner, script string) (string, error) {
 	if p.config.DebugMode != 0 {
 		baseString += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
 	}
-
+	baseString += p.createFlattenedEnvVars(p.config.ElevatedUser != "")
 	if _, err := temp.WriteString(baseString); err != nil {
 		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
 	}
@@ -343,8 +343,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	p.communicator = comm
 	p.generatedData = generatedData
 
-	scripts := make([]string, len(p.config.Scripts))
-	//copy(scripts, p.config.Scripts)
+	var scripts []string
 
 	if p.config.Inline != nil {
 		temp, err := extractInlineScript(p)
@@ -355,27 +354,30 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		// Remove temp script containing the inline commands when done
 		defer os.Remove(temp)
 	}
+	// maps temp script paths to original script paths
+	tempToOriginalScriptMap := make(map[string]string, len(p.config.Scripts))
 
 	if len(p.config.Scripts) > 0 {
-		log.Printf("RUNNING THE FOR LOOP FOR SCRIPTS")
+
 		for _, script := range p.config.Scripts {
 			temp, err := extractScript(p, script)
-			log.Printf("EXTRACTED SCRIPT: %s", temp)
+			tempToOriginalScriptMap[temp] = script
 			if err != nil {
 				ui.Error(fmt.Sprintf("Unable to extract script into a file: %s", err))
 			}
 			scripts = append(scripts, temp)
-			// Remove temp script containing the inline commands when done
+			// Defer removal until the function exits
 			defer os.Remove(temp)
+
 		}
 	}
 
 	// every provisioner run will only have one env var script file so lets add it first
 	uploadedScripts := []string{p.config.RemoteEnvVarPath}
 	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
+		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", tempToOriginalScriptMap[path]))
 
-		log.Printf("Opening %s for reading", path)
+		log.Printf("Opening %s for reading", tempToOriginalScriptMap[path])
 		fi, err := os.Stat(path)
 		if err != nil {
 			return fmt.Errorf("Error stating powershell script: %s", err)
