@@ -313,7 +313,7 @@ func extractInlineScript(p *Provisioner) (string, error) {
 	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := commandBuilder.WriteString(command + "\n"); err != nil {
+		if _, err := commandBuilder.WriteString(command + "\n\t"); err != nil {
 			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
