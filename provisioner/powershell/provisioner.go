@@ -11,6 +11,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -265,9 +266,43 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
+// extractScript prepares a temporary PowerShell script by prepending environment setup and debug config.
+// It copies the contents of the provided script file into the temp script and returns its path.
+func extractScript(p *Provisioner, script string) (string, error) {
+	temp, err := tmp.File("powershell-provisioner-script")
+	if err != nil {
+		return "", err
+	}
+
+	defer temp.Close()
+
+	baseString := `if (Test-Path variable:global:ProgressPreference)` +
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	if p.config.DebugMode != 0 {
+		baseString += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+	}
+	baseString += p.createFlattenedEnvVars(p.config.ElevatedUser != "")
+	if _, err := temp.WriteString(baseString); err != nil {
+		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
+	}
+
+	f, err := os.Open(script)
+	if err != nil {
+		return "", fmt.Errorf("Error opening powershell script: %s", err)
+	}
+	defer f.Close()
+	if _, err := io.Copy(temp, f); err != nil {
+		return "", fmt.Errorf("Error copying script contents: %w", err)
+	}
+
+	return temp.Name(), nil
+
+}
+
 // Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
-func extractScript(p *Provisioner) (string, error) {
+func extractInlineScript(p *Provisioner) (string, error) {
 	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
@@ -280,7 +315,7 @@ func extractScript(p *Provisioner) (string, error) {
 	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := commandBuilder.WriteString(command); err != nil {
+		if _, err := commandBuilder.WriteString(command + "\n\t"); err != nil {
 			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
@@ -310,11 +345,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	p.communicator = comm
 	p.generatedData = generatedData
 
-	scripts := make([]string, len(p.config.Scripts))
-	copy(scripts, p.config.Scripts)
-
+	var scripts []string
+	// maps temp script paths to original script paths
+	tempToOriginalScriptMap := make(map[string]string)
 	if p.config.Inline != nil {
-		temp, err := extractScript(p)
+		temp, err := extractInlineScript(p)
+		tempToOriginalScriptMap[temp] = temp
 		if err != nil {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
@@ -323,12 +359,27 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		defer os.Remove(temp)
 	}
 
+	if len(p.config.Scripts) > 0 {
+
+		for _, script := range p.config.Scripts {
+			temp, err := extractScript(p, script)
+			tempToOriginalScriptMap[temp] = script
+			if err != nil {
+				ui.Error(fmt.Sprintf("Unable to extract script into a file: %s", err))
+			}
+			scripts = append(scripts, temp)
+			// Defer removal until the function exits
+			defer os.Remove(temp)
+
+		}
+	}
+
 	// every provisioner run will only have one env var script file so lets add it first
 	uploadedScripts := []string{p.config.RemoteEnvVarPath}
 	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
+		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", tempToOriginalScriptMap[path]))
 
-		log.Printf("Opening %s for reading", path)
+		log.Printf("Opening %s for reading", tempToOriginalScriptMap[path])
 		fi, err := os.Stat(path)
 		if err != nil {
 			return fmt.Errorf("Error stating powershell script: %s", err)
