@@ -24,7 +24,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 	p := new(Provisioner)
 	_ = p.Prepare(config)
 	p.generatedData = generatedData()
-	file, err := extractScript(p)
+	file, err := extractInlineScript(p)
 	defer os.Remove(file)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
@@ -36,7 +36,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
 	readFile, err := os.ReadFile(file)
-	expectedContents := "if (Test-Path variable:global:ProgressPreference) {\n         set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'\n         }\n         \n         $exitCode = 0\n         try {\n         $env:PACKER_BUILDER_TYPE=\"\"; $env:PACKER_BUILD_NAME=\"\"; \n         foobar\n         $exitCode = 0\n         } catch {\n         Write-Error \"An error occurred: $_\"\n         $exitCode = 1\n         }\n         \n         if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {\n         $exitCode = $LASTEXITCODE\n         }\n         \n         Write-Host $result\n         exit $exitCode"
+	expectedContents := " \n\tif (Test-Path variable:global:ProgressPreference) {\n\t  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'\n\t}\n\t\n\t$exitCode = 0\n\ttry {\n\t$env:PACKER_BUILDER_TYPE=\"\"; $env:PACKER_BUILD_NAME=\"\"; \n\tfoo\n\tbar\n\t\n\t$exitCode = 0\n\t} catch {\n\tWrite-Error \"An error occurred: $_\"\n\t$exitCode = 1\n\t}\n\t\n\tif ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {\n\t\t$exitCode = $LASTEXITCODE\n\t}\n\t\n\tWrite-Host $result\n\texit $exitCode\n\n"
 	normalizedExpectedContent := normalizeWhiteSpace(expectedContents)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)

@@ -1,8 +1,10 @@
 {
   "type": "powershell",
-  "environment_vars": "PackerRunUUID={{build `PackerRunUUID`}},ID={{build `ID`}}",
+  "environment_vars": "PackerRunUUID={{build `PackerRunUUID`}},ID={{build `ID`}},TEST_ENV_VAR=TestValue",
   "inline": [
-    "Write-Host \"$env:ID for provisioner.$env:PackerRunUUID\""
+    "Write-Host \"$env:ID for provisioner.$env:PackerRunUUID build_name: $env:packer_build_name, test_env_var: $env:test_env_var\"",
+    "setx BUILD_AMI_VERSION \"1.0.0\"", 
+    "setx BUILD_AMI_NAME custom_ami_name",
+    "setx BUILD_AMI_DESCRIPTION \"This is a custom AMI created for testing purposes\""
   ]
 }
-
