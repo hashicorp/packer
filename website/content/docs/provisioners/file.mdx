@@ -12,8 +12,8 @@ page_title: file provisioner reference
 
 The `file` Packer provisioner uploads files to machines built by Packer. We recommend implementing the following workflow:
 
-1. Use the `file` provisionerto upload files
-1. Use the [`shell` provisioner](/packer/docs/provisioners/shell) to move the files imto the proper place, set permissions, and perform other tasks.
+1. Use the `file` provisioner to upload files
+1. Use the [`shell` provisioner](/packer/docs/provisioners/shell) to move the files into the proper place, set permissions, and perform other tasks.
 
 You can only upload files to locations that the provisioning user
 (generally not root) has permission to access. Creating files in /tmp and
