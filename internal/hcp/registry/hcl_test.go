@@ -172,7 +172,7 @@ func TestNewRegisterProperBuildName(t *testing.T) {
 		},
 		"multiple build block with same source create conflict": {
 			expectErr:            true,
-			diagsSummaryContains: "conflict",
+			diagsSummaryContains: "mandatory build name",
 			builds: hcl2template.Builds{
 				&hcl2template.BuildBlock{
 					Sources: []hcl2template.SourceUseBlock{
@@ -237,8 +237,7 @@ func TestNewRegisterProperBuildName(t *testing.T) {
 			},
 		},
 		"multiple build block with same source but with only one declared build name": {
-			expectErr:      false,
-			expectedBuilds: []string{"docker.ubuntu", "build.docker.ubuntu"},
+			expectErr: true,
 			builds: hcl2template.Builds{
 				&hcl2template.BuildBlock{
 					Name: "build",
