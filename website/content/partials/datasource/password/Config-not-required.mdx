@@ -1,0 +1,23 @@
+<!-- Code generated from the comments of the Config struct in datasource/password/data.go; DO NOT EDIT MANUALLY -->
+
+- `special` (bool) - Include special characters in the result. These are `!@#$%&*()-_=+[]{}<>:?`.
+
+- `upper` (bool) - Include uppercase alphabet characters in the result.
+
+- `lower` (bool) - Include lowercase alphabet characters in the result.
+
+- `numeric` (bool) - Include numeric characters in the result.
+
+- `min_numeric` (int64) - Minimum number of numeric characters in the result. Default value is 0
+
+- `min_upper` (int64) - Minimum number of uppercase alphabet characters in the result. Default value is 0
+
+- `min_lower` (int64) - Minimum number of lowercase alphabet characters in the result. Default value is 0
+
+- `min_special` (int64) - Minimum number of special characters in the result. Default value is 0
+
+- `override_special` (string) - Supply your own list of special characters to use for string generation.
+  This overrides the default character list in the special argument.
+  The `special` argument must still be set to true for any overwritten characters to be used in generation.
+
+<!-- End of code generated from the comments of the Config struct in datasource/password/data.go; -->
