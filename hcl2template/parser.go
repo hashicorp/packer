@@ -441,7 +441,7 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 		for _, dep := range ds.Dependencies {
 			target := verticesMap[dep.String()]
 			if target == nil {
-				err = multierror.Append(err, fmt.Errorf("unknown dependency %q for %q", dep.String(), dsName))
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), dsName, dep.String()))
 				continue
 			}
 
@@ -461,7 +461,7 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 			target := verticesMap[dep.String()]
 
 			if target == nil {
-				err = multierror.Append(err, fmt.Errorf("unknown dependency %q for %q", dep.String(), locName))
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), locName, dep.String()))
 				continue
 			}
 
