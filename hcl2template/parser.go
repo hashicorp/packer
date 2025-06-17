@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
@@ -403,6 +404,8 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 
 	verticesMap := map[string]dag.Vertex{}
 
+	var err error
+
 	// Do a first pass to create all the vertices
 	for ref := range cfg.Datasources {
 		// We keep a reference to the datasource separately from where it
@@ -434,27 +437,48 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 	for _, ds := range cfg.Datasources {
 		dsName := fmt.Sprintf("data.%s", ds.Name())
 
+		source := verticesMap[dsName]
+		if source == nil {
+			err = multierror.Append(err, fmt.Errorf("unable to find source vertex %q for dependency analysis, this is likely a Packer bug", dsName))
+			continue
+		}
+
 		for _, dep := range ds.Dependencies {
-			retGraph.Connect(
-				dag.BasicEdge(verticesMap[dsName],
-					verticesMap[dep.String()]))
+			target := verticesMap[dep.String()]
+			if target == nil {
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), dsName, dep.String()))
+				continue
+			}
+
+			retGraph.Connect(dag.BasicEdge(source, target))
 		}
 	}
 	for _, loc := range cfg.LocalBlocks {
 		locName := fmt.Sprintf("local.%s", loc.LocalName)
 
+		source := verticesMap[locName]
+		if source == nil {
+			err = multierror.Append(err, fmt.Errorf("unable to find source vertex %q for dependency analysis, this is likely a Packer bug", locName))
+			continue
+		}
+
 		for _, dep := range loc.dependencies {
-			retGraph.Connect(
-				dag.BasicEdge(verticesMap[locName],
-					verticesMap[dep.String()]))
+			target := verticesMap[dep.String()]
+
+			if target == nil {
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), locName, dep.String()))
+				continue
+			}
+
+			retGraph.Connect(dag.BasicEdge(source, target))
 		}
 	}
 
-	if err := retGraph.Validate(); err != nil {
-		return nil, err
+	if validateErr := retGraph.Validate(); validateErr != nil {
+		err = multierror.Append(err, validateErr)
 	}
 
-	return &retGraph, nil
+	return &retGraph, err
 }
 
 func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnostics {
