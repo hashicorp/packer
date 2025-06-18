@@ -21,6 +21,7 @@ import (
 	hcppackerversiondatasource "github.com/hashicorp/packer/datasource/hcp-packer-version"
 	httpdatasource "github.com/hashicorp/packer/datasource/http"
 	nulldatasource "github.com/hashicorp/packer/datasource/null"
+	passworddatasource "github.com/hashicorp/packer/datasource/password"
 	artificepostprocessor "github.com/hashicorp/packer/post-processor/artifice"
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
@@ -73,6 +74,7 @@ var Datasources = map[string]packersdk.Datasource{
 	"hcp-packer-version":   new(hcppackerversiondatasource.Datasource),
 	"http":                 new(httpdatasource.Datasource),
 	"null":                 new(nulldatasource.Datasource),
+	"password":             new(passworddatasource.Datasource),
 }
 
 var pluginRegexp = regexp.MustCompile("packer-(builder|post-processor|provisioner|datasource)-(.+)")
