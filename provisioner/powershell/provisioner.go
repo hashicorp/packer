@@ -535,7 +535,16 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 		keyValue := strings.SplitN(envVar, "=", 2)
 		// Escape chars special to PS in each env var value
 		escapedEnvVarValue := psEscape.Replace(keyValue[1])
-		if escapedEnvVarValue != keyValue[1] {
+
+		isSensitive := false
+		for _, sensitiveVar := range p.config.PackerSensitiveVars {
+			if strings.EqualFold(sensitiveVar, keyValue[0]) {
+				isSensitive = true
+				break
+			}
+		}
+
+		if escapedEnvVarValue != keyValue[1] && !isSensitive {
 			log.Printf("Env var %s converted to %s after escaping chars special to PS", keyValue[1],
 				escapedEnvVarValue)
 		}
