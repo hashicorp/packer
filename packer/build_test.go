@@ -39,8 +39,9 @@ func testBuild() *CoreBuild {
 				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
 			},
 		},
-		Variables: make(map[string]string),
-		onError:   "cleanup",
+		Variables:     make(map[string]string),
+		onError:       "cleanup",
+		SensitiveVars: []string{"sensitive_var"},
 	}
 }
 
@@ -54,6 +55,7 @@ func testDefaultPackerConfig() map[string]interface{} {
 		common.OnErrorConfigKey:       "cleanup",
 		common.TemplatePathKey:        "",
 		common.UserVariablesConfigKey: make(map[string]string),
+		common.SensitiveVarsConfigKey: []string{"sensitive_var"},
 	}
 }
 func TestBuild_Name(t *testing.T) {

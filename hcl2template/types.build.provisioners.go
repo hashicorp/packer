@@ -186,6 +186,16 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
 	builderVars["packer_on_error"] = cfg.onError
 
+	sensitiveVars := make([]string, 0, len(cfg.InputVariables))
+
+	for key, variable := range cfg.InputVariables {
+		if variable.Sensitive {
+			sensitiveVars = append(sensitiveVars, key)
+		}
+	}
+
+	builderVars["packer_sensitive_variables"] = sensitiveVars
+
 	hclProvisioner := &HCL2Provisioner{
 		Provisioner:      provisioner,
 		provisionerBlock: pb,
