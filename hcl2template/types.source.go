@@ -147,8 +147,8 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 }
 
 // These variables will populate the PackerConfig inside of the builders.
-func (source *SourceUseBlock) builderVariables() map[string]string {
-	return map[string]string{
+func (source *SourceUseBlock) builderVariables() map[string]interface{} {
+	return map[string]interface{}{
 		"packer_build_name":   source.Name,
 		"packer_builder_type": source.Type,
 	}

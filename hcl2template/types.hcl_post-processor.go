@@ -21,7 +21,7 @@ type HCL2PostProcessor struct {
 	PostProcessor      packersdk.PostProcessor
 	postProcessorBlock *PostProcessorBlock
 	evalContext        *hcl.EvalContext
-	builderVariables   map[string]string
+	builderVariables   map[string]interface{}
 }
 
 func (p *HCL2PostProcessor) ConfigSpec() hcldec.ObjectSpec {

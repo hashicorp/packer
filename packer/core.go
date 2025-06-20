@@ -494,6 +494,11 @@ func (c *Core) Build(n string) (*CoreBuild, error) {
 		postProcessors = append(postProcessors, current)
 	}
 
+	var sensitiveVars []string
+	for _, sensitive := range c.Template.SensitiveVariables {
+		sensitiveVars = append(sensitiveVars, sensitive.Key)
+	}
+
 	// TODO hooks one day
 
 	// Return a structure that contains the plugins, their types, variables, and
@@ -508,6 +513,7 @@ func (c *Core) Build(n string) (*CoreBuild, error) {
 		CleanupProvisioner: cleanupProvisioner,
 		TemplatePath:       c.Template.Path,
 		Variables:          c.variables,
+		SensitiveVars:      sensitiveVars,
 	}
 
 	//configBuilder.Name is left uninterpolated so we must check against
