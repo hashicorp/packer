@@ -206,9 +206,10 @@ func TestParser_complete(t *testing.T) {
 			false, false,
 			[]*packer.CoreBuild{
 				&packer.CoreBuild{
-					Type:        "virtualbox-iso.ubuntu-1204",
-					BuilderType: "virtualbox-iso",
-					Prepared:    true,
+					Type:          "virtualbox-iso.ubuntu-1204",
+					BuilderType:   "virtualbox-iso",
+					Prepared:      true,
+					SensitiveVars: []string{},
 					Builder: &MockBuilder{
 						Config: MockConfig{
 							NestedMockConfig: NestedMockConfig{
@@ -318,9 +319,10 @@ func TestParser_complete(t *testing.T) {
 					},
 				},
 				&packer.CoreBuild{
-					Type:        "amazon-ebs.ubuntu-1604",
-					BuilderType: "amazon-ebs",
-					Prepared:    true,
+					Type:          "amazon-ebs.ubuntu-1604",
+					BuilderType:   "amazon-ebs",
+					Prepared:      true,
+					SensitiveVars: []string{},
 					Builder: &MockBuilder{
 						Config: MockConfig{
 							NestedMockConfig: NestedMockConfig{

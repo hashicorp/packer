@@ -59,6 +59,7 @@ func TestParse_source(t *testing.T) {
 					Provisioners:   []packer.CoreBuildProvisioner{},
 					PostProcessors: [][]packer.CoreBuildPostProcessor{},
 					Prepared:       true,
+					SensitiveVars:  []string{},
 				},
 			},
 			false,

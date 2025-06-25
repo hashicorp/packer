@@ -42,6 +42,7 @@ type CoreBuild struct {
 	CleanupProvisioner CoreBuildProvisioner
 	TemplatePath       string
 	Variables          map[string]string
+	SensitiveVars      []string
 
 	// Indicates whether the build is already initialized before calling Prepare(..)
 	Prepared bool
@@ -175,6 +176,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 		common.OnErrorConfigKey:       b.onError,
 		common.TemplatePathKey:        b.TemplatePath,
 		common.UserVariablesConfigKey: b.Variables,
+		common.SensitiveVarsConfigKey: b.SensitiveVars,
 	}
 
 	// Prepare the builder

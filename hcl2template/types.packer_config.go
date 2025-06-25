@@ -827,6 +827,14 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 			pcb.PostProcessors = pps
 			pcb.Prepared = true
 
+			pcb.SensitiveVars = make([]string, 0, len(cfg.InputVariables))
+
+			for key, variable := range cfg.InputVariables {
+				if variable.Sensitive {
+					pcb.SensitiveVars = append(pcb.SensitiveVars, key)
+				}
+			}
+
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
 			_, err := pcb.Prepare()
