@@ -11,7 +11,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -145,6 +144,28 @@ func (p *Provisioner) defaultExecuteCommand() string {
 
 }
 
+func (p *Provisioner) defaultScriptCommand() string {
+	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
+		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+
+	if p.config.DebugMode != 0 {
+		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
+	}
+
+	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
+
+	if p.config.ExecutionPolicy == ExecutionPolicyNone {
+		return baseCmd
+	}
+
+	if p.config.UsePwsh {
+		return fmt.Sprintf(`pwsh -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
+	} else {
+		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+	}
+
+}
+
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -171,14 +192,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ElevatedEnvVarFormat == "" {
 		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.defaultExecuteCommand()
-	}
-
-	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -232,6 +245,27 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Only a script file or an inline script can be specified, not both."))
 	}
 
+	if p.config.ExecuteCommand == "" {
+		if p.config.Inline != nil && len(p.config.Scripts) == 0 {
+			p.config.ExecuteCommand = p.defaultExecuteCommand()
+			log.Printf("Using inline default execute command %s", p.config.ExecuteCommand)
+		} else {
+			p.config.ExecuteCommand = p.defaultScriptCommand()
+			log.Printf("Using script default execute command %s", p.config.ExecuteCommand)
+		}
+
+	}
+
+	if p.config.ElevatedExecuteCommand == "" {
+		if p.config.Inline != nil && len(p.config.Scripts) == 0 {
+			p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
+			log.Printf("Using inline default elevated execute command %s", p.config.ElevatedExecuteCommand)
+		} else {
+			p.config.ElevatedExecuteCommand = p.defaultScriptCommand()
+			log.Printf("Using script default elevated execute command %s", p.config.ElevatedExecuteCommand)
+		}
+	}
+
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
 			errs = packersdk.MultiErrorAppend(errs,
@@ -264,40 +298,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	return nil
-}
-
-// extractScript prepares a temporary PowerShell script by prepending environment setup and debug config.
-// It copies the contents of the provided script file into the temp script and returns its path.
-func extractScript(p *Provisioner, script string) (string, error) {
-	temp, err := tmp.File("powershell-provisioner-script")
-	if err != nil {
-		return "", err
-	}
-
-	defer temp.Close()
-
-	baseString := `if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
-
-	if p.config.DebugMode != 0 {
-		baseString += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
-	}
-	baseString += p.createFlattenedEnvVars(p.config.ElevatedUser != "")
-	if _, err := temp.WriteString(baseString); err != nil {
-		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
-	}
-
-	f, err := os.Open(script)
-	if err != nil {
-		return "", fmt.Errorf("Error opening powershell script: %s", err)
-	}
-	defer f.Close()
-	if _, err := io.Copy(temp, f); err != nil {
-		return "", fmt.Errorf("Error copying script contents: %w", err)
-	}
-
-	return temp.Name(), nil
-
 }
 
 // Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
@@ -345,12 +345,11 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	p.communicator = comm
 	p.generatedData = generatedData
 
-	var scripts []string
-	// maps temp script paths to original script paths
-	tempToOriginalScriptMap := make(map[string]string)
+	scripts := make([]string, len(p.config.Scripts))
+	copy(scripts, p.config.Scripts)
+
 	if p.config.Inline != nil {
 		temp, err := extractInlineScript(p)
-		tempToOriginalScriptMap[temp] = temp
 		if err != nil {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
@@ -359,27 +358,12 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 		defer os.Remove(temp)
 	}
 
-	if len(p.config.Scripts) > 0 {
-
-		for _, script := range p.config.Scripts {
-			temp, err := extractScript(p, script)
-			tempToOriginalScriptMap[temp] = script
-			if err != nil {
-				ui.Error(fmt.Sprintf("Unable to extract script into a file: %s", err))
-			}
-			scripts = append(scripts, temp)
-			// Defer removal until the function exits
-			defer os.Remove(temp)
-
-		}
-	}
-
 	// every provisioner run will only have one env var script file so lets add it first
 	uploadedScripts := []string{p.config.RemoteEnvVarPath}
 	for _, path := range scripts {
-		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", tempToOriginalScriptMap[path]))
+		ui.Say(fmt.Sprintf("Provisioning with powershell script: %s", path))
 
-		log.Printf("Opening %s for reading", tempToOriginalScriptMap[path])
+		log.Printf("Opening %s for reading", path)
 		fi, err := os.Stat(path)
 		if err != nil {
 			return fmt.Errorf("Error stating powershell script: %s", err)
