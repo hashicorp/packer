@@ -70,6 +70,23 @@ provisioner "powershell" {
   - `Vars`: The location of a temp file containing the list of
     `environment_vars`, if configured.
 
+> **Note:**
+> As of Packer v1.13.0, the default value for `elevated_execute_command` in the PowerShell provisioner has changed. Previously, the default command invoked the script via an inline call—allowing for custom environment variable injection and runtime PowerShell configuration:
+>
+> ```powershell
+> powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+> ```
+>
+> Starting with v1.13.0, the default command has been simplified to:
+>
+> ```powershell
+> powershell -executionpolicy bypass -file {{.Path}}
+> ```
+>
+> - `Path`: The absolute path to the wrapper script to be executed.
+>
+> This change improves error reporting by allowing non-zero exit codes to be surfaced directly to Packer, and aligns the execution path more closely with native PowerShell semantics. If your workflow relies on environment variables or custom script wrappers, you may need to update your usage or explicitly provide a custom `elevated_execute_command`.
+
 - `env` (map of strings) - A map of key/value pairs to inject prior to the
   execute_command. Packer injects some environmental variables by default into
   the environment, as well, which are covered in the section below. Duplicate
@@ -136,6 +153,23 @@ provisioner "powershell" {
   may need to modify your `execute_command` to make sure that the command is
   valid and properly escaped; the default assumes that you have not changed
   the default shell away from cmd.
+
+> **Note:**
+> As of Packer v1.13.0, the default value for `execute_command` in the PowerShell provisioner has changed. Previously, the default command invoked the script via an inline call—allowing for custom environment variable injection and runtime PowerShell configuration:
+>
+> ```powershell
+> powershell -executionpolicy bypass "& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'};. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }"
+> ```
+>
+> Starting with v1.13.0, the default command has been simplified to:
+>
+> ```powershell
+> powershell -executionpolicy bypass -file {{.Path}}
+> ```
+>
+> - `Path`: The absolute path to the wrapper script to be executed.
+>
+> This change improves error reporting by allowing non-zero exit codes to be surfaced directly to Packer, and aligns the execution path more closely with native PowerShell semantics. If your workflow relies on environment variables or custom script wrappers, you may need to update your usage or explicitly provide a custom `execute_command`.
 
 - `elevated_user` and `elevated_password` (string) - If specified, the
   PowerShell script will be run with elevated privileges using the given
