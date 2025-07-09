@@ -37,13 +37,6 @@ type Client struct {
 // Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
 // Upon error a HCPClientError will be returned.
 func NewClient() (*Client, error) {
-	if !env.HasHCPCredentials() {
-		return nil, &ClientError{
-			StatusCode: InvalidClientConfig,
-			Err:        fmt.Errorf("the client authentication requires both %s and %s environment variables to be set", env.HCPClientID, env.HCPClientSecret),
-		}
-	}
-
 	hcpClientCfg := httpclient.Config{
 		SourceChannel: fmt.Sprintf("packer/%s", version.PackerVersion.FormattedVersion()),
 	}

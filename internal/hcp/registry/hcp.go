@@ -63,17 +63,6 @@ func IsHCPEnabled(cfg packer.Handler) bool {
 func createConfiguredBucket(templateDir string, opts ...bucketConfigurationOpts) (*Bucket, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
-	if !env.HasHCPCredentials() {
-		diags = append(diags, &hcl.Diagnostic{
-			Summary: "HCP authentication information required",
-			Detail: fmt.Sprintf("The client authentication requires both %s and %s environment "+
-				"variables to be set for authenticating with HCP.",
-				env.HCPClientID,
-				env.HCPClientSecret),
-			Severity: hcl.DiagError,
-		})
-	}
-
 	bucket := NewBucketWithVersion()
 
 	for _, opt := range opts {
