@@ -7,10 +7,13 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -31,11 +34,21 @@ const (
 )
 
 type Getter struct {
-	Client    *github.Client
-	UserAgent string
+	Client     *github.Client
+	HttpClient *http.Client
+	UserAgent  string
 }
 
 var _ plugingetter.Getter = &Getter{}
+
+type PluginMetadata struct {
+	Versions map[string]PluginVersion `json:"versions"`
+}
+
+type PluginVersion struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
 
 func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 	return func(in io.ReadCloser) (io.ReadCloser, error) {
@@ -96,6 +109,35 @@ func transformVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
 	for _, m := range m {
 		out = append(out, plugingetter.Release{
 			Version: strings.TrimPrefix(m.Ref, "refs/tags/"),
+		})
+	}
+
+	buf := &bytes.Buffer{}
+	if err := json.NewEncoder(buf).Encode(out); err != nil {
+		return nil, err
+	}
+
+	return io.NopCloser(buf), nil
+}
+
+// transformReleasesVersionStream get a stream from github tags and transforms it into
+// something Packer wants, namely a json list of Release.
+func transformReleasesVersionStream(in io.ReadCloser) (io.ReadCloser, error) {
+	if in == nil {
+		return nil, fmt.Errorf("transformReleasesVersionStream got nil body")
+	}
+	defer in.Close()
+	dec := json.NewDecoder(in)
+
+	var m PluginMetadata
+	if err := dec.Decode(&m); err != nil {
+		return nil, err
+	}
+
+	var out []plugingetter.Release
+	for _, m := range m.Versions {
+		out = append(out, plugingetter.Release{
+			Version: "v" + m.Version,
 		})
 	}
 
@@ -188,6 +230,10 @@ func (gp GithubPlugin) RealRelativePath() string {
 	)
 }
 
+func (gp GithubPlugin) PluginType() string {
+	return fmt.Sprintf("packer-plugin-%s", gp.Type)
+}
+
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
 	ghURI, err := NewGithubPlugin(opts.PluginRequirement.Identifier)
 	if err != nil {
@@ -276,4 +322,90 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 
 	return transform(resp.Body)
+}
+
+func (g *Getter) GetOfficialRelease(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
+	ghURI, err := NewGithubPlugin(opts.PluginRequirement.Identifier)
+	if err != nil {
+		return nil, err
+	}
+
+	if g.HttpClient == nil {
+		caCert, err := ioutil.ReadFile("/Users/anshulsharma/Documents/test_official/cert.pem")
+		if err != nil {
+			panic(err)
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		// Create custom TLS config
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+
+		g.HttpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: tlsConfig,
+			},
+		}
+		//g.HttpClient = &http.Client{}
+	}
+
+	var req *http.Request
+	transform := func(in io.ReadCloser) (io.ReadCloser, error) {
+		return in, nil
+	}
+
+	switch what {
+	case "releases":
+		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/index.json")
+		req, err = http.NewRequest("GET", url, nil)
+		transform = transformReleasesVersionStream
+	case "sha256":
+		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
+		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_SHA256SUMS")
+		transform = transformChecksumStream()
+		log.Printf("[DEBUG] github-getter: getting %q", url)
+		req, err = http.NewRequest("GET", url, nil)
+	case "zip":
+		// https://releases.hashicorp.com/terraform-provider-akamai/8.0.0/terraform-provider-akamai_8.0.0_darwin_arm64.zip
+		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
+		req, err = http.NewRequest("GET", url, nil)
+		transform = transformZipStream()
+	default:
+		return nil, fmt.Errorf("%q not implemented", what)
+	}
+
+	if err != nil {
+		log.Printf("[ERROR] http-getter: error creating request for %q: %s", what, err)
+		return nil, err
+	}
+
+	resp, err := g.HttpClient.Do(req)
+	if err != nil || resp.StatusCode >= 400 {
+		log.Printf("[ERROR] Got error while getting data from releases.hashicorp.com, %v", err)
+		return nil, plugingetter.HTTPFailure
+	}
+
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			log.Printf("[ERROR] http-getter: error closing response body: %s", err)
+		}
+	}(resp.Body)
+
+	return transform(resp.Body)
+}
+
+func transformZipStream() func(in io.ReadCloser) (io.ReadCloser, error) {
+	return func(in io.ReadCloser) (io.ReadCloser, error) {
+		defer in.Close()
+		buf := new(bytes.Buffer)
+		_, err := io.Copy(buf, in)
+		if err != nil {
+			panic(err)
+		}
+		return io.NopCloser(buf), nil
+	}
 }
