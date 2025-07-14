@@ -16,7 +16,7 @@ To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/doc
 This block is available from version 1.7.7 of Packer.
 
 Add a `hcp_packer_registry` block to your template file to enable HCP
-Packer mode. When in HCP Packer mode, Packer pushes all builds in the template to the remote
+Packer mode. When in HCP Packer mode, Packer pushes metadata for all builds in the template to the remote
 registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and
 `HCP_CLIENT_SECRET`). If no HCP credentials are set, Packer will fail the build
 and exit immediately to avoid any potential artifact drift between the defined
