@@ -7,13 +7,10 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -331,25 +328,7 @@ func (g *Getter) GetOfficialRelease(what string, opts plugingetter.GetOptions) (
 	}
 
 	if g.HttpClient == nil {
-		caCert, err := ioutil.ReadFile("/Users/anshulsharma/Documents/test_official/cert.pem")
-		if err != nil {
-			panic(err)
-		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-
-		// Create custom TLS config
-		tlsConfig := &tls.Config{
-			InsecureSkipVerify: true,
-		}
-
-		g.HttpClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
-			},
-		}
-		//g.HttpClient = &http.Client{}
+		g.HttpClient = &http.Client{}
 	}
 
 	var req *http.Request
@@ -363,10 +342,9 @@ func (g *Getter) GetOfficialRelease(what string, opts plugingetter.GetOptions) (
 		req, err = http.NewRequest("GET", url, nil)
 		transform = transformReleasesVersionStream
 	case "sha256":
-		// something like https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
+		// https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
 		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_SHA256SUMS")
 		transform = transformChecksumStream()
-		log.Printf("[DEBUG] github-getter: getting %q", url)
 		req, err = http.NewRequest("GET", url, nil)
 	case "zip":
 		// https://releases.hashicorp.com/terraform-provider-akamai/8.0.0/terraform-provider-akamai_8.0.0_darwin_arm64.zip

@@ -702,7 +702,7 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 	newInstall, err := pr.InstallOfficial(opts)
 	if err != nil {
 		if errors.Is(err, HTTPFailure) {
-			log.Printf("[TRACE] Failure from release site, trying to install from gitHub.com %s", pr.Identifier)
+			log.Printf("[TRACE] Failure from release official site, falling-back to gitHub.com for %s", pr.Identifier)
 			newInstall, err = pr.InstallFromGitHub(opts)
 			if err != nil {
 				return nil, err
@@ -1159,7 +1159,6 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 					}
 
 					if err := entry.validateRelease(version.String(), opts.BinaryInstallationOptions); err != nil {
-						log.Printf("#### Got error %v", err)
 						continue
 					}
 
@@ -1179,12 +1178,18 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 						Checksummer: checksummer,
 					}
 
-					log.Printf("#### getChecksum filename: %s", checksum.Filename)
 					expectedZipFilename := checksum.Filename
-					expectedBinaryFilename := strings.TrimSuffix(expectedZipFilename, filepath.Ext(expectedZipFilename)) + opts.BinaryInstallationOptions.Ext
-					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
+					pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
 
-					log.Printf("#### output filename: %s", outputFileName)
+					expectedBinFilename := strings.Join([]string{fmt.Sprintf("packer-plugin-%s", pluginSourceParts[2]),
+						"v" + version.String(),
+						"x" + pluginsdk.APIVersionMajor + "." + pluginsdk.APIVersionMinor,
+						entry.os,
+						entry.arch + ".zip",
+					}, "_")
+
+					expectedBinaryFilename := strings.TrimSuffix(expectedBinFilename, filepath.Ext(expectedBinFilename)) + opts.BinaryInstallationOptions.Ext
+					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
 
 					for _, potentialChecksumer := range opts.Checksummers {
 						// First check if a local checksum file is already here in the expected
@@ -1236,6 +1241,7 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 							tmpFile.Close()
 							os.Remove(tmpFilePath)
 						}()
+
 						// write binary to tmp file
 						_, err = io.Copy(tmpFile, remoteZipFile)
 						_ = remoteZipFile.Close()
@@ -1249,6 +1255,7 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 							errs = multierror.Append(errs, err)
 							continue
 						}
+
 						// verify that the checksum for the zip is what we expect.
 						if err := checksum.Checksummer.Checksum(checksum.Expected, tmpFile); err != nil {
 							err := fmt.Errorf("%w. Is the checksum file correct ? Is the binary file correct ?", err)
@@ -1263,7 +1270,7 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 
 						var copyFrom io.ReadCloser
 						for _, f := range zr.File {
-							if f.Name != "terraform-provider-akamai_v8.0.0" {
+							if f.Name != expectedBinaryFilename {
 								continue
 							}
 							copyFrom, err = f.Open()
@@ -1364,13 +1371,11 @@ func (pr *Requirement) InstallOfficial(opts InstallOptions) (*Installation, erro
 	errs = multierror.Append(errs, fmt.Errorf("could not install any compatible version of plugin %q", pr.Identifier))
 	return nil, errs
 
-	return nil, errs
 }
 
 func GetPluginDescription(pluginPath string) (pluginsdk.SetDescription, error) {
 	out, err := exec.Command(pluginPath, "describe").Output()
 	if err != nil {
-		log.Printf("#### could not get plugin description for %q %q", pluginPath, err)
 		return pluginsdk.SetDescription{}, err
 	}
 
