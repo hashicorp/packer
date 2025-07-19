@@ -332,9 +332,7 @@ func (g *Getter) GetOfficialRelease(what string, opts plugingetter.GetOptions) (
 	}
 
 	var req *http.Request
-	transform := func(in io.ReadCloser) (io.ReadCloser, error) {
-		return in, nil
-	}
+	transform := transformZipStream()
 
 	switch what {
 	case "releases":
@@ -350,7 +348,6 @@ func (g *Getter) GetOfficialRelease(what string, opts plugingetter.GetOptions) (
 		// https://releases.hashicorp.com/terraform-provider-akamai/8.0.0/terraform-provider-akamai_8.0.0_darwin_arm64.zip
 		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
 		req, err = http.NewRequest("GET", url, nil)
-		transform = transformZipStream()
 	default:
 		return nil, fmt.Errorf("%q not implemented", what)
 	}
