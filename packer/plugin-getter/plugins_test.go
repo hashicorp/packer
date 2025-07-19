@@ -52,7 +52,7 @@ func TestChecksumFileEntry_init(t *testing.T) {
 	}
 }
 
-func TestRequirement_InstallLatest(t *testing.T) {
+func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 	type fields struct {
 		Identifier         string
 		VersionConstraints string
@@ -439,6 +439,259 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 				VersionConstraints: cts,
 			}
 			got, err := pr.InstallFromGitHub(tt.args.opts)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("Requirement.InstallLatest() %s", diff)
+			}
+			if tt.want != nil && tt.want.BinaryPath != "" {
+				// Cleanup.
+				// These two files should be here by now and os.Remove will fail if
+				// they aren't.
+				if err := os.Remove(filepath.Clean(tt.want.BinaryPath)); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Remove(filepath.Clean(tt.want.BinaryPath + "_SHA256SUM")); err != nil {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+}
+
+func TestRequirement_InstallLatestFromOfficialRelease(t *testing.T) {
+	type fields struct {
+		Identifier         string
+		VersionConstraints string
+	}
+	type args struct {
+		opts InstallOptions
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *Installation
+		wantErr bool
+	}{
+		{"already-installed-same-api-version",
+			fields{"amazon", "v1.2.3"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"1.2.3": {{
+								// here the checksum file tells us what zipfiles
+								// to expect. maybe we could cache the zip file
+								// ? but then the plugin is present on the drive
+								// twice.
+								Filename: "packer-plugin-amazon_1.2.3_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},
+						},
+					},
+				},
+				pluginFolderOne,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
+
+		{"already-installed-compatible-api-minor-version",
+			// here 'packer' uses the procol version 5.1 which is compatible
+			// with the 5.0 one of an already installed plugin.
+			fields{"amazon", "v1.2.3"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"1.2.3": {{
+								Filename: "packer-plugin-amazon_1.2.3_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},
+						},
+					},
+				},
+				pluginFolderOne,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
+
+		{"ignore-incompatible-higher-protocol-version",
+			// here 'packer' needs a binary with protocol version 5.0, and a
+			// working plugin is already installed; but a plugin with version
+			// 6.0 is available locally and remotely. It simply needs to be
+			// ignored.
+			fields{"amazon", ">= v1"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v1.2.3"},
+							{Version: "v1.2.4"},
+							{Version: "v1.2.5"},
+							{Version: "v2.0.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							/*"2.0.0": {{
+								Filename: "packer-plugin-amazon_2.0.0_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},*/
+							"1.2.5": {{
+								Filename: "packer-plugin-amazon_1.2.5_darwin_amd64.zip",
+								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+							}},
+						},
+					},
+				},
+				pluginFolderOne,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "5", APIVersionMinor: "0",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			nil, false},
+
+		{"wrong-zip-checksum",
+			// here we have something locally and test that a newer version with
+			// a wrong checksum will not be installed and error.
+			fields{"amazon", ">= v2"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v2.10.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_2.10.0_darwin_amd64.zip",
+								Checksum: "133713371337133713371337c4a152edd277366a7f71ff3812583e4a35dd0d4a",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64.zip": zipFile(map[string]string{
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "h4xx",
+							}),
+						},
+					},
+				},
+				pluginFolderTwo,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+
+			nil, true},
+
+		{"wrong-local-checksum",
+			// here we have something wrong locally and test that a newer
+			// version with a wrong checksum will not be installed
+			// this should totally error.
+			fields{"amazon", ">= v1"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Releases: []Release{
+							{Version: "v2.10.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_2.10.0_darwin_amd64.zip",
+								Checksum: "133713371337133713371337c4a152edd277366a7f71ff3812583e4a35dd0d4a",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64.zip": zipFile(map[string]string{
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "h4xx",
+							}),
+						},
+					},
+				},
+				pluginFolderTwo,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+
+			nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			switch tt.name {
+			case "upgrade-with-diff-protocol-version",
+				"upgrade-with-same-protocol-version",
+				"upgrade-with-one-missing-checksum-file":
+				if runtime.GOOS != "windows" {
+					break
+				}
+				t.Skipf("Test %q cannot run on Windows because of a shell script being invoked, skipping.", tt.name)
+			}
+
+			log.Printf("starting %s test", tt.name)
+
+			identifier, err := addrs.ParsePluginSourceString("github.com/hashicorp/" + tt.fields.Identifier)
+			if err != nil {
+				t.Fatalf("ParsePluginSourceString(%q): %v", tt.fields.Identifier, err)
+			}
+			cts, err := version.NewConstraint(tt.fields.VersionConstraints)
+			if err != nil {
+				t.Fatalf("version.NewConstraint(%q): %v", tt.fields.Identifier, err)
+			}
+			pr := &Requirement{
+				Identifier:         identifier,
+				VersionConstraints: cts,
+			}
+			got, err := pr.InstallOfficial(tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
 				return
