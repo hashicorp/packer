@@ -438,7 +438,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 				Identifier:         identifier,
 				VersionConstraints: cts,
 			}
-			got, err := pr.InstallLatest(tt.args.opts)
+			got, err := pr.InstallFromGitHub(tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
 				return
