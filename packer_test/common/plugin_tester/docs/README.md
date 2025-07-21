@@ -33,6 +33,10 @@ packer {
 }
 ```
 
+Note: With the new packer release the init command will try to install the official(Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [official](https://releases.hashicorp.com/) release site.
+Also going forward the official plugins mentioned above will be released through the official release site of hashicorp. so if one need to use new version of official plugins they need to use new packer release. There are no change in the packer init command.
+
+
 #### Manual installation
 
 You can find pre-built binary releases of the plugin [here](https://github.com/hashicorp/packer-plugin-name/releases).
@@ -40,6 +44,9 @@ Once you have downloaded the latest archive corresponding to your target OS,
 uncompress it to retrieve the plugin binary file corresponding to your platform.
 To install the plugin, please follow the Packer documentation on
 [installing a plugin](https://www.packer.io/docs/extending/plugins/#installing-plugins).
+
+Note: With the new packer release the init command will try to install the official(Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [official](https://releases.hashicorp.com/) release site.
+Also going forward the official plugins mentioned above will be released through the official release site of hashicorp. so if one need to use new version of official plugins they need to use new packer release. There are no change in the packer plugins install command.
 
 
 #### From Source

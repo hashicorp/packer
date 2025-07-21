@@ -69,6 +69,9 @@ pinning plugin versions for build reproducibility. Refer to the [`packer` block 
 
 1. Run the `packer init` command. Packer lists all installed plugins then installs the latest plugin version matching the version constraints specified in the `required_plugins` block. Refer to the [`init` command reference](/packer/docs/commands/init) for additional information.
 
+~> Note: With the new packer release the init command will try to install the official(Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [official](https://releases.hashicorp.com/) release site.
+Also going forward the official plugins mentioned above will be released through the official release site of hashicorp. so if one need to use new version of official plugins they need to use new packer release. There are no change in the packer init command.
+
 ## Manually install plugins using the CLI
 
 You can use the `packer plugins install` command to manually install plugin binaries.
@@ -88,6 +91,9 @@ $ packer plugins install --path happycloud github.com/hashicorp/happycloud
 ```
 
 Refer to the [`packer plugins install`](/packer/docs/commands/plugins/install) reference for additional information.
+
+~> Note: With the new packer release the init command will try to install the official(Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [official](https://releases.hashicorp.com/) release site.
+Also going forward the official plugins mentioned above will be released through the official release site of hashicorp. so if one need to use new version of official plugins they need to use new packer release. There are no change in the packer plugins install command.
 
 
 ## Upgrade plugins
