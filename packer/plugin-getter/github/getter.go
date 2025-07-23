@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"io"
 	"log"
 	"net/http"
@@ -18,6 +17,8 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/hashicorp/packer/hcl2template/addrs"
