@@ -7,14 +7,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
-	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
-	gh "github.com/hashicorp/packer/packer/plugin-getter/github"
 	"io"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
+	gh "github.com/hashicorp/packer/packer/plugin-getter/github"
 )
 
 type Getter struct {

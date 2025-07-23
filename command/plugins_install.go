@@ -10,13 +10,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/hashicorp/packer/packer/plugin-getter/release"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/plugin-getter/release"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"

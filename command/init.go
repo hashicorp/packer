@@ -7,10 +7,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/hashicorp/packer/packer/plugin-getter/release"
 	"log"
 	"runtime"
 	"strings"
+
+	"github.com/hashicorp/packer/packer/plugin-getter/release"
 
 	gversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
