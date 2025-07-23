@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"io"
 	"log"
 	"net/http"
@@ -20,7 +21,6 @@ import (
 
 	"github.com/google/go-github/v33/github"
 	"github.com/hashicorp/packer/hcl2template/addrs"
-	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"golang.org/x/oauth2"
 )
 
