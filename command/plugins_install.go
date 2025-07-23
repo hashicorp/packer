@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/hashicorp/packer/packer/plugin-getter/release"
 	"io"
 	"os"
 	"os/exec"
@@ -176,6 +177,9 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 	}
 
 	getters := []plugingetter.Getter{
+		&release.Getter{
+			Name: "releases.hashicorp.com",
+		},
 		&github.Getter{
 			// In the past some terraform plugins downloads were blocked from a
 			// specific aws region by s3. Changing the user agent unblocked the
@@ -185,6 +189,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			// TODO: allow to set this from the config file or an environment
 			// variable.
 			UserAgent: "packer-getter-github-" + pkrversion.String(),
+			Name:      "github.com",
 		},
 	}
 

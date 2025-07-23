@@ -7,6 +7,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"github.com/hashicorp/packer/packer/plugin-getter/release"
 	"log"
 	"runtime"
 	"strings"
@@ -95,7 +96,11 @@ for more info.`)
 
 	log.Printf("[TRACE] init: %#v", opts)
 
+	// the ordering of the getters is important here, place the getter on top which you want to try first
 	getters := []plugingetter.Getter{
+		&release.Getter{
+			Name: "releases.hashicorp.com",
+		},
 		&github.Getter{
 			// In the past some terraform plugins downloads were blocked from a
 			// specific aws region by s3. Changing the user agent unblocked the
@@ -105,6 +110,7 @@ for more info.`)
 			// TODO: allow to set this from the config file or an environment
 			// variable.
 			UserAgent: "packer-getter-github-" + version.String(),
+			Name:      "github.com",
 		},
 	}
 
