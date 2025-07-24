@@ -183,6 +183,11 @@ func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, i
 
 	var data ManifestMeta
 	body, err := io.ReadAll(manifest)
+	if err != nil {
+		log.Printf("Failed to unmarshal manifest json: %s", err)
+		return err
+	}
+
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		log.Printf("Failed to unmarshal manifest json: %s", err)
