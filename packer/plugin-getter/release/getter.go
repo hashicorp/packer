@@ -116,7 +116,6 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 		// https://releases.hashicorp.com/packer-plugin-docker/1.1.1/packer-plugin-docker_1.1.1_darwin_arm64.zip
 		url := filepath.ToSlash(officialReleaseURL + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
 		req, err = http.NewRequest("GET", url, nil)
-		log.Printf("### url is %s", url)
 	default:
 		return nil, fmt.Errorf("%q not implemented", what)
 	}
