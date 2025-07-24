@@ -18,6 +18,8 @@ import (
 	gh "github.com/hashicorp/packer/packer/plugin-getter/github"
 )
 
+const officialReleaseURL = "https://releases.hashicorp.com/"
+
 type Getter struct {
 	APIMajor   string
 	APIMinor   string
@@ -98,21 +100,21 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	switch what {
 	case "releases":
 		// https://releases.hashicorp.com/packer-plugin-docker/index.json
-		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/index.json")
+		url := filepath.ToSlash(officialReleaseURL + ghURI.PluginType() + "/index.json")
 		req, err = http.NewRequest("GET", url, nil)
 		transform = transformReleasesVersionStream
 	case "sha256":
 		// https://releases.hashicorp.com/packer-plugin-docker/8.0.0/packer-plugin-docker_1.1.1_SHA256SUMS
-		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_SHA256SUMS")
+		url := filepath.ToSlash(officialReleaseURL + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_SHA256SUMS")
 		transform = gh.TransformChecksumStream()
 		req, err = http.NewRequest("GET", url, nil)
 	case "meta":
 		// https://releases.hashicorp.com/packer-plugin-docker/8.0.0/packer-plugin-docker_1.1.1_manifest.json
-		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_manifest.json")
+		url := filepath.ToSlash(officialReleaseURL + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_manifest.json")
 		req, err = http.NewRequest("GET", url, nil)
 	case "zip":
 		// https://releases.hashicorp.com/packer-plugin-docker/1.1.1/packer-plugin-docker_1.1.1_darwin_arm64.zip
-		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
+		url := filepath.ToSlash(officialReleaseURL + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
 		req, err = http.NewRequest("GET", url, nil)
 		log.Printf("### url is %s", url)
 	default:
