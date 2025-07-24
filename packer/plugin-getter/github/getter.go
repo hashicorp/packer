@@ -318,7 +318,7 @@ func (g *Getter) Init(req *plugingetter.Requirement, entry *plugingetter.Checksu
 	return nil
 }
 
-func (g *Getter) Validate(expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
+func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
 	expectedBinVersion := "v" + expectedVersion
 	if entry.BinVersion != expectedBinVersion {
 		return fmt.Errorf("wrong version: '%s' does not match expected %s ", entry.BinVersion, expectedBinVersion)

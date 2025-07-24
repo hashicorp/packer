@@ -712,7 +712,7 @@ func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) erro
 	return nil
 }
 
-func (g *mockPluginGetter) Validate(expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error {
+func (g *mockPluginGetter) Validate(opt GetOptions, expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error {
 	return nil
 }
 

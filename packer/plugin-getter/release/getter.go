@@ -5,6 +5,7 @@ package release
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,14 +14,22 @@ import (
 	"path/filepath"
 	"strings"
 
-	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	gh "github.com/hashicorp/packer/packer/plugin-getter/github"
 )
 
 type Getter struct {
+	APIMajor   string
+	APIMinor   string
 	HttpClient *http.Client
 	Name       string
+}
+
+type ManifestMeta struct {
+	Metadata Metadata `json:"metadata"`
+}
+type Metadata struct {
+	ProtocolVersion string `json:"protocol_version"`
 }
 
 var _ plugingetter.Getter = &Getter{}
@@ -76,7 +85,11 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 
 	if g.HttpClient == nil {
-		g.HttpClient = &http.Client{}
+		g.HttpClient = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			},
+		}
 	}
 
 	var req *http.Request
@@ -84,18 +97,24 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 
 	switch what {
 	case "releases":
+		// https://releases.hashicorp.com/packer-plugin-docker/index.json
 		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/index.json")
 		req, err = http.NewRequest("GET", url, nil)
 		transform = transformReleasesVersionStream
 	case "sha256":
-		// https://github.com/sylviamoss/packer-plugin-comment/releases/download/v0.2.11/packer-plugin-comment_v0.2.11_x5_SHA256SUMS
+		// https://releases.hashicorp.com/packer-plugin-docker/8.0.0/packer-plugin-docker_1.1.1_SHA256SUMS
 		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_SHA256SUMS")
 		transform = gh.TransformChecksumStream()
 		req, err = http.NewRequest("GET", url, nil)
+	case "meta":
+		// https://releases.hashicorp.com/packer-plugin-docker/8.0.0/packer-plugin-docker_1.1.1_manifest.json
+		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + ghURI.PluginType() + "_" + opts.VersionString() + "_manifest.json")
+		req, err = http.NewRequest("GET", url, nil)
 	case "zip":
-		// https://releases.hashicorp.com/terraform-provider-akamai/8.0.0/terraform-provider-akamai_8.0.0_darwin_arm64.zip
+		// https://releases.hashicorp.com/packer-plugin-docker/1.1.1/packer-plugin-docker_1.1.1_darwin_arm64.zip
 		url := filepath.ToSlash("https://releases.hashicorp.com/" + ghURI.PluginType() + "/" + opts.VersionString() + "/" + opts.ExpectedZipFilename())
 		req, err = http.NewRequest("GET", url, nil)
+		log.Printf("### url is %s", url)
 	default:
 		return nil, fmt.Errorf("%q not implemented", what)
 	}
@@ -147,13 +166,35 @@ func (g *Getter) Init(req *plugingetter.Requirement, entry *plugingetter.Checksu
 	return nil
 }
 
-func (g *Getter) Validate(expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
+func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
+
 	if entry.BinVersion != expectedVersion {
 		return fmt.Errorf("wrong version: '%s' does not match expected %s ", entry.BinVersion, expectedVersion)
 	}
 	if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
 		return fmt.Errorf("wrong system, expected %s_%s got %s_%s", installOpts.OS, installOpts.ARCH, entry.Os, entry.Arch)
 	}
+
+	manifest, err := g.Get("meta", opt)
+	if err != nil {
+		return err
+	}
+
+	var data ManifestMeta
+	body, err := io.ReadAll(manifest)
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		log.Printf("Failed to unmarshal manifest json: %s", err)
+		return err
+	}
+
+	err = installOpts.CheckProtocolVersion("x" + data.Metadata.ProtocolVersion)
+	if err != nil {
+		return err
+	}
+
+	g.APIMajor = strings.Split(data.Metadata.ProtocolVersion, ".")[0]
+	g.APIMinor = strings.Split(data.Metadata.ProtocolVersion, ".")[1]
 
 	return nil
 }
@@ -164,7 +205,7 @@ func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, 
 	// We need to verify that the plugin source is in the expected format
 	return strings.Join([]string{fmt.Sprintf("packer-plugin-%s", pluginSourceParts[2]),
 		"v" + version,
-		"x" + pluginsdk.APIVersionMajor + "." + pluginsdk.APIVersionMinor,
+		"x" + g.APIMajor + "." + g.APIMinor,
 		entry.Os,
 		entry.Arch + ".zip",
 	}, "_")

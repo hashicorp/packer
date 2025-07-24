@@ -597,7 +597,7 @@ type Getter interface {
 
 	Init(req *Requirement, entry *ChecksumFileEntry) error
 
-	Validate(expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error
+	Validate(opt GetOptions, expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error
 
 	ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string
 }
@@ -735,7 +735,12 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 						continue
 					}
 
-					if err := getter.Validate(version.String(), opts.BinaryInstallationOptions, &entry); err != nil {
+					metaOpts := GetOptions{
+						PluginRequirement:         pr,
+						BinaryInstallationOptions: opts.BinaryInstallationOptions,
+						version:                   version,
+					}
+					if err := getter.Validate(metaOpts, version.String(), opts.BinaryInstallationOptions, &entry); err != nil {
 						continue
 					}
 
@@ -756,8 +761,8 @@ func (pr *Requirement) InstallLatest(opts InstallOptions) (*Installation, error)
 					}
 
 					expectedZipFilename := checksum.Filename
-					expectedBinZipFilename := getter.ExpectedFileName(pr, version.String(), &entry, expectedZipFilename)
-					expectedBinaryFilename := strings.TrimSuffix(expectedBinZipFilename, filepath.Ext(expectedBinZipFilename)) + opts.BinaryInstallationOptions.Ext
+					expectedBinFilename := getter.ExpectedFileName(pr, version.String(), &entry, expectedZipFilename)
+					expectedBinaryFilename := strings.TrimSuffix(expectedBinFilename, filepath.Ext(expectedBinFilename)) + opts.BinaryInstallationOptions.Ext
 					outputFileName := filepath.Join(outputFolder, expectedBinaryFilename)
 
 					for _, potentialChecksumer := range opts.Checksummers {
