@@ -525,13 +525,13 @@ func (binOpts *BinaryInstallationOptions) CheckProtocolVersion(remoteProt string
 	}
 
 	if localVersion.Major != remoteVersion.Major {
-		return fmt.Errorf("Unsupported remote protocol MAJOR version %d. The current MAJOR protocol version is %d."+
-			" This version of Packer can only communicate with plugins using that version.", remoteVersion.Major, localVersion.Major)
+		return fmt.Errorf("unsupported remote protocol MAJOR version %d. The current MAJOR protocol version is %d."+
+			" This version of Packer can only communicate with plugins using that version", remoteVersion.Major, localVersion.Major)
 	}
 
 	if remoteVersion.Minor > localVersion.Minor {
-		return fmt.Errorf("Unsupported remote protocol MINOR version %d. The supported MINOR protocol versions are version %d and below. "+
-			"Please upgrade Packer or use an older version of the plugin if possible.", remoteVersion.Minor, localVersion.Minor)
+		return fmt.Errorf("unsupported remote protocol MINOR version %d. The supported MINOR protocol versions are version %d and below. "+
+			"Please upgrade Packer or use an older version of the plugin if possible", remoteVersion.Minor, localVersion.Minor)
 	}
 
 	return nil

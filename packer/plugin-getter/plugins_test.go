@@ -756,42 +756,6 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 	return io.NopCloser(read), nil
 }
 
-/*func (g *mockPluginGetter) GetOfficialRelease(what string, options GetOptions) (io.ReadCloser, error) {
-
-	var toEncode interface{}
-	switch what {
-	case "releases":
-		toEncode = g.Releases
-	case "sha256":
-		enc, ok := g.ChecksumFileEntries[options.version.String()]
-		if !ok {
-			return nil, fmt.Errorf("No checksum available for version %q", options.version.String())
-		}
-		toEncode = enc
-	case "zip":
-		// Note: we'll act as if the plugin sources would always be github sources for now.
-		// This test will need to be updated if/when we move on to support other sources.
-		parts := options.PluginRequirement.Identifier.Parts()
-		acc := fmt.Sprintf("%s/%s/packer-plugin-%s/%s", parts[0], parts[1], parts[2], options.ExpectedZipFilename())
-
-		zip, found := g.Zips[acc]
-		if found == false {
-			panic(fmt.Sprintf("could not find zipfile %s. %v", acc, g.Zips))
-		}
-		return zip, nil
-	default:
-		panic("Don't know how to get " + what)
-	}
-
-	read, write := io.Pipe()
-	go func() {
-		if err := json.NewEncoder(write).Encode(toEncode); err != nil {
-			panic(err)
-		}
-	}()
-	return io.NopCloser(read), nil
-}*/
-
 func zipFile(content map[string]string) io.ReadCloser {
 	buff := bytes.NewBuffer(nil)
 	zipWriter := zip.NewWriter(buff)
