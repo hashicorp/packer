@@ -6,6 +6,8 @@ package env
 const (
 	HCPClientID               = "HCP_CLIENT_ID"
 	HCPClientSecret           = "HCP_CLIENT_SECRET"
+	HCPCredFile               = "HCP_CRED_FILE"
+	HCPDefaultCredFilePath    = "~/.config/hcp/cred_file.json"
 	HCPProjectID              = "HCP_PROJECT_ID"
 	HCPOrganizationID         = "HCP_ORGANIZATION_ID"
 	HCPPackerRegistry         = "HCP_PACKER_REGISTRY"
