@@ -1,10 +1,11 @@
 package release
 
 import (
+	"testing"
+
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInit(t *testing.T) {
