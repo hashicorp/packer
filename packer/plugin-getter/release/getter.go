@@ -170,7 +170,7 @@ func (g *Getter) Init(req *plugingetter.Requirement, entry *plugingetter.Checksu
 func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
 
 	if entry.BinVersion != expectedVersion {
-		return fmt.Errorf("wrong version: '%s' does not match expected %s ", entry.BinVersion, expectedVersion)
+		return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedVersion)
 	}
 	if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
 		return fmt.Errorf("wrong system, expected %s_%s got %s_%s", installOpts.OS, installOpts.ARCH, entry.Os, entry.Arch)
