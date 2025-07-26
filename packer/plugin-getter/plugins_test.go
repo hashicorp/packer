@@ -6,10 +6,17 @@ package plugingetter
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	"io"
+	"log"
+	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -20,31 +27,7 @@ var (
 	pluginFolderTwo = filepath.Join("testdata", "plugins_2")
 )
 
-/*func TestChecksumFileEntry_init(t *testing.T) {
-	expectedVersion := "v0.3.0"
-	req := &Requirement{
-		Identifier: &addrs.Plugin{
-			Source: "github.com/ddelnano/xenserver",
-		},
-	}
-
-	checkSum := &ChecksumFileEntry{
-		Filename: fmt.Sprintf("packer-plugin-xenserver_%s_x5.0_darwin_amd64.zip", expectedVersion),
-		Checksum: "0f5969b069b9c0a58f2d5786c422341c70dfe17bd68f896fcbd46677e8c913f1",
-	}
-
-	err := checkSum.init(req, checkSum)
-
-	if err != nil {
-		t.Fatalf("ChecksumFileEntry.init failure: %v", err)
-	}
-
-	if checkSum.BinVersion != expectedVersion {
-		t.Errorf("failed to parse ChecksumFileEntry properly expected version '%s' but found '%s'", expectedVersion, checkSum.binVersion)
-	}
-}*/
-
-/*func TestRequirement_InstallLatestFromGithub(t *testing.T) {
+func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 	type fields struct {
 		Identifier         string
 		VersionConstraints string
@@ -430,7 +413,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 				Identifier:         identifier,
 				VersionConstraints: cts,
 			}
-			got, err := pr.InstallFromGitHub(tt.args.opts)
+			got, err := pr.InstallLatest(tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -451,7 +434,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			}
 		})
 	}
-}*/
+}
 
 /*func TestRequirement_InstallLatestFromOfficialRelease(t *testing.T) {
 	type fields struct {
@@ -713,11 +696,19 @@ func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) erro
 }
 
 func (g *mockPluginGetter) Validate(opt GetOptions, expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error {
-	return nil
+	expectedBinVersion := "v" + expectedVersion
+	if entry.BinVersion != expectedBinVersion {
+		return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedBinVersion)
+	}
+	if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
+		return fmt.Errorf("wrong system, expected %s_%s", installOpts.OS, installOpts.ARCH)
+	}
+
+	return installOpts.CheckProtocolVersion(entry.ProtVersion)
 }
 
 func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string {
-	return ""
+	return zipFileName
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
