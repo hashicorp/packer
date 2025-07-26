@@ -9,9 +9,6 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/packer/hcl2template/addrs"
 	"io"
 	"log"
 	"os"
@@ -19,6 +16,10 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-version"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 )
 
 var (
@@ -84,6 +85,7 @@ func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
@@ -119,6 +121,7 @@ func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 							{Version: "v1.2.4"},
@@ -160,6 +163,7 @@ func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 							{Version: "v1.2.4"},
@@ -211,6 +215,7 @@ echo '{"version":"v2.10.0","api_version":"x6.0"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 							{Version: "v1.2.4"},
@@ -263,6 +268,7 @@ echo '{"version":"v2.10.1","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 							{Version: "v1.2.4"},
@@ -315,6 +321,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v2.10.0"},
 						},
@@ -355,6 +362,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v2.10.0"},
 						},
@@ -689,6 +697,7 @@ type mockPluginGetter struct {
 	Releases            []Release
 	ChecksumFileEntries map[string][]ChecksumFileEntry
 	Zips                map[string]io.ReadCloser
+	Name                string
 }
 
 func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) error {
@@ -708,7 +717,11 @@ func (g *mockPluginGetter) Validate(opt GetOptions, expectedVersion string, inst
 }
 
 func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string {
-	return zipFileName
+	if g.Name == "github.com" {
+		return zipFileName
+	}
+
+	return ""
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
