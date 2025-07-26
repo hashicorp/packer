@@ -1,9 +1,10 @@
 package github
 
 import (
+	"testing"
+
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestInit(t *testing.T) {
