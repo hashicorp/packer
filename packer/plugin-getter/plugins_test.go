@@ -48,6 +48,7 @@ func TestRequirement_InstallLatestFromGithub(t *testing.T) {
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "github.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
@@ -701,6 +702,27 @@ type mockPluginGetter struct {
 }
 
 func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) error {
+	filename := entry.Filename
+	res := strings.TrimPrefix(filename, req.FilenamePrefix())
+	// res now looks like v0.2.12_x5.0_freebsd_amd64.zip
+
+	entry.Ext = filepath.Ext(res)
+
+	res = strings.TrimSuffix(res, entry.Ext)
+	// res now looks like v0.2.12_x5.0_freebsd_amd64
+
+	parts := strings.Split(res, "_")
+	// ["v0.2.12", "x5.0", "freebsd", "amd64"]
+
+	if g.Name == "github.com" {
+		
+	}
+	if len(parts) < 4 {
+		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", req.FilenamePrefix())
+	}
+
+	entry.BinVersion, entry.ProtVersion, entry.Os, entry.Arch = parts[0], parts[1], parts[2], parts[3]
+
 	return nil
 }
 
