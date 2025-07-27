@@ -27,13 +27,6 @@ type Getter struct {
 	Name       string
 }
 
-type ManifestMeta struct {
-	Metadata Metadata `json:"metadata"`
-}
-type Metadata struct {
-	ProtocolVersion string `json:"protocol_version"`
-}
-
 var _ plugingetter.Getter = &Getter{}
 
 func transformZipStream() func(in io.ReadCloser) (io.ReadCloser, error) {
@@ -181,7 +174,7 @@ func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, i
 		return err
 	}
 
-	var data ManifestMeta
+	var data plugingetter.ManifestMeta
 	body, err := io.ReadAll(manifest)
 	if err != nil {
 		log.Printf("Failed to unmarshal manifest json: %s", err)

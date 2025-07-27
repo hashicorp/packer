@@ -445,7 +445,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 	}
 }
 
-/*func TestRequirement_InstallLatestFromOfficialRelease(t *testing.T) {
+func TestRequirement_InstallLatestFromOfficialRelease(t *testing.T) {
 	type fields struct {
 		Identifier         string
 		VersionConstraints string
@@ -465,6 +465,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
@@ -477,6 +478,11 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 								Filename: "packer-plugin-amazon_1.2.3_darwin_amd64.zip",
 								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 							}},
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_1.2.3_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "5.0"},
+							}),
 						},
 					},
 				},
@@ -502,6 +508,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 						},
@@ -510,6 +517,11 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 								Filename: "packer-plugin-amazon_1.2.3_darwin_amd64.zip",
 								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 							}},
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_1.2.3_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "5.0"},
+							}),
 						},
 					},
 				},
@@ -537,6 +549,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
 						Releases: []Release{
 							{Version: "v1.2.3"},
 							{Version: "v1.2.4"},
@@ -548,6 +561,11 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 								Filename: "packer-plugin-amazon_1.2.5_darwin_amd64.zip",
 								Checksum: "1337c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 							}},
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_1.2.5_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "5.0"},
+							}),
 						},
 					},
 				},
@@ -566,6 +584,64 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			}},
 			nil, false},
 
+		{"upgrade-with-diff-protocol-version",
+			// here we have something locally and test that a newer version will
+			// be installed, the newer version has a lower minor protocol
+			// version than the one we support.
+			fields{"amazon", ">= v2"},
+			args{InstallOptions{
+				[]Getter{
+					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
+						Releases: []Release{
+							{Version: "v1.2.3"},
+							{Version: "v1.2.4"},
+							{Version: "v1.2.5"},
+							{Version: "v2.0.0"},
+							{Version: "v2.1.0"},
+							{Version: "v2.10.0"},
+						},
+						ChecksumFileEntries: map[string][]ChecksumFileEntry{
+							"2.10.0": {{
+								Filename: "packer-plugin-amazon_2.10.0_darwin_amd64.zip",
+								Checksum: "5763f8b5b5ed248894e8511a089cf399b96c7ef92d784fb30ee6242a7cb35bce",
+							}},
+						},
+						Zips: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64.zip": zipFile(map[string]string{
+								// Make the false plugin echo an output that matches a subset of `describe` for install to work
+								//
+								// Note: this won't work on Windows as they don't have bin/sh, but this will
+								// eventually be replaced by acceptance tests.
+								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": `#!/bin/sh
+echo '{"version":"v2.10.0","api_version":"x6.0"}'`,
+							}),
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "6.0"},
+							}),
+						},
+					},
+				},
+				pluginFolderTwo,
+				false,
+				BinaryInstallationOptions{
+					APIVersionMajor: "6", APIVersionMinor: "1",
+					OS: "darwin", ARCH: "amd64",
+					Checksummers: []Checksummer{
+						{
+							Type: "sha256",
+							Hash: sha256.New(),
+						},
+					},
+				},
+			}},
+			&Installation{
+				BinaryPath: "testdata/plugins_2/github.com/hashicorp/amazon/packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64",
+				Version:    "v2.10.0",
+			}, false},
+
 		{"wrong-zip-checksum",
 			// here we have something locally and test that a newer version with
 			// a wrong checksum will not be installed and error.
@@ -573,6 +649,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
 						Releases: []Release{
 							{Version: "v2.10.0"},
 						},
@@ -585,6 +662,11 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 						Zips: map[string]io.ReadCloser{
 							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64.zip": zipFile(map[string]string{
 								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "h4xx",
+							}),
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "6.0"},
 							}),
 						},
 					},
@@ -613,6 +695,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			args{InstallOptions{
 				[]Getter{
 					&mockPluginGetter{
+						Name: "releases.hashicorp.com",
 						Releases: []Release{
 							{Version: "v2.10.0"},
 						},
@@ -625,6 +708,11 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 						Zips: map[string]io.ReadCloser{
 							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64.zip": zipFile(map[string]string{
 								"packer-plugin-amazon_v2.10.0_x6.0_darwin_amd64": "h4xx",
+							}),
+						},
+						Manifest: map[string]io.ReadCloser{
+							"github.com/hashicorp/packer-plugin-amazon/packer-plugin-amazon_2.10.0_darwin_amd64_manifest.json": manifestFile(map[string]map[string]string{
+								"metadata": {"protocol_version": "6.0"},
 							}),
 						},
 					},
@@ -671,7 +759,7 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 				Identifier:         identifier,
 				VersionConstraints: cts,
 			}
-			got, err := pr.InstallOfficial(tt.args.opts)
+			got, err := pr.InstallLatest(tt.args.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Requirement.InstallLatest() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -692,13 +780,16 @@ echo '{"version":"v2.10.0","api_version":"x6.1"}'`,
 			}
 		})
 	}
-}*/
+}
 
 type mockPluginGetter struct {
 	Releases            []Release
 	ChecksumFileEntries map[string][]ChecksumFileEntry
 	Zips                map[string]io.ReadCloser
 	Name                string
+	APIMajor            string
+	APIMinor            string
+	Manifest            map[string]io.ReadCloser
 }
 
 func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) error {
@@ -715,35 +806,89 @@ func (g *mockPluginGetter) Init(req *Requirement, entry *ChecksumFileEntry) erro
 	// ["v0.2.12", "x5.0", "freebsd", "amd64"]
 
 	if g.Name == "github.com" {
-		
-	}
-	if len(parts) < 4 {
-		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", req.FilenamePrefix())
-	}
+		if len(parts) < 4 {
+			return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", req.FilenamePrefix())
+		}
 
-	entry.BinVersion, entry.ProtVersion, entry.Os, entry.Arch = parts[0], parts[1], parts[2], parts[3]
+		entry.BinVersion, entry.ProtVersion, entry.Os, entry.Arch = parts[0], parts[1], parts[2], parts[3]
+	} else {
+		if len(parts) < 3 {
+			return fmt.Errorf("malformed filename expected %s{version}_{os}_{arch}", req.FilenamePrefix())
+		}
+
+		entry.BinVersion, entry.Os, entry.Arch = parts[0], parts[1], parts[2]
+		entry.BinVersion = strings.TrimPrefix(entry.BinVersion, "v")
+	}
 
 	return nil
 }
 
 func (g *mockPluginGetter) Validate(opt GetOptions, expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error {
-	expectedBinVersion := "v" + expectedVersion
-	if entry.BinVersion != expectedBinVersion {
-		return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedBinVersion)
-	}
-	if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
-		return fmt.Errorf("wrong system, expected %s_%s", installOpts.OS, installOpts.ARCH)
-	}
+	if g.Name == "github.com" {
+		expectedBinVersion := "v" + expectedVersion
 
-	return installOpts.CheckProtocolVersion(entry.ProtVersion)
+		if entry.BinVersion != expectedBinVersion {
+			return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedBinVersion)
+		}
+		if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
+			return fmt.Errorf("wrong system, expected %s_%s", installOpts.OS, installOpts.ARCH)
+		}
+
+		return installOpts.CheckProtocolVersion(entry.ProtVersion)
+	} else {
+		if entry.BinVersion != expectedVersion {
+			return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedVersion)
+		}
+		if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
+			return fmt.Errorf("wrong system, expected %s_%s got %s_%s", installOpts.OS, installOpts.ARCH, entry.Os, entry.Arch)
+		}
+
+		manifest, err := g.Get("meta", opt)
+		if err != nil {
+			return err
+		}
+
+		var data ManifestMeta
+		body, err := io.ReadAll(manifest)
+		if err != nil {
+			log.Printf("Failed to unmarshal manifest json: %s", err)
+			return err
+		}
+
+		err = json.Unmarshal(body, &data)
+		if err != nil {
+			log.Printf("Failed to unmarshal manifest json: %s", err)
+			return err
+		}
+
+		err = installOpts.CheckProtocolVersion("x" + data.Metadata.ProtocolVersion)
+		if err != nil {
+			return err
+		}
+
+		g.APIMajor = strings.Split(data.Metadata.ProtocolVersion, ".")[0]
+		g.APIMinor = strings.Split(data.Metadata.ProtocolVersion, ".")[1]
+
+		log.Printf("#### versions API %s.%s, entry %s.%s", g.APIMajor, g.APIMinor, entry.ProtVersion, entry.BinVersion)
+
+		return nil
+	}
 }
 
 func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string {
 	if g.Name == "github.com" {
 		return zipFileName
-	}
+	} else {
+		pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
 
-	return ""
+		// We need to verify that the plugin source is in the expected format
+		return strings.Join([]string{fmt.Sprintf("packer-plugin-%s", pluginSourceParts[2]),
+			"v" + version,
+			"x" + g.APIMajor + "." + g.APIMinor,
+			entry.Os,
+			entry.Arch + ".zip",
+		}, "_")
+	}
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
@@ -769,6 +914,17 @@ func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, 
 			panic(fmt.Sprintf("could not find zipfile %s. %v", acc, g.Zips))
 		}
 		return zip, nil
+	case "meta":
+		// Note: we'll act as if the plugin sources would always be github sources for now.
+		// This test will need to be updated if/when we move on to support other sources.
+		parts := options.PluginRequirement.Identifier.Parts()
+		acc := fmt.Sprintf("%s/%s/packer-plugin-%s/packer-plugin-%s_%s_%s_%s_manifest.json", parts[0], parts[1], parts[2], parts[2], options.version, options.BinaryInstallationOptions.OS, options.BinaryInstallationOptions.ARCH)
+
+		manifest, found := g.Manifest[acc]
+		if found == false {
+			panic(fmt.Sprintf("could not find manifest file %s. %v", acc, g.Zips))
+		}
+		return manifest, nil
 	default:
 		panic("Don't know how to get " + what)
 	}
@@ -804,6 +960,16 @@ func zipFile(content map[string]string) io.ReadCloser {
 		panic(err)
 	}
 	return io.NopCloser(buff)
+}
+
+func manifestFile(content map[string]map[string]string) io.ReadCloser {
+	jsonBytes, err := json.Marshal(content)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+	}
+
+	buffer := bytes.NewBuffer(jsonBytes)
+	return io.NopCloser(buffer)
 }
 
 var _ Getter = &mockPluginGetter{}

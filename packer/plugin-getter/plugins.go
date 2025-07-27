@@ -35,6 +35,13 @@ const JSONExtension = ".json"
 
 var HTTPFailure = errors.New("http call failed to releases.hashicorp.com failed")
 
+type ManifestMeta struct {
+	Metadata Metadata `json:"metadata"`
+}
+type Metadata struct {
+	ProtocolVersion string `json:"protocol_version"`
+}
+
 type Requirements []*Requirement
 
 // Requirement describes a required plugin and how it is installed. Usually a list
