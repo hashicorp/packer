@@ -602,10 +602,13 @@ type Getter interface {
 	//    verified then copied to the correct plugin location.
 	Get(what string, opts GetOptions) (io.ReadCloser, error)
 
+	// Init this method parses the checksum file and initializes the entry
 	Init(req *Requirement, entry *ChecksumFileEntry) error
 
+	// Validate checks if OS, ARCH, and protocol version matches with the system and local version
 	Validate(opt GetOptions, expectedVersion string, installOpts BinaryInstallationOptions, entry *ChecksumFileEntry) error
 
+	// ExpectedFileName returns the expected file name for the binary, which needs to be installed
 	ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string
 }
 
