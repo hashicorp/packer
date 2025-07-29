@@ -24,7 +24,7 @@ configurations.
 You can use HCP Packer with both JSON and HCL2 templates. If you are using JSON templates, we recommend getting started with
 the [HCP Packer environment variables](#hcp-packer-environment-variables) and then migrating to HCL when possible.
 
-## Requirements 
+## Requirements
 
 Packer version 1.9.1 or newer is required to use the `HCP_PROJECT_ID` environment variable, which lets Packer connect to specific projects in HCP. Your builds will fail if you configure them to send mulit-project metadata using Packer versions older than 1.9.1.
 
@@ -35,13 +35,19 @@ changing your template. You can use environment variables with both JSON and HCL
 Refer to [Basic Configuration With Environment Variables](/hcp/docs/packer/store-image-metadata/packer-template-configuration#basic-configuration-with-environment-variables)
 in the HCP Packer documentation for complete instructions and examples.
 
-You must set the following environment variables to enable Packer to push metadata to a registry.
+You must set authentication environment variables to connect to HCP Packer, you can either directly set a client ID and secret, or (on Packer versions 1.14.1 and later) use an HCP certificate file
+
+For client ID and secret, you set the following environemnt variables
 
 - `HCP_CLIENT_ID`          - The HCP client ID of a HashiCorp Cloud Platform service principle that Packer can use to
 authenticate to an HCP Packer Registry.
 
 - `HCP_CLIENT_SECRET`      - The HCP client secret of the HashiCorp Cloud Platform service principle that Packer
 can use to authenticate to an HCP Packer Registry.
+
+For certificate based auth simply specify the location of the valid HCP certificate file in the `HCP_CRED_FILE` environment variable, or place it in the default location for the HCP SDK, `~/.hcp/cred-file.json`
+
+See the following HCP docs for more information on [Workload Identity Federation](https://developer.hashicorp.com/hcp/docs/hcp/iam/service-principal/workload-identity-federation) and certificate authentication
 
 - `HCP_PACKER_BUCKET_NAME` - The name of the HCP Packer Bucket where you want HCP Packer to store artifact metadata
 from builds associated with your template. HCP Packer automatically creates the bucket if it does not already exist.
