@@ -34,7 +34,8 @@ type Client struct {
 }
 
 // NewClient returns an authenticated client to a HCP Packer Registry.
-// Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
+// Client crendential authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
+// Client certificate authentication requires either the HCP_CRED_FILE environment variable specified with the path of a valid HCP certificate file,
 // Upon error a HCPClientError will be returned.
 func NewClient() (*Client, error) {
 	hasAuth, err := env.HasHCPAuth()
