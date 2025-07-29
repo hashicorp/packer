@@ -6,7 +6,7 @@ package env
 
 import (
 	"errors"
-	"log"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -18,7 +18,7 @@ func HasHCPAuth() (bool, error) {
 		return false, err
 	}
 	if hasClientCredentials && hasCertificate {
-		log.Print("HCP Client Credentials and certificate are both supplied, only one is required. Packer will allow the SDK to determine which authentication mechanism to configure here.")
+		fmt.Println("HCP Client Credentials (HCP_CLIENT_ID/HCP_CLIENT_SECRET environment variables) and certificate (HCP_CRED_FILE environment variable, or certificate located at default path (~/.hcp/cred-file.json) are both supplied, only one is required. The HCP SDK will determine which authentication mechanism to configure here, it is reccomended to only configure one authentication method")
 	}
 	return (hasClientCredentials || hasCertificate), nil
 }
@@ -84,7 +84,7 @@ func HasHCPCertificateFile() (bool, error) {
 	}
 
 	if envVarCertExists && defaultPathCertExists {
-		log.Print("A HCP credential file was found at the default path, and an HCP_CRED_FILE was specified, the HCP SDK will use the HCP_CRED_FILE")
+		fmt.Println("A HCP credential file was found at the default path, and an HCP_CRED_FILE was specified, the HCP SDK will use the HCP_CRED_FILE")
 	}
 	if envVarCertExists || defaultPathCertExists {
 		return true, nil
