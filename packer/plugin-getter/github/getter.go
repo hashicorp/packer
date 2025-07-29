@@ -18,9 +18,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
+
 	"github.com/google/go-github/v33/github"
 	"github.com/hashicorp/packer/hcl2template/addrs"
-	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"golang.org/x/oauth2"
 )
 
@@ -33,11 +34,21 @@ const (
 type Getter struct {
 	Client    *github.Client
 	UserAgent string
+	Name      string
 }
 
 var _ plugingetter.Getter = &Getter{}
 
-func transformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
+type PluginMetadata struct {
+	Versions map[string]PluginVersion `json:"versions"`
+}
+
+type PluginVersion struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
+func TransformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 	return func(in io.ReadCloser) (io.ReadCloser, error) {
 		defer in.Close()
 		rd := bufio.NewReader(in)
@@ -188,7 +199,12 @@ func (gp GithubPlugin) RealRelativePath() string {
 	)
 }
 
+func (gp GithubPlugin) PluginType() string {
+	return fmt.Sprintf("packer-plugin-%s", gp.Type)
+}
+
 func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, error) {
+	log.Printf("[TRACE] Getting %s of %s plugin from %s", what, opts.PluginRequirement.Identifier, g.Name)
 	ghURI, err := NewGithubPlugin(opts.PluginRequirement.Identifier)
 	if err != nil {
 		return nil, err
@@ -237,7 +253,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 			u,
 			nil,
 		)
-		transform = transformChecksumStream()
+		transform = TransformChecksumStream()
 	case "zip":
 		u := filepath.ToSlash("https://github.com/" + ghURI.RealRelativePath() + "/releases/download/" + opts.Version() + "/" + opts.ExpectedZipFilename())
 		req, err = g.Client.NewRequest(
@@ -276,4 +292,44 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 
 	return transform(resp.Body)
+}
+
+// Init method: a file inside will look like so:
+//
+//	packer-plugin-comment_v0.2.12_x5.0_freebsd_amd64.zip
+func (g *Getter) Init(req *plugingetter.Requirement, entry *plugingetter.ChecksumFileEntry) error {
+	filename := entry.Filename
+	res := strings.TrimPrefix(filename, req.FilenamePrefix())
+	// res now looks like v0.2.12_x5.0_freebsd_amd64.zip
+
+	entry.Ext = filepath.Ext(res)
+
+	res = strings.TrimSuffix(res, entry.Ext)
+	// res now looks like v0.2.12_x5.0_freebsd_amd64
+
+	parts := strings.Split(res, "_")
+	// ["v0.2.12", "x5.0", "freebsd", "amd64"]
+	if len(parts) < 4 {
+		return fmt.Errorf("malformed filename expected %s{version}_x{protocol-version}_{os}_{arch}", req.FilenamePrefix())
+	}
+
+	entry.BinVersion, entry.ProtVersion, entry.Os, entry.Arch = parts[0], parts[1], parts[2], parts[3]
+
+	return nil
+}
+
+func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, installOpts plugingetter.BinaryInstallationOptions, entry *plugingetter.ChecksumFileEntry) error {
+	expectedBinVersion := "v" + expectedVersion
+	if entry.BinVersion != expectedBinVersion {
+		return fmt.Errorf("wrong version: %s does not match expected %s", entry.BinVersion, expectedBinVersion)
+	}
+	if entry.Os != installOpts.OS || entry.Arch != installOpts.ARCH {
+		return fmt.Errorf("wrong system, expected %s_%s", installOpts.OS, installOpts.ARCH)
+	}
+
+	return installOpts.CheckProtocolVersion(entry.ProtVersion)
+}
+
+func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, entry *plugingetter.ChecksumFileEntry, zipFileName string) string {
+	return zipFileName
 }
