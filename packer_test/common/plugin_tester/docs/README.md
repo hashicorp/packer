@@ -47,6 +47,7 @@ uncompress it to retrieve the plugin binary file corresponding to your platform.
 To install the plugin, please follow the Packer documentation on
 [installing a plugin](https://www.packer.io/docs/extending/plugins/#installing-plugins).
 
+
 #### From Source
 
 If you prefer to build the plugin from its source code, clone the GitHub
