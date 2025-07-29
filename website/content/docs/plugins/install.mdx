@@ -69,7 +69,7 @@ pinning plugin versions for build reproducibility. Refer to the [`packer` block 
 
 1. Run the `packer init` command. Packer lists all installed plugins then installs the latest plugin version matching the version constraints specified in the `required_plugins` block. Refer to the [`init` command reference](/packer/docs/commands/init) for additional information.
 
-~> Note: With the new Packer release starting from version 1.14.0, the packer init command will automatically install official (Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [HashiCorp release site]([official](https://releases.hashicorp.com/)).
+~> Note: With the new Packer release starting from version 1.14.0, the packer init command will automatically install official (Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [HashiCorp release site](https://releases.hashicorp.com/).
 These official plugins will now be released through the official release site only.
 
 Going forward, to use newer versions of official Packer plugins, you'll need to upgrade to Packer version 1.14.0 or later. If you're using an older version, you can still install plugins, but as a workaround, you'll need to manually install them using the CLI.
