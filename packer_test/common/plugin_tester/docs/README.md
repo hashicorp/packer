@@ -36,7 +36,7 @@ packer {
 Note: With the new Packer release starting from version 1.14.0, the packer init command will automatically install official (Amazon, Ansible, Azure, Docker, GoogleCloudPlatform, Qemu, Vagrant, VirtualBox) plugins from the [HashiCorp release site](https://releases.hashicorp.com/). 
 These official plugins will now be released through the official release site only.
 
-Going forward, to use newer versions of official Packer plugins, you'll need to upgrade to Packer version 1.14.0 or later. If you're using an older version, you can still install plugins, but as a workaround, you'll need to manually install them using the CLI.
+Going forward, to use newer versions of official Packer plugins, you'll need to upgrade to Packer version 1.14.0 or later. If you're using an older version, you can still install plugins, but as a workaround, you'll need to [manually install them using the CLI](https://developer.hashicorp.com/packer/docs/plugins/install#manually-install-plugins-using-the-cli).
 There is no change to the syntax or commands for installing plugins.
 
 #### Manual installation
