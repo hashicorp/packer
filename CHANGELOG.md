@@ -19,7 +19,7 @@
 
 ### BUG FIXES:
 
-* core: Fixes the default execute command for inline and scripts to its original behavior from v1.12.0. 
+* core: Fixes the default execute command for script and scripts to its original behavior from v1.12.0. 
   The recent change to use the -File operator for script execution required adjustments that are addressed in this PR.
   [GH-13422](https://github.com/hashicorp/packer/pull/13422)
 
