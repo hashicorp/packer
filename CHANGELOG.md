@@ -1,3 +1,35 @@
+## 1.14.0 (Upcoming...)
+
+### IMPROVEMENTS:
+
+* core: Changes to pull official packer plugins binaries from official site (releases.hashicorp.com).
+  This change allows Packer to automatically download and install official plugins from the HashiCorp official release site.
+  This change standardizes our release process and ensures a more secure and reliable pipeline for plugin delivery.
+  [GH-13431](https://github.com/hashicorp/packer/pull/13431)
+
+* core: Updated the docs related to packer provisioners
+  [GH-13412](https://github.com/hashicorp/packer/pull/13412)
+
+* core/HCP: This change corrects the example docs to move the registry block to the top level of the template file
+  [GH-13427](https://github.com/hashicorp/packer/pull/13427)
+
+* core: This update adds a new section explaining conditional expressions in HCL, including syntax, usage examples, and best practices for clarity and maintainability. 
+  The documentation covers how to use conditionals for default values, dynamic argument omission, and recommends using locals for complex logic.
+  [GH-13429](https://github.com/hashicorp/packer/pull/13429)
+
+### BUG FIXES:
+
+* core: Fixes the default execute command for script and scripts to its original behavior from v1.12.0. 
+  The recent change to use the -File operator for script execution required adjustments that are addressed in this PR.
+  [GH-13422](https://github.com/hashicorp/packer/pull/13422)
+
+
+### SECURITY:
+
+* Bump go-git from v5.13.0 to v5.16.2
+  [GH-13420](https://github.com/hashicorp/packer/pull/13420)
+
+
 ## 1.13.0 (June 2, 2025)
 
 ### FEATURES:
