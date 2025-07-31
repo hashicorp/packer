@@ -46,7 +46,7 @@ func NewClient() (*Client, error) {
 	if !hasAuth {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
-			Err:        fmt.Errorf("HCP Authentication not configured, either set an HCP Client ID and secret using the environment variables %s and %s, place an HCP credential file in the default path (%s), or at a different path specified in the %s environment variable.", env.HCPClientID, env.HCPClientSecret, env.HCPDefaultCredFilePath, env.HCPCredFile),
+			Err:        fmt.Errorf("HCP Authentication not configured, either set an HCP Client ID and secret using the environment variables %s and %s, place an HCP credential file in the default path (%s), or at a different path specified in the %s environment variable.", env.HCPClientID, env.HCPClientSecret, env.HCPDefaultCredFilePathFull, env.HCPCredFile),
 		}
 	}
 

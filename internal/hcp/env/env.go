@@ -22,7 +22,7 @@ func HasHCPAuth() (bool, error) {
 		return false, err
 	}
 	if hasClientCredentials && hasCertificate {
-		fmt.Println("HCP Client Credentials (HCP_CLIENT_ID/HCP_CLIENT_SECRET environment variables) and certificate (HCP_CRED_FILE environment variable, or certificate located at default path (~/.hcp/cred_file.json) are both supplied, only one is required. The HCP SDK will determine which authentication mechanism to configure here, it is reccomended to only configure one authentication method")
+		fmt.Printf("HCP Client Credentials (HCP_CLIENT_ID/HCP_CLIENT_SECRET environment variables) and certificate (HCP_CRED_FILE environment variable, or certificate located at default path (%s) are both supplied, only one is required. The HCP SDK will determine which authentication mechanism to configure here, it is reccomended to only configure one authentication method", HCPDefaultCredFilePathFull)
 	}
 	return (hasClientCredentials || hasCertificate), nil
 }
