@@ -7,7 +7,9 @@ package env
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -68,9 +70,7 @@ func HasHCPClientCredentials() bool {
 	return true
 }
 
-// Checks
 func HasHCPCertificateFile() (bool, error) {
-	credFilePath := HCPDefaultCredFilePath
 	envVarCredFile, _ := os.LookupEnv(HCPCredFile)
 	var envVarCertExists bool
 	var err error
@@ -80,11 +80,20 @@ func HasHCPCertificateFile() (bool, error) {
 			return false, err
 		}
 	}
-	defaultPathCertExists, err := fileExists(credFilePath)
+	// Get the user's home directory.
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return false, fmt.Errorf("failed to retrieve user's home directory path: %v", err)
+	}
+
+	// builds file path ~/.config/hcp/cred_file.json, if we don't parse the home directory os.Stat can't find the default credential path
+	defaultCredFilePath := filepath.Join(userHome, HCPDefaultCredFilePath, HCPDefaultCredFile)
+	log.Printf("Checking for default HCP credential file at path %s", defaultCredFilePath)
+	defaultPathCertExists, err := fileExists(defaultCredFilePath)
 	if err != nil {
 		return false, err
 	}
-
+	log.Printf("Default file found status - %t", defaultPathCertExists)
 	if envVarCertExists && defaultPathCertExists {
 		fmt.Println("A HCP credential file was found at the default path, and an HCP_CRED_FILE was specified, the HCP SDK will use the HCP_CRED_FILE")
 	}
