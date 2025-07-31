@@ -66,7 +66,6 @@ func Test_HasHCPAuth(t *testing.T) {
 	credDir := filepath.Join(homeDir, HCPDefaultCredFilePath)
 	defaultCredPath := filepath.Join(credDir, HCPDefaultCredFile)
 
-	origDefaultCredFileExists := false
 	if _, err := os.Stat(defaultCredPath); err == nil {
 		tmpFile, err := os.CreateTemp("", "orig_cred_file.json")
 		if err != nil {
@@ -78,9 +77,7 @@ func Test_HasHCPAuth(t *testing.T) {
 			t.Fatalf("failed to move original cred file: %v", err)
 		}
 	}
-	if _, err := os.ReadFile(defaultCredPath); err == nil {
-		origDefaultCredFileExists = true
-	}
+
 	type setupFunc func(t *testing.T)
 
 	tmpCredFile := func(t *testing.T) string {
@@ -213,9 +210,9 @@ func Test_HasHCPAuth(t *testing.T) {
 	}
 	os.Remove(defaultCredPath)
 	// Restore original default cred file if it was present before test run
-	if origDefaultCredFileExists {
+	if origDefaultCredFilePath != "" {
 		if err := os.Rename(origDefaultCredFilePath, defaultCredPath); err != nil {
-			t.Fatalf("failed to delete temp cred file: %v", err)
+			t.Fatalf("failed to replace temp default cred file: %v", err)
 		}
 	}
 }
