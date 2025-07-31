@@ -16,13 +16,13 @@ import (
 func HasHCPAuth() (bool, error) {
 	// Client crendential authentication requires the following environment variables be set; `HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`.
 	hasClientCredentials := HasHCPClientCredentials()
-	// Client certificate authentication requires a valid HCP certificate file placed in either the default location (~/.hcp/cred-file.json) or at a location specified in the `HCP_CRED_FILE` env var
+	// Client certificate authentication requires a valid HCP certificate file placed in either the default location (~/.hcp/cred_file.json) or at a location specified in the `HCP_CRED_FILE` env var
 	hasCertificate, err := HasHCPCertificateFile()
 	if err != nil {
 		return false, err
 	}
 	if hasClientCredentials && hasCertificate {
-		fmt.Println("HCP Client Credentials (HCP_CLIENT_ID/HCP_CLIENT_SECRET environment variables) and certificate (HCP_CRED_FILE environment variable, or certificate located at default path (~/.hcp/cred-file.json) are both supplied, only one is required. The HCP SDK will determine which authentication mechanism to configure here, it is reccomended to only configure one authentication method")
+		fmt.Println("HCP Client Credentials (HCP_CLIENT_ID/HCP_CLIENT_SECRET environment variables) and certificate (HCP_CRED_FILE environment variable, or certificate located at default path (~/.hcp/cred_file.json) are both supplied, only one is required. The HCP SDK will determine which authentication mechanism to configure here, it is reccomended to only configure one authentication method")
 	}
 	return (hasClientCredentials || hasCertificate), nil
 }
