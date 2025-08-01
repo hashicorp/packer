@@ -34,13 +34,19 @@ type Client struct {
 }
 
 // NewClient returns an authenticated client to a HCP Packer Registry.
-// Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
 // Upon error a HCPClientError will be returned.
 func NewClient() (*Client, error) {
-	if !env.HasHCPCredentials() {
+	hasAuth, err := env.HasHCPAuth()
+	if err != nil {
 		return nil, &ClientError{
 			StatusCode: InvalidClientConfig,
-			Err:        fmt.Errorf("the client authentication requires both %s and %s environment variables to be set", env.HCPClientID, env.HCPClientSecret),
+			Err:        fmt.Errorf("Failed to check for HCP auth, error: %s", err.Error()),
+		}
+	}
+	if !hasAuth {
+		return nil, &ClientError{
+			StatusCode: InvalidClientConfig,
+			Err:        fmt.Errorf("HCP Authentication not configured, either set an HCP Client ID and secret using the environment variables %s and %s, place an HCP credential file in the default path (%s), or at a different path specified in the %s environment variable.", env.HCPClientID, env.HCPClientSecret, env.HCPDefaultCredFilePathFull, env.HCPCredFile),
 		}
 	}
 
