@@ -169,7 +169,7 @@ func Test_HasHCPAuth(t *testing.T) {
 			setup: func(t *testing.T) {
 				os.Unsetenv(HCPClientID)
 				os.Unsetenv(HCPClientSecret)
-				os.Setenv(HCPCredFile, "/dev/null/doesnotexist")
+				os.Setenv(HCPCredFile, filepath.Join(os.TempDir(), "definitely-does-not-exist-12345"))
 			},
 			want:    false,
 			wantErr: true,
