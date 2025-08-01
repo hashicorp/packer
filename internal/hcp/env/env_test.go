@@ -180,14 +180,14 @@ func Test_HasHCPAuth(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.setup(t)
 			got, err := HasHCPAuth()
+			if got != tc.want {
+				t.Fatalf("expected %v, got %v", tc.want, got)
+			}
 			if tc.wantErr && err == nil {
 				t.Fatalf("expected error, got nil")
 			}
 			if !tc.wantErr && err != nil {
 				t.Fatalf("unexpected error: %v", err)
-			}
-			if got != tc.want {
-				t.Fatalf("expected %v, got %v", tc.want, got)
 			}
 		})
 	}
