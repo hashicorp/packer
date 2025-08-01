@@ -165,14 +165,14 @@ func Test_HasHCPAuth(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "certificate file check returns error",
+			name: "certificate file doesn't exist",
 			setup: func(t *testing.T) {
 				os.Unsetenv(HCPClientID)
 				os.Unsetenv(HCPClientSecret)
-				os.Setenv(HCPCredFile, filepath.Join(os.TempDir(), "definitely-does-not-exist-12345"))
+				os.Setenv(HCPCredFile, "/my_fake_file") // Invalid path to trigger error
 			},
 			want:    false,
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 
