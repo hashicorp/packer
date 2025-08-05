@@ -5,7 +5,6 @@ package release
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -80,11 +79,7 @@ func (g *Getter) Get(what string, opts plugingetter.GetOptions) (io.ReadCloser, 
 	}
 
 	if g.HttpClient == nil {
-		g.HttpClient = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			},
-		}
+		g.HttpClient = &http.Client{}
 	}
 
 	var req *http.Request
