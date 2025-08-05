@@ -1,4 +1,12 @@
-## 1.14.0 (Upcoming...)
+## 1.14.1 (August 5, 2025)
+
+### BUG FIXES:
+
+* core: Changes on the packer plugin installation process to ensure that the plugin is installed correctly.
+  The releases binary from official site releases.hashicorp.com was not getting installed from a proxy server, which was addressed in this PR.
+  [GH-13439](https://github.com/hashicorp/packer/pull/13439)
+
+## 1.14.0 (July 30, 2025)
 
 ### IMPROVEMENTS:
 
