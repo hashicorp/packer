@@ -69,9 +69,7 @@ RUN /bin/packer plugins install "github.com/hashicorp/amazon" && \
     /bin/packer plugins install "github.com/hashicorp/googlecompute" && \
     /bin/packer plugins install "github.com/hashicorp/qemu" && \
     /bin/packer plugins install "github.com/hashicorp/vagrant" && \
-    /bin/packer plugins install "github.com/hashicorp/virtualbox" && \
-    /bin/packer plugins install "github.com/hashicorp/vmware" && \
-    /bin/packer plugins install "github.com/hashicorp/vsphere"
+    /bin/packer plugins install "github.com/hashicorp/virtualbox"
 
 ENTRYPOINT ["/bin/packer"]
 
