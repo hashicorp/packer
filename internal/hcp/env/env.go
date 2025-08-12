@@ -16,7 +16,7 @@ import (
 func HasHCPAuth() (bool, error) {
 	// Client crendential authentication requires the following environment variables be set; `HCP_CLIENT_ID` and `HCP_CLIENT_SECRET`.
 	hasClientCredentials := HasHCPClientCredentials()
-	// Client certificate authentication requires a valid HCP certificate file placed in either the default location (~/.hcp/cred_file.json) or at a location specified in the `HCP_CRED_FILE` env var
+	// Client certificate authentication requires a valid HCP certificate file placed in either the default location (~/.config/hcp/cred_file.json) or at a location specified in the `HCP_CRED_FILE` env var
 	hasCertificate, err := HasHCPCertificateFile()
 	if err != nil {
 		return false, err
