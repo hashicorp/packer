@@ -135,9 +135,9 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			diags = append(diags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
 				Summary:  "Invalid " + sourceLabel + " reference",
-				Detail: "A " + sourceLabel + " type is made of three parts that are" +
+				Detail: "A " + sourceLabel + " type is made of three parts that are " +
 					"split by a dot `.`; each part must start with a letter and " +
-					"may contain only letters, digits, underscores, and dashes." +
+					"may contain only letters, digits, underscores, and dashes. " +
 					"A valid source reference looks like: `source.type.name`",
 				Subject: block.DefRange.Ptr(),
 			})
