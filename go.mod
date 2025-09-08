@@ -40,7 +40,7 @@ require (
 	github.com/pkg/sftp v1.13.2 // indirect
 	github.com/posener/complete v1.2.3
 	github.com/stretchr/testify v1.10.0
-	github.com/ulikunitz/xz v0.5.10
+	github.com/ulikunitz/xz v0.5.15
 	github.com/zclconf/go-cty v1.13.3
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.36.0 // indirect
