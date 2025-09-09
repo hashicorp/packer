@@ -6,6 +6,8 @@
 name: "Acceptance Test"
 
 on:
+  # workflow_dispatch allows manual triggering of the workflow
+  workflow_dispatch:
   schedule:
   # Runs against the default branch every day at midnight
   - cron: "0 0 * * *"
@@ -54,11 +56,14 @@ jobs:
           role-duration-seconds: 3600
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
+      
+    # we set the ACC_TEST_BUILDERS="amazon-ebs" since we want to test against the amazon-ebs tests (e.g. Powershell 
+    # provisioner acceptance tests)
       - name: Run acceptance tests per module
         run: |
           mkdir -p /tmp/test-results
           make dev
-          PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+          ACC_TEST_BUILDERS="amazon-ebs" PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
   # Send a slack notification if either job defined above fails
   slack-notify:
     permissions:

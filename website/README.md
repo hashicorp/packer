@@ -49,7 +49,7 @@ The Docker image is pre-built with all the website dependencies installed, which
 
 ### With Node
 
-If your local development environment has a supported version (v18+) of [node installed](https://nodejs.org/en/) you can run:
+If your local development environment has a supported version (v22+) of [node installed](https://nodejs.org/en/) you can run:
 
 - `npm install`
 - `npm start`
