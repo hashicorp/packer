@@ -58,8 +58,6 @@ const wrapPowershellString string = `
 	if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {
 		$exitCode = $LASTEXITCODE
 	}
-	
-	Write-Host $result
 	exit $exitCode
 
 `

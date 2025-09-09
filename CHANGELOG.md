@@ -1,3 +1,44 @@
+# 📦 Changelog
+## 1.14.2 (September 9, 2025)
+## ✨ Features
+- **HCP Certificate Authentication Support** – by @JenGoldstrich ([#13435](https://github.com/hashicorp/packer/pull/13435))  
+  Adds support for the `HCP_CRED_FILE` environment variable and removes restrictions on `HCP_CLIENT_ID` and `HCP_CLIENT_SECRET` when connecting builds to an HCP Packer registry.
+
+- **Upgrade Node.js to v22** – by @LeahMarieBush ([#13450](https://github.com/hashicorp/packer/pull/13450))  
+  Updates the Node.js version used for Packer website builds.
+
+---
+
+## 🐛 Bug Fixes
+- **fix(winrm): catch cmd err from winrm** – by @anurag5sh in ([#298](https://github.com/hashicorp/packer-plugin-sdk/pull/298))  
+  Improved reliability by catching WinRM remote shell failures during provisioning
+- **PowerShell wrapper cleanup** – by @kp2099 ([#13451](https://github.com/hashicorp/packer/pull/13451))  
+  Removed the unused `$result` variable from the wrapper string.
+- **fix tests for shell and shell-local** – by @kp2099 in ([#300](https://github.com/hashicorp/packer-plugin-sdk/pull/300))  
+  Acceptance test fixes for shell and shell-local
+
+---
+
+## 🛠 Improvements
+- Added workflow-dispatch and set `PACKER_ACC_BUILDERS` for acceptance tests – by @kp2099 ([#13444](https://github.com/hashicorp/packer/pull/13444))
+- Improved spacing in `hcl2template` error messages – by @sbraz ([#13453](https://github.com/hashicorp/packer/pull/13453))
+- Added callouts for HashiCorp-maintained plugins moving to [releases.hashicorp.com](https://releases.hashicorp.com) – by @BrianMMcClain ([#13438](https://github.com/hashicorp/packer/pull/13438))
+
+---
+
+## 📦 Dependencies
+- Bump `github.com/ulikunitz/xz` from **0.5.10 → 0.5.14** – by @dependabot ([#13459](https://github.com/hashicorp/packer/pull/13459))
+- Bump `golang.org/x/oauth2` from **0.13.0 → 0.27.0** – by @dependabot ([#13460](https://github.com/hashicorp/packer/pull/13460))
+- Bump `github.com/ulikunitz/xz` from **0.5.10 → 0.5.15** – by @kp2099 ([#13461](https://github.com/hashicorp/packer/pull/13461))
+- Bump `github.com/hashicorp/packer-plugin-sdk` from **0.6.2 → 0.6.3** – by @kp2099 ([#13462](https://github.com/hashicorp/packer/pull/13462))
+
+---
+
+## 👩‍💻 New Contributors
+- @LeahMarieBush made their first contribution in [#13450](https://github.com/hashicorp/packer/pull/13450) 🎉
+
+
+
 ## 1.14.1 (August 5, 2025)
 
 ### BUG FIXES:
