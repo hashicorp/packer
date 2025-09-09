@@ -10,6 +10,8 @@
 ---
 
 ## 🐛 Bug Fixes
+- **fix(winrm): catch cmd err from winrm** by @anurag5sh in ([#298](https://github.com/hashicorp/packer-plugin-sdk/pull/298))
+  Improved reliability by catching WinRM remote shell failures during provisioning
 - **PowerShell wrapper cleanup** – by @kp2099 ([#13451](https://github.com/hashicorp/packer/pull/13451))  
   Removed the unused `$result` variable from the wrapper string.
 
