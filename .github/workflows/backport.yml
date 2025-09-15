@@ -50,10 +50,3 @@ jobs:
           BACKPORT_LABEL_REGEXP: "backport/(?P<target>\\d+\\.\\d+\\.\\w+)"
           BACKPORT_TARGET_TEMPLATE: "release/{{.target}}"
           GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
-      - name: Backport changes to test branch
-        run: |
-          backport-assistant backport -automerge
-        env:
-          BACKPORT_LABEL_REGEXP: "backport/(?P<target>test)"
-          BACKPORT_TARGET_TEMPLATE: "{{.target}}backport"
-          GITHUB_TOKEN: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
