@@ -39,7 +39,7 @@ func TestHttpDataSource(t *testing.T) {
 			Path:  testDatasourceBasic,
 			Error: false,
 			ExpectedOutputs: map[string]string{
-				"url": "url is https://www.packer.io/",
+				"url": "url is https://www.google.com",
 				// Check that body is not empty
 				"body": "body is true",
 			},
