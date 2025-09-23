@@ -24,7 +24,6 @@ type DeprecatedClient struct {
 }
 
 // NewDeprecatedClient returns an authenticated client to a HCP Packer Registry.
-// Client authentication requires the following environment variables be set HCP_CLIENT_ID and HCP_CLIENT_SECRET.
 // Upon error a HCPClientError will be returned.
 func NewDeprecatedClient() (*DeprecatedClient, error) {
 	// Use NewClient to validate HCP configuration provided by user.

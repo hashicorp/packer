@@ -6,6 +6,12 @@ page_title: Install Plugins
 
 # Install Plugins
 
+<Note>
+
+Starting August 1st, 2025, the source for many official HashiCorp-maintained Packer plugins is moving from GitHub releases to the official HashiCorp release site, [releases.hashicorp.com](https://releases.hashicorp.com). Refer to [Install HashiCorp-maintained plugins](#install-hashicorp-maintained-plugins) for more information.
+
+</Note>
+
 This topic describes how to install external plugins for Packer. Refer to [Packer Plugins Overview](/packer/docs/plugins) for additional information about plugins.
 
 ## Overview
@@ -27,9 +33,14 @@ Note that Packer checks the plugin installation directory against the `required_
 
 ### Installation directory
 
-By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH environment variable.
+By default, Packer installs plugins into the plugins directory at `$HOME/.config/packer/plugins` on Unix and  `%APPDATA%\packer.d\plugins` on Windows, but you can specify a different directory using the `PACKER_PLUGIN_PATH` environment variable.
+
+<Note>
+
 Plugin installation requires access to temporary files under `TMPDIR`. If the system's temp directory is non-writable or non-executable, use TMPDIR to override the location of the temporary file store used by Packer.
 Refer to the [Packer configuration reference](/packer/docs/configure) for additional information.
+
+</Note>
 
 ## Requirements
 
@@ -68,6 +79,23 @@ pinning plugin versions for build reproducibility. Refer to the [`packer` block 
 
 1. Run the `packer init` command. Packer lists all installed plugins then installs the latest plugin version matching the version constraints specified in the `required_plugins` block. Refer to the [`init` command reference](/packer/docs/commands/init) for additional information.
 
+## Install HashiCorp-maintained plugins
+
+HashiCorp now makes the following official HashiCorp-maintained plugins available through the [HashiCorp release site](https://releases.hashicorp.com/). 
+
+These plugins include:
+
+- [Amazon](https://developer.hashicorp.com/packer/integrations/hashicorp/amazon)
+- [Ansible](https://developer.hashicorp.com/packer/integrations/hashicorp/ansible)
+- [Azure](https://developer.hashicorp.com/packer/integrations/hashicorp/azure)
+- [Docker](https://developer.hashicorp.com/packer/integrations/hashicorp/docker)
+- [Google Cloud Platform](https://developer.hashicorp.com/packer/integrations/hashicorp/googlecompute)
+- [QEMU](https://developer.hashicorp.com/packer/integrations/hashicorp/qemu)
+- [Vagrant](https://developer.hashicorp.com/packer/integrations/hashicorp/vagrant)
+- [VirtualBox](https://developer.hashicorp.com/packer/integrations/hashicorp/virtualbox)
+
+Starting in Packer 1.14.0, Packer automatically installs these plugins from the new release source, and you do not need to make any changes to your Packer templates. To continue to automatically receive updates to these plugins, you must upgrade to Packer 1.14.0 or newer. If you cannot upgrade your version of Packer, you can still install new versions of these plugins manually. Refer to [Manually install plugins using the CLI](#manually-install-plugins-using-the-cli) for more information.
+
 ## Manually install plugins using the CLI
 
 You can use the `packer plugins install` command to manually install plugin binaries.
@@ -88,7 +116,6 @@ $ packer plugins install --path happycloud github.com/hashicorp/happycloud
 
 Refer to the [`packer plugins install`](/packer/docs/commands/plugins/install) reference for additional information.
 
-
 ## Upgrade plugins
 
 To upgrade plugins that are already installed, run the `packer init` with the `--upgrade` flag. Packer retrieves the latest versions of installed plugins specified in the template configuration.
@@ -102,7 +129,6 @@ $ packer init --upgrade .
 Refer to [`packer init` command](/packer/docs/commands/init) for additional information.
 
 ## Use a plugin under development
-
 
 If a development binary, such as a manually-built binary, is available at the specified source, Packer uses it in the build if it is the highest compatible version installed and if no final plugin version with the same version number is installed alongside it.
 
@@ -147,7 +173,6 @@ When a non-development version of 1.1.1 becomes available, the binary takes prec
           ├── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64
           └── packer-plugin-amazon_v1.1.1_x5.0_darwin_arm64_SHA256SUM
 ```
-
 
 ### Example Docker plugin
 

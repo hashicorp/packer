@@ -168,7 +168,7 @@ cmd.exe /c winrm set "winrm/config/listener?Address=*+Transport=HTTPS" "@{Port=`
 
 # Make sure appropriate firewall port openings exist
 cmd.exe /c netsh advfirewall firewall set rule group="remote administration" new enable=yes
-cmd.exe /c netsh firewall add portopening TCP 5986 "Port 5986"
+cmd.exe /c netsh advfirewall firewall add rule name="Port 5986" dir=in action=allow protocol=TCP localport=5986 profile=any
 
 # Restart WinRM, and set it so that it auto-launches on startup.
 cmd.exe /c net stop winrm

@@ -8,7 +8,6 @@
 package powershell
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -37,6 +36,31 @@ var psEscape = strings.NewReplacer(
 	"`", "``",
 	"'", "`'",
 )
+
+// wraps the content in try catch block and exits with a status.
+const wrapPowershellString string = `
+	if (Test-Path variable:global:ProgressPreference) {
+	  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
+	}
+	{{if .DebugMode}}
+	Set-PsDebug -Trace {{.DebugMode}}
+	{{- end}}
+	$exitCode = 0
+	try {
+	{{.Vars}}
+	{{.Payload}}
+	$exitCode = 0
+	} catch {
+	Write-Error "An error occurred: $_"
+	$exitCode = 1
+	}
+	
+	if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {
+		$exitCode = $LASTEXITCODE
+	}
+	exit $exitCode
+
+`
 
 type Config struct {
 	shell.Provisioner `mapstructure:",squash"`
@@ -105,6 +129,20 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
+
+	if p.config.ExecutionPolicy == ExecutionPolicyNone {
+		return `-file {{.Path}}`
+	}
+
+	if p.config.UsePwsh {
+		return fmt.Sprintf(`pwsh -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+	} else {
+		return fmt.Sprintf(`powershell -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+	}
+
+}
+
+func (p *Provisioner) defaultScriptCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
 		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
 
@@ -152,14 +190,6 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.ElevatedEnvVarFormat == "" {
 		p.config.ElevatedEnvVarFormat = `$env:%s="%s"; `
-	}
-
-	if p.config.ExecuteCommand == "" {
-		p.config.ExecuteCommand = p.defaultExecuteCommand()
-	}
-
-	if p.config.ElevatedExecuteCommand == "" {
-		p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
 	}
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
@@ -213,6 +243,27 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("Only a script file or an inline script can be specified, not both."))
 	}
 
+	if p.config.ExecuteCommand == "" {
+		if p.config.Inline != nil && len(p.config.Scripts) == 0 {
+			p.config.ExecuteCommand = p.defaultExecuteCommand()
+			log.Printf("Using inline default execute command %s", p.config.ExecuteCommand)
+		} else {
+			p.config.ExecuteCommand = p.defaultScriptCommand()
+			log.Printf("Using script default execute command %s", p.config.ExecuteCommand)
+		}
+
+	}
+
+	if p.config.ElevatedExecuteCommand == "" {
+		if p.config.Inline != nil && len(p.config.Scripts) == 0 {
+			p.config.ElevatedExecuteCommand = p.defaultExecuteCommand()
+			log.Printf("Using inline default elevated execute command %s", p.config.ElevatedExecuteCommand)
+		} else {
+			p.config.ElevatedExecuteCommand = p.defaultScriptCommand()
+			log.Printf("Using script default elevated execute command %s", p.config.ElevatedExecuteCommand)
+		}
+	}
+
 	for _, path := range p.config.Scripts {
 		if _, err := os.Stat(path); err != nil {
 			errs = packersdk.MultiErrorAppend(errs,
@@ -247,24 +298,41 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-// Takes the inline scripts, concatenates them into a temporary file and
+// Takes the inline scripts, adds a wrapper around the inline scripts, concatenates them into a temporary file and
 // returns a string containing the location of said file.
-func extractScript(p *Provisioner) (string, error) {
+func extractInlineScript(p *Provisioner) (string, error) {
 	temp, err := tmp.File("powershell-provisioner")
 	if err != nil {
 		return "", err
 	}
+
 	defer temp.Close()
-	writer := bufio.NewWriter(temp)
+
+	var commandBuilder strings.Builder
+
+	// we concatenate all the inline commands
 	for _, command := range p.config.Inline {
 		log.Printf("Found command: %s", command)
-		if _, err := writer.WriteString(command + "\n"); err != nil {
-			return "", fmt.Errorf("Error preparing powershell script: %s", err)
+		if _, err := commandBuilder.WriteString(command + "\n\t"); err != nil {
+			return "", fmt.Errorf("failed to wrap script contents: %w", err)
 		}
 	}
 
-	if err := writer.Flush(); err != nil {
-		return "", fmt.Errorf("Error preparing powershell script: %s", err)
+	// injecting all the variables in the string
+	ctxData := p.generatedData
+	ctxData["Vars"] = p.createFlattenedEnvVars(p.config.ElevatedUser != "")
+	ctxData["Payload"] = commandBuilder.String()
+	ctxData["DebugMode"] = p.config.DebugMode
+	p.config.ctx.Data = ctxData
+
+	data, err := interpolate.Render(wrapPowershellString, &p.config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("Error building powershell wrapper: %w", err)
+	}
+
+	log.Printf("Writing PowerShell script to file: %s", temp.Name())
+	if _, err := temp.WriteString(data); err != nil {
+		return "", fmt.Errorf("Error writing PowerShell script: %w", err)
 	}
 
 	return temp.Name(), nil
@@ -279,7 +347,7 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	copy(scripts, p.config.Scripts)
 
 	if p.config.Inline != nil {
-		temp, err := extractScript(p)
+		temp, err := extractInlineScript(p)
 		if err != nil {
 			ui.Error(fmt.Sprintf("Unable to extract inline scripts into a file: %s", err))
 		}
@@ -449,7 +517,16 @@ func (p *Provisioner) createFlattenedEnvVars(elevated bool) (flattened string) {
 		keyValue := strings.SplitN(envVar, "=", 2)
 		// Escape chars special to PS in each env var value
 		escapedEnvVarValue := psEscape.Replace(keyValue[1])
-		if escapedEnvVarValue != keyValue[1] {
+
+		isSensitive := false
+		for _, sensitiveVar := range p.config.PackerSensitiveVars {
+			if strings.EqualFold(sensitiveVar, keyValue[0]) {
+				isSensitive = true
+				break
+			}
+		}
+
+		if escapedEnvVarValue != keyValue[1] && !isSensitive {
 			log.Printf("Env var %s converted to %s after escaping chars special to PS", keyValue[1],
 				escapedEnvVarValue)
 		}

@@ -18,8 +18,8 @@ To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/doc
 
 This block is available from version 1.7.7 of Packer.
 
-The presence of a `hcp_packer_registry` block in a build block will enable HCP
-Packer mode. Packer will push all builds within that build block to the remote
+Add a `hcp_packer_registry` block to your template file to enable HCP
+Packer mode. When in HCP Packer mode, Packer pushes metadata for all builds in the template to the remote
 registry if the appropriate HCP credentials are set (`HCP_CLIENT_ID` and
 `HCP_CLIENT_SECRET`). If no HCP credentials are set, Packer will fail the build
 and exit immediately to avoid any potential artifact drift between the defined
@@ -34,25 +34,24 @@ source "happycloud" "macos" {
 }
 
 build {
-   hcp_packer_registry {
-    bucket_name = "ios-dev"
+  sources = ["source.happycloud.macos"]
+}
+hcp_packer_registry {
+  bucket_name = "ios-dev"
 
-    description = <<EOT
+  description = <<EOT
 Some nice description about the image which artifact is being published to HCP Packer Registry. =D
-    EOT
+  EOT
 
-    bucket_labels = {
-      "team" = "ios-development",
-      "os"   = "macos"
-    }
-
-    build_labels = {
-      "xcode"   = "11.3.0"
-      "version" = "Big Sur"
-    }
+  bucket_labels = {
+    "team" = "ios-development",
+    "os"   = "macos"
   }
 
-  sources = ["source.happycloud.macos"]
+  build_labels = {
+    "xcode"   = "11.3.0"
+    "version" = "Big Sur"
+  }
 }
 ```
 

@@ -1,7 +1,7 @@
 ---
 page_title: HCL expressions reference
 description: |-
-  HCL expresssions provide access to data exported by data sources and transforms and combines the data into other values. Learn how to use HCL expressions in Packer templates.
+  HCL expressions provide access to data exported by data sources and transforms and combines the data into other values. Learn how to use HCL expressions in Packer templates.
 ---
 
 # HCL expressions reference
@@ -142,6 +142,106 @@ The following named values are available:
 
 For a full list of available functions, see [the function
 reference](/packer/docs/templates/hcl_templates/functions).
+
+## Conditional Expressions
+
+A conditional expression uses the value of a boolean expression to select one of
+two values. This is a compact way to express `if-then-else` logic inside an
+expression.
+
+The syntax for a conditional expression is:
+
+```hcl
+condition ? true_val : false_val
+```
+
+If `condition` is `true`, the expression returns `true_val`. If `condition` is
+`false`, it returns `false_val`. The `true_val` and `false_val` arguments must
+be of compatible types.
+
+### Examples
+
+Here are some examples of how to use conditional expressions.
+
+1.  Setting a Default Value
+
+    You can use a conditional to provide a default value for a variable that
+    can also be customized.
+
+    ```hcl
+    locals {
+      # Set the region to the value of var.region if it is not empty.
+      # Otherwise, use a default value.
+      region = var.region != "" ? var.region : "us-east-1"
+    }
+    ```
+
+2.  Dynamically Omitting an Argument
+
+    You can use a `null` value to dynamically omit an argument from a source.
+    This is a common pattern to effectively "turn off" or prevent an argument
+    from being set.
+
+    ```hcl
+    variable "use_http" {
+      type        = bool
+      description = "Whether to use HTTP for file transfer."
+      default     = true
+    }
+
+    source "example" "foo" {
+      # The http_directory argument is only set if var.use_http is true.
+      # If false, http_directory will be unset.
+      http_directory = var.use_http ? "/path/to/files" : null
+    }
+    ```
+
+    This can also be used to set one of two mutually exclusive arguments:
+
+    ```hcl
+    source "builder" "example" {
+      # If var.use_http is true, http_content is set and cd_content is null.
+      # If var.use_http is false, http_content is null and cd_content is set.
+      http_content = var.use_http ? local.http_files : null
+      cd_content   = !var.use_http ? local.cd_files : null
+    }
+    ```
+
+### Readability and Recommended Practices
+
+While powerful, conditional expressions can lead to complex or hard-to-read
+configurations if not used carefully.
+
+  * **Prioritize Clarity:** When a conditional expression becomes very long or
+    involves multiple nested conditions, consider breaking it down.
+
+  * **Leverage `locals` for Complexity:** For more intricate conditional logic,
+    define the result in a `local` variable. This improves readability in the
+    main `source` or `provisioner` blocks where the `local` is consumed.
+
+    **Example:**
+
+    ```hcl
+    locals {
+      # Determine the kickstart file based on the build environment.
+      kickstart_config_path = var.environment == "production" ?
+                              "config/prod-ks.cfg" :
+                              (var.environment == "staging" ?
+                               "config/stage-ks.cfg" :
+                               "config/dev-ks.cfg")
+    }
+
+    source "builder" "example" {
+      # ...
+      # Use the pre-determined kickstart path.
+      http_content = file(local.kickstart_config_path)
+      # ...
+    }
+    ```
+
+  * **Use `null` to Omit Arguments:** As demonstrated in the examples,
+    using `null` is the idiomatic way to prevent an argument from being set or
+    to effectively "turn off" a setting based on a condition.
 
 ## `for` Expressions
 

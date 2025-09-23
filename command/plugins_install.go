@@ -17,6 +17,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/hashicorp/packer/packer/plugin-getter/release"
+
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -176,6 +178,9 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 	}
 
 	getters := []plugingetter.Getter{
+		&release.Getter{
+			Name: "releases.hashicorp.com",
+		},
 		&github.Getter{
 			// In the past some terraform plugins downloads were blocked from a
 			// specific aws region by s3. Changing the user agent unblocked the
@@ -185,6 +190,7 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 			// TODO: allow to set this from the config file or an environment
 			// variable.
 			UserAgent: "packer-getter-github-" + pkrversion.String(),
+			Name:      "github.com",
 		},
 	}
 

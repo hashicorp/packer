@@ -1,0 +1,57 @@
+---
+page_title: Packer v1.13 release notes
+description: Learn about the changes in Packer v 1.13
+---
+
+# Packer v1.13 release notes
+
+This page describes changes to Packer in v1.13. Refer to the [Packer repository](https://github.com/hashicorp/packer/releases) for information about all releases.
+
+## New features
+
+This release includes the following updates.
+
+### Shell Provisioner Enhancement
+
+The shell provisioner’s inline field now supports executing scripts directly, including those with their own shebang (#!) lines.
+This enhancement allows you to provide a full script as an inline command, enabling dynamic scripts via tools like templatefile.
+
+### New functions
+
+As part of Packer 1.13, we have introduced below functions.
+
+* `sum`: takes a list or set of numbers and returns the sum of those numbers..
+* `startswith`: takes two values: a string to check and a prefix string. The function returns true if the string begins with that exact prefix.
+* `endswith`: takes two values: a string to check and a suffix string. The function returns true if the first string ends with that exact suffix.
+
+### Packer fmt command to format multiple HCL files
+
+Added the ability for the packer fmt command to format multiple HCL files at once.
+This enhancement allows users to format several files in a single command invocation.
+
+### Top-Level hcp_packer_registry Block Support
+
+Added support for defining the hcp_packer_registry block at the top level of the Packer configuration. Enables improved management and referencing of HCP Packer registries directly in the root schema.
+Also added validation around the multiple hcp_packer_registry blocks at top level.
+
+## Bug fixes
+
+### Documentation Update
+
+Updated the documentation to explicitly state that a trailing slash is required when uploading directories, regardless of the guest OS.
+This clarification is intended to ensure consistent behavior and prevent confusion, especially for Windows users.
+
+### --use-sequential-evaluation Flag Now Works in Packer Console
+
+Fixed an issue where using the --use-sequential-evaluation flag with packer console resulted in an error.
+The flag is now properly included in the supported options for packer console and works as intended.
+Removed this flag from the fix subcommand, where it was not used or required.
+
+### Inline PowerShell Command
+
+Added a wrapper around inline PowerShell commands executed by the provisioner to catch errors and ensure the Packer build fails if any command results in an error.
+
+### Preserve the user-defined order of variable files
+
+Ensures that Packer now preserves the user-defined order of variable files as input by the user.
+This change maintains the intended precedence of variables, honoring the order specified on the command line.

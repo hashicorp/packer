@@ -59,8 +59,9 @@ func (u *ColoredUi) Sayf(message string, vals ...any) {
 	u.Say(fmt.Sprintf(message, vals...))
 }
 
+// Deprecated: Use `Say` instead.
 func (u *ColoredUi) Message(message string) {
-	u.Ui.Message(u.colorize(message, u.Color, false))
+	u.Say(message)
 }
 
 func (u *ColoredUi) Error(message string) {
@@ -145,8 +146,9 @@ func (u *TargetedUI) Sayf(message string, args ...any) {
 	u.Say(fmt.Sprintf(message, args...))
 }
 
+// Deprecated: Use `Say` instead.
 func (u *TargetedUI) Message(message string) {
-	u.Ui.Message(u.prefixLines(false, message))
+	u.Say(message)
 }
 
 func (u *TargetedUI) Error(message string) {
@@ -206,6 +208,7 @@ func (u *MachineReadableUi) Sayf(message string, args ...any) {
 	u.Say(fmt.Sprintf(message, args...))
 }
 
+// Deprecated: Use `Say` instead.
 func (u *MachineReadableUi) Message(message string) {
 	u.Machine("ui", "message", message)
 }
@@ -280,8 +283,9 @@ func (u *TimestampedUi) Sayf(message string, args ...any) {
 	u.Say(fmt.Sprintf(message, args...))
 }
 
+// Deprecated: Use `Say` instead.
 func (u *TimestampedUi) Message(message string) {
-	u.Ui.Message(u.timestampLine(message))
+	u.Say(message)
 }
 
 func (u *TimestampedUi) Error(message string) {

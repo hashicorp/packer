@@ -4,7 +4,7 @@ source "null" "example" {
 }
 
 data "http" "basic" {
-  url = "https://www.packer.io/thisWillFail"
+  url = "https://developer.hashicorp.com/packer/thisWillFail"
 }
 
 locals {

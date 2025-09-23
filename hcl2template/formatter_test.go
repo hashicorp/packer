@@ -16,13 +16,15 @@ import (
 func TestHCL2Formatter_Format(t *testing.T) {
 	tt := []struct {
 		Name           string
-		Path           string
+		Paths          []string
 		FormatExpected bool
 	}{
-		{Name: "Unformatted file", Path: "testdata/format/unformatted.pkr.hcl", FormatExpected: true},
-		{Name: "Unformatted vars file", Path: "testdata/format/unformatted.pkrvars.hcl", FormatExpected: true},
-		{Name: "Formatted file", Path: "testdata/format/formatted.pkr.hcl"},
-		{Name: "Directory", Path: "testdata/format", FormatExpected: true},
+		{Name: "Unformatted file", Paths: []string{"testdata/format/unformatted.pkr.hcl"}, FormatExpected: true},
+		{Name: "Unformatted vars file", Paths: []string{"testdata/format/unformatted.pkrvars.hcl"}, FormatExpected: true},
+		{Name: "Formatted file", Paths: []string{"testdata/format/formatted.pkr.hcl"}},
+		{Name: "Directory", Paths: []string{"testdata/format"}, FormatExpected: true},
+		{Name: "No file", Paths: []string{}, FormatExpected: false},
+		{Name: "Multi File", Paths: []string{"testdata/format/unformatted.pkr.hcl", "testdata/format/unformatted.pkrvars.hcl"}, FormatExpected: true},
 	}
 
 	for _, tc := range tt {
@@ -30,12 +32,12 @@ func TestHCL2Formatter_Format(t *testing.T) {
 		var buf bytes.Buffer
 		f := NewHCL2Formatter()
 		f.Output = &buf
-		_, diags := f.Format(tc.Path)
+		_, diags := f.Format(tc.Paths)
 		if diags.HasErrors() {
 			t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 		}
 		if buf.String() != "" && tc.FormatExpected == false {
-			t.Errorf("Format(%q) should contain the name of the formatted file(s), but got %q", tc.Path, buf.String())
+			t.Errorf("Format(%q) should contain the name of the formatted file(s), but got %q", tc.Paths, buf.String())
 		}
 	}
 }
@@ -61,7 +63,9 @@ func TestHCL2Formatter_Format_Write(t *testing.T) {
 	_, _ = tf.Write(unformattedData)
 	tf.Close()
 
-	_, diags := f.Format(tf.Name())
+	var paths []string
+	paths = append(paths, tf.Name())
+	_, diags := f.Format(paths)
 	if diags.HasErrors() {
 		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 	}
@@ -94,7 +98,9 @@ func TestHCL2Formatter_Format_ShowDiff(t *testing.T) {
 		ShowDiff: true,
 	}
 
-	_, diags := f.Format("testdata/format/unformatted.pkr.hcl")
+	var paths []string
+	paths = append(paths, "testdata/format/unformatted.pkr.hcl")
+	_, diags := f.Format(paths)
 	if diags.HasErrors() {
 		t.Fatalf("the call to Format failed unexpectedly %s", diags.Error())
 	}
@@ -108,4 +114,29 @@ func TestHCL2Formatter_Format_ShowDiff(t *testing.T) {
 		t.Errorf("expected buf to contain a file diff, but instead we got %s", buf.String())
 	}
 
+}
+
+func TestHCL2Formatter_FormatNegativeCases(t *testing.T) {
+	tt := []struct {
+		Name        string
+		Paths       []string
+		errExpected bool
+	}{
+		{Name: "Unformatted file", Paths: []string{"testdata/format/test.json"}, errExpected: true},
+	}
+
+	for _, tc := range tt {
+		tc := tc
+		var buf bytes.Buffer
+		f := NewHCL2Formatter()
+		f.Output = &buf
+		_, diags := f.Format(tc.Paths)
+		if tc.errExpected && !diags.HasErrors() {
+			t.Fatalf("Expected error but got none")
+		}
+
+		if diags[0].Detail != "file testdata/format/test.json is not a HCL file" {
+			t.Fatalf("Expected error messge did not received")
+		}
+	}
 }

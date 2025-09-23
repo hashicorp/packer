@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
@@ -210,39 +211,44 @@ func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]st
 	{
 		hclVarFiles, jsonVarFiles, moreDiags := GetHCL2Files(filename, hcl2AutoVarFileExt, hcl2AutoVarJsonFileExt)
 		diags = append(diags, moreDiags...)
-		for _, file := range varFiles {
+
+		// Combine all variable files into a single list, preserving the intended precedence and order.
+		// The order is: auto-loaded HCL files, auto-loaded JSON files, followed by user-specified varFiles.
+		// This ensures that user-specified files can override values from auto-loaded files,
+		// and that their relative order is preserved exactly as specified by the user.
+		variableFileNames := append(append(hclVarFiles, jsonVarFiles...), varFiles...)
+
+		var variableFiles []*hcl.File
+
+		for _, file := range variableFileNames {
+			var (
+				f         *hcl.File
+				moreDiags hcl.Diagnostics
+			)
 			switch filepath.Ext(file) {
 			case ".hcl":
-				hclVarFiles = append(hclVarFiles, file)
+				f, moreDiags = p.ParseHCLFile(file)
 			case ".json":
-				jsonVarFiles = append(jsonVarFiles, file)
+				f, moreDiags = p.ParseJSONFile(file)
 			default:
-				diags = append(moreDiags, &hcl.Diagnostic{
-					Severity: hcl.DiagError,
-					Summary:  "Could not guess format of " + file,
-					Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
-				})
+				moreDiags = hcl.Diagnostics{
+					&hcl.Diagnostic{
+						Severity: hcl.DiagError,
+						Summary:  "Could not guess format of " + file,
+						Detail:   "A var file must be suffixed with `.hcl` or `.json`.",
+					},
+				}
 			}
-		}
-		var varFiles []*hcl.File
-		for _, filename := range hclVarFiles {
-			f, moreDiags := p.ParseHCLFile(filename)
+
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {
 				continue
 			}
-			varFiles = append(varFiles, f)
-		}
-		for _, filename := range jsonVarFiles {
-			f, moreDiags := p.ParseJSONFile(filename)
-			diags = append(diags, moreDiags...)
-			if moreDiags.HasErrors() {
-				continue
-			}
-			varFiles = append(varFiles, f)
+			variableFiles = append(variableFiles, f)
+
 		}
 
-		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), varFiles, argVars)...)
+		diags = append(diags, cfg.collectInputVariableValues(os.Environ(), variableFiles, argVars)...)
 	}
 
 	return cfg, diags
@@ -398,6 +404,8 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 
 	verticesMap := map[string]dag.Vertex{}
 
+	var err error
+
 	// Do a first pass to create all the vertices
 	for ref := range cfg.Datasources {
 		// We keep a reference to the datasource separately from where it
@@ -429,27 +437,48 @@ func (cfg *PackerConfig) buildPrereqsDAG() (*dag.AcyclicGraph, error) {
 	for _, ds := range cfg.Datasources {
 		dsName := fmt.Sprintf("data.%s", ds.Name())
 
+		source := verticesMap[dsName]
+		if source == nil {
+			err = multierror.Append(err, fmt.Errorf("unable to find source vertex %q for dependency analysis, this is likely a Packer bug", dsName))
+			continue
+		}
+
 		for _, dep := range ds.Dependencies {
-			retGraph.Connect(
-				dag.BasicEdge(verticesMap[dsName],
-					verticesMap[dep.String()]))
+			target := verticesMap[dep.String()]
+			if target == nil {
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), dsName, dep.String()))
+				continue
+			}
+
+			retGraph.Connect(dag.BasicEdge(source, target))
 		}
 	}
 	for _, loc := range cfg.LocalBlocks {
 		locName := fmt.Sprintf("local.%s", loc.LocalName)
 
+		source := verticesMap[locName]
+		if source == nil {
+			err = multierror.Append(err, fmt.Errorf("unable to find source vertex %q for dependency analysis, this is likely a Packer bug", locName))
+			continue
+		}
+
 		for _, dep := range loc.dependencies {
-			retGraph.Connect(
-				dag.BasicEdge(verticesMap[locName],
-					verticesMap[dep.String()]))
+			target := verticesMap[dep.String()]
+
+			if target == nil {
+				err = multierror.Append(err, fmt.Errorf("could not get dependency %q for %q, %q missing in template", dep.String(), locName, dep.String()))
+				continue
+			}
+
+			retGraph.Connect(dag.BasicEdge(source, target))
 		}
 	}
 
-	if err := retGraph.Validate(); err != nil {
-		return nil, err
+	if validateErr := retGraph.Validate(); validateErr != nil {
+		err = multierror.Append(err, validateErr)
 	}
 
-	return &retGraph, nil
+	return &retGraph, err
 }
 
 func (cfg *PackerConfig) evaluateBuildPrereqs(skipDatasources bool) hcl.Diagnostics {

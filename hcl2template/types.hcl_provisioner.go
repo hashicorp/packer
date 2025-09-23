@@ -21,7 +21,7 @@ type HCL2Provisioner struct {
 	Provisioner      packersdk.Provisioner
 	provisionerBlock *ProvisionerBlock
 	evalContext      *hcl.EvalContext
-	builderVariables map[string]string
+	builderVariables map[string]interface{}
 	override         map[string]interface{}
 }
 

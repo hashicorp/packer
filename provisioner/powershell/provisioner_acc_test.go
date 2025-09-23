@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"testing"
 
@@ -82,6 +83,16 @@ func TestAccPowershellProvisioner_Inline(t *testing.T) {
 					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
 				}
 			}
+			out, err := os.ReadFile(logfile)
+			if err != nil {
+				return err
+			}
+			output := string(out)
+			regexMatchString := "test_env_var: TestValue"
+			if !regexp.MustCompile(regexp.QuoteMeta(regexMatchString)).MatchString(output) {
+				t.Errorf("expected env string %q in logs:\n%s", regexMatchString, output)
+			}
+
 			return nil
 		},
 	}
@@ -105,9 +116,42 @@ func TestAccPowershellProvisioner_Script(t *testing.T) {
 					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
 				}
 			}
+
+			out, err := os.ReadFile(logfile)
+			if err != nil {
+				return err
+			}
+			output := string(out)
+			regexMatchString := "likewise, var2 is A`Backtick"
+			if !regexp.MustCompile(regexp.QuoteMeta(regexMatchString)).MatchString(output) {
+				t.Errorf("expected env string %q in logs:\n%s", regexMatchString, output)
+			}
 			return nil
 		},
 	}
 
 	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
+}
+
+func TestAccPowershellProvisioner_ExitCodes(t *testing.T) {
+	templateString, err := LoadProvisionerFragment("powershell-exit_codes-provisioner.txt")
+	if err != nil {
+		t.Fatalf("Couldn't load test fixture; %s", err.Error())
+	}
+	testCase := &provisioneracc.ProvisionerTestCase{
+		IsCompatible: powershellIsCompatible,
+		Name:         "powershell-provisioner-script",
+		Template:     templateString,
+		Type:         TestProvisionerType,
+		Check: func(buildcommand *exec.Cmd, logfile string) error {
+			if buildcommand.ProcessState != nil {
+				if buildcommand.ProcessState.ExitCode() != 0 {
+					return fmt.Errorf("Bad exit code. Logfile: %s", logfile)
+				}
+			}
+			return nil
+		},
+	}
+	provisioneracc.TestProvisionersAgainstBuilders(testCase, t)
+
 }

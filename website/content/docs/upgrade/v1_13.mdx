@@ -1,0 +1,48 @@
+---
+page_title: Upgrade to v1.13
+description: Learn how to upgrade your Packer installation to v1.13
+---
+
+# Upgrade to v1.13
+
+The topic describes upgrade considerations for Packer v1.13. Refer to the [v1.13 release notes](/packer/docs/release-notes/v1_13) for details about changes in v1.13.
+
+## Overview
+
+You can use the upgrade command for the package manager you installed Packer with or download and replace the existing binary to upgrade Packer. Refer to [Install Packer](https://developer.hashicorp.com/packer/install) for instructions.
+
+## Upgrade from 1.12
+
+Packer 1.13's notable changes can be summarised by the following points:
+
+1. Provisioner Enhancement
+2. New functions Support
+3. Packer fmt command to format multiple HCL files
+4. Top-Level hcp_packer_registry Block Support
+
+**Note**: The Powershell provisioner changes are breaking changes.
+
+## Provisioner Enhancement
+
+The `shell` provisioner’s inline field now supports executing scripts directly, including those with their own shebang (#!) lines.
+This enhancement allows you to provide a full script as an inline command, enabling dynamic scripts via tools like templatefile.
+
+Added a wrapper around inline `PowerShell` commands executed by the provisioner to catch errors and ensure the Packer build fails if any command results in an error.
+
+## New functions Support
+
+As part of Packer 1.13, we have introduced more functions.
+
+* `sum`: takes a list or set of numbers and returns the sum of those numbers..
+* `startswith`: takes two values: a string to check and a prefix string. The function returns true if the string begins with that exact prefix.
+* `endswith`: takes two values: a string to check and a suffix string. The function returns true if the first string ends with that exact suffix.
+
+## Packer fmt command to format multiple HCL files
+
+Added the ability for the packer fmt command to format multiple HCL files at once.
+
+## Top-Level hcp_packer_registry Block Support
+
+Added support for defining the `hcp_packer_registry` block at the top level of the Packer configuration. Enables improved management and referencing of HCP Packer registries directly in the root schema.
+
+
