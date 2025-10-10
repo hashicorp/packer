@@ -92,7 +92,7 @@ const (
 //
 // Parse returns a PackerConfig that contains configuration layout of a packer
 // build; sources(builders)/provisioners/posts-processors will not be started
-// and their contents wont be verified; Most syntax errors will cause an error,
+// and their contents won't be verified; Most syntax errors will cause an error,
 // init should be called next to expand dynamic blocks and verify that used
 // things do exist.
 func (p *Parser) Parse(filename string, varFiles []string, argVars map[string]string) (*PackerConfig, hcl.Diagnostics) {
