@@ -45,7 +45,7 @@ func (b *ParallelTestBuilder) Run(ctx context.Context, ui packersdk.Ui, hook pac
 	return nil, nil
 }
 
-// LockedBuilder wont run until unlock is called
+// LockedBuilder won't run until unlock is called
 type LockedBuilder struct{ unlock chan interface{} }
 
 func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
