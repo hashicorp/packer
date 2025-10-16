@@ -570,9 +570,9 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 }
 
 func (cfg *PackerConfig) EnforceProvisioners() {
-	// make call to HCP Packer registry to fetch enforced provisioners
-	// we need to convert the fetched provisioners to ProvisionerBlock
-	// and append them to each build's provisioner blocks
+	// Fetch enforced provisioners from the HCP Packer registry.
+	// Parse the raw HCL configuration into ProvisionerBlock objects.
+	// Append the enforced provisioners to the build's execution plan.
 
 	// for point of POC, i just created a Global variable for a provisioner block thats mentioned in the template
 	// we reattach the provisioner block to each build block. And as you can see,
