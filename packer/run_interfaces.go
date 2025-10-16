@@ -68,6 +68,7 @@ type Handler interface {
 	ConfigFixer
 	ConfigInspector
 	PluginBinaryDetector
+	EnforceProvisioners()
 }
 
 //go:generate enumer -type FixConfigMode

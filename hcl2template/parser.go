@@ -5,6 +5,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -566,6 +567,25 @@ func (cfg *PackerConfig) Initialize(opts packer.InitializeOptions) hcl.Diagnosti
 	diags = append(diags, cfg.initializeBlocks()...)
 
 	return diags
+}
+
+func (cfg *PackerConfig) EnforceProvisioners() {
+	// make call to HCP Packer registry to fetch enforced provisioners
+	// we need to convert the fetched provisioners to ProvisionerBlock
+	// and append them to each build's provisioner blocks
+
+	// for point of POC, i just created a Global variable for a provisioner block thats mentioned in the template
+	// we reattach the provisioner block to each build block. And as you can see,
+	//we are able to run "an enforced provisioner"
+
+	if GlobalProvisioner != nil {
+		log.Printf("SETTING THE GLOBAL PROVISIONER\n")
+		for _, build := range cfg.Builds {
+			build.ProvisionerBlocks = append(build.ProvisionerBlocks, GlobalProvisioner)
+
+		}
+
+	}
 }
 
 // parseConfig looks in the found blocks for everything that is not a variable
