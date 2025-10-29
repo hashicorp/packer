@@ -84,10 +84,98 @@ func (g *GitlabCI) Type() string {
 	return "gitlab"
 }
 
+type BitbucketPipelines struct{}
+
+func (b *BitbucketPipelines) Detect() error {
+	_, ok := os.LookupEnv("BITBUCKET_BUILD_NUMBER")
+	if !ok {
+		return fmt.Errorf("BITBUCKET_BUILD_NUMBER environment variable not found")
+	}
+	return nil
+}
+
+func (b *BitbucketPipelines) Details() map[string]interface{} {
+	env := make(map[string]interface{})
+	keys := []string{
+		"BITBUCKET_REPO_FULL_NAME",
+		"BITBUCKET_REPO_UUID",
+		"BITBUCKET_WORKSPACE",
+		"BITBUCKET_COMMIT",
+		"BITBUCKET_BRANCH",
+		"BITBUCKET_TAG",
+		"BITBUCKET_BUILD_NUMBER",
+		"BITBUCKET_PIPELINE_UUID",
+		"BITBUCKET_STEP_UUID",
+		"BITBUCKET_DEPLOYMENT_ENVIRONMENT",
+		"BITBUCKET_PR_ID",
+		"BITBUCKET_PR_DESTINATION_BRANCH",
+		"BITBUCKET_PROJECT_KEY",
+		"BITBUCKET_PROJECT_UUID",
+	}
+
+	for _, key := range keys {
+		if value, ok := os.LookupEnv(key); ok {
+			env[key] = value
+		}
+	}
+
+	return env
+}
+
+func (b *BitbucketPipelines) Type() string {
+	return "bitbucket"
+}
+
+type JenkinsCI struct{}
+
+func (g *JenkinsCI) Detect() error {
+	_, ok := os.LookupEnv("JENKINS_URL")
+	if !ok {
+		return fmt.Errorf("JENKINS_URL environment variable not found")
+	}
+	return nil
+}
+
+func (g *JenkinsCI) Details() map[string]interface{} {
+	env := make(map[string]interface{})
+	keys := []string{
+		"JENKINS_URL",
+		"BUILD_URL",
+		"NODE_NAME",
+		"JOB_NAME",
+		"JOB_URL",
+		"BUILD_NUMBER",
+		"BUILD_ID",
+		"BUILD_TAG",
+		"WORKSPACE",
+		"BUILD_CAUSE",
+		"GIT_COMMIT",
+		"GIT_BRANCH",
+		"GIT_URL",
+		"GIT_AUTHOR_NAME",
+		"GIT_COMMITTER_EMAIL",
+		"GIT_PREVIOUS_SUCCESSFUL_COMMIT",
+	}
+
+	for _, key := range keys {
+		if value, ok := os.LookupEnv(key); ok {
+			env[key] = value
+		}
+	}
+
+	return env
+}
+
+func (g *JenkinsCI) Type() string {
+	return "jenkins"
+}
+
 func GetCicdMetadata() map[string]interface{} {
 	cicd := []MetadataProvider{
+		&JenkinsCI{},
 		&GithubActions{},
 		&GitlabCI{},
+		&BitbucketPipelines{},
 	}
 
 	for _, c := range cicd {
