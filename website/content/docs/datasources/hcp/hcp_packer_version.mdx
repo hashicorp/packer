@@ -1,9 +1,9 @@
 ---
 description: |
-  The `hcp-packer-version` data source retrieves information about
+  The `hcp_packer_version` data source retrieves information about
   an HCP Packer version from the HCP Packer registry. Use this information to
   get a source's external identifier.
-page_title: hcp-packer-version data source reference
+page_title: hcp_packer_version data source reference
 ---
 
 <BadgesHeader>
@@ -11,9 +11,9 @@ page_title: hcp-packer-version data source reference
   <PluginBadge type="hcp_packer_ready" />
 </BadgesHeader>
 
-# `hcp-packer-version`
+# `hcp_packer_version`
 
-The `hcp-packer-version` dsata source retrieves information about
+The `hcp_packer_version` dsata source retrieves information about
 an HCP Packer version from the HCP Packer registry. You can use the version information to
 query HCP for a source's external identifier so that you can use it in various Packer builders.
 
@@ -25,7 +25,7 @@ An administrator can manually deactivate or delete a registry, and HCP Packer au
 
 ## Revoked Versions
 
-If an HCP Packer Version is revoked, the `hcp-packer-version` data source will fail and Packer won't proceed with
+If an HCP Packer Version is revoked, the `hcp_packer_version` data source will fail and Packer won't proceed with
 the build. Building new artifacts from a revoked artifact is not compliant.
 Versions that are scheduled to be revoked will still be considered valid until the revocation date.
 
@@ -34,7 +34,7 @@ Versions that are scheduled to be revoked will still be considered valid until t
 Below is a fully functioning example. It stores information about an HCP Packer Version, which can then be accessed as a variable.
 
 ```hcl
-data "hcp-packer-version" "hardened-source" {
+data "hcp_packer_version" "hardened-source" {
   bucket_name  = "hardened-ubuntu-16-04"
   channel_name = "dev"
 }
@@ -42,7 +42,7 @@ data "hcp-packer-version" "hardened-source" {
 
 ## Full Example
 
-This data source can be used in conjunction with the `hcp-packer-artifact`
+This data source can be used in conjunction with the `hcp_packer_artifact`
 data source to retrieve an artifact identifier. You provide the version fingerprint and channel
 name to the version data source, then use the version source inside the
 artifact data source, then use the artifact data source inside your source block.
@@ -50,7 +50,7 @@ artifact data source, then use the artifact data source inside your source block
 ```hcl
 # Retrieves information about the HCP Packer Version; a "version" can be
 # thought of as all the metadata created by a single call of `packer build`.
-data "hcp-packer-version" "hardened-source" {
+data "hcp_packer_version" "hardened-source" {
   bucket_name  = "hardened-ubuntu-16-04"
   channel_name = "dev"
 }
@@ -59,9 +59,9 @@ data "hcp-packer-version" "hardened-source" {
 # of as all the metadata (including the artifact names) created by a single
 # "source" builder; this can include multiple artifacts so we provide a
 # region to disambiguate.
-data "hcp-packer-artifact" "example" {
+data "hcp_packer_artifact" "example" {
   bucket_name         = "hardened-ubuntu-16-04"
-  version_fingerprint = data.hcp-packer-version.hardened-source.fingerprint
+  version_fingerprint = data.hcp_packer_version.hardened-source.fingerprint
   platform            = "aws"
   region              = "us-east-1"
 }
@@ -70,7 +70,7 @@ data "hcp-packer-artifact" "example" {
 # HCP Packer Registry in this way, you can easily create build pipelines where
 # a single base artifact can be customized in multiple secondary layers.
 source "amazon-ebs" "packer-secondary" {
-  source_ami       = data.hcp-packer-artifact.example.external_identifier
+  source_ami       = data.hcp_packer_artifact.example.external_identifier
   ...
 }
 ```
@@ -83,11 +83,11 @@ described.
 
 ### Required:
 
-@include 'datasource/hcp-packer-version/Config-required.mdx'
+@include 'datasource/hcp_packer_version/Config-required.mdx'
 
 There are currently no optional fields for this datasource, though we intend
 to add filtering fields in the future.
 
 ### Output Fields:
 
-@include 'datasource/hcp-packer-version/DatasourceOutput.mdx'
+@include 'datasource/hcp_packer_version/DatasourceOutput.mdx'
