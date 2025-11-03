@@ -84,10 +84,53 @@ func (g *GitlabCI) Type() string {
 	return "gitlab"
 }
 
+type BitbucketPipelines struct{}
+
+func (b *BitbucketPipelines) Detect() error {
+	_, ok := os.LookupEnv("BITBUCKET_BUILD_NUMBER")
+	if !ok {
+		return fmt.Errorf("BITBUCKET_BUILD_NUMBER environment variable not found")
+	}
+	return nil
+}
+
+func (b *BitbucketPipelines) Details() map[string]interface{} {
+	env := make(map[string]interface{})
+	keys := []string{
+		"BITBUCKET_REPO_FULL_NAME",
+		"BITBUCKET_REPO_UUID",
+		"BITBUCKET_WORKSPACE",
+		"BITBUCKET_COMMIT",
+		"BITBUCKET_BRANCH",
+		"BITBUCKET_TAG",
+		"BITBUCKET_BUILD_NUMBER",
+		"BITBUCKET_PIPELINE_UUID",
+		"BITBUCKET_STEP_UUID",
+		"BITBUCKET_DEPLOYMENT_ENVIRONMENT",
+		"BITBUCKET_PR_ID",
+		"BITBUCKET_PR_DESTINATION_BRANCH",
+		"BITBUCKET_PROJECT_KEY",
+		"BITBUCKET_PROJECT_UUID",
+	}
+
+	for _, key := range keys {
+		if value, ok := os.LookupEnv(key); ok {
+			env[key] = value
+		}
+	}
+
+	return env
+}
+
+func (b *BitbucketPipelines) Type() string {
+	return "bitbucket"
+}
+
 func GetCicdMetadata() map[string]interface{} {
 	cicd := []MetadataProvider{
 		&GithubActions{},
 		&GitlabCI{},
+		&BitbucketPipelines{},
 	}
 
 	for _, c := range cicd {
