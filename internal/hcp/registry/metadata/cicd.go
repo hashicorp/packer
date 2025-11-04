@@ -126,8 +126,53 @@ func (b *BitbucketPipelines) Type() string {
 	return "bitbucket"
 }
 
+type JenkinsCI struct{}
+
+func (g *JenkinsCI) Detect() error {
+	_, ok := os.LookupEnv("JENKINS_URL")
+	if !ok {
+		return fmt.Errorf("JENKINS_URL environment variable not found")
+	}
+	return nil
+}
+
+func (g *JenkinsCI) Details() map[string]interface{} {
+	env := make(map[string]interface{})
+	keys := []string{
+		"JENKINS_URL",
+		"BUILD_URL",
+		"NODE_NAME",
+		"JOB_NAME",
+		"JOB_URL",
+		"BUILD_NUMBER",
+		"BUILD_ID",
+		"BUILD_TAG",
+		"WORKSPACE",
+		"BUILD_CAUSE",
+		"GIT_COMMIT",
+		"GIT_BRANCH",
+		"GIT_URL",
+		"GIT_AUTHOR_NAME",
+		"GIT_COMMITTER_EMAIL",
+		"GIT_PREVIOUS_SUCCESSFUL_COMMIT",
+	}
+
+	for _, key := range keys {
+		if value, ok := os.LookupEnv(key); ok {
+			env[key] = value
+		}
+	}
+
+	return env
+}
+
+func (g *JenkinsCI) Type() string {
+	return "jenkins"
+}
+
 func GetCicdMetadata() map[string]interface{} {
 	cicd := []MetadataProvider{
+		&JenkinsCI{},
 		&GithubActions{},
 		&GitlabCI{},
 		&BitbucketPipelines{},
