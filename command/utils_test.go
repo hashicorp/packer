@@ -29,19 +29,18 @@ func createFiles(dir string, content map[string]string) {
 	}
 }
 
-// type configDirSingleton struct {
-// 	dirs map[string]string
-// }
+type configDirSingleton struct {
+	dirs map[string]string
+}
 
-// unused func
 // when you call dir twice with the same key, the result should be the same
-// func (c *configDirSingleton) dir(key string) string {
-// 	if v, exists := c.dirs[key]; exists {
-// 		return v
-// 	}
-// 	c.dirs[key] = mustString(os.MkdirTemp("", "pkr-test-cfg-dir-"+key))
-// 	return c.dirs[key]
-// }
+func (c *configDirSingleton) dir(key string) string {
+	if v, exists := c.dirs[key]; exists {
+		return v
+	}
+	c.dirs[key] = mustString(os.MkdirTemp("", "pkr-test-cfg-dir-"+key))
+	return c.dirs[key]
+}
 
 // fileExists returns true if the filename is found
 func fileExists(filename string) bool {
