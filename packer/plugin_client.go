@@ -302,7 +302,7 @@ func (c *PluginClient) Start() (net.Addr, error) {
 	}()
 
 	// Make sure after we exit we read the lines from stdout forever
-	// so they dont' block since it is an io.Pipe
+	// so they don't block since it is an io.Pipe
 	defer func() {
 		go func() {
 			for range linesCh {
