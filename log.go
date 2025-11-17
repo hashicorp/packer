@@ -51,7 +51,7 @@ func logOutput() (logOutput io.Writer, err error) {
 			if strings.Contains(scanner.Text(), "ui error:") {
 				continue
 			}
-			fmt.Fprintf(os.Stderr, scanner.Text()+"\n")
+			fmt.Fprintf(os.Stderr, "%s", scanner.Text()+"\n")
 		}
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintf(os.Stderr, "log output filter failed: %s\n", err)
