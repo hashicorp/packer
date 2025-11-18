@@ -69,7 +69,7 @@ The Scaffolding plugin is intended as a starting point for creating Packer plugi
 
 ### Provisioners
 
-- [provisioner](/docs/provisioners/provisioner-name.mdx) - The scaffolding provisioner is used to provisioner
+- [provisioner](/docs/provisioners/provisioner-name.mdx) - The scaffolding provisioner is used to provision
   Packer builds.
 
 ### Post-processors

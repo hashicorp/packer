@@ -706,7 +706,7 @@ func TestIsDoneInterpolating(t *testing.T) {
 		expectedErr  bool
 	}{
 		// Many of these tests are just exercising the regex to make sure it
-		// doesnt get confused by different kinds of whitespace
+		// doesn't get confused by different kinds of whitespace
 		{"charmander-{{ user `spacesaroundticks` }}", false, false},
 		{"pidgey-{{ user `partyparrot`}}", false, false},
 		{"jigglypuff-{{ user`notickspaaces`}}", false, false},

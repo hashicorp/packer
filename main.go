@@ -41,7 +41,7 @@ func main() {
 func realMain() int {
 	var wrapConfig panicwrap.WrapConfig
 	// When following env variable is set, packer
-	// wont panic wrap itself as it's already wrapped.
+	// won't panic wrap itself as it's already wrapped.
 	// i.e.: when terraform runs it.
 	wrapConfig.CookieKey = "PACKER_WRAP_COOKIE"
 	wrapConfig.CookieValue = "49C22B1A-3A93-4C98-97FA-E07D18C787B5"

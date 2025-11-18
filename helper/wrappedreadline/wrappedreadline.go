@@ -14,7 +14,7 @@
 // passed by panicwrap to fix that.
 //
 // panicwrap should be checked for with panicwrap.Wrapped before using this
-// librar, since this library won't adapt if the binary is not wrapped.
+// library, since this library won't adapt if the binary is not wrapped.
 package wrappedreadline
 
 import (
