@@ -561,7 +561,7 @@ func looksLikeSentences(s string) bool {
 	last := runes[len(runes)-1]
 
 	// If the first rune is a letter then it must be an uppercase letter. To
-	// sorts of nudge people into writting sentences. For alphabets that don't
+	// sort of nudge people into writing sentences. For alphabets that don't
 	// have the notion of 'upper', this does nothing.
 	if unicode.IsLetter(first) && !unicode.IsUpper(first) {
 		return false
