@@ -1,4 +1,24 @@
 # 📦 Changelog
+
+## 1.14.3 (November 18, 2025)
+
+### IMPROVEMENTS:
+
+* core/hcp: added cicd metadata support for BitBucket and Jenkins pipelines.
+  [GH-13513](https://github.com/hashicorp/packer/pull/13513)
+  [GH-13505](https://github.com/hashicorp/packer/pull/13505)
+
+* core: bump github.com/hashicorp/packer-plugin-sdk to 0.6.4
+  [GH-13494](https://github.com/hashicorp/packer/pull/13494)
+
+* docs: fix typos and linguistic errors in documentation.
+  [GH-13496](https://github.com/hashicorp/packer/pull/13496)
+
+### SECURITY:
+
+* Bump golang.org/x/crypto to 0.43.0
+  [GH-13518](https://github.com/hashicorp/packer/pull/13518)
+
 ## 1.14.2 (September 9, 2025)
 ## ✨ Features
 - **HCP Certificate Authentication Support** – by @JenGoldstrich ([#13435](https://github.com/hashicorp/packer/pull/13435))  
