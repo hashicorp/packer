@@ -217,17 +217,18 @@ func parseLocalVariableBlocks(f *hcl.File) ([]*LocalBlock, hcl.Diagnostics) {
 	return locals, diags
 }
 
-func (c *PackerConfig) localByName(local string) (*LocalBlock, error) {
-	for _, loc := range c.LocalBlocks {
-		if loc.LocalName != local {
-			continue
-		}
-
-		return loc, nil
-	}
-
-	return nil, fmt.Errorf("local %s not found", local)
-}
+// unused maybe remove?
+// func (c *PackerConfig) localByName(local string) (*LocalBlock, error) {
+// 	for _, loc := range c.LocalBlocks {
+// 		if loc.LocalName != local {
+// 			continue
+// 		}
+//
+// 		return loc, nil
+// 	}
+//
+// 	return nil, fmt.Errorf("local %s not found", local)
+// }
 
 func (c *PackerConfig) evaluateLocalVariables(locals []*LocalBlock) hcl.Diagnostics {
 	var diags hcl.Diagnostics
