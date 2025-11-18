@@ -36,7 +36,7 @@ func panicHandler(logF *os.File) panicwrap.HandlerFunc {
 	return func(m string) {
 		// Write away just output this thing on stderr so that it gets
 		// shown in case anything below fails.
-		fmt.Fprintf(os.Stderr, fmt.Sprintf("%s\n", m))
+		fmt.Fprintf(os.Stderr, "%s", fmt.Sprintf("%s\n", m))
 
 		if err := packer.CheckpointReporter.ReportPanic(m); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to report panic. This is safe to ignore: %s", err)
