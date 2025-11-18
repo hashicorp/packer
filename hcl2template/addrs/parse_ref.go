@@ -17,7 +17,7 @@ type Reference struct {
 	Remaining   hcl.Traversal
 }
 
-// ParseRef attempts to extract a referencable address from the prefix of the
+// ParseRef attempts to extract a referenceable address from the prefix of the
 // given traversal, which must be an absolute traversal or this function
 // will panic.
 //
