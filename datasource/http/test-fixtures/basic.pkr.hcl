@@ -3,7 +3,7 @@ source "null" "example" {
 }
 
 data "http" "basic" {
-  url = "https://www.packer.io/"
+  url = "https://www.google.com"
 }
 
 locals {
