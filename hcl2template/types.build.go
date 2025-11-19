@@ -180,6 +180,7 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 			}
 			build.Sources = append(build.Sources, ref)
 		case buildProvisionerLabel:
+
 			p, moreDiags := p.decodeProvisioner(block, ectx)
 			diags = append(diags, moreDiags...)
 			if moreDiags.HasErrors() {

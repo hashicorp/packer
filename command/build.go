@@ -125,6 +125,9 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	defer hcpRegistry.VersionStatusSummary()
 
 	err := hcpRegistry.PopulateVersion(buildCtx)
+
+	packerStarter.EnforceProvisioners()
+
 	if err != nil {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
 			&hcl.Diagnostic{
