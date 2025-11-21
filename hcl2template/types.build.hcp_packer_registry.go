@@ -20,6 +20,8 @@ type HCPPackerRegistryBlock struct {
 	BucketLabels map[string]string
 	// Build labels
 	BuildLabels map[string]string
+	// Channels
+	Channels []string
 
 	HCL2Ref
 }
@@ -37,6 +39,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 		Labels       map[string]string `hcl:"labels,optional"`
 		BucketLabels map[string]string `hcl:"bucket_labels,optional"`
 		BuildLabels  map[string]string `hcl:"build_labels,optional"`
+		Channels     []string          `hcl:"channels,optional"`
 		Config       hcl.Body          `hcl:",remain"`
 	}
 	ectx := cfg.EvalContext(BuildContext, nil)
@@ -69,6 +72,7 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 
 	par.Slug = b.Slug
 	par.Description = b.Description
+	par.Channels = b.Channels
 
 	if len(b.Labels) > 0 && len(b.BucketLabels) > 0 {
 		diags = append(diags, &hcl.Diagnostic{

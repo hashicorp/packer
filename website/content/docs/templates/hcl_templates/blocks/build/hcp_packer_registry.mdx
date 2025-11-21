@@ -10,7 +10,7 @@ This topic provides reference information about the `hcp_packer_registry` block.
 
 ## Description
 
-The `hcp_packer_registry` block configures details about an image Packer creates or updates in the HCP Packer registry. Use the `hcp_packer_registry` block to customize the metadata Packer sends to HCP Packer Registry. 
+The `hcp_packer_registry` block configures details about an image Packer creates or updates in the HCP Packer registry. Use the `hcp_packer_registry` block to customize the metadata Packer sends to HCP Packer Registry.
 
 To get started with HCP Packer, refer to the [HCP Packer documentation](/hcp/docs/packer) or try the [Get Started with HCP Packer tutorials](/packer/tutorials/hcp-get-started).
 
@@ -76,6 +76,9 @@ Some nice description about the image which artifact is being published to HCP P
   will be updated whenever it is changed and a new build is pushed to the HCP
   Packer registry. Should contain a maximum of 255 characters. Defaults to
   `build.description` if not set.
+
+- `channels` ([]string) - List of channel to update to point to the new build
+  once the build is complete. Channels must already exist in the HCP Packer registry.
 
 - `labels` (map[string]string) - Deprecated in Packer 1.7.9. See [`bucket_labels`](#bucket_labels) for details.
 

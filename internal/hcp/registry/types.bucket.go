@@ -36,6 +36,7 @@ type Bucket struct {
 	Destination                              string
 	BucketLabels                             map[string]string
 	BuildLabels                              map[string]string
+	Channels                                 []string
 	SourceExternalIdentifierToParentVersions map[string]ParentVersion
 	RunningBuilds                            map[string]chan struct{}
 	Version                                  *Version
@@ -94,6 +95,7 @@ func (bucket *Bucket) ReadFromHCPPackerRegistryBlock(registryBlock *hcl2template
 	bucket.Description = registryBlock.Description
 	bucket.BucketLabels = registryBlock.BucketLabels
 	bucket.BuildLabels = registryBlock.BuildLabels
+	bucket.Channels = registryBlock.Channels
 	// If there's already a Name this was set from env variable.
 	// In Packer, env variable overrides config values so we keep it that way for consistency.
 	if bucket.Name == "" && registryBlock.Slug != "" {
@@ -242,6 +244,30 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom pac
 		return fmt.Errorf("the build for the component %q does not have a valid id", buildName)
 	}
 	return bucket.client.UploadSbom(ctx, bucket.Name, bucket.Version.Fingerprint, buildToUpdate.ID, sbom)
+}
+
+func (bucket *Bucket) updateChannels(ctx context.Context) error {
+	if len(bucket.Channels) == 0 {
+		return nil
+	}
+
+	log.Printf("[INFO] Updating %d channel(s) to point to version %s", len(bucket.Channels), bucket.Version.ID)
+
+	body := &hcpPackerModels.HashicorpCloudPacker20230101UpdateChannelBody{
+		VersionFingerprint: bucket.Version.Fingerprint,
+		UpdateMask:         "versionFingerprint",
+	}
+
+	for _, channel := range bucket.Channels {
+		log.Printf("[INFO] Updating channel %s to version %s", channel, bucket.Version.ID)
+		_, err := bucket.client.UpdateChannel(ctx, bucket.Name, channel, body)
+		if err != nil {
+			log.Printf("[ERROR] Failed to update channel %s: %s", channel, err)
+			return fmt.Errorf("failed to update channel %s: %w", channel, err)
+		}
+	}
+
+	return nil
 }
 
 // markBuildComplete should be called to set a build on the HCP Packer registry to DONE.
@@ -724,6 +750,12 @@ func (bucket *Bucket) doCompleteBuild(
 			"failed to update HCP Packer artifacts for %q: %s",
 			buildName,
 			parErr)
+	}
+
+	// Update channels after build is marked complete
+	channelErr := bucket.updateChannels(ctx)
+	if channelErr != nil {
+		log.Printf("[ERROR] Failed to update channels after completing build %s: %s", buildName, channelErr)
 	}
 
 	return append(packerSDKArtifacts, &registryArtifact{
