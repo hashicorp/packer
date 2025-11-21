@@ -22,6 +22,7 @@ type MockPackerClientService struct {
 	CreateBucketCalled, UpdateBucketCalled, GetBucketCalled, BucketNotFound      bool
 	CreateVersionCalled, GetVersionCalled, VersionAlreadyExist, VersionCompleted bool
 	CreateBuildCalled, UpdateBuildCalled, ListBuildsCalled, BuildAlreadyDone     bool
+	UpdateChannelCalled                                                          bool
 	TrackCalledServiceMethods                                                    bool
 
 	// Mock Creates
@@ -285,6 +286,37 @@ func (svc *MockPackerClientService) PackerServiceListBuilds(
 	ok := hcpPackerService.NewPackerServiceListBuildsOK()
 	ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101ListBuildsResponse{
 		Builds: builds,
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceUpdateChannel(
+	params *hcpPackerService.PackerServiceUpdateChannelParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceUpdateChannelOK, error) {
+	if params.BucketName == "" {
+		return nil, errors.New("no valid BucketName was passed in")
+	}
+
+	if params.ChannelName == "" {
+		return nil, errors.New("no valid ChannelName was passed in")
+	}
+
+	if params.Body == nil {
+		return nil, errors.New("no valid update body was passed in")
+	}
+
+	if svc.TrackCalledServiceMethods {
+		svc.UpdateChannelCalled = true
+	}
+
+	ok := hcpPackerService.NewPackerServiceUpdateChannelOK()
+	ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101UpdateChannelResponse{
+		Channel: &hcpPackerModels.HashicorpCloudPacker20230101Channel{
+			Name:       params.ChannelName,
+			BucketName: params.BucketName,
+		},
 	}
 
 	return ok, nil
