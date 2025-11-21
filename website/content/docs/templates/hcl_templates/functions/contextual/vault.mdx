@@ -3,6 +3,11 @@ page_title: vault function reference
 description: The `vault` function retrieves secrets from HashiCorp Vault KV stores. Learn how to use the `vault` function in Packer templates.
 ---
 
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+> [!IMPORTANT]  
+> **Documentation Update:** Product documentation previously located in `/website` has moved to the [`hashicorp/web-unified-docs`](https://github.com/hashicorp/web-unified-docs) repository, where all product documentation is now centralized. Please make contributions directly to `web-unified-docs`, since changes to `/website` in this repository will not appear on developer.hashicorp.com.
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
 # `vault` Function
 
 Retrieves secrets from a HashiCorp Vault KV store. Packer can read secrets from and add them to your template as user variables. The `vault` function is available only within the default value of a user variable, allowing you to default a user variable to a vault secret.
