@@ -55,7 +55,7 @@ const wrapPowershellString string = `
 	$exitCode = 1
 	}
 	
-	if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {
+	if ((Test-Path variable:global:LASTEXITCODE) -and $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {
 		$exitCode = $LASTEXITCODE
 	}
 	exit $exitCode
