@@ -5,6 +5,8 @@ package registry
 
 import (
 	"context"
+	"io"
+	"os"
 	"reflect"
 	"strconv"
 	"sync"
@@ -522,7 +524,11 @@ func TestCompleteBuild(t *testing.T) {
 				Status:        models.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 			})
 
-			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, nil)
+			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, &packer.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      io.Discard,
+				ErrorWriter: io.Discard,
+			}, nil)
 			if err != nil != tt.expectError {
 				t.Errorf("expected %t error; got %t", tt.expectError, err != nil)
 				t.Logf("error was: %s", err)
@@ -584,7 +590,11 @@ func TestBucket_UpdateChannels(t *testing.T) {
 				Fingerprint: "test-fingerprint",
 			}
 
-			err := b.updateChannels(context.Background())
+			err := b.updateChannels(context.Background(), &packer.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      io.Discard,
+				ErrorWriter: io.Discard,
+			})
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("updateChannels() error = %v, wantErr %v", err, tt.wantErr)
@@ -651,7 +661,11 @@ func TestBucket_DoCompleteBuild_WithChannels(t *testing.T) {
 	}
 
 	// Complete the build
-	_, err = b.doCompleteBuild(context.TODO(), "happycloud.image", mockArtifacts, nil)
+	_, err = b.doCompleteBuild(context.TODO(), "happycloud.image", mockArtifacts, &packer.BasicUi{
+		Reader:      os.Stdin,
+		Writer:      io.Discard,
+		ErrorWriter: io.Discard,
+	}, nil)
 	if err != nil {
 		t.Errorf("doCompleteBuild() should have completed successfully for build happycloud.image, got err: %v", err)
 	}

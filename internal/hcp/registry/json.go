@@ -101,7 +101,7 @@ func (h *JSONRegistry) CompleteBuild(
 	if err != nil {
 		return nil, err
 	}
-	return h.bucket.completeBuild(ctx, buildName, artifacts, buildErr)
+	return h.bucket.completeBuild(ctx, buildName, artifacts, h.ui, buildErr)
 }
 
 // VersionStatusSummary prints a status report in the UI if the version is not yet done

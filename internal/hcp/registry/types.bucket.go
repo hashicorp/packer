@@ -246,12 +246,10 @@ func (bucket *Bucket) uploadSbom(ctx context.Context, buildName string, sbom pac
 	return bucket.client.UploadSbom(ctx, bucket.Name, bucket.Version.Fingerprint, buildToUpdate.ID, sbom)
 }
 
-func (bucket *Bucket) updateChannels(ctx context.Context) error {
+func (bucket *Bucket) updateChannels(ctx context.Context, ui packerSDK.Ui) error {
 	if len(bucket.Channels) == 0 {
 		return nil
 	}
-
-	log.Printf("[INFO] Updating %d channel(s) to point to version %s", len(bucket.Channels), bucket.Version.ID)
 
 	body := &hcpPackerModels.HashicorpCloudPacker20230101UpdateChannelBody{
 		VersionFingerprint: bucket.Version.Fingerprint,
@@ -259,10 +257,10 @@ func (bucket *Bucket) updateChannels(ctx context.Context) error {
 	}
 
 	for _, channel := range bucket.Channels {
-		log.Printf("[INFO] Updating channel %s to version %s", channel, bucket.Version.ID)
+		ui.Say(fmt.Sprintf("Assigning version %s to channel `%s`", bucket.Version.ID, channel))
 		_, err := bucket.client.UpdateChannel(ctx, bucket.Name, channel, body)
 		if err != nil {
-			log.Printf("[ERROR] Failed to update channel %s: %s", channel, err)
+			ui.Error(fmt.Sprintf("Failed to update channel %s: %s", channel, err))
 			return fmt.Errorf("failed to update channel %s: %w", channel, err)
 		}
 	}
@@ -653,6 +651,7 @@ func (bucket *Bucket) completeBuild(
 	ctx context.Context,
 	buildName string,
 	packerSDKArtifacts []packerSDK.Artifact,
+	ui packerSDK.Ui,
 	buildErr error,
 ) ([]packerSDK.Artifact, error) {
 	doneCh, ok := bucket.RunningBuilds[buildName]
@@ -677,7 +676,7 @@ func (bucket *Bucket) completeBuild(
 		return packerSDKArtifacts, fmt.Errorf("build failed, not uploading artifacts")
 	}
 
-	artifacts, err := bucket.doCompleteBuild(ctx, buildName, packerSDKArtifacts, buildErr)
+	artifacts, err := bucket.doCompleteBuild(ctx, buildName, packerSDKArtifacts, ui, buildErr)
 	if err != nil {
 		err := bucket.UpdateBuildStatus(ctx, buildName, hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED)
 		if err != nil {
@@ -692,6 +691,7 @@ func (bucket *Bucket) doCompleteBuild(
 	ctx context.Context,
 	buildName string,
 	packerSDKArtifacts []packerSDK.Artifact,
+	ui packerSDK.Ui,
 	buildErr error,
 ) ([]packerSDK.Artifact, error) {
 	for _, art := range packerSDKArtifacts {
@@ -753,7 +753,7 @@ func (bucket *Bucket) doCompleteBuild(
 	}
 
 	// Update channels after build is marked complete
-	channelErr := bucket.updateChannels(ctx)
+	channelErr := bucket.updateChannels(ctx, ui)
 	if channelErr != nil {
 		log.Printf("[ERROR] Failed to update channels after completing build %s: %s", buildName, channelErr)
 	}
