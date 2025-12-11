@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2013, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
 // plugin_acc_test.go should contain acceptance tests for features related to
