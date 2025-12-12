@@ -257,10 +257,10 @@ func (bucket *Bucket) updateChannels(ctx context.Context, ui packerSDK.Ui) error
 	}
 
 	for _, channel := range bucket.Channels {
-		ui.Say(fmt.Sprintf("Assigning version %s to channel `%s`", bucket.Version.ID, channel))
+		ui.Say(fmt.Sprintf("==> Assigning version `%s` to channel `%s`", bucket.Version.Fingerprint, channel))
 		_, err := bucket.client.UpdateChannel(ctx, bucket.Name, channel, body)
 		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to update channel %s: %s", channel, err))
+			ui.Error(fmt.Sprintf("==> Failed assigning version `%s` to channel `%s`: %v", bucket.Version.Fingerprint, channel, err))
 			return fmt.Errorf("failed to update channel %s: %w", channel, err)
 		}
 	}
