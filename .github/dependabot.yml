@@ -1,5 +1,22 @@
 version: 2
 updates:
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+      interval: "monthly"
+  labels:
+    - "dependencies"
+
+  ignore:
+    - dependency-name: "*"
+      update-types:
+        - "version-update:semver-major"
+    groups:
+      # Group all GitHub Actions updates into a single PR
+      actions:
+        patterns:
+          - "*"
+
 - package-ecosystem: gomod
   directory: /
   schedule:
