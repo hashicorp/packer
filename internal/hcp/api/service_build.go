@@ -118,3 +118,23 @@ func (c *Client) UploadSbom(
 	_, err := c.Packer.PackerServiceUploadSbom(params, nil)
 	return err
 }
+
+func (c *Client) UpdateChannel(
+	ctx context.Context,
+	bucketName, channelName string,
+	body *hcpPackerModels.HashicorpCloudPacker20230101UpdateChannelBody,
+) (*hcpPackerAPI.PackerServiceUpdateChannelOK, error) {
+
+	params := hcpPackerAPI.NewPackerServiceUpdateChannelParamsWithContext(ctx)
+	params.LocationOrganizationID = c.OrganizationID
+	params.LocationProjectID = c.ProjectID
+	params.BucketName = bucketName
+	params.ChannelName = channelName
+	params.Body = body
+	resp, err := c.Packer.PackerServiceUpdateChannel(params, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}

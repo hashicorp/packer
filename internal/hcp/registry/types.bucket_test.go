@@ -5,6 +5,8 @@ package registry
 
 import (
 	"context"
+	"io"
+	"os"
 	"reflect"
 	"strconv"
 	"sync"
@@ -373,6 +375,34 @@ func TestReadFromHCLBuildBlock(t *testing.T) {
 					"version":   "1.7.0",
 					"based_off": "alpine",
 				},
+				Channels: nil,
+			},
+		},
+		{
+			desc: "configure bucket with channels",
+			buildBlock: &hcl2template.BuildBlock{
+				HCPPackerRegistry: &hcl2template.HCPPackerRegistryBlock{
+					Slug:        "channel-test-bucket",
+					Description: "bucket with channel configuration",
+					Channels:    []string{"production", "staging", "development"},
+					BucketLabels: map[string]string{
+						"team": "infrastructure",
+					},
+					BuildLabels: map[string]string{
+						"version": "2.0.0",
+					},
+				},
+			},
+			expectedBucket: &Bucket{
+				Name:        "channel-test-bucket",
+				Description: "bucket with channel configuration",
+				Channels:    []string{"production", "staging", "development"},
+				BucketLabels: map[string]string{
+					"team": "infrastructure",
+				},
+				BuildLabels: map[string]string{
+					"version": "2.0.0",
+				},
 			},
 		},
 	}
@@ -494,7 +524,11 @@ func TestCompleteBuild(t *testing.T) {
 				Status:        models.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING,
 			})
 
-			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, nil)
+			_, err := dummyBucket.completeBuild(context.Background(), "test-build", tt.artifactsToUse, &packer.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      io.Discard,
+				ErrorWriter: io.Discard,
+			}, nil)
 			if err != nil != tt.expectError {
 				t.Errorf("expected %t error; got %t", tt.expectError, err != nil)
 				t.Logf("error was: %s", err)
@@ -507,5 +541,142 @@ func TestCompleteBuild(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestBucket_UpdateChannels(t *testing.T) {
+	tests := []struct {
+		name       string
+		channels   []string
+		wantErr    bool
+		wantCalled bool
+	}{
+		{
+			name:       "no channels",
+			channels:   []string{},
+			wantErr:    false,
+			wantCalled: false,
+		},
+		{
+			name:       "single channel",
+			channels:   []string{"production"},
+			wantErr:    false,
+			wantCalled: true,
+		},
+		{
+			name:       "multiple channels",
+			channels:   []string{"staging", "production", "dev"},
+			wantErr:    false,
+			wantCalled: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockService := hcpPackerAPI.NewMockPackerClientService()
+			mockService.TrackCalledServiceMethods = true
+
+			b := &Bucket{
+				Name:     "test-bucket",
+				Channels: tt.channels,
+				client: &hcpPackerAPI.Client{
+					Packer: mockService,
+				},
+			}
+
+			// Initialize version
+			b.Version = &Version{
+				ID:          "test-version-id",
+				Fingerprint: "test-fingerprint",
+			}
+
+			err := b.updateChannels(context.Background(), &packer.BasicUi{
+				Reader:      os.Stdin,
+				Writer:      io.Discard,
+				ErrorWriter: io.Discard,
+			})
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("updateChannels() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if mockService.UpdateChannelCalled != tt.wantCalled {
+				t.Errorf("UpdateChannelCalled = %v, want %v", mockService.UpdateChannelCalled, tt.wantCalled)
+			}
+		})
+	}
+}
+
+func TestBucket_DoCompleteBuild_WithChannels(t *testing.T) {
+	mockService := hcpPackerAPI.NewMockPackerClientService()
+	mockService.VersionAlreadyExist = true
+	mockService.TrackCalledServiceMethods = true
+
+	b := &Bucket{
+		Name:     "TestBucket",
+		Channels: []string{"production", "staging"},
+		client: &hcpPackerAPI.Client{
+			Packer: mockService,
+		},
+	}
+
+	b.Version = NewVersion()
+	err := b.Version.Initialize()
+	if err != nil {
+		t.Fatalf("unexpected failure initializing version: %v", err)
+	}
+
+	b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
+	mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
+
+	err = b.Initialize(context.TODO(), models.HashicorpCloudPacker20230101TemplateTypeHCL2)
+	if err != nil {
+		t.Fatalf("unexpected failure initializing bucket: %v", err)
+	}
+
+	err = b.populateVersion(context.TODO())
+	if err != nil {
+		t.Fatalf("unexpected failure populating version: %v", err)
+	}
+
+	// Create mock HCP-compatible artifacts
+	mockArtifacts := []packer.Artifact{
+		&packer.MockArtifact{
+			BuilderIdValue: "builder.test",
+			FilesValue:     []string{"file.one"},
+			IdValue:        "test-artifact",
+			StateValues: map[string]interface{}{
+				"builder.test": "OK",
+				image.ArtifactStateURI: &image.Image{
+					ImageID:        "hcp-test-image",
+					ProviderName:   "test-provider",
+					ProviderRegion: "test-region",
+					Labels:         map[string]string{},
+					SourceImageID:  "",
+				},
+			},
+			DestroyCalled: false,
+			StringValue:   "",
+		},
+	}
+
+	// Complete the build
+	_, err = b.doCompleteBuild(context.TODO(), "happycloud.image", mockArtifacts, &packer.BasicUi{
+		Reader:      os.Stdin,
+		Writer:      io.Discard,
+		ErrorWriter: io.Discard,
+	}, nil)
+	if err != nil {
+		t.Errorf("doCompleteBuild() should have completed successfully for build happycloud.image, got err: %v", err)
+	}
+
+	// Verify that UpdateChannel was called for channel updates
+	if !mockService.UpdateChannelCalled {
+		t.Error("UpdateChannelCalled should be true after completing build with channels")
+	}
+
+	// Verify that UpdateBuild was called for marking build complete
+	if !mockService.UpdateBuildCalled {
+		t.Error("UpdateBuildCalled should be true after completing build")
 	}
 }
