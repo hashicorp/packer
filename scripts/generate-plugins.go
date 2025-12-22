@@ -1,4 +1,4 @@
-// Copyright (c) HashiCorp, Inc.
+// Copyright IBM Corp. 2013, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
 // Generate Plugins is a small program that updates the lists of plugins in
