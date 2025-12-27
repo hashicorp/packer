@@ -126,9 +126,8 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			},
 			false,
 			&getHCPPackerRegistry{
-				wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
 				wantDiag:         true,
-				wantDiagHasError: false,
+				wantDiagHasError: true,
 			},
 		},
 		{"bucket name OK multiple block second build block",
@@ -191,9 +190,8 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			},
 			false,
 			&getHCPPackerRegistry{
-				wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
 				wantDiag:         true,
-				wantDiagHasError: false,
+				wantDiagHasError: true,
 			},
 		},
 		{"bucket name OK multiple block multiple declaration",
@@ -257,7 +255,6 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 			},
 			false,
 			&getHCPPackerRegistry{
-				wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
 				wantDiag:         true,
 				wantDiagHasError: true,
 			},
@@ -673,6 +670,132 @@ func Test_ParseHCPPackerRegistryBlock(t *testing.T) {
 				wantDiagHasError: true,
 			},
 		},
-	}
+
+		{"multiple build block with Hcp Packer Registry in a build block",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/multibuild-hcp-registry-in-build-block.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+				Builds: Builds{
+					{
+						Name:              "bucket-slug-1",
+						HCPPackerRegistry: &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+					{
+						Name: "bucket-slug-2",
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]*packer.CoreBuild{
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug-1",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug-2",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+			},
+			false,
+			&getHCPPackerRegistry{
+				// wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
+				wantDiag:         true,
+				wantDiagHasError: true,
+			},
+		},
+		{"multiple build block",
+			defaultParser,
+			parseTestArgs{"testdata/hcp_par/multibuild-ok.pkr.hcl", nil, nil},
+			&PackerConfig{
+				CorePackerVersionString: lockedVersion,
+				Basedir:                 filepath.Join("testdata", "hcp_par"),
+				HCPPackerRegistry:       &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
+				Sources: map[SourceRef]SourceBlock{
+					refNull: {
+						Type: "null",
+						Name: "test",
+						block: &hcl.Block{
+							Type: "source",
+						},
+					},
+				},
+				Builds: Builds{
+					{
+						Name: "bucket-slug-1",
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+					{
+						Name: "bucket-slug-2",
+						Sources: []SourceUseBlock{
+							{
+								SourceRef: refNull,
+							},
+						},
+					},
+				},
+			},
+			false, false,
+			[]*packer.CoreBuild{
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug-1",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+				&packer.CoreBuild{
+					BuildName:      "bucket-slug-2",
+					Type:           "null.test",
+					Builder:        &null.Builder{},
+					Provisioners:   []packer.CoreBuildProvisioner{},
+					PostProcessors: [][]packer.CoreBuildPostProcessor{},
+					Prepared:       true,
+					BuilderType:    "null",
+				},
+			},
+			false,
+			&getHCPPackerRegistry{
+				wantBlock:        &HCPPackerRegistryBlock{Slug: "ok-Bucket-name-1"},
+				wantDiag:         false,
+				wantDiagHasError: false,
+			},
+		}}
 	testParse(t, tests)
 }
