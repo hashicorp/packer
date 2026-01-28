@@ -36,7 +36,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 
 	// File contents should contain 2 lines concatenated by newlines: foo\nbar
 	readFile, err := os.ReadFile(file)
-	expectedContents := "if (Test-Path variable:global:ProgressPreference) {\n         set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'\n         }\n         \n         $exitCode = 0\n         try {\n         $env:PACKER_BUILDER_TYPE=\"\"; $env:PACKER_BUILD_NAME=\"\"; \n         foo\n         bar\n         \n         $exitCode = 0\n         } catch {\n         Write-Error \"An error occurred: $_\"\n         $exitCode = 1\n         }\n         \n         if ($LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {\n         $exitCode = $LASTEXITCODE\n         }\n         exit $exitCode"
+	expectedContents := "if (Test-Path variable:global:ProgressPreference) {\n         set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'\n         }\n         \n         $exitCode = 0\n         try {\n         $env:PACKER_BUILDER_TYPE=\"\"; $env:PACKER_BUILD_NAME=\"\"; \n         foo\n         bar\n         \n         $exitCode = 0\n         } catch {\n         Write-Error \"An error occurred: $_\"\n         $exitCode = 1\n         }\n         \n         if ((Test-Path variable:global:LASTEXITCODE) -and $LASTEXITCODE -ne $null -and $LASTEXITCODE -ne 0) {\n         $exitCode = $LASTEXITCODE\n         }\n         exit $exitCode"
 	normalizedExpectedContent := normalizeWhiteSpace(expectedContents)
 	if err != nil {
 		t.Fatalf("Should not be error: %s", err)
