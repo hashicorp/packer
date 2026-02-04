@@ -1,5 +1,40 @@
 # 📦 Changelog
 
+## 1.15.0 (February 4, 2026)
+
+### IMPROVEMENTS:
+
+* core/hcp: add support for updating HCP Packer registry channels and bucket log UI metadata.
+    [GH-13532](https://github.com/hashicorp/packer/pull/13532)
+
+* build: update Go to 1.24.12.
+    [GH-13553](https://github.com/hashicorp/packer/pull/13553)
+
+* docker: remove vmware and vsphere from the packer full image.
+    [GH-13442](https://github.com/hashicorp/packer/pull/13442)
+
+* docs: add comments to packer docs.
+    [GH-13534](https://github.com/hashicorp/packer/pull/13534)
+
+* compliance: update copyright and license headers.
+    [GH-13540](https://github.com/hashicorp/packer/pull/13540)
+    [GH-13543](https://github.com/hashicorp/packer/pull/13543)
+    [GH-13545](https://github.com/hashicorp/packer/pull/13545)
+    [GH-13544](https://github.com/hashicorp/packer/pull/13544)
+
+### BUG FIXES:
+
+* datasource/http: update acceptance test URL to avoid rate limiting.
+    [GH-13480](https://github.com/hashicorp/packer/pull/13480)
+
+* provisioner/powershell: ensure `LASTEXITCODE` is set before checking its value in tests.
+    [GH-13539](https://github.com/hashicorp/packer/pull/13539)
+
+### SECURITY:
+
+* Bump golang.org/x/crypto to 0.46.0
+    [GH-13546](https://github.com/hashicorp/packer/pull/13546)
+
 ## 1.14.3 (November 18, 2025)
 
 ### IMPROVEMENTS:
