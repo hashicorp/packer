@@ -162,6 +162,9 @@ func (c *Core) Initialize(_ InitializeOptions) hcl.Diagnostics {
 	}
 	return nil
 }
+func (c *Core) EnforceProvisioners() {
+	log.Printf("******* INSIDE ENFORCE PROVISIONERS FROM CORE.. ********\n")
+}
 
 func (core *Core) initialize() error {
 	if err := core.validate(); err != nil {

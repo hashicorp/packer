@@ -5,6 +5,7 @@ package hcl2template
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	"github.com/zclconf/go-cty/cty"
 )
+
+var GlobalProvisioner *ProvisionerBlock
 
 // OnlyExcept is a struct that is meant to be embedded that contains the
 // logic required for "only" and "except" meta-parameters.
@@ -163,6 +166,8 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*Pr
 		provisioner.Timeout = timeout
 	}
 
+	log.Printf("STORING PROVISIONER IN GLOBAL VARIABE")
+	GlobalProvisioner = provisioner
 	return provisioner, diags
 }
 
