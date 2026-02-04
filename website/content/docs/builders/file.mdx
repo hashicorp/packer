@@ -74,3 +74,11 @@ the artifact will be empty.
   artifact.
 
 - `content` (string) - The content that will be put into the artifact.
+## Note on Usage
+
+When using the File builder, ensure that the source path you provide
+exists on the local machine running Packer. If the path is incorrect,
+Packer will return a "file not found" error during the build stage.
+
+This small clarification helps avoid common mistakes when working with
+local-file-based artifact generation.
