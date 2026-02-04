@@ -226,6 +226,9 @@ var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 		case <-ctx.Done():
 			log.Println("Communicator wait canceled, exiting loop")
 			return fmt.Errorf("Communicator wait canceled")
+		case <-p.cancel:
+			log.Println("Communicator wait canceled via provisioner, exiting loop")
+			return nil
 		case <-time.After(retryableSleep):
 		}
 		if runCustomRestartCheck {
