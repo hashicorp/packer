@@ -246,17 +246,65 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 // SBOMInternalProvisioner is a wrapper provisioner for the `hcp-sbom` provisioner
 // that sets the path for SBOM file download and, after the successful execution of
 // the `hcp-sbom` provisioner, compresses the SBOM and prepares the data for API
-// integration.
+// integration. It also supports native SBOM generation by automatically downloading
+// and running a scanner tool (default: Syft) on the remote host.
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
 	SBOMFormat     hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
 	SBOMName       string
+	
+	// Native SBOM generation configuration
+	EnableNativeGeneration bool     // Flag to enable/disable native SBOM generation
+	ScannerURL            string   // URL to scanner tool (if empty, auto-download Syft based on detected OS)
+	ScannerChecksum       string   // Expected SHA256 checksum of scanner binary for verification
+	ScannerArgs           []string // Arguments to pass to the scanner tool
+	ScanPath              string   // Path to scan on remote host (default: "/")
 }
 
-func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
-func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
+func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.Provisioner.ConfigSpec() }
+func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return p.Provisioner.FlatConfig() }
+
 func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
+	// Parse configuration for native generation options
+	for _, raw := range raws {
+		if config, ok := raw.(map[string]interface{}); ok {
+			if val, ok := config["enable_native_generation"].(bool); ok {
+				p.EnableNativeGeneration = val
+			}
+			if val, ok := config["scanner_url"].(string); ok {
+				p.ScannerURL = val
+			}
+			if val, ok := config["scanner_checksum"].(string); ok {
+				p.ScannerChecksum = val
+			}
+			if val, ok := config["scanner_args"].([]interface{}); ok {
+				p.ScannerArgs = make([]string, len(val))
+				for i, arg := range val {
+					if argStr, ok := arg.(string); ok {
+						p.ScannerArgs[i] = argStr
+					}
+				}
+			}
+			if val, ok := config["scan_path"].(string); ok {
+				p.ScanPath = val
+			}
+		}
+	}
+	
+	// Set defaults
+	if p.ScanPath == "" {
+		p.ScanPath = "/"
+	}
+	
+	// Validate configuration
+	if p.EnableNativeGeneration {
+		// If checksum is provided, URL must also be provided
+		if p.ScannerChecksum != "" && p.ScannerURL == "" {
+			return fmt.Errorf("scanner_checksum requires scanner_url to be specified")
+		}
+	}
+	
 	return p.Provisioner.Prepare(raws...)
 }
 
