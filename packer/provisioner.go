@@ -4,13 +4,11 @@
 package packer
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
@@ -247,65 +245,18 @@ func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, co
 // SBOMInternalProvisioner is a wrapper provisioner for the `hcp-sbom` provisioner
 // that sets the path for SBOM file download and, after the successful execution of
 // the `hcp-sbom` provisioner, compresses the SBOM and prepares the data for API
-// integration. It also supports native SBOM generation by automatically downloading
-// and running a scanner tool (default: Syft) on the remote host.
+// integration.
 type SBOMInternalProvisioner struct {
 	Provisioner    packersdk.Provisioner
 	CompressedData []byte
 	SBOMFormat     hcpPackerModels.HashicorpCloudPacker20230101SbomFormat
 	SBOMName       string
-	
-	// Native SBOM generation configuration
-	EnableNativeGeneration bool     // Flag to enable/disable native SBOM generation
-	ScannerURL            string   // URL to scanner tool (if empty, auto-download Syft based on detected OS)
-	ScannerChecksum       string   // Expected SHA256 checksum of scanner binary for verification
-	ScannerArgs           []string // Arguments to pass to the scanner tool
-	ScanPath              string   // Path to scan on remote host (default: "/")
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.Provisioner.ConfigSpec() }
 func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return nil }
 
 func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
-	// Parse configuration for native generation options
-	for _, raw := range raws {
-		if config, ok := raw.(map[string]interface{}); ok {
-			if val, ok := config["enable_native_generation"].(bool); ok {
-				p.EnableNativeGeneration = val
-			}
-			if val, ok := config["scanner_url"].(string); ok {
-				p.ScannerURL = val
-			}
-			if val, ok := config["scanner_checksum"].(string); ok {
-				p.ScannerChecksum = val
-			}
-			if val, ok := config["scanner_args"].([]interface{}); ok {
-				p.ScannerArgs = make([]string, len(val))
-				for i, arg := range val {
-					if argStr, ok := arg.(string); ok {
-						p.ScannerArgs[i] = argStr
-					}
-				}
-			}
-			if val, ok := config["scan_path"].(string); ok {
-				p.ScanPath = val
-			}
-		}
-	}
-	
-	// Set defaults
-	if p.ScanPath == "" {
-		p.ScanPath = "/"
-	}
-	
-	// Validate configuration
-	if p.EnableNativeGeneration {
-		// If checksum is provided, URL must also be provided
-		if p.ScannerChecksum != "" && p.ScannerURL == "" {
-			return fmt.Errorf("scanner_checksum requires scanner_url to be specified")
-		}
-	}
-	
 	return p.Provisioner.Prepare(raws...)
 }
 
@@ -313,139 +264,7 @@ func (p *SBOMInternalProvisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
-	// Check if native generation is enabled
-	if !p.EnableNativeGeneration {
-		// Original behavior: user provides SBOM file
-		ui.Say("Using existing SBOM provisioner behavior (user-provided SBOM)")
-		return p.provisionWithExistingSBOM(ctx, ui, comm, generatedData)
-	}
-	
-	// Native generation enabled
-	ui.Say("Native SBOM generation enabled")
-	
-	var osType, osArch string
-	var err error
-	
-	// Only detect OS if scanner_url is NOT provided
-	if p.ScannerURL == "" {
-		ui.Say("No scanner URL provided, detecting remote OS/Arch...")
-		osType, osArch, err = p.detectRemoteOS(ctx, ui, comm, generatedData)
-		if err != nil {
-			return fmt.Errorf("failed to detect remote OS: %s", err)
-		}
-		ui.Say(fmt.Sprintf("Detected: OS=%s, Arch=%s", osType, osArch))
-	} else {
-		ui.Say("Scanner URL provided, skipping OS detection")
-		// User provided scanner URL, assume they know their platform
-		osType = "unknown"
-		osArch = "unknown"
-	}
-	
-	return p.provisionWithNativeGeneration(ctx, ui, comm, osType, osArch)
-}
-
-// detectRemoteOS performs OS detection within the provisioner
-func (p *SBOMInternalProvisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
-                                                  comm packersdk.Communicator,
-                                                  generatedData map[string]interface{}) (string, string, error) {
-	// First check if already detected (from generatedData)
-	if osType, ok := generatedData["OSType"].(string); ok {
-		if osArch, ok := generatedData["OSArch"].(string); ok {
-			ui.Message("Using previously detected OS information from generated data")
-			return osType, osArch, nil
-		}
-	}
-	
-	// Not in generatedData, detect now
-	ui.Message("Running OS detection commands on remote host...")
-	
-	// Get communicator type
-	connType := "ssh" // default
-	if ct, ok := generatedData["ConnType"].(string); ok {
-		connType = ct
-	}
-	
-	// Run detection command based on communicator
-	var cmd *packersdk.RemoteCmd
-	if connType == "winrm" {
-		cmd = &packersdk.RemoteCmd{
-			Command: "echo %PROCESSOR_ARCHITECTURE%",
-		}
-	} else {
-		cmd = &packersdk.RemoteCmd{
-			Command: "uname -s -m",
-		}
-	}
-	
-	var stdout bytes.Buffer
-	cmd.Stdout = &stdout
-	
-	if err := comm.Start(ctx, cmd); err != nil {
-		return "", "", fmt.Errorf("failed to run OS detection command: %s", err)
-	}
-	
-	cmd.Wait()
-	
-	if cmd.ExitStatus() != 0 {
-		return "", "", fmt.Errorf("OS detection command exited with status %d", cmd.ExitStatus())
-	}
-	
-	output := strings.TrimSpace(stdout.String())
-	ui.Message(fmt.Sprintf("OS detection output: %s", output))
-	
-	// Parse output
-	var osType, osArch string
-	if connType == "winrm" {
-		osType = "Windows"
-		osArch = strings.ToLower(output) // AMD64, ARM64, etc.
-	} else {
-		parts := strings.Fields(output)
-		if len(parts) >= 2 {
-			osType = parts[0]  // Linux, Darwin, FreeBSD, etc.
-			osArch = parts[1]  // x86_64, aarch64, etc.
-		} else if len(parts) == 1 {
-			// Some systems might only return one value
-			osType = parts[0]
-			osArch = "unknown"
-		}
-	}
-	
-	if osType == "" || osArch == "" {
-		return "", "", fmt.Errorf("failed to parse OS detection output: %s", output)
-	}
-	
-	// Store in generatedData for potential reuse
-	generatedData["OSType"] = osType
-	generatedData["OSArch"] = osArch
-	
-	return osType, osArch, nil
-}
-
-// provisionWithNativeGeneration handles the new native SBOM generation flow
-func (p *SBOMInternalProvisioner) provisionWithNativeGeneration(
-	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	osType, osArch string,
-) error {
-	ui.Say("Starting native SBOM generation workflow...")
-	
-	// TODO: Implement in next commits
-	// Step 1: Download scanner binary
-	// Step 2: Verify checksum if provided
-	// Step 3: Upload scanner to remote
-	// Step 4: Run scanner on remote
-	// Step 5: Download SBOM
-	// Step 6: Process SBOM for HCP
-	// Step 7: Cleanup remote files
-	
-	return fmt.Errorf("native SBOM generation not yet fully implemented")
-}
-
-// provisionWithExistingSBOM handles the original SBOM provisioner behavior
-func (p *SBOMInternalProvisioner) provisionWithExistingSBOM(
-	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{},
-) error {
-	// Original implementation
+	// Original implementation - all logic now in hcp-sbom provisioner
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current working directory for Packer SBOM: %s", err)
