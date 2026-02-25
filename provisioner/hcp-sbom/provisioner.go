@@ -407,13 +407,36 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	}
 
 	// Step 3: Upload scanner to remote
-	// Step 4: Run scanner on remote
-	// Step 5: Download SBOM
-	// Step 6: Process SBOM for HCP
-	// Step 7: Cleanup remote files
-	// TODO: Implement in commits 4-6
+	ui.Say("Uploading scanner to remote host...")
+	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerLocalPath, osType)
+	if err != nil {
+		return fmt.Errorf("failed to upload scanner: %s", err)
+	}
+	defer p.cleanupRemoteFile(ctx, ui, comm, remoteScannerPath)
 
-	return fmt.Errorf("native SBOM generation partially implemented (commits 4-6 pending)")
+	// Step 4: Run scanner on remote
+	ui.Say(fmt.Sprintf("Running scanner on remote host (scanning %s)...", p.config.ScanPath))
+	remoteSBOMPath, err := p.runScanner(ctx, ui, comm, remoteScannerPath, osType)
+	if err != nil {
+		return fmt.Errorf("failed to run scanner: %s", err)
+	}
+	defer p.cleanupRemoteFile(ctx, ui, comm, remoteSBOMPath)
+
+	// Step 5: Download SBOM from remote
+	ui.Say("Downloading SBOM from remote host...")
+	sbomData, err := p.downloadSBOM(ctx, ui, comm, remoteSBOMPath)
+	if err != nil {
+		return fmt.Errorf("failed to download SBOM: %s", err)
+	}
+
+	// Step 6: Process SBOM for HCP (validate, compress, store)
+	ui.Say("Processing SBOM for HCP Packer...")
+	if err := p.processSBOMForHCP(generatedData, sbomData); err != nil {
+		return fmt.Errorf("failed to process SBOM: %s", err)
+	}
+
+	ui.Say("Native SBOM generation completed successfully")
+	return nil
 }
 
 // downloadScanner downloads the scanner binary using go-getter
@@ -687,6 +710,199 @@ func (p *Provisioner) verifyChecksum(filePath string) error {
 	expectedChecksum := strings.ToLower(strings.TrimSpace(p.config.ScannerChecksum))
 	if actualChecksum != expectedChecksum {
 		return fmt.Errorf("checksum mismatch: expected %s, got %s", expectedChecksum, actualChecksum)
+	}
+
+	return nil
+}
+
+
+// uploadScanner uploads the scanner binary to the remote host
+func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, localPath, osType string) (string, error) {
+	
+	// Determine remote path based on OS
+	var remotePath string
+	if strings.Contains(strings.ToLower(osType), "windows") {
+		remotePath = "C:\\Windows\\Temp\\packer-scanner.exe"
+	} else {
+		remotePath = "/tmp/packer-scanner"
+	}
+
+	// Open local file
+	localFile, err := os.Open(localPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to open local scanner: %s", err)
+	}
+	defer localFile.Close()
+
+	// Upload to remote
+	ui.Message(fmt.Sprintf("Uploading scanner to %s...", remotePath))
+	if err := comm.Upload(remotePath, localFile, nil); err != nil {
+		return "", fmt.Errorf("failed to upload scanner: %s", err)
+	}
+
+	// Make executable on Unix-like systems
+	if !strings.Contains(strings.ToLower(osType), "windows") {
+		cmd := &packersdk.RemoteCmd{
+			Command: fmt.Sprintf("chmod +x %s", remotePath),
+		}
+		if err := comm.Start(ctx, cmd); err != nil {
+			return "", fmt.Errorf("failed to make scanner executable: %s", err)
+		}
+		cmd.Wait()
+		if cmd.ExitStatus() != 0 {
+			return "", fmt.Errorf("chmod command failed with exit status %d", cmd.ExitStatus())
+		}
+	}
+
+	return remotePath, nil
+}
+
+// runScanner executes the scanner on the remote host
+func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, scannerPath, osType string) (string, error) {
+	
+	// Determine output path based on OS
+	var outputPath string
+	if strings.Contains(strings.ToLower(osType), "windows") {
+		outputPath = "C:\\Windows\\Temp\\packer-sbom.json"
+	} else {
+		outputPath = "/tmp/packer-sbom.json"
+	}
+
+	// Build scanner command
+	args := append(p.config.ScannerArgs, p.config.ScanPath)
+	
+	// Add output redirection
+	var cmdStr string
+	if strings.Contains(strings.ToLower(osType), "windows") {
+		cmdStr = fmt.Sprintf("%s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
+	} else {
+		cmdStr = fmt.Sprintf("%s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
+	}
+
+	ui.Message(fmt.Sprintf("Executing: %s", cmdStr))
+
+	// Execute scanner
+	var stdout, stderr bytes.Buffer
+	cmd := &packersdk.RemoteCmd{
+		Command: cmdStr,
+		Stdout:  &stdout,
+		Stderr:  &stderr,
+	}
+
+	if err := comm.Start(ctx, cmd); err != nil {
+		return "", fmt.Errorf("failed to start scanner: %s", err)
+	}
+
+	cmd.Wait()
+
+	// Log output
+	if stdout.Len() > 0 {
+		ui.Message(fmt.Sprintf("Scanner stdout: %s", stdout.String()))
+	}
+	if stderr.Len() > 0 {
+		ui.Message(fmt.Sprintf("Scanner stderr: %s", stderr.String()))
+	}
+
+	if cmd.ExitStatus() != 0 {
+		return "", fmt.Errorf("scanner exited with status %d", cmd.ExitStatus())
+	}
+
+	return outputPath, nil
+}
+
+// downloadSBOM downloads the SBOM file from the remote host
+func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, remotePath string) ([]byte, error) {
+	
+	var buf bytes.Buffer
+	ui.Message(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
+	
+	if err := comm.Download(remotePath, &buf); err != nil {
+		return nil, fmt.Errorf("failed to download SBOM: %s", err)
+	}
+
+	if buf.Len() == 0 {
+		return nil, fmt.Errorf("downloaded SBOM is empty")
+	}
+
+	ui.Message(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
+	return buf.Bytes(), nil
+}
+
+// cleanupRemoteFile removes a file from the remote host
+func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, remotePath string) {
+	
+	if remotePath == "" {
+		return
+	}
+
+	ui.Message(fmt.Sprintf("Cleaning up remote file: %s", remotePath))
+	
+	// Determine delete command based on path
+	var cmdStr string
+	if strings.Contains(remotePath, "C:\\") || strings.Contains(remotePath, "c:\\") {
+		cmdStr = fmt.Sprintf("del /F /Q %s", remotePath)
+	} else {
+		cmdStr = fmt.Sprintf("rm -f %s", remotePath)
+	}
+
+	cmd := &packersdk.RemoteCmd{
+		Command: cmdStr,
+	}
+
+	if err := comm.Start(ctx, cmd); err != nil {
+		ui.Error(fmt.Sprintf("Failed to cleanup remote file %s: %s", remotePath, err))
+		return
+	}
+
+	cmd.Wait()
+	if cmd.ExitStatus() != 0 {
+		ui.Error(fmt.Sprintf("Cleanup command failed for %s with exit status %d", remotePath, cmd.ExitStatus()))
+	}
+}
+
+// processSBOMForHCP validates, compresses, and prepares SBOM for HCP upload
+func (p *Provisioner) processSBOMForHCP(generatedData map[string]interface{}, sbomData []byte) error {
+	// Validate SBOM format
+	format, err := validateSBOM(sbomData)
+	if err != nil {
+		return fmt.Errorf("SBOM validation failed: %s", err)
+	}
+
+	// Get destination path from generatedData
+	pkrDst, ok := generatedData["dst"].(string)
+	if !ok || pkrDst == "" {
+		return fmt.Errorf("packer destination path missing from configs: this is an internal error")
+	}
+
+	// Write PackerSBOM to destination
+	outFile, err := os.Create(pkrDst)
+	if err != nil {
+		return fmt.Errorf("failed to create output file %q: %s", pkrDst, err)
+	}
+	defer outFile.Close()
+
+	err = json.NewEncoder(outFile).Encode(PackerSBOM{
+		RawSBOM: sbomData,
+		Format:  format,
+		Name:    p.config.SbomName,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to write SBOM to %q: %s", pkrDst, err)
+	}
+
+	// Also save to user destination if specified
+	if p.config.Destination != "" {
+		usrDst, err := p.getUserDestination()
+		if err != nil {
+			return fmt.Errorf("failed to compute destination path %q: %s", p.config.Destination, err)
+		}
+		if err := os.WriteFile(usrDst, sbomData, 0644); err != nil {
+			return fmt.Errorf("failed to write SBOM to destination %q: %s", usrDst, err)
+		}
 	}
 
 	return nil
