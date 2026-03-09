@@ -10,17 +10,22 @@ import (
 // FlatConfig is an auto-generated flat version of Config.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatConfig struct {
-	PackerBuildName     *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
-	PackerBuilderType   *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
-	PackerCoreVersion   *string           `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
-	PackerDebug         *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
-	PackerForce         *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
-	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
-	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
-	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Source              *string           `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
-	Destination         *string           `mapstructure:"destination" cty:"destination" hcl:"destination"`
-	SbomName            *string           `mapstructure:"sbom_name" cty:"sbom_name" hcl:"sbom_name"`
+	PackerBuildName        *string           `mapstructure:"packer_build_name" cty:"packer_build_name" hcl:"packer_build_name"`
+	PackerBuilderType      *string           `mapstructure:"packer_builder_type" cty:"packer_builder_type" hcl:"packer_builder_type"`
+	PackerCoreVersion      *string           `mapstructure:"packer_core_version" cty:"packer_core_version" hcl:"packer_core_version"`
+	PackerDebug            *bool             `mapstructure:"packer_debug" cty:"packer_debug" hcl:"packer_debug"`
+	PackerForce            *bool             `mapstructure:"packer_force" cty:"packer_force" hcl:"packer_force"`
+	PackerOnError          *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
+	PackerUserVars         map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
+	PackerSensitiveVars    []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
+	Source                 *string           `mapstructure:"source" cty:"source" hcl:"source"`
+	Destination            *string           `mapstructure:"destination" cty:"destination" hcl:"destination"`
+	SbomName               *string           `mapstructure:"sbom_name" cty:"sbom_name" hcl:"sbom_name"`
+	EnableNativeGeneration *bool             `mapstructure:"enable_native_generation" cty:"enable_native_generation" hcl:"enable_native_generation"`
+	ScannerURL             *string           `mapstructure:"scanner_url" cty:"scanner_url" hcl:"scanner_url"`
+	ScannerChecksum        *string           `mapstructure:"scanner_checksum" cty:"scanner_checksum" hcl:"scanner_checksum"`
+	ScannerArgs            []string          `mapstructure:"scanner_args" cty:"scanner_args" hcl:"scanner_args"`
+	ScanPath               *string           `mapstructure:"scan_path" cty:"scan_path" hcl:"scan_path"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -46,6 +51,11 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"source":                     &hcldec.AttrSpec{Name: "source", Type: cty.String, Required: false},
 		"destination":                &hcldec.AttrSpec{Name: "destination", Type: cty.String, Required: false},
 		"sbom_name":                  &hcldec.AttrSpec{Name: "sbom_name", Type: cty.String, Required: false},
+		"enable_native_generation":   &hcldec.AttrSpec{Name: "enable_native_generation", Type: cty.Bool, Required: false},
+		"scanner_url":                &hcldec.AttrSpec{Name: "scanner_url", Type: cty.String, Required: false},
+		"scanner_checksum":           &hcldec.AttrSpec{Name: "scanner_checksum", Type: cty.String, Required: false},
+		"scanner_args":               &hcldec.AttrSpec{Name: "scanner_args", Type: cty.List(cty.String), Required: false},
+		"scan_path":                  &hcldec.AttrSpec{Name: "scan_path", Type: cty.String, Required: false},
 	}
 	return s
 }

@@ -18,10 +18,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -266,13 +268,13 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	// First check if already detected (from generatedData)
 	if osType, ok := generatedData["OSType"].(string); ok {
 		if osArch, ok := generatedData["OSArch"].(string); ok {
-			ui.Message("Using previously detected OS information from generated data")
+			ui.Say("Using previously detected OS information from generated data")
 			return osType, osArch, nil
 		}
 	}
 
 	// Not in generatedData, detect now
-	ui.Message("Running OS detection commands on remote host...")
+	ui.Say("Running OS detection commands on remote host...")
 
 	// Get communicator type
 	connType := "ssh" // default
@@ -306,7 +308,7 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	}
 
 	output := strings.TrimSpace(stdout.String())
-	ui.Message(fmt.Sprintf("OS detection output: %s", output))
+	ui.Say(fmt.Sprintf("OS detection output: %s", output))
 
 	// Parse output
 	var osType, osArch string
@@ -447,15 +449,15 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	// If user provided a URL, use it
 	if p.config.ScannerURL != "" {
 		downloadURL = p.config.ScannerURL
-		ui.Message(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
+		ui.Say(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
 	} else {
 		// Default to Syft from GitHub releases
 		if osType == "unknown" || osArch == "unknown" {
 			return "", fmt.Errorf("cannot auto-download scanner: OS/Arch unknown (provide scanner_url)")
 		}
+		ui.Say(fmt.Sprintf("Fetching latest Syft version for %s/%s...", osType, osArch))
 		downloadURL = p.buildDefaultSyftURL(osType, osArch)
-		ui.Message(fmt.Sprintf("Auto-downloading Syft for %s/%s", osType, osArch))
-		ui.Message(fmt.Sprintf("Download URL: %s", downloadURL))
+		ui.Say(fmt.Sprintf("Download URL: %s", downloadURL))
 	}
 
 	// Create temporary directory for download
@@ -473,7 +475,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		Dst: tmpDir,
 	}
 
-	ui.Message("Downloading scanner binary...")
+	ui.Say("Downloading scanner binary...")
 	if _, err := client.Get(ctx, req); err != nil {
 		return "", fmt.Errorf("failed to download scanner: %s", err)
 	}
@@ -490,7 +492,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		return "", fmt.Errorf("failed to copy scanner: %s", err)
 	}
 
-	ui.Message(fmt.Sprintf("Scanner downloaded to: %s", finalPath))
+	ui.Say(fmt.Sprintf("Scanner downloaded to: %s", finalPath))
 	return finalPath, nil
 }
 
@@ -499,8 +501,13 @@ func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
 	// Map to Syft platform naming
 	syftOS, syftArch := p.mapToSyftPlatform(osType, osArch)
 
-	// Default to latest stable version
-	version := "v0.100.0"
+	// Fetch latest version from GitHub API
+	version := p.getLatestSyftVersion()
+	if version == "" {
+		// Fallback to a known stable version if API call fails
+		log.Printf("[WARN] Failed to fetch latest Syft version, using fallback v0.100.0")
+		version = "v0.100.0"
+	}
 
 	// Construct GitHub release URL
 	// Example: https://github.com/anchore/syft/releases/download/v0.100.0/syft_0.100.0_linux_amd64.tar.gz
@@ -509,6 +516,60 @@ func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
 
 	return fmt.Sprintf("https://github.com/anchore/syft/releases/download/%s/%s",
 		version, fileName)
+}
+
+// getLatestSyftVersion fetches the latest Syft release version from GitHub API
+func (p *Provisioner) getLatestSyftVersion() string {
+	// GitHub API endpoint for latest release
+	apiURL := "https://api.github.com/repos/anchore/syft/releases/latest"
+
+	// Create HTTP client with timeout
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// Create request
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		log.Printf("[WARN] Failed to create request for Syft version: %s", err)
+		return ""
+	}
+
+	// Set User-Agent header (GitHub API requires it)
+	req.Header.Set("User-Agent", "Packer-HCP-SBOM-Provisioner")
+	req.Header.Set("Accept", "application/vnd.github.v3+json")
+
+	// Make request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("[WARN] Failed to fetch latest Syft version: %s", err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	// Check status code
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("[WARN] GitHub API returned status %d for Syft version", resp.StatusCode)
+		return ""
+	}
+
+	// Parse response
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		log.Printf("[WARN] Failed to parse Syft version response: %s", err)
+		return ""
+	}
+
+	if release.TagName == "" {
+		log.Printf("[WARN] Empty tag_name in Syft release response")
+		return ""
+	}
+
+	log.Printf("[INFO] Latest Syft version: %s", release.TagName)
+	return release.TagName
 }
 
 // mapToSyftPlatform maps detected OS/Arch to Syft naming conventions
@@ -723,9 +784,9 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	// Determine remote path based on OS
 	var remotePath string
 	if strings.Contains(strings.ToLower(osType), "windows") {
-		remotePath = "C:\\Windows\\Temp\\packer-scanner.exe"
+		remotePath = "C:\\Windows\\Temp\\packer-sbom-scanner.exe"
 	} else {
-		remotePath = "/tmp/packer-scanner"
+		remotePath = "/tmp/packer-sbom-scanner"
 	}
 
 	// Open local file
@@ -736,7 +797,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	defer localFile.Close()
 
 	// Upload to remote
-	ui.Message(fmt.Sprintf("Uploading scanner to %s...", remotePath))
+	ui.Say(fmt.Sprintf("Uploading scanner to %s...", remotePath))
 	if err := comm.Upload(remotePath, localFile, nil); err != nil {
 		return "", fmt.Errorf("failed to upload scanner: %s", err)
 	}
@@ -778,10 +839,10 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	if strings.Contains(strings.ToLower(osType), "windows") {
 		cmdStr = fmt.Sprintf("%s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
 	} else {
-		cmdStr = fmt.Sprintf("%s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
+		cmdStr = fmt.Sprintf("sudo %s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
 	}
 
-	ui.Message(fmt.Sprintf("Executing: %s", cmdStr))
+	ui.Say(fmt.Sprintf("Executing: %s", cmdStr))
 
 	// Execute scanner
 	var stdout, stderr bytes.Buffer
@@ -799,10 +860,10 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 
 	// Log output
 	if stdout.Len() > 0 {
-		ui.Message(fmt.Sprintf("Scanner stdout: %s", stdout.String()))
+		ui.Say(fmt.Sprintf("Scanner stdout: %s", stdout.String()))
 	}
 	if stderr.Len() > 0 {
-		ui.Message(fmt.Sprintf("Scanner stderr: %s", stderr.String()))
+		ui.Say(fmt.Sprintf("Scanner stderr: %s", stderr.String()))
 	}
 
 	if cmd.ExitStatus() != 0 {
@@ -817,7 +878,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) ([]byte, error) {
 	
 	var buf bytes.Buffer
-	ui.Message(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
+	ui.Say(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
 	
 	if err := comm.Download(remotePath, &buf); err != nil {
 		return nil, fmt.Errorf("failed to download SBOM: %s", err)
@@ -827,7 +888,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 		return nil, fmt.Errorf("downloaded SBOM is empty")
 	}
 
-	ui.Message(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
+	ui.Say(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
 	return buf.Bytes(), nil
 }
 
@@ -839,7 +900,7 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		return
 	}
 
-	ui.Message(fmt.Sprintf("Cleaning up remote file: %s", remotePath))
+	ui.Say(fmt.Sprintf("Cleaning up remote file: %s", remotePath))
 	
 	// Determine delete command based on path
 	var cmdStr string
