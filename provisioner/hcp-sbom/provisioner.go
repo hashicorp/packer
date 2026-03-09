@@ -213,52 +213,15 @@ func (p *Provisioner) provisionWithExistingSBOM(
 ) error {
 	src := p.config.Source
 
-	pkrDst := generatedData["dst"].(string)
-	if pkrDst == "" {
-		return fmt.Errorf("packer destination path missing from configs: this is an internal error, which should be reported to be fixed.")
-	}
-
+	// Download SBOM from remote
 	var buf bytes.Buffer
 	if err := comm.Download(src, &buf); err != nil {
 		ui.Errorf("download failed for SBOM file: %s", err)
 		return err
 	}
 
-	format, err := validateSBOM(buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("validation failed for SBOM file: %s", err)
-	}
-
-	outFile, err := os.Create(pkrDst)
-	if err != nil {
-		return fmt.Errorf("failed to open/create output file %q: %s", pkrDst, err)
-	}
-	defer outFile.Close()
-
-	err = json.NewEncoder(outFile).Encode(PackerSBOM{
-		RawSBOM: buf.Bytes(),
-		Format:  format,
-		Name:    p.config.SbomName,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to write sbom file to %q: %s", pkrDst, err)
-	}
-
-	if p.config.Destination == "" {
-		return nil
-	}
-
-	// SBOM for User
-	usrDst, err := p.getUserDestination()
-	if err != nil {
-		return fmt.Errorf("failed to compute destination path %q: %s", p.config.Destination, err)
-	}
-	err = os.WriteFile(usrDst, buf.Bytes(), 0644)
-	if err != nil {
-		return fmt.Errorf("failed to write SBOM to destination %q: %s", usrDst, err)
-	}
-
-	return nil
+	// Process and write SBOM (reuses common logic)
+	return p.processSBOMForHCP(generatedData, buf.Bytes())
 }
 
 // detectRemoteOS performs OS detection on the remote host
