@@ -39,7 +39,7 @@ type Config struct {
 
 	// The file path or URL to the SBOM file in the Packer artifact.
 	// This file must either be in the SPDX or CycloneDX format.
-	// Not required if enable_native_generation is true.
+	// Not required if auto_generate is true.
 	Source string `mapstructure:"source"`
 
 	// The path on the local machine to store a copy of the SBOM file.
@@ -56,11 +56,11 @@ type Config struct {
 	SbomName string `mapstructure:"sbom_name"`
 	
 	// Native SBOM generation configuration
-	// Enable native SBOM generation by automatically downloading and running a scanner
-	EnableNativeGeneration bool `mapstructure:"enable_native_generation"`
+	// Enable automatic SBOM generation by downloading and running a scanner tool on the remote host
+	AutoGenerate bool `mapstructure:"auto_generate"`
 	
 	// URL to scanner tool (supports go-getter syntax: HTTP, local files, Git, S3, etc.)
-	// If empty and enable_native_generation is true, Syft will be auto-downloaded based on detected OS/Arch
+	// If empty and auto_generate is true, Syft will be auto-downloaded based on detected OS/Arch
 	ScannerURL string `mapstructure:"scanner_url"`
 	
 	// Expected SHA256 checksum of scanner binary for verification
@@ -104,7 +104,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	var errs error
 
 	// Validate based on mode
-	if p.config.EnableNativeGeneration {
+	if p.config.AutoGenerate {
 		// Native generation mode: source is optional
 		// Set defaults
 		if p.config.ScanPath == "" {
@@ -121,7 +121,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	} else {
 		// Traditional mode: source is required
 		if p.config.Source == "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified (or enable enable_native_generation)"))
+			errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified (or enable auto_generate)"))
 		}
 	}
 
@@ -176,7 +176,7 @@ func (p *Provisioner) Provision(
 	p.config.ctx.Data = generatedData
 
 	// Check if native generation is enabled
-	if !p.config.EnableNativeGeneration {
+	if !p.config.AutoGenerate {
 		// Original behavior: user provides SBOM file
 		ui.Say("Using existing SBOM provisioner behavior (user-provided SBOM)")
 		return p.provisionWithExistingSBOM(ctx, ui, comm, generatedData)
@@ -193,7 +193,9 @@ func (p *Provisioner) Provision(
 		ui.Say("No scanner URL provided, detecting remote OS/Arch...")
 		osType, osArch, err = p.detectRemoteOS(ctx, ui, comm, generatedData)
 		if err != nil {
-			return fmt.Errorf("failed to detect remote OS: %s", err)
+			ui.Error(fmt.Sprintf("Failed to detect remote OS: %s", err))
+			ui.Error("SBOM generation will be skipped, but build will continue")
+			return nil
 		}
 		ui.Say(fmt.Sprintf("Detected: OS=%s, Arch=%s", osType, osArch))
 	} else {
@@ -203,7 +205,13 @@ func (p *Provisioner) Provision(
 		osArch = "unknown"
 	}
 
-	return p.provisionWithNativeGeneration(ctx, ui, comm, generatedData, osType, osArch)
+	err = p.provisionWithNativeGeneration(ctx, ui, comm, generatedData, osType, osArch)
+	if err != nil {
+		ui.Error(fmt.Sprintf("SBOM generation failed: %s", err))
+		ui.Error("Build will continue without SBOM")
+		return nil
+	}
+	return nil
 }
 
 // provisionWithExistingSBOM handles the original flow where user provides an SBOM file
@@ -216,12 +224,19 @@ func (p *Provisioner) provisionWithExistingSBOM(
 	// Download SBOM from remote
 	var buf bytes.Buffer
 	if err := comm.Download(src, &buf); err != nil {
-		ui.Errorf("download failed for SBOM file: %s", err)
-		return err
+		ui.Error(fmt.Sprintf("Failed to download SBOM file: %s", err))
+		ui.Error("Build will continue without SBOM")
+		return nil
 	}
 
 	// Process and write SBOM (reuses common logic)
-	return p.processSBOMForHCP(generatedData, buf.Bytes())
+	err := p.processSBOMForHCP(generatedData, buf.Bytes())
+	if err != nil {
+		ui.Error(fmt.Sprintf("Failed to process SBOM: %s", err))
+		ui.Error("Build will continue without SBOM")
+		return nil
+	}
+	return nil
 }
 
 // detectRemoteOS performs OS detection on the remote host
