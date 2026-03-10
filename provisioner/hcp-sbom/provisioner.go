@@ -68,7 +68,7 @@ type Config struct {
 	ScannerChecksum string `mapstructure:"scanner_checksum"`
 	
 	// Arguments to pass to the scanner tool
-	// Default for Syft: ["-o", "spdx-json"]
+	// Default for Syft: ["-o", "cyclonedx-json", "-q"]
 	ScannerArgs []string `mapstructure:"scanner_args"`
 	
 	// Path to scan on remote host
@@ -111,7 +111,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			p.config.ScanPath = "/"
 		}
 		if len(p.config.ScannerArgs) == 0 {
-			p.config.ScannerArgs = []string{"-o", "spdx-json"}
+			// Default to CycloneDX JSON format with quiet output
+			p.config.ScannerArgs = []string{
+				"-o", "cyclonedx-json",
+				"-q", // Quiet mode - suppress non-essential output
+			}
 		}
 		
 		// Validate: if checksum is provided, URL must also be provided
