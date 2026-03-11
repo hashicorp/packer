@@ -113,3 +113,17 @@ func (h *JSONRegistry) VersionStatusSummary() {
 func (h *JSONRegistry) Metadata() Metadata {
 	return h.metadata
 }
+
+// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
+func (h *JSONRegistry) FetchEnforcedBlocks(ctx context.Context) error {
+	return h.bucket.FetchEnforcedBlocks(ctx)
+}
+
+// InjectEnforcedProvisioners injects enforced provisioners into the builds
+// Note: JSON templates don't support enforced provisioners as they are a legacy format
+func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	if len(h.bucket.EnforcedBlocks) > 0 {
+		h.ui.Say("Warning: Enforced provisioners are not supported for legacy JSON templates")
+	}
+	return nil
+}

@@ -140,6 +140,43 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, c
 	return nil
 }
 
+// ProvisionerWrapOptions contains options for wrapping a provisioner with
+// additional behavior like pausing, timeouts, and retries.
+type ProvisionerWrapOptions struct {
+	PauseBefore time.Duration
+	Timeout     time.Duration
+	MaxRetries  int
+}
+
+// WrapProvisionerWithOptions wraps a provisioner with additional behavior
+// based on the provided options.
+func WrapProvisionerWithOptions(provisioner packersdk.Provisioner, opts ProvisionerWrapOptions) packersdk.Provisioner {
+	wrapped := provisioner
+
+	if opts.PauseBefore != 0 {
+		wrapped = &PausedProvisioner{
+			PauseBefore: opts.PauseBefore,
+			Provisioner: wrapped,
+		}
+	}
+
+	if opts.Timeout != 0 {
+		wrapped = &TimeoutProvisioner{
+			Timeout:     opts.Timeout,
+			Provisioner: wrapped,
+		}
+	}
+
+	if opts.MaxRetries != 0 {
+		wrapped = &RetriedProvisioner{
+			MaxRetries:  opts.MaxRetries,
+			Provisioner: wrapped,
+		}
+	}
+
+	return wrapped
+}
+
 // PausedProvisioner is a Provisioner implementation that pauses before
 // the provisioner is actually run.
 type PausedProvisioner struct {

@@ -29,6 +29,15 @@ import (
 // build is still alive.
 const HeartbeatPeriod = 2 * time.Minute
 
+// EnforcedBlock represents an enforced provisioner block from HCP Packer
+type EnforcedBlock struct {
+	ID           string
+	Name         string
+	BlockContent string // Raw HCL content containing provisioner blocks
+	VersionID    string
+	Version      string
+}
+
 // Bucket represents a single bucket on the HCP Packer registry.
 type Bucket struct {
 	Name                                     string
@@ -40,6 +49,7 @@ type Bucket struct {
 	SourceExternalIdentifierToParentVersions map[string]ParentVersion
 	RunningBuilds                            map[string]chan struct{}
 	Version                                  *Version
+	EnforcedBlocks                           []*EnforcedBlock
 	client                                   *hcpPackerAPI.Client
 }
 
@@ -140,6 +150,115 @@ func (bucket *Bucket) Initialize(
 	}
 
 	return bucket.initializeVersion(ctx, templateType)
+}
+
+// FetchEnforcedBlocks retrieves all enforced blocks linked to this bucket from HCP Packer.
+// These blocks contain provisioner configurations that should be automatically injected
+// into builds for this bucket.
+func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
+	if bucket.client == nil {
+		return errors.New("bucket client not initialized, call Initialize first")
+	}
+
+	resp, err := bucket.client.GetEnforcedBlocksForBucket(ctx, bucket.Name)
+	if err != nil {
+		// If the API doesn't support enforced blocks yet or returns not found, continue silently
+		log.Printf("[DEBUG] fetching enforced blocks for bucket %q: %v", bucket.Name, err)
+		return nil
+	}
+
+	if resp == nil {
+		return nil
+	}
+
+	bucket.EnforcedBlocks = make([]*EnforcedBlock, 0, len(resp.EnforcedBlockDetail))
+	for _, detail := range resp.EnforcedBlockDetail {
+		if detail == nil || detail.Version == nil {
+			continue
+		}
+
+		block := &EnforcedBlock{
+			ID:           detail.ID,
+			Name:         detail.Name,
+			BlockContent: detail.Version.BlockContent,
+			VersionID:    detail.Version.ID,
+			Version:      detail.Version.Version,
+		}
+		bucket.EnforcedBlocks = append(bucket.EnforcedBlocks, block)
+	}
+
+	log.Printf("[INFO] fetched %d enforced block(s) for bucket %q", len(bucket.EnforcedBlocks), bucket.Name)
+	return nil
+}
+
+// PublishEnforcedBlocks publishes the given provisioner block content as an enforced block
+// on HCP Packer, linked to this bucket. If an enforced block with the given name already
+// exists and the content has changed, a new version is created. If it doesn't exist,
+// a new enforced block is created.
+func (bucket *Bucket) PublishEnforcedBlocks(
+	ctx context.Context,
+	blockName string,
+	blockContent string,
+	templateType hcpPackerModels.HashicorpCloudPacker20230101TemplateType,
+) error {
+	if bucket.client == nil {
+		return errors.New("bucket client not initialized, call Initialize first")
+	}
+
+	if blockContent == "" {
+		log.Printf("[DEBUG] no provisioner content to publish as enforced blocks for bucket %q", bucket.Name)
+		return nil
+	}
+
+	// List existing enforced blocks to check for duplicates
+	existingResp, err := bucket.client.ListEnforcedBlocks(ctx)
+	if err != nil {
+		log.Printf("[WARN] failed to list existing enforced blocks: %v", err)
+		// Continue anyway — create will fail if there's a conflict
+	}
+
+	// Build a map of existing enforced blocks by name for quick lookup
+	existingByName := make(map[string]*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlock)
+	if existingResp != nil {
+		for _, eb := range existingResp.EnforcedBlocks {
+			if eb != nil && eb.Name != "" {
+				existingByName[eb.Name] = eb
+			}
+		}
+	}
+
+	version := "1"
+
+	existing, found := existingByName[blockName]
+	if found {
+		// Enforced block already exists — check if content changed
+		if existing.LatestVersion != nil && existing.LatestVersion.BlockContent == blockContent {
+			log.Printf("[INFO] enforced block %q already up-to-date, skipping", blockName)
+			return nil
+		}
+
+		// Content changed — create a new version
+		log.Printf("[INFO] updating enforced block %q with new version", blockName)
+		_, err := bucket.client.CreateEnforcedBlockVersion(
+			ctx, existing.ID, blockContent, version, templateType, "",
+		)
+		if err != nil {
+			return fmt.Errorf("failed to create new version for enforced block %q: %w", blockName, err)
+		}
+		log.Printf("[INFO] created new version for enforced block %q", blockName)
+	} else {
+		// Create new enforced block
+		log.Printf("[INFO] creating enforced block %q for bucket %q", blockName, bucket.Name)
+		_, err := bucket.client.CreateEnforcedBlock(
+			ctx, blockName, blockContent, version, templateType, "", nil,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to create enforced block %q: %w", blockName, err)
+		}
+		log.Printf("[INFO] created enforced block %q", blockName)
+	}
+
+	return nil
 }
 
 func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {

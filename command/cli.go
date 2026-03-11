@@ -101,6 +101,8 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 
 	flags.BoolVar(&ba.ReleaseOnly, "ignore-prerelease-plugins", false, "Disable the loading of prerelease plugin binaries (x.y.z-dev).")
 
+	flags.BoolVar(&ba.SkipEnforcement, "skip-enforcement", false, "Skip injection of HCP Packer enforced provisioners. Requires admin privileges.")
+
 	ba.MetaArgs.AddFlagSets(flags)
 }
 
@@ -136,6 +138,7 @@ type BuildArgs struct {
 	ParallelBuilds                      int64
 	OnError                             string
 	ReleaseOnly                         bool
+	SkipEnforcement                     bool
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
