@@ -150,6 +150,20 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
+	// Fetch and inject enforced provisioners from HCP Packer (if configured)
+	if !cla.SkipEnforcement {
+		if err := hcpRegistry.FetchEnforcedBlocks(buildCtx); err != nil {
+			c.Ui.Error(fmt.Sprintf("Warning: failed to fetch enforced provisioners: %s", err))
+		}
+
+		diags := hcpRegistry.InjectEnforcedProvisioners(builds)
+		if diags.HasErrors() {
+			return writeDiags(c.Ui, nil, diags)
+		}
+	} else {
+		c.Ui.Say("Skipping HCP Packer enforced provisioners (--skip-enforcement flag set)")
+	}
+
 	if cla.Debug {
 		c.Ui.Say("Debug mode enabled. Builds will not be parallelized.")
 	}
@@ -456,6 +470,7 @@ Options:
   -warn-on-undeclared-var       Display warnings for user variable files containing undeclared variables.
   -ignore-prerelease-plugins    Disable the loading of prerelease plugin binaries (x.y.z-dev).
   -use-sequential-evaluation    Fallback to using a sequential approach for local/datasource evaluation.
+  -skip-enforcement             Skip injection of HCP Packer enforced provisioners.
 `
 
 	return strings.TrimSpace(helpText)

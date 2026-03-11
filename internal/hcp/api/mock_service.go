@@ -25,6 +25,11 @@ type MockPackerClientService struct {
 	UpdateChannelCalled                                                          bool
 	TrackCalledServiceMethods                                                    bool
 
+	// Enforced block tracking
+	CreateEnforcedBlockCalled, GetEnforcedBlockCalled, ListEnforcedBlocksCalled bool
+	CreateEnforcedBlockVersionCalled, GetEnforcedBlockVersionsCalled            bool
+	GetEnforcedBlocksByBucketCalled                                             bool
+
 	// Mock Creates
 	CreateBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101CreateBucketResponse
 	CreateVersionResp *hcpPackerModels.HashicorpCloudPacker20230101CreateVersionResponse
@@ -32,6 +37,20 @@ type MockPackerClientService struct {
 
 	// Mock Gets
 	GetVersionResp *hcpPackerModels.HashicorpCloudPacker20230101GetVersionResponse
+
+	// Mock enforced blocks
+	CreateEnforcedBlockResp        *hcpPackerModels.HashicorpCloudPacker20230101CreateEnforcedBlockResponse
+	CreateEnforcedBlockErr         error
+	GetEnforcedBlockResp           *hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlockResponse
+	GetEnforcedBlockErr            error
+	ListEnforcedBlocksResp         *hcpPackerModels.HashicorpCloudPacker20230101ListEnforcedBlocksResponse
+	ListEnforcedBlocksErr          error
+	CreateEnforcedBlockVersionResp *hcpPackerModels.HashicorpCloudPacker20230101CreateEnforcedBlockVersionResponse
+	CreateEnforcedBlockVersionErr  error
+	GetEnforcedBlockVersionsResp   *hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlockVersionsResponse
+	GetEnforcedBlockVersionsErr    error
+	GetEnforcedBlocksByBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse
+	GetEnforcedBlocksByBucketErr   error
 
 	ExistingBuilds      []string
 	ExistingBuildLabels map[string]string
@@ -317,6 +336,166 @@ func (svc *MockPackerClientService) PackerServiceUpdateChannel(
 			Name:       params.ChannelName,
 			BucketName: params.BucketName,
 		},
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceCreateEnforcedBlock(
+	params *hcpPackerService.PackerServiceCreateEnforcedBlockParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceCreateEnforcedBlockOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.CreateEnforcedBlockCalled = true
+	}
+
+	if svc.CreateEnforcedBlockErr != nil {
+		return nil, svc.CreateEnforcedBlockErr
+	}
+
+	ok := &hcpPackerService.PackerServiceCreateEnforcedBlockOK{}
+	if svc.CreateEnforcedBlockResp != nil {
+		ok.Payload = svc.CreateEnforcedBlockResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101CreateEnforcedBlockResponse{
+			EnforcedBlock: &hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlock{
+				ID:   "enforced-block-id",
+				Name: params.Body.Name,
+			},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceGetEnforcedBlock(
+	params *hcpPackerService.PackerServiceGetEnforcedBlockParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceGetEnforcedBlockOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.GetEnforcedBlockCalled = true
+	}
+
+	if svc.GetEnforcedBlockErr != nil {
+		return nil, svc.GetEnforcedBlockErr
+	}
+
+	ok := &hcpPackerService.PackerServiceGetEnforcedBlockOK{}
+	if svc.GetEnforcedBlockResp != nil {
+		ok.Payload = svc.GetEnforcedBlockResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlockResponse{
+			EnforcedBlock: &hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlock{
+				ID: params.EnforcedBlockID,
+			},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceListEnforcedBlocks(
+	params *hcpPackerService.PackerServiceListEnforcedBlocksParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceListEnforcedBlocksOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.ListEnforcedBlocksCalled = true
+	}
+
+	if svc.ListEnforcedBlocksErr != nil {
+		return nil, svc.ListEnforcedBlocksErr
+	}
+
+	ok := &hcpPackerService.PackerServiceListEnforcedBlocksOK{}
+	if svc.ListEnforcedBlocksResp != nil {
+		ok.Payload = svc.ListEnforcedBlocksResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101ListEnforcedBlocksResponse{
+			EnforcedBlocks: []*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlock{},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceCreateEnforcedBlockVersion(
+	params *hcpPackerService.PackerServiceCreateEnforcedBlockVersionParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceCreateEnforcedBlockVersionOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.CreateEnforcedBlockVersionCalled = true
+	}
+
+	if svc.CreateEnforcedBlockVersionErr != nil {
+		return nil, svc.CreateEnforcedBlockVersionErr
+	}
+
+	ok := &hcpPackerService.PackerServiceCreateEnforcedBlockVersionOK{}
+	if svc.CreateEnforcedBlockVersionResp != nil {
+		ok.Payload = svc.CreateEnforcedBlockVersionResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101CreateEnforcedBlockVersionResponse{
+			EnforcedBlockVersion: &hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlockVersion{
+				ID:              "enforced-block-version-id",
+				EnforcedBlockID: params.EnforcedBlockID,
+				BlockContent:    params.Body.BlockContent,
+				Version:         params.Body.Version,
+			},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceGetEnforcedBlockVersions(
+	params *hcpPackerService.PackerServiceGetEnforcedBlockVersionsParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceGetEnforcedBlockVersionsOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.GetEnforcedBlockVersionsCalled = true
+	}
+
+	if svc.GetEnforcedBlockVersionsErr != nil {
+		return nil, svc.GetEnforcedBlockVersionsErr
+	}
+
+	ok := &hcpPackerService.PackerServiceGetEnforcedBlockVersionsOK{}
+	if svc.GetEnforcedBlockVersionsResp != nil {
+		ok.Payload = svc.GetEnforcedBlockVersionsResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlockVersionsResponse{
+			EnforcedBlockDetail: []*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlockDetail{},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceGetEnforcedBlocksByBucket(
+	params *hcpPackerService.PackerServiceGetEnforcedBlocksByBucketParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceGetEnforcedBlocksByBucketOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.GetEnforcedBlocksByBucketCalled = true
+	}
+
+	if svc.GetEnforcedBlocksByBucketErr != nil {
+		return nil, svc.GetEnforcedBlocksByBucketErr
+	}
+
+	ok := &hcpPackerService.PackerServiceGetEnforcedBlocksByBucketOK{}
+	if svc.GetEnforcedBlocksByBucketResp != nil {
+		ok.Payload = svc.GetEnforcedBlocksByBucketResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse{
+			EnforcedBlockDetail: []*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlockDetail{},
+		}
 	}
 
 	return ok, nil

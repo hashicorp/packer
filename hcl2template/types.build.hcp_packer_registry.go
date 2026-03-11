@@ -6,9 +6,11 @@ package hcl2template
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
+	"github.com/hashicorp/hcl/v2/hclwrite"
 )
 
 type HCPPackerRegistryBlock struct {
@@ -96,4 +98,44 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 	par.BuildLabels = b.BuildLabels
 
 	return par, diags
+}
+
+// ExtractBuildProvisionerHCL extracts all provisioner blocks from the build
+// blocks in the configuration and returns them as raw HCL content.
+// This is used to publish provisioner configurations as enforced blocks
+// to HCP Packer, so that other builds against the same bucket will
+// automatically have these provisioners injected.
+func (cfg *PackerConfig) ExtractBuildProvisionerHCL() (string, error) {
+	sourceFiles := cfg.parser.Files()
+
+	var buf strings.Builder
+
+	for filename, file := range sourceFiles {
+		// hclwrite only supports HCL native syntax, skip JSON and variable files
+		if !strings.HasSuffix(filename, hcl2FileExt) {
+			continue
+		}
+
+		wf, diags := hclwrite.ParseConfig(file.Bytes, filename, hcl.Pos{Line: 1, Column: 1})
+		if diags.HasErrors() {
+			continue
+		}
+
+		for _, block := range wf.Body().Blocks() {
+			if block.Type() != buildLabel {
+				continue
+			}
+
+			for _, inner := range block.Body().Blocks() {
+				if inner.Type() != buildProvisionerLabel {
+					continue
+				}
+
+				buf.Write(inner.BuildTokens(nil).Bytes())
+				buf.WriteString("\n")
+			}
+		}
+	}
+
+	return strings.TrimSpace(buf.String()), nil
 }
