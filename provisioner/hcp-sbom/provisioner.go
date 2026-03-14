@@ -32,6 +32,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/guestexec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
@@ -415,22 +416,41 @@ func (p *Provisioner) provisionWithNativeGeneration(
 ) error {
 	ui.Say("Starting Automatic SBOM generation workflow...")
 
-	// Step 1: Download scanner binary
+	// Step 1: Download scanner binary with retry logic (max 3 attempts)
+	// Make the entire download + checksum verification atomic
+	var scannerLocalPath string
 	ui.Say("Downloading scanner binary...")
-	scannerLocalPath, err := p.downloadScanner(ctx, ui, osType, osArch)
+	err := retry.Config{
+		Tries:      3,
+		RetryDelay: func() time.Duration { return 10 * time.Second },
+	}.Run(ctx, func(ctx context.Context) error {
+		// Download the scanner
+		path, err := p.downloadScanner(ctx, ui, osType, osArch)
+		if err != nil {
+			log.Printf("[WARN] Scanner download failed, will retry: %s", err)
+			return err
+		}
+
+		// Verify checksum if provided (part of atomic operation)
+		if p.config.ScannerChecksum != "" {
+			if err := p.verifyChecksum(path); err != nil {
+				log.Printf("[WARN] Checksum verification failed, will retry: %s", err)
+				os.Remove(path) // Clean up failed download
+				return err
+			}
+			log.Printf("[INFO] Checksum verification passed")
+		}
+
+		scannerLocalPath = path
+		return nil
+	})
+
 	if err != nil {
-		return fmt.Errorf("failed to download scanner: %s", err)
+		return fmt.Errorf("failed to download and verify scanner after retries: %s", err)
 	}
 	defer os.Remove(scannerLocalPath)
 
-	// Step 2: Verify checksum if provided
-	if p.config.ScannerChecksum != "" {
-		ui.Say("Verifying scanner checksum...")
-		if err := p.verifyChecksum(scannerLocalPath); err != nil {
-			return fmt.Errorf("checksum verification failed: %s", err)
-		}
-		ui.Say("Checksum verification passed")
-	}
+	ui.Say(fmt.Sprintf("Scanner ready at: %s", scannerLocalPath))
 
 	// Step 3: Upload scanner to remote
 	ui.Say("Uploading scanner to remote host...")
@@ -635,7 +655,11 @@ func (p *Provisioner) mapToSyftPlatform(osType, osArch string) (string, string) 
 	return syftOS, syftArch
 }
 
-// findScannerBinary locates the scanner executable in the downloaded directory
+// findScannerBinary locates the scanner executable in the downloaded directory.
+// It handles three cases:
+// 1. Standalone binary (no archive) - used directly
+// 2. .tar.gz archive - extracted to find binary
+// 3. .zip archive - extracted to find binary
 func (p *Provisioner) findScannerBinary(dir, osType string) (string, error) {
 	osType = strings.ToLower(osType)
 
@@ -646,6 +670,7 @@ func (p *Provisioner) findScannerBinary(dir, osType string) (string, error) {
 		binaryName = "syft"
 	}
 
+	// First, try to find the binary directly (handles standalone binaries)
 	var foundPath string
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -672,7 +697,7 @@ func (p *Provisioner) findScannerBinary(dir, osType string) (string, error) {
 	}
 
 	if foundPath == "" {
-		// If not found, try to extract from tar.gz
+		// Binary not found directly, try to extract from archive (.tar.gz or .zip)
 		foundPath, err = p.extractScannerFromArchive(dir, binaryName)
 		if err != nil {
 			return "", fmt.Errorf("scanner binary '%s' not found in downloaded files", binaryName)
