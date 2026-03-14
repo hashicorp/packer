@@ -26,6 +26,9 @@ type FlatConfig struct {
 	ScannerChecksum     *string           `mapstructure:"scanner_checksum" cty:"scanner_checksum" hcl:"scanner_checksum"`
 	ScannerArgs         []string          `mapstructure:"scanner_args" cty:"scanner_args" hcl:"scanner_args"`
 	ScanPath            *string           `mapstructure:"scan_path" cty:"scan_path" hcl:"scan_path"`
+	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
+	ElevatedUser        *string           `mapstructure:"elevated_user" cty:"elevated_user" hcl:"elevated_user"`
+	ElevatedPassword    *string           `mapstructure:"elevated_password" cty:"elevated_password" hcl:"elevated_password"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
@@ -56,6 +59,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"scanner_checksum":           &hcldec.AttrSpec{Name: "scanner_checksum", Type: cty.String, Required: false},
 		"scanner_args":               &hcldec.AttrSpec{Name: "scanner_args", Type: cty.List(cty.String), Required: false},
 		"scan_path":                  &hcldec.AttrSpec{Name: "scan_path", Type: cty.String, Required: false},
+		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
+		"elevated_user":              &hcldec.AttrSpec{Name: "elevated_user", Type: cty.String, Required: false},
+		"elevated_password":          &hcldec.AttrSpec{Name: "elevated_password", Type: cty.String, Required: false},
 	}
 	return s
 }

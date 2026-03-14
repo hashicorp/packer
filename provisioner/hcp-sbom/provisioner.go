@@ -8,6 +8,7 @@ package hcp_sbom
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"context"
@@ -29,6 +30,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/guestexec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
@@ -54,32 +56,60 @@ type Config struct {
 	// This value must be between three and 36 characters from the following set: `[A-Za-z0-9_-]`.
 	// You must specify a unique name for each build in an artifact version.
 	SbomName string `mapstructure:"sbom_name"`
-	
+
 	// Native SBOM generation configuration
 	// Enable automatic SBOM generation by downloading and running a scanner tool on the remote host
 	AutoGenerate bool `mapstructure:"auto_generate"`
-	
+
 	// URL to scanner tool (supports go-getter syntax: HTTP, local files, Git, S3, etc.)
 	// If empty and auto_generate is true, Syft will be auto-downloaded based on detected OS/Arch
 	ScannerURL string `mapstructure:"scanner_url"`
-	
+
 	// Expected SHA256 checksum of scanner binary for verification
 	// If provided, scanner_url must also be specified
 	ScannerChecksum string `mapstructure:"scanner_checksum"`
-	
+
 	// Arguments to pass to the scanner tool
 	// Default for Syft: ["-o", "cyclonedx-json", "-q"]
 	ScannerArgs []string `mapstructure:"scanner_args"`
-	
+
 	// Path to scan on remote host
 	// Default: "/"
 	ScanPath string `mapstructure:"scan_path"`
-	
+
+	// The command template used to execute the scanner on the remote host.
+	// Available template variables:
+	//   {{.Path}} - Path to the scanner binary on the remote host
+	//   {{.Args}} - Scanner arguments (from scanner_args)
+	//   {{.ScanPath}} - Path to scan (from scan_path)
+	//   {{.Output}} - Output file path for the SBOM
+	//
+	// Default for Unix: "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// Default for Windows: "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	//
+	// Examples:
+	//   Without sudo: "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	//   With sudo password: "chmod +x {{.Path}} && echo 'password' | sudo -S {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	//   With sudo -n (no password): "chmod +x {{.Path}} && sudo -n {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	//   With specific user: "chmod +x {{.Path}} && sudo -u myuser {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	ExecuteCommand string `mapstructure:"execute_command"`
+
+	// A username to use for elevated permissions when running the scanner on Windows.
+	// This is only used for Windows hosts when the scanner needs administrative privileges.
+	// For Unix-like systems, use execute_command with sudo instead.
+	ElevatedUser string `mapstructure:"elevated_user"`
+
+	// The password for the elevated_user. Required if elevated_user is specified.
+	// Only applicable for Windows hosts.
+	ElevatedPassword string `mapstructure:"elevated_password"`
+
 	ctx interpolate.Context
 }
 
 type Provisioner struct {
-	config Config
+	config        Config
+	communicator  packersdk.Communicator
+	generatedData map[string]interface{}
 }
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
@@ -94,7 +124,9 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 		Interpolate:        true,
 		InterpolateContext: &p.config.ctx,
 		InterpolateFilter: &interpolate.RenderFilter{
-			Exclude: []string{},
+			Exclude: []string{
+				"execute_command",
+			},
 		},
 	}, raws...)
 	if err != nil {
@@ -117,10 +149,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 				"-q", // Quiet mode - suppress non-essential output
 			}
 		}
-		
+
+		// Set default execute_command if not provided
+		// Note: This will be further customized based on OS at runtime
+		if p.config.ExecuteCommand == "" {
+			p.config.ExecuteCommand = "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+		}
+
 		// Validate: if checksum is provided, URL must also be provided
 		if p.config.ScannerChecksum != "" && p.config.ScannerURL == "" {
 			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_checksum requires scanner_url to be specified"))
+		}
+
+		// Validate elevated user configuration (Windows only)
+		if p.config.ElevatedUser == "" && p.config.ElevatedPassword != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("elevated_user must be specified if elevated_password is provided"))
 		}
 	} else {
 		// Traditional mode: source is required
@@ -172,6 +215,9 @@ func (p *Provisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
+	// Store communicator and generatedData for elevated execution
+	p.communicator = comm
+	p.generatedData = generatedData
 	log.Println("Starting to provision with `hcp-sbom` provisioner")
 
 	if generatedData == nil {
@@ -187,14 +233,13 @@ func (p *Provisioner) Provision(
 	}
 
 	// Native generation enabled
-	ui.Say("Native SBOM generation enabled")
+	ui.Say("Automatic SBOM generation enabled")
 
 	var osType, osArch string
 	var err error
 
 	// Only detect OS if scanner_url is NOT provided
 	if p.config.ScannerURL == "" {
-		ui.Say("No scanner URL provided, detecting remote OS/Arch...")
 		osType, osArch, err = p.detectRemoteOS(ctx, ui, comm, generatedData)
 		if err != nil {
 			ui.Error(fmt.Sprintf("Failed to detect remote OS: %s", err))
@@ -203,7 +248,6 @@ func (p *Provisioner) Provision(
 		}
 		ui.Say(fmt.Sprintf("Detected: OS=%s, Arch=%s", osType, osArch))
 	} else {
-		ui.Say("Scanner URL provided, skipping OS detection")
 		// User provided scanner URL, assume they know their platform
 		osType = "unknown"
 		osArch = "unknown"
@@ -250,7 +294,6 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	// First check if already detected (from generatedData)
 	if osType, ok := generatedData["OSType"].(string); ok {
 		if osArch, ok := generatedData["OSArch"].(string); ok {
-			ui.Say("Using previously detected OS information from generated data")
 			return osType, osArch, nil
 		}
 	}
@@ -365,13 +408,12 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-
 // provisionWithNativeGeneration handles the new native SBOM generation flow
 func (p *Provisioner) provisionWithNativeGeneration(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{}, osType, osArch string,
 ) error {
-	ui.Say("Starting native SBOM generation workflow...")
+	ui.Say("Starting Automatic SBOM generation workflow...")
 
 	// Step 1: Download scanner binary
 	ui.Say("Downloading scanner binary...")
@@ -419,7 +461,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 		return fmt.Errorf("failed to process SBOM: %s", err)
 	}
 
-	ui.Say("Native SBOM generation completed successfully")
+	ui.Say("Automatic SBOM generation completed successfully")
 	return nil
 }
 
@@ -451,7 +493,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 
 	// Use go-getter to download
 	client := &getter.Client{}
-	
+
 	req := &getter.Request{
 		Src: downloadURL,
 		Dst: tmpDir,
@@ -487,14 +529,22 @@ func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
 	version := p.getLatestSyftVersion()
 	if version == "" {
 		// Fallback to a known stable version if API call fails
-		log.Printf("[WARN] Failed to fetch latest Syft version, using fallback v0.100.0")
-		version = "v0.100.0"
+		log.Printf("[WARN] Failed to fetch latest Syft version, using fallback v1.42.2")
+		version = "v1.42.2"
+	}
+
+	// Determine file extension based on OS
+	// Windows uses .zip, Unix-like systems use .tar.gz
+	fileExt := ".tar.gz"
+	if strings.Contains(strings.ToLower(osType), "windows") {
+		fileExt = ".zip"
 	}
 
 	// Construct GitHub release URL
 	// Example: https://github.com/anchore/syft/releases/download/v0.100.0/syft_0.100.0_linux_amd64.tar.gz
+	// Example: https://github.com/anchore/syft/releases/download/v0.100.0/syft_0.100.0_windows_amd64.zip
 	versionNum := strings.TrimPrefix(version, "v")
-	fileName := fmt.Sprintf("syft_%s_%s_%s.tar.gz", versionNum, syftOS, syftArch)
+	fileName := fmt.Sprintf("syft_%s_%s_%s%s", versionNum, syftOS, syftArch, fileExt)
 
 	return fmt.Sprintf("https://github.com/anchore/syft/releases/download/%s/%s",
 		version, fileName)
@@ -632,25 +682,41 @@ func (p *Provisioner) findScannerBinary(dir, osType string) (string, error) {
 	return foundPath, nil
 }
 
-// extractScannerFromArchive extracts the scanner binary from a tar.gz archive
+// extractScannerFromArchive extracts the scanner binary from a tar.gz or zip archive
 func (p *Provisioner) extractScannerFromArchive(dir, binaryName string) (string, error) {
-	// Find tar.gz file
+	// Find archive file (.tar.gz or .zip)
 	var archivePath string
+	var isZip bool
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() && strings.HasSuffix(path, ".tar.gz") {
-			archivePath = path
-			return filepath.SkipDir
+		if !info.IsDir() {
+			if strings.HasSuffix(path, ".tar.gz") {
+				archivePath = path
+				isZip = false
+				return filepath.SkipDir
+			} else if strings.HasSuffix(path, ".zip") {
+				archivePath = path
+				isZip = true
+				return filepath.SkipDir
+			}
 		}
 		return nil
 	})
 
 	if archivePath == "" {
-		return "", fmt.Errorf("no tar.gz archive found")
+		return "", fmt.Errorf("no tar.gz or zip archive found")
 	}
 
+	if isZip {
+		return p.extractFromZip(archivePath, dir, binaryName)
+	}
+	return p.extractFromTarGz(archivePath, dir, binaryName)
+}
+
+// extractFromTarGz extracts a binary from a tar.gz archive
+func (p *Provisioner) extractFromTarGz(archivePath, dir, binaryName string) (string, error) {
 	// Open and extract
 	file, err := os.Open(archivePath)
 	if err != nil {
@@ -699,7 +765,50 @@ func (p *Provisioner) extractScannerFromArchive(dir, binaryName string) (string,
 		}
 	}
 
-	return "", fmt.Errorf("binary '%s' not found in archive", binaryName)
+	return "", fmt.Errorf("binary '%s' not found in tar.gz archive", binaryName)
+}
+
+// extractFromZip extracts a binary from a zip archive
+func (p *Provisioner) extractFromZip(archivePath, dir, binaryName string) (string, error) {
+	// Open zip file
+	zipReader, err := zip.OpenReader(archivePath)
+	if err != nil {
+		return "", err
+	}
+	defer zipReader.Close()
+
+	// Find and extract the binary
+	for _, file := range zipReader.File {
+		if filepath.Base(file.Name) == binaryName {
+			// Open file in zip
+			rc, err := file.Open()
+			if err != nil {
+				return "", err
+			}
+			defer rc.Close()
+
+			// Create temporary file for the binary
+			tmpBinary, err := os.CreateTemp(dir, "syft-binary-*")
+			if err != nil {
+				return "", err
+			}
+			defer tmpBinary.Close()
+
+			// Copy binary content
+			if _, err := io.Copy(tmpBinary, rc); err != nil {
+				return "", err
+			}
+
+			// Make executable (important for Unix, no-op on Windows)
+			if err := os.Chmod(tmpBinary.Name(), 0755); err != nil {
+				return "", err
+			}
+
+			return tmpBinary.Name(), nil
+		}
+	}
+
+	return "", fmt.Errorf("binary '%s' not found in zip archive", binaryName)
 }
 
 // copyScannerToTemp copies the scanner binary to a permanent temp location
@@ -758,11 +867,10 @@ func (p *Provisioner) verifyChecksum(filePath string) error {
 	return nil
 }
 
-
 // uploadScanner uploads the scanner binary to the remote host
 func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, localPath, osType string) (string, error) {
-	
+
 	// Determine remote path based on OS
 	var remotePath string
 	if strings.Contains(strings.ToLower(osType), "windows") {
@@ -804,24 +912,51 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 // runScanner executes the scanner on the remote host
 func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, scannerPath, osType string) (string, error) {
-	
+
 	// Determine output path based on OS
 	var outputPath string
-	if strings.Contains(strings.ToLower(osType), "windows") {
+	isWindows := strings.Contains(strings.ToLower(osType), "windows")
+	if isWindows {
 		outputPath = "C:\\Windows\\Temp\\packer-sbom.json"
 	} else {
 		outputPath = "/tmp/packer-sbom.json"
 	}
 
-	// Build scanner command
-	args := append(p.config.ScannerArgs, p.config.ScanPath)
-	
-	// Add output redirection
-	var cmdStr string
-	if strings.Contains(strings.ToLower(osType), "windows") {
-		cmdStr = fmt.Sprintf("%s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
-	} else {
-		cmdStr = fmt.Sprintf("sudo %s %s > %s", scannerPath, strings.Join(args, " "), outputPath)
+	// Prepare template data
+	templateData := make(map[string]interface{})
+	// Copy generatedData
+	for k, v := range p.generatedData {
+		templateData[k] = v
+	}
+	// Add scanner-specific data
+	templateData["Path"] = scannerPath
+	templateData["Args"] = strings.Join(p.config.ScannerArgs, " ")
+	templateData["ScanPath"] = p.config.ScanPath
+	templateData["Output"] = outputPath
+
+	p.config.ctx.Data = templateData
+
+	// Use Windows-specific default if on Windows and user hasn't customized
+	executeCommand := p.config.ExecuteCommand
+	if isWindows && executeCommand == "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}" {
+		// User didn't customize, use Windows default (no sudo on Windows)
+		executeCommand = "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	}
+
+	// Render the execute command template
+	cmdStr, err := interpolate.Render(executeCommand, &p.config.ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to render execute_command: %s", err)
+	}
+
+	// For Windows with elevated user, wrap command with elevated runner
+	if isWindows && p.config.ElevatedUser != "" {
+		ui.Say(fmt.Sprintf("Using elevated user '%s' for scanner execution", p.config.ElevatedUser))
+		elevatedCmd, err := guestexec.GenerateElevatedRunner(cmdStr, p)
+		if err != nil {
+			return "", fmt.Errorf("failed to generate elevated runner: %s", err)
+		}
+		cmdStr = elevatedCmd
 	}
 
 	ui.Say(fmt.Sprintf("Executing: %s", cmdStr))
@@ -858,10 +993,10 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 // downloadSBOM downloads the SBOM file from the remote host
 func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) ([]byte, error) {
-	
+
 	var buf bytes.Buffer
 	ui.Say(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
-	
+
 	if err := comm.Download(remotePath, &buf); err != nil {
 		return nil, fmt.Errorf("failed to download SBOM: %s", err)
 	}
@@ -877,13 +1012,13 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 // cleanupRemoteFile removes a file from the remote host
 func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) {
-	
+
 	if remotePath == "" {
 		return
 	}
 
 	ui.Say(fmt.Sprintf("Cleaning up remote file: %s", remotePath))
-	
+
 	// Determine delete command based on path
 	var cmdStr string
 	if strings.Contains(remotePath, "C:\\") || strings.Contains(remotePath, "c:\\") {
@@ -949,4 +1084,22 @@ func (p *Provisioner) processSBOMForHCP(generatedData map[string]interface{}, sb
 	}
 
 	return nil
+}
+
+// Communicator returns the communicator for elevated execution
+func (p *Provisioner) Communicator() packersdk.Communicator {
+	return p.communicator
+}
+
+// ElevatedUser returns the elevated user for Windows execution
+func (p *Provisioner) ElevatedUser() string {
+	return p.config.ElevatedUser
+}
+
+// ElevatedPassword returns the elevated password for Windows execution
+func (p *Provisioner) ElevatedPassword() string {
+	// Interpolate password if needed
+	p.config.ctx.Data = p.generatedData
+	elevatedPassword, _ := interpolate.Render(p.config.ElevatedPassword, &p.config.ctx)
+	return elevatedPassword
 }
