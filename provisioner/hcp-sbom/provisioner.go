@@ -42,67 +42,98 @@ type Config struct {
 
 	// The file path or URL to the SBOM file in the Packer artifact.
 	// This file must either be in the SPDX or CycloneDX format.
-	// Not required if auto_generate is true.
-	Source string `mapstructure:"source"`
+	// Not required if `auto_generate` is true.
+	Source string `mapstructure:"source" required:"true"`
 
 	// The path on the local machine to store a copy of the SBOM file.
 	// You can specify an absolute or a path relative to the working directory
 	// when you execute the Packer build. If the file already exists on the
 	// local machine, Packer overwrites the file. If the destination is a
 	// directory, the directory must already exist.
-	Destination string `mapstructure:"destination"`
+	Destination string `mapstructure:"destination" required:"false"`
 
 	// The name of the SBOM file stored in HCP Packer.
 	// If omitted, HCP Packer uses the build fingerprint as the file name.
-	// This value must be between three and 36 characters from the following set: `[A-Za-z0-9_-]`.
-	// You must specify a unique name for each build in an artifact version.
-	SbomName string `mapstructure:"sbom_name"`
+	// This value must be between three and 36 characters from the following
+	// set: `[A-Za-z0-9_-]`. You must specify a unique name for each build in
+	// an artifact version.
+	SbomName string `mapstructure:"sbom_name" required:"false"`
 
-	// Native SBOM generation configuration
-	// Enable automatic SBOM generation by downloading and running a scanner tool on the remote host
-	AutoGenerate bool `mapstructure:"auto_generate"`
+	// Enable automatic SBOM generation by downloading and running a scanner
+	// tool on the remote host. When enabled, the provisioner will detect the
+	// remote OS and architecture, download an appropriate scanner (Syft by
+	// default), and execute it to generate an SBOM. Not required if `source`
+	// is provided.
+	AutoGenerate bool `mapstructure:"auto_generate" required:"false"`
 
-	// URL to scanner tool (supports go-getter syntax: HTTP, local files, Git, S3, etc.)
-	// If empty and auto_generate is true, Syft will be auto-downloaded based on detected OS/Arch
-	ScannerURL string `mapstructure:"scanner_url"`
+	// URL to scanner tool. Supports go-getter syntax including HTTP, local
+	// files, Git, S3, etc. If empty and `auto_generate` is true, Syft will be
+	// automatically downloaded based on detected OS and architecture. When
+	// specified, only direct binary URLs are supported (archives are not
+	// extracted).
+	ScannerURL string `mapstructure:"scanner_url" required:"false"`
 
-	// Expected SHA256 checksum of scanner binary for verification
-	// If provided, scanner_url must also be specified
-	ScannerChecksum string `mapstructure:"scanner_checksum"`
+	// Expected SHA256 checksum of scanner binary for verification. Provide as
+	// a hex string without prefix, for example: `abc123def456...`. If
+	// provided, `scanner_url` must also be specified. The checksum is verified
+	// after download and before upload to the remote host.
+	ScannerChecksum string `mapstructure:"scanner_checksum" required:"false"`
 
-	// Arguments to pass to the scanner tool
-	// Default for Syft: ["-o", "cyclonedx-json", "-q"]
-	ScannerArgs []string `mapstructure:"scanner_args"`
+	// Arguments to pass to the scanner tool. Default for Syft:
+	// `["-o", "cyclonedx-json", "-q"]`.
+	ScannerArgs []string `mapstructure:"scanner_args" required:"false"`
 
-	// Path to scan on remote host
-	// Default: "/"
-	ScanPath string `mapstructure:"scan_path"`
+	// Path to scan on remote host. Defaults to `/` (root directory).
+	ScanPath string `mapstructure:"scan_path" required:"false"`
 
 	// The command template used to execute the scanner on the remote host.
 	// Available template variables:
-	//   {{.Path}} - Path to the scanner binary on the remote host
-	//   {{.Args}} - Scanner arguments (from scanner_args)
-	//   {{.ScanPath}} - Path to scan (from scan_path)
-	//   {{.Output}} - Output file path for the SBOM
 	//
-	// Default for Unix: "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	// Default for Windows: "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// - `{{.Path}}` - Path to the scanner binary on the remote host
+	// - `{{.Args}}` - Scanner arguments (from `scanner_args`)
+	// - `{{.ScanPath}}` - Path to scan (from `scan_path`)
+	// - `{{.Output}}` - Output file path for the SBOM
+	//
+	// Default for Unix: `chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}`
+	//
+	// Default for Windows: `{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}`
 	//
 	// Examples:
-	//   Without sudo: "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	//   With sudo password: "chmod +x {{.Path}} && echo 'password' | sudo -S {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	//   With sudo -n (no password): "chmod +x {{.Path}} && sudo -n {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	//   With specific user: "chmod +x {{.Path}} && sudo -u myuser {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	ExecuteCommand string `mapstructure:"execute_command"`
+	//
+	// Without sudo:
+	//
+	// ``` hcl
+	// execute_command = "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// ```
+	//
+	// With sudo password:
+	//
+	// ``` hcl
+	// execute_command = "chmod +x {{.Path}} && echo 'password' | sudo -S {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// ```
+	//
+	// With sudo -n (no password):
+	//
+	// ``` hcl
+	// execute_command = "chmod +x {{.Path}} && sudo -n {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// ```
+	//
+	// With specific user:
+	//
+	// ``` hcl
+	// execute_command = "chmod +x {{.Path}} && sudo -u myuser {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// ```
+	ExecuteCommand string `mapstructure:"execute_command" required:"false"`
 
-	// A username to use for elevated permissions when running the scanner on Windows.
-	// This is only used for Windows hosts when the scanner needs administrative privileges.
-	// For Unix-like systems, use execute_command with sudo instead.
-	ElevatedUser string `mapstructure:"elevated_user"`
+	// A username to use for elevated permissions when running the scanner on
+	// Windows. This is only used for Windows hosts when the scanner needs
+	// administrative privileges. For Unix-like systems, use `execute_command`
+	// with sudo instead.
+	ElevatedUser string `mapstructure:"elevated_user" required:"false"`
 
-	// The password for the elevated_user. Required if elevated_user is specified.
-	// Only applicable for Windows hosts.
-	ElevatedPassword string `mapstructure:"elevated_password"`
+	// The password for the `elevated_user`. Required if `elevated_user` is
+	// specified. Only applicable for Windows hosts.
+	ElevatedPassword string `mapstructure:"elevated_password" required:"false"`
 
 	ctx interpolate.Context
 }

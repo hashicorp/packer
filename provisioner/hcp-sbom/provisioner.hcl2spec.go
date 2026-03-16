@@ -18,17 +18,17 @@ type FlatConfig struct {
 	PackerOnError       *string           `mapstructure:"packer_on_error" cty:"packer_on_error" hcl:"packer_on_error"`
 	PackerUserVars      map[string]string `mapstructure:"packer_user_variables" cty:"packer_user_variables" hcl:"packer_user_variables"`
 	PackerSensitiveVars []string          `mapstructure:"packer_sensitive_variables" cty:"packer_sensitive_variables" hcl:"packer_sensitive_variables"`
-	Source              *string           `mapstructure:"source" cty:"source" hcl:"source"`
-	Destination         *string           `mapstructure:"destination" cty:"destination" hcl:"destination"`
-	SbomName            *string           `mapstructure:"sbom_name" cty:"sbom_name" hcl:"sbom_name"`
-	AutoGenerate        *bool             `mapstructure:"auto_generate" cty:"auto_generate" hcl:"auto_generate"`
-	ScannerURL          *string           `mapstructure:"scanner_url" cty:"scanner_url" hcl:"scanner_url"`
-	ScannerChecksum     *string           `mapstructure:"scanner_checksum" cty:"scanner_checksum" hcl:"scanner_checksum"`
-	ScannerArgs         []string          `mapstructure:"scanner_args" cty:"scanner_args" hcl:"scanner_args"`
-	ScanPath            *string           `mapstructure:"scan_path" cty:"scan_path" hcl:"scan_path"`
-	ExecuteCommand      *string           `mapstructure:"execute_command" cty:"execute_command" hcl:"execute_command"`
-	ElevatedUser        *string           `mapstructure:"elevated_user" cty:"elevated_user" hcl:"elevated_user"`
-	ElevatedPassword    *string           `mapstructure:"elevated_password" cty:"elevated_password" hcl:"elevated_password"`
+	Source              *string           `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
+	Destination         *string           `mapstructure:"destination" required:"false" cty:"destination" hcl:"destination"`
+	SbomName            *string           `mapstructure:"sbom_name" required:"false" cty:"sbom_name" hcl:"sbom_name"`
+	AutoGenerate        *bool             `mapstructure:"auto_generate" required:"false" cty:"auto_generate" hcl:"auto_generate"`
+	ScannerURL          *string           `mapstructure:"scanner_url" required:"false" cty:"scanner_url" hcl:"scanner_url"`
+	ScannerChecksum     *string           `mapstructure:"scanner_checksum" required:"false" cty:"scanner_checksum" hcl:"scanner_checksum"`
+	ScannerArgs         []string          `mapstructure:"scanner_args" required:"false" cty:"scanner_args" hcl:"scanner_args"`
+	ScanPath            *string           `mapstructure:"scan_path" required:"false" cty:"scan_path" hcl:"scan_path"`
+	ExecuteCommand      *string           `mapstructure:"execute_command" required:"false" cty:"execute_command" hcl:"execute_command"`
+	ElevatedUser        *string           `mapstructure:"elevated_user" required:"false" cty:"elevated_user" hcl:"elevated_user"`
+	ElevatedPassword    *string           `mapstructure:"elevated_password" required:"false" cty:"elevated_password" hcl:"elevated_password"`
 }
 
 // FlatMapstructure returns a new FlatConfig.
