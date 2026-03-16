@@ -167,9 +167,14 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	var errs error
 
+	// Validate that source and auto_generate are mutually exclusive
+	if p.config.Source != "" && p.config.AutoGenerate {
+		errs = packersdk.MultiErrorAppend(errs, errors.New("source and auto_generate are mutually exclusive; use either source for pre-generated SBOMs or auto_generate to create them"))
+	}
+
 	// Validate based on mode
 	if p.config.AutoGenerate {
-		// Native generation mode: source is optional
+		// Native generation mode: source must not be set
 		// Set defaults
 		if p.config.ScanPath == "" {
 			p.config.ScanPath = "/"
@@ -200,7 +205,30 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	} else {
 		// Traditional mode: source is required
 		if p.config.Source == "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified (or enable auto_generate)"))
+			errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified when auto_generate is not enabled"))
+		}
+
+		// Validate that scanner-related fields are not used without auto_generate
+		if p.config.ScannerURL != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_url can only be used when auto_generate is enabled"))
+		}
+		if p.config.ScannerChecksum != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_checksum can only be used when auto_generate is enabled"))
+		}
+		if len(p.config.ScannerArgs) > 0 {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_args can only be used when auto_generate is enabled"))
+		}
+		if p.config.ScanPath != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("scan_path can only be used when auto_generate is enabled"))
+		}
+		if p.config.ExecuteCommand != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("execute_command can only be used when auto_generate is enabled"))
+		}
+		if p.config.ElevatedUser != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("elevated_user can only be used when auto_generate is enabled"))
+		}
+		if p.config.ElevatedPassword != "" {
+			errs = packersdk.MultiErrorAppend(errs, errors.New("elevated_password can only be used when auto_generate is enabled"))
 		}
 	}
 
