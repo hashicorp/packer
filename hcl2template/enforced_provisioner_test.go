@@ -104,6 +104,63 @@ provisioner "shell" {
 			wantTypes:    nil,
 			wantErr:      true,
 		},
+		{
+			name: "json single shell provisioner",
+			blockContent: `{
+  "provisioner": [
+    {
+      "shell": {
+        "inline": ["echo 'Hello from enforced provisioner JSON'"]
+      }
+    }
+  ]
+}`,
+			wantCount: 1,
+			wantTypes: []string{"shell"},
+			wantErr:   false,
+		},
+		{
+			name: "json multiple provisioners",
+			blockContent: `{
+  "provisioner": [
+    {
+      "shell": {
+        "inline": ["echo 'first'"]
+      }
+    },
+    {
+      "shell": {
+        "name": "security-scan",
+        "inline": ["echo 'second'"]
+      }
+    }
+  ]
+}`,
+			wantCount: 2,
+			wantTypes: []string{"shell", "shell"},
+			wantErr:   false,
+		},
+		{
+			name:         "invalid json syntax",
+			blockContent: `{"provisioner": [ { "shell": { "inline": ["test"] } ] }`,
+			wantCount:    0,
+			wantTypes:    nil,
+			wantErr:      true,
+		},
+		{
+			name: "legacy json provisioners format",
+			blockContent: `{
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo legacy json format"]
+    }
+  ]
+}`,
+			wantCount: 1,
+			wantTypes: []string{"shell"},
+			wantErr:   false,
+		},
 	}
 
 	for _, tt := range tests {
@@ -208,5 +265,45 @@ provisioner "shell" {
 	// Skip should return false for sources in the only list
 	if blocks[0].OnlyExcept.Skip("amazon-ebs.ubuntu") {
 		t.Error("Skip() should return false for source in only list")
+	}
+}
+
+func TestParseProvisionerBlocksJSONWithOptions(t *testing.T) {
+	blockContent := `{
+  "provisioner": [
+    {
+      "shell": {
+        "pause_before": "15s",
+        "max_retries": 2,
+        "only": ["docker.ubuntu"],
+        "inline": ["echo 'json test'"]
+      }
+    }
+  ]
+}`
+
+	blocks, diags := ParseProvisionerBlocks(blockContent)
+	if diags.HasErrors() {
+		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
+	}
+
+	if len(blocks) != 1 {
+		t.Fatalf("Expected 1 block, got %d", len(blocks))
+	}
+
+	if blocks[0].PauseBefore.Seconds() != 15 {
+		t.Errorf("Expected PauseBefore=15s, got %v", blocks[0].PauseBefore)
+	}
+
+	if blocks[0].MaxRetries != 2 {
+		t.Errorf("Expected MaxRetries=2, got %d", blocks[0].MaxRetries)
+	}
+
+	if blocks[0].OnlyExcept.Skip("docker.ubuntu") {
+		t.Error("Skip() should return false for source in only list")
+	}
+
+	if !blocks[0].OnlyExcept.Skip("null.test") {
+		t.Error("Skip() should return true for source not in only list")
 	}
 }

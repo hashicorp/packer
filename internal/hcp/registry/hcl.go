@@ -43,21 +43,6 @@ func (h *HCLRegistry) PopulateVersion(ctx context.Context) error {
 		return err
 	}
 
-	// Extract provisioner blocks from the build and publish them as enforced
-	// blocks to HCP Packer, so other builds against the same bucket will
-	// automatically have these provisioners injected.
-	blockContent, err := h.configuration.ExtractBuildProvisionerHCL()
-	if err != nil {
-		log.Printf("[WARN] failed to extract provisioner blocks for enforced publishing: %v", err)
-	} else if blockContent != "" {
-		blockName := h.bucket.Name + "-provisioners"
-		if pubErr := h.bucket.PublishEnforcedBlocks(
-			ctx, blockName, blockContent, hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2,
-		); pubErr != nil {
-			log.Printf("[WARN] failed to publish enforced blocks for bucket %q: %v", h.bucket.Name, pubErr)
-		}
-	}
-
 	err = h.bucket.populateVersion(ctx)
 	if err != nil {
 		return err
@@ -137,7 +122,7 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 		}
 
 		if len(provBlocks) > 0 {
-			h.ui.Say(fmt.Sprintf("Loaded %d enforced provisioner(s) from HCP block %q", len(provBlocks), eb.Name))
+			h.ui.Say(fmt.Sprintf("Loaded %d enforced provisioner(s) from HCP block %q and template type %q", len(provBlocks), eb.Name, eb.TemplateType))
 		}
 
 		// Inject into each build
@@ -156,10 +141,10 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 					continue
 				}
 
-				log.Printf("[INFO] injecting enforced provisioner %q from block %q into build %q",
-					pb.PType, eb.Name, build.Name())
-
 				build.Provisioners = append(build.Provisioners, coreProv)
+
+				log.Printf("[INFO] injected enforced provisioner %q from block %q into build %q",
+					pb.PType, eb.Name, build.Name())
 			}
 		}
 	}
