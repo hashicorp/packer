@@ -486,16 +486,21 @@ func (p *Provisioner) provisionWithNativeGeneration(
 }
 
 // downloadScanner downloads the scanner binary using go-getter
+// If scanner_url is provided: downloads binary directly (no archive extraction)
+// If scanner_url is empty: auto-downloads Syft archive and extracts it
+// For Windows auto-download: returns zip file path for remote extraction (optimization)
+// For Unix auto-download: extracts and returns the binary path
 func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	osType, osArch string) (string, error) {
 	var downloadURL string
+	isCustomURL := p.config.ScannerURL != ""
 
-	// If user provided a URL, use it
-	if p.config.ScannerURL != "" {
+	// If user provided a URL, use it (expect direct binary, not archive)
+	if isCustomURL {
 		downloadURL = p.config.ScannerURL
 		ui.Say(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
 	} else {
-		// Default to Syft from GitHub releases
+		// Default to Syft from GitHub releases (archive format)
 		if osType == "unknown" || osArch == "unknown" {
 			return "", fmt.Errorf("cannot auto-download scanner: OS/Arch unknown (provide scanner_url)")
 		}
@@ -503,6 +508,8 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		downloadURL = p.buildDefaultSyftURL(osType, osArch)
 		ui.Say(fmt.Sprintf("Download URL: %s", downloadURL))
 	}
+
+	isWindows := strings.Contains(strings.ToLower(osType), "windows")
 
 	// Create temporary directory for download
 	tmpDir, err := os.MkdirTemp("", "packer-scanner-*")
@@ -514,17 +521,76 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	// Use go-getter to download
 	client := &getter.Client{}
 
+	// For Windows auto-download (Syft): disable decompression to keep the zip file intact
+	// This optimization allows us to upload the zip and extract remotely (faster than uploading extracted binary)
+	if isWindows && !isCustomURL {
+		client.Decompressors = map[string]getter.Decompressor{}
+	}
+
 	req := &getter.Request{
 		Src: downloadURL,
 		Dst: tmpDir,
 	}
 
-	ui.Say("Downloading scanner binary...")
+	ui.Say("Downloading scanner...")
 	if _, err := client.Get(ctx, req); err != nil {
 		return "", fmt.Errorf("failed to download scanner: %s", err)
 	}
 
-	// Find the scanner binary in the downloaded files
+	// If custom URL provided, expect a direct binary (no extraction needed)
+	if isCustomURL {
+		// Find the downloaded binary
+		var binaryPath string
+		filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() {
+				binaryPath = path
+				return filepath.SkipDir
+			}
+			return nil
+		})
+
+		if binaryPath == "" {
+			return "", fmt.Errorf("no file found in download")
+		}
+
+		// Copy to permanent temp location
+		return p.copyScannerToTemp(binaryPath)
+	}
+
+	// Auto-download (Syft): handle archive extraction
+	// For Windows: return the zip file path for remote extraction (faster upload)
+	if isWindows {
+		// Find the zip file
+		var zipPath string
+		filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() && strings.HasSuffix(strings.ToLower(path), ".zip") {
+				zipPath = path
+				return filepath.SkipDir
+			}
+			return nil
+		})
+
+		if zipPath == "" {
+			return "", fmt.Errorf("no zip file found in downloaded files")
+		}
+
+		// Copy zip to a permanent temp location using existing helper
+		finalPath, err := p.copyScannerToTemp(zipPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to copy zip file: %s", err)
+		}
+
+		ui.Say(fmt.Sprintf("Scanner zip ready: %s (will extract on remote)", finalPath))
+		return finalPath, nil
+	}
+
+	// For Unix: extract and return binary path (existing behavior)
 	scannerPath, err := p.findScannerBinary(tmpDir, osType)
 	if err != nil {
 		return "", fmt.Errorf("failed to locate scanner binary: %s", err)
@@ -893,12 +959,93 @@ func (p *Provisioner) verifyChecksum(filePath string) error {
 }
 
 // uploadScanner uploads the scanner binary to the remote host
+// For Windows: uploads zip file and extracts remotely (optimization for slow WinRM uploads)
+// For Unix: uploads binary directly
 func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, localPath, osType string) (string, error) {
 
-	// Determine remote path based on OS
+	isWindows := strings.Contains(strings.ToLower(osType), "windows")
+	isZipFile := strings.HasSuffix(strings.ToLower(localPath), ".zip")
+
+	// Windows optimization: upload zip and extract remotely
+	if isWindows && isZipFile {
+		ui.Say("Uploading scanner zip file...")
+
+		// Upload zip to remote
+		remoteZipPath := "C:\\Windows\\Temp\\packer-sbom-scanner.zip"
+		zipFile, err := os.Open(localPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to open scanner zip: %s", err)
+		}
+		defer zipFile.Close()
+
+		ui.Say(fmt.Sprintf("Uploading zip to %s...", remoteZipPath))
+		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
+			return "", fmt.Errorf("failed to upload scanner zip: %s", err)
+		}
+
+		// Extract zip on remote using PowerShell
+		extractDir := "C:\\Windows\\Temp\\packer-sbom-scanner"
+
+		// Simplified extraction command
+		extractCmd := fmt.Sprintf(
+			"powershell -Command \"Expand-Archive -Path '%s' -DestinationPath '%s' -Force\"",
+			remoteZipPath, extractDir,
+		)
+
+		ui.Say("Extracting scanner on remote host...")
+		cmd := &packersdk.RemoteCmd{Command: extractCmd}
+		if err := comm.Start(ctx, cmd); err != nil {
+			return "", fmt.Errorf("failed to extract scanner: %s", err)
+		}
+		cmd.Wait()
+
+		if cmd.ExitStatus() != 0 {
+			return "", fmt.Errorf("extraction failed with exit status %d", cmd.ExitStatus())
+		}
+
+		// Find the executable in extracted files
+		// Look for any .exe file (could be syft.exe, grype.exe, or custom scanner)
+		findCmd := fmt.Sprintf(
+			"powershell -Command \"Get-ChildItem -Path '%s' -Recurse -Filter '*.exe' | Select-Object -First 1 -ExpandProperty FullName\"",
+			extractDir,
+		)
+
+		ui.Say("Locating scanner executable in extracted files...")
+		var stdout bytes.Buffer
+		findCmdExec := &packersdk.RemoteCmd{
+			Command: findCmd,
+			Stdout:  &stdout,
+		}
+		if err := comm.Start(ctx, findCmdExec); err != nil {
+			return "", fmt.Errorf("failed to locate scanner executable: %s", err)
+		}
+		findCmdExec.Wait()
+
+		if findCmdExec.ExitStatus() != 0 {
+			return "", fmt.Errorf("failed to find scanner executable in extracted files (exit status %d)", findCmdExec.ExitStatus())
+		}
+
+		remoteBinaryPath := strings.TrimSpace(stdout.String())
+		if remoteBinaryPath == "" {
+			return "", fmt.Errorf("no executable (.exe) found in extracted files")
+		}
+
+		// Clean up zip file
+		cleanupCmd := &packersdk.RemoteCmd{
+			Command: fmt.Sprintf("del \"%s\"", remoteZipPath),
+		}
+		comm.Start(ctx, cleanupCmd)
+		cleanupCmd.Wait()
+
+		ui.Say(fmt.Sprintf("Scanner ready at: %s", remoteBinaryPath))
+		// Return format: "DIR:extractDir|EXE:actualPath" so cleanup knows to remove the directory
+		return fmt.Sprintf("DIR:%s|EXE:%s", extractDir, remoteBinaryPath), nil
+	}
+
+	// Standard upload for Unix or non-zip Windows files
 	var remotePath string
-	if strings.Contains(strings.ToLower(osType), "windows") {
+	if isWindows {
 		remotePath = "C:\\Windows\\Temp\\packer-sbom-scanner.exe"
 	} else {
 		remotePath = "/tmp/packer-sbom-scanner"
@@ -918,7 +1065,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	}
 
 	// Make executable on Unix-like systems
-	if !strings.Contains(strings.ToLower(osType), "windows") {
+	if !isWindows {
 		cmd := &packersdk.RemoteCmd{
 			Command: fmt.Sprintf("chmod +x %s", remotePath),
 		}
@@ -938,6 +1085,16 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, scannerPath, osType string) (string, error) {
 
+	// Parse scanner path if it's in special format (Windows zip extraction)
+	// Format: "DIR:extractDir|EXE:actualPath"
+	actualScannerPath := scannerPath
+	if strings.Contains(scannerPath, "DIR:") && strings.Contains(scannerPath, "|EXE:") {
+		parts := strings.Split(scannerPath, "|EXE:")
+		if len(parts) == 2 {
+			actualScannerPath = parts[1]
+		}
+	}
+
 	// Determine output path based on OS
 	var outputPath string
 	isWindows := strings.Contains(strings.ToLower(osType), "windows")
@@ -954,7 +1111,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		templateData[k] = v
 	}
 	// Add scanner-specific data
-	templateData["Path"] = scannerPath
+	templateData["Path"] = actualScannerPath
 	templateData["Args"] = strings.Join(p.config.ScannerArgs, " ")
 	templateData["ScanPath"] = p.config.ScanPath
 	templateData["Output"] = outputPath
@@ -1034,7 +1191,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	return buf.Bytes(), nil
 }
 
-// cleanupRemoteFile removes a file from the remote host
+// cleanupRemoteFile removes a file or directory from the remote host
 func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) {
 
@@ -1042,14 +1199,32 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		return
 	}
 
-	ui.Say(fmt.Sprintf("Cleaning up remote file: %s", remotePath))
-
-	// Determine delete command based on path
-	var cmdStr string
-	if strings.Contains(remotePath, "C:\\") || strings.Contains(remotePath, "c:\\") {
-		cmdStr = fmt.Sprintf("del /F /Q %s", remotePath)
+	// Check if this is a special format path (Windows zip extraction)
+	// Format: "DIR:extractDir|EXE:actualPath"
+	var cleanupPath string
+	var isDirectory bool
+	if strings.Contains(remotePath, "DIR:") && strings.Contains(remotePath, "|EXE:") {
+		// Extract the directory path
+		parts := strings.Split(remotePath, "|EXE:")
+		dirPart := strings.TrimPrefix(parts[0], "DIR:")
+		cleanupPath = dirPart
+		isDirectory = true
+		ui.Say(fmt.Sprintf("Cleaning up extraction directory: %s", cleanupPath))
 	} else {
-		cmdStr = fmt.Sprintf("rm -f %s", remotePath)
+		cleanupPath = remotePath
+		isDirectory = false
+		ui.Say(fmt.Sprintf("Cleaning up remote file: %s", cleanupPath))
+	}
+
+	// Determine delete command based on type and path
+	var cmdStr string
+	if isDirectory {
+		// Windows directory removal
+		cmdStr = fmt.Sprintf("powershell -Command \"Remove-Item -Path '%s' -Recurse -Force\"", cleanupPath)
+	} else if strings.Contains(cleanupPath, "C:\\") || strings.Contains(cleanupPath, "c:\\") {
+		cmdStr = fmt.Sprintf("del /F /Q %s", cleanupPath)
+	} else {
+		cmdStr = fmt.Sprintf("rm -f %s", cleanupPath)
 	}
 
 	cmd := &packersdk.RemoteCmd{
@@ -1057,7 +1232,7 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 	}
 
 	if err := comm.Start(ctx, cmd); err != nil {
-		ui.Error(fmt.Sprintf("Failed to cleanup remote file %s: %s", remotePath, err))
+		ui.Error(fmt.Sprintf("Failed to cleanup: %s", err))
 		return
 	}
 
