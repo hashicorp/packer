@@ -36,7 +36,9 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 		ectx = p.evalContext.NewChild()
 		buildValues := map[string]cty.Value{}
 		if !p.evalContext.Variables[buildAccessor].IsNull() {
-			buildValues = p.evalContext.Variables[buildAccessor].AsValueMap()
+			for k, v := range p.evalContext.Variables[buildAccessor].AsValueMap() {
+				buildValues[k] = v
+			}
 		}
 		for k, v := range buildVars {
 			val, err := ConvertPluginConfigValueToHCLValue(v)

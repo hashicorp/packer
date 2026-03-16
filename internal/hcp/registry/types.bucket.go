@@ -36,6 +36,7 @@ type EnforcedBlock struct {
 	BlockContent string // Raw HCL content containing provisioner blocks
 	VersionID    string
 	Version      string
+	TemplateType string
 }
 
 // Bucket represents a single bucket on the HCP Packer registry.
@@ -160,6 +161,8 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 		return errors.New("bucket client not initialized, call Initialize first")
 	}
 
+	log.Printf("[INFO] fetching enforced blocks linked to bucket %q", bucket.Name)
+
 	resp, err := bucket.client.GetEnforcedBlocksForBucket(ctx, bucket.Name)
 	if err != nil {
 		// If the API doesn't support enforced blocks yet or returns not found, continue silently
@@ -168,6 +171,7 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 	}
 
 	if resp == nil {
+		log.Printf("[INFO] no enforced blocks response returned for bucket %q", bucket.Name)
 		return nil
 	}
 
@@ -184,10 +188,20 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 			VersionID:    detail.Version.ID,
 			Version:      detail.Version.Version,
 		}
+
+		if detail.Version.TemplateType != nil {
+			block.TemplateType = string(*detail.Version.TemplateType)
+		}
 		bucket.EnforcedBlocks = append(bucket.EnforcedBlocks, block)
+		log.Printf("[INFO] linked enforced block found for bucket %q: name=%q id=%q version=%q",
+			bucket.Name, block.Name, block.ID, block.Version)
 	}
 
-	log.Printf("[INFO] fetched %d enforced block(s) for bucket %q", len(bucket.EnforcedBlocks), bucket.Name)
+	if len(bucket.EnforcedBlocks) == 0 {
+		log.Printf("[INFO] no enforced provisioner blocks linked to bucket %q", bucket.Name)
+	}
+
+	log.Printf("[INFO] fetched %d enforced block(s) linked to bucket %q", len(bucket.EnforcedBlocks), bucket.Name)
 	return nil
 }
 
@@ -247,15 +261,8 @@ func (bucket *Bucket) PublishEnforcedBlocks(
 		}
 		log.Printf("[INFO] created new version for enforced block %q", blockName)
 	} else {
-		// Create new enforced block
-		log.Printf("[INFO] creating enforced block %q for bucket %q", blockName, bucket.Name)
-		_, err := bucket.client.CreateEnforcedBlock(
-			ctx, blockName, blockContent, version, templateType, "", nil,
-		)
-		if err != nil {
-			return fmt.Errorf("failed to create enforced block %q: %w", blockName, err)
-		}
-		log.Printf("[INFO] created enforced block %q", blockName)
+		// Requirement: do not create enforced blocks from CLI.
+		log.Printf("[INFO] enforced block %q does not exist; skipping creation for bucket %q", blockName, bucket.Name)
 	}
 
 	return nil
