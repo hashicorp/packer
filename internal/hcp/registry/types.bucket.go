@@ -205,69 +205,6 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 	return nil
 }
 
-// PublishEnforcedBlocks publishes the given provisioner block content as an enforced block
-// on HCP Packer, linked to this bucket. If an enforced block with the given name already
-// exists and the content has changed, a new version is created. If it doesn't exist,
-// a new enforced block is created.
-func (bucket *Bucket) PublishEnforcedBlocks(
-	ctx context.Context,
-	blockName string,
-	blockContent string,
-	templateType hcpPackerModels.HashicorpCloudPacker20230101TemplateType,
-) error {
-	if bucket.client == nil {
-		return errors.New("bucket client not initialized, call Initialize first")
-	}
-
-	if blockContent == "" {
-		log.Printf("[DEBUG] no provisioner content to publish as enforced blocks for bucket %q", bucket.Name)
-		return nil
-	}
-
-	// List existing enforced blocks to check for duplicates
-	existingResp, err := bucket.client.ListEnforcedBlocks(ctx)
-	if err != nil {
-		log.Printf("[WARN] failed to list existing enforced blocks: %v", err)
-		// Continue anyway — create will fail if there's a conflict
-	}
-
-	// Build a map of existing enforced blocks by name for quick lookup
-	existingByName := make(map[string]*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlock)
-	if existingResp != nil {
-		for _, eb := range existingResp.EnforcedBlocks {
-			if eb != nil && eb.Name != "" {
-				existingByName[eb.Name] = eb
-			}
-		}
-	}
-
-	version := "1"
-
-	existing, found := existingByName[blockName]
-	if found {
-		// Enforced block already exists — check if content changed
-		if existing.LatestVersion != nil && existing.LatestVersion.BlockContent == blockContent {
-			log.Printf("[INFO] enforced block %q already up-to-date, skipping", blockName)
-			return nil
-		}
-
-		// Content changed — create a new version
-		log.Printf("[INFO] updating enforced block %q with new version", blockName)
-		_, err := bucket.client.CreateEnforcedBlockVersion(
-			ctx, existing.ID, blockContent, version, templateType, "",
-		)
-		if err != nil {
-			return fmt.Errorf("failed to create new version for enforced block %q: %w", blockName, err)
-		}
-		log.Printf("[INFO] created new version for enforced block %q", blockName)
-	} else {
-		// Requirement: do not create enforced blocks from CLI.
-		log.Printf("[INFO] enforced block %q does not exist; skipping creation for bucket %q", blockName, bucket.Name)
-	}
-
-	return nil
-}
-
 func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {
 	if bucket == nil {
 		return
