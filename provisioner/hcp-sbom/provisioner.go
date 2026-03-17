@@ -494,7 +494,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 		if p.config.ScannerChecksum != "" {
 			if err := p.verifyChecksum(path); err != nil {
 				log.Printf("[WARN] Checksum verification failed, will retry: %s", err)
-				os.Remove(path) // Clean up failed download
+				_ = os.Remove(path) // Clean up failed download, ignore error
 				return err
 			}
 			log.Printf("[INFO] Checksum verification passed")
@@ -507,11 +507,13 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	if err != nil {
 		return fmt.Errorf("failed to download and verify scanner after retries: %s", err)
 	}
-	defer os.Remove(scannerLocalPath)
+	defer func() {
+		_ = os.Remove(scannerLocalPath) // Cleanup, ignore error
+	}()
 
 	ui.Say(fmt.Sprintf("Scanner ready at: %s", scannerLocalPath))
 
-	// Step 3: Upload scanner to remote
+	// Step 2: Upload scanner to remote
 	ui.Say("Uploading scanner to remote host...")
 	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerLocalPath, osType)
 	if err != nil {
@@ -519,7 +521,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	}
 	defer p.cleanupRemoteFile(ctx, ui, comm, remoteScannerPath)
 
-	// Step 4: Run scanner on remote
+	// Step 3: Run scanner on remote
 	ui.Say(fmt.Sprintf("Running scanner on remote host (scanning %s)...", p.config.ScanPath))
 	remoteSBOMPath, err := p.runScanner(ctx, ui, comm, remoteScannerPath, osType)
 	if err != nil {
@@ -527,14 +529,14 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	}
 	defer p.cleanupRemoteFile(ctx, ui, comm, remoteSBOMPath)
 
-	// Step 5: Download SBOM from remote
+	// Step 4: Download SBOM from remote
 	ui.Say("Downloading SBOM from remote host...")
 	sbomData, err := p.downloadSBOM(ctx, ui, comm, remoteSBOMPath)
 	if err != nil {
 		return fmt.Errorf("failed to download SBOM: %s", err)
 	}
 
-	// Step 6: Process SBOM for HCP (validate, compress, store)
+	// Step 5: Process SBOM for HCP (validate, compress, store)
 	ui.Say("Processing SBOM for HCP Packer...")
 	if err := p.processSBOMForHCP(generatedData, sbomData); err != nil {
 		return fmt.Errorf("failed to process SBOM: %s", err)
@@ -575,7 +577,9 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp directory: %s", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir) // Cleanup, ignore error
+	}()
 
 	// Use go-getter to download
 	client := &getter.Client{}
@@ -600,7 +604,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	if isCustomURL {
 		// Find the downloaded binary
 		var binaryPath string
-		filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+		_ = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -624,7 +628,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	if isWindows {
 		// Find the zip file
 		var zipPath string
-		filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+		_ = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -722,7 +726,9 @@ func (p *Provisioner) getLatestSyftVersion() string {
 		log.Printf("[WARN] Failed to fetch latest Syft version: %s", err)
 		return ""
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close() // Cleanup, ignore error
+	}()
 
 	// Check status code
 	if resp.StatusCode != http.StatusOK {
@@ -837,7 +843,7 @@ func (p *Provisioner) extractScannerFromArchive(dir, binaryName string) (string,
 	// Find archive file (.tar.gz or .zip)
 	var archivePath string
 	var isZip bool
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -872,13 +878,17 @@ func (p *Provisioner) extractFromTarGz(archivePath, dir, binaryName string) (str
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close() // Cleanup, ignore error
+	}()
 
 	gzr, err := gzip.NewReader(file)
 	if err != nil {
 		return "", err
 	}
-	defer gzr.Close()
+	defer func() {
+		_ = gzr.Close() // Cleanup, ignore error
+	}()
 
 	tr := tar.NewReader(gzr)
 
@@ -899,7 +909,9 @@ func (p *Provisioner) extractFromTarGz(archivePath, dir, binaryName string) (str
 			if err != nil {
 				return "", err
 			}
-			defer tmpBinary.Close()
+			defer func() {
+				_ = tmpBinary.Close() // Cleanup, ignore error
+			}()
 
 			// Copy binary content
 			if _, err := io.Copy(tmpBinary, tr); err != nil {
@@ -925,7 +937,9 @@ func (p *Provisioner) extractFromZip(archivePath, dir, binaryName string) (strin
 	if err != nil {
 		return "", err
 	}
-	defer zipReader.Close()
+	defer func() {
+		_ = zipReader.Close() // Cleanup, ignore error
+	}()
 
 	// Find and extract the binary
 	for _, file := range zipReader.File {
@@ -935,14 +949,18 @@ func (p *Provisioner) extractFromZip(archivePath, dir, binaryName string) (strin
 			if err != nil {
 				return "", err
 			}
-			defer rc.Close()
+			defer func() {
+				_ = rc.Close() // Cleanup, ignore error
+			}()
 
 			// Create temporary file for the binary
 			tmpBinary, err := os.CreateTemp(dir, "syft-binary-*")
 			if err != nil {
 				return "", err
 			}
-			defer tmpBinary.Close()
+			defer func() {
+				_ = tmpBinary.Close() // Cleanup, ignore error
+			}()
 
 			// Copy binary content
 			if _, err := io.Copy(tmpBinary, rc); err != nil {
@@ -968,14 +986,18 @@ func (p *Provisioner) copyScannerToTemp(srcPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer tmpFile.Close()
+	defer func() {
+		_ = tmpFile.Close() // Cleanup, ignore error
+	}()
 
 	// Open source
 	src, err := os.Open(srcPath)
 	if err != nil {
 		return "", err
 	}
-	defer src.Close()
+	defer func() {
+		_ = src.Close() // Cleanup, ignore error
+	}()
 
 	// Copy
 	if _, err := io.Copy(tmpFile, src); err != nil {
@@ -997,7 +1019,9 @@ func (p *Provisioner) verifyChecksum(filePath string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close() // Cleanup, ignore error
+	}()
 
 	// Calculate SHA256
 	hash := sha256.New()
@@ -1036,7 +1060,9 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 		if err != nil {
 			return "", fmt.Errorf("failed to open scanner zip: %s", err)
 		}
-		defer zipFile.Close()
+		defer func() {
+			_ = zipFile.Close() // Cleanup, ignore error
+		}()
 
 		ui.Say(fmt.Sprintf("Uploading zip to %s...", remoteZipPath))
 		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
@@ -1094,7 +1120,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 		cleanupCmd := &packersdk.RemoteCmd{
 			Command: fmt.Sprintf("del \"%s\"", remoteZipPath),
 		}
-		comm.Start(ctx, cleanupCmd)
+		_ = comm.Start(ctx, cleanupCmd) // Best effort cleanup, ignore error
 		cleanupCmd.Wait()
 
 		ui.Say(fmt.Sprintf("Scanner ready at: %s", remoteBinaryPath))
@@ -1115,7 +1141,9 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	if err != nil {
 		return "", fmt.Errorf("failed to open local scanner: %s", err)
 	}
-	defer localFile.Close()
+	defer func() {
+		_ = localFile.Close() // Cleanup, ignore error
+	}()
 
 	// Upload to remote
 	ui.Say(fmt.Sprintf("Uploading scanner to %s...", remotePath))
@@ -1320,7 +1348,9 @@ func (p *Provisioner) processSBOMForHCP(generatedData map[string]interface{}, sb
 	if err != nil {
 		return fmt.Errorf("failed to create output file %q: %s", pkrDst, err)
 	}
-	defer outFile.Close()
+	defer func() {
+		_ = outFile.Close() // Cleanup, ignore error
+	}()
 
 	err = json.NewEncoder(outFile).Encode(PackerSBOM{
 		RawSBOM: sbomData,

@@ -298,7 +298,11 @@ func (p *SBOMInternalProvisioner) Provision(
 	if err != nil {
 		return fmt.Errorf("failed to open Packer SBOM file %q: %s", tmpFileName, err)
 	}
-	defer packerSbom.Close()
+	defer func() {
+		if err := packerSbom.Close(); err != nil {
+			log.Printf("[WARN] Failed to close Packer SBOM file: %s", err)
+		}
+	}()
 
 	provisionerOut := &hcpSbomProvisioner.PackerSBOM{}
 	err = json.NewDecoder(packerSbom).Decode(provisionerOut)
