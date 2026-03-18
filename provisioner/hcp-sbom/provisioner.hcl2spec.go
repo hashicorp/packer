@@ -21,7 +21,7 @@ type FlatConfig struct {
 	Source              *string           `mapstructure:"source" required:"true" cty:"source" hcl:"source"`
 	Destination         *string           `mapstructure:"destination" required:"false" cty:"destination" hcl:"destination"`
 	SbomName            *string           `mapstructure:"sbom_name" required:"false" cty:"sbom_name" hcl:"sbom_name"`
-	AutoGenerate        *bool             `mapstructure:"auto_generate" required:"false" cty:"auto_generate" hcl:"auto_generate"`
+	AutoGenerate        *bool             `mapstructure:"auto_generate" required:"true" cty:"auto_generate" hcl:"auto_generate"`
 	ScannerURL          *string           `mapstructure:"scanner_url" required:"false" cty:"scanner_url" hcl:"scanner_url"`
 	ScannerChecksum     *string           `mapstructure:"scanner_checksum" required:"false" cty:"scanner_checksum" hcl:"scanner_checksum"`
 	ScannerArgs         []string          `mapstructure:"scanner_args" required:"false" cty:"scanner_args" hcl:"scanner_args"`

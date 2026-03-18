@@ -43,6 +43,8 @@ type Config struct {
 	// The file path or URL to the SBOM file in the Packer artifact.
 	// This file must either be in the SPDX or CycloneDX format.
 	// Not required if `auto_generate` is true.
+	//
+	// -> **Note:** You must specify either `source` OR `auto_generate`, but not both. These options are mutually exclusive.
 	Source string `mapstructure:"source" required:"true"`
 
 	// The path on the local machine to store a copy of the SBOM file.
@@ -64,7 +66,9 @@ type Config struct {
 	// remote OS and architecture, download an appropriate scanner (Syft by
 	// default), and execute it to generate an SBOM. Not required if `source`
 	// is provided.
-	AutoGenerate bool `mapstructure:"auto_generate" required:"false"`
+	//
+	// -> **Note:** You must specify either `source` OR `auto_generate`, but not both. These options are mutually exclusive.
+	AutoGenerate bool `mapstructure:"auto_generate" required:"true"`
 
 	// URL to scanner tool. Supports go-getter syntax including HTTP, local
 	// files, Git, S3, etc. If empty and `auto_generate` is true, Syft will be
@@ -148,6 +152,10 @@ func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.config.FlatMapstructure().HCL2Spec()
 }
 
+func (p *Provisioner) FlatConfig() interface{} {
+	return p.config.FlatMapstructure()
+}
+
 var sbomFormatRegexp = regexp.MustCompile("^[0-9A-Za-z-]{3,36}$")
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
@@ -208,28 +216,8 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errs = packersdk.MultiErrorAppend(errs, errors.New("source must be specified when auto_generate is not enabled"))
 		}
 
-		// Validate that scanner-related fields are not used without auto_generate
-		if p.config.ScannerURL != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_url can only be used when auto_generate is enabled"))
-		}
-		if p.config.ScannerChecksum != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_checksum can only be used when auto_generate is enabled"))
-		}
-		if len(p.config.ScannerArgs) > 0 {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_args can only be used when auto_generate is enabled"))
-		}
-		if p.config.ScanPath != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("scan_path can only be used when auto_generate is enabled"))
-		}
-		if p.config.ExecuteCommand != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("execute_command can only be used when auto_generate is enabled"))
-		}
-		if p.config.ElevatedUser != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("elevated_user can only be used when auto_generate is enabled"))
-		}
-		if p.config.ElevatedPassword != "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("elevated_password can only be used when auto_generate is enabled"))
-		}
+		// Note: Scanner-related fields are allowed in source mode to support
+		// toggling auto_generate without clearing configuration fields
 	}
 
 	if p.config.SbomName != "" && !sbomFormatRegexp.MatchString(p.config.SbomName) {
@@ -468,21 +456,12 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-// provisionWithNativeGeneration handles the new native SBOM generation flow
-func (p *Provisioner) provisionWithNativeGeneration(
-	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{}, osType, osArch string,
-) error {
-	ui.Say("Starting Automatic SBOM generation workflow...")
-
-	// Step 1: Download scanner binary with retry logic (max 3 attempts)
-	// Make the entire download + checksum verification atomic
-	var scannerLocalPath string
-	ui.Say("Downloading scanner binary...")
-	err := retry.Config{
-		Tries:      3,
-		RetryDelay: func() time.Duration { return 10 * time.Second },
-	}.Run(ctx, func(ctx context.Context) error {
+// downloadAndVerifyScanner is the retry callback for downloading and verifying the scanner binary.
+// It performs atomic download + checksum verification to ensure consistency.
+func (p *Provisioner) downloadAndVerifyScanner(
+	ctx context.Context, ui packersdk.Ui, osType, osArch string, scannerPath *string,
+) func(context.Context) error {
+	return func(ctx context.Context) error {
 		// Download the scanner
 		path, err := p.downloadScanner(ctx, ui, osType, osArch)
 		if err != nil {
@@ -500,9 +479,26 @@ func (p *Provisioner) provisionWithNativeGeneration(
 			log.Printf("[INFO] Checksum verification passed")
 		}
 
-		scannerLocalPath = path
+		*scannerPath = path
 		return nil
-	})
+	}
+}
+
+// provisionWithNativeGeneration handles the new native SBOM generation flow
+func (p *Provisioner) provisionWithNativeGeneration(
+	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
+	generatedData map[string]interface{}, osType, osArch string,
+) error {
+	ui.Say("Starting Automatic SBOM generation workflow...")
+
+	// Step 1: Download scanner binary with retry logic (max 3 attempts)
+	// Make the entire download + checksum verification atomic
+	var scannerLocalPath string
+	ui.Say("Downloading scanner binary...")
+	err := retry.Config{
+		Tries:      3,
+		RetryDelay: func() time.Duration { return 10 * time.Second },
+	}.Run(ctx, p.downloadAndVerifyScanner(ctx, ui, osType, osArch, &scannerLocalPath))
 
 	if err != nil {
 		return fmt.Errorf("failed to download and verify scanner after retries: %s", err)
@@ -1309,7 +1305,8 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		// Windows directory removal
 		cmdStr = fmt.Sprintf("powershell -Command \"Remove-Item -Path '%s' -Recurse -Force\"", cleanupPath)
 	} else if strings.Contains(cleanupPath, "C:\\") || strings.Contains(cleanupPath, "c:\\") {
-		cmdStr = fmt.Sprintf("del /F /Q %s", cleanupPath)
+		// Quote path for Windows to handle spaces
+		cmdStr = fmt.Sprintf("del /F /Q \"%s\"", cleanupPath)
 	} else {
 		cmdStr = fmt.Sprintf("rm -f %s", cleanupPath)
 	}

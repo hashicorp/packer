@@ -254,7 +254,13 @@ type SBOMInternalProvisioner struct {
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.Provisioner.ConfigSpec() }
-func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return nil }
+func (p *SBOMInternalProvisioner) FlatConfig() interface{} {
+	// Try to delegate to inner provisioner if it implements FlatConfig
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() interface{} }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
 
 func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
