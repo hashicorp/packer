@@ -42,9 +42,7 @@ type Config struct {
 
 	// The file path or URL to the SBOM file in the Packer artifact.
 	// This file must either be in the SPDX or CycloneDX format.
-	// Not required if `auto_generate` is true.
-	//
-	// -> **Note:** You must specify either `source` OR `auto_generate`, but not both. These options are mutually exclusive.
+	// Mutually exclusive with `auto_generate`.
 	Source string `mapstructure:"source" required:"true"`
 
 	// The path on the local machine to store a copy of the SBOM file.
@@ -64,10 +62,8 @@ type Config struct {
 	// Enable automatic SBOM generation by downloading and running a scanner
 	// tool on the remote host. When enabled, the provisioner will detect the
 	// remote OS and architecture, download an appropriate scanner (Syft by
-	// default), and execute it to generate an SBOM. Not required if `source`
-	// is provided.
-	//
-	// -> **Note:** You must specify either `source` OR `auto_generate`, but not both. These options are mutually exclusive.
+	// default), and execute it to generate an SBOM.
+	// Mutually exclusive with `source`.
 	AutoGenerate bool `mapstructure:"auto_generate" required:"true"`
 
 	// URL to scanner tool. Supports go-getter syntax including HTTP, local
