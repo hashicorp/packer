@@ -22,12 +22,13 @@ func init() {
 }
 
 // TimestampFunc constructs a function that returns a string representation of the current date and time.
+// It uses initTime so the value remains constant across the entire build, including post-processors.
 var TimestampFunc = function.New(&function.Spec{
 	Params:       []function.Parameter{},
 	Type:         function.StaticReturnType(cty.String),
 	RefineResult: refineNotNull,
 	Impl: func(args []cty.Value, retType cty.Type) (cty.Value, error) {
-		return cty.StringVal(time.Now().UTC().Format(time.RFC3339)), nil
+		return cty.StringVal(initTime.Format(time.RFC3339)), nil
 	},
 })
 
