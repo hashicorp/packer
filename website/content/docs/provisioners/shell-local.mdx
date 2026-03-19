@@ -125,7 +125,7 @@ Optional parameters:
   it is necessary below.
 
 - `execute_command` (array of strings) - The command used to execute the
-  script. By default this is `["/bin/sh", "-c", "{{.Vars}}", "{{.Script}}"]`
+  script. By default this is `["/bin/sh", "-c", "{{.Vars}} {{.Script}}"]`
   on Unix and `["cmd", "/c", "{{.Vars}}", "{{.Script}}"]` on Windows. This is
   treated as a [template engine](/packer/docs/templates/legacy_json_templates/engine). There are two
   available variables: `Script`, which is the path to the script to run, and
