@@ -452,32 +452,30 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-// downloadAndVerifyScanner is the retry callback for downloading and verifying the scanner binary.
+// downloadAndVerifyScanner downloads and verifies the scanner binary.
 // It performs atomic download + checksum verification to ensure consistency.
 func (p *Provisioner) downloadAndVerifyScanner(
 	ctx context.Context, ui packersdk.Ui, osType, osArch string, scannerPath *string,
-) func(context.Context) error {
-	return func(ctx context.Context) error {
-		// Download the scanner
-		path, err := p.downloadScanner(ctx, ui, osType, osArch)
-		if err != nil {
-			log.Printf("[WARN] Scanner download failed, will retry: %s", err)
+) error {
+	// Download the scanner
+	path, err := p.downloadScanner(ctx, ui, osType, osArch)
+	if err != nil {
+		log.Printf("[WARN] Scanner download failed, will retry: %s", err)
+		return err
+	}
+
+	// Verify checksum if provided (part of atomic operation)
+	if p.config.ScannerChecksum != "" {
+		if err := p.verifyChecksum(path); err != nil {
+			log.Printf("[WARN] Checksum verification failed, will retry: %s", err)
+			_ = os.Remove(path) // Clean up failed download, ignore error
 			return err
 		}
-
-		// Verify checksum if provided (part of atomic operation)
-		if p.config.ScannerChecksum != "" {
-			if err := p.verifyChecksum(path); err != nil {
-				log.Printf("[WARN] Checksum verification failed, will retry: %s", err)
-				_ = os.Remove(path) // Clean up failed download, ignore error
-				return err
-			}
-			log.Printf("[INFO] Checksum verification passed")
-		}
-
-		*scannerPath = path
-		return nil
+		log.Printf("[INFO] Checksum verification passed")
 	}
+
+	*scannerPath = path
+	return nil
 }
 
 // provisionWithNativeGeneration handles the new native SBOM generation flow
@@ -494,7 +492,9 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	err := retry.Config{
 		Tries:      3,
 		RetryDelay: func() time.Duration { return 10 * time.Second },
-	}.Run(ctx, p.downloadAndVerifyScanner(ctx, ui, osType, osArch, &scannerLocalPath))
+	}.Run(ctx, func(ctx context.Context) error {
+		return p.downloadAndVerifyScanner(ctx, ui, osType, osArch, &scannerLocalPath)
+	})
 
 	if err != nil {
 		return fmt.Errorf("failed to download and verify scanner after retries: %s", err)
