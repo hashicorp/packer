@@ -6,12 +6,9 @@ package hcl2template
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
-	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/zclconf/go-cty/cty"
 )
 
 type HCPPackerRegistryBlock struct {
@@ -99,110 +96,4 @@ func (p *Parser) decodeHCPRegistry(block *hcl.Block, cfg *PackerConfig) (*HCPPac
 	par.BuildLabels = b.BuildLabels
 
 	return par, diags
-}
-
-// ExtractBuildProvisionerHCL extracts inline commands from all shell
-// provisioner blocks across every build block and merges them into a single
-// provisioner "shell" block. This merged block is what gets published to
-// HCP Packer as an enforced block so that other builds against the same
-// bucket automatically run these commands.
-func (cfg *PackerConfig) ExtractBuildProvisionerHCL() (string, error) {
-	sourceFiles := cfg.parser.Files()
-
-	// Re-parse source files with a fresh parser so the bodies are unconsumed.
-	freshParser := hclparse.NewParser()
-
-	buildSchema := &hcl.BodySchema{
-		Blocks: []hcl.BlockHeaderSchema{
-			{Type: buildLabel},
-		},
-	}
-	provisionerSchema := &hcl.BodySchema{
-		Blocks: []hcl.BlockHeaderSchema{
-			{Type: buildProvisionerLabel, LabelNames: []string{"type"}},
-		},
-	}
-	inlineSchema := &hcl.BodySchema{
-		Attributes: []hcl.AttributeSchema{
-			{Name: "inline"},
-		},
-	}
-
-	var allCommands []string
-
-	for filename, file := range sourceFiles {
-		if !strings.HasSuffix(filename, hcl2FileExt) {
-			continue
-		}
-
-		f, diags := freshParser.ParseHCL(file.Bytes, filename)
-		if diags.HasErrors() {
-			continue
-		}
-
-		content, _, diags := f.Body.PartialContent(buildSchema)
-		if diags.HasErrors() {
-			continue
-		}
-
-		for _, buildBlock := range content.Blocks {
-			innerContent, _, diags := buildBlock.Body.PartialContent(provisionerSchema)
-			if diags.HasErrors() {
-				continue
-			}
-
-			for _, provBlock := range innerContent.Blocks {
-				if provBlock.Labels[0] != "shell" {
-					continue
-				}
-
-				attrContent, _, diags := provBlock.Body.PartialContent(inlineSchema)
-				if diags.HasErrors() {
-					continue
-				}
-
-				inlineAttr, ok := attrContent.Attributes["inline"]
-				if !ok {
-					continue
-				}
-
-				val, diags := inlineAttr.Expr.Value(nil)
-				if diags.HasErrors() {
-					continue
-				}
-
-				if !val.CanIterateElements() {
-					continue
-				}
-
-				it := val.ElementIterator()
-				for it.Next() {
-					_, v := it.Element()
-					if v.Type() == cty.String {
-						allCommands = append(allCommands, v.AsString())
-					}
-				}
-			}
-		}
-	}
-
-	if len(allCommands) == 0 {
-		return "", nil
-	}
-
-	// Build a single merged provisioner "shell" block with all commands.
-	var buf strings.Builder
-	buf.WriteString(`provisioner "shell" {` + "\n")
-	buf.WriteString("  inline = [\n")
-	for i, cmd := range allCommands {
-		buf.WriteString(fmt.Sprintf("    %q", cmd))
-		if i < len(allCommands)-1 {
-			buf.WriteString(",")
-		}
-		buf.WriteString("\n")
-	}
-	buf.WriteString("  ]\n")
-	buf.WriteString("}\n")
-
-	return buf.String(), nil
 }
