@@ -377,7 +377,7 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	}
 
 	output := strings.TrimSpace(stdout.String())
-	log.Println(fmt.Sprintf("OS detection output: %s", output))
+	log.Printf("OS detection output: %s", output)
 
 	// Parse output
 	var osType, osArch string
@@ -421,7 +421,7 @@ func (p *Provisioner) getUserDestination() (string, error) {
 				return "", fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
 			}
 			dst = tmpFile.Name()
-			tmpFile.Close()
+			_ = tmpFile.Close() // Ignore error on close after getting name
 		}
 		return dst, nil
 	}
@@ -431,7 +431,7 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	// and create it if it doesn't already exist
 	err = os.MkdirAll(outDir, 0755)
 	if err != nil {
-		return "", fmt.Errorf("failed to create destination directory for user SBOM: %s\n", err)
+		return "", fmt.Errorf("failed to create destination directory for user SBOM: %s", err)
 	}
 
 	// Check if the destination is a directory after the previous step.
@@ -446,7 +446,7 @@ func (p *Provisioner) getUserDestination() (string, error) {
 			return "", fmt.Errorf("failed to create temporary file in user SBOM directory %s: %s", dst, err)
 		}
 		dst = tmpFile.Name()
-		tmpFile.Close()
+		_ = tmpFile.Close() // Ignore error on close after getting name
 	}
 
 	return dst, nil
@@ -503,7 +503,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 		_ = os.Remove(scannerLocalPath) // Cleanup, ignore error
 	}()
 
-	log.Println(fmt.Sprintf("Scanner ready at: %s", scannerLocalPath))
+	log.Printf("Scanner ready at: %s", scannerLocalPath)
 
 	// Step 2: Upload scanner to remote
 	log.Println("Uploading scanner to remote host...")
@@ -551,15 +551,15 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	// If user provided a URL, use it (expect direct binary, not archive)
 	if isCustomURL {
 		downloadURL = p.config.ScannerURL
-		log.Println(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
+		log.Printf("Using custom scanner URL: %s", downloadURL)
 	} else {
 		// Default to Syft from GitHub releases (archive format)
 		if osType == "unknown" || osArch == "unknown" {
 			return "", fmt.Errorf("cannot auto-download scanner: OS/Arch unknown (provide scanner_url)")
 		}
-		log.Println(fmt.Sprintf("Fetching latest Syft version for %s/%s...", osType, osArch))
+		log.Printf("Fetching latest Syft version for %s/%s...", osType, osArch)
 		downloadURL = p.buildDefaultSyftURL(osType, osArch)
-		log.Println(fmt.Sprintf("Download URL: %s", downloadURL))
+		log.Printf("Download URL: %s", downloadURL)
 	}
 
 	isWindows := strings.Contains(strings.ToLower(osType), "windows")
@@ -641,7 +641,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 			return "", fmt.Errorf("failed to copy zip file: %s", err)
 		}
 
-		log.Println(fmt.Sprintf("Scanner zip ready: %s (will extract on remote)", finalPath))
+		log.Printf("Scanner zip ready: %s (will extract on remote)", finalPath)
 		return finalPath, nil
 	}
 
@@ -657,7 +657,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		return "", fmt.Errorf("failed to copy scanner: %s", err)
 	}
 
-	log.Println(fmt.Sprintf("Scanner downloaded to: %s", finalPath))
+	log.Printf("Scanner downloaded to: %s", finalPath)
 	return finalPath, nil
 }
 
@@ -1079,7 +1079,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 			_ = zipFile.Close() // Cleanup, ignore error
 		}()
 
-		log.Println(fmt.Sprintf("Uploading zip to %s...", remoteZipPath))
+		log.Printf("Uploading zip to %s...", remoteZipPath)
 		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
 			return "", fmt.Errorf("failed to upload scanner zip: %s", err)
 		}
@@ -1138,7 +1138,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 		_ = comm.Start(ctx, cleanupCmd) // Best effort cleanup, ignore error
 		cleanupCmd.Wait()
 
-		log.Println(fmt.Sprintf("Scanner ready at: %s", remoteBinaryPath))
+		log.Printf("Scanner ready at: %s", remoteBinaryPath)
 		// Return format: "DIR:extractDir|EXE:actualPath" so cleanup knows to remove the directory
 		return fmt.Sprintf("DIR:%s|EXE:%s", extractDir, remoteBinaryPath), nil
 	}
@@ -1161,7 +1161,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	}()
 
 	// Upload to remote
-	log.Println(fmt.Sprintf("Uploading scanner to %s...", remotePath))
+	log.Printf("Uploading scanner to %s...", remotePath)
 	if err := comm.Upload(remotePath, localFile, nil); err != nil {
 		return "", fmt.Errorf("failed to upload scanner: %s", err)
 	}
@@ -1235,7 +1235,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 
 	// For Windows with elevated user, wrap command with elevated runner
 	if isWindows && p.config.ElevatedUser != "" {
-		log.Println(fmt.Sprintf("Using elevated user '%s' for scanner execution", p.config.ElevatedUser))
+		log.Printf("Using elevated user '%s' for scanner execution", p.config.ElevatedUser)
 		elevatedCmd, err := guestexec.GenerateElevatedRunner(cmdStr, p)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate elevated runner: %s", err)
@@ -1243,7 +1243,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		cmdStr = elevatedCmd
 	}
 
-	log.Println(fmt.Sprintf("Executing: %s", cmdStr))
+	log.Printf("Executing: %s", cmdStr)
 
 	// Execute scanner
 	var stdout, stderr bytes.Buffer
@@ -1279,7 +1279,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) ([]byte, error) {
 
 	var buf bytes.Buffer
-	log.Println(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
+	log.Printf("Downloading SBOM from %s...", remotePath)
 
 	if err := comm.Download(remotePath, &buf); err != nil {
 		return nil, fmt.Errorf("failed to download SBOM: %s", err)
@@ -1289,7 +1289,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 		return nil, fmt.Errorf("downloaded SBOM is empty")
 	}
 
-	log.Println(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
+	log.Printf("Downloaded SBOM (%d bytes)", buf.Len())
 	return buf.Bytes(), nil
 }
 
@@ -1311,11 +1311,11 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		dirPart := strings.TrimPrefix(parts[0], "DIR:")
 		cleanupPath = dirPart
 		isDirectory = true
-		log.Println(fmt.Sprintf("Cleaning up extraction directory: %s", cleanupPath))
+		log.Printf("Cleaning up extraction directory: %s", cleanupPath)
 	} else {
 		cleanupPath = remotePath
 		isDirectory = false
-		log.Println(fmt.Sprintf("Cleaning up remote file: %s", cleanupPath))
+		log.Printf("Cleaning up remote file: %s", cleanupPath)
 	}
 
 	// Determine delete command based on type and path
