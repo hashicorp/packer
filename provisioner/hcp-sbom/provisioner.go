@@ -272,7 +272,7 @@ func (p *Provisioner) Provision(
 	// Check if native generation is enabled
 	if !p.config.AutoGenerate {
 		// Original behavior: user provides SBOM file
-		ui.Say("Using existing SBOM provisioner behavior (user-provided SBOM)")
+		log.Println("Using existing SBOM provisioner behavior (user-provided SBOM)")
 		return p.provisionWithExistingSBOM(ctx, ui, comm, generatedData)
 	}
 
@@ -343,7 +343,7 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	}
 
 	// Not in generatedData, detect now
-	ui.Say("Running OS detection commands on remote host...")
+	log.Println("Running OS detection commands on remote host...")
 
 	// Get communicator type
 	connType := "ssh" // default
@@ -377,7 +377,7 @@ func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	}
 
 	output := strings.TrimSpace(stdout.String())
-	ui.Say(fmt.Sprintf("OS detection output: %s", output))
+	log.Println(fmt.Sprintf("OS detection output: %s", output))
 
 	// Parse output
 	var osType, osArch string
@@ -488,7 +488,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	// Step 1: Download scanner binary with retry logic (max 3 attempts)
 	// Make the entire download + checksum verification atomic
 	var scannerLocalPath string
-	ui.Say("Downloading scanner binary...")
+	log.Println("Downloading scanner binary...")
 	err := retry.Config{
 		Tries:      3,
 		RetryDelay: func() time.Duration { return 10 * time.Second },
@@ -503,10 +503,10 @@ func (p *Provisioner) provisionWithNativeGeneration(
 		_ = os.Remove(scannerLocalPath) // Cleanup, ignore error
 	}()
 
-	ui.Say(fmt.Sprintf("Scanner ready at: %s", scannerLocalPath))
+	log.Println(fmt.Sprintf("Scanner ready at: %s", scannerLocalPath))
 
 	// Step 2: Upload scanner to remote
-	ui.Say("Uploading scanner to remote host...")
+	log.Println("Uploading scanner to remote host...")
 	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerLocalPath, osType)
 	if err != nil {
 		return fmt.Errorf("failed to upload scanner: %s", err)
@@ -522,14 +522,14 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	defer p.cleanupRemoteFile(ctx, ui, comm, remoteSBOMPath)
 
 	// Step 4: Download SBOM from remote
-	ui.Say("Downloading SBOM from remote host...")
+	log.Println("Downloading SBOM from remote host...")
 	sbomData, err := p.downloadSBOM(ctx, ui, comm, remoteSBOMPath)
 	if err != nil {
 		return fmt.Errorf("failed to download SBOM: %s", err)
 	}
 
 	// Step 5: Process SBOM for HCP (validate, compress, store)
-	ui.Say("Processing SBOM for HCP Packer...")
+	log.Println("Processing SBOM for HCP Packer...")
 	if err := p.processSBOMForHCP(generatedData, sbomData); err != nil {
 		return fmt.Errorf("failed to process SBOM: %s", err)
 	}
@@ -551,15 +551,15 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 	// If user provided a URL, use it (expect direct binary, not archive)
 	if isCustomURL {
 		downloadURL = p.config.ScannerURL
-		ui.Say(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
+		log.Println(fmt.Sprintf("Using custom scanner URL: %s", downloadURL))
 	} else {
 		// Default to Syft from GitHub releases (archive format)
 		if osType == "unknown" || osArch == "unknown" {
 			return "", fmt.Errorf("cannot auto-download scanner: OS/Arch unknown (provide scanner_url)")
 		}
-		ui.Say(fmt.Sprintf("Fetching latest Syft version for %s/%s...", osType, osArch))
+		log.Println(fmt.Sprintf("Fetching latest Syft version for %s/%s...", osType, osArch))
 		downloadURL = p.buildDefaultSyftURL(osType, osArch)
-		ui.Say(fmt.Sprintf("Download URL: %s", downloadURL))
+		log.Println(fmt.Sprintf("Download URL: %s", downloadURL))
 	}
 
 	isWindows := strings.Contains(strings.ToLower(osType), "windows")
@@ -587,7 +587,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		Dst: tmpDir,
 	}
 
-	ui.Say("Downloading scanner...")
+	log.Println("Downloading scanner...")
 	if _, err := client.Get(ctx, req); err != nil {
 		return "", fmt.Errorf("failed to download scanner: %s", err)
 	}
@@ -641,7 +641,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 			return "", fmt.Errorf("failed to copy zip file: %s", err)
 		}
 
-		ui.Say(fmt.Sprintf("Scanner zip ready: %s (will extract on remote)", finalPath))
+		log.Println(fmt.Sprintf("Scanner zip ready: %s (will extract on remote)", finalPath))
 		return finalPath, nil
 	}
 
@@ -657,7 +657,7 @@ func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
 		return "", fmt.Errorf("failed to copy scanner: %s", err)
 	}
 
-	ui.Say(fmt.Sprintf("Scanner downloaded to: %s", finalPath))
+	log.Println(fmt.Sprintf("Scanner downloaded to: %s", finalPath))
 	return finalPath, nil
 }
 
@@ -691,60 +691,83 @@ func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
 		version, fileName)
 }
 
-// getLatestSyftVersion fetches the latest Syft release version from GitHub API
+// getLatestSyftVersion fetches the latest Syft v1.x release version from GitHub API
+// It paginates through releases to find the latest v1 version for compatibility
 func (p *Provisioner) getLatestSyftVersion() string {
-	// GitHub API endpoint for latest release
-	apiURL := "https://api.github.com/repos/anchore/syft/releases/latest"
-
 	// Create HTTP client with timeout
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 
-	// Create request
-	req, err := http.NewRequest("GET", apiURL, nil)
-	if err != nil {
-		log.Printf("[WARN] Failed to create request for Syft version: %s", err)
-		return ""
+	// Paginate through releases to find latest v1.x
+	page := 1
+	perPage := 100
+
+	for page <= 10 { // Limit to 10 pages (1000 releases) to avoid infinite loops
+		// GitHub API endpoint for releases with pagination
+		apiURL := fmt.Sprintf("https://api.github.com/repos/anchore/syft/releases?per_page=%d&page=%d", perPage, page)
+
+		// Create request
+		req, err := http.NewRequest("GET", apiURL, nil)
+		if err != nil {
+			log.Printf("[WARN] Failed to create request for Syft version: %s", err)
+			return ""
+		}
+
+		// Set User-Agent header (GitHub API requires it)
+		req.Header.Set("User-Agent", "Packer-HCP-SBOM-Provisioner")
+		req.Header.Set("Accept", "application/vnd.github.v3+json")
+
+		// Make request
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("[WARN] Failed to fetch Syft releases (page %d): %s", page, err)
+			return ""
+		}
+
+		// Check status code
+		if resp.StatusCode == http.StatusNotFound {
+			// 404 means no more pages available
+			log.Printf("[INFO] No more Syft releases available (page %d returned 404)", page)
+			_ = resp.Body.Close()
+			break
+		}
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("[WARN] GitHub API returned status %d for Syft releases (page %d)", resp.StatusCode, page)
+			_ = resp.Body.Close()
+			return ""
+		}
+
+		// Parse response
+		var releases []struct {
+			TagName string `json:"tag_name"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+			log.Printf("[WARN] Failed to parse Syft releases response (page %d): %s", page, err)
+			_ = resp.Body.Close()
+			return ""
+		}
+		_ = resp.Body.Close()
+
+		// Look for latest v1.x release
+		for _, release := range releases {
+			if strings.HasPrefix(release.TagName, "v1.") {
+				log.Printf("[INFO] Found latest Syft v1.x version: %s", release.TagName)
+				return release.TagName
+			}
+		}
+
+		// If we got fewer releases than per_page, we've reached the end
+		if len(releases) < perPage {
+			break
+		}
+
+		page++
 	}
 
-	// Set User-Agent header (GitHub API requires it)
-	req.Header.Set("User-Agent", "Packer-HCP-SBOM-Provisioner")
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
-
-	// Make request
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("[WARN] Failed to fetch latest Syft version: %s", err)
-		return ""
-	}
-	defer func() {
-		_ = resp.Body.Close() // Cleanup, ignore error
-	}()
-
-	// Check status code
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("[WARN] GitHub API returned status %d for Syft version", resp.StatusCode)
-		return ""
-	}
-
-	// Parse response
-	var release struct {
-		TagName string `json:"tag_name"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
-		log.Printf("[WARN] Failed to parse Syft version response: %s", err)
-		return ""
-	}
-
-	if release.TagName == "" {
-		log.Printf("[WARN] Empty tag_name in Syft release response")
-		return ""
-	}
-
-	log.Printf("[INFO] Latest Syft version: %s", release.TagName)
-	return release.TagName
+	log.Printf("[WARN] No Syft v1.x release found in paginated results")
+	return ""
 }
 
 // mapToSyftPlatform maps detected OS/Arch to Syft naming conventions
@@ -1044,7 +1067,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 
 	// Windows optimization: upload zip and extract remotely
 	if isWindows && isZipFile {
-		ui.Say("Uploading scanner zip file...")
+		log.Println("Uploading scanner zip file...")
 
 		// Upload zip to remote
 		remoteZipPath := "C:\\Windows\\Temp\\packer-sbom-scanner.zip"
@@ -1056,7 +1079,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 			_ = zipFile.Close() // Cleanup, ignore error
 		}()
 
-		ui.Say(fmt.Sprintf("Uploading zip to %s...", remoteZipPath))
+		log.Println(fmt.Sprintf("Uploading zip to %s...", remoteZipPath))
 		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
 			return "", fmt.Errorf("failed to upload scanner zip: %s", err)
 		}
@@ -1070,7 +1093,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 			remoteZipPath, extractDir,
 		)
 
-		ui.Say("Extracting scanner on remote host...")
+		log.Println("Extracting scanner on remote host...")
 		cmd := &packersdk.RemoteCmd{Command: extractCmd}
 		if err := comm.Start(ctx, cmd); err != nil {
 			return "", fmt.Errorf("failed to extract scanner: %s", err)
@@ -1088,7 +1111,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 			extractDir,
 		)
 
-		ui.Say("Locating scanner executable in extracted files...")
+		log.Println("Locating scanner executable in extracted files...")
 		var stdout bytes.Buffer
 		findCmdExec := &packersdk.RemoteCmd{
 			Command: findCmd,
@@ -1115,7 +1138,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 		_ = comm.Start(ctx, cleanupCmd) // Best effort cleanup, ignore error
 		cleanupCmd.Wait()
 
-		ui.Say(fmt.Sprintf("Scanner ready at: %s", remoteBinaryPath))
+		log.Println(fmt.Sprintf("Scanner ready at: %s", remoteBinaryPath))
 		// Return format: "DIR:extractDir|EXE:actualPath" so cleanup knows to remove the directory
 		return fmt.Sprintf("DIR:%s|EXE:%s", extractDir, remoteBinaryPath), nil
 	}
@@ -1138,7 +1161,7 @@ func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	}()
 
 	// Upload to remote
-	ui.Say(fmt.Sprintf("Uploading scanner to %s...", remotePath))
+	log.Println(fmt.Sprintf("Uploading scanner to %s...", remotePath))
 	if err := comm.Upload(remotePath, localFile, nil); err != nil {
 		return "", fmt.Errorf("failed to upload scanner: %s", err)
 	}
@@ -1212,7 +1235,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 
 	// For Windows with elevated user, wrap command with elevated runner
 	if isWindows && p.config.ElevatedUser != "" {
-		ui.Say(fmt.Sprintf("Using elevated user '%s' for scanner execution", p.config.ElevatedUser))
+		log.Println(fmt.Sprintf("Using elevated user '%s' for scanner execution", p.config.ElevatedUser))
 		elevatedCmd, err := guestexec.GenerateElevatedRunner(cmdStr, p)
 		if err != nil {
 			return "", fmt.Errorf("failed to generate elevated runner: %s", err)
@@ -1220,7 +1243,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		cmdStr = elevatedCmd
 	}
 
-	ui.Say(fmt.Sprintf("Executing: %s", cmdStr))
+	log.Println(fmt.Sprintf("Executing: %s", cmdStr))
 
 	// Execute scanner
 	var stdout, stderr bytes.Buffer
@@ -1256,7 +1279,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) ([]byte, error) {
 
 	var buf bytes.Buffer
-	ui.Say(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
+	log.Println(fmt.Sprintf("Downloading SBOM from %s...", remotePath))
 
 	if err := comm.Download(remotePath, &buf); err != nil {
 		return nil, fmt.Errorf("failed to download SBOM: %s", err)
@@ -1266,7 +1289,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 		return nil, fmt.Errorf("downloaded SBOM is empty")
 	}
 
-	ui.Say(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
+	log.Println(fmt.Sprintf("Downloaded SBOM (%d bytes)", buf.Len()))
 	return buf.Bytes(), nil
 }
 
@@ -1288,11 +1311,11 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		dirPart := strings.TrimPrefix(parts[0], "DIR:")
 		cleanupPath = dirPart
 		isDirectory = true
-		ui.Say(fmt.Sprintf("Cleaning up extraction directory: %s", cleanupPath))
+		log.Println(fmt.Sprintf("Cleaning up extraction directory: %s", cleanupPath))
 	} else {
 		cleanupPath = remotePath
 		isDirectory = false
-		ui.Say(fmt.Sprintf("Cleaning up remote file: %s", cleanupPath))
+		log.Println(fmt.Sprintf("Cleaning up remote file: %s", cleanupPath))
 	}
 
 	// Determine delete command based on type and path
