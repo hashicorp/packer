@@ -699,7 +699,10 @@ func (p *Provisioner) getLatestSyftVersion() string {
 		Timeout: 30 * time.Second,
 	}
 
-	// Paginate through releases to find latest v1.x
+	// Compile regex to match v1.x.x format (e.g., v1.0.0, v1.42.2, v1.100.25)
+	v1Pattern := regexp.MustCompile(`^v1\.\d+\.\d+$`)
+
+	// Paginate through releases to find latest v1.x.x
 	page := 1
 	perPage := 100
 
@@ -750,10 +753,10 @@ func (p *Provisioner) getLatestSyftVersion() string {
 		}
 		_ = resp.Body.Close()
 
-		// Look for latest v1.x release
+		// Look for latest v1.x.x release using regex
 		for _, release := range releases {
-			if strings.HasPrefix(release.TagName, "v1.") {
-				log.Printf("[INFO] Found latest Syft v1.x version: %s", release.TagName)
+			if v1Pattern.MatchString(release.TagName) {
+				log.Printf("[INFO] Found latest Syft v1.x.x version: %s", release.TagName)
 				return release.TagName
 			}
 		}
@@ -766,7 +769,7 @@ func (p *Provisioner) getLatestSyftVersion() string {
 		page++
 	}
 
-	log.Printf("[WARN] No Syft v1.x release found in paginated results")
+	log.Printf("[WARN] No Syft v1.x.x release found in paginated results")
 	return ""
 }
 
