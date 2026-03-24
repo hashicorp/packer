@@ -7,6 +7,88 @@ import (
 	"testing"
 )
 
+func TestGetCoreBuildProvisionerFromBlock_AppliesOverrideForBuild(t *testing.T) {
+	parser := getBasicParser()
+	cfg := &PackerConfig{
+		parser:                  parser,
+		CorePackerVersionString: lockedVersion,
+	}
+
+	blocks, diags := ParseProvisionerBlocks(`
+provisioner "shell" {
+  override = {
+    "amazon-ebs.ubuntu" = {
+      bool = false
+    }
+  }
+}
+`)
+	if diags.HasErrors() {
+		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
+	}
+
+	if len(blocks) != 1 {
+		t.Fatalf("expected 1 block, got %d", len(blocks))
+	}
+
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "amazon-ebs.ubuntu")
+	if diags.HasErrors() {
+		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
+	}
+
+	hclProv, ok := coreProv.Provisioner.(*HCL2Provisioner)
+	if !ok {
+		t.Fatalf("expected *HCL2Provisioner, got %T", coreProv.Provisioner)
+	}
+
+	if hclProv.override == nil {
+		t.Fatal("expected override to be applied, got nil")
+	}
+
+	if got, ok := hclProv.override["bool"]; !ok || got != false {
+		t.Fatalf("expected override bool=false, got %#v", hclProv.override["bool"])
+	}
+}
+
+func TestGetCoreBuildProvisionerFromBlock_OverrideNotAppliedForOtherBuild(t *testing.T) {
+	parser := getBasicParser()
+	cfg := &PackerConfig{
+		parser:                  parser,
+		CorePackerVersionString: lockedVersion,
+	}
+
+	blocks, diags := ParseProvisionerBlocks(`
+provisioner "shell" {
+  override = {
+    "amazon-ebs.ubuntu" = {
+      bool = false
+    }
+  }
+}
+`)
+	if diags.HasErrors() {
+		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
+	}
+
+	if len(blocks) != 1 {
+		t.Fatalf("expected 1 block, got %d", len(blocks))
+	}
+
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "virtualbox-iso.base")
+	if diags.HasErrors() {
+		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
+	}
+
+	hclProv, ok := coreProv.Provisioner.(*HCL2Provisioner)
+	if !ok {
+		t.Fatalf("expected *HCL2Provisioner, got %T", coreProv.Provisioner)
+	}
+
+	if hclProv.override != nil {
+		t.Fatalf("expected no override to be applied, got %#v", hclProv.override)
+	}
+}
+
 func TestParseProvisionerBlocks(t *testing.T) {
 	tests := []struct {
 		name         string

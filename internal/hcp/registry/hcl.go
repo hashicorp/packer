@@ -114,7 +114,7 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 		provBlocks, diags := hcl2template.ParseProvisionerBlocks(eb.BlockContent)
 		if diags.HasErrors() {
 			allDiags = append(allDiags, &hcl.Diagnostic{
-				Severity: hcl.DiagWarning,
+				Severity: hcl.DiagError,
 				Summary:  fmt.Sprintf("Failed to parse enforced block %q", eb.Name),
 				Detail:   diags.Error(),
 			})
@@ -135,7 +135,7 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 					continue
 				}
 
-				coreProv, moreDiags := h.configuration.GetCoreBuildProvisionerFromBlock(pb)
+				coreProv, moreDiags := h.configuration.GetCoreBuildProvisionerFromBlock(pb, build.Type)
 				if moreDiags.HasErrors() {
 					allDiags = append(allDiags, moreDiags...)
 					continue
