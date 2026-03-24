@@ -682,8 +682,8 @@ func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
 	}
 
 	// Construct GitHub release URL
-	// Example: https://github.com/anchore/syft/releases/download/v0.100.0/syft_0.100.0_linux_amd64.tar.gz
-	// Example: https://github.com/anchore/syft/releases/download/v0.100.0/syft_0.100.0_windows_amd64.zip
+	// Example: https://github.com/anchore/syft/releases/download/v1.20.0/syft_1.20.0_linux_amd64.tar.gz
+	// Example: https://github.com/anchore/syft/releases/download/v1.20.0/syft_1.20.0_windows_amd64.zip
 	versionNum := strings.TrimPrefix(version, "v")
 	fileName := fmt.Sprintf("syft_%s_%s_%s%s", versionNum, syftOS, syftArch, fileExt)
 
@@ -1330,7 +1330,8 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		// Quote path for Windows to handle spaces
 		cmdStr = fmt.Sprintf("del /F /Q \"%s\"", cleanupPath)
 	} else {
-		cmdStr = fmt.Sprintf("rm -f %s", cleanupPath)
+		// Quote path for Unix to handle spaces
+		cmdStr = fmt.Sprintf("rm -f \"%s\"", cleanupPath)
 	}
 
 	cmd := &packersdk.RemoteCmd{
