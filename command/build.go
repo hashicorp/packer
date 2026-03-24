@@ -153,7 +153,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// Fetch and inject enforced provisioners from HCP Packer (if configured)
 	if !cla.SkipEnforcement {
 		if err := hcpRegistry.FetchEnforcedBlocks(buildCtx); err != nil {
-			c.Ui.Error(fmt.Sprintf("Warning: failed to fetch enforced provisioners: %s", err))
+			return writeDiags(c.Ui, nil, hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Summary:  "HCP: fetching enforced provisioners failed",
+					Severity: hcl.DiagError,
+					Detail:   err.Error(),
+				},
+			})
 		}
 
 		diags := hcpRegistry.InjectEnforcedProvisioners(builds)

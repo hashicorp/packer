@@ -142,7 +142,7 @@ func parseProvisionerBlocksFromFile(parser *Parser, file *hcl.File, diags hcl.Di
 
 // GetCoreBuildProvisionerFromBlock converts a ProvisionerBlock to a CoreBuildProvisioner.
 // This is used for enforced provisioners that need to be injected into builds.
-func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock) (packer.CoreBuildProvisioner, hcl.Diagnostics) {
+func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock, buildName string) (packer.CoreBuildProvisioner, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 
 	// Get the provisioner plugin
@@ -174,6 +174,14 @@ func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock) 
 		provisionerBlock: pb,
 		evalContext:      ectx,
 		builderVariables: builderVars,
+	}
+
+	if pb.Override != nil {
+		if override, ok := pb.Override[buildName]; ok {
+			if typedOverride, ok := override.(map[string]interface{}); ok {
+				hclProvisioner.override = typedOverride
+			}
+		}
 	}
 
 	// Prepare the provisioner

@@ -165,9 +165,13 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 
 	resp, err := bucket.client.GetEnforcedBlocksForBucket(ctx, bucket.Name)
 	if err != nil {
-		// If the API doesn't support enforced blocks yet or returns not found, continue silently
-		log.Printf("[DEBUG] fetching enforced blocks for bucket %q: %v", bucket.Name, err)
-		return nil
+		if hcpPackerAPI.CheckErrorCode(err, codes.NotFound) || hcpPackerAPI.CheckErrorCode(err, codes.Unimplemented) {
+			// If the API doesn't support enforced blocks yet or returns not found, continue silently.
+			log.Printf("[DEBUG] fetching enforced blocks for bucket %q: %v", bucket.Name, err)
+			return nil
+		}
+
+		return fmt.Errorf("failed fetching enforced blocks for bucket %q: %w", bucket.Name, err)
 	}
 
 	if resp == nil {
@@ -192,6 +196,7 @@ func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
 		if detail.Version.TemplateType != nil {
 			block.TemplateType = string(*detail.Version.TemplateType)
 		}
+
 		bucket.EnforcedBlocks = append(bucket.EnforcedBlocks, block)
 		log.Printf("[INFO] linked enforced block found for bucket %q: name=%q id=%q version=%q",
 			bucket.Name, block.Name, block.ID, block.Version)

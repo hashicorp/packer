@@ -123,7 +123,13 @@ func (h *JSONRegistry) FetchEnforcedBlocks(ctx context.Context) error {
 // Note: JSON templates don't support enforced provisioners as they are a legacy format
 func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
 	if len(h.bucket.EnforcedBlocks) > 0 {
-		h.ui.Say("Warning: Enforced provisioners are not supported for legacy JSON templates")
+		return hcl.Diagnostics{
+			&hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  "Enforced provisioners are not supported for legacy JSON templates",
+				Detail:   "Linked enforced blocks were found for this bucket, but the current build is a legacy JSON template.",
+			},
+		}
 	}
 	return nil
 }
