@@ -23,7 +23,7 @@ require (
 	github.com/hashicorp/go-version v1.8.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/hcp-sdk-go v0.167.0
-	github.com/hashicorp/packer-plugin-sdk v0.6.6
+	github.com/hashicorp/packer-plugin-sdk v0.6.7
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.18.4
 	github.com/klauspost/pgzip v1.2.6
