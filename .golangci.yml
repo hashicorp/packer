@@ -1,6 +1,8 @@
 # Copyright IBM Corp. 2013, 2025
 # SPDX-License-Identifier: BUSL-1.1
 
+version: 2
+
 issues:
   # List of regexps of issue texts to exclude, empty list by default.
   # But independently from this option we use default exclude patterns,
@@ -34,14 +36,16 @@ linters:
   disable-all: true
   enable:
     - errcheck
-    - goimports
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
     - unconvert
     - unused
   fast: true
+
+formatters:
+  enable:
+    - goimports
 
 # options for analysis running
 run:
@@ -94,7 +98,9 @@ run:
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  format: colored-line-number
+  formats:
+    colored-line-number:
+      path: stdout
 
   # print lines of code with issue, default is true
   print-issued-lines: true
