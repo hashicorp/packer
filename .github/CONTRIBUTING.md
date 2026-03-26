@@ -282,6 +282,52 @@ localized code generation. Say you are working on the Amazon builder: running
 `go generate ./builder/amazon/...` will do that for you. Make sure that the
 latest code generation tool is installed by running `make install-gen-deps`.
 
+#### Updating Documentation
+
+**IMPORTANT:** Packer's product documentation has moved to the [`hashicorp/web-unified-docs`](https://github.com/hashicorp/web-unified-docs) repository. All documentation contributions must be made directly to that repository.
+
+##### Making Documentation Changes
+
+1. **Clone the web-unified-docs repository:**
+   ```bash
+   git clone https://github.com/hashicorp/web-unified-docs.git
+   cd web-unified-docs
+   ```
+
+2. **Make your documentation changes:**
+   - **For auto-generated partials** (e.g., configuration options): Edit the source code in your local Packer repository, then run `make generate` in `web-unified-docs` to regenerate the documentation
+   - **For all other documentation files**: Edit them directly in the `web-unified-docs` repository
+
+3. **Generate documentation** (if you've made changes to Packer code that affect auto-generated docs):
+   ```bash
+   make generate
+   ```
+
+##### Testing Documentation Changes Locally
+
+To test your documentation changes against your local Packer code:
+
+Set the following environment variables before running `make generate`:
+
+- `PACKER_REPO`: Path to your local Packer repository
+  ```bash
+  export PACKER_REPO=/path/to/your/local/packer
+  ```
+
+- `PACKER_BRANCH`: Branch name (only needed for remote repos, not local paths)
+  ```bash
+  export PACKER_BRANCH=your-feature-branch
+  ```
+
+Then run:
+```bash
+make generate
+```
+
+This will use your local Packer code to generate the documentation, allowing you to preview how your code changes will appear in the docs.
+
+For more information about the documentation structure and contribution process, refer to the README in the `web-unified-docs` repository.
+
 #### Code linting
 
 Packer relies on [golangci-lint](https://github.com/golangci/golangci-lint) for linting its Go code base, excluding any generated code created by `go generate`. Linting is executed on new files during Travis builds via `make ci`; the linting of existing code base is only executed when running `make lint`. Linting a large project like Packer is an iterative process so existing code base will have issues that are actively being fixed; pull-requests that fix existing linting issues are always welcomed :smile:.

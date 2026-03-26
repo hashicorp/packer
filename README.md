@@ -48,6 +48,14 @@ See
 for best practices and instructions on setting up your development environment
 to work on Packer.
 
+### Contributing to Documentation
+
+**Important:** Packer documentation has moved to the [`hashicorp/web-unified-docs`](https://github.com/hashicorp/web-unified-docs) repository.
+
+To contribute documentation changes:
+- Make contributions directly to the `web-unified-docs` repository
+- See the [Updating Documentation section](https://github.com/hashicorp/packer/blob/main/.github/CONTRIBUTING.md#updating-documentation) in CONTRIBUTING.md for detailed instructions
+
 ## Unmaintained Plugins
 As contributors' circumstances change, development on a community maintained
 plugin can slow. When this happens, HashiCorp may use GitHub's option to archive the 
