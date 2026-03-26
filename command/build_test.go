@@ -1131,6 +1131,16 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 			},
 			0,
 		},
+		{fields{defaultMeta},
+			args{[]string{"-skip-enforcement", "file.json"}},
+			&BuildArgs{
+				MetaArgs:         MetaArgs{Path: "file.json"},
+				ParallelBuilds:   math.MaxInt64,
+				Color:            true,
+				SkipEnforcement:  true,
+			},
+			0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s", tt.args.args), func(t *testing.T) {
