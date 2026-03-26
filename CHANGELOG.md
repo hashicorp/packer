@@ -1,5 +1,41 @@
 # 📦 Changelog
 
+## 1.15.1 (March 26, 2026)
+
+### FEATURES:
+
+* hcp: native sbom generation for hcp
+    [GH-13566](https://github.com/hashicorp/packer/pull/13566)
+
+### BUG FIXES:
+
+* core: Scrub multiline sensitive values from build output (including OS-specific multiline sensitive-value fixtures)
+    [GH-13582](https://github.com/hashicorp/packer/pull/13582)
+
+### SECURITY:
+
+* deps: bump syft to v1.42.3 (fixes GO-2026-4809)
+    [GH-13581](https://github.com/hashicorp/packer/pull/13581)
+* deps: bump github.com/hashicorp/packer-plugin-sdk to v0.6.7
+    [GH-13581](https://github.com/hashicorp/packer/pull/13581)
+* deps: bump github.com/hashicorp/hcp-sdk-go from 0.136.0 to 0.167.0
+    [GH-13560](https://github.com/hashicorp/packer/pull/13560)
+* deps: Updates OpenTelemetry dependencies to v1.41.0
+    [GH-13572](https://github.com/hashicorp/packer/pull/13572)
+* deps: Upgrade go-git to v5.17.0 and grpc to 1.79.3
+    [GH-13570](https://github.com/hashicorp/packer/pull/13570)
+* deps: Updates circl dependency to v1.6.3
+    [GH-13564](https://github.com/hashicorp/packer/pull/13564)
+
+### INTERNAL:
+
+* ci: Adds grouped and scheduled updates for GitHub Actions (monthly, grouped PRs, ignore major bumps)
+    [GH-13575](https://github.com/hashicorp/packer/pull/13575)
+* docs: remove docs validation from packer (docs changes move to web-unified-docs)
+    [GH-13577](https://github.com/hashicorp/packer/pull/13577)
+* legal: Update LICENSE
+    [GH-13563](https://github.com/hashicorp/packer/pull/13563)
+
 ## 1.15.0 (February 4, 2026)
 
 ### IMPROVEMENTS:

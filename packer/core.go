@@ -171,7 +171,7 @@ func (core *Core) initialize() error {
 		return err
 	}
 	for _, secret := range core.secrets {
-		packersdk.LogSecretFilter.Set(secret)
+		RegisterSecret(secret)
 	}
 
 	// Go through and interpolate all the build names. We should be able

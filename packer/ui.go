@@ -52,7 +52,7 @@ func (u *ColoredUi) Askf(query string, vals ...any) (string, error) {
 }
 
 func (u *ColoredUi) Say(message string) {
-	u.Ui.Say(u.colorize(message, u.Color, true))
+	u.Ui.Say(u.colorize(scrubSecrets(message), u.Color, true))
 }
 
 func (u *ColoredUi) Sayf(message string, vals ...any) {
@@ -70,7 +70,7 @@ func (u *ColoredUi) Error(message string) {
 		color = UiColorRed
 	}
 
-	u.Ui.Error(u.colorize(message, color, true))
+	u.Ui.Error(u.colorize(scrubSecrets(message), color, true))
 }
 
 func (u *ColoredUi) Errorf(message string, vals ...any) {
@@ -139,7 +139,7 @@ func (u *TargetedUI) Askf(query string, args ...any) (string, error) {
 }
 
 func (u *TargetedUI) Say(message string) {
-	u.Ui.Say(u.prefixLines(true, message))
+	u.Ui.Say(u.prefixLines(true, scrubSecrets(message)))
 }
 
 func (u *TargetedUI) Sayf(message string, args ...any) {
@@ -152,7 +152,7 @@ func (u *TargetedUI) Message(message string) {
 }
 
 func (u *TargetedUI) Error(message string) {
-	u.Ui.Error(u.prefixLines(true, message))
+	u.Ui.Error(u.prefixLines(true, scrubSecrets(message)))
 }
 
 func (u *TargetedUI) Errorf(message string, args ...any) {
@@ -235,10 +235,10 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	// Prepare the args
 	for i, v := range args {
 		// Use packersdk.LogSecretFilter to scrub out sensitive variables
-		args[i] = packersdk.LogSecretFilter.FilterString(args[i])
-		args[i] = strings.Replace(v, ",", "%!(PACKER_COMMA)", -1)
-		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
-		args[i] = strings.Replace(args[i], "\n", "\\n", -1)
+		args[i] = scrubSecrets(v)
+		args[i] = strings.ReplaceAll(args[i], ",", "%!(PACKER_COMMA)")
+		args[i] = strings.ReplaceAll(args[i], "\r", "\\r")
+		args[i] = strings.ReplaceAll(args[i], "\n", "\\n")
 	}
 	argsString := strings.Join(args, ",")
 
@@ -276,7 +276,7 @@ func (u *TimestampedUi) Askf(query string, args ...any) (string, error) {
 }
 
 func (u *TimestampedUi) Say(message string) {
-	u.Ui.Say(u.timestampLine(message))
+	u.Ui.Say(u.timestampLine(scrubSecrets(message)))
 }
 
 func (u *TimestampedUi) Sayf(message string, args ...any) {
@@ -289,7 +289,7 @@ func (u *TimestampedUi) Message(message string) {
 }
 
 func (u *TimestampedUi) Error(message string) {
-	u.Ui.Error(u.timestampLine(message))
+	u.Ui.Error(u.timestampLine(scrubSecrets(message)))
 }
 
 func (u *TimestampedUi) Errorf(message string, args ...any) {
@@ -306,4 +306,8 @@ func (u *TimestampedUi) TrackProgress(src string, currentSize, totalSize int64, 
 
 func (u *TimestampedUi) timestampLine(string string) string {
 	return fmt.Sprintf("%v: %v", time.Now().Format(time.RFC3339), string)
+}
+
+func scrubSecrets(message string) string {
+	return packersdk.LogSecretFilter.FilterString(message)
 }

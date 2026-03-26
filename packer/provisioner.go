@@ -9,13 +9,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	hcpSbomProvisioner "github.com/hashicorp/packer/provisioner/hcp-sbom"
 
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/klauspost/compress/zstd"
-
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -254,8 +253,15 @@ type SBOMInternalProvisioner struct {
 	SBOMName       string
 }
 
-func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
-func (p *SBOMInternalProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
+func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.Provisioner.ConfigSpec() }
+func (p *SBOMInternalProvisioner) FlatConfig() interface{} {
+	// Try to delegate to inner provisioner if it implements FlatConfig
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() interface{} }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
+
 func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
 	return p.Provisioner.Prepare(raws...)
 }
@@ -264,6 +270,7 @@ func (p *SBOMInternalProvisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{},
 ) error {
+	// Original implementation - all logic now in hcp-sbom provisioner
 	cwd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("failed to get current working directory for Packer SBOM: %s", err)
@@ -297,6 +304,11 @@ func (p *SBOMInternalProvisioner) Provision(
 	if err != nil {
 		return fmt.Errorf("failed to open Packer SBOM file %q: %s", tmpFileName, err)
 	}
+	defer func() {
+		if err := packerSbom.Close(); err != nil {
+			log.Printf("[WARN] Failed to close Packer SBOM file: %s", err)
+		}
+	}()
 
 	provisionerOut := &hcpSbomProvisioner.PackerSBOM{}
 	err = json.NewDecoder(packerSbom).Decode(provisionerOut)
