@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	ttmp "text/template"
 
@@ -18,12 +19,15 @@ import (
 	multierror "github.com/hashicorp/go-multierror"
 	version "github.com/hashicorp/go-version"
 	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hcldec"
 	"github.com/hashicorp/packer-plugin-sdk/didyoumean"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
+	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	packerversion "github.com/hashicorp/packer/version"
+	"github.com/zclconf/go-cty/cty"
 )
 
 // Core is the main executor of Packer. If Packer is being used as a
@@ -259,6 +263,12 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 			"provisioner failed to be started and did not error: %s", rawP.Type)
 	}
 
+	return c.generateCoreBuildProvisionerWithProvisioner(rawP, rawName, provisioner)
+}
+
+func (c *Core) generateCoreBuildProvisionerWithProvisioner(rawP *template.Provisioner, rawName string, provisioner packersdk.Provisioner) (CoreBuildProvisioner, error) {
+	cbp := CoreBuildProvisioner{}
+
 	// Get the configuration
 	config := make([]interface{}, 1, 2)
 	config[0] = rawP.Config
@@ -310,6 +320,79 @@ func (c *Core) generateCoreBuildProvisioner(rawP *template.Provisioner, rawName 
 	}
 
 	return cbp, nil
+}
+
+// GenerateCoreBuildProvisionerFromHCLBody converts a parsed enforced provisioner body into
+// a legacy JSON core build provisioner, using the same runtime behavior as normal JSON templates.
+func (c *Core) GenerateCoreBuildProvisionerFromHCLBody(
+	provisionerType string,
+	configBody hcl.Body,
+	override map[string]interface{},
+	pauseBefore time.Duration,
+	maxRetries int,
+	timeout time.Duration,
+	rawName string,
+) (CoreBuildProvisioner, hcl.Diagnostics) {
+	var diags hcl.Diagnostics
+
+	if !c.components.PluginConfig.Provisioners.Has(provisionerType) {
+		return CoreBuildProvisioner{}, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed to start enforced provisioner %q", provisionerType),
+			Detail:   fmt.Sprintf("The provisioner plugin %q could not be loaded.", provisionerType),
+		}}
+	}
+
+	provisioner, err := c.components.PluginConfig.Provisioners.Start(provisionerType)
+	if err != nil {
+		return CoreBuildProvisioner{}, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed to start enforced provisioner %q", provisionerType),
+			Detail:   fmt.Sprintf("The provisioner plugin could not be loaded: %s", err.Error()),
+		}}
+	}
+	if provisioner == nil {
+		return CoreBuildProvisioner{}, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed to start enforced provisioner %q", provisionerType),
+			Detail:   "The provisioner failed to start and returned no instance.",
+		}}
+	}
+
+	flatProvisionerCfg, moreDiags := hcldec.Decode(configBody, provisioner.ConfigSpec(), &hcl.EvalContext{Variables: map[string]cty.Value{}})
+	diags = append(diags, moreDiags...)
+	if diags.HasErrors() {
+		return CoreBuildProvisioner{}, diags
+	}
+
+	flatProvisionerCfg = hcl2shim.WriteUnknownPlaceholderValues(flatProvisionerCfg)
+	decodedConfig := hcl2shim.ConfigValueFromHCL2(flatProvisionerCfg)
+	configMap, _ := decodedConfig.(map[string]interface{})
+	if configMap == nil {
+		configMap = make(map[string]interface{})
+	}
+
+	rawProvisioner := &template.Provisioner{
+		Type:        provisionerType,
+		Config:      configMap,
+		Override:    override,
+		PauseBefore: pauseBefore,
+		Timeout:     timeout,
+	}
+	if maxRetries > 0 {
+		rawProvisioner.MaxRetries = strconv.Itoa(maxRetries)
+	}
+
+	coreProvisioner, err := c.generateCoreBuildProvisionerWithProvisioner(rawProvisioner, rawName, provisioner)
+	if err != nil {
+		return CoreBuildProvisioner{}, hcl.Diagnostics{&hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Failed to prepare enforced provisioner %q", provisionerType),
+			Detail:   err.Error(),
+		}}
+	}
+
+	return coreProvisioner, diags
 }
 
 // This is used for json templates to launch the build plugins.
