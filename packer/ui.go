@@ -236,9 +236,9 @@ func (u *MachineReadableUi) Machine(category string, args ...string) {
 	for i, v := range args {
 		// Use packersdk.LogSecretFilter to scrub out sensitive variables
 		args[i] = scrubSecrets(v)
-		args[i] = strings.Replace(args[i], ",", "%!(PACKER_COMMA)", -1)
-		args[i] = strings.Replace(args[i], "\r", "\\r", -1)
-		args[i] = strings.Replace(args[i], "\n", "\\n", -1)
+		args[i] = strings.ReplaceAll(args[i], ",", "%!(PACKER_COMMA)")
+		args[i] = strings.ReplaceAll(args[i], "\r", "\\r")
+		args[i] = strings.ReplaceAll(args[i], "\n", "\\n")
 	}
 	argsString := strings.Join(args, ",")
 

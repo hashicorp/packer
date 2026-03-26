@@ -4,38 +4,14 @@
 package command
 
 import (
-	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
 
 func TestBuildScrubsSensitiveMultilineShellLocalOutput(t *testing.T) {
-	template := `variable "secret_multiline" {
-					type      = string
-					sensitive = true
-					default = "line-one-secret\nline-two-secret\nline-three-secret"
-				}
-
-				source "null" "example" {
-					communicator = "none"
-				}
-
-				build {
-					sources = ["sources.null.example"]
-
-					provisioner "shell-local" {
-						inline = [
-							"printf 'BEGIN\n%s\nEND\n' '${var.secret_multiline}'"
-						]
-					}
-				}`
-
-	tmpDir := t.TempDir()
-	templatePath := filepath.Join(tmpDir, "multi-pwd.pkr.hcl")
-	if err := os.WriteFile(templatePath, []byte(template), 0o600); err != nil {
-		t.Fatalf("failed to write template: %v", err)
-	}
+	templatePath := filepath.Join(testFixture("repro-sensitive-multiline"), testBuildSensitiveMultilineShellLocalFixture(runtime.GOOS))
 
 	c := &BuildCommand{
 		Meta: TestMetaFile(t),
@@ -59,4 +35,12 @@ func TestBuildScrubsSensitiveMultilineShellLocalOutput(t *testing.T) {
 	if !strings.Contains(output, "<sensitive>") {
 		t.Fatalf("expected scrubbed output, got: %q", output)
 	}
+}
+
+func testBuildSensitiveMultilineShellLocalFixture(goos string) string {
+	if goos == "windows" {
+		return "multi-pwd.windows.pkr.hcl"
+	}
+
+	return "multi-pwd.unix.pkr.hcl"
 }
