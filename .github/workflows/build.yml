@@ -27,7 +27,7 @@ jobs:
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: 'Determine Go version'
         id: get-go-version
         # We use .go-version as our source of truth for current Go
@@ -45,7 +45,7 @@ jobs:
       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
       set-ld-flags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: set product version
         id: set-product-version
         uses: hashicorp/actions-set-product-version@v1
@@ -68,7 +68,7 @@ jobs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
     steps:
       - name: 'Checkout directory'
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Generate metadata file
         id: generate-metadata-file
         uses: hashicorp/actions-generate-metadata@main
@@ -76,7 +76,7 @@ jobs:
           version: ${{ needs.set-product-version.outputs.product-version }}
           product: ${{ env.REPO_NAME }}
 
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
@@ -106,7 +106,7 @@ jobs:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -144,7 +144,7 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -187,11 +187,11 @@ jobs:
         run: |
           echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
           echo "DEB_PACKAGE=$(basename out/*.deb)" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.RPM_PACKAGE }}
           path: out/${{ env.RPM_PACKAGE }}
-      - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ env.DEB_PACKAGE }}
           path: out/${{ env.DEB_PACKAGE }}
@@ -214,7 +214,7 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
@@ -245,7 +245,7 @@ jobs:
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v2
         with:
@@ -275,7 +275,7 @@ jobs:
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Docker Build (Action)
         uses: hashicorp/actions-docker-build@v2
         with:
