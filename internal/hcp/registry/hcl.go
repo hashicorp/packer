@@ -12,7 +12,6 @@ import (
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/hcl2template"
-	"github.com/hashicorp/packer/internal/enforcedparser"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -112,7 +111,7 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 			continue
 		}
 
-		provBlocks, diags := enforcedparser.ParseProvisionerBlocks(eb.BlockContent)
+		provBlocks, diags := hcl2template.ParseProvisionerBlocks(eb.BlockContent)
 		if diags.HasErrors() {
 			allDiags = append(allDiags, &hcl.Diagnostic{
 				Severity: hcl.DiagError,
@@ -136,7 +135,7 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 					continue
 				}
 
-				coreProv, moreDiags := h.configuration.GetCoreBuildProvisionerFromEnforcedBlock(pb, build.Type)
+				coreProv, moreDiags := h.configuration.GetCoreBuildProvisionerFromBlock(pb, build.Type)
 				if moreDiags.HasErrors() {
 					allDiags = append(allDiags, moreDiags...)
 					continue

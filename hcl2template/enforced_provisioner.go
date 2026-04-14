@@ -8,36 +8,8 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/packer/internal/enforcedparser"
 	"github.com/hashicorp/packer/packer"
 )
-
-func provisionerBlockFromEnforced(pb *enforcedparser.ProvisionerBlock) *ProvisionerBlock {
-	return &ProvisionerBlock{
-		PType:       pb.PType,
-		PName:       pb.PName,
-		PauseBefore: pb.PauseBefore,
-		MaxRetries:  pb.MaxRetries,
-		Timeout:     pb.Timeout,
-		Override:    pb.Override,
-		OnlyExcept: OnlyExcept{
-			Only:   pb.OnlyExcept.Only,
-			Except: pb.OnlyExcept.Except,
-		},
-		HCL2Ref: HCL2Ref{
-			DefRange:     pb.DefRange,
-			TypeRange:    pb.TypeRange,
-			LabelsRanges: pb.LabelsRange,
-			Rest:         pb.Rest,
-		},
-	}
-}
-
-// GetCoreBuildProvisionerFromEnforcedBlock converts a shared enforced provisioner block
-// into a CoreBuildProvisioner using HCL runtime semantics.
-func (cfg *PackerConfig) GetCoreBuildProvisionerFromEnforcedBlock(pb *enforcedparser.ProvisionerBlock, buildName string) (packer.CoreBuildProvisioner, hcl.Diagnostics) {
-	return cfg.GetCoreBuildProvisionerFromBlock(provisionerBlockFromEnforced(pb), buildName)
-}
 
 // GetCoreBuildProvisionerFromBlock converts a ProvisionerBlock to a CoreBuildProvisioner.
 // This is used for enforced provisioners that need to be injected into builds.

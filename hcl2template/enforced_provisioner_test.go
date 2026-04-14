@@ -5,8 +5,6 @@ package hcl2template
 
 import (
 	"testing"
-
-	"github.com/hashicorp/packer/internal/enforcedparser"
 )
 
 func TestGetCoreBuildProvisionerFromBlock_AppliesOverrideForBuild(t *testing.T) {
@@ -16,7 +14,7 @@ func TestGetCoreBuildProvisionerFromBlock_AppliesOverrideForBuild(t *testing.T) 
 		CorePackerVersionString: lockedVersion,
 	}
 
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(`
+	blocks, diags := ParseProvisionerBlocks(`
 provisioner "shell" {
   override = {
     "amazon-ebs.ubuntu" = {
@@ -33,7 +31,7 @@ provisioner "shell" {
 		t.Fatalf("expected 1 block, got %d", len(blocks))
 	}
 
-	coreProv, diags := cfg.GetCoreBuildProvisionerFromEnforcedBlock(blocks[0], "amazon-ebs.ubuntu")
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "amazon-ebs.ubuntu")
 	if diags.HasErrors() {
 		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
 	}
@@ -59,7 +57,7 @@ func TestGetCoreBuildProvisionerFromBlock_OverrideNotAppliedForOtherBuild(t *tes
 		CorePackerVersionString: lockedVersion,
 	}
 
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(`
+	blocks, diags := ParseProvisionerBlocks(`
 provisioner "shell" {
   override = {
     "amazon-ebs.ubuntu" = {
@@ -76,7 +74,7 @@ provisioner "shell" {
 		t.Fatalf("expected 1 block, got %d", len(blocks))
 	}
 
-	coreProv, diags := cfg.GetCoreBuildProvisionerFromEnforcedBlock(blocks[0], "virtualbox-iso.base")
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "virtualbox-iso.base")
 	if diags.HasErrors() {
 		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
 	}
@@ -102,7 +100,7 @@ func TestGetCoreBuildProvisionerFromBlock_IncludesSensitiveVariables(t *testing.
 		},
 	}
 
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(`
+	blocks, diags := ParseProvisionerBlocks(`
 provisioner "shell" {
 	override = {
 	  "amazon-ebs.ubuntu" = {
@@ -115,7 +113,7 @@ provisioner "shell" {
 		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
 	}
 
-	coreProv, diags := cfg.GetCoreBuildProvisionerFromEnforcedBlock(blocks[0], "amazon-ebs.ubuntu")
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "amazon-ebs.ubuntu")
 	if diags.HasErrors() {
 		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
 	}
@@ -293,7 +291,7 @@ provisioner "shell" {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			blocks, diags := enforcedparser.ParseProvisionerBlocks(tt.blockContent)
+			blocks, diags := ParseProvisionerBlocks(tt.blockContent)
 
 			if tt.wantErr {
 				if !diags.HasErrors() {
@@ -328,7 +326,7 @@ provisioner "shell" {
   inline       = ["echo 'test'"]
 }
 `
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(blockContent)
+	blocks, diags := ParseProvisionerBlocks(blockContent)
 	if diags.HasErrors() {
 		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
 	}
@@ -350,7 +348,7 @@ provisioner "shell" {
   inline      = ["echo 'test'"]
 }
 `
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(blockContent)
+	blocks, diags := ParseProvisionerBlocks(blockContent)
 	if diags.HasErrors() {
 		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
 	}
@@ -371,7 +369,7 @@ provisioner "shell" {
   inline = ["echo 'test'"]
 }
 `
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(blockContent)
+	blocks, diags := ParseProvisionerBlocks(blockContent)
 	if diags.HasErrors() {
 		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
 	}
@@ -410,7 +408,7 @@ func TestParseProvisionerBlocksJSONWithOptions(t *testing.T) {
   ]
 }`
 
-	blocks, diags := enforcedparser.ParseProvisionerBlocks(blockContent)
+	blocks, diags := ParseProvisionerBlocks(blockContent)
 	if diags.HasErrors() {
 		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
 	}
