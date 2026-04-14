@@ -52,6 +52,7 @@ type CoreBuild struct {
 	onError       string
 	l             sync.Mutex
 	prepareCalled bool
+	generatedVars []string
 
 	SBOMs []SBOM
 }
@@ -163,10 +164,9 @@ func (b *CoreBuild) prepareProvisioners(provisioners []CoreBuildProvisioner, pac
 	generatedPlaceholderMap := placeholderDataFromGeneratedVars(generatedVars)
 
 	for _, coreProv := range provisioners {
-		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
+		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+2)
 		copy(configs, coreProv.config)
-		configs = append(configs, packerConfig)
-		configs = append(configs, generatedPlaceholderMap)
+		configs = append(configs, packerConfig, generatedPlaceholderMap)
 
 		if err := coreProv.Provisioner.Prepare(configs...); err != nil {
 			return err
@@ -186,15 +186,21 @@ func placeholderDataFromGeneratedVars(generatedVars []string) map[string]string 
 	return generatedPlaceholderMap
 }
 
+// SetGeneratedVars stores the builder-generated variables from the initial
+// builder preparation so late-injected provisioners can reuse them without
+// invoking Builder.Prepare again.
+func (b *CoreBuild) SetGeneratedVars(generatedVars []string) {
+	b.generatedVars = append([]string(nil), generatedVars...)
+}
+
 // PrepareProvisioners prepares provisioners injected after the build itself has already been prepared.
 func (b *CoreBuild) PrepareProvisioners(provisioners ...CoreBuildProvisioner) error {
-	packerConfig := b.packerConfig()
-	generatedVars, _, err := b.Builder.Prepare(b.BuilderConfig, packerConfig)
-	if err != nil {
-		return err
+	if !b.prepareCalled {
+		return fmt.Errorf("Prepare must be called first")
 	}
 
-	return b.prepareProvisioners(provisioners, packerConfig, generatedVars)
+	packerConfig := b.packerConfig()
+	return b.prepareProvisioners(provisioners, packerConfig, b.generatedVars)
 }
 
 // Prepare prepares the build by doing some initialization for the builder
@@ -227,6 +233,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 		log.Printf("Build '%s' prepare failure: %s\n", b.Type, err)
 		return
 	}
+	b.SetGeneratedVars(generatedVars)
 
 	if err = b.prepareProvisioners(b.Provisioners, packerConfig, generatedVars); err != nil {
 		return
@@ -236,10 +243,9 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 
 	// Prepare the on-error-cleanup provisioner
 	if b.CleanupProvisioner.PType != "" {
-		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+1)
+		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+2)
 		copy(configs, b.CleanupProvisioner.config)
-		configs = append(configs, packerConfig)
-		configs = append(configs, generatedPlaceholderMap)
+		configs = append(configs, packerConfig, generatedPlaceholderMap)
 		err = b.CleanupProvisioner.Provisioner.Prepare(configs...)
 		if err != nil {
 			return

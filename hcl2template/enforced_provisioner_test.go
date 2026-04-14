@@ -91,6 +91,50 @@ provisioner "shell" {
 	}
 }
 
+func TestGetCoreBuildProvisionerFromBlock_IncludesSensitiveVariables(t *testing.T) {
+	parser := getBasicParser()
+	cfg := &PackerConfig{
+		parser:                  parser,
+		CorePackerVersionString: lockedVersion,
+		InputVariables: Variables{
+			"visible": &Variable{Name: "visible"},
+			"secret":  &Variable{Name: "secret", Sensitive: true},
+		},
+	}
+
+	blocks, diags := enforcedparser.ParseProvisionerBlocks(`
+provisioner "shell" {
+	override = {
+	  "amazon-ebs.ubuntu" = {
+	    bool = false
+	  }
+	}
+}
+`)
+	if diags.HasErrors() {
+		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
+	}
+
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromEnforcedBlock(blocks[0], "amazon-ebs.ubuntu")
+	if diags.HasErrors() {
+		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
+	}
+
+	hclProv, ok := coreProv.Provisioner.(*HCL2Provisioner)
+	if !ok {
+		t.Fatalf("expected *HCL2Provisioner, got %T", coreProv.Provisioner)
+	}
+
+	sensitiveVars, ok := hclProv.builderVariables["packer_sensitive_variables"].([]string)
+	if !ok {
+		t.Fatalf("expected []string packer_sensitive_variables, got %T", hclProv.builderVariables["packer_sensitive_variables"])
+	}
+
+	if len(sensitiveVars) != 1 || sensitiveVars[0] != "secret" {
+		t.Fatalf("expected sensitive vars [secret], got %#v", sensitiveVars)
+	}
+}
+
 func TestParseProvisionerBlocks(t *testing.T) {
 	tests := []struct {
 		name         string

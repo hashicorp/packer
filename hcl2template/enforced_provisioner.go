@@ -61,7 +61,7 @@ func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock, 
 		"packer_debug":               strconv.FormatBool(cfg.debug),
 		"packer_force":               strconv.FormatBool(cfg.force),
 		"packer_on_error":            cfg.onError,
-		"packer_sensitive_variables": []string{},
+		"packer_sensitive_variables": cfg.sensitiveInputVariableKeys(),
 	}
 
 	// Create evaluation context

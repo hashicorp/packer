@@ -827,14 +827,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 			pcb.Provisioners = provisioners
 			pcb.PostProcessors = pps
 			pcb.Prepared = true
-
-			pcb.SensitiveVars = make([]string, 0, len(cfg.InputVariables))
-
-			for key, variable := range cfg.InputVariables {
-				if variable.Sensitive {
-					pcb.SensitiveVars = append(pcb.SensitiveVars, key)
-				}
-			}
+			pcb.SetGeneratedVars(generatedVars)
+			pcb.SensitiveVars = cfg.sensitiveInputVariableKeys()
 
 			// Prepare just sets the "prepareCalled" flag on CoreBuild, since
 			// we did all the prep here.
@@ -924,6 +918,18 @@ func (p *PackerConfig) printVariables() string {
 		fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	return out.String()
+}
+
+func (cfg *PackerConfig) sensitiveInputVariableKeys() []string {
+	sensitiveVars := make([]string, 0, len(cfg.InputVariables))
+
+	for key, variable := range cfg.InputVariables {
+		if variable.Sensitive {
+			sensitiveVars = append(sensitiveVars, key)
+		}
+	}
+
+	return sensitiveVars
 }
 
 func (p *PackerConfig) printBuilds() string {
