@@ -398,6 +398,3 @@ require (
 go 1.25.8
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/issues/187
-
-// The internal Go SDK has the enforced block types not yet available in the public SDK.
-replace github.com/hashicorp/hcp-sdk-go => github.com/hashicorp/hcp-sdk-go-internal v0.0.0-20260304114239-45aa9349dd39
