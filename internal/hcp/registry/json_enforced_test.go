@@ -4,7 +4,6 @@
 package registry
 
 import (
-	"os"
 	"testing"
 
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
@@ -14,13 +13,6 @@ import (
 
 func testJSONRegistryWithBuilds(t *testing.T, builderNames ...string) (*JSONRegistry, []*packer.CoreBuild, *packersdk.MockProvisioner) {
 	t.Helper()
-
-	if err := os.Setenv("HCP_PACKER_BUCKET_NAME", "test-bucket"); err != nil {
-		t.Fatalf("Setenv() unexpected error: %v", err)
-	}
-	t.Cleanup(func() {
-		_ = os.Unsetenv("HCP_PACKER_BUCKET_NAME")
-	})
 
 	coreConfig := packer.TestCoreConfig(t)
 	packer.TestBuilder(t, coreConfig, "test")
@@ -41,9 +33,14 @@ func testJSONRegistryWithBuilds(t *testing.T, builderNames ...string) (*JSONRegi
 	}
 
 	core := packer.TestCore(t, coreConfig)
-	registry, diags := NewJSONRegistry(core, packer.TestUi(t))
-	if diags.HasErrors() {
-		t.Fatalf("NewJSONRegistry() unexpected error: %v", diags)
+	bucket := NewBucketWithVersion()
+	bucket.Name = "test-bucket"
+
+	registry := &JSONRegistry{
+		configuration: core,
+		bucket:        bucket,
+		ui:            packer.TestUi(t),
+		metadata:      &MetadataStore{},
 	}
 
 	builds, diags := core.GetBuilds(packer.GetBuildsOptions{})
