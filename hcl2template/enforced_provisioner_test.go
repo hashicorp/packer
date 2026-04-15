@@ -217,8 +217,28 @@ provisioner "shell" {
 			wantErr:   false,
 		},
 		{
+			name: "provisioner with both only and except",
+			blockContent: `
+provisioner "shell" {
+  only   = ["amazon-ebs.ubuntu"]
+  except = ["null.test"]
+  inline = ["echo 'invalid filter combination'"]
+}
+`,
+			wantCount: 0,
+			wantTypes: nil,
+			wantErr:   true,
+		},
+		{
 			name:         "empty block content",
 			blockContent: "",
+			wantCount:    0,
+			wantTypes:    nil,
+			wantErr:      false,
+		},
+		{
+			name:         "whitespace only block content",
+			blockContent: "\n\n\t  \n",
 			wantCount:    0,
 			wantTypes:    nil,
 			wantErr:      false,
@@ -237,6 +257,21 @@ provisioner "shell" {
     {
       "shell": {
         "inline": ["echo 'Hello from enforced provisioner JSON'"]
+      }
+    }
+  ]
+}`,
+			wantCount: 1,
+			wantTypes: []string{"shell"},
+			wantErr:   false,
+		},
+		{
+			name: "json provisioner with escaped newline in string value",
+			blockContent: `{
+  "provisioner": [
+    {
+      "shell": {
+        "inline": ["echo first line\necho second line"]
       }
     }
   ]
@@ -286,6 +321,32 @@ provisioner "shell" {
 			wantCount: 1,
 			wantTypes: []string{"shell"},
 			wantErr:   false,
+		},
+		{
+			name: "legacy json provisioners with escaped newline and multiple types",
+			blockContent: `{
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": ["echo legacy line 1\necho legacy line 2"]
+    },
+    {
+      "type": "file",
+      "source": "source.txt",
+      "destination": "destination.txt"
+    }
+  ]
+}`,
+			wantCount: 2,
+			wantTypes: []string{"shell", "file"},
+			wantErr:   false,
+		},
+		{
+			name:         "hcl provisioners with windows newlines",
+			blockContent: "provisioner \"shell\" {\r\n  inline = [\"echo first\"]\r\n}\r\n\r\nprovisioner \"file\" {\r\n  source = \"source.txt\"\r\n  destination = \"destination.txt\"\r\n}\r\n",
+			wantCount:    2,
+			wantTypes:    []string{"shell", "file"},
+			wantErr:      false,
 		},
 	}
 

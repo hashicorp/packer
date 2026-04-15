@@ -35,8 +35,12 @@ func (p *Parser) parseProvisionerBlocks(blockContent string) ([]*ProvisionerBloc
 
 	file, diags := hclParser.ParseHCL([]byte(blockContent), "provisioner.pkr.hcl")
 	if !diags.HasErrors() {
+		provisioners, provisionerDiags := p.parseProvisionerBlocksFromFile(file, diags)
+		if provisionerDiags.HasErrors() {
+			return nil, provisionerDiags
+		}
 		log.Printf("[DEBUG] parsed provisioner block content as HCL")
-		return p.parseProvisionerBlocksFromFile(file, diags)
+		return provisioners, provisionerDiags
 	}
 	log.Printf("[DEBUG] failed to parse provisioner block content as HCL, trying JSON fallback")
 
