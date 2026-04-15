@@ -150,7 +150,7 @@ func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hc
 
 		for _, build := range builds {
 			buildName := build.Type
-			injected := make([]packer.CoreBuildProvisioner, 0, len(provBlocks))
+			injectedProvisioners := make([]packer.CoreBuildProvisioner, 0, len(provBlocks))
 
 			for _, pb := range provBlocks {
 				if pb.OnlyExcept.Skip(buildName) {
@@ -174,17 +174,17 @@ func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hc
 				}
 
 				build.Provisioners = append(build.Provisioners, coreProv)
-				injected = append(injected, coreProv)
+				injectedProvisioners = append(injectedProvisioners, coreProv)
 
 				log.Printf("[INFO] injected enforced provisioner %q from block %q into legacy JSON build %q",
 					pb.PType, eb.Name, build.Name())
 			}
 
-			if len(injected) == 0 {
+			if len(injectedProvisioners) == 0 {
 				continue
 			}
 
-			if err := build.PrepareProvisioners(injected...); err != nil {
+			if err := build.PrepareProvisioners(injectedProvisioners...); err != nil {
 				allDiags = append(allDiags, &hcl.Diagnostic{
 					Severity: hcl.DiagError,
 					Summary:  fmt.Sprintf("Failed to prepare enforced provisioners for legacy JSON build %q", build.Name()),
