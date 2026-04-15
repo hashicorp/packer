@@ -319,7 +319,7 @@ func (c *PackerConfig) recursivelyEvaluateLocalVariable(local *LocalBlock, depth
 		return hcl.Diagnostics{&hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Max local recursion depth exceeded.",
-			Detail: "An error occured while recursively evaluating locals." +
+			Detail: "An error occurred while recursively evaluating locals." +
 				"Your local variables likely have a cyclic dependency. " +
 				"Please simplify your config to continue. ",
 		}}
@@ -428,7 +428,7 @@ func (cfg *PackerConfig) recursivelyEvaluateDatasources(ref DatasourceRef, depen
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
 			Summary:  "Max datasource recursion depth exceeded.",
-			Detail: "An error occured while recursively evaluating data " +
+			Detail: "An error occurred while recursively evaluating data " +
 				"sources. Either your data source depends on more than ten " +
 				"other data sources, or your data sources have a cyclic " +
 				"dependency. Please simplify your config to continue. ",
