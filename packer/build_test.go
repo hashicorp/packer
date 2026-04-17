@@ -230,6 +230,92 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 	}
 }
 
+func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVars(t *testing.T) {
+	packerConfig := testDefaultPackerConfig()
+
+	build := testBuild()
+	builder := build.Builder.(*packersdk.MockBuilder)
+	builder.GeneratedVars = []string{"PartyVar"}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("bad error: %s", err)
+	}
+
+	builder.PrepareCalled = false
+
+	lateProv := CoreBuildProvisioner{
+		PType:       "mock-provisioner",
+		Provisioner: &packersdk.MockProvisioner{},
+		config:      []interface{}{84},
+	}
+
+	if err := build.PrepareProvisioners(lateProv); err != nil {
+		t.Fatalf("bad error: %s", err)
+	}
+
+	if builder.PrepareCalled {
+		t.Fatal("builder prepare should not be called again")
+	}
+
+	prov := lateProv.Provisioner.(*packersdk.MockProvisioner)
+	generated := BasicPlaceholderData()
+	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{84, packerConfig, generated}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
+	}
+}
+
+func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVarsForPreparedBuild(t *testing.T) {
+	packerConfig := testDefaultPackerConfig()
+
+	build := testBuild()
+	builder := build.Builder.(*packersdk.MockBuilder)
+	build.Prepared = true
+	build.SetGeneratedVars([]string{"PartyVar"})
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("bad error: %s", err)
+	}
+
+	lateProv := CoreBuildProvisioner{
+		PType:       "mock-provisioner",
+		Provisioner: &packersdk.MockProvisioner{},
+		config:      []interface{}{84},
+	}
+
+	if err := build.PrepareProvisioners(lateProv); err != nil {
+		t.Fatalf("bad error: %s", err)
+	}
+
+	if builder.PrepareCalled {
+		t.Fatal("builder prepare should not be called for prepared builds")
+	}
+
+	prov := lateProv.Provisioner.(*packersdk.MockProvisioner)
+	generated := BasicPlaceholderData()
+	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
+	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{84, packerConfig, generated}) {
+		t.Fatalf("bad: %#v", prov.PrepConfigs)
+	}
+}
+
+func TestBuild_PrepareProvisioners_RequiresPrepare(t *testing.T) {
+	build := testBuild()
+	lateProv := CoreBuildProvisioner{
+		PType:       "mock-provisioner",
+		Provisioner: &packersdk.MockProvisioner{},
+		config:      []interface{}{84},
+	}
+
+	err := build.PrepareProvisioners(lateProv)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	if err.Error() != "Prepare must be called first" {
+		t.Fatalf("bad error: %s", err)
+	}
+}
+
 func TestBuild_Run(t *testing.T) {
 	ui := testUi()
 
