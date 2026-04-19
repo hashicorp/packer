@@ -25,6 +25,7 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/template"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 	hcl2shim "github.com/hashicorp/packer/hcl2template/shim"
+	"github.com/hashicorp/packer/packer/buildfilter"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	packerversion "github.com/hashicorp/packer/version"
 	"github.com/zclconf/go-cty/cty"
@@ -401,6 +402,19 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]*CoreBuild, hcl.Diagnostics) 
 	buildNames := c.BuildNames(opts.Only, opts.Except)
 	builds := []*CoreBuild{}
 	diags := hcl.Diagnostics{}
+
+	filterExprs, err := buildfilter.Parse(opts.Filters)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid -filter expression",
+			Detail:   err.Error(),
+		})
+		return nil, diags
+	}
+	filterCandidates := 0
+	filterMatches := 0
+
 	for _, n := range buildNames {
 		b, err := c.Build(n)
 		if err != nil {
@@ -410,6 +424,16 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]*CoreBuild, hcl.Diagnostics) 
 				Detail:   err.Error(),
 			})
 			continue
+		}
+
+		// -filter is applied before Prepare so skipped builds never run
+		// the plugin's Prepare code path.
+		if len(filterExprs) > 0 {
+			filterCandidates++
+			if !buildfilter.Match(b, filterExprs) {
+				continue
+			}
+			filterMatches++
 		}
 
 		// Now that build plugin has been launched, call Prepare()
@@ -441,7 +465,74 @@ func (c *Core) GetBuilds(opts GetBuildsOptions) ([]*CoreBuild, hcl.Diagnostics) 
 			}
 		}
 	}
+
+	if len(filterExprs) > 0 && filterCandidates > 0 && filterMatches == 0 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "a -filter option was passed, but did not match any build.",
+			Detail: "Verify that your JSON builders declare packer_tags and/or " +
+				"packer_labels matching the filter expression.",
+		})
+	}
+
 	return builds, diags
+}
+
+// extractJSONTagsLabels pulls Packer-reserved tags and labels out of a raw
+// JSON builder config. The reserved keys are "packer_tags" (list of
+// strings) and "packer_labels" (string-keyed string map). Using a
+// packer_-prefix avoids collision with plugin-defined attributes such as
+// amazon-ebs's own "tags" map for AWS AMI tagging.
+//
+// The keys are deleted from cfg in place so the plugin's Prepare call
+// never sees them. Malformed values are silently ignored: JSON templates
+// have no HCL diagnostics channel here and a malformed metadata field
+// should not block a build that would otherwise succeed.
+func extractJSONTagsLabels(cfg interface{}) ([]string, map[string]string) {
+	m, ok := cfg.(map[string]interface{})
+	if !ok {
+		return nil, nil
+	}
+
+	var tags []string
+	if raw, ok := m["packer_tags"]; ok {
+		if list, ok := raw.([]interface{}); ok {
+			for _, v := range list {
+				if s, ok := v.(string); ok {
+					tags = append(tags, s)
+				}
+			}
+		}
+		delete(m, "packer_tags")
+	}
+
+	var labels map[string]string
+	if raw, ok := m["packer_labels"]; ok {
+		if lm, ok := raw.(map[string]interface{}); ok {
+			labels = make(map[string]string, len(lm))
+			for k, v := range lm {
+				if s, ok := v.(string); ok {
+					labels[k] = s
+				}
+			}
+		}
+		delete(m, "packer_labels")
+	}
+
+	// Dedup tags, preserving order.
+	if len(tags) > 0 {
+		seen := make(map[string]struct{}, len(tags))
+		out := make([]string, 0, len(tags))
+		for _, t := range tags {
+			if _, dup := seen[t]; dup {
+				continue
+			}
+			seen[t] = struct{}{}
+			out = append(out, t)
+		}
+		tags = out
+	}
+	return tags, labels
 }
 
 // Build returns the Build object for the given name.
@@ -586,6 +677,7 @@ func (c *Core) Build(n string) (*CoreBuild, error) {
 
 	// Return a structure that contains the plugins, their types, variables, and
 	// the raw builder config loaded from the json template
+	tags, labels := extractJSONTagsLabels(configBuilder.Config)
 	cb := &CoreBuild{
 		Type:               n,
 		Builder:            builder,
@@ -597,6 +689,8 @@ func (c *Core) Build(n string) (*CoreBuild, error) {
 		TemplatePath:       c.Template.Path,
 		Variables:          c.variables,
 		SensitiveVars:      sensitiveVars,
+		Tags:               tags,
+		Labels:             labels,
 	}
 
 	//configBuilder.Name is left uninterpolated so we must check against

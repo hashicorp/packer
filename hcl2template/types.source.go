@@ -25,6 +25,17 @@ type SourceBlock struct {
 
 	block *hcl.Block
 
+	// Body is the source block body with the top-level `tags` and `labels`
+	// attributes stripped out. This is what downstream code (body merging,
+	// plugin decoding) should use. It is populated at parse time; if the
+	// source has no tags/labels it is equal to block.Body.
+	Body hcl.Body
+
+	// Tags is the list of tags declared on the source block.
+	Tags []string
+	// Labels is the key/value metadata declared on the source block.
+	Labels map[string]string
+
 	// LocalName can be set in a singular source block from a build block, it
 	// allows to give a special name to a build in the logs.
 	LocalName string
@@ -40,6 +51,16 @@ type SourceUseBlock struct {
 	// LocalName can be set in a singular source block from a build block, it
 	// allows to give a special name to a build in the logs.
 	LocalName string
+
+	// Tags is the list of tags declared on an inline `source "type.name" {}`
+	// usage inside a build block. These are layered on top of the definition
+	// source's tags.
+	Tags []string
+	// Labels is the key/value metadata declared on an inline source usage
+	// inside a build block. Layered on top of the definition source's labels
+	// (usage keys win on conflict with the definition source, but the
+	// definition source still wins over the enclosing build block).
+	Labels map[string]string
 
 	// Rest of the body, in case the build.source block has more specific
 	// content
@@ -66,27 +87,91 @@ func (b *SourceUseBlock) ctyValues() map[string]cty.Value {
 	}
 }
 
+// metadataBlockLabel is the reserved nested block name that carries
+// Packer-specific build metadata (tags and labels) on source and build
+// blocks. It is stripped from the body before the plugin ConfigSpec
+// decoder runs, so it never collides with plugin-defined attributes such
+// as amazon-ebs's own `tags` map.
+const metadataBlockLabel = "metadata"
+
+// metadataBodySchema describes the attributes accepted inside a
+// `metadata { }` nested block.
+type metadataBody struct {
+	Tags   []string          `hcl:"tags,optional"`
+	Labels map[string]string `hcl:"labels,optional"`
+}
+
+// extractMetadata pulls any `metadata` block out of body. It returns the
+// extracted tags/labels, a remainder body with the metadata block removed,
+// and any diagnostics. When body has no metadata block, tags and labels
+// are nil and remainder == body.
+func extractMetadata(body hcl.Body, ectx *hcl.EvalContext) (tags []string, labels map[string]string, remainder hcl.Body, diags hcl.Diagnostics) {
+	schema := &hcl.BodySchema{
+		Blocks: []hcl.BlockHeaderSchema{
+			{Type: metadataBlockLabel},
+		},
+	}
+	content, remain, diags := body.PartialContent(schema)
+	if len(content.Blocks) == 0 {
+		// No metadata block: return the original body so callers can detect
+		// the no-op case by pointer equality and avoid perturbing downstream
+		// test fixtures.
+		return nil, nil, body, diags
+	}
+	remainder = remain
+	if len(content.Blocks) > 1 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  fmt.Sprintf("Only one %q block is allowed per source or build", metadataBlockLabel),
+			Subject:  content.Blocks[1].DefRange.Ptr(),
+		})
+	}
+	mb := content.Blocks[0]
+	var decoded metadataBody
+	moreDiags := gohcl.DecodeBody(mb.Body, ectx, &decoded)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
+		return nil, nil, remainder, diags
+	}
+	return dedupStrings(decoded.Tags), decoded.Labels, remainder, diags
+}
+
 // decodeBuildSource reads a used source block from a build:
 //
 //	build {
 //	  source "type.example" {
 //	    name = "local_name"
+//	    metadata {
+//	      tags   = ["prod"]
+//	      labels = { region = "us-east" }
+//	    }
 //	  }
 //	}
 func (p *Parser) decodeBuildSource(block *hcl.Block) (SourceUseBlock, hcl.Diagnostics) {
 	ref := sourceRefFromString(block.Labels[0])
 	out := SourceUseBlock{SourceRef: ref}
+
+	// First strip out the metadata block so the subsequent gohcl decode
+	// and the plugin ConfigSpec decoder never see it.
+	tags, labels, bodyAfterMeta, diags := extractMetadata(block.Body, nil)
+	if diags.HasErrors() {
+		return out, diags
+	}
+	out.Tags = tags
+	out.Labels = labels
+
 	var b struct {
 		Name string   `hcl:"name,optional"`
 		Rest hcl.Body `hcl:",remain"`
 	}
-	diags := gohcl.DecodeBody(block.Body, nil, &b)
-	if diags.HasErrors() {
+	moreDiags := gohcl.DecodeBody(bodyAfterMeta, nil, &b)
+	diags = append(diags, moreDiags...)
+	if moreDiags.HasErrors() {
 		return out, diags
 	}
 	out.LocalName = b.Name
 	out.Body = b.Rest
-	return out, nil
+	return out, diags
 }
 
 func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
@@ -95,9 +180,37 @@ func (p *Parser) decodeSource(block *hcl.Block) (SourceBlock, hcl.Diagnostics) {
 		Name:  block.Labels[1],
 		block: block,
 	}
-	var diags hcl.Diagnostics
-
+	tags, labels, remain, diags := extractMetadata(block.Body, nil)
+	// Only populate the filter-specific fields when the user actually
+	// declared a metadata block. Leaving Body/Tags/Labels as their zero
+	// values in the common case avoids perturbing equality checks in
+	// existing parser tests, and plugin.go falls back to block.Body when
+	// Body is nil.
+	if tags != nil || labels != nil {
+		source.Body = remain
+		source.Tags = tags
+		source.Labels = labels
+	}
 	return source, diags
+}
+
+// dedupStrings returns s with duplicates removed, preserving order. Returns
+// nil when s is empty so callers can distinguish "no tags declared" from
+// "empty tag list declared".
+func dedupStrings(s []string) []string {
+	if len(s) == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(s))
+	out := make([]string, 0, len(s))
+	for _, v := range s {
+		if _, ok := seen[v]; ok {
+			continue
+		}
+		seen[v] = struct{}{}
+		out = append(out, v)
+	}
+	return out
 }
 
 func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalContext) (packersdk.Builder, hcl.Diagnostics, []string) {

@@ -56,6 +56,7 @@ func (ma *MetaArgs) GetConfigType() (configType, error) {
 func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 	fs.Var((*sliceflag.StringFlag)(&ma.Only), "only", "")
 	fs.Var((*sliceflag.StringFlag)(&ma.Except), "except", "")
+	fs.Var((*sliceflag.StringFlag)(&ma.Filters), "filter", "")
 	fs.Var((*kvflag.Flag)(&ma.Vars), "var", "")
 	fs.Var((*kvflag.StringSlice)(&ma.VarFiles), "var-file", "")
 	fs.Var(&ma.ConfigType, "config-type", "set to 'hcl2' to run in hcl2 mode when no file is passed.")
@@ -68,8 +69,11 @@ type MetaArgs struct {
 	Path         string
 	Paths        []string
 	Only, Except []string
-	Vars         map[string]string
-	VarFiles     []string
+	// Filters holds repeated -filter expressions that select builds by
+	// tags/labels. See packer/buildfilter for the grammar.
+	Filters  []string
+	Vars     map[string]string
+	VarFiles []string
 	// set to "hcl2" to force hcl2 mode
 	ConfigType configType
 
@@ -117,6 +121,7 @@ func GetCleanedBuildArgs(ba *BuildArgs) map[string]interface{} {
 		"force":     ba.Force,
 		"only":      ba.Only,
 		"except":    ba.Except,
+		"filter":    ba.Filters,
 		"var-files": ba.VarFiles,
 		"path":      ba.Path,
 	}

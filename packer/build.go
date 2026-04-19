@@ -44,6 +44,16 @@ type CoreBuild struct {
 	Variables          map[string]string
 	SensitiveVars      []string
 
+	// Tags is the effective set of tags for this build, merged from the
+	// source block and the enclosing build block. Populated by the HCL2 and
+	// JSON template loaders. Consumed by the -filter CLI flag.
+	Tags []string
+	// Labels is the effective key/value metadata for this build, merged
+	// from the source block and the enclosing build block (source keys win
+	// on conflict). Populated by the HCL2 and JSON template loaders.
+	// Consumed by the -filter CLI flag.
+	Labels map[string]string
+
 	// Indicates whether the build is already initialized before calling Prepare(..)
 	Prepared bool
 
@@ -145,6 +155,14 @@ func (b *CoreBuild) Name() string {
 	}
 	return b.Type
 }
+
+// FilterTags returns the build's tag set for use by the buildfilter package.
+// Satisfies buildfilter.Taggable.
+func (b *CoreBuild) FilterTags() []string { return b.Tags }
+
+// FilterLabels returns the build's label map for use by the buildfilter
+// package. Satisfies buildfilter.Taggable.
+func (b *CoreBuild) FilterLabels() map[string]string { return b.Labels }
 
 func (b *CoreBuild) packerConfig() map[string]interface{} {
 	return map[string]interface{}{
