@@ -6,7 +6,7 @@ require (
 	github.com/cheggaaa/pb v1.0.27
 	github.com/chzyer/readline v1.5.1
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707
-	github.com/go-git/go-git/v5 v5.17.1
+	github.com/go-git/go-git/v5 v5.18.0
 	github.com/go-openapi/runtime v0.28.0
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/flock v0.8.1 // indirect
