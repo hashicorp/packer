@@ -20,7 +20,7 @@ func (ts *PackerHCPSbomTestSuite) TestSourceNotExisting() {
 		AddEnv("HOME", os.Getenv("HOME")).
 		AddEnv("PATH", os.Getenv("PATH")).
 		SetArgs("build", "templates/source_not_existing.pkr.hcl").
-		Assert(check.MustFail(), check.Grep("download failed for SBOM file"))
+		Assert(check.MustFail(), check.Grep("Failed to download SBOM file"))
 }
 
 // Greayed out because the communicator for the docker plugin does not return an error
