@@ -11,13 +11,9 @@
 
 * build: exclude syft dependency import on NetBSD, OpenBSD, and Solaris
     [GH-13578](https://github.com/hashicorp/packer/pull/13578)
-* core: scrub multiline sensitive values from build output
-    [GH-13582](https://github.com/hashicorp/packer/pull/13582)
 
 ### SECURITY:
 
-* deps: bump syft to v1.42.3
-    [GH-13581](https://github.com/hashicorp/packer/pull/13581)
 * deps: bump github.com/go-jose/go-jose/v4
     [GH-13594](https://github.com/hashicorp/packer/pull/13594)
 * deps: bump go.opentelemetry.io/otel/sdk
@@ -27,8 +23,6 @@
 
 ### INTERNAL:
 
-* docs: remove docs validation from packer
-    [GH-13577](https://github.com/hashicorp/packer/pull/13577)
 * build: bump Go to 1.25.9 and refresh dependencies
     [GH-13614](https://github.com/hashicorp/packer/pull/13614)
     [GH-13615](https://github.com/hashicorp/packer/pull/13615)
