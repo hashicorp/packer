@@ -4,7 +4,7 @@
 
 ### FEATURES:
 
-* provisioner: enforce provisioner behavior
+* provisioner: enforce provisioner follow the configured lifecycle consistently to reduce unexpected runs and improve build predictability.
     [GH-13591](https://github.com/hashicorp/packer/pull/13591)
 
 ### BUG FIXES:
