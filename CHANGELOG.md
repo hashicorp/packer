@@ -4,13 +4,9 @@
 
 ### FEATURES:
 
-* provisioner: enforce provisioner follow the configured lifecycle consistently to reduce unexpected runs and improve build predictability.
+* provisioner: added support for the enforced provisioner.
     [GH-13591](https://github.com/hashicorp/packer/pull/13591)
 
-### BUG FIXES:
-
-* build: exclude syft dependency import on NetBSD, OpenBSD, and Solaris
-    [GH-13578](https://github.com/hashicorp/packer/pull/13578)
 
 ### SECURITY:
 
