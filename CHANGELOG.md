@@ -1,5 +1,29 @@
 # 📦 Changelog
 
+## 1.15.2 (April 21, 2026)
+
+### FEATURES:
+
+* provisioner: added support for the enforced provisioner.
+    [GH-13591](https://github.com/hashicorp/packer/pull/13591)
+
+
+### SECURITY:
+
+* deps: bump github.com/go-jose/go-jose/v4
+    [GH-13594](https://github.com/hashicorp/packer/pull/13594)
+* deps: bump go.opentelemetry.io/otel/sdk
+    [GH-13606](https://github.com/hashicorp/packer/pull/13606)
+* deps: update cloud.google.com/go and aws-sdk-go-v2 related dependencies
+    [GH-13610](https://github.com/hashicorp/packer/pull/13610)
+
+### INTERNAL:
+
+* build: bump Go to 1.25.9 and refresh dependencies
+    [GH-13614](https://github.com/hashicorp/packer/pull/13614)
+    [GH-13615](https://github.com/hashicorp/packer/pull/13615)
+
+
 ## 1.15.1 (March 26, 2026)
 
 ### FEATURES:
