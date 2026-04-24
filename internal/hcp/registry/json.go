@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer/hcl2template"
 	"github.com/hashicorp/packer/packer"
 )
 
@@ -112,4 +113,86 @@ func (h *JSONRegistry) VersionStatusSummary() {
 // Metadata gets the global metadata object that registers global settings
 func (h *JSONRegistry) Metadata() Metadata {
 	return h.metadata
+}
+
+// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
+func (h *JSONRegistry) FetchEnforcedBlocks(ctx context.Context) error {
+	return h.bucket.FetchEnforcedBlocks(ctx)
+}
+
+// InjectEnforcedProvisioners injects enforced provisioners into the builds
+func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	enforcedBlocks := h.bucket.EnforcedBlocks
+	if len(enforcedBlocks) == 0 {
+		return nil
+	}
+
+	var allDiags hcl.Diagnostics
+
+	for _, eb := range enforcedBlocks {
+		if eb.BlockContent == "" {
+			continue
+		}
+
+		provBlocks, diags := hcl2template.ParseProvisionerBlocks(eb.BlockContent)
+		if diags.HasErrors() {
+			allDiags = append(allDiags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to parse enforced block %q", eb.Name),
+				Detail:   diags.Error(),
+			})
+			continue
+		}
+
+		if len(provBlocks) > 0 {
+			h.ui.Say(fmt.Sprintf("Loaded %d enforced provisioner(s) from HCP block %q and template type %q", len(provBlocks), eb.Name, eb.TemplateType))
+		}
+
+		for _, build := range builds {
+			buildName := build.Type
+			injectedProvisioners := make([]packer.CoreBuildProvisioner, 0, len(provBlocks))
+
+			for _, pb := range provBlocks {
+				if pb.OnlyExcept.Skip(buildName) {
+					log.Printf("[DEBUG] skipping enforced provisioner %q for legacy JSON build %q due to only/except rules",
+						pb.PType, build.Name())
+					continue
+				}
+
+				coreProv, moreDiags := h.configuration.GenerateCoreBuildProvisionerFromHCLBody(
+					pb.PType,
+					pb.Rest,
+					pb.Override,
+					pb.PauseBefore,
+					pb.MaxRetries,
+					pb.Timeout,
+					buildName,
+				)
+				if moreDiags.HasErrors() {
+					allDiags = append(allDiags, moreDiags...)
+					continue
+				}
+
+				build.Provisioners = append(build.Provisioners, coreProv)
+				injectedProvisioners = append(injectedProvisioners, coreProv)
+
+				log.Printf("[INFO] injected enforced provisioner %q from block %q into legacy JSON build %q",
+					pb.PType, eb.Name, build.Name())
+			}
+
+			if len(injectedProvisioners) == 0 {
+				continue
+			}
+
+			if err := build.PrepareProvisioners(injectedProvisioners...); err != nil {
+				allDiags = append(allDiags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Failed to prepare enforced provisioners for legacy JSON build %q", build.Name()),
+					Detail:   err.Error(),
+				})
+			}
+		}
+	}
+
+	return allDiags
 }

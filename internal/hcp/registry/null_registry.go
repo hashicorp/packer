@@ -6,6 +6,7 @@ package registry
 import (
 	"context"
 
+	"github.com/hashicorp/hcl/v2"
 	sdkpacker "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/packer"
 )
@@ -34,4 +35,12 @@ func (r nullRegistry) VersionStatusSummary() {}
 
 func (r nullRegistry) Metadata() Metadata {
 	return NilMetadata{}
+}
+
+func (r nullRegistry) FetchEnforcedBlocks(ctx context.Context) error {
+	return nil
+}
+
+func (r nullRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	return nil
 }

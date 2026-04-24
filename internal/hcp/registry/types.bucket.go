@@ -29,6 +29,16 @@ import (
 // build is still alive.
 const HeartbeatPeriod = 2 * time.Minute
 
+// EnforcedBlock represents an enforced provisioner block from HCP Packer
+type EnforcedBlock struct {
+	ID           string
+	Name         string
+	BlockContent string // Raw HCL content containing provisioner blocks
+	VersionID    string
+	Version      string
+	TemplateType string
+}
+
 // Bucket represents a single bucket on the HCP Packer registry.
 type Bucket struct {
 	Name                                     string
@@ -40,6 +50,7 @@ type Bucket struct {
 	SourceExternalIdentifierToParentVersions map[string]ParentVersion
 	RunningBuilds                            map[string]chan struct{}
 	Version                                  *Version
+	EnforcedBlocks                           []*EnforcedBlock
 	client                                   *hcpPackerAPI.Client
 }
 
@@ -140,6 +151,63 @@ func (bucket *Bucket) Initialize(
 	}
 
 	return bucket.initializeVersion(ctx, templateType)
+}
+
+// FetchEnforcedBlocks retrieves all enforced blocks linked to this bucket from HCP Packer.
+// These blocks contain provisioner configurations that should be automatically injected
+// into builds for this bucket.
+func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
+	if bucket.client == nil {
+		return errors.New("bucket client not initialized, call Initialize first")
+	}
+
+	log.Printf("[INFO] fetching enforced blocks linked to bucket %q", bucket.Name)
+
+	resp, err := bucket.client.GetEnforcedBlocksForBucket(ctx, bucket.Name)
+	if err != nil {
+		if hcpPackerAPI.CheckErrorCode(err, codes.NotFound) || hcpPackerAPI.CheckErrorCode(err, codes.Unimplemented) {
+			// If the API doesn't support enforced blocks yet or returns not found, continue silently.
+			log.Printf("[DEBUG] fetching enforced blocks for bucket %q: %v", bucket.Name, err)
+			return nil
+		}
+
+		return fmt.Errorf("failed fetching enforced blocks for bucket %q: %w", bucket.Name, err)
+	}
+
+	if resp == nil {
+		log.Printf("[INFO] no enforced blocks response returned for bucket %q", bucket.Name)
+		return nil
+	}
+
+	bucket.EnforcedBlocks = make([]*EnforcedBlock, 0, len(resp.EnforcedBlockDetail))
+	for _, detail := range resp.EnforcedBlockDetail {
+		if detail == nil || detail.Version == nil {
+			continue
+		}
+
+		block := &EnforcedBlock{
+			ID:           detail.ID,
+			Name:         detail.Name,
+			BlockContent: detail.Version.BlockContent,
+			VersionID:    detail.Version.ID,
+			Version:      detail.Version.Version,
+		}
+
+		if detail.Version.TemplateType != nil {
+			block.TemplateType = string(*detail.Version.TemplateType)
+		}
+
+		bucket.EnforcedBlocks = append(bucket.EnforcedBlocks, block)
+		log.Printf("[INFO] linked enforced block found for bucket %q: name=%q id=%q version=%q",
+			bucket.Name, block.Name, block.ID, block.Version)
+	}
+
+	if len(bucket.EnforcedBlocks) == 0 {
+		log.Printf("[INFO] no enforced provisioner blocks linked to bucket %q", bucket.Name)
+	}
+
+	log.Printf("[INFO] fetched %d enforced block(s) linked to bucket %q", len(bucket.EnforcedBlocks), bucket.Name)
+	return nil
 }
 
 func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {

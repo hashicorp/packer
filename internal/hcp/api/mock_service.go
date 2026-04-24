@@ -25,6 +25,9 @@ type MockPackerClientService struct {
 	UpdateChannelCalled                                                          bool
 	TrackCalledServiceMethods                                                    bool
 
+	// Enforced block tracking
+	GetEnforcedBlocksByBucketCalled bool
+
 	// Mock Creates
 	CreateBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101CreateBucketResponse
 	CreateVersionResp *hcpPackerModels.HashicorpCloudPacker20230101CreateVersionResponse
@@ -32,6 +35,10 @@ type MockPackerClientService struct {
 
 	// Mock Gets
 	GetVersionResp *hcpPackerModels.HashicorpCloudPacker20230101GetVersionResponse
+
+	// Mock enforced blocks
+	GetEnforcedBlocksByBucketResp *hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse
+	GetEnforcedBlocksByBucketErr  error
 
 	ExistingBuilds      []string
 	ExistingBuildLabels map[string]string
@@ -317,6 +324,31 @@ func (svc *MockPackerClientService) PackerServiceUpdateChannel(
 			Name:       params.ChannelName,
 			BucketName: params.BucketName,
 		},
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceGetEnforcedBlocksByBucket(
+	params *hcpPackerService.PackerServiceGetEnforcedBlocksByBucketParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceGetEnforcedBlocksByBucketOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.GetEnforcedBlocksByBucketCalled = true
+	}
+
+	if svc.GetEnforcedBlocksByBucketErr != nil {
+		return nil, svc.GetEnforcedBlocksByBucketErr
+	}
+
+	ok := &hcpPackerService.PackerServiceGetEnforcedBlocksByBucketOK{}
+	if svc.GetEnforcedBlocksByBucketResp != nil {
+		ok.Payload = svc.GetEnforcedBlocksByBucketResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse{
+			EnforcedBlockDetail: []*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlockDetail{},
+		}
 	}
 
 	return ok, nil

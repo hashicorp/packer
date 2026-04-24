@@ -52,6 +52,7 @@ type CoreBuild struct {
 	onError       string
 	l             sync.Mutex
 	prepareCalled bool
+	generatedVars []string
 
 	SBOMs []SBOM
 }
@@ -145,6 +146,63 @@ func (b *CoreBuild) Name() string {
 	return b.Type
 }
 
+func (b *CoreBuild) packerConfig() map[string]interface{} {
+	return map[string]interface{}{
+		common.BuildNameConfigKey:     b.Type,
+		common.BuilderTypeConfigKey:   b.BuilderType,
+		common.CoreVersionConfigKey:   version.FormattedVersion(),
+		common.DebugConfigKey:         b.debug,
+		common.ForceConfigKey:         b.force,
+		common.OnErrorConfigKey:       b.onError,
+		common.TemplatePathKey:        b.TemplatePath,
+		common.UserVariablesConfigKey: b.Variables,
+		common.SensitiveVarsConfigKey: b.SensitiveVars,
+	}
+}
+
+func (b *CoreBuild) prepareProvisioners(provisioners []CoreBuildProvisioner, packerConfig map[string]interface{}, generatedVars []string) error {
+	generatedPlaceholderMap := placeholderDataFromGeneratedVars(generatedVars)
+
+	for _, coreProv := range provisioners {
+		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+2)
+		copy(configs, coreProv.config)
+		configs = append(configs, packerConfig, generatedPlaceholderMap)
+
+		if err := coreProv.Provisioner.Prepare(configs...); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func placeholderDataFromGeneratedVars(generatedVars []string) map[string]string {
+	generatedPlaceholderMap := BasicPlaceholderData()
+	for _, k := range generatedVars {
+		generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
+			packerbuilderdata.PlaceholderMsg, k)
+	}
+
+	return generatedPlaceholderMap
+}
+
+// SetGeneratedVars stores the builder-generated variables from the initial
+// builder preparation so late-injected provisioners can reuse them without
+// invoking Builder.Prepare again.
+func (b *CoreBuild) SetGeneratedVars(generatedVars []string) {
+	b.generatedVars = append([]string(nil), generatedVars...)
+}
+
+// PrepareProvisioners prepares provisioners injected after the build itself has already been prepared.
+func (b *CoreBuild) PrepareProvisioners(provisioners ...CoreBuildProvisioner) error {
+	if !b.prepareCalled {
+		return fmt.Errorf("Prepare must be called first")
+	}
+
+	packerConfig := b.packerConfig()
+	return b.prepareProvisioners(provisioners, packerConfig, b.generatedVars)
+}
+
 // Prepare prepares the build by doing some initialization for the builder
 // and any hooks. This _must_ be called prior to Run. The parameter is the
 // overrides for the variables within the template (if any).
@@ -167,17 +225,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 	// a custom json area instead of just aborting early for HCL.
 	b.prepareCalled = true
 
-	packerConfig := map[string]interface{}{
-		common.BuildNameConfigKey:     b.Type,
-		common.BuilderTypeConfigKey:   b.BuilderType,
-		common.CoreVersionConfigKey:   version.FormattedVersion(),
-		common.DebugConfigKey:         b.debug,
-		common.ForceConfigKey:         b.force,
-		common.OnErrorConfigKey:       b.onError,
-		common.TemplatePathKey:        b.TemplatePath,
-		common.UserVariablesConfigKey: b.Variables,
-		common.SensitiveVarsConfigKey: b.SensitiveVars,
-	}
+	packerConfig := b.packerConfig()
 
 	// Prepare the builder
 	generatedVars, warn, err := b.Builder.Prepare(b.BuilderConfig, packerConfig)
@@ -185,35 +233,19 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 		log.Printf("Build '%s' prepare failure: %s\n", b.Type, err)
 		return
 	}
+	b.SetGeneratedVars(generatedVars)
 
-	// If the builder has provided a list of to-be-generated variables that
-	// should be made accessible to provisioners, pass that list into
-	// the provisioner prepare() so that the provisioner can appropriately
-	// validate user input against what will become available.
-	generatedPlaceholderMap := BasicPlaceholderData()
-	for _, k := range generatedVars {
-		generatedPlaceholderMap[k] = fmt.Sprintf("Build_%s. "+
-			packerbuilderdata.PlaceholderMsg, k)
+	if err = b.prepareProvisioners(b.Provisioners, packerConfig, generatedVars); err != nil {
+		return
 	}
 
-	// Prepare the provisioners
-	for _, coreProv := range b.Provisioners {
-		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+1)
-		copy(configs, coreProv.config)
-		configs = append(configs, packerConfig)
-		configs = append(configs, generatedPlaceholderMap)
-
-		if err = coreProv.Provisioner.Prepare(configs...); err != nil {
-			return
-		}
-	}
+	generatedPlaceholderMap := placeholderDataFromGeneratedVars(generatedVars)
 
 	// Prepare the on-error-cleanup provisioner
 	if b.CleanupProvisioner.PType != "" {
-		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+1)
+		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+2)
 		copy(configs, b.CleanupProvisioner.config)
-		configs = append(configs, packerConfig)
-		configs = append(configs, generatedPlaceholderMap)
+		configs = append(configs, packerConfig, generatedPlaceholderMap)
 		err = b.CleanupProvisioner.Provisioner.Prepare(configs...)
 		if err != nil {
 			return

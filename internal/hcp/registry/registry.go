@@ -20,6 +20,10 @@ type Registry interface {
 	CompleteBuild(ctx context.Context, build *packer.CoreBuild, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
 	VersionStatusSummary()
 	Metadata() Metadata
+	// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
+	FetchEnforcedBlocks(ctx context.Context) error
+	// InjectEnforcedProvisioners injects enforced provisioners into the builds
+	InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics
 }
 
 // New instantiates the appropriate registry for the Packer configuration template type.

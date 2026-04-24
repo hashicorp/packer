@@ -91,6 +91,67 @@ func (h *HCLRegistry) VersionStatusSummary() {
 	h.bucket.Version.statusSummary(h.ui)
 }
 
+// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
+func (h *HCLRegistry) FetchEnforcedBlocks(ctx context.Context) error {
+	return h.bucket.FetchEnforcedBlocks(ctx)
+}
+
+// InjectEnforcedProvisioners injects enforced provisioners into the builds
+func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	enforcedBlocks := h.bucket.EnforcedBlocks
+	if len(enforcedBlocks) == 0 {
+		return nil
+	}
+
+	var allDiags hcl.Diagnostics
+
+	// Parse all enforced blocks into provisioner blocks
+	for _, eb := range enforcedBlocks {
+		if eb.BlockContent == "" {
+			continue
+		}
+
+		provBlocks, diags := hcl2template.ParseProvisionerBlocks(eb.BlockContent)
+		if diags.HasErrors() {
+			allDiags = append(allDiags, &hcl.Diagnostic{
+				Severity: hcl.DiagError,
+				Summary:  fmt.Sprintf("Failed to parse enforced block %q", eb.Name),
+				Detail:   diags.Error(),
+			})
+			continue
+		}
+
+		if len(provBlocks) > 0 {
+			h.ui.Say(fmt.Sprintf("Loaded %d enforced provisioner(s) from HCP block %q and template type %q", len(provBlocks), eb.Name, eb.TemplateType))
+		}
+
+		// Inject into each build
+		for _, build := range builds {
+			for _, pb := range provBlocks {
+				// Check if this provisioner should be skipped for this build
+				if pb.OnlyExcept.Skip(build.Type) {
+					log.Printf("[DEBUG] skipping enforced provisioner %q for build %q due to only/except rules",
+						pb.PType, build.Name())
+					continue
+				}
+
+				coreProv, moreDiags := h.configuration.GetCoreBuildProvisionerFromBlock(pb, build.Type)
+				if moreDiags.HasErrors() {
+					allDiags = append(allDiags, moreDiags...)
+					continue
+				}
+
+				build.Provisioners = append(build.Provisioners, coreProv)
+
+				log.Printf("[INFO] injected enforced provisioner %q from block %q into build %q",
+					pb.PType, eb.Name, build.Name())
+			}
+		}
+	}
+
+	return allDiags
+}
+
 func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLRegistry, hcl.Diagnostics) {
 	var diags hcl.Diagnostics
 	if len(config.Builds) > 1 {
