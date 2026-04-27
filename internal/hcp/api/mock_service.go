@@ -34,6 +34,7 @@ type MockPackerClientService struct {
 	CreateBuildResp   *hcpPackerModels.HashicorpCloudPacker20230101CreateBuildResponse
 
 	// Mock Gets
+	GetBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101GetBucketResponse
 	GetVersionResp *hcpPackerModels.HashicorpCloudPacker20230101GetVersionResponse
 
 	// Mock enforced blocks
@@ -94,7 +95,11 @@ func (svc *MockPackerClientService) PackerServiceGetBucket(
 	if svc.BucketNotFound {
 		return nil, status.Error(codes.NotFound, fmt.Sprintf("Code:%d %s", codes.NotFound, codes.NotFound.String()))
 	}
-	return hcpPackerService.NewPackerServiceGetBucketOK(), nil
+	resp := hcpPackerService.NewPackerServiceGetBucketOK()
+	if svc.GetBucketResp != nil {
+		resp.Payload = svc.GetBucketResp
+	}
+	return resp, nil
 }
 
 func (svc *MockPackerClientService) PackerServiceUpdateBucket(
