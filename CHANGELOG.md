@@ -1,5 +1,13 @@
 # 📦 Changelog
 
+## 1.15.3 (April 27, 2026)
+
+### BUG FIXES:
+
+* hcp: skip bucket update requests when description and labels already match, avoiding unnecessary updates for existing buckets.
+    [GH-13624](https://github.com/hashicorp/packer/pull/13624)
+
+
 ## 1.15.2 (April 21, 2026)
 
 ### FEATURES:
