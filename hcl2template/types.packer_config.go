@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/packer/buildfilter"
 	"github.com/zclconf/go-cty/cty"
 	"github.com/zclconf/go-cty/cty/function"
 )
@@ -711,6 +712,20 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 		})
 	}
 
+	// Compile -filter expressions once up front so a parse error aborts
+	// before we start builder plugins.
+	filterExprs, err := buildfilter.Parse(opts.Filters)
+	if err != nil {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagError,
+			Summary:  "Invalid -filter expression",
+			Detail:   err.Error(),
+		})
+		return nil, diags
+	}
+	filterMatches := 0
+	filterCandidates := 0
+
 	for _, build := range cfg.Builds {
 		for _, srcUsage := range build.Sources {
 			src, found := cfg.Sources[srcUsage.SourceRef]
@@ -727,6 +742,8 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 			pcb := &packer.CoreBuild{
 				BuildName: build.Name,
 				Type:      srcUsage.String(),
+				Tags:      mergeTags(build.Tags, src.Tags, srcUsage.Tags),
+				Labels:    mergeLabels(build.Labels, srcUsage.Labels, src.Labels),
 			}
 
 			pcb.SetDebug(cfg.debug)
@@ -774,6 +791,16 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 					opts.ExceptMatches++
 					continue
 				}
+			}
+
+			// -filter: applied after -only/-except, against the effective
+			// tags/labels set already assigned to pcb.
+			if len(filterExprs) > 0 {
+				filterCandidates++
+				if !buildfilter.Match(pcb, filterExprs) {
+					continue
+				}
+				filterMatches++
 			}
 
 			builder, moreDiags, generatedVars := cfg.startBuilder(srcUsage, cfg.EvalContext(BuildContext, nil))
@@ -862,7 +889,63 @@ func (cfg *PackerConfig) GetBuilds(opts packer.GetBuildsOptions) ([]*packer.Core
 				"These could also be matched with a glob pattern like: 'happycloud.*'", possibleBuildNames),
 		})
 	}
+	if len(filterExprs) > 0 && filterCandidates > 0 && filterMatches == 0 {
+		diags = append(diags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "a -filter option was passed, but did not match any build.",
+			Detail: fmt.Sprintf("Possible build names: %v.\n"+
+				"Verify that your source and build blocks declare the `tags` and/or `labels` attributes you are filtering on.",
+				possibleBuildNames),
+		})
+	}
 	return res, diags
+}
+
+// mergeTags returns a deduplicated union of the tag slices, preserving the
+// order in which values are first encountered (build tags first, then the
+// source definition, then the inline source usage). The result is nil when
+// every input is empty so CoreBuild.Tags reflects "no tags declared" as a
+// nil rather than an empty non-nil slice.
+func mergeTags(tagSets ...[]string) []string {
+	total := 0
+	for _, s := range tagSets {
+		total += len(s)
+	}
+	if total == 0 {
+		return nil
+	}
+	seen := make(map[string]struct{}, total)
+	out := make([]string, 0, total)
+	for _, s := range tagSets {
+		for _, t := range s {
+			if _, ok := seen[t]; ok {
+				continue
+			}
+			seen[t] = struct{}{}
+			out = append(out, t)
+		}
+	}
+	return out
+}
+
+// mergeLabels merges label maps. Earlier-listed maps provide defaults;
+// later-listed maps override on key conflict. The caller passes them in
+// precedence order (lowest to highest): typically build, usage, source.
+func mergeLabels(labelSets ...map[string]string) map[string]string {
+	total := 0
+	for _, m := range labelSets {
+		total += len(m)
+	}
+	if total == 0 {
+		return nil
+	}
+	out := make(map[string]string, total)
+	for _, m := range labelSets {
+		for k, v := range m {
+			out[k] = v
+		}
+	}
+	return out
 }
 
 var PackerConsoleHelp = strings.TrimSpace(`

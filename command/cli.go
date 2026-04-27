@@ -28,6 +28,21 @@ func (c *configType) Set(value string) error {
 	return err
 }
 
+// appendStringFlag implements flag.Value by appending each call's value
+// verbatim. Unlike sliceflag.StringFlag, it does NOT split on commas — a
+// comma is a meaningful character inside a -filter expression's value list
+// (e.g. `tags=prod,x86`), so comma-splitting would mangle the input.
+type appendStringFlag []string
+
+func (a *appendStringFlag) String() string {
+	return strings.Join(*a, " ")
+}
+
+func (a *appendStringFlag) Set(v string) error {
+	*a = append(*a, v)
+	return nil
+}
+
 // ConfigType tells what type of config we should use, it can return values
 // like "hcl" or "json".
 // Make sure Args was correctly set before.
@@ -56,6 +71,7 @@ func (ma *MetaArgs) GetConfigType() (configType, error) {
 func (ma *MetaArgs) AddFlagSets(fs *flag.FlagSet) {
 	fs.Var((*sliceflag.StringFlag)(&ma.Only), "only", "")
 	fs.Var((*sliceflag.StringFlag)(&ma.Except), "except", "")
+	fs.Var((*appendStringFlag)(&ma.Filters), "filter", "")
 	fs.Var((*kvflag.Flag)(&ma.Vars), "var", "")
 	fs.Var((*kvflag.StringSlice)(&ma.VarFiles), "var-file", "")
 	fs.Var(&ma.ConfigType, "config-type", "set to 'hcl2' to run in hcl2 mode when no file is passed.")
@@ -68,8 +84,11 @@ type MetaArgs struct {
 	Path         string
 	Paths        []string
 	Only, Except []string
-	Vars         map[string]string
-	VarFiles     []string
+	// Filters holds repeated -filter expressions that select builds by
+	// tags/labels. See packer/buildfilter for the grammar.
+	Filters  []string
+	Vars     map[string]string
+	VarFiles []string
 	// set to "hcl2" to force hcl2 mode
 	ConfigType configType
 
@@ -117,6 +136,7 @@ func GetCleanedBuildArgs(ba *BuildArgs) map[string]interface{} {
 		"force":     ba.Force,
 		"only":      ba.Only,
 		"except":    ba.Except,
+		"filter":    ba.Filters,
 		"var-files": ba.VarFiles,
 		"path":      ba.Path,
 	}

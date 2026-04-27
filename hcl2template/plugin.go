@@ -182,7 +182,13 @@ func (cfg *PackerConfig) initializeBlocks() hcl.Diagnostics {
 				continue
 			}
 
-			body := sourceDefinition.block.Body
+			// Use sourceDefinition.Body (which has tags/labels stripped)
+			// rather than block.Body so plugin ConfigSpec decoding never
+			// sees the filter attributes.
+			body := sourceDefinition.Body
+			if body == nil {
+				body = sourceDefinition.block.Body
+			}
 			if srcUsage.Body != nil {
 				// merge additions into source definition to get a new body.
 				body = hcl.MergeBodies([]hcl.Body{body, srcUsage.Body})

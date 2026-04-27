@@ -56,6 +56,39 @@ artifacts that are created will be outputted at the end of the build.
 
 `@include 'commands/only.mdx'`
 
+- `-filter='KEY=VALUE[,VALUE...]'` - Select builds by declared tags and labels.
+  Applied after `-only` and `-except`. Repeatable; multiple `-filter` flags are
+  AND-ed together (all must match for a build to run).
+
+  The expression grammar is:
+
+  - `KEY=VAL(,VAL)` - build must match **every** listed value (all-of)
+  - `KEY~=VAL(,VAL)` - build must match **at least one** listed value (any-of)
+  - `KEY!=VAL(,VAL)` - build must match **none** of the listed values (none-of)
+
+  `KEY` is either the literal string `tags` (matching against the list of tags
+  declared on the source and build blocks) or a label key. Values are
+  [glob](https://github.com/gobwas/glob) patterns; for example
+  `-filter=region~=us-*` matches any `region` label starting with `us-`.
+
+  Tags and labels are declared in HCL2 via a `metadata { ... }` block inside
+  a `source` or `build` block:
+
+  ```hcl
+  source "amazon-ebs" "web" {
+    metadata {
+      tags   = ["prod", "x86"]
+      labels = { region = "us-east" }
+    }
+    # ...builder-specific config
+  }
+  ```
+
+  In legacy JSON templates, use the reserved top-level builder keys
+  `packer_tags` (list of strings) and `packer_labels` (map of string to string).
+  Using the `packer_` prefix avoids collision with plugin-specific attributes
+  such as the `amazon-ebs` builder's own `tags` map.
+
 - `-parallel-builds=N` - Limit the number of builds to run in parallel, 0
   means no limit (defaults to 0).
 

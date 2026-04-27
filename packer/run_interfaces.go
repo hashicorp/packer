@@ -13,6 +13,10 @@ type GetBuildsOptions struct {
 	// Get builds except the ones that match with except and with only the ones
 	// that match with Only. When those are empty everything matches.
 	Except, Only []string
+	// Filters are repeated -filter expressions selecting builds by declared
+	// tags/labels. Applied after -only/-except. See packer/buildfilter for
+	// the grammar. An empty slice selects every build.
+	Filters      []string
 	Debug, Force bool
 	OnError      string
 

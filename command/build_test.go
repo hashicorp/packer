@@ -281,6 +281,64 @@ func TestBuild(t *testing.T) {
 			},
 		},
 
+		// -filter: tags and labels (HCL2)
+		{
+			name: "hcl - '-filter tags=prod' selects sources tagged prod",
+			args: []string{
+				"-filter=tags=prod",
+				testFixture("hcl-filter"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"chocolate.txt", "cherry.txt"},
+				notExpected: []string{"vanilla.txt"},
+			},
+		},
+		{
+			name: "hcl - '-filter tags=prod,x86' selects intersection",
+			args: []string{
+				"-filter=tags=prod,x86",
+				testFixture("hcl-filter"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"chocolate.txt"},
+				notExpected: []string{"vanilla.txt", "cherry.txt"},
+			},
+		},
+		{
+			name: "hcl - '-filter tags!=dev' excludes dev-tagged sources",
+			args: []string{
+				"-filter=tags!=dev",
+				testFixture("hcl-filter"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"chocolate.txt", "cherry.txt"},
+				notExpected: []string{"vanilla.txt"},
+			},
+		},
+		{
+			name: "hcl - '-filter region~=us-*' selects by label glob",
+			args: []string{
+				"-filter=region~=us-*",
+				testFixture("hcl-filter"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"chocolate.txt", "vanilla.txt"},
+				notExpected: []string{"cherry.txt"},
+			},
+		},
+		{
+			name: "hcl - multiple -filter flags are AND-ed",
+			args: []string{
+				"-filter=tags=prod",
+				"-filter=region=us-east",
+				testFixture("hcl-filter"),
+			},
+			fileCheck: fileCheck{
+				expected:    []string{"chocolate.txt"},
+				notExpected: []string{"vanilla.txt", "cherry.txt"},
+			},
+		},
+
 		// recipes
 		{
 			name: "hcl - recipes",
