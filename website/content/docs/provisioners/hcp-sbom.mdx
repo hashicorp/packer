@@ -17,6 +17,10 @@ page_title: hcp-sbom provisioner reference
 
 The `hcp-sbom` provisioner uploads software bill of materials (SBOM) files from artifacts built by Packer to HCP Packer. You must format  SBOM files you want to upload as JSON and follow either the [SPDX](https://spdx.github.io/spdx-spec/latest) or [CycloneDX](https://cyclonedx.org/) specification. HCP Packer ties these SBOM files to the version of the artifact that Packer builds.
 
+## Deprecation Notice
+
+~> **Deprecated Configuration Options:** The `scanner_url` and `scanner_checksum` configuration options are deprecated as of Packer v1.15.4 and will be removed in a future major version. The provisioner now uses the Packer binary with embedded Syft SDK for automatic SBOM generation. For custom SBOM generation tools, use manual generation with the `source` field instead of `auto_generate`.
+
 ## Example
 
 The following example uploads an SBOM from the local `/tmp` directory and stores a copy at `./sbom/sbom_cyclonedx.json` on the local machine.
@@ -46,6 +50,10 @@ provisioner "hcp-sbom" {
 
 </Tab>
 </Tabs>
+
+## Migrating from Custom Scanner URLs
+
+Prior to v1.15.4, the `hcp-sbom` provisioner supported downloading custom scanner binaries via `scanner_url`. This is no longer supported as the provisioner now uses the Packer binary with embedded Syft SDK.
 
 ## Configuration reference
 
