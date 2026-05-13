@@ -1,5 +1,12 @@
 name: Create a release branch
 on: [workflow_dispatch]
+
+# The actions-create-release-branch step uses secrets.ELEVATED_GITHUB_TOKEN
+# to push the release branch; the default GITHUB_TOKEN only needs read
+# access for the checkout.
+permissions:
+  contents: read
+
 jobs:
   create-branch:
     runs-on: ubuntu-latest
