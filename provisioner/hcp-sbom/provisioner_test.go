@@ -1,6 +1,10 @@
 package hcp_sbom
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -286,5 +290,145 @@ func TestNormalizeScannerExecuteCommand(t *testing.T) {
 				t.Fatalf("unexpected normalized command:\nwant: %q\n got: %q", tt.want, got)
 			}
 		})
+	}
+}
+
+func TestExpectedZipSHA256FromSums(t *testing.T) {
+	tests := []struct {
+		name        string
+		sumsContent string
+		fileName    string
+		want        string
+		wantErr     string
+	}{
+		{
+			name: "matches standard sums line",
+			sumsContent: strings.Join([]string{
+				"1111111111111111111111111111111111111111111111111111111111111111  packer_1.12.0_linux_amd64.zip",
+				"2222222222222222222222222222222222222222222222222222222222222222  packer_1.12.0_linux_arm64.zip",
+			}, "\n"),
+			fileName: "packer_1.12.0_linux_arm64.zip",
+			want:     "2222222222222222222222222222222222222222222222222222222222222222",
+		},
+		{
+			name: "matches starred filename",
+			sumsContent: strings.Join([]string{
+				"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa *packer_1.12.0_windows_amd64.zip",
+				"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb *packer_1.12.0_linux_amd64.zip",
+			}, "\n"),
+			fileName: "packer_1.12.0_windows_amd64.zip",
+			want:     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		},
+		{
+			name: "rejects malformed checksum format",
+			sumsContent: strings.Join([]string{
+				"not-a-valid-sha256  packer_1.12.0_linux_amd64.zip",
+			}, "\n"),
+			fileName: "packer_1.12.0_linux_amd64.zip",
+			wantErr:  "invalid SHA256 checksum format",
+		},
+		{
+			name: "returns not found for missing file",
+			sumsContent: strings.Join([]string{
+				"1111111111111111111111111111111111111111111111111111111111111111  packer_1.12.0_linux_amd64.zip",
+			}, "\n"),
+			fileName: "packer_1.12.0_freebsd_amd64.zip",
+			wantErr:  "not found in SHA256SUMS",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := expectedZipSHA256FromSums(tt.sumsContent, tt.fileName)
+			if tt.wantErr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got nil", tt.wantErr)
+				}
+				if !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("expected error containing %q, got %q", tt.wantErr, err.Error())
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			if got != tt.want {
+				t.Fatalf("unexpected checksum: want %q, got %q", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestIsValidSHA256Hex(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want bool
+	}{
+		{
+			name: "valid lowercase sha256",
+			in:   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+			want: true,
+		},
+		{
+			name: "valid uppercase sha256",
+			in:   "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+			want: true,
+		},
+		{
+			name: "rejects non-hex characters",
+			in:   "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+			want: false,
+		},
+		{
+			name: "rejects short length",
+			in:   "abc123",
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isValidSHA256Hex(tt.in); got != tt.want {
+				t.Fatalf("unexpected result: want %t, got %t", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestFileSHA256(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sample.bin")
+	content := []byte("packer checksum test payload")
+
+	if err := os.WriteFile(path, content, 0600); err != nil {
+		t.Fatalf("failed to write temp file: %s", err)
+	}
+
+	got, err := fileSHA256(path)
+	if err != nil {
+		t.Fatalf("unexpected error hashing file: %s", err)
+	}
+
+	wantBytes := sha256.Sum256(content)
+	want := hex.EncodeToString(wantBytes[:])
+	if got != want {
+		t.Fatalf("unexpected hash: want %q, got %q", want, got)
+	}
+}
+
+func TestChecksumMismatchDetection(t *testing.T) {
+	fileName := "packer_1.12.0_linux_amd64.zip"
+	sumsContent := "1111111111111111111111111111111111111111111111111111111111111111  " + fileName
+
+	expected, err := expectedZipSHA256FromSums(sumsContent, fileName)
+	if err != nil {
+		t.Fatalf("unexpected error resolving expected checksum: %s", err)
+	}
+
+	actual := "2222222222222222222222222222222222222222222222222222222222222222"
+	if strings.EqualFold(expected, actual) {
+		t.Fatalf("expected checksum mismatch, but checksums compared equal")
 	}
 }

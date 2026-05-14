@@ -857,19 +857,16 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		outputPath = "/tmp/packer-sbom.json"
 	}
 
-	// Prepare template data
-	templateData := make(map[string]interface{})
-	// Copy generatedData
-	for k, v := range p.generatedData {
-		templateData[k] = v
+	// Restrict execute_command interpolation data to explicit scanner keys.
+	// This avoids exposing arbitrary generatedData values to shell template rendering.
+	templateData := map[string]string{
+		"Path":     scannerPath,
+		"Args":     strings.Join(p.config.ScannerArgs, " "),
+		"ScanPath": p.config.ScanPath,
+		"Output":   outputPath,
 	}
-	// Add scanner-specific data
-	templateData["Path"] = scannerPath
-	templateData["Args"] = strings.Join(p.config.ScannerArgs, " ")
-	templateData["ScanPath"] = p.config.ScanPath
-	templateData["Output"] = outputPath
-
-	p.config.ctx.Data = templateData
+	renderCtx := p.config.ctx
+	renderCtx.Data = templateData
 
 	// Use Windows-specific default if on Windows and user hasn't customized
 	executeCommand := p.config.ExecuteCommand
@@ -887,7 +884,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	}
 
 	// Render the execute command template
-	cmdStr, err := interpolate.Render(executeCommand, &p.config.ctx)
+	cmdStr, err := interpolate.Render(executeCommand, &renderCtx)
 	if err != nil {
 		return "", fmt.Errorf("failed to render execute_command: %s", err)
 	}
