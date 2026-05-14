@@ -250,3 +250,41 @@ func TestConfigPrepare(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeScannerExecuteCommand(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "injects when path directly followed by args",
+			in:   "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
+			want: "chmod +x {{.Path}} && {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "injects when path directly followed by scan path",
+			in:   "sudo {{.Path}} {{.ScanPath}} > {{.Output}}",
+			want: "sudo {{.Path}} sbom-generate {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "keeps command when sbom-generate already present",
+			in:   "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			want: "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "does not modify non-scan invocation",
+			in:   "chmod +x {{.Path}} && {{.Path}} version",
+			want: "chmod +x {{.Path}} && {{.Path}} version",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := normalizeScannerExecuteCommand(tt.in)
+			if got != tt.want {
+				t.Fatalf("unexpected normalized command:\nwant: %q\n got: %q", tt.want, got)
+			}
+		})
+	}
+}

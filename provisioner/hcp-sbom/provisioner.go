@@ -10,6 +10,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -149,6 +151,38 @@ func (p *Provisioner) FlatConfig() interface{} {
 }
 
 var sbomFormatRegexp = regexp.MustCompile("^[0-9A-Za-z-]{3,36}$")
+
+// scannerPathTokenRegexp matches the raw execute_command template token used
+// for the uploaded binary path, including optional whitespace inside the
+// template braces.
+//
+// Examples that match:
+//
+//	{{.Path}}
+//	{{ .Path }}
+//
+// Examples that do not match:
+//
+//	{{.Args}}
+//	/tmp/packer-sbom-runner
+var scannerPathTokenRegexp = regexp.MustCompile(`\{\{\s*\.Path\s*\}\}`)
+
+// scannerArgsOrScanPathTokenPrefixRegexp matches only when the next
+// non-whitespace token after {{.Path}} is either {{.Args}} or {{.ScanPath}}.
+// This is the backward-compatible shape of older scanner commands where the
+// path was executed directly without an explicit sbom-generate subcommand.
+//
+// Examples that match after trimming leading whitespace:
+//
+//	{{.Args}} {{.ScanPath}} > {{.Output}}
+//	{{ .ScanPath }} > {{.Output}}
+//
+// Examples that do not match:
+//
+//	sbom-generate {{.Args}} {{.ScanPath}}
+//	version
+//	&& chmod +x {{.Path}}
+var scannerArgsOrScanPathTokenPrefixRegexp = regexp.MustCompile(`^\{\{\s*\.(Args|ScanPath)\s*\}\}`)
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -459,6 +493,58 @@ func findModuleRoot() (string, error) {
 	return "", fmt.Errorf("could not find go.mod walking up from %s (is this a dev build?)", filepath.Dir(exe))
 }
 
+func downloadText(ctx context.Context, client *http.Client, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to build request for %s: %w", url, err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to download %s: %w", url, err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("download failed: HTTP %d for %s", resp.StatusCode, url)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed reading response body for %s: %w", url, err)
+	}
+
+	return string(body), nil
+}
+
+func expectedZipSHA256FromSums(sumsContent, fileName string) (string, error) {
+	for _, line := range strings.Split(sumsContent, "\n") {
+		fields := strings.Fields(strings.TrimSpace(line))
+		if len(fields) < 2 {
+			continue
+		}
+		if fields[len(fields)-1] == fileName {
+			return strings.ToLower(fields[0]), nil
+		}
+	}
+	return "", fmt.Errorf("checksum for %s not found in SHA256SUMS", fileName)
+}
+
+func fileSHA256(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open %s for hashing: %w", path, err)
+	}
+	defer func() { _ = f.Close() }()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", fmt.Errorf("failed hashing %s: %w", path, err)
+	}
+
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
 // crossCompilePackerBinary cross-compiles the Packer binary for the given
 // GOOS/GOARCH using the local Go toolchain. Used for dev builds when the remote
 // host differs from the Packer host.
@@ -497,6 +583,7 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 	// e.g. https://releases.hashicorp.com/packer/1.12.0/packer_1.12.0_linux_arm64.zip
 	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
 	url := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/%s", version, fileName)
+	shaSumsURL := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_SHA256SUMS", version, version)
 
 	log.Printf("[INFO] Downloading Packer %s for %s/%s from %s...", version, goos, goarch, url)
 
@@ -529,6 +616,26 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 		return "", fmt.Errorf("failed to write zip file: %w", err)
 	}
 	_ = zipFile.Close()
+
+	// Verify ZIP integrity against official HashiCorp SHA256SUMS before extracting.
+	sumsContent, err := downloadText(ctx, client, shaSumsURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve release checksums: %w", err)
+	}
+
+	expectedSHA, err := expectedZipSHA256FromSums(sumsContent, fileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve expected checksum: %w", err)
+	}
+
+	actualSHA, err := fileSHA256(zipPath)
+	if err != nil {
+		return "", err
+	}
+
+	if !strings.EqualFold(expectedSHA, actualSHA) {
+		return "", fmt.Errorf("release checksum verification failed for %s: expected %s, got %s", fileName, expectedSHA, actualSHA)
+	}
 
 	// Extract the packer binary from the zip
 	binaryName := "packer"
@@ -581,9 +688,8 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 // boolean indicating whether the caller must delete the file after use.
 //
 // Resolution order:
-//  1. Local pkg/{os}_{arch}/packer — pre-built by `make bin`, used as-is (no temp copy)
-//  2. Release builds — download from releases.hashicorp.com (temp file, delete after)
-//  3. Dev builds — cross-compile from source using local Go toolchain (temp file, delete after)
+//  1. Release builds — download from releases.hashicorp.com (temp file, delete after)
+//  2. Dev builds — cross-compile from source using local Go toolchain (temp file, delete after)
 func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui, osType, osArch string) (path string, isTemp bool, err error) {
 	// Normalise uname-style OS/arch strings to GOOS/GOARCH values.
 	targetGOOS := strings.ToLower(osType)
@@ -595,20 +701,10 @@ func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui,
 		targetGOARCH = mapped
 	}
 
-	// 1. Check for a pre-built binary in pkg/{os}_{arch}/packer (produced by `make bin`).
-	moduleRoot, modErr := findModuleRoot()
-	if modErr == nil {
-		pkgBin := filepath.Join(moduleRoot, "pkg", fmt.Sprintf("%s_%s", targetGOOS, targetGOARCH), "packer")
-		if _, statErr := os.Stat(pkgBin); statErr == nil {
-			ui.Say(fmt.Sprintf("Found pre-built binary for %s/%s at %s", targetGOOS, targetGOARCH, pkgBin))
-			return pkgBin, false, nil
-		}
-	}
-
 	version := packerversion.Version
 	prerelease := packerversion.VersionPrerelease
 
-	// 2. Release build — download from releases.hashicorp.com
+	// 1. Release build — download from releases.hashicorp.com
 	if prerelease == "" {
 		ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from releases.hashicorp.com...", version, targetGOOS, targetGOARCH))
 		binPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
@@ -618,7 +714,7 @@ func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui,
 		return binPath, true, nil
 	}
 
-	// 3. Dev/pre-release build — cross-compile from source
+	// 2. Dev/pre-release build — cross-compile from source
 	ui.Say(fmt.Sprintf("Dev build detected (%s-%s) — cross-compiling Packer for %s/%s...", version, prerelease, targetGOOS, targetGOARCH))
 	binPath, err := crossCompilePackerBinary(ctx, targetGOOS, targetGOARCH)
 	if err != nil {
@@ -760,6 +856,14 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		executeCommand = "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
 	}
 
+	// Backward compatibility: older execute_command templates omitted the
+	// sbom-generate subcommand and invoked the scanner binary directly.
+	normalizedExecuteCommand := normalizeScannerExecuteCommand(executeCommand)
+	if normalizedExecuteCommand != executeCommand {
+		log.Printf("[INFO] execute_command compatibility: injected 'sbom-generate' subcommand")
+		executeCommand = normalizedExecuteCommand
+	}
+
 	// Render the execute command template
 	cmdStr, err := interpolate.Render(executeCommand, &p.config.ctx)
 	if err != nil {
@@ -805,6 +909,72 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	}
 
 	return outputPath, nil
+}
+
+func normalizeScannerExecuteCommand(executeCommand string) string {
+	// Walk each {{.Path}} token and only inject "sbom-generate" when that
+	// token is being used as the scanner executable invocation.
+	//
+	// Example rewritten:
+	//   chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}
+	// becomes:
+	//   chmod +x {{.Path}} && {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}
+	//
+	// Example left unchanged:
+	//   chmod +x {{.Path}} && {{.Path}} version
+	// because the token after {{.Path}} is not {{.Args}} or {{.ScanPath}}.
+	var out strings.Builder
+	cursor := 0
+
+	for {
+		loc := scannerPathTokenRegexp.FindStringIndex(executeCommand[cursor:])
+		if loc == nil {
+			break
+		}
+
+		end := cursor + loc[1]
+		out.WriteString(executeCommand[cursor:end])
+
+		after := executeCommand[end:]
+		trimmedAfter := strings.TrimLeft(after, " \t")
+
+		if !hasSBOMGenerateSubcommandPrefix(trimmedAfter) && scannerArgsOrScanPathTokenPrefixRegexp.MatchString(trimmedAfter) {
+			out.WriteString(" sbom-generate")
+		}
+
+		cursor = end
+	}
+
+	out.WriteString(executeCommand[cursor:])
+	return out.String()
+}
+
+func hasSBOMGenerateSubcommandPrefix(s string) bool {
+	// Treat sbom-generate as already present only when it is a complete shell
+	// token prefix, not when it is part of a longer word.
+	//
+	// Matches:
+	//   sbom-generate {{.Args}}
+	//   sbom-generate; echo done
+	//
+	// Does not match:
+	//   sbom-generate-custom
+	const subcommand = "sbom-generate"
+	if !strings.HasPrefix(s, subcommand) {
+		return false
+	}
+
+	if len(s) == len(subcommand) {
+		return true
+	}
+
+	next := s[len(subcommand)]
+	switch next {
+	case ' ', '\t', '\n', '\r', ';', '|', '&', '>', '<':
+		return true
+	default:
+		return false
+	}
 }
 
 // downloadSBOM downloads the SBOM file from the remote host
