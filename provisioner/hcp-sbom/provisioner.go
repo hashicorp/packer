@@ -7,22 +7,16 @@
 package hcp_sbom
 
 import (
-	"archive/zip"
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
@@ -471,215 +465,53 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-// findModuleRoot walks up from the running executable's directory to find the
-// nearest directory containing a go.mod file (the module root for dev builds).
-func findModuleRoot() (string, error) {
-	exe, err := os.Executable()
+// provisionWithNativeGeneration handles the native SBOM generation flow by
+// downloading and extracting a Packer binary on the remote host and running
+// `packer sbom-generate` there.
+func (p *Provisioner) provisionWithNativeGeneration(
+	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
+	generatedData map[string]interface{}, osType, osArch string,
+) error {
+	ui.Say("Starting Automatic SBOM generation workflow...")
+
+	// Step 1: Download and extract a release scanner directly on the remote host.
+	remoteScannerPath, remoteZipPath, err := p.prepareRemoteScannerOnRemote(ctx, ui, comm, osType, osArch)
 	if err != nil {
-		return "", fmt.Errorf("could not find Packer executable: %w", err)
+		return fmt.Errorf("failed to prepare scanner on remote host: %s", err)
 	}
-	dir := filepath.Dir(exe)
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			return dir, nil
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
+	defer p.cleanupRemoteFile(ctx, ui, comm, remoteScannerPath)
+	if remoteZipPath != "" {
+		defer p.cleanupRemoteFile(ctx, ui, comm, remoteZipPath)
 	}
-	return "", fmt.Errorf("could not find go.mod walking up from %s (is this a dev build?)", filepath.Dir(exe))
+
+	// Step 2: Run scanner on remote
+	ui.Say(fmt.Sprintf("Running scanner on remote host (scanning %s)...", p.config.ScanPath))
+	remoteSBOMPath, err := p.runScanner(ctx, ui, comm, remoteScannerPath, osType)
+	if err != nil {
+		return fmt.Errorf("failed to run scanner: %s", err)
+	}
+	defer p.cleanupRemoteFile(ctx, ui, comm, remoteSBOMPath)
+
+	// Step 3: Download SBOM from remote
+	log.Println("Downloading SBOM from remote host...")
+	sbomData, err := p.downloadSBOM(ctx, ui, comm, remoteSBOMPath)
+	if err != nil {
+		return fmt.Errorf("failed to download SBOM: %s", err)
+	}
+
+	// Step 4: Process SBOM for HCP (validate, compress, store)
+	log.Println("Processing SBOM for HCP Packer...")
+	if err := p.processSBOMForHCP(generatedData, sbomData); err != nil {
+		return fmt.Errorf("failed to process SBOM: %s", err)
+	}
+
+	ui.Say("Automatic SBOM generation completed successfully")
+	return nil
 }
 
-func downloadText(ctx context.Context, client *http.Client, url string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to build request for %s: %w", url, err)
-	}
+func (p *Provisioner) prepareRemoteScannerOnRemote(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, osType, osArch string) (remoteScannerPath, remoteZipPath string, err error) {
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to download %s: %w", url, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download failed: HTTP %d for %s", resp.StatusCode, url)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed reading response body for %s: %w", url, err)
-	}
-	if len(strings.TrimSpace(string(body))) == 0 {
-		return "", fmt.Errorf("empty response body for %s", url)
-	}
-
-	return string(body), nil
-}
-
-func isValidSHA256Hex(s string) bool {
-	if len(s) != 64 {
-		return false
-	}
-	_, err := hex.DecodeString(s)
-	return err == nil
-}
-
-func expectedZipSHA256FromSums(sumsContent, fileName string) (string, error) {
-	for _, line := range strings.Split(sumsContent, "\n") {
-		fields := strings.Fields(strings.TrimSpace(line))
-		if len(fields) < 2 {
-			continue
-		}
-		candidateFileName := strings.TrimPrefix(fields[len(fields)-1], "*")
-		if candidateFileName == fileName {
-			hash := strings.ToLower(fields[0])
-			if !isValidSHA256Hex(hash) {
-				return "", fmt.Errorf("invalid SHA256 checksum format for %s in SHA256SUMS", fileName)
-			}
-			return hash, nil
-		}
-	}
-	return "", fmt.Errorf("checksum for %s not found in SHA256SUMS", fileName)
-}
-
-func fileSHA256(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("failed to open %s for hashing: %w", path, err)
-	}
-	defer func() { _ = f.Close() }()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", fmt.Errorf("failed hashing %s: %w", path, err)
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-// downloadPackerRelease downloads the Packer release binary for the given
-// GOOS/GOARCH from releases.hashicorp.com. Used for release builds when the
-// remote host differs from the Packer host.
-func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (string, error) {
-	// Packer releases use the format: packer_{version}_{os}_{arch}.zip
-	// e.g. https://releases.hashicorp.com/packer/1.12.0/packer_1.12.0_linux_arm64.zip
-	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
-	url := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/%s", version, fileName)
-	shaSumsURL := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_SHA256SUMS", version, version)
-
-	log.Printf("[INFO] Downloading Packer %s for %s/%s from %s...", version, goos, goarch, url)
-
-	client := &http.Client{Timeout: 5 * time.Minute}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to build download request: %w", err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to download Packer release: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download failed: HTTP %d for %s", resp.StatusCode, url)
-	}
-
-	// Write zip to a temp file
-	zipFile, err := os.CreateTemp("", "packer-release-*.zip")
-	if err != nil {
-		return "", fmt.Errorf("failed to create temp zip file: %w", err)
-	}
-	zipPath := zipFile.Name()
-	defer func() {
-		if err := os.Remove(zipPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-			log.Printf("[WARN] failed to remove temp release zip %s: %v", zipPath, err)
-		}
-	}()
-
-	if _, err := io.Copy(zipFile, resp.Body); err != nil {
-		_ = zipFile.Close()
-		return "", fmt.Errorf("failed to write zip file: %w", err)
-	}
-	_ = zipFile.Close()
-
-	// Verify ZIP integrity against official HashiCorp SHA256SUMS before extracting.
-	sumsContent, err := downloadText(ctx, client, shaSumsURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve release checksums: %w", err)
-	}
-
-	expectedSHA, err := expectedZipSHA256FromSums(sumsContent, fileName)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve expected checksum: %w", err)
-	}
-
-	actualSHA, err := fileSHA256(zipPath)
-	if err != nil {
-		return "", err
-	}
-
-	if !strings.EqualFold(expectedSHA, actualSHA) {
-		return "", fmt.Errorf("release checksum verification failed for %s: expected %s, got %s", fileName, expectedSHA, actualSHA)
-	}
-
-	// Extract the packer binary from the zip
-	binaryName := "packer"
-	if goos == "windows" {
-		binaryName = "packer.exe"
-	}
-
-	zr, err := zip.OpenReader(zipPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open downloaded zip: %w", err)
-	}
-	defer func() { _ = zr.Close() }()
-
-	for _, f := range zr.File {
-		if f.Name == binaryName {
-			rc, err := f.Open()
-			if err != nil {
-				return "", fmt.Errorf("failed to open %s in zip: %w", binaryName, err)
-			}
-			defer func() { _ = rc.Close() }()
-
-			out, err := os.CreateTemp("", fmt.Sprintf("packer-%s-%s-*", goos, goarch))
-			if err != nil {
-				return "", fmt.Errorf("failed to create temp binary file: %w", err)
-			}
-			outPath := out.Name()
-
-			if _, err := io.Copy(out, rc); err != nil {
-				_ = out.Close()
-				_ = os.Remove(outPath)
-				return "", fmt.Errorf("failed to extract Packer binary: %w", err)
-			}
-			_ = out.Close()
-
-			if err := os.Chmod(outPath, 0755); err != nil {
-				_ = os.Remove(outPath)
-				return "", fmt.Errorf("failed to make Packer binary executable: %w", err)
-			}
-
-			log.Printf("[INFO] Downloaded Packer binary to: %s", outPath)
-			return outPath, nil
-		}
-	}
-
-	return "", fmt.Errorf("packer binary not found in release zip %s", url)
-}
-
-// resolveScannerBinary returns the local path to a Packer binary that can run
-// on the remote host (given its osType and osArch from uname output), plus a
-// boolean indicating whether the caller must delete the file after use.
-//
-// Resolution behavior:
-//  1. Download from releases.hashicorp.com (temp file, delete after)
-func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui, osType, osArch string) (path string, isTemp bool, err error) {
-	// Normalise uname-style OS/arch strings to GOOS/GOARCH values.
 	targetGOOS := strings.ToLower(osType)
 	archMap := map[string]string{
 		"x86_64": "amd64", "aarch64": "arm64", "i386": "386", "i686": "386", "armv7l": "arm", "armv7": "arm",
@@ -690,116 +522,45 @@ func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui,
 	}
 
 	version := packerversion.Version
+	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, targetGOOS, targetGOARCH)
+	url := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/%s", version, fileName)
 
-	ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from releases.hashicorp.com...", version, targetGOOS, targetGOARCH))
-	binPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
-	if err != nil {
-		return "", false, fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
-	}
-	return binPath, true, nil
-}
-
-// provisionWithNativeGeneration handles the native SBOM generation flow by
-// uploading a Packer binary (with embedded Syft SDK) to the remote host and
-// running `packer sbom-generate` there. Automatically selects the right release
-// binary for the remote OS/arch.
-func (p *Provisioner) provisionWithNativeGeneration(
-	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{}, osType, osArch string,
-) error {
-	ui.Say("Starting Automatic SBOM generation workflow...")
-
-	// Step 1: Get a Packer binary compatible with the remote host's OS/arch.
-	scannerLocalPath, isTemp, err := p.resolveScannerBinary(ctx, ui, osType, osArch)
-	if err != nil {
-		return fmt.Errorf("failed to obtain Packer binary for remote host: %s", err)
-	}
-	if isTemp {
-		defer func() {
-			log.Printf("Cleaning up temporary Packer binary: %s", scannerLocalPath)
-			if err := os.Remove(scannerLocalPath); err != nil && !errors.Is(err, os.ErrNotExist) {
-				log.Printf("[WARN] failed to remove temporary Packer binary %s: %v", scannerLocalPath, err)
-			}
-		}()
+	isWindows := strings.Contains(targetGOOS, "windows")
+	if isWindows {
+		remoteZipPath = "C:\\Windows\\Temp\\packer-sbom-runner.zip"
+		remoteScannerPath = "C:\\Windows\\Temp\\packer-sbom-runner.exe"
+		cmdStr := fmt.Sprintf("powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"$ErrorActionPreference='Stop'; Invoke-WebRequest -Uri '%s' -OutFile '%s'; Expand-Archive -Path '%s' -DestinationPath 'C:\\Windows\\Temp' -Force; Move-Item -Force 'C:\\Windows\\Temp\\packer.exe' '%s'\"", url, remoteZipPath, remoteZipPath, remoteScannerPath)
+		cmd := &packersdk.RemoteCmd{Command: cmdStr}
+		if err := comm.Start(ctx, cmd); err != nil {
+			return "", "", fmt.Errorf("failed to start remote download/extract command: %s", err)
+		}
+		cmd.Wait()
+		if cmd.ExitStatus() != 0 {
+			return "", "", fmt.Errorf("remote download/extract command failed with exit status %d", cmd.ExitStatus())
+		}
+		ui.Say(fmt.Sprintf("Downloaded Packer %s to remote path %s", version, remoteScannerPath))
+		return remoteScannerPath, remoteZipPath, nil
 	}
 
-	// Step 2: Upload scanner to remote
-	log.Println("Uploading scanner to remote host...")
-	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerLocalPath, osType)
-	if err != nil {
-		return fmt.Errorf("failed to upload scanner: %s", err)
+	remoteZipPath = "/tmp/packer-sbom-runner.zip"
+	remoteScannerPath = "/tmp/packer-sbom-runner"
+	cmdStr := fmt.Sprintf("set -e; if command -v curl >/dev/null 2>&1; then curl -fsSL '%s' -o '%s'; elif command -v wget >/dev/null 2>&1; then wget -qO '%s' '%s'; else echo 'curl or wget required' >&2; exit 1; fi; if command -v unzip >/dev/null 2>&1; then unzip -p '%s' packer > '%s'; elif command -v bsdtar >/dev/null 2>&1; then bsdtar -xOf '%s' packer > '%s'; else echo 'unzip or bsdtar required' >&2; exit 1; fi; chmod +x '%s'", url, remoteZipPath, remoteZipPath, url, remoteZipPath, remoteScannerPath, remoteZipPath, remoteScannerPath, remoteScannerPath)
+	cmd := &packersdk.RemoteCmd{Command: cmdStr}
+	if err := comm.Start(ctx, cmd); err != nil {
+		return "", "", fmt.Errorf("failed to start remote download/extract command: %s", err)
 	}
-	defer p.cleanupRemoteFile(ctx, ui, comm, remoteScannerPath)
-
-	// Step 3: Run scanner on remote
-	ui.Say(fmt.Sprintf("Running scanner on remote host (scanning %s)...", p.config.ScanPath))
-	remoteSBOMPath, err := p.runScanner(ctx, ui, comm, remoteScannerPath, osType)
-	if err != nil {
-		return fmt.Errorf("failed to run scanner: %s", err)
-	}
-	defer p.cleanupRemoteFile(ctx, ui, comm, remoteSBOMPath)
-
-	// Step 4: Download SBOM from remote
-	log.Println("Downloading SBOM from remote host...")
-	sbomData, err := p.downloadSBOM(ctx, ui, comm, remoteSBOMPath)
-	if err != nil {
-		return fmt.Errorf("failed to download SBOM: %s", err)
+	cmd.Wait()
+	if cmd.ExitStatus() != 0 {
+		return "", "", fmt.Errorf("remote download/extract command failed with exit status %d", cmd.ExitStatus())
 	}
 
-	// Step 5: Process SBOM for HCP (validate, compress, store)
-	log.Println("Processing SBOM for HCP Packer...")
-	if err := p.processSBOMForHCP(generatedData, sbomData); err != nil {
-		return fmt.Errorf("failed to process SBOM: %s", err)
-	}
-
-	ui.Say("Automatic SBOM generation completed successfully")
-	return nil
+	ui.Say(fmt.Sprintf("Downloaded Packer %s to remote path %s", version, remoteScannerPath))
+	return remoteScannerPath, remoteZipPath, nil
 }
 
 // uploadScanner uploads the Packer binary to the remote host.
 // For Unix: uploads to /tmp/packer-sbom-runner and makes it executable.
 // For Windows: uploads to C:\Windows\Temp\packer-sbom-runner.exe.
-func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
-	comm packersdk.Communicator, localPath, osType string) (string, error) {
-
-	isWindows := strings.Contains(strings.ToLower(osType), "windows")
-
-	var remotePath string
-	if isWindows {
-		remotePath = "C:\\Windows\\Temp\\packer-sbom-runner.exe"
-	} else {
-		remotePath = "/tmp/packer-sbom-runner"
-	}
-
-	localFile, err := os.Open(localPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open Packer binary: %s", err)
-	}
-	defer func() {
-		_ = localFile.Close()
-	}()
-
-	log.Printf("Uploading Packer binary to %s...", remotePath)
-	if err := comm.Upload(remotePath, localFile, nil); err != nil {
-		return "", fmt.Errorf("failed to upload Packer binary: %s", err)
-	}
-
-	if !isWindows {
-		cmd := &packersdk.RemoteCmd{
-			Command: fmt.Sprintf("chmod +x %s", remotePath),
-		}
-		if err := comm.Start(ctx, cmd); err != nil {
-			return "", fmt.Errorf("failed to make Packer binary executable: %s", err)
-		}
-		cmd.Wait()
-		if cmd.ExitStatus() != 0 {
-			return "", fmt.Errorf("chmod command failed with exit status %d", cmd.ExitStatus())
-		}
-	}
-
-	return remotePath, nil
-}
-
 // runScanner executes `packer sbom-generate` on the remote host.
 func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, scannerPath, osType string) (string, error) {
