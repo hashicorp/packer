@@ -34,6 +34,7 @@ func (cmd *SBOMGenerateCommand) ParseArgs(args []string) (*sbom.Config, int) {
 		ScanPath:    "/",
 		Format:      sbom.FormatCycloneDX, // default format
 		Parallelism: 4,                    // default parallelism
+		Scope:       sbom.ScopeSquashed,   // default scope
 	}
 
 	//Parse Syft Style args
@@ -59,11 +60,60 @@ func (cmd *SBOMGenerateCommand) ParseArgs(args []string) (*sbom.Config, int) {
 			}
 			cfg.Format = format
 
-		default:
-			// Assume it's the scan path (positional argument)
-			if !strings.HasPrefix(arg, "-") {
-				cfg.ScanPath = arg
+		case "--exclude":
+			if i+1 >= len(args) {
+				cmd.Ui.Error("Missing value for --exclude flag")
+				return cfg, 1
 			}
+			i++
+			cfg.Exclude = append(cfg.Exclude, args[i])
+
+		case "--scope":
+			if i+1 >= len(args) {
+				cmd.Ui.Error("Missing value for --scope flag")
+				return cfg, 1
+			}
+			i++
+			scope, err := sbom.ParseScopeFromArgs(args[i])
+			if err != nil {
+				cmd.Ui.Error(err.Error())
+				return cfg, 1
+			}
+			cfg.Scope = scope
+
+		default:
+			if strings.HasPrefix(arg, "--exclude=") {
+				value := strings.TrimPrefix(arg, "--exclude=")
+				if value == "" {
+					cmd.Ui.Error("Missing value for --exclude flag")
+					return cfg, 1
+				}
+				cfg.Exclude = append(cfg.Exclude, value)
+				continue
+			}
+
+			if strings.HasPrefix(arg, "--scope=") {
+				value := strings.TrimPrefix(arg, "--scope=")
+				if value == "" {
+					cmd.Ui.Error("Missing value for --scope flag")
+					return cfg, 1
+				}
+				scope, err := sbom.ParseScopeFromArgs(value)
+				if err != nil {
+					cmd.Ui.Error(err.Error())
+					return cfg, 1
+				}
+				cfg.Scope = scope
+				continue
+			}
+
+			if strings.HasPrefix(arg, "-") {
+				cmd.Ui.Say(fmt.Sprintf("Warning: unsupported sbom-generate argument ignored: %s", arg))
+				continue
+			}
+
+			// Assume it's the scan path (positional argument)
+			cfg.ScanPath = arg
 		}
 	}
 	return cfg, 0
@@ -104,6 +154,8 @@ Usage: packer sbom-generate [options] <path>
   This command is typically invoked internally by the hcp-sbom provisioner.
 Options:
   -o <format>      Output format: cyclonedx-json, spdx-json (default: cyclonedx-json)
+	--exclude <glob> Optional: exclude path glob from scanning (repeatable)
+	--scope <scope>  Optional: scan scope: squashed, all-layers (default: squashed)
 Arguments:
   <path>           Path to scan (default: /)
 Examples:
@@ -113,6 +165,8 @@ Examples:
   packer sbom-generate -o spdx-json / > sbom.json
   # Scan specific directory
   packer sbom-generate -o cyclonedx-json /opt/app > app-sbom.json
+  # Scan all image layers and exclude temporary paths
+  packer sbom-generate --scope all-layers --exclude "/tmp/**" -o cyclonedx-json / > sbom.json
 Note: Output is written to stdout. Use shell redirection (>) to save to file.
 `
 	return strings.TrimSpace(helpText)

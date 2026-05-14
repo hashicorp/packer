@@ -22,17 +22,31 @@ import (
 
 // Generate creates an SBOM for the configured scan path and returns the encoded result.
 func (g *Generator) Generate(ctx context.Context) ([]byte, error) {
-
 	sourceInput := g.config.ScanPath
-	src, err := syft.GetSource(ctx, sourceInput, nil)
+	getSourceCfg := syft.DefaultGetSourceConfig()
+	if len(g.config.Exclude) > 0 {
+		getSourceCfg = getSourceCfg.WithExcludeConfig(source.ExcludeConfig{Paths: g.config.Exclude})
+	}
+
+	src, err := syft.GetSource(ctx, sourceInput, getSourceCfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get source: %w", err)
 	}
 	defer src.Close()
 
+	var scope source.Scope
+	switch g.config.Scope {
+	case ScopeAllLayers:
+		scope = source.AllLayersScope
+	case "", ScopeSquashed:
+		scope = source.SquashedScope
+	default:
+		return nil, fmt.Errorf("unsupported scope: %s", g.config.Scope)
+	}
+
 	sbomCfg := syft.DefaultCreateSBOMConfig().
 		WithSearchConfig(cataloging.SearchConfig{
-			Scope: source.SquashedScope,
+			Scope: scope,
 		}).
 		WithParallelism(g.config.Parallelism)
 
