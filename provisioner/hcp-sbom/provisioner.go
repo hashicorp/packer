@@ -513,8 +513,19 @@ func downloadText(ctx context.Context, client *http.Client, url string) (string,
 	if err != nil {
 		return "", fmt.Errorf("failed reading response body for %s: %w", url, err)
 	}
+	if len(strings.TrimSpace(string(body))) == 0 {
+		return "", fmt.Errorf("empty response body for %s", url)
+	}
 
 	return string(body), nil
+}
+
+func isValidSHA256Hex(s string) bool {
+	if len(s) != 64 {
+		return false
+	}
+	_, err := hex.DecodeString(s)
+	return err == nil
 }
 
 func expectedZipSHA256FromSums(sumsContent, fileName string) (string, error) {
@@ -523,8 +534,13 @@ func expectedZipSHA256FromSums(sumsContent, fileName string) (string, error) {
 		if len(fields) < 2 {
 			continue
 		}
-		if fields[len(fields)-1] == fileName {
-			return strings.ToLower(fields[0]), nil
+		candidateFileName := strings.TrimPrefix(fields[len(fields)-1], "*")
+		if candidateFileName == fileName {
+			hash := strings.ToLower(fields[0])
+			if !isValidSHA256Hex(hash) {
+				return "", fmt.Errorf("invalid SHA256 checksum format for %s in SHA256SUMS", fileName)
+			}
+			return hash, nil
 		}
 	}
 	return "", fmt.Errorf("checksum for %s not found in SHA256SUMS", fileName)
@@ -609,7 +625,11 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 		return "", fmt.Errorf("failed to create temp zip file: %w", err)
 	}
 	zipPath := zipFile.Name()
-	defer func() { _ = os.Remove(zipPath) }()
+	defer func() {
+		if err := os.Remove(zipPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Printf("[WARN] failed to remove temp release zip %s: %v", zipPath, err)
+		}
+	}()
 
 	if _, err := io.Copy(zipFile, resp.Body); err != nil {
 		_ = zipFile.Close()
@@ -741,7 +761,9 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	if isTemp {
 		defer func() {
 			log.Printf("Cleaning up temporary Packer binary: %s", scannerLocalPath)
-			_ = os.Remove(scannerLocalPath)
+			if err := os.Remove(scannerLocalPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+				log.Printf("[WARN] failed to remove temporary Packer binary %s: %v", scannerLocalPath, err)
+			}
 		}()
 	}
 
