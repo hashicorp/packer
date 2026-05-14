@@ -19,7 +19,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -561,36 +560,6 @@ func fileSHA256(path string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-// crossCompilePackerBinary cross-compiles the Packer binary for the given
-// GOOS/GOARCH using the local Go toolchain. Used for dev builds when the remote
-// host differs from the Packer host.
-func crossCompilePackerBinary(ctx context.Context, goos, goarch string) (string, error) {
-	moduleRoot, err := findModuleRoot()
-	if err != nil {
-		return "", fmt.Errorf("cross-compilation requires a dev build with source available: %w", err)
-	}
-
-	outFile, err := os.CreateTemp("", fmt.Sprintf("packer-%s-%s-*", goos, goarch))
-	if err != nil {
-		return "", fmt.Errorf("failed to create temp file for cross-compiled binary: %w", err)
-	}
-	outPath := outFile.Name()
-	_ = outFile.Close()
-
-	log.Printf("[INFO] Cross-compiling Packer for %s/%s from %s...", goos, goarch, moduleRoot)
-
-	cmd := exec.CommandContext(ctx, "go", "build", "-o", outPath, ".")
-	cmd.Dir = moduleRoot
-	cmd.Env = append(os.Environ(), "GOOS="+goos, "GOARCH="+goarch)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		_ = os.Remove(outPath)
-		return "", fmt.Errorf("cross-compilation failed: %w\n%s", err, string(out))
-	}
-
-	log.Printf("[INFO] Cross-compiled Packer binary at: %s", outPath)
-	return outPath, nil
-}
-
 // downloadPackerRelease downloads the Packer release binary for the given
 // GOOS/GOARCH from releases.hashicorp.com. Used for release builds when the
 // remote host differs from the Packer host.
@@ -707,9 +676,8 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 // on the remote host (given its osType and osArch from uname output), plus a
 // boolean indicating whether the caller must delete the file after use.
 //
-// Resolution order:
-//  1. Release builds — download from releases.hashicorp.com (temp file, delete after)
-//  2. Dev builds — cross-compile from source using local Go toolchain (temp file, delete after)
+// Resolution behavior:
+//  1. Download from releases.hashicorp.com (temp file, delete after)
 func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui, osType, osArch string) (path string, isTemp bool, err error) {
 	// Normalise uname-style OS/arch strings to GOOS/GOARCH values.
 	targetGOOS := strings.ToLower(osType)
@@ -722,31 +690,19 @@ func (p *Provisioner) resolveScannerBinary(ctx context.Context, ui packersdk.Ui,
 	}
 
 	version := packerversion.Version
-	prerelease := packerversion.VersionPrerelease
 
-	// 1. Release build — download from releases.hashicorp.com
-	if prerelease == "" {
-		ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from releases.hashicorp.com...", version, targetGOOS, targetGOARCH))
-		binPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
-		if err != nil {
-			return "", false, fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
-		}
-		return binPath, true, nil
-	}
-
-	// 2. Dev/pre-release build — cross-compile from source
-	ui.Say(fmt.Sprintf("Dev build detected (%s-%s) — cross-compiling Packer for %s/%s...", version, prerelease, targetGOOS, targetGOARCH))
-	binPath, err := crossCompilePackerBinary(ctx, targetGOOS, targetGOARCH)
+	ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from releases.hashicorp.com...", version, targetGOOS, targetGOARCH))
+	binPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to cross-compile Packer for %s/%s: %w", targetGOOS, targetGOARCH, err)
+		return "", false, fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
 	}
 	return binPath, true, nil
 }
 
 // provisionWithNativeGeneration handles the native SBOM generation flow by
 // uploading a Packer binary (with embedded Syft SDK) to the remote host and
-// running `packer sbom-generate` there. Automatically selects the right binary
-// for the remote OS/arch — downloading a release or cross-compiling as needed.
+// running `packer sbom-generate` there. Automatically selects the right release
+// binary for the remote OS/arch.
 func (p *Provisioner) provisionWithNativeGeneration(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{}, osType, osArch string,
