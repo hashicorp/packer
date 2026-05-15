@@ -1,5 +1,15 @@
 # 📦 Changelog
 
+## 1.15.4 (Unreleased)
+
+### DEPRECATIONS:
+
+* provisioners/hcp-sbom: The `scanner_url` and `scanner_checksum` configuration options are deprecated and will be removed in a future major version. If specified, these fields are ignored and a warning is logged. For custom SBOM generation tools, use manual generation with the `source` field instead of `auto_generate`.
+
+### IMPROVEMENTS:
+
+* provisioners/hcp-sbom: Automatic SBOM generation now uses the Packer binary with embedded Syft SDK instead of downloading external scanners.
+
 ## 1.15.3 (April 27, 2026)
 
 ### BUG FIXES:
