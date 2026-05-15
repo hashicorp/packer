@@ -30,3 +30,5 @@ Thumbs.db
 .project
 cache
 /.vscode/
+*.hcl
+*.json
