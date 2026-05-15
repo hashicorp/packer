@@ -110,6 +110,70 @@ func TestConfigPrepare(t *testing.T) {
 			"",
 		},
 		{
+			"auto_generate with scanner_args including -q",
+			map[string]interface{}{
+				"auto_generate": true,
+				"scanner_args":  []string{"-o", "cyclonedx-json", "-q"},
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:   true,
+				ScanPath:       "/",
+				ScannerArgs:    []string{"-o", "cyclonedx-json", "-q"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
+			"auto_generate with scanner_args excluding -q",
+			map[string]interface{}{
+				"auto_generate": true,
+				"scanner_args":  []string{"-o", "cyclonedx-json"},
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:   true,
+				ScanPath:       "/",
+				ScannerArgs:    []string{"-o", "cyclonedx-json"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
+			"auto_generate with scanner_args using long scope and exclude flags",
+			map[string]interface{}{
+				"auto_generate": true,
+				"scanner_args":  []string{"-o", "cyclonedx-json", "--scope", "all-layers", "--exclude", "/tmp/**"},
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:   true,
+				ScanPath:       "/",
+				ScannerArgs:    []string{"-o", "cyclonedx-json", "--scope", "all-layers", "--exclude", "/tmp/**"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
+			"auto_generate with scanner_args using equals scope and exclude flags",
+			map[string]interface{}{
+				"auto_generate": true,
+				"scanner_args":  []string{"-o", "cyclonedx-json", "--scope=all-layers", "--exclude=/var/cache/**"},
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:   true,
+				ScanPath:       "/",
+				ScannerArgs:    []string{"-o", "cyclonedx-json", "--scope=all-layers", "--exclude=/var/cache/**"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
 			"auto_generate with deprecated scanner_url (should warn but not fail)",
 			map[string]interface{}{
 				"auto_generate": true,

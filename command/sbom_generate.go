@@ -108,7 +108,6 @@ func (cmd *SBOMGenerateCommand) ParseArgs(args []string) (*sbom.Config, int) {
 			}
 
 			if strings.HasPrefix(arg, "-") {
-				cmd.Ui.Say(fmt.Sprintf("Warning: unsupported sbom-generate argument ignored: %s", arg))
 				continue
 			}
 
@@ -154,8 +153,8 @@ Usage: packer sbom-generate [options] <path>
   This command is typically invoked internally by the hcp-sbom provisioner.
 Options:
   -o <format>      Output format: cyclonedx-json, spdx-json (default: cyclonedx-json)
-	--exclude <glob> Optional: exclude path glob from scanning (repeatable)
-	--scope <scope>  Optional: scan scope: squashed, all-layers (default: squashed)
+  --exclude <glob> Optional: exclude path glob from scanning (repeatable)
+  --scope <scope>  Optional: scan scope: squashed, all-layers (default: squashed)
 Arguments:
   <path>           Path to scan (default: /)
 Examples:

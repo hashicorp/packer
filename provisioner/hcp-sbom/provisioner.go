@@ -539,13 +539,28 @@ func fileSHA256(path string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
+// releaseBaseURL is the base URL for downloading Packer release artifacts.
+// Override this to point at a local release server (e.g. for air-gapped testing):
+//
+//	PACKER_RELEASE_SERVER=http://127.0.0.1:3231
+const defaultReleaseBaseURL = "https://releases.hashicorp.com"
+
+func getReleaseBaseURL() string {
+	if v := os.Getenv("PACKER_RELEASE_SERVER"); v != "" {
+		return strings.TrimRight(v, "/")
+	}
+	return defaultReleaseBaseURL
+}
+
 // downloadPackerRelease downloads the Packer release zip for the given
-// GOOS/GOARCH from releases.hashicorp.com, verifies its checksum, and
-// extracts the packer binary to a local temp file.
+// GOOS/GOARCH, verifies its checksum, and extracts the packer binary to a
+// local temp file. Set PACKER_RELEASE_SERVER=http://127.0.0.1:3231 to use
+// the local release server instead of releases.hashicorp.com.
 func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (string, error) {
+	base := getReleaseBaseURL()
 	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
-	url := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/%s", version, fileName)
-	shaSumsURL := fmt.Sprintf("https://releases.hashicorp.com/packer/%s/packer_%s_SHA256SUMS", version, version)
+	url := fmt.Sprintf("%s/packer/%s/%s", base, version, fileName)
+	shaSumsURL := fmt.Sprintf("%s/packer/%s/packer_%s_SHA256SUMS", base, version, version)
 
 	log.Printf("[INFO] Downloading Packer %s for %s/%s from %s...", version, goos, goarch, url)
 
@@ -708,7 +723,7 @@ func (p *Provisioner) provisionWithNativeGeneration(
 		targetGOARCH = mapped
 	}
 	version := packerversion.Version
-	ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from releases.hashicorp.com...", version, targetGOOS, targetGOARCH))
+	ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from %s...", version, targetGOOS, targetGOARCH, getReleaseBaseURL()))
 	scannerLocalPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
 	if err != nil {
 		return fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
@@ -779,7 +794,7 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	// Use Windows-specific default if on Windows and user hasn't customized
 	executeCommand := p.config.ExecuteCommand
 	if isWindows && executeCommand == "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}" {
-		// User didn't customize, use Windows default (no sudo, uses sbom-generate subcommand)
+		// User didn't customize, use Windows default (no sudo)
 		executeCommand = "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
 	}
 
