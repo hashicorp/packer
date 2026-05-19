@@ -10,19 +10,15 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
@@ -31,7 +27,6 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
-	packerversion "github.com/hashicorp/packer/version"
 )
 
 type Config struct {
@@ -60,7 +55,7 @@ type Config struct {
 	// the remote host. When enabled, the provisioner uploads the running Packer
 	// binary (which embeds the Syft SDK) to the remote VM and executes it there
 	// to generate an SBOM. Mutually exclusive with `source`.
-	AutoGenerate bool `mapstructure:"auto_generate" required:"false"`
+	AutoGenerate bool `mapstructure:"auto_generate" required:"true"`
 
 	// Arguments to pass to `packer sbom-generate`. Default:
 	// `["-o", "cyclonedx-json"]`.
@@ -471,175 +466,6 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-func downloadText(ctx context.Context, client *http.Client, url string) (string, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to build request for %s: %w", url, err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to download %s: %w", url, err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download failed: HTTP %d for %s", resp.StatusCode, url)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed reading response body for %s: %w", url, err)
-	}
-	if len(strings.TrimSpace(string(body))) == 0 {
-		return "", fmt.Errorf("empty response body for %s", url)
-	}
-
-	return string(body), nil
-}
-
-func isValidSHA256Hex(s string) bool {
-	if len(s) != 64 {
-		return false
-	}
-	_, err := hex.DecodeString(s)
-	return err == nil
-}
-
-func expectedZipSHA256FromSums(sumsContent, fileName string) (string, error) {
-	for _, line := range strings.Split(sumsContent, "\n") {
-		fields := strings.Fields(strings.TrimSpace(line))
-		if len(fields) < 2 {
-			continue
-		}
-		candidateFileName := strings.TrimPrefix(fields[len(fields)-1], "*")
-		if candidateFileName == fileName {
-			hash := strings.ToLower(fields[0])
-			if !isValidSHA256Hex(hash) {
-				return "", fmt.Errorf("invalid SHA256 checksum format for %s in SHA256SUMS", fileName)
-			}
-			return hash, nil
-		}
-	}
-	return "", fmt.Errorf("checksum for %s not found in SHA256SUMS", fileName)
-}
-
-func fileSHA256(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("failed to open %s for hashing: %w", path, err)
-	}
-	defer func() { _ = f.Close() }()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", fmt.Errorf("failed hashing %s: %w", path, err)
-	}
-
-	return hex.EncodeToString(h.Sum(nil)), nil
-}
-
-// releaseBaseURL is the base URL for downloading Packer release artifacts.
-// Override this to point at a local release server (e.g. for air-gapped testing):
-//
-//	PACKER_RELEASE_SERVER=http://127.0.0.1:3231
-const defaultReleaseBaseURL = "https://releases.hashicorp.com"
-
-func getReleaseBaseURL() string {
-	if v := os.Getenv("PACKER_RELEASE_SERVER"); v != "" {
-		return strings.TrimRight(v, "/")
-	}
-	return defaultReleaseBaseURL
-}
-
-// downloadPackerRelease downloads the Packer release zip for the given
-// GOOS/GOARCH and verifies its checksum. It returns the local temp zip path.
-// Set PACKER_RELEASE_SERVER=http://127.0.0.1:3231 to use the local release
-// server instead of releases.hashicorp.com.
-func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (string, error) {
-	base := getReleaseBaseURL()
-	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
-	url := fmt.Sprintf("%s/packer/%s/%s", base, version, fileName)
-	shaSumsURL := fmt.Sprintf("%s/packer/%s/packer_%s_SHA256SUMS", base, version, version)
-
-	log.Printf("[INFO] Downloading Packer %s for %s/%s from %s...", version, goos, goarch, url)
-
-	client := &http.Client{Timeout: 5 * time.Minute}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-	if err != nil {
-		return "", fmt.Errorf("failed to build download request: %w", err)
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("failed to download Packer release: %w", err)
-	}
-	defer func() { _ = resp.Body.Close() }()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("download failed: HTTP %d for %s", resp.StatusCode, url)
-	}
-
-	zipFile, err := os.CreateTemp("", "packer-release-*.zip")
-	if err != nil {
-		return "", fmt.Errorf("failed to create temp zip file: %w", err)
-	}
-	zipPath := zipFile.Name()
-
-	if _, err := io.Copy(zipFile, resp.Body); err != nil {
-		_ = zipFile.Close()
-		return "", fmt.Errorf("failed to write zip file: %w", err)
-	}
-	_ = zipFile.Close()
-
-	sumsContent, err := downloadText(ctx, client, shaSumsURL)
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve release checksums: %w", err)
-	}
-
-	expectedSHA, err := expectedZipSHA256FromSums(sumsContent, fileName)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve expected checksum: %w", err)
-	}
-
-	actualSHA, err := fileSHA256(zipPath)
-	if err != nil {
-		return "", err
-	}
-
-	if !strings.EqualFold(expectedSHA, actualSHA) {
-		return "", fmt.Errorf("release checksum verification failed for %s: expected %s, got %s", fileName, expectedSHA, actualSHA)
-	}
-
-	binaryName := "packer"
-	if goos == "windows" {
-		binaryName = "packer.exe"
-	}
-
-	// Validate expected binary exists in the archive before uploading it remotely.
-	zr, err := zip.OpenReader(zipPath)
-	if err != nil {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("failed to open downloaded zip: %w", err)
-	}
-	defer func() { _ = zr.Close() }()
-
-	foundBinary := false
-	for _, f := range zr.File {
-		if f.Name == binaryName {
-			foundBinary = true
-			break
-		}
-	}
-	if !foundBinary {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("packer binary not found in release zip %s", url)
-	}
-
-	log.Printf("[INFO] Downloaded Packer release zip to: %s", zipPath)
-	return zipPath, nil
-}
-
 // uploadScanner uploads the scanner binary to the remote host.
 // For Windows: uploads zip file and extracts remotely (optimization for slow WinRM uploads).
 // For Unix: uploads binary directly.
@@ -799,9 +625,8 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	if mapped, ok := archMap[targetGOARCH]; ok {
 		targetGOARCH = mapped
 	}
-	version := packerversion.Version
-	ui.Say(fmt.Sprintf("Downloading Packer %s for %s/%s from %s...", version, targetGOOS, targetGOARCH, getReleaseBaseURL()))
-	scannerZipPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH, version)
+	ui.Say(fmt.Sprintf("Downloading latest Packer release for %s/%s from %s...", targetGOOS, targetGOARCH, getReleaseBaseURL()))
+	scannerZipPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH)
 	if err != nil {
 		return fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
 	}
