@@ -119,6 +119,10 @@ type Config struct {
 	// Run pwsh.exe instead of powershell.exe - latest version of powershell.
 	UsePwsh bool `mapstructure:"use_pwsh"`
 
+	// Whether to run PowerShell in non-interactive mode.
+	// Defaults to true.
+	NonInteractive *bool `mapstructure:"non_interactive"`
+
 	ctx interpolate.Context
 }
 
@@ -129,15 +133,19 @@ type Provisioner struct {
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
+	nonInteractive := ""
+	if *p.config.NonInteractive {
+		nonInteractive = "-NonInteractive "
+	}
 
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
-		return `-file {{.Path}}`
+		return fmt.Sprintf(`%s-file {{.Path}}`, nonInteractive)
 	}
 
 	if p.config.UsePwsh {
-		return fmt.Sprintf(`pwsh -NonInteractive -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+		return fmt.Sprintf(`pwsh %s-executionpolicy %s -file {{.Path}}`, nonInteractive, p.config.ExecutionPolicy)
 	} else {
-		return fmt.Sprintf(`powershell -NonInteractive -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+		return fmt.Sprintf(`powershell %s-executionpolicy %s -file {{.Path}}`, nonInteractive, p.config.ExecutionPolicy)
 	}
 
 }
@@ -152,14 +160,19 @@ func (p *Provisioner) defaultScriptCommand() string {
 
 	baseCmd += `. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }`
 
+	nonInteractive := ""
+	if *p.config.NonInteractive {
+		nonInteractive = "-NonInteractive "
+	}
+
 	if p.config.ExecutionPolicy == ExecutionPolicyNone {
-		return baseCmd
+		return fmt.Sprintf(`%s-command "%s"`, nonInteractive, baseCmd)
 	}
 
 	if p.config.UsePwsh {
-		return fmt.Sprintf(`pwsh -NonInteractive -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`pwsh %s-executionpolicy %s -command "%s"`, nonInteractive, p.config.ExecutionPolicy, baseCmd)
 	} else {
-		return fmt.Sprintf(`powershell -NonInteractive -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`powershell %s-executionpolicy %s "%s"`, nonInteractive, p.config.ExecutionPolicy, baseCmd)
 	}
 
 }
@@ -194,6 +207,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 
 	if p.config.Inline != nil && len(p.config.Inline) == 0 {
 		p.config.Inline = nil
+	}
+
+	if p.config.NonInteractive == nil {
+		b := true
+		p.config.NonInteractive = &b
 	}
 
 	if p.config.StartRetryTimeout == 0 {
