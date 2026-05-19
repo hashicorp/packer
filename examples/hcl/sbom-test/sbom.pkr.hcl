@@ -7,7 +7,7 @@ packer {
   }
 }
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "test16"
+  ami_name      = "test17"
   instance_type = "t2.large"
   region        = "us-west-2"
   source_ami_filter {
@@ -37,11 +37,8 @@ build {
     inline = ["echo 'packer works'"]
   }
   provisioner "hcp-sbom" {
-    # source = "registry.hcp.hashicorp.com/native-sbom/aws"
     auto_generate = true
     scan_path = "/usr/bin"
-    # scanner_url = "file:///Users/anurag.sharma/ptemplates/my/aws/syft/mysyft"
-    # scanner_checksum = "3d5e9f5c069d8054d3cb3fbe3f2521f13e2bcc7867eee177be0b1bcd7c32da99"
     destination = "sbom.json"
   }
   # provisioner "breakpoint" {

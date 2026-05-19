@@ -640,79 +640,144 @@ func downloadPackerRelease(ctx context.Context, goos, goarch, version string) (s
 	return zipPath, nil
 }
 
-// uploadScanner uploads the Packer release zip to the remote host and extracts
-// the packer binary there.
-// For Unix: uploads /tmp/packer-sbom-runner.zip, extracts packer, and makes
-// /tmp/packer-sbom-runner executable.
-// For Windows: uploads C:\Windows\Temp\packer-sbom-runner.zip and extracts
-// C:\Windows\Temp\packer-sbom-runner.exe.
+// uploadScanner uploads the scanner binary to the remote host.
+// For Windows: uploads zip file and extracts remotely (optimization for slow WinRM uploads).
+// For Unix: uploads binary directly.
+//
+// Unix path:
+//  1. Extract local zip entry `packer`
+//  2. Upload binary → /tmp/packer-sbom-runner
+//  3. chmod +x      → /tmp/packer-sbom-runner
+//
+// Windows path:
+//  1. Upload zip  → C:\Windows\Temp\packer-sbom-runner.zip
+//     2-5. Single PowerShell command (Expand-Archive + Move-Item + Remove-Item)
 func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, localZipPath, osType string) (string, error) {
+	_ = ui
 
 	isWindows := strings.Contains(strings.ToLower(osType), "windows")
 
-	var remotePath, remoteZipPath, remoteDir, binaryName string
+	var remotePath, binaryName string
 	if isWindows {
-		remoteDir = "C:\\Windows\\Temp"
 		binaryName = "packer.exe"
-		remoteZipPath = remoteDir + "\\packer-sbom-runner.zip"
 		remotePath = "C:\\Windows\\Temp\\packer-sbom-runner.exe"
 	} else {
-		remoteDir = "/tmp"
 		binaryName = "packer"
-		remoteZipPath = "/tmp/packer-sbom-runner.zip"
 		remotePath = "/tmp/packer-sbom-runner"
 	}
 
-	localFile, err := os.Open(localZipPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open Packer release zip: %s", err)
-	}
-	defer func() { _ = localFile.Close() }()
-
-	log.Printf("Uploading Packer release zip to %s...", remoteZipPath)
-	if err := comm.Upload(remoteZipPath, localFile, nil); err != nil {
-		return "", fmt.Errorf("failed to upload Packer release zip: %s", err)
-	}
-
-	var extractCmd string
 	if isWindows {
-		extractCmd = fmt.Sprintf(
-			`powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; Expand-Archive -Path '%s' -DestinationPath '%s' -Force; if (!(Test-Path '%s\\%s')) { throw 'packer binary not found in archive' }; Move-Item -Force '%s\\%s' '%s'; Remove-Item -Force '%s'"`,
-			remoteZipPath, remoteDir, remoteDir, binaryName, remoteDir, binaryName, remotePath, remoteZipPath,
+		remoteDir := "C:\\Windows\\Temp"
+		remoteZipPath := remoteDir + "\\packer-sbom-runner.zip"
+
+		// Step 1: upload zip to remote.
+		zipFile, err := os.Open(localZipPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to open Packer release zip: %s", err)
+		}
+		defer func() { _ = zipFile.Close() }()
+
+		log.Printf("[INFO] Uploading Packer release zip to %s...", remoteZipPath)
+		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
+			return "", fmt.Errorf("failed to upload Packer release zip: %s", err)
+		}
+
+		// Single PowerShell command: extract, move binary, remove zip.
+		psCmd := fmt.Sprintf(
+			`powershell -NoProfile -ExecutionPolicy Bypass -Command `+
+				`"$ErrorActionPreference='Stop'; `+
+				`Expand-Archive -Path '%s' -DestinationPath '%s' -Force; `+
+				`if (!(Test-Path '%s\%s')) { throw 'packer.exe not found after extraction' }; `+
+				`Move-Item -Force '%s\%s' '%s'; `+
+				`Remove-Item -Force '%s'"`,
+			remoteZipPath, remoteDir,
+			remoteDir, binaryName,
+			remoteDir, binaryName, remotePath,
+			remoteZipPath,
 		)
+		if err := p.runRemoteCmd(ctx, comm, psCmd, "extract scanner (Windows)"); err != nil {
+			return "", err
+		}
 	} else {
-		extractCmd = fmt.Sprintf(
-			`(command -v unzip >/dev/null 2>&1 && unzip -o -j "%s" "%s" -d "%s") || (command -v bsdtar >/dev/null 2>&1 && bsdtar -xf "%s" -C "%s" "%s"); mv -f "%s/%s" "%s"; chmod +x "%s"; rm -f "%s"`,
-			remoteZipPath, binaryName, remoteDir,
-			remoteZipPath, remoteDir, binaryName,
-			remoteDir, binaryName, remotePath, remotePath, remoteZipPath,
-		)
-	}
-
-	cmd := &packersdk.RemoteCmd{Command: extractCmd}
-	if err := comm.Start(ctx, cmd); err != nil {
-		return "", fmt.Errorf("failed to extract scanner on remote host: %s", err)
-	}
-	cmd.Wait()
-	if cmd.ExitStatus() != 0 {
-		return "", fmt.Errorf("remote extraction command failed with exit status %d", cmd.ExitStatus())
-	}
-
-	if !isWindows {
-		verifyCmd := &packersdk.RemoteCmd{
-			Command: fmt.Sprintf("test -x %s", remotePath),
+		// Step 1: extract the binary locally from the release zip.
+		binaryData, err := extractBinaryFromZip(localZipPath, binaryName)
+		if err != nil {
+			return "", fmt.Errorf("failed to extract %s from Packer release zip: %w", binaryName, err)
 		}
-		if err := comm.Start(ctx, verifyCmd); err != nil {
-			return "", fmt.Errorf("failed to make Packer binary executable: %s", err)
+
+		// Step 2: upload binary directly to remote.
+		localFile := bytes.NewReader(binaryData)
+		log.Printf("[INFO] Uploading Packer binary to %s...", remotePath)
+		if err := comm.Upload(remotePath, localFile, nil); err != nil {
+			return "", fmt.Errorf("failed to upload Packer binary: %s", err)
 		}
-		verifyCmd.Wait()
-		if verifyCmd.ExitStatus() != 0 {
-			return "", fmt.Errorf("scanner is not executable after extraction")
+
+		// Step 3: make it executable.
+		chmodCmd := fmt.Sprintf(`chmod +x "%s"`, remotePath)
+		if err := p.runRemoteCmd(ctx, comm, chmodCmd, "chmod scanner binary"); err != nil {
+			return "", err
+		}
+
+		// Final verify: confirm binary is executable.
+		verifyCmd := fmt.Sprintf(`test -x "%s"`, remotePath)
+		if err := p.runRemoteCmd(ctx, comm, verifyCmd, "verify scanner is executable"); err != nil {
+			return "", fmt.Errorf("scanner binary is not executable at %s after chmod; "+
+				"check that /tmp is not mounted noexec on the remote host", remotePath)
 		}
 	}
 
 	return remotePath, nil
+}
+
+func extractBinaryFromZip(zipPath, binaryName string) ([]byte, error) {
+	zr, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open zip: %w", err)
+	}
+	defer func() { _ = zr.Close() }()
+
+	for _, f := range zr.File {
+		if f.Name != binaryName {
+			continue
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return nil, fmt.Errorf("failed to open %s from zip: %w", binaryName, err)
+		}
+
+		data, readErr := io.ReadAll(rc)
+		closeErr := rc.Close()
+		if readErr != nil {
+			return nil, fmt.Errorf("failed to read %s from zip: %w", binaryName, readErr)
+		}
+		if closeErr != nil {
+			return nil, fmt.Errorf("failed to close %s stream from zip: %w", binaryName, closeErr)
+		}
+		return data, nil
+	}
+
+	return nil, fmt.Errorf("%s not found in zip %s", binaryName, zipPath)
+}
+
+// runRemoteCmd runs a single shell command on the remote host and returns a
+// descriptive error if it fails.
+func (p *Provisioner) runRemoteCmd(ctx context.Context, comm packersdk.Communicator, cmdStr, step string) error {
+	var stderr bytes.Buffer
+	cmd := &packersdk.RemoteCmd{
+		Command: cmdStr,
+		Stderr:  &stderr,
+	}
+	if err := comm.Start(ctx, cmd); err != nil {
+		return fmt.Errorf("failed to start remote step %q: %s", step, err)
+	}
+	cmd.Wait()
+	if cmd.ExitStatus() != 0 {
+		return fmt.Errorf("remote step %q failed (exit %d): %s",
+			step, cmd.ExitStatus(), strings.TrimSpace(stderr.String()))
+	}
+	return nil
 }
 
 // provisionWithNativeGeneration handles the native SBOM generation flow.
