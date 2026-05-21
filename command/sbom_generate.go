@@ -66,6 +66,10 @@ func (cmd *SBOMGenerateCommand) ParseArgs(args []string) (*sbom.Config, int) {
 				return cfg, 1
 			}
 			i++
+			if err := validateExcludePattern(args[i]); err != nil {
+				cmd.Ui.Error(fmt.Sprintf("Invalid --exclude pattern %q: %s", args[i], err))
+				return cfg, 1
+			}
 			cfg.Exclude = append(cfg.Exclude, args[i])
 
 		case "--scope":
@@ -86,6 +90,10 @@ func (cmd *SBOMGenerateCommand) ParseArgs(args []string) (*sbom.Config, int) {
 				value := strings.TrimPrefix(arg, "--exclude=")
 				if value == "" {
 					cmd.Ui.Error("Missing value for --exclude flag")
+					return cfg, 1
+				}
+				if err := validateExcludePattern(value); err != nil {
+					cmd.Ui.Error(fmt.Sprintf("Invalid --exclude pattern %q: %s", value, err))
 					return cfg, 1
 				}
 				cfg.Exclude = append(cfg.Exclude, value)
@@ -143,6 +151,18 @@ func (cmd *SBOMGenerateCommand) RunContext(ctx context.Context, cfg *sbom.Config
 	return 0
 
 }
+// validateExcludePattern checks that an exclude glob pattern uses one of the
+// prefixes required by the Syft file resolver: './', '*/', or '**/'.
+// Absolute paths like '/tmp' are rejected because Syft cannot match them.
+func validateExcludePattern(pattern string) error {
+	for _, prefix := range []string{"./", "*/", "**/"} {
+		if strings.HasPrefix(pattern, prefix) {
+			return nil
+		}
+	}
+	return fmt.Errorf("pattern must start with './', '*/', or '**/' (e.g. '**/tmp/**'); got %q", pattern)
+}
+
 func (c *SBOMGenerateCommand) Synopsis() string {
 	return "Generate SBOM for the local system (internal use)"
 }
@@ -154,6 +174,8 @@ Usage: packer sbom-generate [options] <path>
 Options:
   -o <format>      Output format: cyclonedx-json, spdx-json (default: cyclonedx-json)
   --exclude <glob> Optional: exclude path glob from scanning (repeatable)
+                   Pattern must start with './', '*/', or '**/' — absolute
+                   paths like '/tmp' are not accepted. Use '**/tmp/**' instead.
   --scope <scope>  Optional: scan scope: squashed, all-layers (default: squashed)
 Arguments:
   <path>           Path to scan (default: /)
