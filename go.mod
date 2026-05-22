@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	github.com/CycloneDX/cyclonedx-go v0.10.0
+	github.com/CycloneDX/cyclonedx-go v0.11.0
 	github.com/anchore/syft v1.42.3
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/oklog/ulid v1.3.1
