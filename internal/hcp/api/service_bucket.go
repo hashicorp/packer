@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"reflect"
 
 	hcpPackerService "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/client/packer_service"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
@@ -48,12 +49,16 @@ func (c *Client) UpsertBucket(
 	getParams.LocationProjectID = c.ProjectID
 	getParams.BucketName = bucketName
 
-	_, err := c.Packer.PackerServiceGetBucket(getParams, nil)
+	resp, err := c.Packer.PackerServiceGetBucket(getParams, nil)
 	if err != nil {
 		if CheckErrorCode(err, codes.NotFound) {
 			_, err = c.CreateBucket(ctx, bucketName, bucketDescription, bucketLabels)
 		}
 		return err
+	}
+
+	if resp != nil && resp.Payload != nil && bucketMetadataMatches(resp.Payload.Bucket, bucketDescription, bucketLabels) {
+		return nil
 	}
 
 	params := hcpPackerService.NewPackerServiceUpdateBucketParamsWithContext(ctx)
@@ -67,4 +72,24 @@ func (c *Client) UpsertBucket(
 	_, err = c.Packer.PackerServiceUpdateBucket(params, nil)
 
 	return err
+}
+
+func bucketMetadataMatches(
+	bucket *hcpPackerModels.HashicorpCloudPacker20230101Bucket,
+	description string,
+	labels map[string]string,
+) bool {
+	if bucket == nil {
+		return false
+	}
+
+	if bucket.Description != description {
+		return false
+	}
+
+	if len(bucket.Labels) == 0 && len(labels) == 0 {
+		return true
+	}
+
+	return reflect.DeepEqual(bucket.Labels, labels)
 }
