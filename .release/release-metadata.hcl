@@ -1,4 +1,4 @@
-# Copyright IBM Corp. 2013, 2025
+# Copyright IBM Corp. 2024, 2025
 # SPDX-License-Identifier: BUSL-1.1
 
 url_docker_registry_dockerhub = "https://hub.docker.com/r/hashicorp/packer"
