@@ -22,8 +22,8 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.8.0
 	github.com/hashicorp/hcl/v2 v2.24.0
-	github.com/hashicorp/hcp-sdk-go v0.167.0
-	github.com/hashicorp/packer-plugin-sdk v0.6.7
+	github.com/hashicorp/hcp-sdk-go v0.172.0
+	github.com/hashicorp/packer-plugin-sdk v0.6.9
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.18.5
 	github.com/klauspost/pgzip v1.2.6
@@ -55,7 +55,7 @@ require (
 )
 
 require (
-	github.com/CycloneDX/cyclonedx-go v0.10.0
+	github.com/CycloneDX/cyclonedx-go v0.11.0
 	github.com/anchore/syft v1.42.3
 	github.com/go-openapi/strfmt v0.23.0
 	github.com/oklog/ulid v1.3.1
@@ -75,7 +75,7 @@ require (
 	cloud.google.com/go/storage v1.61.3 // indirect
 	cyphar.com/go-pathrs v0.2.1 // indirect
 	dario.cat/mergo v1.0.2 // indirect
-	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
+	github.com/Azure/go-ntlmssp v0.1.1 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20210404020558-97928f7e12b6 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
@@ -397,6 +397,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-go 1.25.9
+go 1.25.10
 
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
