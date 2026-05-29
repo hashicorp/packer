@@ -62,11 +62,10 @@ func (g *Generator) Generate(ctx context.Context) ([]byte, error) {
 func (g *Generator) encodeToFormat(sbomData *sbom.SBOM) ([]byte, error) {
 	switch g.config.Format {
 	case FormatCycloneDX:
+		cycloneCfg := cyclonedxjson.DefaultEncoderConfig()
+		cycloneCfg.Pretty = true
 		encoder, err := cyclonedxjson.NewFormatEncoderWithConfig(
-			cyclonedxjson.EncoderConfig{
-				Version: "1.5",
-				Pretty:  true,
-			},
+			cycloneCfg,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create CycloneDX encoder: %w", err)
@@ -74,11 +73,10 @@ func (g *Generator) encodeToFormat(sbomData *sbom.SBOM) ([]byte, error) {
 		return format.Encode(*sbomData, encoder)
 
 	case FormatSPDX:
+		spdxCfg := spdxjson.DefaultEncoderConfig()
+		spdxCfg.Pretty = true
 		encoder, err := spdxjson.NewFormatEncoderWithConfig(
-			spdxjson.EncoderConfig{
-				Version: "2.3",
-				Pretty:  true,
-			},
+			spdxCfg,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create SPDX encoder: %w", err)
