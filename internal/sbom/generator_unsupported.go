@@ -1,7 +1,7 @@
 // Copyright IBM Corp. 2013, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
-//go:build netbsd || openbsd || solaris || mips || mipsle || mips64 || (freebsd && 386)
+//go:build netbsd || openbsd || solaris || mips || mipsle || mips64 || (freebsd && (386 || arm))
 
 package sbom
 
