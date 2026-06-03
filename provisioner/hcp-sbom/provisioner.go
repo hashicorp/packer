@@ -7,32 +7,24 @@
 package hcp_sbom
 
 import (
-	"archive/tar"
 	"archive/zip"
 	"bytes"
-	"compress/gzip"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
-	"github.com/hashicorp/go-getter/v2"
 	"github.com/hashicorp/hcl/v2/hcldec"
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
 	"github.com/hashicorp/packer-plugin-sdk/common"
 	"github.com/hashicorp/packer-plugin-sdk/guestexec"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
-	"github.com/hashicorp/packer-plugin-sdk/retry"
 	"github.com/hashicorp/packer-plugin-sdk/template/config"
 	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
@@ -59,29 +51,26 @@ type Config struct {
 	// an artifact version.
 	SbomName string `mapstructure:"sbom_name" required:"false"`
 
-	// Enable automatic SBOM generation by downloading and running a scanner
-	// tool on the remote host. When enabled, the provisioner will detect the
-	// remote OS and architecture, download an appropriate scanner (Syft by
-	// default), and execute it to generate an SBOM.
-	// Mutually exclusive with `source`.
+	// Enable automatic SBOM generation by running `packer sbom-generate` on
+	// the remote host. When enabled, the provisioner uploads the running Packer
+	// binary (which embeds the Syft SDK) to the remote VM and executes it there
+	// to generate an SBOM. Mutually exclusive with `source`.
 	AutoGenerate bool `mapstructure:"auto_generate" required:"true"`
 
-	// URL to scanner tool. Supports go-getter syntax including HTTP, local
-	// files, Git, S3, etc. If empty and `auto_generate` is true, Syft will be
-	// automatically downloaded based on detected OS and architecture. When
-	// specified, only direct binary URLs are supported (archives are not
-	// extracted).
+	// Arguments to pass to `packer sbom-generate`. Default:
+	// `["-o", "cyclonedx-json"]`.
+	ScannerArgs []string `mapstructure:"scanner_args" required:"false"`
+
+	// DEPRECATED: Custom scanner URL is no longer supported. The hcp-sbom
+	// provisioner now uses the Packer binary with embedded Syft SDK for
+	// automatic SBOM generation. This field is ignored and will be removed
+	// in a future major version. For custom SBOM tools, use manual generation
+	// with the `source` field instead of `auto_generate`.
 	ScannerURL string `mapstructure:"scanner_url" required:"false"`
 
-	// Expected SHA256 checksum of scanner binary for verification. Provide as
-	// a hex string without prefix, for example: `abc123def456...`. If
-	// provided, `scanner_url` must also be specified. The checksum is verified
-	// after download and before upload to the remote host.
+	// DEPRECATED: Scanner checksum verification is no longer supported.
+	// This field is ignored and will be removed in a future major version.
 	ScannerChecksum string `mapstructure:"scanner_checksum" required:"false"`
-
-	// Arguments to pass to the scanner tool. Default for Syft:
-	// `["-o", "cyclonedx-json", "-q"]`.
-	ScannerArgs []string `mapstructure:"scanner_args" required:"false"`
 
 	// Path to scan on remote host. Defaults to `/` (root directory).
 	ScanPath string `mapstructure:"scan_path" required:"false"`
@@ -94,41 +83,28 @@ type Config struct {
 	// - `{{.ScanPath}}` - Path to scan (from `scan_path`)
 	// - `{{.Output}}` - Output file path for the SBOM
 	//
-	// Default for Unix: `chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}`
+	// Default for Unix: `chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}`
 	//
-	// Default for Windows: `{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}`
+	// Default for Windows: `{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}`
 	//
 	// Examples:
 	//
 	// Without sudo:
 	//
 	// ``` hcl
-	// execute_command = "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// execute_command = "chmod +x {{.Path}} && {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
 	// ```
 	//
 	// With sudo password:
 	//
 	// ``` hcl
-	// execute_command = "chmod +x {{.Path}} && echo 'password' | sudo -S {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	// ```
-	//
-	// With sudo -n (no password):
-	//
-	// ``` hcl
-	// execute_command = "chmod +x {{.Path}} && sudo -n {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
-	// ```
-	//
-	// With specific user:
-	//
-	// ``` hcl
-	// execute_command = "chmod +x {{.Path}} && sudo -u myuser {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	// execute_command = "chmod +x {{.Path}} && echo 'password' | sudo -S {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
 	// ```
 	ExecuteCommand string `mapstructure:"execute_command" required:"false"`
 
-	// A username to use for elevated permissions when running the scanner on
-	// Windows. This is only used for Windows hosts when the scanner needs
-	// administrative privileges. For Unix-like systems, use `execute_command`
-	// with sudo instead.
+	// A username to use for elevated permissions when running Packer on
+	// Windows. This is only used for Windows hosts when elevated privileges
+	// are required. For Unix-like systems, use `execute_command` with sudo instead.
 	ElevatedUser string `mapstructure:"elevated_user" required:"false"`
 
 	// The password for the `elevated_user`. Required if `elevated_user` is
@@ -144,6 +120,22 @@ type Provisioner struct {
 	generatedData map[string]interface{}
 }
 
+func formatUIWarning(message string) string {
+	if os.Getenv("PACKER_NO_COLOR") != "" {
+		return "WARNING: " + message
+	}
+	return "\033[33mWARNING:\033[0m " + message
+}
+
+func (p *Provisioner) warnDeprecatedConfigInUI(ui packersdk.Ui) {
+	if p.config.ScannerURL != "" {
+		ui.Say(formatUIWarning("'scanner_url' is deprecated and ignored. This field will be removed in a future version."))
+	}
+	if p.config.ScannerChecksum != "" {
+		ui.Say(formatUIWarning("'scanner_checksum' is deprecated and ignored. This field will be removed in a future version."))
+	}
+}
+
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.config.FlatMapstructure().HCL2Spec()
 }
@@ -153,6 +145,38 @@ func (p *Provisioner) FlatConfig() interface{} {
 }
 
 var sbomFormatRegexp = regexp.MustCompile("^[0-9A-Za-z-]{3,36}$")
+
+// scannerPathTokenRegexp matches the raw execute_command template token used
+// for the uploaded binary path, including optional whitespace inside the
+// template braces.
+//
+// Examples that match:
+//
+//	{{.Path}}
+//	{{ .Path }}
+//
+// Examples that do not match:
+//
+//	{{.Args}}
+//	/tmp/packer-sbom-runner
+var scannerPathTokenRegexp = regexp.MustCompile(`\{\{\s*\.Path\s*\}\}`)
+
+// scannerArgsOrScanPathTokenPrefixRegexp matches only when the next
+// non-whitespace token after {{.Path}} is either {{.Args}} or {{.ScanPath}}.
+// This is the backward-compatible shape of older scanner commands where the
+// path was executed directly without an explicit sbom-generate subcommand.
+//
+// Examples that match after trimming leading whitespace:
+//
+//	{{.Args}} {{.ScanPath}} > {{.Output}}
+//	{{ .ScanPath }} > {{.Output}}
+//
+// Examples that do not match:
+//
+//	sbom-generate {{.Args}} {{.ScanPath}}
+//	version
+//	&& chmod +x {{.Path}}
+var scannerArgsOrScanPathTokenPrefixRegexp = regexp.MustCompile(`^\{\{\s*\.(Args|ScanPath)\s*\}\}`)
 
 func (p *Provisioner) Prepare(raws ...interface{}) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
@@ -184,22 +208,21 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			p.config.ScanPath = "/"
 		}
 		if len(p.config.ScannerArgs) == 0 {
-			// Default to CycloneDX JSON format with quiet output
+			// Default to CycloneDX JSON format
 			p.config.ScannerArgs = []string{
 				"-o", "cyclonedx-json",
-				"-q", // Quiet mode - suppress non-essential output
 			}
 		}
 
 		// Set default execute_command if not provided
 		// Note: This will be further customized based on OS at runtime
 		if p.config.ExecuteCommand == "" {
-			p.config.ExecuteCommand = "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+			p.config.ExecuteCommand = "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
 		}
 
-		// Validate: if checksum is provided, URL must also be provided
+		// Keep legacy validation for clarity while fields remain accepted.
 		if p.config.ScannerChecksum != "" && p.config.ScannerURL == "" {
-			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_checksum requires scanner_url to be specified"))
+			errs = packersdk.MultiErrorAppend(errs, errors.New("scanner_checksum requires scanner_url to be specified (note: both fields are deprecated and ignored)"))
 		}
 
 		// Validate elevated user configuration (Windows only)
@@ -278,24 +301,15 @@ func (p *Provisioner) Provision(
 
 	// Native generation enabled
 	ui.Say("Automatic SBOM generation enabled")
+	p.warnDeprecatedConfigInUI(ui)
 
-	var osType, osArch string
-	var err error
-
-	// Only detect OS if scanner_url is NOT provided
-	if p.config.ScannerURL == "" {
-		osType, osArch, err = p.detectRemoteOS(ctx, ui, comm, generatedData)
-		if err != nil {
-			ui.Error(fmt.Sprintf("Failed to detect remote OS: %s", err))
-			ui.Error("SBOM generation will be skipped, but build will continue")
-			return nil
-		}
-		ui.Say(fmt.Sprintf("Detected: OS=%s, Arch=%s", osType, osArch))
-	} else {
-		// User provided scanner URL, assume they know their platform
-		osType = "unknown"
-		osArch = "unknown"
+	osType, osArch, err := p.detectRemoteOS(ctx, ui, comm, generatedData)
+	if err != nil {
+		ui.Error(fmt.Sprintf("Failed to detect remote OS: %s", err))
+		ui.Error("SBOM generation will be skipped, but build will continue")
+		return nil
 	}
+	ui.Say(fmt.Sprintf("Detected: OS=%s, Arch=%s", osType, osArch))
 
 	err = p.provisionWithNativeGeneration(ctx, ui, comm, generatedData, osType, osArch)
 	if err != nil {
@@ -452,62 +466,179 @@ func (p *Provisioner) getUserDestination() (string, error) {
 	return dst, nil
 }
 
-// downloadAndVerifyScanner downloads and verifies the scanner binary.
-// It performs atomic download + checksum verification to ensure consistency.
-func (p *Provisioner) downloadAndVerifyScanner(
-	ctx context.Context, ui packersdk.Ui, osType, osArch string, scannerPath *string,
-) error {
-	// Download the scanner
-	path, err := p.downloadScanner(ctx, ui, osType, osArch)
-	if err != nil {
-		log.Printf("[WARN] Scanner download failed, will retry: %s", err)
-		return err
+// uploadScanner uploads the scanner binary to the remote host.
+// For Windows: uploads zip file and extracts remotely (optimization for slow WinRM uploads).
+// For Unix: uploads binary directly.
+//
+// Unix path:
+//  1. Extract local zip entry `packer`
+//  2. Upload binary → /tmp/packer-sbom-runner
+//  3. chmod +x      → /tmp/packer-sbom-runner
+//
+// Windows path:
+//  1. Upload zip  → C:\Windows\Temp\packer-sbom-runner.zip
+//     2-5. Single PowerShell command (Expand-Archive + Move-Item + Remove-Item)
+func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
+	comm packersdk.Communicator, localZipPath, osType string) (string, error) {
+	_ = ui
+
+	isWindows := strings.Contains(strings.ToLower(osType), "windows")
+
+	var remotePath, binaryName string
+	if isWindows {
+		binaryName = "packer.exe"
+		remotePath = "C:\\Windows\\Temp\\packer-sbom-runner.exe"
+	} else {
+		binaryName = "packer"
+		remotePath = "/tmp/packer-sbom-runner"
 	}
 
-	// Verify checksum if provided (part of atomic operation)
-	if p.config.ScannerChecksum != "" {
-		if err := p.verifyChecksum(path); err != nil {
-			log.Printf("[WARN] Checksum verification failed, will retry: %s", err)
-			_ = os.Remove(path) // Clean up failed download, ignore error
-			return err
+	if isWindows {
+		remoteDir := "C:\\Windows\\Temp"
+		remoteZipPath := remoteDir + "\\packer-sbom-runner.zip"
+
+		// Step 1: upload zip to remote.
+		zipFile, err := os.Open(localZipPath)
+		if err != nil {
+			return "", fmt.Errorf("failed to open Packer release zip: %s", err)
 		}
-		log.Printf("[INFO] Checksum verification passed")
+		defer func() { _ = zipFile.Close() }()
+
+		log.Printf("[INFO] Uploading Packer release zip to %s...", remoteZipPath)
+		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
+			return "", fmt.Errorf("failed to upload Packer release zip: %s", err)
+		}
+
+		// Single PowerShell command: extract, move binary, remove zip.
+		psCmd := fmt.Sprintf(
+			`powershell -NoProfile -ExecutionPolicy Bypass -Command `+
+				`"$ErrorActionPreference='Stop'; `+
+				`Expand-Archive -Path '%s' -DestinationPath '%s' -Force; `+
+				`if (!(Test-Path '%s\%s')) { throw 'packer.exe not found after extraction' }; `+
+				`Move-Item -Force '%s\%s' '%s'; `+
+				`Remove-Item -Force '%s'"`,
+			remoteZipPath, remoteDir,
+			remoteDir, binaryName,
+			remoteDir, binaryName, remotePath,
+			remoteZipPath,
+		)
+		if err := p.runRemoteCmd(ctx, comm, psCmd, "extract scanner (Windows)"); err != nil {
+			return "", err
+		}
+	} else {
+		// Step 1: extract the binary locally from the release zip.
+		binaryData, err := extractBinaryFromZip(localZipPath, binaryName)
+		if err != nil {
+			return "", fmt.Errorf("failed to extract %s from Packer release zip: %w", binaryName, err)
+		}
+
+		// Step 2: upload binary directly to remote.
+		localFile := bytes.NewReader(binaryData)
+		log.Printf("[INFO] Uploading Packer binary to %s...", remotePath)
+		if err := comm.Upload(remotePath, localFile, nil); err != nil {
+			return "", fmt.Errorf("failed to upload Packer binary: %s", err)
+		}
+
+		// Step 3: make it executable.
+		chmodCmd := fmt.Sprintf(`chmod +x "%s"`, remotePath)
+		if err := p.runRemoteCmd(ctx, comm, chmodCmd, "chmod scanner binary"); err != nil {
+			return "", err
+		}
+
+		// Final verify: confirm binary is executable.
+		verifyCmd := fmt.Sprintf(`test -x "%s"`, remotePath)
+		if err := p.runRemoteCmd(ctx, comm, verifyCmd, "verify scanner is executable"); err != nil {
+			return "", fmt.Errorf("scanner binary is not executable at %s after chmod; "+
+				"check that /tmp is not mounted noexec on the remote host", remotePath)
+		}
 	}
 
-	*scannerPath = path
+	return remotePath, nil
+}
+
+func extractBinaryFromZip(zipPath, binaryName string) ([]byte, error) {
+	zr, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open zip: %w", err)
+	}
+	defer func() { _ = zr.Close() }()
+
+	for _, f := range zr.File {
+		if f.Name != binaryName {
+			continue
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return nil, fmt.Errorf("failed to open %s from zip: %w", binaryName, err)
+		}
+
+		data, readErr := io.ReadAll(rc)
+		closeErr := rc.Close()
+		if readErr != nil {
+			return nil, fmt.Errorf("failed to read %s from zip: %w", binaryName, readErr)
+		}
+		if closeErr != nil {
+			return nil, fmt.Errorf("failed to close %s stream from zip: %w", binaryName, closeErr)
+		}
+		return data, nil
+	}
+
+	return nil, fmt.Errorf("%s not found in zip %s", binaryName, zipPath)
+}
+
+// runRemoteCmd runs a single shell command on the remote host and returns a
+// descriptive error if it fails.
+func (p *Provisioner) runRemoteCmd(ctx context.Context, comm packersdk.Communicator, cmdStr, step string) error {
+	var stderr bytes.Buffer
+	cmd := &packersdk.RemoteCmd{
+		Command: cmdStr,
+		Stderr:  &stderr,
+	}
+	if err := comm.Start(ctx, cmd); err != nil {
+		return fmt.Errorf("failed to start remote step %q: %s", step, err)
+	}
+	cmd.Wait()
+	if cmd.ExitStatus() != 0 {
+		return fmt.Errorf("remote step %q failed (exit %d): %s",
+			step, cmd.ExitStatus(), strings.TrimSpace(stderr.String()))
+	}
 	return nil
 }
 
-// provisionWithNativeGeneration handles the new native SBOM generation flow
+// provisionWithNativeGeneration handles the native SBOM generation flow.
+// The Packer release binary is downloaded on the host (works in air-gapped
+// environments where the VM has no internet access), verified, then uploaded
+// to the remote host via the communicator before running `packer sbom-generate`.
 func (p *Provisioner) provisionWithNativeGeneration(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
 	generatedData map[string]interface{}, osType, osArch string,
 ) error {
 	ui.Say("Starting Automatic SBOM generation workflow...")
 
-	// Step 1: Download scanner binary with retry logic (max 3 attempts)
-	// Make the entire download + checksum verification atomic
-	var scannerLocalPath string
-	log.Println("Downloading scanner binary...")
-	err := retry.Config{
-		Tries:      3,
-		RetryDelay: func() time.Duration { return 10 * time.Second },
-	}.Run(ctx, func(ctx context.Context) error {
-		return p.downloadAndVerifyScanner(ctx, ui, osType, osArch, &scannerLocalPath)
-	})
-
+	// Step 1: Download Packer release binary on the host.
+	targetGOOS := strings.ToLower(osType)
+	archMap := map[string]string{
+		"x86_64": "amd64", "aarch64": "arm64", "i386": "386", "i686": "386", "armv7l": "arm", "armv7": "arm",
+	}
+	targetGOARCH := strings.ToLower(osArch)
+	if mapped, ok := archMap[targetGOARCH]; ok {
+		targetGOARCH = mapped
+	}
+	ui.Say(fmt.Sprintf("Downloading latest Packer release for %s/%s from %s...", targetGOOS, targetGOARCH, getReleaseBaseURL()))
+	scannerZipPath, err := downloadPackerRelease(ctx, targetGOOS, targetGOARCH)
 	if err != nil {
-		return fmt.Errorf("failed to download and verify scanner after retries: %s", err)
+		return fmt.Errorf("failed to download Packer release for %s/%s: %w", targetGOOS, targetGOARCH, err)
 	}
 	defer func() {
-		_ = os.Remove(scannerLocalPath) // Cleanup, ignore error
+		if err := os.Remove(scannerZipPath); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Printf("[WARN] failed to remove temporary Packer release zip %s: %v", scannerZipPath, err)
+		}
 	}()
 
-	log.Printf("Scanner ready at: %s", scannerLocalPath)
-
-	// Step 2: Upload scanner to remote
+	// Step 2: Upload scanner to remote.
 	log.Println("Uploading scanner to remote host...")
-	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerLocalPath, osType)
+	remoteScannerPath, err := p.uploadScanner(ctx, ui, comm, scannerZipPath, osType)
 	if err != nil {
 		return fmt.Errorf("failed to upload scanner: %s", err)
 	}
@@ -538,667 +669,9 @@ func (p *Provisioner) provisionWithNativeGeneration(
 	return nil
 }
 
-// downloadScanner downloads the scanner binary using go-getter
-// If scanner_url is provided: downloads binary directly (no archive extraction)
-// If scanner_url is empty: auto-downloads Syft archive and extracts it
-// For Windows auto-download: returns zip file path for remote extraction (optimization)
-// For Unix auto-download: extracts and returns the binary path
-func (p *Provisioner) downloadScanner(ctx context.Context, ui packersdk.Ui,
-	osType, osArch string) (string, error) {
-	var downloadURL string
-	isCustomURL := p.config.ScannerURL != ""
-
-	// If user provided a URL, use it (expect direct binary, not archive)
-	if isCustomURL {
-		downloadURL = p.config.ScannerURL
-		log.Printf("Using custom scanner URL: %s", downloadURL)
-	} else {
-		// Default to Syft from GitHub releases (archive format)
-		if osType == "unknown" || osArch == "unknown" {
-			return "", fmt.Errorf("cannot auto-download scanner: OS/Arch unknown (provide scanner_url)")
-		}
-		log.Printf("Fetching latest Syft version for %s/%s...", osType, osArch)
-		downloadURL = p.buildDefaultSyftURL(osType, osArch)
-		log.Printf("Download URL: %s", downloadURL)
-	}
-
-	isWindows := strings.Contains(strings.ToLower(osType), "windows")
-
-	// Create temporary directory for download
-	tmpDir, err := os.MkdirTemp("", "packer-scanner-*")
-	if err != nil {
-		return "", fmt.Errorf("failed to create temp directory: %s", err)
-	}
-	defer func() {
-		_ = os.RemoveAll(tmpDir) // Cleanup, ignore error
-	}()
-
-	// Use go-getter to download
-	client := &getter.Client{}
-
-	// For Windows auto-download (Syft): disable decompression to keep the zip file intact
-	// This optimization allows us to upload the zip and extract remotely (faster than uploading extracted binary)
-	if isWindows && !isCustomURL {
-		client.Decompressors = map[string]getter.Decompressor{}
-	}
-
-	req := &getter.Request{
-		Src: downloadURL,
-		Dst: tmpDir,
-	}
-
-	log.Println("Downloading scanner...")
-	if _, err := client.Get(ctx, req); err != nil {
-		return "", fmt.Errorf("failed to download scanner: %s", err)
-	}
-
-	// If custom URL provided, expect a direct binary (no extraction needed)
-	if isCustomURL {
-		// Find the downloaded binary
-		var binaryPath string
-		_ = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if !info.IsDir() {
-				binaryPath = path
-				return filepath.SkipDir
-			}
-			return nil
-		})
-
-		if binaryPath == "" {
-			return "", fmt.Errorf("no file found in download")
-		}
-
-		// Copy to permanent temp location
-		return p.copyScannerToTemp(binaryPath)
-	}
-
-	// Auto-download (Syft): handle archive extraction
-	// For Windows: return the zip file path for remote extraction (faster upload)
-	if isWindows {
-		// Find the zip file
-		var zipPath string
-		_ = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if !info.IsDir() && strings.HasSuffix(strings.ToLower(path), ".zip") {
-				zipPath = path
-				return filepath.SkipDir
-			}
-			return nil
-		})
-
-		if zipPath == "" {
-			return "", fmt.Errorf("no zip file found in downloaded files")
-		}
-
-		// Copy zip to a permanent temp location using existing helper
-		finalPath, err := p.copyScannerToTemp(zipPath)
-		if err != nil {
-			return "", fmt.Errorf("failed to copy zip file: %s", err)
-		}
-
-		log.Printf("Scanner zip ready: %s (will extract on remote)", finalPath)
-		return finalPath, nil
-	}
-
-	// For Unix: extract and return binary path (existing behavior)
-	scannerPath, err := p.findScannerBinary(tmpDir, osType)
-	if err != nil {
-		return "", fmt.Errorf("failed to locate scanner binary: %s", err)
-	}
-
-	// Copy to a permanent temp location
-	finalPath, err := p.copyScannerToTemp(scannerPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to copy scanner: %s", err)
-	}
-
-	log.Printf("Scanner downloaded to: %s", finalPath)
-	return finalPath, nil
-}
-
-// buildDefaultSyftURL constructs the default Syft download URL
-func (p *Provisioner) buildDefaultSyftURL(osType, osArch string) string {
-	// Map to Syft platform naming
-	syftOS, syftArch := p.mapToSyftPlatform(osType, osArch)
-
-	// Fetch latest version from GitHub API
-	version := p.getLatestSyftVersion()
-	if version == "" {
-		// Fallback to a known stable version if API call fails
-		log.Printf("[WARN] Failed to fetch latest Syft version, using fallback v1.42.2")
-		version = "v1.42.2"
-	}
-
-	// Determine file extension based on OS
-	// Windows uses .zip, Unix-like systems use .tar.gz
-	fileExt := ".tar.gz"
-	if strings.Contains(strings.ToLower(osType), "windows") {
-		fileExt = ".zip"
-	}
-
-	// Construct GitHub release URL
-	// Example: https://github.com/anchore/syft/releases/download/v1.20.0/syft_1.20.0_linux_amd64.tar.gz
-	// Example: https://github.com/anchore/syft/releases/download/v1.20.0/syft_1.20.0_windows_amd64.zip
-	versionNum := strings.TrimPrefix(version, "v")
-	fileName := fmt.Sprintf("syft_%s_%s_%s%s", versionNum, syftOS, syftArch, fileExt)
-
-	return fmt.Sprintf("https://github.com/anchore/syft/releases/download/%s/%s",
-		version, fileName)
-}
-
-// getLatestSyftVersion fetches the latest Syft v1.x release version from GitHub API
-// It paginates through releases to find the latest v1 version for compatibility
-func (p *Provisioner) getLatestSyftVersion() string {
-	// Create HTTP client with timeout
-	client := &http.Client{
-		Timeout: 30 * time.Second,
-	}
-
-	// Compile regex to match v1.x.x format (e.g., v1.0.0, v1.42.2, v1.100.25)
-	v1Pattern := regexp.MustCompile(`^v1\.\d+\.\d+$`)
-
-	// Paginate through releases to find latest v1.x.x
-	page := 1
-	perPage := 100
-
-	for page <= 10 { // Limit to 10 pages (1000 releases) to avoid infinite loops
-		// GitHub API endpoint for releases with pagination
-		apiURL := fmt.Sprintf("https://api.github.com/repos/anchore/syft/releases?per_page=%d&page=%d", perPage, page)
-
-		// Create request
-		req, err := http.NewRequest("GET", apiURL, nil)
-		if err != nil {
-			log.Printf("[WARN] Failed to create request for Syft version: %s", err)
-			return ""
-		}
-
-		// Set User-Agent header (GitHub API requires it)
-		req.Header.Set("User-Agent", "Packer-HCP-SBOM-Provisioner")
-		req.Header.Set("Accept", "application/vnd.github.v3+json")
-
-		// Make request
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Printf("[WARN] Failed to fetch Syft releases (page %d): %s", page, err)
-			return ""
-		}
-
-		// Check status code
-		if resp.StatusCode == http.StatusNotFound {
-			// 404 means no more pages available
-			log.Printf("[INFO] No more Syft releases available (page %d returned 404)", page)
-			_ = resp.Body.Close()
-			break
-		}
-		if resp.StatusCode != http.StatusOK {
-			log.Printf("[WARN] GitHub API returned status %d for Syft releases (page %d)", resp.StatusCode, page)
-			_ = resp.Body.Close()
-			return ""
-		}
-
-		// Parse response
-		var releases []struct {
-			TagName string `json:"tag_name"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
-			log.Printf("[WARN] Failed to parse Syft releases response (page %d): %s", page, err)
-			_ = resp.Body.Close()
-			return ""
-		}
-		_ = resp.Body.Close()
-
-		// Look for latest v1.x.x release using regex
-		for _, release := range releases {
-			if v1Pattern.MatchString(release.TagName) {
-				log.Printf("[INFO] Found latest Syft v1.x.x version: %s", release.TagName)
-				return release.TagName
-			}
-		}
-
-		// If we got fewer releases than per_page, we've reached the end
-		if len(releases) < perPage {
-			break
-		}
-
-		page++
-	}
-
-	log.Printf("[WARN] No Syft v1.x.x release found in paginated results")
-	return ""
-}
-
-// mapToSyftPlatform maps detected OS/Arch to Syft naming conventions
-func (p *Provisioner) mapToSyftPlatform(osType, osArch string) (string, string) {
-	osType = strings.ToLower(osType)
-	osArch = strings.ToLower(osArch)
-
-	// Map OS
-	syftOS := "linux"
-	if strings.Contains(osType, "darwin") || strings.Contains(osType, "macos") {
-		syftOS = "darwin"
-	} else if strings.Contains(osType, "windows") {
-		syftOS = "windows"
-	} else if strings.Contains(osType, "freebsd") {
-		syftOS = "freebsd"
-	}
-
-	// Map Architecture
-	syftArch := osArch
-	switch osArch {
-	case "x86_64", "amd64":
-		syftArch = "amd64"
-	case "aarch64", "arm64":
-		syftArch = "arm64"
-	case "i386", "i686":
-		syftArch = "386"
-	case "armv7l", "armv7":
-		syftArch = "arm"
-	}
-
-	return syftOS, syftArch
-}
-
-// findScannerBinary locates the scanner executable in the downloaded directory.
-// It handles three cases:
-// 1. Standalone binary (no archive) - used directly
-// 2. .tar.gz archive - extracted to find binary
-// 3. .zip archive - extracted to find binary
-func (p *Provisioner) findScannerBinary(dir, osType string) (string, error) {
-	osType = strings.ToLower(osType)
-
-	var binaryName string
-	if strings.Contains(osType, "windows") {
-		binaryName = "syft.exe"
-	} else {
-		binaryName = "syft"
-	}
-
-	// First, try to find the binary directly (handles standalone binaries)
-	var foundPath string
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			fileName := filepath.Base(path)
-			// Match exact name or name as part of the file
-			if fileName == binaryName || strings.Contains(fileName, binaryName) {
-				// For archives, we want the actual binary, not the archive
-				if !strings.HasSuffix(fileName, ".tar.gz") &&
-					!strings.HasSuffix(fileName, ".zip") &&
-					!strings.HasSuffix(fileName, ".tar") {
-					foundPath = path
-					return filepath.SkipDir
-				}
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		return "", err
-	}
-
-	if foundPath == "" {
-		// Binary not found directly, try to extract from archive (.tar.gz or .zip)
-		foundPath, err = p.extractScannerFromArchive(dir, binaryName)
-		if err != nil {
-			return "", fmt.Errorf("scanner binary '%s' not found in downloaded files", binaryName)
-		}
-	}
-
-	return foundPath, nil
-}
-
-// extractScannerFromArchive extracts the scanner binary from a tar.gz or zip archive
-func (p *Provisioner) extractScannerFromArchive(dir, binaryName string) (string, error) {
-	// Find archive file (.tar.gz or .zip)
-	var archivePath string
-	var isZip bool
-	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			if strings.HasSuffix(path, ".tar.gz") {
-				archivePath = path
-				isZip = false
-				return filepath.SkipDir
-			} else if strings.HasSuffix(path, ".zip") {
-				archivePath = path
-				isZip = true
-				return filepath.SkipDir
-			}
-		}
-		return nil
-	})
-
-	if archivePath == "" {
-		return "", fmt.Errorf("no tar.gz or zip archive found")
-	}
-
-	if isZip {
-		return p.extractFromZip(archivePath, dir, binaryName)
-	}
-	return p.extractFromTarGz(archivePath, dir, binaryName)
-}
-
-// extractFromTarGz extracts a binary from a tar.gz archive
-func (p *Provisioner) extractFromTarGz(archivePath, dir, binaryName string) (string, error) {
-	// Open and extract
-	file, err := os.Open(archivePath)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_ = file.Close() // Cleanup, ignore error
-	}()
-
-	gzr, err := gzip.NewReader(file)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_ = gzr.Close() // Cleanup, ignore error
-	}()
-
-	tr := tar.NewReader(gzr)
-
-	// Find and extract the binary
-	for {
-		header, err := tr.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return "", err
-		}
-
-		// Look for the binary
-		if filepath.Base(header.Name) == binaryName {
-			// Create temporary file for the binary
-			tmpBinary, err := os.CreateTemp(dir, "syft-binary-*")
-			if err != nil {
-				return "", err
-			}
-			defer func() {
-				_ = tmpBinary.Close() // Cleanup, ignore error
-			}()
-
-			// Copy binary content
-			if _, err := io.Copy(tmpBinary, tr); err != nil {
-				return "", err
-			}
-
-			// Make executable
-			if err := os.Chmod(tmpBinary.Name(), 0755); err != nil {
-				return "", err
-			}
-
-			return tmpBinary.Name(), nil
-		}
-	}
-
-	return "", fmt.Errorf("binary '%s' not found in tar.gz archive", binaryName)
-}
-
-// extractFromZip extracts a binary from a zip archive
-func (p *Provisioner) extractFromZip(archivePath, dir, binaryName string) (string, error) {
-	// Open zip file
-	zipReader, err := zip.OpenReader(archivePath)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_ = zipReader.Close() // Cleanup, ignore error
-	}()
-
-	// Find and extract the binary
-	for _, file := range zipReader.File {
-		if filepath.Base(file.Name) == binaryName {
-			// Open file in zip
-			rc, err := file.Open()
-			if err != nil {
-				return "", err
-			}
-			defer func() {
-				_ = rc.Close() // Cleanup, ignore error
-			}()
-
-			// Create temporary file for the binary
-			tmpBinary, err := os.CreateTemp(dir, "syft-binary-*")
-			if err != nil {
-				return "", err
-			}
-			defer func() {
-				_ = tmpBinary.Close() // Cleanup, ignore error
-			}()
-
-			// Copy binary content
-			if _, err := io.Copy(tmpBinary, rc); err != nil {
-				return "", err
-			}
-
-			// Make executable (important for Unix, no-op on Windows)
-			if err := os.Chmod(tmpBinary.Name(), 0755); err != nil {
-				return "", err
-			}
-
-			return tmpBinary.Name(), nil
-		}
-	}
-
-	return "", fmt.Errorf("binary '%s' not found in zip archive", binaryName)
-}
-
-// copyScannerToTemp copies the scanner binary to a permanent temp location
-func (p *Provisioner) copyScannerToTemp(srcPath string) (string, error) {
-	// Create temp file
-	tmpFile, err := os.CreateTemp("", "packer-scanner-*")
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_ = tmpFile.Close() // Cleanup, ignore error
-	}()
-
-	// Open source
-	src, err := os.Open(srcPath)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		_ = src.Close() // Cleanup, ignore error
-	}()
-
-	// Copy
-	if _, err := io.Copy(tmpFile, src); err != nil {
-		return "", err
-	}
-
-	// Make executable
-	if err := os.Chmod(tmpFile.Name(), 0755); err != nil {
-		return "", err
-	}
-
-	return tmpFile.Name(), nil
-}
-
-// verifyChecksum verifies the SHA256 checksum of the scanner binary
-func (p *Provisioner) verifyChecksum(filePath string) error {
-	// Open file
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = file.Close() // Cleanup, ignore error
-	}()
-
-	// Calculate SHA256
-	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return err
-	}
-
-	// Get hex string
-	actualChecksum := hex.EncodeToString(hash.Sum(nil))
-
-	// Compare with expected
-	expectedChecksum := strings.ToLower(strings.TrimSpace(p.config.ScannerChecksum))
-	if actualChecksum != expectedChecksum {
-		return fmt.Errorf("checksum mismatch: expected %s, got %s", expectedChecksum, actualChecksum)
-	}
-
-	return nil
-}
-
-// uploadScanner uploads the scanner binary to the remote host
-// For Windows: uploads zip file and extracts remotely (optimization for slow WinRM uploads)
-// For Unix: uploads binary directly
-func (p *Provisioner) uploadScanner(ctx context.Context, ui packersdk.Ui,
-	comm packersdk.Communicator, localPath, osType string) (string, error) {
-
-	isWindows := strings.Contains(strings.ToLower(osType), "windows")
-	isZipFile := strings.HasSuffix(strings.ToLower(localPath), ".zip")
-
-	// Windows optimization: upload zip and extract remotely
-	if isWindows && isZipFile {
-		log.Println("Uploading scanner zip file...")
-
-		// Upload zip to remote
-		remoteZipPath := "C:\\Windows\\Temp\\packer-sbom-scanner.zip"
-		zipFile, err := os.Open(localPath)
-		if err != nil {
-			return "", fmt.Errorf("failed to open scanner zip: %s", err)
-		}
-		defer func() {
-			_ = zipFile.Close() // Cleanup, ignore error
-		}()
-
-		log.Printf("Uploading zip to %s...", remoteZipPath)
-		if err := comm.Upload(remoteZipPath, zipFile, nil); err != nil {
-			return "", fmt.Errorf("failed to upload scanner zip: %s", err)
-		}
-
-		// Extract zip on remote using PowerShell
-		extractDir := "C:\\Windows\\Temp\\packer-sbom-scanner"
-
-		// Simplified extraction command
-		extractCmd := fmt.Sprintf(
-			"powershell -Command \"Expand-Archive -Path '%s' -DestinationPath '%s' -Force\"",
-			remoteZipPath, extractDir,
-		)
-
-		log.Println("Extracting scanner on remote host...")
-		cmd := &packersdk.RemoteCmd{Command: extractCmd}
-		if err := comm.Start(ctx, cmd); err != nil {
-			return "", fmt.Errorf("failed to extract scanner: %s", err)
-		}
-		cmd.Wait()
-
-		if cmd.ExitStatus() != 0 {
-			return "", fmt.Errorf("extraction failed with exit status %d", cmd.ExitStatus())
-		}
-
-		// Find the executable in extracted files
-		// Look for any .exe file (could be syft.exe, grype.exe, or custom scanner)
-		findCmd := fmt.Sprintf(
-			"powershell -Command \"Get-ChildItem -Path '%s' -Recurse -Filter '*.exe' | Select-Object -First 1 -ExpandProperty FullName\"",
-			extractDir,
-		)
-
-		log.Println("Locating scanner executable in extracted files...")
-		var stdout bytes.Buffer
-		findCmdExec := &packersdk.RemoteCmd{
-			Command: findCmd,
-			Stdout:  &stdout,
-		}
-		if err := comm.Start(ctx, findCmdExec); err != nil {
-			return "", fmt.Errorf("failed to locate scanner executable: %s", err)
-		}
-		findCmdExec.Wait()
-
-		if findCmdExec.ExitStatus() != 0 {
-			return "", fmt.Errorf("failed to find scanner executable in extracted files (exit status %d)", findCmdExec.ExitStatus())
-		}
-
-		remoteBinaryPath := strings.TrimSpace(stdout.String())
-		if remoteBinaryPath == "" {
-			return "", fmt.Errorf("no executable (.exe) found in extracted files")
-		}
-
-		// Clean up zip file
-		cleanupCmd := &packersdk.RemoteCmd{
-			Command: fmt.Sprintf("del \"%s\"", remoteZipPath),
-		}
-		_ = comm.Start(ctx, cleanupCmd) // Best effort cleanup, ignore error
-		cleanupCmd.Wait()
-
-		log.Printf("Scanner ready at: %s", remoteBinaryPath)
-		// Return format: "DIR:extractDir|EXE:actualPath" so cleanup knows to remove the directory
-		return fmt.Sprintf("DIR:%s|EXE:%s", extractDir, remoteBinaryPath), nil
-	}
-
-	// Standard upload for Unix or non-zip Windows files
-	var remotePath string
-	if isWindows {
-		remotePath = "C:\\Windows\\Temp\\packer-sbom-scanner.exe"
-	} else {
-		remotePath = "/tmp/packer-sbom-scanner"
-	}
-
-	// Open local file
-	localFile, err := os.Open(localPath)
-	if err != nil {
-		return "", fmt.Errorf("failed to open local scanner: %s", err)
-	}
-	defer func() {
-		_ = localFile.Close() // Cleanup, ignore error
-	}()
-
-	// Upload to remote
-	log.Printf("Uploading scanner to %s...", remotePath)
-	if err := comm.Upload(remotePath, localFile, nil); err != nil {
-		return "", fmt.Errorf("failed to upload scanner: %s", err)
-	}
-
-	// Make executable on Unix-like systems
-	if !isWindows {
-		cmd := &packersdk.RemoteCmd{
-			Command: fmt.Sprintf("chmod +x %s", remotePath),
-		}
-		if err := comm.Start(ctx, cmd); err != nil {
-			return "", fmt.Errorf("failed to make scanner executable: %s", err)
-		}
-		cmd.Wait()
-		if cmd.ExitStatus() != 0 {
-			return "", fmt.Errorf("chmod command failed with exit status %d", cmd.ExitStatus())
-		}
-	}
-
-	return remotePath, nil
-}
-
-// runScanner executes the scanner on the remote host
+// runScanner executes `packer sbom-generate` on the remote host.
 func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, scannerPath, osType string) (string, error) {
-
-	// Parse scanner path if it's in special format (Windows zip extraction)
-	// Format: "DIR:extractDir|EXE:actualPath"
-	actualScannerPath := scannerPath
-	if strings.Contains(scannerPath, "DIR:") && strings.Contains(scannerPath, "|EXE:") {
-		parts := strings.Split(scannerPath, "|EXE:")
-		if len(parts) == 2 {
-			actualScannerPath = parts[1]
-		}
-	}
 
 	// Determine output path based on OS
 	var outputPath string
@@ -1209,29 +682,34 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 		outputPath = "/tmp/packer-sbom.json"
 	}
 
-	// Prepare template data
-	templateData := make(map[string]interface{})
-	// Copy generatedData
-	for k, v := range p.generatedData {
-		templateData[k] = v
+	// Restrict execute_command interpolation data to explicit scanner keys.
+	// This avoids exposing arbitrary generatedData values to shell template rendering.
+	templateData := map[string]string{
+		"Path":     scannerPath,
+		"Args":     strings.Join(p.config.ScannerArgs, " "),
+		"ScanPath": p.config.ScanPath,
+		"Output":   outputPath,
 	}
-	// Add scanner-specific data
-	templateData["Path"] = actualScannerPath
-	templateData["Args"] = strings.Join(p.config.ScannerArgs, " ")
-	templateData["ScanPath"] = p.config.ScanPath
-	templateData["Output"] = outputPath
-
-	p.config.ctx.Data = templateData
+	renderCtx := p.config.ctx
+	renderCtx.Data = templateData
 
 	// Use Windows-specific default if on Windows and user hasn't customized
 	executeCommand := p.config.ExecuteCommand
-	if isWindows && executeCommand == "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}" {
-		// User didn't customize, use Windows default (no sudo on Windows)
-		executeCommand = "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
+	if isWindows && executeCommand == "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}" {
+		// User didn't customize, use Windows default (no sudo, uses sbom-generate subcommand).
+		executeCommand = "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}"
+	}
+
+	// Backward compatibility: older execute_command templates omitted the
+	// sbom-generate subcommand and invoked the scanner binary directly.
+	normalizedExecuteCommand := normalizeScannerExecuteCommand(executeCommand)
+	if normalizedExecuteCommand != executeCommand {
+		log.Printf("[INFO] execute_command compatibility: injected 'sbom-generate' subcommand")
+		executeCommand = normalizedExecuteCommand
 	}
 
 	// Render the execute command template
-	cmdStr, err := interpolate.Render(executeCommand, &p.config.ctx)
+	cmdStr, err := interpolate.Render(executeCommand, &renderCtx)
 	if err != nil {
 		return "", fmt.Errorf("failed to render execute_command: %s", err)
 	}
@@ -1277,6 +755,72 @@ func (p *Provisioner) runScanner(ctx context.Context, ui packersdk.Ui,
 	return outputPath, nil
 }
 
+func normalizeScannerExecuteCommand(executeCommand string) string {
+	// Walk each {{.Path}} token and only inject "sbom-generate" when that
+	// token is being used as the scanner executable invocation.
+	//
+	// Example rewritten:
+	//   chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}
+	// becomes:
+	//   chmod +x {{.Path}} && {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}
+	//
+	// Example left unchanged:
+	//   chmod +x {{.Path}} && {{.Path}} version
+	// because the token after {{.Path}} is not {{.Args}} or {{.ScanPath}}.
+	var out strings.Builder
+	cursor := 0
+
+	for {
+		loc := scannerPathTokenRegexp.FindStringIndex(executeCommand[cursor:])
+		if loc == nil {
+			break
+		}
+
+		end := cursor + loc[1]
+		out.WriteString(executeCommand[cursor:end])
+
+		after := executeCommand[end:]
+		trimmedAfter := strings.TrimLeft(after, " \t")
+
+		if !hasSBOMGenerateSubcommandPrefix(trimmedAfter) && scannerArgsOrScanPathTokenPrefixRegexp.MatchString(trimmedAfter) {
+			out.WriteString(" sbom-generate")
+		}
+
+		cursor = end
+	}
+
+	out.WriteString(executeCommand[cursor:])
+	return out.String()
+}
+
+func hasSBOMGenerateSubcommandPrefix(s string) bool {
+	// Treat sbom-generate as already present only when it is a complete shell
+	// token prefix, not when it is part of a longer word.
+	//
+	// Matches:
+	//   sbom-generate {{.Args}}
+	//   sbom-generate; echo done
+	//
+	// Does not match:
+	//   sbom-generate-custom
+	const subcommand = "sbom-generate"
+	if !strings.HasPrefix(s, subcommand) {
+		return false
+	}
+
+	if len(s) == len(subcommand) {
+		return true
+	}
+
+	next := s[len(subcommand)]
+	switch next {
+	case ' ', '\t', '\n', '\r', ';', '|', '&', '>', '<':
+		return true
+	default:
+		return false
+	}
+}
+
 // downloadSBOM downloads the SBOM file from the remote host
 func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) ([]byte, error) {
@@ -1296,7 +840,7 @@ func (p *Provisioner) downloadSBOM(ctx context.Context, ui packersdk.Ui,
 	return buf.Bytes(), nil
 }
 
-// cleanupRemoteFile removes a file or directory from the remote host
+// cleanupRemoteFile removes a file from the remote host.
 func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator, remotePath string) {
 
@@ -1304,34 +848,14 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 		return
 	}
 
-	// Check if this is a special format path (Windows zip extraction)
-	// Format: "DIR:extractDir|EXE:actualPath"
-	var cleanupPath string
-	var isDirectory bool
-	if strings.Contains(remotePath, "DIR:") && strings.Contains(remotePath, "|EXE:") {
-		// Extract the directory path
-		parts := strings.Split(remotePath, "|EXE:")
-		dirPart := strings.TrimPrefix(parts[0], "DIR:")
-		cleanupPath = dirPart
-		isDirectory = true
-		log.Printf("Cleaning up extraction directory: %s", cleanupPath)
-	} else {
-		cleanupPath = remotePath
-		isDirectory = false
-		log.Printf("Cleaning up remote file: %s", cleanupPath)
-	}
+	log.Printf("Cleaning up remote file: %s", remotePath)
 
-	// Determine delete command based on type and path
+	// Determine delete command based on path (Windows vs Unix)
 	var cmdStr string
-	if isDirectory {
-		// Windows directory removal
-		cmdStr = fmt.Sprintf("powershell -Command \"Remove-Item -Path '%s' -Recurse -Force\"", cleanupPath)
-	} else if strings.Contains(cleanupPath, "C:\\") || strings.Contains(cleanupPath, "c:\\") {
-		// Quote path for Windows to handle spaces
-		cmdStr = fmt.Sprintf("del /F /Q \"%s\"", cleanupPath)
+	if strings.Contains(remotePath, "C:\\") || strings.Contains(remotePath, "c:\\") {
+		cmdStr = fmt.Sprintf("del /F /Q \"%s\"", remotePath)
 	} else {
-		// Quote path for Unix to handle spaces
-		cmdStr = fmt.Sprintf("rm -f \"%s\"", cleanupPath)
+		cmdStr = fmt.Sprintf("rm -f \"%s\"", remotePath)
 	}
 
 	cmd := &packersdk.RemoteCmd{

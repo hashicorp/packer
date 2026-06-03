@@ -74,45 +74,24 @@ func TestConfigPrepare(t *testing.T) {
 			&Config{
 				AutoGenerate:   true,
 				ScanPath:       "/",
-				ScannerArgs:    []string{"-o", "cyclonedx-json", "-q"},
-				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
+				ScannerArgs:    []string{"-o", "cyclonedx-json"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
 			},
 			false,
 			"",
 		},
 		{
-			"auto_generate with custom scanner URL",
+			"auto_generate with custom scan path",
 			map[string]interface{}{
 				"auto_generate": true,
-				"scanner_url":   "https://example.com/scanner",
 				"scan_path":     "/opt/app",
 			},
 			interpolate.Context{},
 			&Config{
 				AutoGenerate:   true,
-				ScannerURL:     "https://example.com/scanner",
 				ScanPath:       "/opt/app",
-				ScannerArgs:    []string{"-o", "cyclonedx-json", "-q"},
-				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
-			},
-			false,
-			"",
-		},
-		{
-			"auto_generate with scanner checksum and URL",
-			map[string]interface{}{
-				"auto_generate":    true,
-				"scanner_url":      "https://example.com/scanner",
-				"scanner_checksum": "abc123def456",
-			},
-			interpolate.Context{},
-			&Config{
-				AutoGenerate:    true,
-				ScannerURL:      "https://example.com/scanner",
-				ScannerChecksum: "abc123def456",
-				ScanPath:        "/",
-				ScannerArgs:     []string{"-o", "cyclonedx-json", "-q"},
-				ExecuteCommand:  "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
+				ScannerArgs:    []string{"-o", "cyclonedx-json"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
 			},
 			false,
 			"",
@@ -127,11 +106,59 @@ func TestConfigPrepare(t *testing.T) {
 			&Config{
 				AutoGenerate:   true,
 				ScanPath:       "/",
-				ScannerArgs:    []string{"-o", "cyclonedx-json", "-q"},
+				ScannerArgs:    []string{"-o", "cyclonedx-json"},
 				ExecuteCommand: "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
 			},
 			false,
 			"",
+		},
+		{
+			"auto_generate with deprecated scanner_url (should warn but not fail)",
+			map[string]interface{}{
+				"auto_generate": true,
+				"scanner_url":   "https://example.com/scanner",
+				"scan_path":     "/opt/app",
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:   true,
+				ScannerURL:     "https://example.com/scanner",
+				ScanPath:       "/opt/app",
+				ScannerArgs:    []string{"-o", "cyclonedx-json"},
+				ExecuteCommand: "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
+			"deprecated scanner_checksum with scanner_url (should warn but not fail)",
+			map[string]interface{}{
+				"auto_generate":    true,
+				"scanner_url":      "https://example.com/scanner",
+				"scanner_checksum": "abc123def456",
+			},
+			interpolate.Context{},
+			&Config{
+				AutoGenerate:    true,
+				ScannerURL:      "https://example.com/scanner",
+				ScannerChecksum: "abc123def456",
+				ScanPath:        "/",
+				ScannerArgs:     []string{"-o", "cyclonedx-json"},
+				ExecuteCommand:  "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			},
+			false,
+			"",
+		},
+		{
+			"deprecated scanner_checksum without scanner_url - should still error for clarity",
+			map[string]interface{}{
+				"auto_generate":    true,
+				"scanner_checksum": "abc123",
+			},
+			interpolate.Context{},
+			nil,
+			true,
+			"scanner_checksum requires scanner_url",
 		},
 		{
 			"auto_generate with elevated user and password",
@@ -146,8 +173,8 @@ func TestConfigPrepare(t *testing.T) {
 				ElevatedUser:     "admin",
 				ElevatedPassword: "password123",
 				ScanPath:         "/",
-				ScannerArgs:      []string{"-o", "cyclonedx-json", "-q"},
-				ExecuteCommand:   "chmod +x {{.Path}} && sudo {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
+				ScannerArgs:      []string{"-o", "cyclonedx-json"},
+				ExecuteCommand:   "chmod +x {{.Path}} && sudo {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
 			},
 			false,
 			"",
@@ -164,17 +191,6 @@ func TestConfigPrepare(t *testing.T) {
 			"source and auto_generate are mutually exclusive",
 		},
 		{
-			"scanner_checksum without scanner_url - should error",
-			map[string]interface{}{
-				"auto_generate":    true,
-				"scanner_checksum": "abc123",
-			},
-			interpolate.Context{},
-			nil,
-			true,
-			"scanner_checksum requires scanner_url",
-		},
-		{
 			"elevated_password without elevated_user - should error",
 			map[string]interface{}{
 				"auto_generate":     true,
@@ -189,22 +205,18 @@ func TestConfigPrepare(t *testing.T) {
 			"source mode with scanner fields - should succeed (allows toggling auto_generate)",
 			map[string]interface{}{
 				"source":            "sbom.json",
-				"scanner_url":       "https://example.com/scanner",
-				"scanner_checksum":  "abc123",
 				"scanner_args":      []string{"-o", "json"},
 				"scan_path":         "/opt/app",
-				"execute_command":   "{{.Path}} {{.Args}}",
+				"execute_command":   "{{.Path}} sbom-generate {{.Args}}",
 				"elevated_user":     "admin",
 				"elevated_password": "password123",
 			},
 			interpolate.Context{},
 			&Config{
 				Source:           "sbom.json",
-				ScannerURL:       "https://example.com/scanner",
-				ScannerChecksum:  "abc123",
 				ScannerArgs:      []string{"-o", "json"},
 				ScanPath:         "/opt/app",
-				ExecuteCommand:   "{{.Path}} {{.Args}}",
+				ExecuteCommand:   "{{.Path}} sbom-generate {{.Args}}",
 				ElevatedUser:     "admin",
 				ElevatedPassword: "password123",
 			},
@@ -237,6 +249,44 @@ func TestConfigPrepare(t *testing.T) {
 			diff := cmp.Diff(prov.config, *tt.expectConfig, cmpopts.IgnoreUnexported(Config{}))
 			if diff != "" {
 				t.Errorf("configuration returned by `Prepare` is different from what was expected: %s", diff)
+			}
+		})
+	}
+}
+
+func TestNormalizeScannerExecuteCommand(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "injects when path directly followed by args",
+			in:   "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
+			want: "chmod +x {{.Path}} && {{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "injects when path directly followed by scan path",
+			in:   "sudo {{.Path}} {{.ScanPath}} > {{.Output}}",
+			want: "sudo {{.Path}} sbom-generate {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "keeps command when sbom-generate already present",
+			in:   "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+			want: "{{.Path}} sbom-generate {{.Args}} {{.ScanPath}} > {{.Output}}",
+		},
+		{
+			name: "does not modify non-scan invocation",
+			in:   "chmod +x {{.Path}} && {{.Path}} version",
+			want: "chmod +x {{.Path}} && {{.Path}} version",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := normalizeScannerExecuteCommand(tt.in)
+			if got != tt.want {
+				t.Fatalf("unexpected normalized command:\nwant: %q\n got: %q", tt.want, got)
 			}
 		})
 	}
