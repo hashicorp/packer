@@ -265,7 +265,7 @@ func wrappedMain() int {
 		Args:         args,
 		Autocomplete: true,
 		Commands:     Commands,
-		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin"}),
+		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin", "sbom-generate"}),
 		HelpWriter:   os.Stdout,
 		Name:         "packer",
 		Version:      version.Version,
