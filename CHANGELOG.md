@@ -1,5 +1,30 @@
 # 📦 Changelog
 
+## 1.15.4 (June 3, 2026)
+
+### DEPRECATIONS:
+
+* hcp/sbom: removed Syft binary download and handling from the HCP SBOM provisioner; Syft binary management is now deprecated in favor of the native flow.
+    [GH-13636](https://github.com/hashicorp/packer/pull/13636)
+
+### BUG FIXES:
+
+* security: addressed authorization-bypass related issues by upgrading `go-git` and `golang.org/x/crypto`.
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* sbom: bump CycloneDX dependency to improve BOM generation handling.
+    [GH-13638](https://github.com/hashicorp/packer/pull/13638)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` to `v0.6.9`.
+    [GH-13640](https://github.com/hashicorp/packer/pull/13640)
+* deps: update `github.com/Azure/go-ntlmssp` to `v0.1.1`.
+    [GH-13622](https://github.com/hashicorp/packer/pull/13622)
+* deps: update `go-git` and `golang.org/x/crypto`.
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* build/deps: bump GitHub Actions dependencies group (7 updates).
+    [GH-13649](https://github.com/hashicorp/packer/pull/13649)
+
 ## 1.15.3 (April 27, 2026)
 
 ### BUG FIXES:
