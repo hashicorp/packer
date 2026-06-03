@@ -1,5 +1,35 @@
 # 📦 Changelog
 
+## 1.15.4 (June 3, 2026)
+
+### BUG FIXES:
+
+* builder: update build constraints to support arm architecture on FreeBSD
+    [GH-13650](https://github.com/hashicorp/packer/pull/13650)
+
+### IMPROVEMENTS:
+
+* hcp: removes Syft binary download/handling from the HCP SBOM provisioner
+    [GH-13636](https://github.com/hashicorp/packer/pull/13636)
+
+### SECURITY:
+
+* deps: upgraded crypto version
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* deps: upgraded go-git version
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* deps: bump github.com/hashicorp/packer-plugin-sdk to 0.6.9
+    [GH-13640](https://github.com/hashicorp/packer/pull/13640)
+
+### INTERNAL:
+
+* build: bump Go to 1.25.10 and refresh dependencies
+    [GH-13646](https://github.com/hashicorp/packer/pull/13646)
+    [GH-13647](https://github.com/hashicorp/packer/pull/13647)
+* deps: update cloud.google.com/go and aws-sdk-go-v2 related dependencies
+    [GH-13610](https://github.com/hashicorp/packer/pull/13610)
+
+
 ## 1.15.3 (April 27, 2026)
 
 ### BUG FIXES:
