@@ -22,9 +22,9 @@ type FlatConfig struct {
 	Destination         *string           `mapstructure:"destination" required:"false" cty:"destination" hcl:"destination"`
 	SbomName            *string           `mapstructure:"sbom_name" required:"false" cty:"sbom_name" hcl:"sbom_name"`
 	AutoGenerate        *bool             `mapstructure:"auto_generate" required:"true" cty:"auto_generate" hcl:"auto_generate"`
+	ScannerArgs         []string          `mapstructure:"scanner_args" required:"false" cty:"scanner_args" hcl:"scanner_args"`
 	ScannerURL          *string           `mapstructure:"scanner_url" required:"false" cty:"scanner_url" hcl:"scanner_url"`
 	ScannerChecksum     *string           `mapstructure:"scanner_checksum" required:"false" cty:"scanner_checksum" hcl:"scanner_checksum"`
-	ScannerArgs         []string          `mapstructure:"scanner_args" required:"false" cty:"scanner_args" hcl:"scanner_args"`
 	ScanPath            *string           `mapstructure:"scan_path" required:"false" cty:"scan_path" hcl:"scan_path"`
 	ExecuteCommand      *string           `mapstructure:"execute_command" required:"false" cty:"execute_command" hcl:"execute_command"`
 	ElevatedUser        *string           `mapstructure:"elevated_user" required:"false" cty:"elevated_user" hcl:"elevated_user"`
@@ -55,9 +55,9 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"destination":                &hcldec.AttrSpec{Name: "destination", Type: cty.String, Required: false},
 		"sbom_name":                  &hcldec.AttrSpec{Name: "sbom_name", Type: cty.String, Required: false},
 		"auto_generate":              &hcldec.AttrSpec{Name: "auto_generate", Type: cty.Bool, Required: false},
+		"scanner_args":               &hcldec.AttrSpec{Name: "scanner_args", Type: cty.List(cty.String), Required: false},
 		"scanner_url":                &hcldec.AttrSpec{Name: "scanner_url", Type: cty.String, Required: false},
 		"scanner_checksum":           &hcldec.AttrSpec{Name: "scanner_checksum", Type: cty.String, Required: false},
-		"scanner_args":               &hcldec.AttrSpec{Name: "scanner_args", Type: cty.List(cty.String), Required: false},
 		"scan_path":                  &hcldec.AttrSpec{Name: "scan_path", Type: cty.String, Required: false},
 		"execute_command":            &hcldec.AttrSpec{Name: "execute_command", Type: cty.String, Required: false},
 		"elevated_user":              &hcldec.AttrSpec{Name: "elevated_user", Type: cty.String, Required: false},
