@@ -228,78 +228,84 @@ func downloadPackerRelease(ctx context.Context, goos, goarch string) (string, er
 	base := getReleaseBaseURL()
 	client := &http.Client{Timeout: 5 * time.Minute}
 
-	// Resolve the latest stable version from the releases index.
-	version, err := fetchLatestPackerVersion(ctx, client)
-	if err != nil {
-		return "", fmt.Errorf("failed to determine latest Packer version: %w", err)
-	}
-
-	fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
-	zipURL := fmt.Sprintf("%s/packer/%s/%s", base, version, fileName)
-	shaSumsURL := fmt.Sprintf("%s/packer/%s/packer_%s_SHA256SUMS", base, version, version)
-
-	log.Printf("[INFO] Downloading Packer %s for %s/%s...", version, goos, goarch)
-
-	// Download the release zip.
-	zipPath, err := downloadURLToTempFile(ctx, client, zipURL, ".zip")
-	if err != nil {
-		return "", fmt.Errorf("failed to download Packer release zip: %w", err)
-	}
-
-	// Download the SHA256SUMS file with retry.
-	var sumsContent string
-	err = retry.Config{
+	var zipPath string
+	err := retry.Config{
 		Tries:      3,
 		RetryDelay: func() time.Duration { return 5 * time.Second },
 	}.Run(ctx, func(ctx context.Context) error {
-		var e error
-		sumsContent, e = downloadChecksumFile(ctx, client, shaSumsURL)
-		return e
+		// Resolve the latest stable version from the releases index.
+		version, err := fetchLatestPackerVersion(ctx, client)
+		if err != nil {
+			return fmt.Errorf("failed to determine latest Packer version: %w", err)
+		}
+
+		fileName := fmt.Sprintf("packer_%s_%s_%s.zip", version, goos, goarch)
+		zipURL := fmt.Sprintf("%s/packer/%s/%s", base, version, fileName)
+		shaSumsURL := fmt.Sprintf("%s/packer/%s/packer_%s_SHA256SUMS", base, version, version)
+
+		log.Printf("[INFO] Downloading and verifying Packer %s for %s/%s...", version, goos, goarch)
+
+		candidateZipPath, err := downloadURLToTempFile(ctx, client, zipURL, ".zip")
+		if err != nil {
+			return fmt.Errorf("failed to download Packer release zip: %w", err)
+		}
+
+		keepCandidate := false
+		defer func() {
+			if !keepCandidate {
+				_ = os.Remove(candidateZipPath)
+			}
+		}()
+
+		sumsContent, err := downloadChecksumFile(ctx, client, shaSumsURL)
+		if err != nil {
+			return fmt.Errorf("failed to download release checksums: %w", err)
+		}
+
+		expectedSHA, err := expectedZipSHA256FromSums(sumsContent, fileName)
+		if err != nil {
+			return fmt.Errorf("failed to resolve expected checksum: %w", err)
+		}
+
+		actualSHA, err := fileSHA256(candidateZipPath)
+		if err != nil {
+			return err
+		}
+
+		if !strings.EqualFold(expectedSHA, actualSHA) {
+			return fmt.Errorf("checksum mismatch for %s: expected %s, got %s", fileName, expectedSHA, actualSHA)
+		}
+
+		// Validate the expected binary exists inside the archive.
+		binaryName := "packer"
+		if goos == "windows" {
+			binaryName = "packer.exe"
+		}
+
+		zr, err := zip.OpenReader(candidateZipPath)
+		if err != nil {
+			return fmt.Errorf("failed to open downloaded zip: %w", err)
+		}
+		defer func() { _ = zr.Close() }()
+
+		foundBinary := false
+		for _, f := range zr.File {
+			if f.Name == binaryName {
+				foundBinary = true
+				break
+			}
+		}
+
+		if !foundBinary {
+			return fmt.Errorf("packer binary %q not found in release zip %s", binaryName, zipURL)
+		}
+
+		keepCandidate = true
+		zipPath = candidateZipPath
+		return nil
 	})
 	if err != nil {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("failed to download release checksums: %w", err)
-	}
-
-	// Verify checksum.
-	expectedSHA, err := expectedZipSHA256FromSums(sumsContent, fileName)
-	if err != nil {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("failed to resolve expected checksum: %w", err)
-	}
-	actualSHA, err := fileSHA256(zipPath)
-	if err != nil {
-		_ = os.Remove(zipPath)
-		return "", err
-	}
-	if !strings.EqualFold(expectedSHA, actualSHA) {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("checksum mismatch for %s: expected %s, got %s", fileName, expectedSHA, actualSHA)
-	}
-
-	// Validate the expected binary exists inside the archive.
-	binaryName := "packer"
-	if goos == "windows" {
-		binaryName = "packer.exe"
-	}
-
-	zr, err := zip.OpenReader(zipPath)
-	if err != nil {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("failed to open downloaded zip: %w", err)
-	}
-	defer func() { _ = zr.Close() }()
-
-	foundBinary := false
-	for _, f := range zr.File {
-		if f.Name == binaryName {
-			foundBinary = true
-			break
-		}
-	}
-	if !foundBinary {
-		_ = os.Remove(zipPath)
-		return "", fmt.Errorf("packer binary %q not found in release zip %s", binaryName, zipURL)
+		return "", fmt.Errorf("failed to download and verify Packer release zip: %w", err)
 	}
 
 	log.Printf("[INFO] Downloaded and verified Packer release zip: %s", zipPath)

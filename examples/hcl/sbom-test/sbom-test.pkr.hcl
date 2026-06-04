@@ -43,12 +43,18 @@ build {
   #
   # You can also pin a specific binary with `scanner_binary_path` (e.g. for
   # air-gapped environments or pre-built cross-compiled binaries).
+  provisioner "file" {
+    source      = "/Users/hariom/Desktop/Projects/packer/sbom/packer-user-sbom-899651203-29mb.json"
+    destination = "/tmp/packer-user-sbom-899651203-29mb.json"
+  }
+
   provisioner "hcp-sbom" {
+    # source = "/tmp/packer-user-sbom-899651203-29mb.json"
     auto_generate = true
     scan_path     = "/"
     destination   = "./sbom" # local folder must already exist
     sbom_name     = "auto-sbom"
-    scanner_args = ["-o", "spdx-json", "-q"]
+    # scanner_args = ["-o", "spdx-json", "-q"]
     # {{.Path}} is the uploaded Packer binary; sbom-generate is the subcommand.
     execute_command = "chmod +x {{.Path}} && {{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}"
   }

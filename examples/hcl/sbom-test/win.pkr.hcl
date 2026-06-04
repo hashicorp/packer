@@ -8,7 +8,7 @@ packer {
 }
 
 source "amazon-ebs" "windows" {
-  ami_name      = "test1-windows"
+  ami_name      = "test3-windows"
   instance_type = "m4.2xlarge"
   region        = "us-west-2"
   source_ami_filter {
