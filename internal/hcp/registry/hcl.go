@@ -91,19 +91,32 @@ func (h *HCLRegistry) VersionStatusSummary() {
 	h.bucket.Version.statusSummary(h.ui)
 }
 
-// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
-func (h *HCLRegistry) FetchEnforcedBlocks(ctx context.Context) error {
-	return h.bucket.FetchEnforcedBlocks(ctx)
+// FetchEnforcedBlocks resolves enforced provisioner blocks from HCP Packer.
+func (h *HCLRegistry) FetchEnforcedBlocks(ctx context.Context, opts EnforcementOptions) error {
+	return h.bucket.FetchEnforcedBlocks(ctx, opts)
+}
+
+// RecordEnforcementSkip records an authorized --skip-enforcement decision.
+func (h *HCLRegistry) RecordEnforcementSkip(reasonCode, reasonNote string) {
+	h.bucket.RecordEnforcementSkip(reasonCode, reasonNote)
 }
 
 // InjectEnforcedProvisioners injects enforced provisioners into the builds
 func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	// Surface advisory-mode degradation warnings (RFC 6.4).
+	for _, w := range h.bucket.EnforcementWarnings {
+		h.ui.Say(fmt.Sprintf("Warning: %s", w))
+	}
+
 	enforcedBlocks := h.bucket.EnforcedBlocks
 	if len(enforcedBlocks) == 0 {
+		// Distinguish "no configured provisioners" from "skipped" (RFC 10).
+		h.ui.Say(fmt.Sprintf("No HCP Packer enforced provisioners configured for bucket %q.", h.bucket.Name))
 		return nil
 	}
 
 	var allDiags hcl.Diagnostics
+	injected := 0
 
 	// Parse all enforced blocks into provisioner blocks
 	for _, eb := range enforcedBlocks {
@@ -142,11 +155,18 @@ func (h *HCLRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl
 				}
 
 				build.Provisioners = append(build.Provisioners, coreProv)
+				injected++
 
 				log.Printf("[INFO] injected enforced provisioner %q from block %q into build %q",
 					pb.PType, eb.Name, build.Name())
 			}
 		}
+	}
+
+	if injected > 0 {
+		h.ui.Say(fmt.Sprintf(
+			"Applied HCP Packer enforced provisioners for bucket %q (policy_mode=%s, resolution_id=%s).",
+			h.bucket.Name, h.bucket.EnforcementPolicyMode, h.bucket.EnforcementResolutionID))
 	}
 
 	return allDiags

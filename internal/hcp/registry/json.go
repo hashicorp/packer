@@ -115,19 +115,30 @@ func (h *JSONRegistry) Metadata() Metadata {
 	return h.metadata
 }
 
-// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
-func (h *JSONRegistry) FetchEnforcedBlocks(ctx context.Context) error {
-	return h.bucket.FetchEnforcedBlocks(ctx)
+// FetchEnforcedBlocks resolves enforced provisioner blocks from HCP Packer.
+func (h *JSONRegistry) FetchEnforcedBlocks(ctx context.Context, opts EnforcementOptions) error {
+	return h.bucket.FetchEnforcedBlocks(ctx, opts)
+}
+
+// RecordEnforcementSkip records an authorized --skip-enforcement decision.
+func (h *JSONRegistry) RecordEnforcementSkip(reasonCode, reasonNote string) {
+	h.bucket.RecordEnforcementSkip(reasonCode, reasonNote)
 }
 
 // InjectEnforcedProvisioners injects enforced provisioners into the builds
 func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
+	for _, w := range h.bucket.EnforcementWarnings {
+		h.ui.Say(fmt.Sprintf("Warning: %s", w))
+	}
+
 	enforcedBlocks := h.bucket.EnforcedBlocks
 	if len(enforcedBlocks) == 0 {
+		h.ui.Say(fmt.Sprintf("No HCP Packer enforced provisioners configured for bucket %q.", h.bucket.Name))
 		return nil
 	}
 
 	var allDiags hcl.Diagnostics
+	injected := 0
 
 	for _, eb := range enforcedBlocks {
 		if eb.BlockContent == "" {
@@ -175,6 +186,7 @@ func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hc
 
 				build.Provisioners = append(build.Provisioners, coreProv)
 				injectedProvisioners = append(injectedProvisioners, coreProv)
+				injected++
 
 				log.Printf("[INFO] injected enforced provisioner %q from block %q into legacy JSON build %q",
 					pb.PType, eb.Name, build.Name())
@@ -192,6 +204,12 @@ func (h *JSONRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hc
 				})
 			}
 		}
+	}
+
+	if injected > 0 {
+		h.ui.Say(fmt.Sprintf(
+			"Applied HCP Packer enforced provisioners for bucket %q (policy_mode=%s, resolution_id=%s).",
+			h.bucket.Name, h.bucket.EnforcementPolicyMode, h.bucket.EnforcementResolutionID))
 	}
 
 	return allDiags
