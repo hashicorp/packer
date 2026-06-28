@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: set product version
         id: set-product-version
-        uses: hashicorp/actions-set-product-version@v1
+        uses: hashicorp/actions-set-product-version@e2c49d61aff17b1280ddfe7bb031331d02ca0140 # v1
       - name: set-ld-flags
         id: set-ld-flags
         run: |
@@ -71,7 +71,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Generate metadata file
         id: generate-metadata-file
-        uses: hashicorp/actions-generate-metadata@main
+        uses: hashicorp/actions-generate-metadata@a43468dfb100445f2c2aa52cdc3d57b2c982a0f3 # main
         with:
           version: ${{ needs.set-product-version.outputs.product-version }}
           product: ${{ env.REPO_NAME }}
@@ -113,7 +113,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -151,7 +151,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -170,7 +170,7 @@ jobs:
         run: |
           mkdir -p "$LICENSE_DIR" && cp LICENSE "$LICENSE_DIR/LICENSE.txt"
       - name: Linux Packaging
-        uses: hashicorp/actions-packaging-linux@v1
+        uses: hashicorp/actions-packaging-linux@006298649be64cee63e7f94a54dfcf3e14766bf6 # v1
         with:
           name: ${{ env.REPO_NAME }}
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
@@ -221,7 +221,7 @@ jobs:
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -247,7 +247,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v2
+        uses: hashicorp/actions-docker-build@e12557abf02a40557313ab2839d6cd2c6705261e # v2
         with:
           version: ${{ env.version }}
           target: release-light
@@ -277,7 +277,7 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v2
+        uses: hashicorp/actions-docker-build@e12557abf02a40557313ab2839d6cd2c6705261e # v2
         with:
           version: ${{ env.version }}
           target: release-full

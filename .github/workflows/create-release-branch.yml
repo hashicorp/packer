@@ -5,6 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: hashicorp/actions-create-release-branch@v1
+      - uses: hashicorp/actions-create-release-branch@96a01e83eb1055a66f2097029b50801ff926fea3 # v1
         with:
           token: ${{ secrets.ELEVATED_GITHUB_TOKEN }}
