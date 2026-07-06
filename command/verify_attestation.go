@@ -47,7 +47,7 @@ func (c *VerifyAttestationCommand) Run(args []string) int {
 func (c *VerifyAttestationCommand) ParseArgs(args []string) (*VerifyAttestationArgs, int) {
 	var cfg VerifyAttestationArgs
 
-	flags := c.Meta.FlagSet("verify-attestation")
+	flags := c.FlagSet("verify-attestation")
 	flags.Usage = func() { c.Ui.Say(c.Help()) }
 	flags.StringVar(&cfg.SigningMode, "signing-mode", "", "Signing mode used for the attestation")
 	flags.StringVar(&cfg.Key, "key", "", "PEM path or KMS/Vault URI")

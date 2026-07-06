@@ -176,7 +176,7 @@ func (s *keylessSigner) SignBundle(ctx context.Context, payloadType string, payl
 
 	rawEnvelope := bundleEnvelope.RawEnvelope()
 	if rawEnvelope == nil {
-		return Envelope{}, nil, fmt.Errorf("Sigstore bundle does not contain a DSSE envelope")
+		return Envelope{}, nil, fmt.Errorf("sigstore bundle does not contain a DSSE envelope")
 	}
 
 	bundleJSON, err := bundleWrapper.MarshalJSON()
@@ -333,7 +333,7 @@ func resolveGitHubActionsIDToken(env map[string]string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("request GitHub OIDC token: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode/100 != 2 {
 		return "", fmt.Errorf("request GitHub OIDC token: unexpected status %s", resp.Status)

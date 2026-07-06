@@ -28,15 +28,15 @@ import (
 
 func TestPostProcessorWritesUnsignedStatementAndPreservesArtifact(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `"
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]string{{
+			"type":       "provenance",
+			"output_dir": outputDir,
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -83,18 +83,18 @@ func TestPostProcessorWritesUnsignedStatementAndPreservesArtifact(t *testing.T) 
 
 func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "template": "ubuntu.pkr.hcl",
-	    "only_builds": ["qemu.ubuntu"],
-	    "user_variables": {"role": "web"}
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":           "provenance",
+			"output_dir":     outputDir,
+			"template":       "ubuntu.pkr.hcl",
+			"only_builds":    []string{"qemu.ubuntu"},
+			"user_variables": map[string]string{"role": "web"},
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -191,16 +191,16 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 
 func TestPostProcessorWritesSBOMAttestation(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "sbom": true
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":       "provenance",
+			"output_dir": outputDir,
+			"sbom":       true,
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -239,7 +239,7 @@ func TestPostProcessorWritesSBOMAttestation(t *testing.T) {
 
 func TestPostProcessorRegeneratesStaleSBOM(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
 	staleSBOM := []byte(`{"bomFormat":"CycloneDX","specVersion":"1.5","stale":true}`)
@@ -247,13 +247,13 @@ func TestPostProcessorRegeneratesStaleSBOM(t *testing.T) {
 		t.Fatalf("write stale sbom: %v", err)
 	}
 
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "sbom": true
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":       "provenance",
+			"output_dir": outputDir,
+			"sbom":       true,
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -298,20 +298,20 @@ func TestPostProcessorRegeneratesStaleSBOM(t *testing.T) {
 
 func TestPostProcessorSignsAttestationsWithConfiguredVerifier(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	privateKeyPath, publicKeyPath := writeSigningKeypair(t)
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "signing_mode": "key",
-	    "signer": "` + privateKeyPath + `",
-	    "verifier": "` + publicKeyPath + `",
-	    "sbom": true
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":         "provenance",
+			"output_dir":   outputDir,
+			"signing_mode": "key",
+			"signer":       privateKeyPath,
+			"verifier":     publicKeyPath,
+			"sbom":         true,
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -339,20 +339,20 @@ func TestPostProcessorSignsAttestationsWithConfiguredVerifier(t *testing.T) {
 
 func TestPostProcessorRejectsMismatchedVerifier(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	privateKeyPath, _ := writeSigningKeypair(t)
 	_, mismatchedVerifierPath := writeSigningKeypair(t)
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "signing_mode": "key",
-	    "signer": "` + privateKeyPath + `",
-	    "verifier": "` + mismatchedVerifierPath + `"
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":         "provenance",
+			"output_dir":   outputDir,
+			"signing_mode": "key",
+			"signer":       privateKeyPath,
+			"verifier":     mismatchedVerifierPath,
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -371,19 +371,19 @@ func TestPostProcessorRejectsMismatchedVerifier(t *testing.T) {
 
 func TestPostProcessorWritesSigstoreBundleForKeylessAttestations(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := `{
-	  "post-processors": [{
-	    "type": "provenance",
-	    "output_dir": "` + outputDir + `",
-	    "signing_mode": "keyless",
-	    "upload_tlog": false,
-	    "keyless_identity": "https://github.com/hashicorp/packer/.github/workflows/build.yml@refs/heads/main",
-	    "keyless_oidc_issuer": "https://token.actions.githubusercontent.com"
-	  }]
-	}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]interface{}{{
+			"type":                "provenance",
+			"output_dir":          outputDir,
+			"signing_mode":        "keyless",
+			"upload_tlog":         false,
+			"keyless_identity":    "https://github.com/hashicorp/packer/.github/workflows/build.yml@refs/heads/main",
+			"keyless_oidc_issuer": "https://token.actions.githubusercontent.com",
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -654,7 +654,7 @@ func readFileString(t *testing.T, path string) string {
 
 func TestOutputStemDisambiguatesByBuildName(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	var pp PostProcessor
 
@@ -712,7 +712,13 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	t.Helper()
 
 	target := filepath.Join(t.TempDir(), "package.txt")
-	config := `{"builders":[{"type":"file","target":"` + target + `","content":"Hello world!"}]}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"builders": []map[string]string{{
+			"type":    "file",
+			"target":  target,
+			"content": "Hello world!",
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -733,4 +739,15 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	}
 
 	return artifact
+}
+
+func mustTemplateJSON(t *testing.T, value interface{}) string {
+	t.Helper()
+
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		t.Fatalf("marshal template config: %v", err)
+	}
+
+	return string(encoded)
 }

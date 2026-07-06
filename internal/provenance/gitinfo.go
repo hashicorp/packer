@@ -5,6 +5,7 @@ package provenance
 
 import (
 	"fmt"
+	"net/url"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -109,7 +110,7 @@ func detectLocalGitDependency(workingDir string, runner gitRunner) (ResolvedDepe
 		if topLevelErr != nil || topLevel == "" {
 			repositoryURL = ""
 		} else {
-			repositoryURL = "file://" + filepath.Clean(topLevel)
+			repositoryURL = localGitFileURI(topLevel)
 		}
 	}
 
@@ -128,6 +129,20 @@ func detectLocalGitDependency(workingDir string, runner gitRunner) (ResolvedDepe
 			"gitCommit": commit,
 		},
 	}, true
+}
+
+func localGitFileURI(path string) string {
+	cleaned := filepath.Clean(path)
+	if cleaned == "" {
+		return ""
+	}
+
+	slashed := filepath.ToSlash(cleaned)
+	if !strings.HasPrefix(slashed, "/") {
+		slashed = "/" + slashed
+	}
+
+	return (&url.URL{Scheme: "file", Path: slashed}).String()
 }
 
 func runGitCommand(workingDir string, args ...string) (string, error) {

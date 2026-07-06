@@ -570,14 +570,6 @@ func collectUserVariables(env map[string]string) map[string]string {
 	return userVariables
 }
 
-func (p *PostProcessor) outputPath(source packersdk.Artifact) (string, error) {
-	paths, err := p.outputPaths(source)
-	if err != nil {
-		return "", err
-	}
-	return paths.ProvenanceStatement, nil
-}
-
 func (p *PostProcessor) outputPaths(source packersdk.Artifact) (outputPaths, error) {
 	baseDir := p.config.OutputDir
 	if baseDir == "" && len(source.Files()) > 0 {
@@ -674,15 +666,15 @@ func atomicWriteFile(path string, data []byte, perm os.FileMode) error {
 	}()
 
 	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Chmod(perm); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Sync(); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Close(); err != nil {

@@ -324,7 +324,7 @@ func verifySigstoreBundleEvidenceImpl(envelope Envelope, cfg BackendConfig, poli
 		if err != nil {
 			return fmt.Errorf("open artifact %q for bundle verification: %w", policy.ArtifactPath, err)
 		}
-		defer artifact.Close()
+		defer func() { _ = artifact.Close() }()
 		artifactPolicy = sigstoreverify.WithArtifact(artifact)
 	}
 
@@ -349,11 +349,11 @@ func ensureBundleMatchesEnvelope(bundle *sigstorebundle.Bundle, envelope Envelop
 
 	rawEnvelope := bundleEnvelope.RawEnvelope()
 	if rawEnvelope == nil {
-		return fmt.Errorf("Sigstore bundle does not contain a DSSE envelope")
+		return fmt.Errorf("sigstore bundle does not contain a DSSE envelope")
 	}
 
 	if rawEnvelope.PayloadType != envelope.PayloadType || rawEnvelope.Payload != envelope.Payload {
-		return fmt.Errorf("Sigstore bundle payload does not match attestation")
+		return fmt.Errorf("sigstore bundle payload does not match attestation")
 	}
 
 	if len(envelope.Signatures) == 0 {
@@ -366,7 +366,7 @@ func ensureBundleMatchesEnvelope(bundle *sigstorebundle.Bundle, envelope Envelop
 	}
 
 	if !bytes.Equal(bundleEnvelope.Signature(), signature) {
-		return fmt.Errorf("Sigstore bundle signature does not match attestation")
+		return fmt.Errorf("sigstore bundle signature does not match attestation")
 	}
 
 	return nil
@@ -393,7 +393,7 @@ func sha256File(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, file); err != nil {

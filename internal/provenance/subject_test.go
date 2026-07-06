@@ -21,7 +21,7 @@ import (
 
 func TestDeriveSubjectsFromFiles(t *testing.T) {
 	artifact := buildFileArtifact(t)
-	defer artifact.Destroy()
+	defer func() { _ = artifact.Destroy() }()
 
 	subjects, err := deriveSubjects(artifact)
 	if err != nil {
@@ -87,7 +87,13 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	t.Helper()
 
 	target := filepath.Join(t.TempDir(), "package.txt")
-	config := `{"builders":[{"type":"file","target":"` + target + `","content":"Hello world!"}]}`
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"builders": []map[string]string{{
+			"type":    "file",
+			"target":  target,
+			"content": "Hello world!",
+		}},
+	})
 	tpl, err := template.Parse(strings.NewReader(config))
 	if err != nil {
 		t.Fatalf("parse template: %v", err)
@@ -108,4 +114,15 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	}
 
 	return artifact
+}
+
+func mustTemplateJSON(t *testing.T, value interface{}) string {
+	t.Helper()
+
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		t.Fatalf("marshal template config: %v", err)
+	}
+
+	return string(encoded)
 }
