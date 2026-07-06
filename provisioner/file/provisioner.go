@@ -67,6 +67,11 @@ type Config struct {
 	// the Packer run, but realize that there are situations where this may be
 	// unavoidable.
 	Generated bool `mapstructure:"generated" required:"false"`
+	// A list of files or directories to exclude from the upload. This is
+	// useful if you have a directory with many files and you only want to
+	// upload a few of them. This only works if you are uploading a directory
+	// and not a single file.
+	Excludes []string `mapstructure:"excludes" required:"false"`
 
 	ctx interpolate.Context
 }
@@ -227,7 +232,7 @@ func (p *Provisioner) ProvisionUpload(ui packersdk.Ui, comm packersdk.Communicat
 
 		// If we're uploading a directory, short circuit and do that
 		if info.IsDir() {
-			if err = comm.UploadDir(dst, src, nil); err != nil {
+			if err = comm.UploadDir(dst, src, p.config.Excludes); err != nil {
 				ui.Error(fmt.Sprintf("Upload failed: %s", err))
 				return err
 			}
