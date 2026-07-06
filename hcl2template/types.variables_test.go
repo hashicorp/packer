@@ -692,6 +692,40 @@ func TestParse_variables(t *testing.T) {
 	testParse(t, tests)
 }
 
+// TestParse_variables_optional_attributes ensures that the optional() attribute
+// modifier is accepted within an object type constraint and that declared
+// defaults are applied to attributes omitted from the value.
+func TestParse_variables_optional_attributes(t *testing.T) {
+	parser := getBasicParser()
+
+	cfg, diags := parser.Parse(
+		filepath.Join("testdata", "variables", "optional_attributes.pkr.hcl"),
+		nil, nil,
+	)
+	if diags.HasErrors() {
+		t.Fatalf("unexpected error diagnostics parsing optional attributes: %s", diags)
+	}
+
+	v, ok := cfg.InputVariables["context"]
+	if !ok {
+		t.Fatal("expected 'context' input variable to be present")
+	}
+
+	if v.TypeDefaults == nil {
+		t.Fatal("expected TypeDefaults to be populated for a type using optional()")
+	}
+
+	got := v.Value()
+	want := cty.ObjectVal(map[string]cty.Value{
+		"with_default":    cty.StringVal("default_value"),
+		"without_default": cty.NullVal(cty.Number),
+		"required":        cty.StringVal("set"),
+	})
+	if !got.RawEquals(want) {
+		t.Fatalf("unexpected value for context variable.\n got: %#v\nwant: %#v", got, want)
+	}
+}
+
 func TestVariables_collectVariableValues(t *testing.T) {
 	type args struct {
 		env      []string
