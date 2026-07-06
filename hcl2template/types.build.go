@@ -37,6 +37,7 @@ var buildSchema = &hcl.BodySchema{
 		{Type: buildPostProcessorLabel, LabelNames: []string{"type"}},
 		{Type: buildPostProcessorsLabel, LabelNames: []string{}},
 		{Type: buildHCPPackerRegistryLabel},
+		{Type: metadataBlockLabel},
 	},
 }
 
@@ -62,6 +63,17 @@ type BuildBlock struct {
 	// A description of what this build does, it could be used in a inspect
 	// call for example.
 	Description string
+
+	// Tags is the list of tags declared on the build block. These are
+	// unioned with the per-source tags to produce the effective tag set
+	// used by the -filter CLI flag.
+	Tags []string
+
+	// Labels is the key/value metadata declared on the build block. These
+	// are merged with the per-source labels to produce the effective
+	// label set used by the -filter CLI flag. On conflict, source labels
+	// take precedence over build labels because sources are more specific.
+	Labels map[string]string
 
 	// HCPPackerRegistry contains the configuration for publishing the image to the HCP Packer Registry.
 	HCPPackerRegistry *HCPPackerRegistryBlock
@@ -154,8 +166,27 @@ func (p *Parser) decodeBuildConfig(block *hcl.Block, cfg *PackerConfig) (*BuildB
 	if diags.HasErrors() {
 		return nil, diags
 	}
+	seenMetadata := false
 	for _, block := range content.Blocks {
 		switch block.Type {
+		case metadataBlockLabel:
+			if seenMetadata {
+				diags = append(diags, &hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  fmt.Sprintf("Only one %q block is allowed per build", metadataBlockLabel),
+					Subject:  block.DefRange.Ptr(),
+				})
+				continue
+			}
+			seenMetadata = true
+			var meta metadataBody
+			moreDiags := gohcl.DecodeBody(block.Body, cfg.EvalContext(LocalContext, nil), &meta)
+			diags = append(diags, moreDiags...)
+			if moreDiags.HasErrors() {
+				continue
+			}
+			build.Tags = dedupStrings(meta.Tags)
+			build.Labels = meta.Labels
 		case buildHCPPackerRegistryLabel:
 			if build.HCPPackerRegistry != nil {
 				diags = append(diags, &hcl.Diagnostic{

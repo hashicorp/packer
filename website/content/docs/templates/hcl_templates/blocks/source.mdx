@@ -57,6 +57,29 @@ build {
 
 `@include 'from-1.5/contextual-source-variables.mdx'`
 
+## `metadata` block
+
+A source block may declare a nested `metadata` block that carries Packer
+build metadata used by the [`packer build -filter`](/packer/docs/commands/build)
+flag. Two attributes are accepted:
+
+- `tags` (list of strings) — labels attached to the source.
+- `labels` (map of string to string) — key/value metadata attached to the source.
+
+The `metadata` block is reserved by Packer and is not passed to the builder
+plugin, so it can never collide with builder-specific attributes such as
+amazon-ebs's own `tags` map.
+
+```hcl
+source "amazon-ebs" "web" {
+  metadata {
+    tags   = ["prod", "x86"]
+    labels = { region = "us-east" }
+  }
+  # ...builder-specific config
+}
+```
+
 ## Related
 
 - Refer to the [builders reference overview](/packer/docs/builders) for information about Packer builders.

@@ -97,6 +97,31 @@ Here `'a.null.first-example'` was skipped.
 -> Note: It is not yet possible to match a named `build` block to do this, but
 this is soon going to be possible. So here "a.\*" will match nothing.
 
+## `metadata` block
+
+A `build` block may declare a nested `metadata` block that carries Packer
+build metadata used by the [`packer build -filter`](/packer/docs/commands/build)
+flag. Two attributes are accepted:
+
+- `tags` (list of strings) — labels attached to every source selected by this build.
+- `labels` (map of string to string) — key/value metadata merged with per-source labels.
+
+Build-level tags are unioned with per-source tags. Labels from the source
+definition take precedence over labels declared on the enclosing build
+block, so the more-specific source metadata wins on key conflict.
+
+```hcl
+build {
+  metadata {
+    tags = ["nightly"]
+  }
+  sources = [
+    "source.amazon-ebs.web",
+    "source.amazon-ebs.db",
+  ]
+}
+```
+
 ## Related
 
 - Refer to the [community builders reference](/packer/docs/community-tools#community-builders) for information about builders maintained by the community.

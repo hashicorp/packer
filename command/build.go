@@ -138,6 +138,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	builds, diags := packerStarter.GetBuilds(packer.GetBuildsOptions{
 		Only:    cla.Only,
 		Except:  cla.Except,
+		Filters: cla.Filters,
 		Debug:   cla.Debug,
 		Force:   cla.Force,
 		OnError: cla.OnError,
@@ -466,6 +467,13 @@ Options:
   -debug                        Debug mode enabled for builds.
   -except=foo,bar,baz           Run all builds and post-processors other than these.
   -only=foo,bar,baz             Build only the specified builds.
+  -filter='tags=prod,x86'       Select builds by declared tags/labels. Repeatable;
+                                multiple -filter flags are AND-ed together.
+                                Grammar: KEY=VAL(,VAL)   all of
+                                         KEY~=VAL(,VAL)  any of
+                                         KEY!=VAL(,VAL)  none of
+                                KEY is either "tags" or a label key. Values are
+                                globs. Applied after -only and -except.
   -force                        Force a build to continue if artifacts exist, deletes existing artifacts.
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask|run-cleanup-provisioner] If the build fails do: clean up (default), abort, ask, or run-cleanup-provisioner.
@@ -496,6 +504,7 @@ func (*BuildCommand) AutocompleteFlags() complete.Flags {
 		"-debug":            complete.PredictNothing,
 		"-except":           complete.PredictNothing,
 		"-only":             complete.PredictNothing,
+		"-filter":           complete.PredictNothing,
 		"-force":            complete.PredictNothing,
 		"-machine-readable": complete.PredictNothing,
 		"-on-error":         complete.PredictNothing,

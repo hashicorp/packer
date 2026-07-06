@@ -91,8 +91,9 @@ func (c *ValidateCommand) RunContext(ctx context.Context, cla *ValidateArgs) int
 	}
 
 	_, diags = packerStarter.GetBuilds(packer.GetBuildsOptions{
-		Only:   cla.Only,
-		Except: cla.Except,
+		Only:    cla.Only,
+		Except:  cla.Except,
+		Filters: cla.Filters,
 	})
 
 	fixerDiags := packerStarter.FixConfig(packer.FixConfigOptions{
