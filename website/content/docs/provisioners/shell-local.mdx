@@ -353,8 +353,8 @@ tempfile_extension
 
 ```hcl
 provisioner "shell-local" {
-  environment_vars   = ["SHELLLOCALTEST=ShellTest2"],
-  tempfile_extension = ".cmd",
+  environment_vars   = ["SHELLLOCALTEST=ShellTest2"]
+  tempfile_extension = ".cmd"
   inline             = [echo "%SHELLLOCALTEST%"]
 }
 ```
@@ -382,7 +382,7 @@ customizations: use_linux_pathing and execute_command
 
 ```hcl
 provisioner "shell-local" {
-  environment_vars  = ["SHELLLOCALTEST=ShellTest3"],
+  environment_vars  = ["SHELLLOCALTEST=ShellTest3"]
   execute_command   = ["bash", "-c", "{{.Vars}} {{.Script}}"]
   use_linux_pathing = true
   script            = "./scripts/example_bash.sh"
