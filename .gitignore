@@ -2,9 +2,6 @@
 /local
 /pkg
 /src
-/website/.sass-cache
-/website/build
-/website/tmp
 .DS_Store
 .vagrant
 .idea
@@ -14,9 +11,6 @@ test/.env
 *.swp
 
 vendor/
-
-website/.bundle
-website/vendor
 
 packer-test*.log
 

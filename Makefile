@@ -22,7 +22,7 @@ GOLDFLAGS=-X $(GIT_IMPORT).GitCommit=$(GIT_COMMIT)$(GIT_DIRTY) $(LDFLAGS)
 
 export GOLDFLAGS
 
-.PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-docs fmt-examples generate install-lint-deps lint \
+.PHONY: bin checkversion ci ci-lint default install-build-deps install-gen-deps fmt fmt-examples generate install-lint-deps lint \
 	releasebin test testacc testrace version
 
 default: install-build-deps install-gen-deps generate dev
@@ -111,9 +111,6 @@ fmt-check: fmt ## Check go code formatting
 		echo "You can use the command: \`make fmt\` to reformat code."; \
 		exit 1; \
 	fi
-
-fmt-docs:
-	@find ./website/pages/docs -name "*.md" -exec pandoc --wrap auto --columns 79 --atx-headers -s -f "markdown_github+yaml_metadata_block" -t "markdown_github+yaml_metadata_block" {} -o {} \;
 
 # Install js-beautify with npm install -g js-beautify
 fmt-examples:
