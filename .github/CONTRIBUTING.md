@@ -273,7 +273,7 @@ does not attempt to track the latest version for each dependency.
 
 Packer relies on `go generate` to generate a [peg parser for boot
 commands](https://github.com/hashicorp/packer-plugin-sdk/blob/main/bootcommand/boot_command.go),
-[docs](https://github.com/hashicorp/packer-plugin-amazon/blob/main/docs/builders/chroot.mdx)
+[docs](https://github.com/hashicorp/packer-plugin-amazon/blob/main/docs-partials/builder/chroot/Config-not-required.mdx)
 and HCL2's bridging code. Packer's testing suite will run `make generate-check`
 to check that all the generated files Packer needs are what they should be.
 `make generate` re-generates all these file and can take a while depending on
