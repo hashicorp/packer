@@ -27,7 +27,7 @@ jobs:
     outputs:
       go-version: ${{ steps.get-go-version.outputs.go-version }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: 'Determine Go version'
         id: get-go-version
         # We use .go-version as our source of truth for current Go
@@ -45,10 +45,10 @@ jobs:
       product-prerelease-version: ${{ steps.set-product-version.outputs.prerelease-product-version }}
       set-ld-flags: ${{ steps.set-ld-flags.outputs.set-ld-flags }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: set product version
         id: set-product-version
-        uses: hashicorp/actions-set-product-version@v1
+        uses: hashicorp/actions-set-product-version@d9be602dfa87e201c79a3937c038f19391c9a430 # v2.0.2
       - name: set-ld-flags
         id: set-ld-flags
         run: |
@@ -68,15 +68,16 @@ jobs:
       filepath: ${{ steps.generate-metadata-file.outputs.filepath }}
     steps:
       - name: 'Checkout directory'
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Generate metadata file
         id: generate-metadata-file
-        uses: hashicorp/actions-generate-metadata@main
+        uses: hashicorp/actions-generate-metadata@a43468dfb100445f2c2aa52cdc3d57b2c982a0f3 # v1.1.4
         with:
           version: ${{ needs.set-product-version.outputs.product-version }}
           product: ${{ env.REPO_NAME }}
+          repository: ${{ env.REPO_NAME }}
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: metadata.json
           path: ${{ steps.generate-metadata-file.outputs.filepath }}
@@ -106,14 +107,14 @@ jobs:
       GOPRIVATE: "github.com/hashicorp"
       GO111MODULE: on
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1.1.2
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -144,14 +145,14 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1.1.2
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -170,7 +171,7 @@ jobs:
         run: |
           mkdir -p "$LICENSE_DIR" && cp LICENSE "$LICENSE_DIR/LICENSE.txt"
       - name: Linux Packaging
-        uses: hashicorp/actions-packaging-linux@v1
+        uses: hashicorp/actions-packaging-linux@006298649be64cee63e7f94a54dfcf3e14766bf6 # v1.11
         with:
           name: ${{ env.REPO_NAME }}
           description: "HashiCorp Packer - A tool for creating identical machine images for multiple platforms from a single source configuration"
@@ -187,11 +188,11 @@ jobs:
         run: |
           echo "RPM_PACKAGE=$(basename out/*.rpm)" >> $GITHUB_ENV
           echo "DEB_PACKAGE=$(basename out/*.deb)" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.RPM_PACKAGE }}
           path: out/${{ env.RPM_PACKAGE }}
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.DEB_PACKAGE }}
           path: out/${{ env.DEB_PACKAGE }}
@@ -214,14 +215,14 @@ jobs:
       GO111MODULE: on
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Go Build
         env:
           PRODUCT_VERSION: ${{ needs.set-product-version.outputs.product-version }}
           PRERELEASE_VERSION: ${{ needs.set-product-version.outputs.product-prerelease-version }}
           LD_FLAGS: "${{ needs.set-product-version.outputs.set-ld-flags}}"
           CGO_ENABLED: "0"
-        uses: hashicorp/actions-go-build@v1
+        uses: hashicorp/actions-go-build@dd7ca5a30c402c933e1fe61e0ff7165e5c4ee9e4 # v1.1.2
         with:
           product_name: ${{ env.REPO_NAME }}
           product_version: ${{ needs.set-product-version.outputs.product-version }}
@@ -245,18 +246,18 @@ jobs:
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v2
+        uses: hashicorp/actions-docker-build@e12557abf02a40557313ab2839d6cd2c6705261e # v2.2.1
         with:
           version: ${{ env.version }}
           target: release-light
           arch: ${{ matrix.arch }}
           tags: |
-            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('docker.io/hashicorp/{0}:light', env.REPO_NAME) }}
+            ${{ needs.set-product-version.outputs.product-prerelease-version == '' && format('docker.io/hashicorp/{0}:light', env.REPO_NAME) }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
-            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('public.ecr.aws/hashicorp/{0}:light', env.REPO_NAME) }}
+            ${{ needs.set-product-version.outputs.product-prerelease-version == '' && format('public.ecr.aws/hashicorp/{0}:light', env.REPO_NAME) }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:light-${{ env.version }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:${{ env.version }}
           dev_tags: |
@@ -275,17 +276,17 @@ jobs:
     env:
       version: ${{ needs.set-product-version.outputs.product-version }}
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Docker Build (Action)
-        uses: hashicorp/actions-docker-build@v2
+        uses: hashicorp/actions-docker-build@e12557abf02a40557313ab2839d6cd2c6705261e # v2.2.1
         with:
           version: ${{ env.version }}
           target: release-full
           arch: ${{ matrix.arch }}
           tags: |
-            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('docker.io/hashicorp/{0}:full', env.REPO_NAME) }}
+            ${{ needs.set-product-version.outputs.product-prerelease-version == '' && format('docker.io/hashicorp/{0}:full', env.REPO_NAME) }}
             docker.io/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
-            ${{ steps.set-product-version.output.prerelease-product-version == '' && format('public.ecr.aws/hashicorp/{0}:full', env.REPO_NAME) }}
+            ${{ needs.set-product-version.outputs.product-prerelease-version == '' && format('public.ecr.aws/hashicorp/{0}:full', env.REPO_NAME) }}
             public.ecr.aws/hashicorp/${{ env.REPO_NAME }}:full-${{ env.version }}
           dev_tags: |
             docker.io/hashicorppreview/${{ env.REPO_NAME }}:full-${{ env.version }}
