@@ -193,6 +193,18 @@ provisioner "shell" {
 			wantErr:   false,
 		},
 		{
+			name: "provisioner with continue_on_error",
+			blockContent: `
+provisioner "shell" {
+  continue_on_error = true
+  inline            = ["echo 'Continue on error test'"]
+}
+`,
+			wantCount: 1,
+			wantTypes: []string{"shell"},
+			wantErr:   false,
+		},
+		{
 			name: "provisioner with only filter",
 			blockContent: `
 provisioner "shell" {

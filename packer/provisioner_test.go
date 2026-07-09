@@ -346,3 +346,155 @@ func TestRetriedProvisionerCancel(t *testing.T) {
 		t.Fatal("should have err")
 	}
 }
+
+func TestContinueOnErrorProvisioner_impl(t *testing.T) {
+	var _ packersdk.Provisioner = new(ContinueOnErrorProvisioner)
+}
+
+func TestContinueOnErrorProvisionerConfigSpecAndFlatConfig_doNotRecurse(t *testing.T) {
+	mock := new(packersdk.MockProvisioner)
+	prov := &ContinueOnErrorProvisioner{Provisioner: mock}
+	_ = prov.ConfigSpec()
+	_ = prov.FlatConfig()
+}
+
+func TestContinueOnErrorProvisionerPrepare(t *testing.T) {
+	mock := new(packersdk.MockProvisioner)
+	prov := &ContinueOnErrorProvisioner{
+		Provisioner: mock,
+	}
+
+	err := prov.Prepare(42)
+	if err != nil {
+		t.Fatal("should not have errored")
+	}
+	if !mock.PrepCalled {
+		t.Fatal("prepare should be called")
+	}
+	if mock.PrepConfigs[0] != 42 {
+		t.Fatal("should have proper configs")
+	}
+}
+
+func TestContinueOnErrorProvisionerProvision(t *testing.T) {
+	// A failing provisioner must not propagate its error.
+	mock := &packersdk.MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			return errors.New("failed")
+		},
+	}
+
+	prov := &ContinueOnErrorProvisioner{
+		Provisioner: mock,
+	}
+
+	ui := testUi()
+	comm := new(packersdk.MockCommunicator)
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should have swallowed the error, got: %s", err)
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+}
+
+func TestContinueOnErrorProvisionerProvision_success(t *testing.T) {
+	// A successful provisioner returns nil as usual.
+	mock := new(packersdk.MockProvisioner)
+
+	prov := &ContinueOnErrorProvisioner{
+		Provisioner: mock,
+	}
+
+	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	if err != nil {
+		t.Fatalf("should not have errored, got: %s", err)
+	}
+	if !mock.ProvCalled {
+		t.Fatal("prov should be called")
+	}
+}
+
+func TestContinueOnErrorProvisionerCancelledProvision(t *testing.T) {
+	// A cancelled context must still propagate, even with continue_on_error.
+	ctx, cancel := context.WithCancel(context.Background())
+
+	mock := &packersdk.MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			cancel()
+			<-ctx.Done()
+			return ctx.Err()
+		},
+	}
+
+	prov := &ContinueOnErrorProvisioner{
+		Provisioner: mock,
+	}
+
+	err := prov.Provision(ctx, testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	if err == nil {
+		t.Fatal("should have propagated the cancellation error")
+	}
+}
+
+// TestProvisionHook_failsWithoutContinueOnError is the negative case: when a
+// provisioner fails and is NOT wrapped with continue_on_error (i.e. the option
+// is false or unset), the hook must return the error and must NOT run any
+// subsequent provisioners.
+func TestProvisionHook_failsWithoutContinueOnError(t *testing.T) {
+	pA := &packersdk.MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			return errors.New("failed")
+		},
+	}
+	pB := &packersdk.MockProvisioner{}
+
+	hook := &ProvisionHook{
+		Provisioners: []*HookedProvisioner{
+			{pA, nil, ""},
+			{pB, nil, ""},
+		},
+	}
+
+	err := hook.Run(context.Background(), "foo", testUi(), new(packersdk.MockCommunicator), nil)
+	if err == nil {
+		t.Fatal("hook should have errored when a provisioner fails")
+	}
+	if !pA.ProvCalled {
+		t.Fatal("failing provisioner should have been called")
+	}
+	if pB.ProvCalled {
+		t.Fatal("subsequent provisioner should NOT run after a failure")
+	}
+}
+
+// TestProvisionHook_continueOnErrorRunsRemaining is the positive case: when the
+// failing provisioner is wrapped with continue_on_error, the hook swallows the
+// error and continues running the remaining provisioners.
+func TestProvisionHook_continueOnErrorRunsRemaining(t *testing.T) {
+	failing := &packersdk.MockProvisioner{
+		ProvFunc: func(ctx context.Context) error {
+			return errors.New("failed")
+		},
+	}
+	pB := &packersdk.MockProvisioner{}
+
+	hook := &ProvisionHook{
+		Provisioners: []*HookedProvisioner{
+			{&ContinueOnErrorProvisioner{Provisioner: failing}, nil, ""},
+			{pB, nil, ""},
+		},
+	}
+
+	err := hook.Run(context.Background(), "foo", testUi(), new(packersdk.MockCommunicator), nil)
+	if err != nil {
+		t.Fatalf("hook should not have errored, got: %s", err)
+	}
+	if !failing.ProvCalled {
+		t.Fatal("failing provisioner should have been called")
+	}
+	if !pB.ProvCalled {
+		t.Fatal("subsequent provisioner should run after a swallowed failure")
+	}
+}

@@ -6,6 +6,7 @@ package packer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -142,9 +143,10 @@ func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, c
 // ProvisionerWrapOptions contains options for wrapping a provisioner with
 // additional behavior like pausing, timeouts, and retries.
 type ProvisionerWrapOptions struct {
-	PauseBefore time.Duration
-	Timeout     time.Duration
-	MaxRetries  int
+	PauseBefore     time.Duration
+	Timeout         time.Duration
+	MaxRetries      int
+	ContinueOnError bool
 }
 
 // WrapProvisionerWithOptions wraps a provisioner with additional behavior
@@ -169,6 +171,12 @@ func WrapProvisionerWithOptions(provisioner packersdk.Provisioner, opts Provisio
 	if opts.MaxRetries != 0 {
 		wrapped = &RetriedProvisioner{
 			MaxRetries:  opts.MaxRetries,
+			Provisioner: wrapped,
+		}
+	}
+
+	if opts.ContinueOnError {
+		wrapped = &ContinueOnErrorProvisioner{
 			Provisioner: wrapped,
 		}
 	}
@@ -242,6 +250,43 @@ func (r *RetriedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, com
 	ui.Say("retry limit reached.")
 
 	return err
+}
+
+// ContinueOnErrorProvisioner is a Provisioner implementation that allows the
+// build to continue even when the wrapped provisioner returns an error.
+type ContinueOnErrorProvisioner struct {
+	Provisioner packersdk.Provisioner
+}
+
+func (p *ContinueOnErrorProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	return p.Provisioner.ConfigSpec()
+}
+func (p *ContinueOnErrorProvisioner) FlatConfig() interface{} {
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() interface{} }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
+func (p *ContinueOnErrorProvisioner) Prepare(raws ...interface{}) error {
+	return p.Provisioner.Prepare(raws...)
+}
+
+func (p *ContinueOnErrorProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+	err := p.Provisioner.Provision(ctx, ui, comm, generatedData)
+	if err == nil {
+		return nil
+	}
+
+	// Do not swallow cancellations; those should still stop the build. Return
+	// both the original provisioner failure and the context error so callers
+	// keep the failure detail while still being able to detect the
+	// cancellation via errors.Is(err, context.Canceled).
+	if ctx.Err() != nil {
+		return errors.Join(err, ctx.Err())
+	}
+
+	ui.Say(fmt.Sprintf("Warning: Provisioner failed with %q, but continue_on_error is set; continuing the build.", err))
+	return nil
 }
 
 // DebuggedProvisioner is a Provisioner implementation that waits until a key
