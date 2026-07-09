@@ -582,6 +582,14 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 		}
 	}
 
+	// Wrap last (outside retries) so retries are exhausted before the error
+	// is ignored and the build is allowed to continue.
+	if pb.ContinueOnError {
+		provisioner = &packer.ContinueOnErrorProvisioner{
+			Provisioner: provisioner,
+		}
+	}
+
 	return packer.CoreBuildProvisioner{
 		PType:       pb.PType,
 		PName:       pb.PName,

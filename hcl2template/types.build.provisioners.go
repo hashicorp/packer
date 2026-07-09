@@ -63,13 +63,14 @@ func (o *OnlyExcept) Validate() hcl.Diagnostics {
 
 // ProvisionerBlock references a detected but unparsed provisioner
 type ProvisionerBlock struct {
-	PType       string
-	PName       string
-	PauseBefore time.Duration
-	MaxRetries  int
-	Timeout     time.Duration
-	Override    map[string]interface{}
-	OnlyExcept  OnlyExcept
+	PType           string
+	PName           string
+	PauseBefore     time.Duration
+	MaxRetries      int
+	Timeout         time.Duration
+	ContinueOnError bool
+	Override        map[string]interface{}
+	OnlyExcept      OnlyExcept
 	HCL2Ref
 }
 
@@ -79,14 +80,15 @@ func (p *ProvisionerBlock) String() string {
 
 func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*ProvisionerBlock, hcl.Diagnostics) {
 	var b struct {
-		Name        string    `hcl:"name,optional"`
-		PauseBefore string    `hcl:"pause_before,optional"`
-		MaxRetries  int       `hcl:"max_retries,optional"`
-		Timeout     string    `hcl:"timeout,optional"`
-		Only        []string  `hcl:"only,optional"`
-		Except      []string  `hcl:"except,optional"`
-		Override    cty.Value `hcl:"override,optional"`
-		Rest        hcl.Body  `hcl:",remain"`
+		Name            string    `hcl:"name,optional"`
+		PauseBefore     string    `hcl:"pause_before,optional"`
+		MaxRetries      int       `hcl:"max_retries,optional"`
+		Timeout         string    `hcl:"timeout,optional"`
+		ContinueOnError bool      `hcl:"continue_on_error,optional"`
+		Only            []string  `hcl:"only,optional"`
+		Except          []string  `hcl:"except,optional"`
+		Override        cty.Value `hcl:"override,optional"`
+		Rest            hcl.Body  `hcl:",remain"`
 	}
 	diags := gohcl.DecodeBody(block.Body, ectx, &b)
 	if diags.HasErrors() {
@@ -94,11 +96,12 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*Pr
 	}
 
 	provisioner := &ProvisionerBlock{
-		PType:      block.Labels[0],
-		PName:      b.Name,
-		MaxRetries: b.MaxRetries,
-		OnlyExcept: OnlyExcept{Only: b.Only, Except: b.Except},
-		HCL2Ref:    newHCL2Ref(block, b.Rest),
+		PType:           block.Labels[0],
+		PName:           b.Name,
+		MaxRetries:      b.MaxRetries,
+		ContinueOnError: b.ContinueOnError,
+		OnlyExcept:      OnlyExcept{Only: b.Only, Except: b.Except},
+		HCL2Ref:         newHCL2Ref(block, b.Rest),
 	}
 
 	diags = diags.Extend(provisioner.OnlyExcept.Validate())
