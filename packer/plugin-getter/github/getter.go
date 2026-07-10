@@ -20,7 +20,7 @@ import (
 
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v75/github"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	"golang.org/x/oauth2"
 )
