@@ -20,6 +20,7 @@ binary {
 		suppress {
 			vulnerabilities = [
 				"GO-2022-0635", // github.com/aws/aws-sdk-go@v1.55.5 TODO(dduzgun-security): remove when deps is resolved
+				"GO-2026-5932", // golang.org/x/crypto - only affects the unmaintained openpgp subpackage (no fixed version); not imported by Packer, confirmed absent from the binary via govulncheck/symbol scan.
 			]
 		}
 	}
