@@ -12,7 +12,6 @@ require (
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v33 v33.0.1-0.20210113204525-9318e629ec69
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/go-checkpoint v0.5.1-0.20260522084958-784cec078f5b
@@ -43,15 +42,15 @@ require (
 	github.com/ulikunitz/xz v0.5.15
 	github.com/zclconf/go-cty v1.18.1
 	github.com/zclconf/go-cty-yaml v1.0.1
-	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/mod v0.36.0
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/mod v0.37.0
 	golang.org/x/net v0.56.0
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/sync v0.21.0
-	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/term v0.44.0 // indirect
-	golang.org/x/text v0.38.0
-	golang.org/x/tools v0.45.0
+	golang.org/x/sync v0.22.0
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/term v0.45.0 // indirect
+	golang.org/x/text v0.40.0
+	golang.org/x/tools v0.47.0
 )
 
 require (
@@ -59,6 +58,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/anchore/syft v1.42.3
 	github.com/go-openapi/strfmt v0.23.0
+	github.com/google/go-github/v75 v75.0.0
 	github.com/oklog/ulid v1.3.1
 	github.com/pierrec/lz4/v4 v4.1.22
 	github.com/shirou/gopsutil/v3 v3.23.4
