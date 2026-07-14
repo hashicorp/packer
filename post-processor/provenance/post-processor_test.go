@@ -14,6 +14,7 @@ import (
 	"encoding/pem"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -78,6 +79,76 @@ func TestPostProcessorWritesUnsignedStatementAndPreservesArtifact(t *testing.T) 
 	}
 	if got, want := len(statement.Subject), 1; got != want {
 		t.Fatalf("unexpected subject count %d, want %d", got, want)
+	}
+}
+
+// TestPostProcessorChainsWithoutModifyingArtifact verifies that the provenance
+// post-processor is a transparent pass-through: it returns the same artifact it
+// received, unmodified, so a downstream post-processor in the chain observes the
+// identical input it would have without provenance in the chain.
+func TestPostProcessorChainsWithoutModifyingArtifact(t *testing.T) {
+	artifact := buildFileArtifact(t)
+	defer func() { _ = artifact.Destroy() }()
+
+	// Record the artifact's observable state and file contents before running.
+	builderIDBefore := artifact.BuilderId()
+	idBefore := artifact.Id()
+	stringBefore := artifact.String()
+	filesBefore := append([]string(nil), artifact.Files()...)
+	contentsBefore := make(map[string]string, len(filesBefore))
+	for _, file := range filesBefore {
+		contentsBefore[file] = readFileString(t, file)
+	}
+
+	outputDir := t.TempDir()
+	config := mustTemplateJSON(t, map[string]interface{}{
+		"post-processors": []map[string]string{{
+			"type":       "provenance",
+			"output_dir": outputDir,
+		}},
+	})
+	tpl, err := template.Parse(strings.NewReader(config))
+	if err != nil {
+		t.Fatalf("parse template: %v", err)
+	}
+
+	var postProcessor PostProcessor
+	if err := postProcessor.Configure(tpl.PostProcessors[0][0].Config); err != nil {
+		t.Fatalf("configure post-processor: %v", err)
+	}
+
+	returnedArtifact, keep, mustKeep, err := postProcessor.PostProcess(context.Background(), packersdk.TestUi(t), artifact)
+	if err != nil {
+		t.Fatalf("post-process artifact: %v", err)
+	}
+
+	// The next post-processor in the chain must receive the same artifact.
+	if returnedArtifact != artifact {
+		t.Fatalf("expected the same artifact instance to be returned for chaining")
+	}
+	if !keep || !mustKeep {
+		t.Fatalf("expected keep and mustKeep to be true so the artifact survives the chain")
+	}
+
+	// The returned artifact's observable state must be unchanged.
+	if got := returnedArtifact.BuilderId(); got != builderIDBefore {
+		t.Fatalf("builder id changed: got %q, want %q", got, builderIDBefore)
+	}
+	if got := returnedArtifact.Id(); got != idBefore {
+		t.Fatalf("artifact id changed: got %q, want %q", got, idBefore)
+	}
+	if got := returnedArtifact.String(); got != stringBefore {
+		t.Fatalf("artifact string changed: got %q, want %q", got, stringBefore)
+	}
+	if got := returnedArtifact.Files(); !slices.Equal(got, filesBefore) {
+		t.Fatalf("artifact files changed: got %v, want %v", got, filesBefore)
+	}
+
+	// A downstream consumer must still see the original, unmodified files.
+	for _, file := range returnedArtifact.Files() {
+		if got := readFileString(t, file); got != contentsBefore[file] {
+			t.Fatalf("artifact file %q contents changed: got %q, want %q", file, got, contentsBefore[file])
+		}
 	}
 }
 
@@ -186,6 +257,30 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 	onlyBuilds, ok := externalParameters["onlyBuilds"].([]interface{})
 	if !ok || len(onlyBuilds) != 1 || onlyBuilds[0] != "qemu.ubuntu" {
 		t.Fatalf("unexpected onlyBuilds value %#v", externalParameters["onlyBuilds"])
+	}
+}
+
+func TestExternalParametersRedactsSensitiveVariables(t *testing.T) {
+	var pp PostProcessor
+	pp.config.UserVariables = map[string]string{"password": "s3cr3t", "region": "us-east-1"}
+	pp.config.PackerSensitiveVars = []string{"password", "api_token"}
+
+	env := map[string]string{"PKR_VAR_api_token": "tok-value"}
+
+	external := pp.externalParameters(env)
+	userVariables, ok := external["userVariables"].(map[string]string)
+	if !ok {
+		t.Fatalf("expected userVariables map, got %T", external["userVariables"])
+	}
+
+	if got := userVariables["password"]; got != redactedSensitiveValue {
+		t.Fatalf("expected sensitive config variable to be redacted, got %q", got)
+	}
+	if got := userVariables["api_token"]; got != redactedSensitiveValue {
+		t.Fatalf("expected sensitive PKR_VAR variable to be redacted, got %q", got)
+	}
+	if got, want := userVariables["region"], "us-east-1"; got != want {
+		t.Fatalf("expected non-sensitive variable to be preserved, got %q want %q", got, want)
 	}
 }
 

@@ -88,7 +88,7 @@ func newKeylessSigner(ctx context.Context, cfg BackendConfig) (Signer, error) {
 		fulcioURL = defaultFulcioURL
 	}
 
-	idToken, err := resolveAmbientIDToken(cfg.Env)
+	idToken, err := resolveAmbientIDToken(ctx, cfg.Env)
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +288,7 @@ func (p staticCertificateProvider) GetCertificate(context.Context, sigstoregosig
 	return append([]byte(nil), p.certDER...), nil
 }
 
-func resolveAmbientIDToken(env map[string]string) (string, error) {
+func resolveAmbientIDToken(ctx context.Context, env map[string]string) (string, error) {
 	if token := strings.TrimSpace(env["SIGSTORE_ID_TOKEN"]); token != "" {
 		return token, nil
 	}
@@ -298,14 +298,14 @@ func resolveAmbientIDToken(env map[string]string) (string, error) {
 	if token := strings.TrimSpace(env["CI_JOB_JWT"]); token != "" {
 		return token, nil
 	}
-	if token, err := resolveGitHubActionsIDToken(env); err == nil && token != "" {
+	if token, err := resolveGitHubActionsIDToken(ctx, env); err == nil && token != "" {
 		return token, nil
 	}
 
 	return "", fmt.Errorf("signing_mode %q requires an ambient OIDC token; set SIGSTORE_ID_TOKEN, use a CI-provided OIDC token, or switch to signing_mode=\"none\" or a key-backed mode", SigningModeKeyless)
 }
 
-func resolveGitHubActionsIDToken(env map[string]string) (string, error) {
+func resolveGitHubActionsIDToken(ctx context.Context, env map[string]string) (string, error) {
 	requestURL := strings.TrimSpace(env["ACTIONS_ID_TOKEN_REQUEST_URL"])
 	requestToken := strings.TrimSpace(env["ACTIONS_ID_TOKEN_REQUEST_TOKEN"])
 	if requestURL == "" || requestToken == "" {
@@ -322,7 +322,7 @@ func resolveGitHubActionsIDToken(env map[string]string) (string, error) {
 		parsedURL.RawQuery = query.Encode()
 	}
 
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, parsedURL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
 	if err != nil {
 		return "", fmt.Errorf("create GitHub OIDC request: %w", err)
 	}

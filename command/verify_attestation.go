@@ -120,9 +120,9 @@ Options:
   -trusted-root-path=PATH       Optional Sigstore trusted-root JSON for keyless verification.
   -keyless-identity=IDENTITY    Expected keyless signing identity.
   -keyless-oidc-issuer=ISSUER   Expected keyless OIDC issuer.
-	-bundle=PATH                  Optional Sigstore bundle JSON for Rekor or timestamp verification.
-	-require-rekor                Require Rekor transparency log verification from the bundle.
-	-require-timestamp            Require a trusted observer timestamp from Rekor integrated time or RFC3161 evidence.
+  -bundle=PATH                  Optional Sigstore bundle JSON for Rekor or timestamp verification.
+  -require-rekor                Require Rekor transparency log verification from the bundle.
+  -require-timestamp            Require a trusted observer timestamp from Rekor integrated time or RFC3161 evidence.
 `
 
 	return strings.TrimSpace(helpText)

@@ -11,6 +11,14 @@ It supports:
 
 Signing defaults to `none`, which writes the unsigned JSON statement.
 
+## Source detection
+
+The provenance statement records the build's source repository as a resolved
+dependency. Packer detects this from the Git repository containing the current
+working directory (the directory Packer runs in). Set `source_uri` to override
+the detected value, for example when the build runs outside the source checkout
+or the remote URL should be normalized.
+
 Signing modes:
 
 - `key` signs with a PEM private key and verifies with either the signer's
@@ -87,20 +95,20 @@ the configured identity policy. For Rekor-backed verification, run
 ## SLSA levels and CI
 
 SLSA Build levels are mostly properties of the build platform, not the build
-tool. Packer is a tool, so its honest reach is:
+tool. Packer is a tool, so its reach is:
 
-| SLSA Build level | Requirement | Packer's role | Honest target |
+| SLSA Build level | Requirement | Packer's role | What Packer provides |
 |---|---|---|---|
-| **L1** | Provenance exists and is distributed | Fully in Packer | Ship it |
-| **L2** | Provenance signed by a hosted platform | Packer signs via CI OIDC identity | Default in CI |
-| **L3** | Hardened platform; build steps cannot reach the signing key | Packer is *compatible*, cannot confer alone | "L3-compatible" via an isolated signer |
-| **L4** | — | Does not exist in SLSA v1.0 | Do not claim |
+| **L1** | Provenance exists and is distributed | Fully in Packer | Provenance generation |
+| **L2** | Provenance signed by a hosted platform | Packer signs via CI OIDC identity | Keyless signing in CI |
+| **L3** | Hardened platform; build steps cannot reach the signing key | Platform property; Packer is compatible | Delegated-signing pattern |
+| **L4** | — | Not defined in SLSA v1.0 | — |
 
-Packer may be described as generating SLSA Provenance v1 and reaching Build L1,
-and L2 when run on a hosted CI with keyless signing. Do not claim Packer is SLSA
-L3 on its own: L3 requires the signing key to be unreachable by the build steps,
-which is a platform property. Reach L3 by delegating signing to an isolated
-workflow.
+Packer generates SLSA Provenance v1 and reaches Build L1, and L2 when run on a
+hosted CI with keyless signing. L3 is a property of the build platform: it
+requires the signing key to be unreachable by the build steps. Packer does not
+confer L3 on its own, but the delegated-signing pattern is compatible with an L3
+platform.
 
 Reference GitHub Actions workflows for both the L2 keyless pattern and the
 L3-compatible delegated-signing pattern live under

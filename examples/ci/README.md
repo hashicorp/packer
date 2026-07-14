@@ -5,25 +5,23 @@ Packer `provenance` post-processor. They are **not** wired into this
 repository's own CI — copy them into your project's `.github/workflows/`
 directory and adapt the template and artifact paths.
 
-## SLSA levels: what Packer can honestly provide
+## SLSA levels and Packer
 
 SLSA Build levels are mostly properties of the build **platform**, not the
-build **tool**. Packer is a tool, so its honest reach is:
+build **tool**. Packer is a tool, so its reach is:
 
-| SLSA Build level | Requirement | Packer's role | Honest target |
+| SLSA Build level | Requirement | Packer's role | What Packer provides |
 |---|---|---|---|
-| **L1** | Provenance exists and is distributed | Fully in Packer | Ship it |
-| **L2** | Provenance signed by a hosted platform | Packer signs via CI OIDC identity | Default in CI |
-| **L3** | Hardened platform; build steps cannot reach the signing key | Packer is *compatible*, cannot confer alone | "L3-compatible" via an isolated signer |
-| **L4** | — | Does not exist in SLSA v1.0 | Do not claim |
+| **L1** | Provenance exists and is distributed | Fully in Packer | Provenance generation |
+| **L2** | Provenance signed by a hosted platform | Packer signs via CI OIDC identity | Keyless signing in CI |
+| **L3** | Hardened platform; build steps cannot reach the signing key | Platform property; Packer is compatible | Delegated-signing pattern |
+| **L4** | — | Not defined in SLSA v1.0 | — |
 
-Rules for claims:
-
-- You MAY say Packer "generates SLSA Provenance v1" and "achieves Build L1, and
-  L2 when run on a hosted CI with keyless signing."
-- You MUST NOT say "Packer is SLSA L3." L3 requires the signing key to be
-  unreachable by the build steps, which is a platform property. Reach L3 by
-  delegating signing to an isolated workflow.
+Packer generates SLSA Provenance v1 and reaches Build L1, and L2 when run on a
+hosted CI with keyless signing. L3 is a property of the build platform: it
+requires the signing key to be unreachable by the build steps. Packer does not
+confer L3 on its own, but the delegated-signing pattern below is compatible with
+an L3 platform.
 
 ## Workflows
 

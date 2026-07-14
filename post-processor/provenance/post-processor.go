@@ -197,6 +197,10 @@ const (
 	predicateTypeSPDX      = "https://spdx.dev/Document"
 )
 
+// redactedSensitiveValue replaces sensitive user-variable values in the
+// provenance predicate so secrets are never written to the attestation.
+const redactedSensitiveValue = "[sensitive value redacted]"
+
 type outputPaths struct {
 	BaseDir             string
 	Stem                string
@@ -439,7 +443,7 @@ func (p *PostProcessor) resolveSBOMScanPath(source packersdk.Artifact) (string, 
 		return parent, nil
 	}
 
-	return "", fmt.Errorf("sbom=true requires local artifact files, sbom_scan_path, or an existing SBOM output")
+	return "", fmt.Errorf("sbom=true requires local artifact files or sbom_scan_path")
 }
 
 func buildSBOMPredicate(rawSBOM []byte, format internalsbom.Format) (interface{}, string, error) {
@@ -475,6 +479,7 @@ func (p *PostProcessor) externalParameters(env map[string]string) map[string]int
 	for key, value := range p.config.UserVariables {
 		userVariables[key] = value
 	}
+	redactSensitiveVariables(userVariables, p.config.PackerSensitiveVars)
 	if len(userVariables) > 0 {
 		externalParameters["userVariables"] = userVariables
 	}
@@ -568,6 +573,17 @@ func collectUserVariables(env map[string]string) map[string]string {
 	}
 
 	return userVariables
+}
+
+// redactSensitiveVariables replaces the values of any user variables whose names
+// were marked sensitive (packer_sensitive_variables) so that secrets are not
+// embedded in the provenance predicate, per SLSA guidance.
+func redactSensitiveVariables(userVariables map[string]string, sensitiveKeys []string) {
+	for _, key := range sensitiveKeys {
+		if _, ok := userVariables[key]; ok {
+			userVariables[key] = redactedSensitiveValue
+		}
+	}
 }
 
 func (p *PostProcessor) outputPaths(source packersdk.Artifact) (outputPaths, error) {

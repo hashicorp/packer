@@ -251,7 +251,7 @@ func TestKeylessBundleAndRekorIntegration(t *testing.T) {
 	}
 
 	env := currentProcessEnv()
-	if _, err := resolveAmbientIDToken(env); err != nil {
+	if _, err := resolveAmbientIDToken(context.Background(), env); err != nil {
 		t.Skipf("keyless integration test skipped without an ambient OIDC token: %v", err)
 	}
 

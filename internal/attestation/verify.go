@@ -360,16 +360,19 @@ func ensureBundleMatchesEnvelope(bundle *sigstorebundle.Bundle, envelope Envelop
 		return fmt.Errorf("attestation envelope has no signatures")
 	}
 
-	signature, err := DecodeEnvelopeSignature(envelope.Signatures[0])
-	if err != nil {
-		return err
+	bundleSignature := bundleEnvelope.Signature()
+	for i, envelopeSignature := range envelope.Signatures {
+		signature, err := DecodeEnvelopeSignature(envelopeSignature)
+		if err != nil {
+			return fmt.Errorf("decode attestation envelope signature %d: %w", i, err)
+		}
+
+		if bytes.Equal(bundleSignature, signature) {
+			return nil
+		}
 	}
 
-	if !bytes.Equal(bundleEnvelope.Signature(), signature) {
-		return fmt.Errorf("sigstore bundle signature does not match attestation")
-	}
-
-	return nil
+	return fmt.Errorf("sigstore bundle signature does not match any attestation signature")
 }
 
 func verifyArtifactSubject(subjects []internalprovenance.Subject, artifactPath string) error {
