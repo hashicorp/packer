@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 
 //go:generate packer-sdc mapstructure-to-hcl2 -type Config
+//go:generate packer-sdc struct-markdown
 
 package provenance
 
@@ -32,28 +33,75 @@ var buildSigstoreBundleForSigner = internalattestation.BuildBundleForSigner
 type Config struct {
 	common.PackerConfig `mapstructure:",squash"`
 
-	Provenance        config.Trilean    `mapstructure:"provenance"`
-	BuildType         string            `mapstructure:"build_type"`
-	OutputDir         string            `mapstructure:"output_dir"`
-	TemplatePath      string            `mapstructure:"template"`
-	OnlyBuilds        []string          `mapstructure:"only_builds"`
-	UserVariables     map[string]string `mapstructure:"user_variables"`
-	SourceURI         string            `mapstructure:"source_uri"`
-	SBOM              bool              `mapstructure:"sbom"`
-	SBOMFormat        string            `mapstructure:"sbom_format"`
-	SBOMScanPath      string            `mapstructure:"sbom_scan_path"`
-	SBOMScope         string            `mapstructure:"sbom_scope"`
-	SBOMExclude       []string          `mapstructure:"sbom_exclude"`
-	SigningMode       string            `mapstructure:"signing_mode"`
-	Signer            string            `mapstructure:"signer"`
-	Key               string            `mapstructure:"key"`
-	Verifier          string            `mapstructure:"verifier"`
-	FulcioURL         string            `mapstructure:"fulcio_url"`
-	RekorURL          string            `mapstructure:"rekor_url"`
-	UploadTlog        bool              `mapstructure:"upload_tlog"`
-	TrustedRootPath   string            `mapstructure:"trusted_root_path"`
-	KeylessIdentity   string            `mapstructure:"keyless_identity"`
-	KeylessOIDCIssuer string            `mapstructure:"keyless_oidc_issuer"`
+	// Whether to emit provenance attestations. Enabled by default; set to
+	// `false` to skip the post-processor and pass the artifact through unchanged.
+	Provenance config.Trilean `mapstructure:"provenance"`
+	// The SLSA `buildType` URI recorded in the provenance predicate. Defaults to
+	// `https://packer.io/buildtypes/hcl2/v1`.
+	BuildType string `mapstructure:"build_type"`
+	// Directory where attestation sidecar files are written. Defaults to the
+	// directory containing the artifact's first file, or the current directory
+	// for artifacts without local files.
+	OutputDir string `mapstructure:"output_dir"`
+	// Path to the Packer template that produced the artifact. Recorded as an
+	// external parameter in the provenance predicate.
+	TemplatePath string `mapstructure:"template"`
+	// The list of builds this artifact came from. Recorded as an external
+	// parameter in the provenance predicate.
+	OnlyBuilds []string `mapstructure:"only_builds"`
+	// Additional user variables to record as external parameters in the
+	// provenance predicate. Values for variables named in
+	// `packer_sensitive_variables` are redacted.
+	UserVariables map[string]string `mapstructure:"user_variables"`
+	// Overrides the auto-detected source repository URI recorded as a resolved
+	// dependency. By default the source is detected from the Git repository
+	// containing the current working directory or from CI environment variables.
+	SourceURI string `mapstructure:"source_uri"`
+	// Whether to also generate a software bill of materials (SBOM) and a
+	// corresponding SBOM attestation alongside the provenance statement.
+	SBOM bool `mapstructure:"sbom"`
+	// The SBOM output format, either `cyclonedx` (default) or `spdx`.
+	SBOMFormat string `mapstructure:"sbom_format"`
+	// The path to scan when generating the SBOM. Defaults to the artifact's
+	// files or their common parent directory. Required when the artifact files
+	// span multiple directories.
+	SBOMScanPath string `mapstructure:"sbom_scan_path"`
+	// The SBOM scan scope, either `squashed` (default) or `all-layers`.
+	SBOMScope string `mapstructure:"sbom_scope"`
+	// Glob patterns of paths to exclude from the SBOM scan.
+	SBOMExclude []string `mapstructure:"sbom_exclude"`
+	// The signing mode for attestations: `none` (default, unsigned JSON),
+	// `key` (local PEM key), `kms` (KMS or Vault URI), or `keyless` (Sigstore
+	// Fulcio).
+	SigningMode string `mapstructure:"signing_mode"`
+	// The signer reference. A PEM private key path for `key` mode, or a KMS or
+	// Vault URI such as `awskms://...`, `gcpkms://...`, `azurekms://...`, or
+	// `hashivault://...` for `kms` mode.
+	Signer string `mapstructure:"signer"`
+	// An alias for `signer`. When both are set they must be equal.
+	Key string `mapstructure:"key"`
+	// The PEM verifier path used to verify the signature in `key` and `kms`
+	// modes. Defaults to the signer's derived public key.
+	Verifier string `mapstructure:"verifier"`
+	// The Fulcio certificate authority URL used for `keyless` signing. Defaults
+	// to `https://fulcio.sigstore.dev`.
+	FulcioURL string `mapstructure:"fulcio_url"`
+	// The Rekor transparency log URL used when `upload_tlog` is enabled.
+	// Defaults to `https://rekor.sigstore.dev`.
+	RekorURL string `mapstructure:"rekor_url"`
+	// Whether to upload the `keyless` signature to the Rekor transparency log
+	// and emit a Sigstore bundle carrying the transparency evidence.
+	UploadTlog bool `mapstructure:"upload_tlog"`
+	// An optional path to a Sigstore trusted-root JSON file used to pin keyless
+	// verification. When unset, the public Sigstore trusted root is fetched.
+	TrustedRootPath string `mapstructure:"trusted_root_path"`
+	// The expected signing identity for `keyless` mode, such as the workflow
+	// ref `https://github.com/OWNER/REPO/.github/workflows/build.yml@refs/heads/main`.
+	// Required for keyless signing.
+	KeylessIdentity string `mapstructure:"keyless_identity"`
+	// The expected OIDC issuer for `keyless` mode, such as
+	// `https://token.actions.githubusercontent.com`. Required for keyless signing.
+	KeylessOIDCIssuer string `mapstructure:"keyless_oidc_issuer"`
 
 	ctx interpolate.Context
 }
