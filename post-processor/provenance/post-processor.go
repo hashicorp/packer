@@ -7,6 +7,7 @@
 package provenance
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -495,7 +496,7 @@ func (p *PostProcessor) resolveSBOMScanPath(source packersdk.Artifact) (string, 
 }
 
 func buildSBOMPredicate(rawSBOM []byte, format internalsbom.Format) (interface{}, string, error) {
-	decoder := json.NewDecoder(strings.NewReader(string(rawSBOM)))
+	decoder := json.NewDecoder(bytes.NewReader(rawSBOM))
 	decoder.UseNumber()
 
 	var predicate interface{}

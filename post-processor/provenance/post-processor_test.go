@@ -4,7 +4,6 @@
 package provenance
 
 import (
-	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -517,7 +516,6 @@ func TestPostProcessorWritesSigstoreBundleForKeylessAttestations(t *testing.T) {
 	if got, want := strings.TrimSpace(readFileString(t, filepath.Join(outputDir, "package.txt.provenance.sigstore.json"))), `{"mediaType":"application/vnd.dev.sigstore.bundle+json;version=0.3"}`; got != want {
 		t.Fatalf("unexpected bundle contents %q, want %q", got, want)
 	}
-	_ = bytes.Buffer{}
 }
 
 func TestSigningBackendConfigAcceptsKMSReferences(t *testing.T) {
