@@ -18,7 +18,7 @@ performant, creating machine images for multiple platforms in parallel. Packer
 supports various platforms through external plugin integrations, the full list of which can
 be found at https://developer.hashicorp.com/packer/integrations.
 
-The images that Packer creates can easily be turned into [Vagrant](http://www.vagrantup.com) boxes.
+The images that Packer creates can easily be turned into [Vagrant](https://www.vagrantup.com) boxes.
 
 ## Quick Start
 
