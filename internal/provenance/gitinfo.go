@@ -118,6 +118,8 @@ func detectLocalGitDependency(workingDir string, runner gitRunner) (ResolvedDepe
 		return ResolvedDependency{}, false
 	}
 
+	repositoryURL = sanitizeGitRemoteURL(repositoryURL)
+
 	uri := "git+" + repositoryURL
 	if branch, branchErr := runner(workingDir, "rev-parse", "--abbrev-ref", "HEAD"); branchErr == nil && branch != "" && branch != "HEAD" {
 		uri += "@refs/heads/" + branch
@@ -129,6 +131,19 @@ func detectLocalGitDependency(workingDir string, runner gitRunner) (ResolvedDepe
 			"gitCommit": commit,
 		},
 	}, true
+}
+
+func sanitizeGitRemoteURL(raw string) string {
+	// SCP-style remotes (git@host:repo) carry no userinfo — leave them unchanged
+	if !strings.Contains(raw, "://") {
+		return raw
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+	u.User = nil // strips embedded username and password/token
+	return u.String()
 }
 
 func localGitFileURI(path string) string {

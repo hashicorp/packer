@@ -9,6 +9,7 @@ package provenance
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -176,7 +177,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 		return source, true, true, nil
 	}
 
-	startedAt := p.currentTime().UTC()
 	env := p.currentEnv()
 
 	select {
@@ -197,9 +197,13 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 			return source, true, true, err
 		}
 
+		identityBytes, err := json.Marshal(identityRecord)
+		if err != nil {
+			return source, true, true, err
+		}
 		byproducts = append(byproducts, internalprovenance.Byproduct{
 			Name:    "cloud-artifact-identity",
-			Content: identityRecord,
+			Content: base64.StdEncoding.EncodeToString(identityBytes),
 		})
 	}
 
@@ -207,8 +211,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 	if invocationID == "" {
 		invocationID, _ = uuid.GenerateUUID()
 	}
-
-	finishedAt := p.currentTime().UTC()
 
 	predicate := internalprovenance.BuildSLSAPredicate(internalprovenance.PredicateInput{
 		BuildType:            p.config.BuildType,
@@ -218,8 +220,6 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 		BuilderID:            internalprovenance.DetectBuilderID(env),
 		Byproducts:           byproducts,
 		InvocationID:         invocationID,
-		StartedOn:            startedAt.Format(time.RFC3339),
-		FinishedOn:           finishedAt.Format(time.RFC3339),
 	})
 	statement := internalprovenance.WrapInToto(subjects, internalprovenance.SLSAProvenanceV1PredicateType, predicate)
 
@@ -584,14 +584,6 @@ func (p *PostProcessor) currentEnv() map[string]string {
 	}
 
 	return env
-}
-
-func (p *PostProcessor) currentTime() time.Time {
-	if p.now != nil {
-		return p.now()
-	}
-
-	return time.Now()
 }
 
 func (p *PostProcessor) currentWorkingDir() string {

@@ -103,7 +103,7 @@ func TestKeylessSignerAndVerifier(t *testing.T) {
 		}
 		return nil, nil
 	}
-	verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer string) error {
+	verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer, trustedRootPath string) error {
 		summary, err := fulciocertificate.SummarizeCertificate(certificate)
 		if err != nil {
 			t.Fatalf("summarize certificate: %v", err)
@@ -399,7 +399,7 @@ func TestVerifyAttestationFileWithKeylessEnvelope(t *testing.T) {
 		}
 		return nil, nil
 	}
-	verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer string) error {
+	verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer, trustedRootPath string) error {
 		summary, err := fulciocertificate.SummarizeCertificate(certificate)
 		if err != nil {
 			t.Fatalf("summarize certificate: %v", err)
@@ -555,7 +555,7 @@ func TestVerifyAttestationFileWithBundleRequirements(t *testing.T) {
 	loadKeylessTrustedMaterial = func(cfg BackendConfig) (sigstoreroot.TrustedMaterial, error) {
 		return nil, nil
 	}
-	verifyKeylessCertificate = func(*x509.Certificate, sigstoreroot.TrustedMaterial, string, string) error {
+	verifyKeylessCertificate = func(*x509.Certificate, sigstoreroot.TrustedMaterial, string, string, string) error {
 		return nil
 	}
 	called := false

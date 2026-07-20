@@ -49,9 +49,18 @@ var loadKeylessTrustedMaterial = func(cfg BackendConfig) (sigstoreroot.TrustedMa
 	return sigstoreroot.NewTrustedRootFromPath(trustedRootPath)
 }
 
-var verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer string) error {
-	if _, err := sigstoreverify.VerifyLeafCertificate(time.Now().UTC(), certificate, trustedMaterial); err != nil {
+var verifyKeylessCertificate = func(certificate *x509.Certificate, trustedMaterial sigstoreroot.TrustedMaterial, expectedIdentity, expectedOIDCIssuer, trustedRootPath string) error {
+	chains, err := sigstoreverify.VerifyLeafCertificate(time.Now().UTC(), certificate, trustedMaterial)
+	if err != nil {
 		return fmt.Errorf("verify Fulcio certificate chain: %w", err)
+	}
+
+	// When using the public Sigstore root (no custom trusted root configured),
+	// require a valid SCT so certificates issued outside a public CT log are rejected.
+	if strings.TrimSpace(trustedRootPath) == "" {
+		if err := sigstoreverify.VerifySignedCertificateTimestamp(chains, 1, trustedMaterial); err != nil {
+			return fmt.Errorf("verify Fulcio certificate SCT: %w", err)
+		}
 	}
 
 	summary, err := fulciocertificate.SummarizeCertificate(certificate)
@@ -231,6 +240,7 @@ func newKeylessVerifier(cfg BackendConfig, certificate *x509.Certificate) (Verif
 		trustedMaterial:   trustedMaterial,
 		identity:          cfg.KeylessIdentity,
 		oidcIssuer:        cfg.KeylessOIDCIssuer,
+		trustedRootPath:   cfg.TrustedRootPath,
 	}, nil
 }
 
@@ -240,10 +250,11 @@ type keylessVerifier struct {
 	trustedMaterial   sigstoreroot.TrustedMaterial
 	identity          string
 	oidcIssuer        string
+	trustedRootPath   string
 }
 
 func (v *keylessVerifier) Verify(ctx context.Context, payloadType string, payload, signature []byte) error {
-	if err := verifyKeylessCertificate(v.certificate, v.trustedMaterial, v.identity, v.oidcIssuer); err != nil {
+	if err := verifyKeylessCertificate(v.certificate, v.trustedMaterial, v.identity, v.oidcIssuer, v.trustedRootPath); err != nil {
 		return err
 	}
 

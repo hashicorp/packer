@@ -30,7 +30,7 @@ type SLSAProvenancePredicate struct {
 
 type BuildDefinition struct {
 	BuildType            string                 `json:"buildType"`
-	ExternalParameters   map[string]interface{} `json:"externalParameters,omitempty"`
+	ExternalParameters   map[string]interface{} `json:"externalParameters"`
 	InternalParameters   map[string]interface{} `json:"internalParameters,omitempty"`
 	ResolvedDependencies []ResolvedDependency   `json:"resolvedDependencies,omitempty"`
 }
@@ -73,6 +73,11 @@ func BuildSLSAPredicate(input PredicateInput) SLSAProvenancePredicate {
 		builderID = DefaultLocalBuilderID
 	}
 
+	externalParameters := map[string]interface{}{}
+	for key, value := range input.ExternalParameters {
+		externalParameters[key] = value
+	}
+
 	internalParameters := map[string]interface{}{
 		"packerVersion": packerversion.String(),
 	}
@@ -83,7 +88,7 @@ func BuildSLSAPredicate(input PredicateInput) SLSAProvenancePredicate {
 	predicate := SLSAProvenancePredicate{
 		BuildDefinition: BuildDefinition{
 			BuildType:            buildType,
-			ExternalParameters:   input.ExternalParameters,
+			ExternalParameters:   externalParameters,
 			InternalParameters:   internalParameters,
 			ResolvedDependencies: input.ResolvedDependencies,
 		},

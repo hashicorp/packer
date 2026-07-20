@@ -224,12 +224,6 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 	if got, want := statement.Predicate.RunDetails.Metadata.InvocationID, "run-42"; got != want {
 		t.Fatalf("unexpected invocation id %q, want %q", got, want)
 	}
-	if got, want := statement.Predicate.RunDetails.Metadata.StartedOn, "2026-07-04T10:00:00Z"; got != want {
-		t.Fatalf("unexpected startedOn %q, want %q", got, want)
-	}
-	if got, want := statement.Predicate.RunDetails.Metadata.FinishedOn, "2026-07-04T10:12:00Z"; got != want {
-		t.Fatalf("unexpected finishedOn %q, want %q", got, want)
-	}
 
 	externalParameters := statement.Predicate.BuildDefinition.ExternalParameters
 	if got, want := externalParameters["template"], "ubuntu.pkr.hcl"; got != want {

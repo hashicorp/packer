@@ -49,6 +49,11 @@ func VerifyAttestationFile(ctx context.Context, path string, cfg BackendConfig, 
 		return nil, fmt.Errorf("decode attestation envelope %q: %w", path, err)
 	}
 
+	if envelope.PayloadType != InTotoPayloadType {
+		return nil, fmt.Errorf("attestation %q has unexpected payloadType %q (want %q)",
+			path, envelope.PayloadType, InTotoPayloadType)
+	}
+
 	if err := verifyEnvelopeSignature(ctx, path, cfg, policy, envelope); err != nil {
 		return nil, err
 	}
