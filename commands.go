@@ -112,6 +112,10 @@ func init() {
 			return &command.SBOMGenerateCommand{Meta: *CommandMeta}, nil
 		},
 
+		"verify-attestation": func() (cli.Command, error) {
+			return &command.VerifyAttestationCommand{Meta: *CommandMeta}, nil
+		},
+
 		// plugin is essentially an alias to the plugins command
 		//
 		// It is not meant to be documented or used outside of simple

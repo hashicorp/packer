@@ -1,0 +1,64 @@
+# Reference workflow — NOT wired into this repository's CI.
+#
+# Copy this into your own project's .github/workflows/ directory.
+#
+# SLSA Build L3-compatible pattern: the build job ONLY builds the artifact and
+# publishes its digest. Provenance generation and signing are delegated to an
+# isolated, reusable workflow (the SLSA GitHub generator) that runs in a
+# separate job the build steps cannot influence or reach. This keeps the
+# signing material unreachable from the build, which is what L3 requires.
+#
+# Packer itself does not confer L3. It participates by producing the artifact;
+# the platform (isolated signer) provides the L3 property.
+
+name: build-and-delegate-provenance
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.hash.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+
+      - name: Initialize plugins
+        run: packer init .
+
+      # Build only. Do NOT sign here: signing in the build job would defeat the
+      # isolation that the delegated signer provides.
+      - name: Build artifact
+        run: packer build .
+
+      # Emit a base64-encoded subject digest for the delegated generator.
+      - name: Compute artifact digest
+        id: hash
+        run: |
+          # Adjust the artifact path to match your build output.
+          echo "digest=$(sha256sum output/image.qcow2 | base64 -w0)" >> "${GITHUB_OUTPUT}"
+
+  # Isolated, reusable workflow that generates and signs SLSA provenance in a
+  # job the build cannot reach. This is the component that provides the L3
+  # property; pin it to a released tag in real usage.
+  provenance:
+    needs: [build]
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: ${{ needs.build.outputs.digest }}
