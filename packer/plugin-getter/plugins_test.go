@@ -875,20 +875,27 @@ func (g *mockPluginGetter) Validate(opt GetOptions, expectedVersion string, inst
 	}
 }
 
-func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, zipFileName string) string {
-	if g.Name == "github.com" {
-		return zipFileName
-	} else {
-		pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
+func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, entry *ChecksumFileEntry, _ string) string {
+	pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
 
-		// We need to verify that the plugin source is in the expected format
-		return strings.Join([]string{fmt.Sprintf("packer-plugin-%s", pluginSourceParts[2]),
-			"v" + version,
-			"x" + g.APIMajor + "." + g.APIMinor,
+	if g.Name == "github.com" {
+		// Mirror the real github getter: reconstruct from validated entry fields,
+		// never return the raw remote filename.
+		return strings.Join([]string{
+			"packer-plugin-" + pluginSourceParts[2],
+			entry.BinVersion,
+			entry.ProtVersion,
 			entry.Os,
-			entry.Arch + ".zip",
+			entry.Arch + entry.Ext,
 		}, "_")
 	}
+
+	return strings.Join([]string{fmt.Sprintf("packer-plugin-%s", pluginSourceParts[2]),
+		"v" + version,
+		"x" + g.APIMajor + "." + g.APIMinor,
+		entry.Os,
+		entry.Arch + ".zip",
+	}, "_")
 }
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
