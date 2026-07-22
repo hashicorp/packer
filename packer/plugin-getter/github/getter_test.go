@@ -6,6 +6,7 @@ package github
 import (
 	"testing"
 
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/stretchr/testify/assert"
 )
@@ -189,7 +190,25 @@ func TestValidate(t *testing.T) {
 
 func TestExpectedFileName(t *testing.T) {
 	getter := &Getter{}
-	pr := plugingetter.Requirement{}
-	fileName := getter.ExpectedFileName(&pr, "1.2.3", &plugingetter.ChecksumFileEntry{}, "packer-plugin-docker_v1.2.3_x5.0_linux_amd64.zip")
+	pr := plugingetter.Requirement{
+		Identifier: &addrs.Plugin{
+			Source: "github.com/hashicorp/docker",
+		},
+	}
+	entry := &plugingetter.ChecksumFileEntry{
+		BinVersion:  "v1.2.3",
+		ProtVersion: "x5.0",
+		Os:          "linux",
+		Arch:        "amd64",
+		Ext:         ".zip",
+	}
+	// The raw zipFileName argument must be ignored; the result is built from
+	// the validated entry fields, preventing path traversal via a crafted filename.
+	fileName := getter.ExpectedFileName(&pr, "1.2.3", entry, "packer-plugin-docker_v1.2.3_x5.0_linux_amd64.zip")
 	assert.Equal(t, "packer-plugin-docker_v1.2.3_x5.0_linux_amd64.zip", fileName)
+
+	// A malicious zipFileName with path traversal must not affect the output.
+	maliciousFileName := getter.ExpectedFileName(&pr, "1.2.3", entry,
+		`packer-plugin-docker_v1.2.3_x5.0_linux_amd64_/../../tmp/PWNED.zip`)
+	assert.Equal(t, "packer-plugin-docker_v1.2.3_x5.0_linux_amd64.zip", maliciousFileName)
 }

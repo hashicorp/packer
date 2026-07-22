@@ -330,6 +330,13 @@ func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, i
 	return installOpts.CheckProtocolVersion(entry.ProtVersion)
 }
 
-func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, entry *plugingetter.ChecksumFileEntry, zipFileName string) string {
-	return zipFileName
+func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, entry *plugingetter.ChecksumFileEntry, _ string) string {
+	pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
+	return strings.Join([]string{
+		"packer-plugin-" + pluginSourceParts[2],
+		entry.BinVersion,
+		entry.ProtVersion,
+		entry.Os,
+		entry.Arch + entry.Ext,
+	}, "_")
 }
