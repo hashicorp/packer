@@ -210,10 +210,7 @@ WaitLoop:
 }
 
 var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
-	runCustomRestartCheck := true
-	if p.config.RestartCheckCommand == DefaultRestartCheckCommand {
-		runCustomRestartCheck = false
-	}
+	runCustomRestartCheck := p.config.RestartCheckCommand != DefaultRestartCheckCommand
 	// This command is configurable by the user to make sure that the
 	// vm has met their necessary criteria for having restarted. If the
 	// user doesn't set a special restart command, we just run the
@@ -236,7 +233,9 @@ var waitForCommunicator = func(ctx context.Context, p *Provisioner) error {
 				continue
 			}
 			log.Printf("Connected to machine")
-			runCustomRestartCheck = false
+			// User provided a custom check — skip the default PowerShell
+			// module-load check to avoid breaking Constrained Language Mode.
+			break
 		}
 		// This is the non-user-configurable check that powershell
 		// modules have loaded.
