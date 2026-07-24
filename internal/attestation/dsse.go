@@ -23,7 +23,7 @@ type EnvelopeSignature struct {
 	Cert  string `json:"cert,omitempty"`
 }
 
-func MarshalPayload(value interface{}) ([]byte, error) {
+func MarshalPayload(value any) ([]byte, error) {
 	return json.Marshal(value)
 }
 

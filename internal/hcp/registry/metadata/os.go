@@ -33,7 +33,7 @@ func (d DefaultExecutor) Exec(name string, arg ...string) ([]byte, error) {
 
 var executor CommandExecutor = DefaultExecutor{}
 
-func GetOSMetadata() map[string]interface{} {
+func GetOSMetadata() map[string]any {
 	var osInfo OSInfo
 
 	switch runtime.GOOS {
@@ -56,9 +56,9 @@ func GetOSMetadata() map[string]interface{} {
 		}
 	}
 
-	return map[string]interface{}{
+	return map[string]any{
 		"type": osInfo.Name,
-		"details": map[string]interface{}{
+		"details": map[string]any{
 			"arch":    osInfo.Arch,
 			"version": osInfo.Version,
 		},

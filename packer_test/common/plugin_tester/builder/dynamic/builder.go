@@ -39,7 +39,7 @@ type Builder struct {
 
 func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
-func (b *Builder) Prepare(raws ...interface{}) (generatedVars []string, warnings []string, err error) {
+func (b *Builder) Prepare(raws ...any) (generatedVars []string, warnings []string, err error) {
 	err = config.Decode(&b.config, &config.DecodeOpts{
 		PluginType:  "packer.builder.dynamic",
 		Interpolate: true,
@@ -70,7 +70,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 
 	// Set the value of the generated data that will become available to provisioners.
 	// To share the data with post-processors, use the StateData in the artifact.
-	state.Put("generated_data", map[string]interface{}{
+	state.Put("generated_data", map[string]any{
 		"GeneratedMockData": "mock-build-data",
 	})
 
@@ -86,7 +86,7 @@ func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (pack
 	artifact := &Artifact{
 		// Add the builder generated data to the artifact StateData so that post-processors
 		// can access them.
-		StateData: map[string]interface{}{"generated_data": state.Get("generated_data")},
+		StateData: map[string]any{"generated_data": state.Get("generated_data")},
 	}
 	return artifact, nil
 }

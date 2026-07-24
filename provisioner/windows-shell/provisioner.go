@@ -46,7 +46,7 @@ type Config struct {
 
 type Provisioner struct {
 	config        Config
-	generatedData map[string]interface{}
+	generatedData map[string]any
 }
 
 type ExecuteCommandTemplate struct {
@@ -56,7 +56,7 @@ type ExecuteCommandTemplate struct {
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "windows-shell",
 		Interpolate:        true,
@@ -162,7 +162,7 @@ func extractScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	ui.Say("Provisioning with windows-shell...")
 	scripts := make([]string, len(p.config.Scripts))
 	copy(scripts, p.config.Scripts)

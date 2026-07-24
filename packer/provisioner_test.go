@@ -14,8 +14,7 @@ import (
 )
 
 func TestProvisionHook_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &ProvisionHook{}
+	var raw any = &ProvisionHook{}
 	if _, ok := raw.(packersdk.Hook); !ok {
 		t.Fatalf("must be a Hook")
 	}
@@ -27,7 +26,7 @@ func TestProvisionHook(t *testing.T) {
 
 	ui := testUi()
 	var comm packersdk.Communicator = new(packersdk.MockCommunicator)
-	var data interface{} = nil
+	var data any = nil
 
 	hook := &ProvisionHook{
 		Provisioners: []*HookedProvisioner{
@@ -53,7 +52,7 @@ func TestProvisionHook_nilComm(t *testing.T) {
 
 	ui := testUi()
 	var comm packersdk.Communicator = nil
-	var data interface{} = nil
+	var data any = nil
 
 	hook := &ProvisionHook{
 		Provisioners: []*HookedProvisioner{
@@ -120,7 +119,9 @@ func TestPausedProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(packersdk.MockCommunicator)
-	prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err := prov.Provision(context.Background(), ui, comm, make(map[string]any)); err != nil {
+		t.Fatalf("provision failed: %v", err)
+	}
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -149,7 +150,7 @@ func TestPausedProvisionerProvision_waits(t *testing.T) {
 		},
 	}
 
-	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 
 	if err != nil {
 		t.Fatalf("prov failed: %v", err)
@@ -170,7 +171,7 @@ func TestPausedProvisionerCancel(t *testing.T) {
 		return ctx.Err()
 	}
 
-	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 	if err == nil {
 		t.Fatal("should have err")
 	}
@@ -204,7 +205,9 @@ func TestDebuggedProvisionerProvision(t *testing.T) {
 	ui := testUi()
 	comm := new(packersdk.MockCommunicator)
 	writeReader(ui, "\n")
-	prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err := prov.Provision(context.Background(), ui, comm, make(map[string]any)); err != nil {
+		t.Fatalf("provision failed: %v", err)
+	}
 	if !mock.ProvCalled {
 		t.Fatal("prov should be called")
 	}
@@ -230,7 +233,7 @@ func TestDebuggedProvisionerCancel(t *testing.T) {
 		return ctx.Err()
 	}
 
-	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -272,7 +275,7 @@ func TestRetriedProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(packersdk.MockCommunicator)
-	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatal("should not have errored")
 	}
@@ -309,7 +312,7 @@ func TestRetriedProvisionerCancelledProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(packersdk.MockCommunicator)
-	err := prov.Provision(ctx, ui, comm, make(map[string]interface{}))
+	err := prov.Provision(ctx, ui, comm, make(map[string]any))
 	if err == nil {
 		t.Fatal("should have errored")
 	}
@@ -341,7 +344,7 @@ func TestRetriedProvisionerCancel(t *testing.T) {
 		return ctx.Err()
 	}
 
-	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(topCtx, testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 	if err == nil {
 		t.Fatal("should have err")
 	}
@@ -390,7 +393,7 @@ func TestContinueOnErrorProvisionerProvision(t *testing.T) {
 
 	ui := testUi()
 	comm := new(packersdk.MockCommunicator)
-	err := prov.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := prov.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should have swallowed the error, got: %s", err)
 	}
@@ -407,7 +410,7 @@ func TestContinueOnErrorProvisionerProvision_success(t *testing.T) {
 		Provisioner: mock,
 	}
 
-	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(context.Background(), testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 	if err != nil {
 		t.Fatalf("should not have errored, got: %s", err)
 	}
@@ -432,7 +435,7 @@ func TestContinueOnErrorProvisionerCancelledProvision(t *testing.T) {
 		Provisioner: mock,
 	}
 
-	err := prov.Provision(ctx, testUi(), new(packersdk.MockCommunicator), make(map[string]interface{}))
+	err := prov.Provision(ctx, testUi(), new(packersdk.MockCommunicator), make(map[string]any))
 	if err == nil {
 		t.Fatal("should have propagated the cancellation error")
 	}

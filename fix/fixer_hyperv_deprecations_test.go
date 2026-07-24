@@ -15,28 +15,28 @@ func TestFixerHypervDeprecations_impl(t *testing.T) {
 
 func TestFixerHypervDeprecations_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No vhd_temp_path field in template - noop
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "hyperv-iso",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "hyperv-iso",
 			},
 		},
 
 		// Deprecated vhd_temp_path field in template should be deleted
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":          "hyperv-iso",
 				"vhd_temp_path": "foopath",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "hyperv-iso",
 			},
 		},
@@ -45,12 +45,12 @@ func TestFixerHypervDeprecations_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerHypervDeprecations
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

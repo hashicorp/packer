@@ -14,7 +14,7 @@ type Fixer interface {
 	// Fix takes a raw map structure input, potentially transforms it
 	// in some way, and returns the new, transformed structure. The
 	// Fix method is allowed to mutate the input.
-	Fix(input map[string]interface{}) (map[string]interface{}, error)
+	Fix(input map[string]any) (map[string]any, error)
 
 	// Synopsis returns a string description of what the fixer actually
 	// does.

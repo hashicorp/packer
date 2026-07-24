@@ -17,9 +17,9 @@ func (FixerPowerShellEscapes) DeprecatedOptions() map[string][]string {
 	return map[string][]string{}
 }
 
-func (FixerPowerShellEscapes) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerPowerShellEscapes) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Provisioners []interface{}
+		Provisioners []any
 	}
 
 	var psUnescape = strings.NewReplacer(
@@ -36,7 +36,7 @@ func (FixerPowerShellEscapes) Fix(input map[string]interface{}) (map[string]inte
 	}
 
 	for i, raw := range tpl.Provisioners {
-		var provisioners map[string]interface{}
+		var provisioners map[string]any
 		if err := mapstructure.Decode(raw, &provisioners); err != nil {
 			// Ignore errors, could be a non-map
 			continue
@@ -57,7 +57,7 @@ func (FixerPowerShellEscapes) Fix(input map[string]interface{}) (map[string]inte
 			if err := mapstructure.Decode(raw, &env_vars); err != nil {
 				continue
 			}
-			env_vars_unescaped := make([]interface{}, len(env_vars))
+			env_vars_unescaped := make([]any, len(env_vars))
 			for j, env_var := range env_vars {
 				env_vars_unescaped[j] = psUnescape.Replace(env_var)
 			}

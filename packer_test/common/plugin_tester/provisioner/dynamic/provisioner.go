@@ -37,7 +37,7 @@ func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.config.FlatMapstructure().HCL2Spec()
 }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "packer.provisioner.dynamic",
 		Interpolate:        true,
@@ -52,7 +52,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(_ context.Context, ui packer.Ui, _ packer.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(_ context.Context, ui packer.Ui, _ packer.Communicator, generatedData map[string]any) error {
 	ui.Say(fmt.Sprintf("Called dynamic provisioner"))
 	for _, nst := range p.config.Nesteds {
 		ui.Say(fmt.Sprintf("Provisioner: nested one %s", nst.Name))

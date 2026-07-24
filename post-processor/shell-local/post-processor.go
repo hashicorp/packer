@@ -22,7 +22,7 @@ type ExecuteCommandTemplate struct {
 
 func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *PostProcessor) Configure(raws ...interface{}) error {
+func (p *PostProcessor) Configure(raws ...any) error {
 	err := sl.Decode(&p.config, raws...)
 	if err != nil {
 		return err
@@ -44,10 +44,10 @@ func (p *PostProcessor) Configure(raws ...interface{}) error {
 }
 
 func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
-	generatedData := make(map[string]interface{})
+	generatedData := make(map[string]any)
 	artifactStateData := artifact.State("generated_data")
 	if artifactStateData != nil {
-		for k, v := range artifactStateData.(map[interface{}]interface{}) {
+		for k, v := range artifactStateData.(map[any]any) {
 			generatedData[k.(string)] = v
 		}
 	}

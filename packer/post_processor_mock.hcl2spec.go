@@ -16,7 +16,7 @@ type FlatMockPostProcessor struct {
 	ForceOverride       *bool           `cty:"force_override" hcl:"force_override"`
 	Error               error           `cty:"error" hcl:"error"`
 	ConfigureCalled     *bool           `cty:"configure_called" hcl:"configure_called"`
-	ConfigureConfigs    []interface{}   `cty:"configure_configs" hcl:"configure_configs"`
+	ConfigureConfigs    []any           `cty:"configure_configs" hcl:"configure_configs"`
 	ConfigureError      error           `cty:"configure_error" hcl:"configure_error"`
 	PostProcessCalled   *bool           `cty:"post_process_called" hcl:"post_process_called"`
 	PostProcessArtifact packer.Artifact `cty:"post_process_artifact" hcl:"post_process_artifact"`
