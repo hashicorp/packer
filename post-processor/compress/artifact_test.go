@@ -10,8 +10,7 @@ import (
 )
 
 func TestArtifact_ImplementsArtifact(t *testing.T) {
-	var raw interface{}
-	raw = &Artifact{}
+	var raw any = &Artifact{}
 	if _, ok := raw.(packersdk.Artifact); !ok {
 		t.Fatalf("Artifact should be a Artifact!")
 	}

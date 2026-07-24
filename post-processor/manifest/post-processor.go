@@ -51,7 +51,7 @@ type ManifestFile struct {
 
 func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *PostProcessor) Configure(raws ...interface{}) error {
+func (p *PostProcessor) Configure(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "packer.post-processor.manifest",
 		Interpolate:        true,
@@ -79,7 +79,7 @@ func (p *PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, source
 	generatedData := source.State("generated_data")
 	if generatedData == nil {
 		// Make sure it's not a nil map so we can assign to it later.
-		generatedData = make(map[string]interface{})
+		generatedData = make(map[string]any)
 	}
 	p.config.ctx.Data = generatedData
 

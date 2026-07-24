@@ -66,7 +66,7 @@ func (c *FixCommand) RunContext(ctx context.Context, cla *FixArgs) int {
 	defer tplF.Close()
 
 	// Decode the JSON into a generic map structure
-	var templateData map[string]interface{}
+	var templateData map[string]any
 	decoder := json.NewDecoder(tplF)
 	if err := decoder.Decode(&templateData); err != nil {
 		c.Ui.Error(fmt.Sprintf("Error parsing template: %s", err))

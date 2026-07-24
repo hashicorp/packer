@@ -28,7 +28,7 @@ func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock, 
 	}
 
 	// Create basic builder variables
-	builderVars := map[string]interface{}{
+	builderVars := map[string]any{
 		"packer_core_version":        cfg.CorePackerVersionString,
 		"packer_debug":               strconv.FormatBool(cfg.debug),
 		"packer_force":               strconv.FormatBool(cfg.force),
@@ -49,7 +49,7 @@ func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock, 
 
 	if pb.Override != nil {
 		if override, ok := pb.Override[buildName]; ok {
-			if typedOverride, ok := override.(map[string]interface{}); ok {
+			if typedOverride, ok := override.(map[string]any); ok {
 				hclProvisioner.override = typedOverride
 			}
 		}

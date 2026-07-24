@@ -9,8 +9,7 @@ import (
 )
 
 func TestFixerCreateTime_Impl(t *testing.T) {
-	var raw interface{}
-	raw = new(FixerCreateTime)
+	var raw any = new(FixerCreateTime)
 	if _, ok := raw.(Fixer); !ok {
 		t.Fatalf("must be a Fixer")
 	}
@@ -19,8 +18,8 @@ func TestFixerCreateTime_Impl(t *testing.T) {
 func TestFixerCreateTime_Fix(t *testing.T) {
 	var f FixerCreateTime
 
-	input := map[string]interface{}{
-		"builders": []interface{}{
+	input := map[string]any{
+		"builders": []any{
 			map[string]string{
 				"type":     "foo",
 				"ami_name": "{{.CreateTime}} foo",
@@ -28,8 +27,8 @@ func TestFixerCreateTime_Fix(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"builders": []map[string]interface{}{
+	expected := map[string]any{
+		"builders": []map[string]any{
 			{
 				"type":     "foo",
 				"ami_name": "{{timestamp}} foo",

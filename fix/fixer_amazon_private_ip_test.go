@@ -14,17 +14,17 @@ func TestFixerAmazonPrivateIP_Impl(t *testing.T) {
 
 func TestFixerAmazonPrivateIP(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// Attach field == false
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":           "amazon-ebs",
 				"ssh_private_ip": false,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "amazon-ebs",
 				"ssh_interface": "public_ip",
 			},
@@ -32,12 +32,12 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 
 		// Attach field == true
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":           "amazon-ebs",
 				"ssh_private_ip": true,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "amazon-ebs",
 				"ssh_interface": "private_ip",
 			},
@@ -45,12 +45,12 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 
 		// ssh_private_ip specified as string
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":           "amazon-ebs",
 				"ssh_private_ip": "true",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "amazon-ebs",
 				"ssh_interface": "private_ip",
 			},
@@ -60,12 +60,12 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerAmazonPrivateIP
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)
@@ -82,8 +82,8 @@ func TestFixerAmazonPrivateIP(t *testing.T) {
 func TestFixerAmazonPrivateIPNonBoolean(t *testing.T) {
 	var f FixerAmazonPrivateIP
 
-	input := map[string]interface{}{
-		"builders": []map[string]interface{}{{
+	input := map[string]any{
+		"builders": []map[string]any{{
 			"type":           "amazon-ebs",
 			"ssh_private_ip": "not-a-boolean-value",
 		}},

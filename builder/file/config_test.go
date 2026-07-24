@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testConfig() map[string]any {
+	return map[string]any{
 		"source":  "src.txt",
 		"target":  "dst.txt",
 		"content": "Hello, world!",

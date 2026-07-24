@@ -69,7 +69,7 @@ type ProvisionerBlock struct {
 	MaxRetries      int
 	Timeout         time.Duration
 	ContinueOnError bool
-	Override        map[string]interface{}
+	Override        map[string]any
 	OnlyExcept      OnlyExcept
 	HCL2Ref
 }
@@ -118,9 +118,9 @@ func (p *Parser) decodeProvisioner(block *hcl.Block, ectx *hcl.EvalContext) (*Pr
 			})
 		}
 
-		override := make(map[string]interface{})
+		override := make(map[string]any)
 		for buildName, overrides := range b.Override.AsValueMap() {
-			buildOverrides := make(map[string]interface{})
+			buildOverrides := make(map[string]any)
 
 			if !overrides.Type().IsObjectType() {
 				return nil, append(diags, &hcl.Diagnostic{
@@ -199,7 +199,7 @@ func (cfg *PackerConfig) startProvisioner(source SourceUseBlock, pb *Provisioner
 
 	if pb.Override != nil {
 		if override, ok := pb.Override[source.name()]; ok {
-			hclProvisioner.override = override.(map[string]interface{})
+			hclProvisioner.override = override.(map[string]any)
 		}
 	}
 

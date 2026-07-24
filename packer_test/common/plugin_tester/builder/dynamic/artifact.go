@@ -7,7 +7,7 @@ package dynamic
 type Artifact struct {
 	// StateData should store data such as GeneratedData
 	// to be shared with post-processors
-	StateData map[string]interface{}
+	StateData map[string]any
 }
 
 func (*Artifact) BuilderId() string {
@@ -26,7 +26,7 @@ func (a *Artifact) String() string {
 	return ""
 }
 
-func (a *Artifact) State(name string) interface{} {
+func (a *Artifact) State(name string) any {
 	return a.StateData[name]
 }
 
