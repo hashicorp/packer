@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/packer-plugin-sdk/communicator"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testConfig() map[string]any {
+	return map[string]any{
 		"ssh_host":     "foo",
 		"ssh_username": "bar",
 		"ssh_password": "baz",

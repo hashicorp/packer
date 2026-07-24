@@ -42,7 +42,7 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("%s-%s", a.BuildName, a.ArtifactId)
 }
 
-func (a *Artifact) State(name string) interface{} {
+func (a *Artifact) State(name string) any {
 	return nil
 }
 

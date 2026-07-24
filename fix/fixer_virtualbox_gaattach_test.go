@@ -14,28 +14,28 @@ func TestFixerVirtualBoxGAAttach_Impl(t *testing.T) {
 
 func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No attach field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "virtualbox",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "virtualbox",
 			},
 		},
 
 		// Attach field == false
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                   "virtualbox",
 				"guest_additions_attach": false,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":                 "virtualbox",
 				"guest_additions_mode": "upload",
 			},
@@ -43,12 +43,12 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 
 		// Attach field == true
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                   "virtualbox",
 				"guest_additions_attach": true,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":                 "virtualbox",
 				"guest_additions_mode": "attach",
 			},
@@ -56,12 +56,12 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 
 		// Attach field is not a bool
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                   "virtualbox",
 				"guest_additions_attach": "what",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":                   "virtualbox",
 				"guest_additions_attach": "what",
 			},
@@ -71,12 +71,12 @@ func TestFixerVirtualBoxGAAttach_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerVirtualBoxGAAttach
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

@@ -14,7 +14,7 @@ func (FixerVagrantPPOverride) DeprecatedOptions() map[string][]string {
 	return map[string][]string{}
 }
 
-func (FixerVagrantPPOverride) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerVagrantPPOverride) Fix(input map[string]any) (map[string]any, error) {
 	if input["post-processors"] == nil {
 		return input, nil
 	}
@@ -46,7 +46,7 @@ func (FixerVagrantPPOverride) Fix(input map[string]interface{}) (map[string]inte
 			continue
 		}
 
-		overrides := make(map[string]interface{})
+		overrides := make(map[string]any)
 		for _, name := range possible {
 			if _, ok := pp[name]; !ok {
 				continue

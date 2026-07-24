@@ -20,7 +20,7 @@ type MockPostProcessor struct {
 	Error         error
 
 	ConfigureCalled  bool
-	ConfigureConfigs []interface{}
+	ConfigureConfigs []any
 	ConfigureError   error
 
 	PostProcessCalled   bool
@@ -30,7 +30,7 @@ type MockPostProcessor struct {
 
 func (t *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec { return t.FlatMapstructure().HCL2Spec() }
 
-func (t *MockPostProcessor) Configure(configs ...interface{}) error {
+func (t *MockPostProcessor) Configure(configs ...any) error {
 	t.ConfigureCalled = true
 	t.ConfigureConfigs = configs
 	return t.ConfigureError

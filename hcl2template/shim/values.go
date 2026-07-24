@@ -18,7 +18,7 @@ import (
 // This function will transform a cty null value into a Go nil value, which
 // isn't a possible outcome of the HCL/HIL-based decoder and so callers may
 // need to detect and reject any null values.
-func ConfigValueFromHCL2(v cty.Value) interface{} {
+func ConfigValueFromHCL2(v cty.Value) any {
 	if !v.IsKnown() {
 		return hcl2helper.UnknownVariableValue
 	}
@@ -56,7 +56,7 @@ func ConfigValueFromHCL2(v cty.Value) interface{} {
 	}
 
 	if v.Type().IsListType() || v.Type().IsSetType() || v.Type().IsTupleType() {
-		l := make([]interface{}, 0, v.LengthInt())
+		l := make([]any, 0, v.LengthInt())
 		it := v.ElementIterator()
 		for it.Next() {
 			_, ev := it.Element()
@@ -66,7 +66,7 @@ func ConfigValueFromHCL2(v cty.Value) interface{} {
 	}
 
 	if v.Type().IsMapType() || v.Type().IsObjectType() {
-		l := make(map[string]interface{})
+		l := make(map[string]any)
 		it := v.ElementIterator()
 		for it.Next() {
 			ek, ev := it.Element()
