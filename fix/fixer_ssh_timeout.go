@@ -16,9 +16,9 @@ func (FixerSSHTimout) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerSSHTimout) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerSSHTimout) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Builders []interface{}
+		Builders []any
 	}
 
 	// Decode the input into our structure, if we can
@@ -28,7 +28,7 @@ func (FixerSSHTimout) Fix(input map[string]interface{}) (map[string]interface{},
 	}
 
 	for i, raw := range tpl.Builders {
-		var builders map[string]interface{}
+		var builders map[string]any
 		if err := mapstructure.Decode(raw, &builders); err != nil {
 			// Ignore errors, could be a non-map
 			continue

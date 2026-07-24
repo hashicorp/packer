@@ -17,10 +17,10 @@ func (FixerISOChecksumTypeAndURL) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerISOChecksumTypeAndURL) Fix(input map[string]any) (map[string]any, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can
@@ -52,7 +52,7 @@ func (FixerISOChecksumTypeAndURL) Fix(input map[string]interface{}) (map[string]
 	return input, nil
 }
 
-func stringValue(v interface{}) string {
+func stringValue(v any) string {
 	switch rfl := v.(type) {
 	case string:
 		return rfl

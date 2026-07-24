@@ -662,7 +662,7 @@ func currentProcessEnv() map[string]string {
 	return env
 }
 
-func mustJSONMarshal(t *testing.T, value interface{}) []byte {
+func mustJSONMarshal(t *testing.T, value any) []byte {
 	t.Helper()
 
 	encoded, err := json.Marshal(value)

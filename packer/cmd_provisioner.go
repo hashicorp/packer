@@ -25,7 +25,7 @@ func (p *cmdProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.p.ConfigSpec()
 }
 
-func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
+func (c *cmdProvisioner) Prepare(configs ...any) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
@@ -34,7 +34,7 @@ func (c *cmdProvisioner) Prepare(configs ...interface{}) error {
 	return c.p.Prepare(configs...)
 }
 
-func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
@@ -43,7 +43,7 @@ func (c *cmdProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm pa
 	return c.p.Provision(ctx, ui, comm, generatedData)
 }
 
-func (c *cmdProvisioner) checkExit(p interface{}, cb func()) {
+func (c *cmdProvisioner) checkExit(p any, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {

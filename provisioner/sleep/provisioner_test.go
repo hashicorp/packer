@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-func test1sConfig() map[string]interface{} {
-	return map[string]interface{}{
+func test1sConfig() map[string]any {
+	return map[string]any{
 		"duration": "1s",
 	}
 }
@@ -51,7 +51,7 @@ func TestProvisioner_Provision(t *testing.T) {
 			p := &Provisioner{
 				Duration: tt.fields.Duration,
 			}
-			if err := p.Provision(tt.args.ctx, nil, nil, make(map[string]interface{})); (err != nil) != tt.wantErr {
+			if err := p.Provision(tt.args.ctx, nil, nil, make(map[string]any)); (err != nil) != tt.wantErr {
 				t.Errorf("Provisioner.Provision() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

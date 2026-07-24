@@ -8,8 +8,8 @@ import (
 )
 
 func TestExecutionPolicy_Decode(t *testing.T) {
-	config := map[string]interface{}{
-		"inline":           []interface{}{"foo", "bar"},
+	config := map[string]any{
+		"inline":           []any{"foo", "bar"},
 		"execution_policy": "allsigned",
 	}
 	p := new(Provisioner)

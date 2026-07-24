@@ -18,8 +18,8 @@ func (g *GithubActions) Detect() error {
 	return nil
 }
 
-func (g *GithubActions) Details() map[string]interface{} {
-	env := make(map[string]interface{})
+func (g *GithubActions) Details() map[string]any {
+	env := make(map[string]any)
 	keys := []string{
 		"GITHUB_REPOSITORY",
 		"GITHUB_REPOSITORY_ID",
@@ -57,8 +57,8 @@ func (g *GitlabCI) Detect() error {
 	return nil
 }
 
-func (g *GitlabCI) Details() map[string]interface{} {
-	env := make(map[string]interface{})
+func (g *GitlabCI) Details() map[string]any {
+	env := make(map[string]any)
 	keys := []string{
 		"CI_PROJECT_NAME",
 		"CI_PROJECT_ID",
@@ -97,8 +97,8 @@ func (b *BitbucketPipelines) Detect() error {
 	return nil
 }
 
-func (b *BitbucketPipelines) Details() map[string]interface{} {
-	env := make(map[string]interface{})
+func (b *BitbucketPipelines) Details() map[string]any {
+	env := make(map[string]any)
 	keys := []string{
 		"BITBUCKET_REPO_FULL_NAME",
 		"BITBUCKET_REPO_UUID",
@@ -139,8 +139,8 @@ func (g *JenkinsCI) Detect() error {
 	return nil
 }
 
-func (g *JenkinsCI) Details() map[string]interface{} {
-	env := make(map[string]interface{})
+func (g *JenkinsCI) Details() map[string]any {
+	env := make(map[string]any)
 	keys := []string{
 		"JENKINS_URL",
 		"BUILD_URL",
@@ -173,7 +173,7 @@ func (g *JenkinsCI) Type() string {
 	return "jenkins"
 }
 
-func GetCicdMetadata() map[string]interface{} {
+func GetCicdMetadata() map[string]any {
 	cicd := []MetadataProvider{
 		&JenkinsCI{},
 		&GithubActions{},
@@ -184,7 +184,7 @@ func GetCicdMetadata() map[string]interface{} {
 	for _, c := range cicd {
 		err := c.Detect()
 		if err == nil {
-			return map[string]interface{}{
+			return map[string]any{
 				"type":    c.Type(),
 				"details": c.Details(),
 			}

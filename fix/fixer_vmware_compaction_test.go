@@ -14,34 +14,34 @@ func TestFixerVMwareCompaction_impl(t *testing.T) {
 
 func TestFixerVMwareCompaction_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "virtualbox-iso",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "virtualbox-iso",
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "vmware-iso",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "vmware-iso",
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":        "vmware-iso",
 				"remote_type": "esx5",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "vmware-iso",
 				"remote_type":     "esx5",
 				"disk_type_id":    "zeroedthick",
@@ -49,13 +49,13 @@ func TestFixerVMwareCompaction_Fix(t *testing.T) {
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":         "vmware-iso",
 				"remote_type":  "esx5",
 				"disk_type_id": "zeroedthick",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "vmware-iso",
 				"remote_type":     "esx5",
 				"disk_type_id":    "zeroedthick",
@@ -63,14 +63,14 @@ func TestFixerVMwareCompaction_Fix(t *testing.T) {
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":            "vmware-iso",
 				"remote_type":     "esx5",
 				"disk_type_id":    "zeroedthick",
 				"skip_compaction": false,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "vmware-iso",
 				"remote_type":     "esx5",
 				"disk_type_id":    "zeroedthick",
@@ -78,13 +78,13 @@ func TestFixerVMwareCompaction_Fix(t *testing.T) {
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":         "vmware-iso",
 				"remote_type":  "esx5",
 				"disk_type_id": "thin",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":         "vmware-iso",
 				"remote_type":  "esx5",
 				"disk_type_id": "thin",
@@ -95,12 +95,12 @@ func TestFixerVMwareCompaction_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerVMwareCompaction
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

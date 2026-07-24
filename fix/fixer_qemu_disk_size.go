@@ -16,9 +16,9 @@ func (FixerQEMUDiskSize) DeprecatedOptions() map[string][]string {
 	return map[string][]string{}
 }
 
-func (FixerQEMUDiskSize) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerQEMUDiskSize) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can

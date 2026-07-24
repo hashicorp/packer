@@ -10,8 +10,7 @@ import (
 )
 
 func TestFixerProxmoxType_Impl(t *testing.T) {
-	var raw interface{}
-	raw = new(FixerProxmoxType)
+	var raw any = new(FixerProxmoxType)
 	if _, ok := raw.(Fixer); !ok {
 		t.Fatalf("must be a Fixer")
 	}
@@ -20,36 +19,36 @@ func TestFixerProxmoxType_Impl(t *testing.T) {
 func TestFixerProxmoxType_Fix(t *testing.T) {
 
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "proxmox",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "proxmox-iso",
 			},
 		},
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "proxmox-iso",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "proxmox-iso",
 			},
 		},
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "proxmox-clone",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "proxmox-clone",
 			},
 		},
@@ -58,12 +57,12 @@ func TestFixerProxmoxType_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerProxmoxType
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

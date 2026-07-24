@@ -13,13 +13,12 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{}
+func testConfig() map[string]any {
+	return map[string]any{}
 }
 
 func TestProvisioner_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &Provisioner{}
+	var raw any = &Provisioner{}
 	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
@@ -107,7 +106,7 @@ func TestProvisionerProvision_Success(t *testing.T) {
 	waitForRestart = func(context.Context, *Provisioner, packersdk.Communicator) error {
 		return nil
 	}
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -143,7 +142,7 @@ func TestProvisionerProvision_CustomCommand(t *testing.T) {
 	waitForRestart = func(context.Context, *Provisioner, packersdk.Communicator) error {
 		return nil
 	}
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatal("should not have error")
 	}
@@ -166,7 +165,7 @@ func TestProvisionerProvision_RestartCommandFail(t *testing.T) {
 	comm.StartExitStatus = 1
 
 	p.Prepare(config)
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -185,7 +184,7 @@ func TestProvisionerProvision_WaitForRestartFail(t *testing.T) {
 	waitForCommunicator = func(context.Context, *Provisioner) error {
 		return fmt.Errorf("Machine did not restart properly")
 	}
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err == nil {
 		t.Fatal("should have error")
 	}
@@ -217,7 +216,7 @@ func TestProvision_waitForRestartTimeout(t *testing.T) {
 	}
 
 	go func() {
-		err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+		err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 		close(waitDone)
 	}()
 	<-waitContinue
@@ -328,7 +327,7 @@ func TestProvision_Cancel(t *testing.T) {
 	// Create two go routines to provision and cancel in parallel
 	// Provision will block until cancel happens
 	go func() {
-		done <- p.Provision(topCtx, ui, comm, make(map[string]interface{}))
+		done <- p.Provision(topCtx, ui, comm, make(map[string]any))
 	}()
 
 	// Expect interrupt error
