@@ -139,6 +139,7 @@ func (cfg *PackerConfig) startBuilder(source SourceUseBlock, ectx *hcl.EvalConte
 	builderVars["packer_debug"] = strconv.FormatBool(cfg.debug)
 	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
 	builderVars["packer_on_error"] = cfg.onError
+	builderVars["packer_user_variables"] = cfg.userVariableValues()
 
 	generatedVars, warning, err := builder.Prepare(builderVars, decoded)
 	moreDiags = warningErrorsToDiags(cfg.Sources[source.SourceRef].block, warning, err)

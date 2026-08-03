@@ -5,6 +5,9 @@ package hcl2template
 
 import (
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/zclconf/go-cty/cty"
 )
 
 func TestGetCoreBuildProvisionerFromBlock_AppliesOverrideForBuild(t *testing.T) {
@@ -130,6 +133,66 @@ provisioner "shell" {
 
 	if len(sensitiveVars) != 1 || sensitiveVars[0] != "secret" {
 		t.Fatalf("expected sensitive vars [secret], got %#v", sensitiveVars)
+	}
+}
+
+func TestGetCoreBuildProvisionerFromBlock_IncludesUserVariables(t *testing.T) {
+	parser := getBasicParser()
+	cfg := &PackerConfig{
+		parser:                  parser,
+		CorePackerVersionString: lockedVersion,
+		InputVariables: Variables{
+			"visible": &Variable{
+				Name: "visible",
+				Type: cty.String,
+				Values: []VariableAssignment{
+					{From: "default", Value: cty.StringVal("hello")},
+				},
+			},
+			"vtpm": &Variable{
+				Name: "vtpm",
+				Type: cty.Bool,
+				Values: []VariableAssignment{
+					{From: "default", Value: cty.True},
+				},
+			},
+			"secret": &Variable{
+				Name:      "secret",
+				Type:      cty.String,
+				Sensitive: true,
+				Values: []VariableAssignment{
+					{From: "default", Value: cty.StringVal("hunter2")},
+				},
+			},
+		},
+	}
+
+	blocks, diags := ParseProvisionerBlocks(`
+provisioner "shell" {
+}
+`)
+	if diags.HasErrors() {
+		t.Fatalf("ParseProvisionerBlocks() unexpected error: %v", diags)
+	}
+
+	coreProv, diags := cfg.GetCoreBuildProvisionerFromBlock(blocks[0], "amazon-ebs.ubuntu")
+	if diags.HasErrors() {
+		t.Fatalf("GetCoreBuildProvisionerFromBlock() unexpected error: %v", diags)
+	}
+
+	hclProv, ok := coreProv.Provisioner.(*HCL2Provisioner)
+	if !ok {
+		t.Fatalf("expected *HCL2Provisioner, got %T", coreProv.Provisioner)
+	}
+
+	userVars, ok := hclProv.builderVariables["packer_user_variables"].(map[string]string)
+	if !ok {
+		t.Fatalf("expected map[string]string packer_user_variables, got %T", hclProv.builderVariables["packer_user_variables"])
+	}
+
+	want := map[string]string{"visible": "hello", "vtpm": "true"}
+	if diff := cmp.Diff(want, userVars); diff != "" {
+		t.Fatalf("unexpected user vars (sensitive must be excluded) (-want +got):\n%s", diff)
 	}
 }
 
