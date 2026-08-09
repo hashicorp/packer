@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2026
 // SPDX-License-Identifier: BUSL-1.1
 
 package hcl2template
@@ -186,6 +186,18 @@ provisioner "shell" {
 provisioner "shell" {
   max_retries = 3
   inline      = ["echo 'Retry test'"]
+}
+`,
+			wantCount: 1,
+			wantTypes: []string{"shell"},
+			wantErr:   false,
+		},
+		{
+			name: "provisioner with continue_on_error",
+			blockContent: `
+provisioner "shell" {
+  continue_on_error = true
+  inline            = ["echo 'Continue on error test'"]
 }
 `,
 			wantCount: 1,

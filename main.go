@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
 // This is the main package for the `packer` application.
@@ -265,7 +265,7 @@ func wrappedMain() int {
 		Args:         args,
 		Autocomplete: true,
 		Commands:     Commands,
-		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin"}),
+		HelpFunc:     excludeHelpFunc(Commands, []string{"execute", "plugin", "sbom-generate"}),
 		HelpWriter:   os.Stdout,
 		Name:         "packer",
 		Version:      version.Version,

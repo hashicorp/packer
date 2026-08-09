@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
 package github
@@ -20,7 +20,7 @@ import (
 
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 
-	"github.com/google/go-github/v33/github"
+	"github.com/google/go-github/v75/github"
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	"golang.org/x/oauth2"
 )
@@ -330,6 +330,13 @@ func (g *Getter) Validate(opt plugingetter.GetOptions, expectedVersion string, i
 	return installOpts.CheckProtocolVersion(entry.ProtVersion)
 }
 
-func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, entry *plugingetter.ChecksumFileEntry, zipFileName string) string {
-	return zipFileName
+func (g *Getter) ExpectedFileName(pr *plugingetter.Requirement, version string, entry *plugingetter.ChecksumFileEntry, _ string) string {
+	pluginSourceParts := strings.Split(pr.Identifier.Source, "/")
+	return strings.Join([]string{
+		"packer-plugin-" + pluginSourceParts[2],
+		entry.BinVersion,
+		entry.ProtVersion,
+		entry.Os,
+		entry.Arch + entry.Ext,
+	}, "_")
 }

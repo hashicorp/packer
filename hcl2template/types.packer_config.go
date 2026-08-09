@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2026
 // SPDX-License-Identifier: BUSL-1.1
 
 package hcl2template
@@ -578,6 +578,14 @@ func (cfg *PackerConfig) getCoreBuildProvisioner(source SourceUseBlock, pb *Prov
 
 	if pb.PType == "hcp-sbom" {
 		provisioner = &packer.SBOMInternalProvisioner{
+			Provisioner: provisioner,
+		}
+	}
+
+	// Wrap last (outside retries) so retries are exhausted before the error
+	// is ignored and the build is allowed to continue.
+	if pb.ContinueOnError {
+		provisioner = &packer.ContinueOnErrorProvisioner{
 			Provisioner: provisioner,
 		}
 	}

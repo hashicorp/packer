@@ -1,5 +1,89 @@
 # 📦 Changelog
 
+## 1.16.0 (July 24, 2026)
+
+### FEATURES:
+
+* provenance: add new `provenance` post-processor and `packer verify-attestation` command for
+  SLSA Build L1/L2 supply-chain attestations. Derives in-toto subjects from Packer artifacts,
+  builds SLSA Provenance v1 predicates with Git/CI metadata, and signs via local PEM key, cloud
+  KMS (`awskms://`, `gcpkms://`, `azurekms://`, `hashivault://`), or keyless Sigstore (Fulcio +
+  optional Rekor transparency log). Reference CI workflows for L2 keyless and L3-compatible
+  delegated-signing patterns are included under `examples/ci/`.
+    [GH-13667](https://github.com/hashicorp/packer/pull/13667)
+* core/hcl2: add `rfc3339_parse` and `unix_timestamp_parse` template functions. Both accept
+  RFC 3339 timestamps; `unix_timestamp_parse` additionally accepts Unix epoch integers.
+    [GH-13669](https://github.com/hashicorp/packer/pull/13669)
+* core/hcl2: add `continue_on_error` meta-argument to provisioner blocks. When set to `true`,
+  a provisioner failure is logged and the build continues rather than halting.
+    [GH-13674](https://github.com/hashicorp/packer/pull/13674)
+* core/hcl2: variable `object` types now support `optional()` attribute modifiers, allowing
+  object variables to declare per-attribute defaults and omit fields that have a default set.
+    [GH-13670](https://github.com/hashicorp/packer/pull/13670)
+
+### BUG FIXES:
+
+* plugin/getter: prevent path traversal vulnerability in GitHub plugin getter filename handling.
+    [GH-13680](https://github.com/hashicorp/packer/pull/13680)
+* build: update build constraints to support arm architecture on FreeBSD.
+    [GH-13650](https://github.com/hashicorp/packer/pull/13650)
+
+### SECURITY:
+
+* security: drop `x/crypto/openpgp` by upgrading `go-github` v33 → v75.
+    [GH-13676](https://github.com/hashicorp/packer/pull/13676)
+* security: suppress false positive for GO-2026-5932.
+    [GH-13677](https://github.com/hashicorp/packer/pull/13677)
+* deps: bump `golang.org/x/crypto` to v0.54.0.
+    [GH-13672](https://github.com/hashicorp/packer/pull/13672)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` to `v0.6.10`.
+    [GH-13673](https://github.com/hashicorp/packer/pull/13673)
+* deps: bump `github.com/hashicorp/hcp-sdk-go` to `v0.174.0`.
+    [GH-13673](https://github.com/hashicorp/packer/pull/13673)
+* deps: bump `github.com/zclconf/go-cty` to `v1.18.1`.
+    [GH-13673](https://github.com/hashicorp/packer/pull/13673)
+* deps: bump `github.com/google/go-github` v33 → v75.
+    [GH-13676](https://github.com/hashicorp/packer/pull/13676)
+* deps: bump `golang.org/x/net` to `v0.56.0`.
+    [GH-13664](https://github.com/hashicorp/packer/pull/13664)
+* deps: update various Go module dependencies.
+    [GH-13673](https://github.com/hashicorp/packer/pull/13673)
+
+### INTERNAL:
+
+* ci: pin GitHub Action refs to latest verified SHAs.
+    [GH-13675](https://github.com/hashicorp/packer/pull/13675)
+* chore: remove old website references.
+    [GH-13668](https://github.com/hashicorp/packer/pull/13668)
+
+## 1.15.4 (June 3, 2026)
+
+### DEPRECATIONS:
+
+* hcp/sbom: removed Syft binary download and handling from the HCP SBOM provisioner; Syft binary management is now deprecated in favor of the native flow.
+    [GH-13636](https://github.com/hashicorp/packer/pull/13636)
+
+### BUG FIXES:
+
+* security: addressed authorization-bypass related issues by upgrading `go-git` and `golang.org/x/crypto`.
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* sbom: bump CycloneDX dependency to improve BOM generation handling.
+    [GH-13638](https://github.com/hashicorp/packer/pull/13638)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` to `v0.6.9`.
+    [GH-13640](https://github.com/hashicorp/packer/pull/13640)
+* deps: update `github.com/Azure/go-ntlmssp` to `v0.1.1`.
+    [GH-13622](https://github.com/hashicorp/packer/pull/13622)
+* deps: update `go-git` and `golang.org/x/crypto`.
+    [GH-13645](https://github.com/hashicorp/packer/pull/13645)
+* build/deps: bump GitHub Actions dependencies group (7 updates).
+    [GH-13649](https://github.com/hashicorp/packer/pull/13649)
+
 ## 1.15.3 (April 27, 2026)
 
 ### BUG FIXES:

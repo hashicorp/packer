@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2026
 // SPDX-License-Identifier: BUSL-1.1
 
 package hcl2template
@@ -68,9 +68,10 @@ func (cfg *PackerConfig) GetCoreBuildProvisionerFromBlock(pb *ProvisionerBlock, 
 
 	// Wrap provisioner with any special behavior (pause, timeout, retry)
 	wrappedProvisioner := packer.WrapProvisionerWithOptions(hclProvisioner, packer.ProvisionerWrapOptions{
-		PauseBefore: pb.PauseBefore,
-		Timeout:     pb.Timeout,
-		MaxRetries:  pb.MaxRetries,
+		PauseBefore:     pb.PauseBefore,
+		Timeout:         pb.Timeout,
+		MaxRetries:      pb.MaxRetries,
+		ContinueOnError: pb.ContinueOnError,
 	})
 
 	return packer.CoreBuildProvisioner{

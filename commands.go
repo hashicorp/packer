@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2013, 2025
+// Copyright IBM Corp. 2024, 2025
 // SPDX-License-Identifier: BUSL-1.1
 
 package main
@@ -106,6 +106,14 @@ func init() {
 				Meta:      *CommandMeta,
 				CheckFunc: commandVersionCheck,
 			}, nil
+		},
+
+		"sbom-generate": func() (cli.Command, error) {
+			return &command.SBOMGenerateCommand{Meta: *CommandMeta}, nil
+		},
+
+		"verify-attestation": func() (cli.Command, error) {
+			return &command.VerifyAttestationCommand{Meta: *CommandMeta}, nil
 		},
 
 		// plugin is essentially an alias to the plugins command

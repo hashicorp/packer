@@ -25,6 +25,7 @@ import (
 	checksumpostprocessor "github.com/hashicorp/packer/post-processor/checksum"
 	compresspostprocessor "github.com/hashicorp/packer/post-processor/compress"
 	manifestpostprocessor "github.com/hashicorp/packer/post-processor/manifest"
+	provenancepostprocessor "github.com/hashicorp/packer/post-processor/provenance"
 	shelllocalpostprocessor "github.com/hashicorp/packer/post-processor/shell-local"
 	breakpointprovisioner "github.com/hashicorp/packer/provisioner/breakpoint"
 	fileprovisioner "github.com/hashicorp/packer/provisioner/file"
@@ -63,6 +64,7 @@ var PostProcessors = map[string]packersdk.PostProcessor{
 	"checksum":    new(checksumpostprocessor.PostProcessor),
 	"compress":    new(compresspostprocessor.PostProcessor),
 	"manifest":    new(manifestpostprocessor.PostProcessor),
+	"provenance":  new(provenancepostprocessor.PostProcessor),
 	"shell-local": new(shelllocalpostprocessor.PostProcessor),
 }
 

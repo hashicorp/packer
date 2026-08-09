@@ -1,0 +1,93 @@
+# Reference workflow — NOT wired into this repository's CI.
+#
+# Copy this into your own project's .github/workflows/ directory.
+#
+# SLSA Build L2 pattern: Packer signs the provenance attestation keyless, using
+# the GitHub Actions workflow's own OIDC identity (Fulcio) and records the
+# signature in the Rekor transparency log. This yields signed, transparently
+# logged provenance produced by a hosted platform.
+#
+# This does NOT confer SLSA L3 on its own: the build job can still reach the
+# (ephemeral) signing material. See github-actions-l3-delegated.yml for the
+# L3-compatible delegated-signing pattern.
+
+name: build-and-sign-provenance
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  # Required so Packer's keyless signing can request an OIDC token from GitHub
+  # and exchange it with Fulcio for a short-lived signing certificate.
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Must match the workflow's OIDC identity so verification can pin it.
+      KEYLESS_IDENTITY: "https://github.com/${{ github.repository }}/.github/workflows/build-and-sign-provenance.yml@${{ github.ref }}"
+      KEYLESS_OIDC_ISSUER: "https://token.actions.githubusercontent.com"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: latest
+
+      - name: Initialize plugins
+        run: packer init .
+
+      # The template below is expected to declare two input variables and a
+      # keyless provenance post-processor. NOTE: Packer's `env()` function may
+      # only appear in a variable `default`, never inline in a block, so the
+      # workflow passes the values with `-var` instead.
+      #
+      #   variable "keyless_identity"    { type = string }
+      #   variable "keyless_oidc_issuer" { type = string }
+      #
+      #   post-processor "provenance" {
+      #     signing_mode        = "keyless"
+      #     upload_tlog         = true
+      #     keyless_identity    = var.keyless_identity
+      #     keyless_oidc_issuer = var.keyless_oidc_issuer
+      #   }
+      #
+      # Packer picks up the ambient GitHub OIDC token automatically from the
+      # ACTIONS_ID_TOKEN_REQUEST_URL / ACTIONS_ID_TOKEN_REQUEST_TOKEN variables
+      # that are available when `id-token: write` is granted above.
+      - name: Build and sign
+        run: |
+          packer build \
+            -var "keyless_identity=${KEYLESS_IDENTITY}" \
+            -var "keyless_oidc_issuer=${KEYLESS_OIDC_ISSUER}" \
+            .
+
+      # Verify the signed attestation with Rekor-backed transparency evidence
+      # using the generated Sigstore bundle sidecar (*.sigstore.json).
+      - name: Verify attestation
+        run: |
+          for att in *.provenance.json; do
+            packer verify-attestation \
+              -signing-mode=keyless \
+              -bundle="${att%.json}.sigstore.json" \
+              -require-rekor \
+              -require-timestamp \
+              -keyless-identity="${KEYLESS_IDENTITY}" \
+              -keyless-oidc-issuer="${KEYLESS_OIDC_ISSUER}" \
+              -predicate-type="https://slsa.dev/provenance/v1" \
+              "${att}"
+          done
+
+      - name: Upload provenance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: provenance
+          path: |
+            *.provenance.json
+            *.sigstore.json
