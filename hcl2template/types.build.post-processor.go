@@ -77,6 +77,7 @@ func (cfg *PackerConfig) startPostProcessor(source SourceUseBlock, pp *PostProce
 	builderVars["packer_force"] = strconv.FormatBool(cfg.force)
 	builderVars["packer_on_error"] = cfg.onError
 	builderVars["packer_sensitive_variables"] = cfg.sensitiveInputVariableKeys()
+	builderVars["packer_user_variables"] = cfg.userVariableValues()
 
 	hclPostProcessor := &HCL2PostProcessor{
 		PostProcessor:      postProcessor,
