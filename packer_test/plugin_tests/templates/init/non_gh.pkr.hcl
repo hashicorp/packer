@@ -4,7 +4,7 @@
 packer {
 	required_plugins {
 		tester = {
-			source = "hubgit.com/hashicorp/tester"
+			source = "hubgit.invalid/hashicorp/tester"
 			version = ">= 1.0.9"
 		}
 	}

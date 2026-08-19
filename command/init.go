@@ -15,9 +15,11 @@ import (
 
 	gversion "github.com/hashicorp/go-version"
 	pluginsdk "github.com/hashicorp/packer-plugin-sdk/plugin"
+	"github.com/hashicorp/packer/hcl2template/addrs"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
 	"github.com/hashicorp/packer/packer/plugin-getter/github"
+	"github.com/hashicorp/packer/packer/plugin-getter/remote"
 	"github.com/hashicorp/packer/version"
 	"github.com/posener/complete"
 )
@@ -97,24 +99,6 @@ for more info.`)
 
 	log.Printf("[TRACE] init: %#v", opts)
 
-	// the ordering of the getters is important here, place the getter on top which you want to try first
-	getters := []plugingetter.Getter{
-		&release.Getter{
-			Name: "releases.hashicorp.com",
-		},
-		&github.Getter{
-			// In the past some terraform plugins downloads were blocked from a
-			// specific aws region by s3. Changing the user agent unblocked the
-			// downloads so having one user agent per version will help mitigate
-			// that a little more. Especially in the case someone forks this
-			// code to make it more aggressive or something.
-			// TODO: allow to set this from the config file or an environment
-			// variable.
-			UserAgent: "packer-getter-github-" + version.String(),
-			Name:      "github.com",
-		},
-	}
-
 	ui := &packer.ColoredUi{
 		Color: packer.UiColorCyan,
 		Ui:    c.Ui,
@@ -155,7 +139,7 @@ for more info.`)
 		newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 			PluginDirectory:           opts.PluginDirectory,
 			BinaryInstallationOptions: opts.BinaryInstallationOptions,
-			Getters:                   getters,
+			Getters:                   pluginGetters(pluginRequirement.Identifier),
 			Force:                     cla.Force,
 		})
 		if err != nil {
@@ -169,6 +153,38 @@ for more info.`)
 		}
 	}
 	return ret
+}
+
+// pluginGetters returns the getters to consult for a plugin source: the
+// official release site then github.com for github.com sources, or a single
+// remote-source getter for any other host.
+func pluginGetters(identifier *addrs.Plugin) []plugingetter.Getter {
+	if host := identifier.Parts()[0]; host != "github.com" {
+		return []plugingetter.Getter{
+			&remote.Getter{
+				BaseURL: "https://" + host,
+				Name:    host,
+			},
+		}
+	}
+	// The ordering of the getters is important here, place the getter on
+	// top which you want to try first.
+	return []plugingetter.Getter{
+		&release.Getter{
+			Name: "releases.hashicorp.com",
+		},
+		&github.Getter{
+			// In the past some terraform plugins downloads were blocked from a
+			// specific aws region by s3. Changing the user agent unblocked the
+			// downloads so having one user agent per version will help mitigate
+			// that a little more. Especially in the case someone forks this
+			// code to make it more aggressive or something.
+			// TODO: allow to set this from the config file or an environment
+			// variable.
+			UserAgent: "packer-getter-github-" + version.String(),
+			Name:      "github.com",
+		},
+	}
 }
 
 func (*InitCommand) Help() string {
