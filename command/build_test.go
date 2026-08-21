@@ -382,7 +382,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - valid cmd ( invalid varfile bypased )",
+			name: "hcl - valid cmd ( invalid varfile bypassed )",
 			args: []string{
 				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "invalid_value.pkrvars.hcl")),
 				"-var", `image_metadata={key = "new_value", something = { foo = "bar" }}`,
@@ -392,7 +392,7 @@ func TestBuild(t *testing.T) {
 		},
 
 		{
-			name: "hcl - invalid cmd ( valid varfile bypased )",
+			name: "hcl - invalid cmd ( valid varfile bypassed )",
 			args: []string{
 				"-var-file", filepath.Join(testFixture("hcl", "validation", "map", "valid_value.pkrvars.hcl")),
 				"-var", `image_metadata={key = "?", something = { foo = "wrong" }}`,
