@@ -15,10 +15,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/hcl/v2"
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 	"github.com/hashicorp/packer/internal/hcp/registry"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/version"
 	"golang.org/x/sync/semaphore"
 
 	"github.com/hako/durafmt"
@@ -150,12 +152,49 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		return ret
 	}
 
-	// Fetch and inject enforced provisioners from HCP Packer (if configured)
-	if !cla.SkipEnforcement {
-		if err := hcpRegistry.FetchEnforcedBlocks(buildCtx); err != nil {
+	// Resolve and inject enforced provisioners from HCP Packer (RFC vNext).
+	if cla.SkipEnforcement {
+		// Skip governance (RFC 10): a closed-enum reason code is required.
+		if cla.SkipReasonCode == "" {
 			return writeDiags(c.Ui, nil, hcl.Diagnostics{
 				&hcl.Diagnostic{
-					Summary:  "HCP: fetching enforced provisioners failed",
+					Severity: hcl.DiagError,
+					Summary:  "HCP: --skip-enforcement requires --skip-reason-code",
+					Detail: fmt.Sprintf("--skip-enforcement must be accompanied by --skip-reason-code=<code>, one of: %s.",
+						strings.Join(registry.ValidSkipReasonCodes, ", ")),
+				},
+			})
+		}
+		if !registry.IsValidSkipReasonCode(cla.SkipReasonCode) {
+			return writeDiags(c.Ui, nil, hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "HCP: invalid --skip-reason-code",
+					Detail: fmt.Sprintf("%q is not a valid skip reason code. Must be one of: %s.",
+						cla.SkipReasonCode, strings.Join(registry.ValidSkipReasonCodes, ", ")),
+				},
+			})
+		}
+
+		hcpRegistry.RecordEnforcementSkip(cla.SkipReasonCode, cla.SkipReasonNote)
+		c.Ui.Say(fmt.Sprintf("Skipping HCP Packer enforced provisioners (--skip-enforcement; reason_code=%s).", cla.SkipReasonCode))
+		if cla.SkipReasonNote != "" {
+			c.Ui.Say(fmt.Sprintf("  reason note: %s", cla.SkipReasonNote))
+		}
+	} else {
+		buildCorrelationID, err := uuid.GenerateUUID()
+		if err != nil {
+			buildCorrelationID = ""
+		}
+		opts := registry.EnforcementOptions{
+			CLIVersion:         version.Version,
+			BuildCorrelationID: buildCorrelationID,
+		}
+
+		if err := hcpRegistry.FetchEnforcedBlocks(buildCtx, opts); err != nil {
+			return writeDiags(c.Ui, nil, hcl.Diagnostics{
+				&hcl.Diagnostic{
+					Summary:  "HCP: resolving enforced provisioners failed",
 					Severity: hcl.DiagError,
 					Detail:   err.Error(),
 				},
@@ -166,8 +205,6 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		if diags.HasErrors() {
 			return writeDiags(c.Ui, nil, diags)
 		}
-	} else {
-		c.Ui.Say("Skipping HCP Packer enforced provisioners (--skip-enforcement flag set)")
 	}
 
 	if cla.Debug {
@@ -476,7 +513,9 @@ Options:
   -warn-on-undeclared-var       Display warnings for user variable files containing undeclared variables.
   -ignore-prerelease-plugins    Disable the loading of prerelease plugin binaries (x.y.z-dev).
   -use-sequential-evaluation    Fallback to using a sequential approach for local/datasource evaluation.
-  -skip-enforcement             Skip injection of HCP Packer enforced provisioners.
+  -skip-enforcement             Skip injection of HCP Packer enforced provisioners. Requires admin privileges and -skip-reason-code.
+  -skip-reason-code=code        Reason code required with -skip-enforcement. One of: breakglass_incident, resolver_outage, verified_exception, migration_compatibility.
+  -skip-reason-note=text        Optional free-text note accompanying -skip-reason-code.
 `
 
 	return strings.TrimSpace(helpText)

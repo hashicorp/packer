@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,7 +30,8 @@ import (
 // build is still alive.
 const HeartbeatPeriod = 2 * time.Minute
 
-// EnforcedBlock represents an enforced provisioner block from HCP Packer
+// EnforcedBlock represents a single resolved enforced provisioner entry from the
+// HCP Packer resolver (RFC 6.2 effective_provisioners[]).
 type EnforcedBlock struct {
 	ID           string
 	Name         string
@@ -37,6 +39,14 @@ type EnforcedBlock struct {
 	VersionID    string
 	Version      string
 	TemplateType string
+	// Ordinal is the resolved execution ordinal; the resolved set is applied in
+	// ascending ordinal order (the resolver's canonical execution order).
+	Ordinal int32
+	// ContentHash is the immutable "sha256:<hex>" hash recorded for the version
+	// at publish time; emitted into build metadata for integrity (RFC 6.3).
+	ContentHash string
+	// VersionState is the resolved lifecycle state (expected released).
+	VersionState string
 }
 
 // Bucket represents a single bucket on the HCP Packer registry.
@@ -52,6 +62,14 @@ type Bucket struct {
 	Version                                  *Version
 	EnforcedBlocks                           []*EnforcedBlock
 	client                                   *hcpPackerAPI.Client
+
+	// Enforcement resolution state, populated by FetchEnforcedBlocks.
+	EnforcementPolicyMode   string   // normalized "mandatory"/"advisory"
+	EnforcementResolutionID string   // resolver audit_context.resolution_id
+	EnforcementEtag         string   // resolver audit_context.etag (freshness token)
+	EnforcementConfigured   bool     // bucket has an active enforced-provisioner set
+	EnforcementFromCache    bool     // resolved set was served from local stale cache
+	EnforcementWarnings     []string // advisory-mode degradation warnings to surface
 }
 
 type ParentVersion struct {
@@ -153,61 +171,209 @@ func (bucket *Bucket) Initialize(
 	return bucket.initializeVersion(ctx, templateType)
 }
 
-// FetchEnforcedBlocks retrieves all enforced blocks linked to this bucket from HCP Packer.
-// These blocks contain provisioner configurations that should be automatically injected
-// into builds for this bucket.
-func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context) error {
+// FetchEnforcedBlocks resolves the effective enforced-provisioner set for this
+// bucket via the HCP Packer resolver (RFC 6.2) and applies the mandatory/advisory
+// failure-handling matrix (RFC 6.4).
+//
+// On success it populates bucket.EnforcedBlocks (in resolver-canonical ordinal
+// order) and the resolution metadata, and persists a local cache keyed on the
+// returned etag for stale-cache revalidation.
+//
+// Returns a non-nil error only when the build must FAIL CLOSED (mandatory mode).
+// In advisory mode, degradations append to bucket.EnforcementWarnings and return
+// nil so the build continues.
+func (bucket *Bucket) FetchEnforcedBlocks(ctx context.Context, opts EnforcementOptions) error {
 	if bucket.client == nil {
 		return errors.New("bucket client not initialized, call Initialize first")
 	}
 
-	log.Printf("[INFO] fetching enforced blocks linked to bucket %q", bucket.Name)
+	orgID := bucket.client.OrganizationID
+	projectID := bucket.client.ProjectID
 
-	resp, err := bucket.client.GetEnforcedBlocksForBucket(ctx, bucket.Name)
-	if err != nil {
-		if hcpPackerAPI.CheckErrorCode(err, codes.NotFound) || hcpPackerAPI.CheckErrorCode(err, codes.Unimplemented) {
-			// If the API doesn't support enforced blocks yet or returns not found, continue silently.
-			log.Printf("[DEBUG] fetching enforced blocks for bucket %q: %v", bucket.Name, err)
-			return nil
-		}
-
-		return fmt.Errorf("failed fetching enforced blocks for bucket %q: %w", bucket.Name, err)
+	// Load any prior successful resolution so we can revalidate with
+	// If-None-Match and fall back to it on resolver outage (RFC 6.4).
+	cached, cacheErr := loadEnforcementCache(orgID, projectID, bucket.Name)
+	if cacheErr != nil {
+		log.Printf("[DEBUG] enforced provisioners: ignoring unreadable cache for bucket %q: %v", bucket.Name, cacheErr)
+	}
+	ifNoneMatch := ""
+	if cached != nil {
+		ifNoneMatch = cached.Etag
 	}
 
+	log.Printf("[INFO] resolving enforced provisioners for bucket %q", bucket.Name)
+	resp, err := bucket.client.ResolveEnforcedProvisioners(ctx, bucket.Name, ifNoneMatch, opts.BuildCorrelationID, opts.CLIVersion)
+	if err != nil {
+		return bucket.handleResolveError(err, cached)
+	}
 	if resp == nil {
-		log.Printf("[INFO] no enforced blocks response returned for bucket %q", bucket.Name)
+		return bucket.handleResolveError(errors.New("empty resolver response"), cached)
+	}
+
+	mode := normalizePolicyMode(resp.PolicyMode)
+	bucket.EnforcementPolicyMode = mode
+	if resp.AuditContext != nil {
+		bucket.EnforcementResolutionID = resp.AuditContext.ResolutionID
+		bucket.EnforcementEtag = resp.AuditContext.Etag
+	}
+	bucket.EnforcementFromCache = false
+
+	blocks := buildEnforcedBlocks(resp.EffectiveProvisioners)
+
+	// Client-side RFC 11 hard-limit guardrail: reject a resolved set that
+	// violates the per-bucket count or per-version payload caps before it is
+	// applied or cached.
+	if limitErr := validateResolvedEnforcementLimits(blocks); limitErr != nil {
+		return bucket.handleEnforcementLimitViolation(mode, limitErr)
+	}
+
+	bucket.EnforcedBlocks = blocks
+	bucket.EnforcementConfigured = len(blocks) > 0
+
+	// Persist the successful resolution for future revalidation/outage reuse.
+	entry := &enforcementCacheEntry{
+		Etag:         bucket.EnforcementEtag,
+		ResolvedAt:   time.Now().UTC(),
+		PolicyMode:   mode,
+		ResolutionID: bucket.EnforcementResolutionID,
+		Blocks:       blocks,
+	}
+	if resp.ResolutionTTLSeconds > 0 {
+		entry.TTLSeconds = resp.ResolutionTTLSeconds
+	}
+	if err := saveEnforcementCache(orgID, projectID, bucket.Name, entry); err != nil {
+		log.Printf("[DEBUG] enforced provisioners: failed to cache resolution for bucket %q: %v", bucket.Name, err)
+	}
+
+	bucket.recordEnforcementMetadata()
+
+	log.Printf("[INFO] resolved %d enforced provisioner(s) for bucket %q (policy_mode=%s resolution_id=%s)",
+		len(blocks), bucket.Name, mode, bucket.EnforcementResolutionID)
+	return nil
+}
+
+// Reserved build-label keys used to persist the resolved enforcement context
+// into HCP build metadata (RFC 6.3 integrity / 10 audit).
+const (
+	enforcementLabelPolicyMode    = "hcp_packer_enforcement_policy_mode"
+	enforcementLabelResolutionID  = "hcp_packer_enforcement_resolution_id"
+	enforcementLabelVersionIDs    = "hcp_packer_enforcement_version_ids"
+	enforcementLabelContentHashes = "hcp_packer_enforcement_content_hashes"
+	enforcementLabelFromCache     = "hcp_packer_enforcement_from_cache"
+	enforcementLabelSkipped       = "hcp_packer_enforcement_skipped"
+	enforcementLabelSkipReason    = "hcp_packer_enforcement_skip_reason_code"
+	enforcementLabelSkipNote      = "hcp_packer_enforcement_skip_reason_note"
+)
+
+// recordEnforcementMetadata persists the resolved enforcement context into the
+// bucket build labels so it is captured in HCP build metadata. The CLI must
+// record the resolution id, resolved version ids, content hashes, and policy
+// mode (RFC 6.2/6.3).
+func (bucket *Bucket) recordEnforcementMetadata() {
+	if bucket.BuildLabels == nil {
+		bucket.BuildLabels = make(map[string]string)
+	}
+	bucket.BuildLabels[enforcementLabelPolicyMode] = bucket.EnforcementPolicyMode
+	bucket.BuildLabels[enforcementLabelResolutionID] = bucket.EnforcementResolutionID
+	if bucket.EnforcementFromCache {
+		bucket.BuildLabels[enforcementLabelFromCache] = "true"
+	}
+
+	versionIDs := make([]string, 0, len(bucket.EnforcedBlocks))
+	hashes := make([]string, 0, len(bucket.EnforcedBlocks))
+	for _, eb := range bucket.EnforcedBlocks {
+		versionIDs = append(versionIDs, eb.VersionID)
+		hashes = append(hashes, eb.ContentHash)
+	}
+	bucket.BuildLabels[enforcementLabelVersionIDs] = strings.Join(versionIDs, ",")
+	bucket.BuildLabels[enforcementLabelContentHashes] = strings.Join(hashes, ",")
+}
+
+// RecordEnforcementSkip persists an authorized --skip-enforcement decision into
+// build metadata (RFC 10). Server-side authorization and audit emission are
+// enforced separately by the bucket policy; this records the CLI-side request.
+func (bucket *Bucket) RecordEnforcementSkip(reasonCode, reasonNote string) {
+	if bucket.BuildLabels == nil {
+		bucket.BuildLabels = make(map[string]string)
+	}
+	bucket.BuildLabels[enforcementLabelSkipped] = "true"
+	bucket.BuildLabels[enforcementLabelSkipReason] = reasonCode
+	if reasonNote != "" {
+		bucket.BuildLabels[enforcementLabelSkipNote] = reasonNote
+	}
+}
+
+// handleEnforcementLimitViolation applies the failure matrix when the resolved
+// set violates an RFC 11 hard limit. Mandatory buckets fail closed; advisory
+// buckets warn and continue without enforcement (the suspect set is dropped
+// rather than applied). The resolution context is still recorded for audit.
+func (bucket *Bucket) handleEnforcementLimitViolation(mode string, err error) error {
+	if mode == policyModeAdvisory {
+		bucket.EnforcedBlocks = nil
+		bucket.EnforcementConfigured = false
+		bucket.EnforcementWarnings = append(bucket.EnforcementWarnings,
+			fmt.Sprintf("HCP Packer resolved enforced provisioners for bucket %q exceed CLI safety limits (advisory mode); continuing without enforcement: %v", bucket.Name, err))
+		log.Printf("[WARN] enforced provisioners: resolved set for bucket %q exceeds CLI limits (advisory); continuing: %v", bucket.Name, err)
+		bucket.recordEnforcementMetadata()
+		return nil
+	}
+	return fmt.Errorf("enforced provisioners for bucket %q exceed CLI safety limits (mandatory mode, fail-closed): %w", bucket.Name, err)
+}
+
+// handleResolveError applies the RFC 6.4 failure matrix when the resolver call
+// fails. It consults the locally cached resolution (if fresh enough for the
+// effective mode) before deciding to fail closed or warn-and-continue.
+func (bucket *Bucket) handleResolveError(err error, cached *enforcementCacheEntry) error {
+	// API does not yet support the resolver (older deployment): treat as no
+	// enforcement configured rather than failing the build.
+	if hcpPackerAPI.CheckErrorCode(err, codes.Unimplemented) || hcpPackerAPI.CheckErrorCode(err, codes.NotFound) {
+		log.Printf("[DEBUG] enforced provisioners: resolver unavailable on this API for bucket %q: %v", bucket.Name, err)
+		bucket.EnforcedBlocks = nil
+		bucket.EnforcementConfigured = false
 		return nil
 	}
 
-	bucket.EnforcedBlocks = make([]*EnforcedBlock, 0, len(resp.EnforcedBlockDetail))
-	for _, detail := range resp.EnforcedBlockDetail {
-		if detail == nil || detail.Version == nil {
-			continue
-		}
-
-		block := &EnforcedBlock{
-			ID:           detail.ID,
-			Name:         detail.Name,
-			BlockContent: detail.Version.BlockContent,
-			VersionID:    detail.Version.ID,
-			Version:      detail.Version.Version,
-		}
-
-		if detail.Version.TemplateType != nil {
-			block.TemplateType = string(*detail.Version.TemplateType)
-		}
-
-		bucket.EnforcedBlocks = append(bucket.EnforcedBlocks, block)
-		log.Printf("[INFO] linked enforced block found for bucket %q: name=%q id=%q version=%q",
-			bucket.Name, block.Name, block.ID, block.Version)
+	// Old CLI on a mandatory bucket: explicit upgrade requirement (RFC 6.4/12.4).
+	if hcpPackerAPI.IsClientUpgradeRequired(err) {
+		return fmt.Errorf("this Packer version cannot enforce provisioners for bucket %q: the registry requires a newer CLI (%s). Upgrade Packer to continue", bucket.Name, hcpPackerAPI.EnforcementReasonClientUpgradeRequired)
 	}
 
-	if len(bucket.EnforcedBlocks) == 0 {
-		log.Printf("[INFO] no enforced provisioner blocks linked to bucket %q", bucket.Name)
+	// Determine effective mode for the failure decision. Prefer the last known
+	// policy mode from cache; default to mandatory (fail-safe) when unknown.
+	mode := policyModeMandatory
+	if cached != nil && cached.PolicyMode != "" {
+		mode = cached.PolicyMode
 	}
 
-	log.Printf("[INFO] fetched %d enforced block(s) linked to bucket %q", len(bucket.EnforcedBlocks), bucket.Name)
-	return nil
+	now := time.Now().UTC()
+	if cached != nil && cached.fresh(mode, now) {
+		// Reuse the cached resolution (RFC 6.4 stale-cache rules).
+		bucket.EnforcedBlocks = cached.Blocks
+		bucket.EnforcementPolicyMode = mode
+		bucket.EnforcementResolutionID = cached.ResolutionID
+		bucket.EnforcementEtag = cached.Etag
+		bucket.EnforcementConfigured = len(cached.Blocks) > 0
+		bucket.EnforcementFromCache = true
+		log.Printf("[WARN] enforced provisioners: resolver unavailable for bucket %q; reusing cached resolution (age within %s limit)", bucket.Name, mode)
+		bucket.EnforcementWarnings = append(bucket.EnforcementWarnings,
+			fmt.Sprintf("HCP Packer resolver unavailable for bucket %q; using cached enforced provisioners.", bucket.Name))
+		return nil
+	}
+
+	// No usable cache.
+	if mode == policyModeAdvisory {
+		// Advisory: warn and continue without enforcement.
+		bucket.EnforcedBlocks = nil
+		bucket.EnforcementPolicyMode = mode
+		bucket.EnforcementConfigured = false
+		bucket.EnforcementWarnings = append(bucket.EnforcementWarnings,
+			fmt.Sprintf("HCP Packer resolver unavailable for bucket %q (advisory mode); continuing without enforced provisioners: %v", bucket.Name, err))
+		log.Printf("[WARN] enforced provisioners: resolver unavailable for bucket %q (advisory); continuing: %v", bucket.Name, err)
+		return nil
+	}
+
+	// Mandatory with no fresh cache: fail closed.
+	return fmt.Errorf("failed resolving enforced provisioners for bucket %q (mandatory mode, fail-closed): %w", bucket.Name, err)
 }
 
 func (bucket *Bucket) RegisterBuildForComponent(sourceName string) {
