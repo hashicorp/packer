@@ -186,12 +186,12 @@ func (version *Version) AddMetadataToBuild(
 		return err
 	}
 
-	packerMetadata := make(map[string]interface{})
+	packerMetadata := make(map[string]any)
 	packerMetadata["version"] = buildMetadata.PackerVersion
 
-	var pluginsMetadata []map[string]interface{}
+	var pluginsMetadata []map[string]any
 	for _, plugin := range buildMetadata.Plugins {
-		pluginMetadata := map[string]interface{}{
+		pluginMetadata := map[string]any{
 			"version": plugin.Description.Version,
 			"name":    plugin.Name,
 		}

@@ -21,14 +21,14 @@ type HCL2PostProcessor struct {
 	PostProcessor      packersdk.PostProcessor
 	postProcessorBlock *PostProcessorBlock
 	evalContext        *hcl.EvalContext
-	builderVariables   map[string]interface{}
+	builderVariables   map[string]any
 }
 
 func (p *HCL2PostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return p.PostProcessor.ConfigSpec()
 }
 
-func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error {
+func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]any) error {
 	var diags hcl.Diagnostics
 	ectx := p.evalContext
 	if len(buildVars) > 0 {
@@ -65,13 +65,13 @@ func (p *HCL2PostProcessor) HCL2Prepare(buildVars map[string]interface{}) error 
 	return p.PostProcessor.Configure(p.builderVariables, flatPostProcessorCfg)
 }
 
-func (p *HCL2PostProcessor) Configure(args ...interface{}) error {
+func (p *HCL2PostProcessor) Configure(args ...any) error {
 	return p.PostProcessor.Configure(args...)
 }
 
 func (p *HCL2PostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, artifact packersdk.Artifact) (packersdk.Artifact, bool, bool, error) {
-	generatedData := make(map[string]interface{})
-	if artifactStateData, ok := artifact.State("generated_data").(map[interface{}]interface{}); ok {
+	generatedData := make(map[string]any)
+	if artifactStateData, ok := artifact.State("generated_data").(map[any]any); ok {
 		for k, v := range artifactStateData {
 			generatedData[k.(string)] = v
 		}

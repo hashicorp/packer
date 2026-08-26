@@ -16,7 +16,7 @@ func TestProvisioner_impl(t *testing.T) {
 func TestConfigPrepare(t *testing.T) {
 	cases := []struct {
 		Key   string
-		Value interface{}
+		Value any
 		Err   bool
 	}{
 		{
@@ -51,8 +51,8 @@ func TestConfigPrepare(t *testing.T) {
 	}
 }
 
-func testConfig(t *testing.T) map[string]interface{} {
-	return map[string]interface{}{
+func testConfig(t *testing.T) map[string]any {
+	return map[string]any{
 		"command": "echo foo",
 	}
 }

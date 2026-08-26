@@ -32,11 +32,11 @@ func testBuild() *CoreBuild {
 			{
 				PType:       "mock-provisioner",
 				Provisioner: &packersdk.MockProvisioner{},
-				config:      []interface{}{42}},
+				config:      []any{42}},
 		},
 		PostProcessors: [][]CoreBuildPostProcessor{
 			{
-				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
+				{&MockPostProcessor{ArtifactId: "pp"}, "testPP", "testPPName", cty.Value{}, make(map[string]any), boolPointer(true)},
 			},
 		},
 		Variables:     make(map[string]string),
@@ -45,8 +45,8 @@ func testBuild() *CoreBuild {
 	}
 }
 
-func testDefaultPackerConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testDefaultPackerConfig() map[string]any {
+	return map[string]any{
 		common.BuildNameConfigKey:     "test",
 		common.BuilderTypeConfigKey:   "foo",
 		common.CoreVersionConfigKey:   version.FormattedVersion(),
@@ -75,7 +75,7 @@ func TestBuild_Prepare(t *testing.T) {
 	if !builder.PrepareCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(builder.PrepareConfig, []any{42, packerConfig}) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
@@ -84,7 +84,7 @@ func TestBuild_Prepare(t *testing.T) {
 	if !prov.PrepCalled {
 		t.Fatal("prep should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []any{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 
@@ -93,7 +93,7 @@ func TestBuild_Prepare(t *testing.T) {
 	if !pp.ConfigureCalled {
 		t.Fatal("should be called")
 	}
-	if !reflect.DeepEqual(pp.ConfigureConfigs, []interface{}{make(map[string]interface{}), packerConfig, BasicPlaceholderData()}) {
+	if !reflect.DeepEqual(pp.ConfigureConfigs, []any{make(map[string]any), packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", pp.ConfigureConfigs)
 	}
 }
@@ -161,7 +161,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	if !builder.PrepareCalled {
 		t.Fatalf("should be called")
 	}
-	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(builder.PrepareConfig, []any{42, packerConfig}) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
@@ -170,7 +170,7 @@ func TestBuild_Prepare_Debug(t *testing.T) {
 	if !prov.PrepCalled {
 		t.Fatal("prepare should be called")
 	}
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, BasicPlaceholderData()}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []any{42, packerConfig, BasicPlaceholderData()}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
@@ -213,7 +213,7 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 	if !builder.PrepareCalled {
 		t.Fatalf("should be called")
 	}
-	if !reflect.DeepEqual(builder.PrepareConfig, []interface{}{42, packerConfig}) {
+	if !reflect.DeepEqual(builder.PrepareConfig, []any{42, packerConfig}) {
 		t.Fatalf("bad: %#v", builder.PrepareConfig)
 	}
 
@@ -225,7 +225,7 @@ func TestBuildPrepare_ProvisionerGetsGeneratedMap(t *testing.T) {
 
 	generated := BasicPlaceholderData()
 	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{42, packerConfig, generated}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []any{42, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
@@ -246,7 +246,7 @@ func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVars(t *testing.T) {
 	lateProv := CoreBuildProvisioner{
 		PType:       "mock-provisioner",
 		Provisioner: &packersdk.MockProvisioner{},
-		config:      []interface{}{84},
+		config:      []any{84},
 	}
 
 	if err := build.PrepareProvisioners(lateProv); err != nil {
@@ -260,7 +260,7 @@ func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVars(t *testing.T) {
 	prov := lateProv.Provisioner.(*packersdk.MockProvisioner)
 	generated := BasicPlaceholderData()
 	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{84, packerConfig, generated}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []any{84, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
@@ -280,7 +280,7 @@ func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVarsForPreparedBuild(t *
 	lateProv := CoreBuildProvisioner{
 		PType:       "mock-provisioner",
 		Provisioner: &packersdk.MockProvisioner{},
-		config:      []interface{}{84},
+		config:      []any{84},
 	}
 
 	if err := build.PrepareProvisioners(lateProv); err != nil {
@@ -294,7 +294,7 @@ func TestBuild_PrepareProvisioners_ReusesStoredGeneratedVarsForPreparedBuild(t *
 	prov := lateProv.Provisioner.(*packersdk.MockProvisioner)
 	generated := BasicPlaceholderData()
 	generated["PartyVar"] = "Build_PartyVar. " + packerbuilderdata.PlaceholderMsg
-	if !reflect.DeepEqual(prov.PrepConfigs, []interface{}{84, packerConfig, generated}) {
+	if !reflect.DeepEqual(prov.PrepConfigs, []any{84, packerConfig, generated}) {
 		t.Fatalf("bad: %#v", prov.PrepConfigs)
 	}
 }
@@ -304,7 +304,7 @@ func TestBuild_PrepareProvisioners_RequiresPrepare(t *testing.T) {
 	lateProv := CoreBuildProvisioner{
 		PType:       "mock-provisioner",
 		Provisioner: &packersdk.MockProvisioner{},
-		config:      []interface{}{84},
+		config:      []any{84},
 	}
 
 	err := build.PrepareProvisioners(lateProv)
@@ -394,7 +394,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false)},
 		},
 	}
 
@@ -419,10 +419,10 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp2"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(true)},
 		},
 	}
 
@@ -447,12 +447,12 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build = testBuild()
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
-			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(true)},
+			{&MockPostProcessor{ArtifactId: "pp1a"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp1b"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(true)},
 		},
 		{
-			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
-			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2a"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false)},
+			{&MockPostProcessor{ArtifactId: "pp2b"}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false)},
 		},
 	}
 
@@ -478,7 +478,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: true}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false),
 			},
 		},
 	}
@@ -506,7 +506,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), boolPointer(false),
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]any), boolPointer(false),
 			},
 		},
 	}
@@ -533,7 +533,7 @@ func TestBuild_Run_Artifacts(t *testing.T) {
 	build.PostProcessors = [][]CoreBuildPostProcessor{
 		{
 			{
-				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]interface{}), nil,
+				&MockPostProcessor{ArtifactId: "pp", Keep: true, ForceOverride: false}, "pp", "testPPName", cty.Value{}, make(map[string]any), nil,
 			},
 		},
 	}

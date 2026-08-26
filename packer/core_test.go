@@ -146,7 +146,7 @@ func TestCoreBuild_env(t *testing.T) {
 	}
 
 	// Interpolate the config
-	var result map[string]interface{}
+	var result map[string]any
 	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -204,7 +204,7 @@ func TestCoreBuild_buildNameVar(t *testing.T) {
 	}
 
 	// Interpolate the config
-	var result map[string]interface{}
+	var result map[string]any
 	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -233,7 +233,7 @@ func TestCoreBuild_buildTypeVar(t *testing.T) {
 	}
 
 	// Interpolate the config
-	var result map[string]interface{}
+	var result map[string]any
 	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -393,7 +393,7 @@ func TestCoreBuild_provOverride(t *testing.T) {
 
 	found := false
 	for _, raw := range p.PrepConfigs {
-		if m, ok := raw.(map[string]interface{}); ok {
+		if m, ok := raw.(map[string]any); ok {
 			if _, ok := m["foo"]; ok {
 				found = true
 				break
@@ -459,7 +459,7 @@ func TestCoreBuild_templatePath(t *testing.T) {
 	}
 
 	// Interpolate the config
-	var result map[string]interface{}
+	var result map[string]any
 	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
 	if err != nil {
 		t.Fatalf("err: %s", err)
@@ -866,7 +866,7 @@ func TestCoreBuild_packerVersion(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 	// Interpolate the config
-	var result map[string]interface{}
+	var result map[string]any
 	err = configHelper.Decode(&result, nil, b.PrepareConfig...)
 	if err != nil {
 		t.Fatalf("err: %s", err)

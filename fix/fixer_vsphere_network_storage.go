@@ -19,10 +19,10 @@ func (FixerVSphereNetworkDisk) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerVSphereNetworkDisk) Fix(input map[string]any) (map[string]any, error) {
 	// The type we'll decode into; we only care about builders
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can
@@ -46,8 +46,8 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 			continue
 		}
 
-		var networkAdapters []interface{}
-		nic := make(map[string]interface{})
+		var networkAdapters []any
+		nic := make(map[string]any)
 		hasNetwork := false
 
 		networkRaw, ok := builder["network"]
@@ -77,15 +77,15 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 			networkAdapters = append(networkAdapters, nic)
 			adaptersRaw, ok := builder["network_adapters"]
 			if ok {
-				existingAdapters := adaptersRaw.([]interface{})
+				existingAdapters := adaptersRaw.([]any)
 				networkAdapters = append(networkAdapters, existingAdapters...)
 			}
 
 			builder["network_adapters"] = networkAdapters
 		}
 
-		var storage []interface{}
-		disk := make(map[string]interface{})
+		var storage []any
+		disk := make(map[string]any)
 		hasStorage := false
 
 		diskSizeRaw, ok := builder["disk_size"]
@@ -113,7 +113,7 @@ func (FixerVSphereNetworkDisk) Fix(input map[string]interface{}) (map[string]int
 			storage = append(storage, disk)
 			storageRaw, ok := builder["storage"]
 			if ok {
-				existingStorage := storageRaw.([]interface{})
+				existingStorage := storageRaw.([]any)
 				storage = append(storage, existingStorage...)
 			}
 

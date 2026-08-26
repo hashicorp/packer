@@ -17,7 +17,7 @@ type Provisioner struct {
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...any) error {
 	err := sl.Decode(&p.config, raws...)
 	if err != nil {
 		return err
@@ -31,7 +31,7 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	return nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, _ packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, _ packersdk.Communicator, generatedData map[string]any) error {
 	_, retErr := sl.Run(ctx, ui, &p.config, generatedData)
 
 	return retErr

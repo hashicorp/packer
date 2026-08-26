@@ -14,10 +14,10 @@ func (FixerVirtualBoxRename) DeprecatedOptions() map[string][]string {
 	return map[string][]string{}
 }
 
-func (FixerVirtualBoxRename) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerVirtualBoxRename) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Builders     []map[string]interface{}
-		Provisioners []interface{}
+		Builders     []map[string]any
+		Provisioners []any
 	}
 
 	// Decode the input into our structure, if we can
@@ -45,7 +45,7 @@ func (FixerVirtualBoxRename) Fix(input map[string]interface{}) (map[string]inter
 	}
 
 	for i, raw := range tpl.Provisioners {
-		var m map[string]interface{}
+		var m map[string]any
 		if err := mapstructure.WeakDecode(raw, &m); err != nil {
 			// Ignore errors, could be a non-map
 			continue
@@ -56,7 +56,7 @@ func (FixerVirtualBoxRename) Fix(input map[string]interface{}) (map[string]inter
 			continue
 		}
 
-		var override map[string]interface{}
+		var override map[string]any
 		if err := mapstructure.WeakDecode(raw, &override); err != nil {
 			return nil, err
 		}

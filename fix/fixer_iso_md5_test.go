@@ -9,8 +9,7 @@ import (
 )
 
 func TestFixerISOMD5_Impl(t *testing.T) {
-	var raw interface{}
-	raw = new(FixerISOMD5)
+	var raw any = new(FixerISOMD5)
 	if _, ok := raw.(Fixer); !ok {
 		t.Fatalf("must be a Fixer")
 	}
@@ -19,8 +18,8 @@ func TestFixerISOMD5_Impl(t *testing.T) {
 func TestFixerISOMD5_Fix(t *testing.T) {
 	var f FixerISOMD5
 
-	input := map[string]interface{}{
-		"builders": []interface{}{
+	input := map[string]any{
+		"builders": []any{
 			map[string]string{
 				"type":    "foo",
 				"iso_md5": "bar",
@@ -28,8 +27,8 @@ func TestFixerISOMD5_Fix(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"builders": []map[string]interface{}{
+	expected := map[string]any{
+		"builders": []map[string]any{
 			{
 				"type":              "foo",
 				"iso_checksum":      "bar",

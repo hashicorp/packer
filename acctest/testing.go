@@ -73,9 +73,9 @@ type TestTeardownFunc func() error
 //
 // Users should just use a *testing.T object, which implements this.
 type TestT interface {
-	Error(args ...interface{})
-	Fatal(args ...interface{})
-	Skip(args ...interface{})
+	Error(args ...any)
+	Fatal(args ...any)
+	Skip(args ...any)
 }
 
 type TestBuilderSet struct {

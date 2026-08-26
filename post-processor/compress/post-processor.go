@@ -61,7 +61,7 @@ type PostProcessor struct {
 
 func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *PostProcessor) Configure(raws ...interface{}) error {
+func (p *PostProcessor) Configure(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "compress",
 		Interpolate:        true,
@@ -114,16 +114,16 @@ func (p *PostProcessor) PostProcess(
 	ui packersdk.Ui,
 	artifact packersdk.Artifact,
 ) (packersdk.Artifact, bool, bool, error) {
-	var generatedData map[interface{}]interface{}
+	var generatedData map[any]any
 	stateData := artifact.State("generated_data")
 	if stateData != nil {
 		// Make sure it's not a nil map so we can assign to it later.
-		generatedData = stateData.(map[interface{}]interface{})
+		generatedData = stateData.(map[any]any)
 	}
 	// If stateData has a nil map generatedData will be nil
 	// and we need to make sure it's not
 	if generatedData == nil {
-		generatedData = make(map[interface{}]interface{})
+		generatedData = make(map[any]any)
 	}
 
 	// These are extra variables that will be made available for interpolation.

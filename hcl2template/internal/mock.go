@@ -45,7 +45,7 @@ type MockConfig struct {
 	NestedSlice      []NestedMockConfig `mapstructure:"nested_slice"`
 }
 
-func (b *MockConfig) Prepare(raws ...interface{}) error {
+func (b *MockConfig) Prepare(raws ...any) error {
 	for i, raw := range raws {
 		cval, ok := raw.(cty.Value)
 		if !ok {
@@ -78,7 +78,7 @@ var _ packersdk.Builder = new(MockBuilder)
 
 func (b *MockBuilder) ConfigSpec() hcldec.ObjectSpec { return b.Config.FlatMapstructure().HCL2Spec() }
 
-func (b *MockBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+func (b *MockBuilder) Prepare(raws ...any) ([]string, []string, error) {
 	return []string{"ID"}, nil, b.Config.Prepare(raws...)
 }
 
@@ -100,11 +100,11 @@ func (b *MockProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (b *MockProvisioner) Prepare(raws ...interface{}) error {
+func (b *MockProvisioner) Prepare(raws ...any) error {
 	return b.Config.Prepare(raws...)
 }
 
-func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]interface{}) error {
+func (b *MockProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, _ map[string]any) error {
 	return nil
 }
 
@@ -126,7 +126,7 @@ func (d *MockDatasource) OutputSpec() hcldec.ObjectSpec {
 	return d.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *MockDatasource) Configure(raws ...interface{}) error {
+func (d *MockDatasource) Configure(raws ...any) error {
 	return d.Config.Prepare(raws...)
 }
 
@@ -148,7 +148,7 @@ func (b *MockPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (b *MockPostProcessor) Configure(raws ...interface{}) error {
+func (b *MockPostProcessor) Configure(raws ...any) error {
 	return b.Config.Prepare(raws...)
 }
 
@@ -171,7 +171,7 @@ func (b *MockCommunicator) ConfigSpec() hcldec.ObjectSpec {
 	return b.Config.FlatMapstructure().HCL2Spec()
 }
 
-func (b *MockCommunicator) Configure(raws ...interface{}) ([]string, error) {
+func (b *MockCommunicator) Configure(raws ...any) ([]string, error) {
 	return nil, b.Config.Prepare(raws...)
 }
 

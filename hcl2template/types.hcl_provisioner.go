@@ -21,15 +21,15 @@ type HCL2Provisioner struct {
 	Provisioner      packersdk.Provisioner
 	provisionerBlock *ProvisionerBlock
 	evalContext      *hcl.EvalContext
-	builderVariables map[string]interface{}
-	override         map[string]interface{}
+	builderVariables map[string]any
+	override         map[string]any
 }
 
 func (p *HCL2Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.Provisioner.ConfigSpec()
 }
 
-func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
+func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]any) error {
 	var diags hcl.Diagnostics
 	ectx := p.evalContext
 	if len(buildVars) > 0 {
@@ -68,11 +68,11 @@ func (p *HCL2Provisioner) HCL2Prepare(buildVars map[string]interface{}) error {
 	return p.Provisioner.Prepare(p.builderVariables, flatProvisionerCfg, p.override)
 }
 
-func (p *HCL2Provisioner) Prepare(args ...interface{}) error {
+func (p *HCL2Provisioner) Prepare(args ...any) error {
 	return p.Provisioner.Prepare(args...)
 }
 
-func (p *HCL2Provisioner) Provision(ctx context.Context, ui packersdk.Ui, c packersdk.Communicator, vars map[string]interface{}) error {
+func (p *HCL2Provisioner) Provision(ctx context.Context, ui packersdk.Ui, c packersdk.Communicator, vars map[string]any) error {
 	err := p.HCL2Prepare(vars)
 	if err != nil {
 		return err

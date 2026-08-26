@@ -29,7 +29,7 @@ type CoreBuild struct {
 	//
 	// Is is deserialised directly from the JSON template,
 	// and is only populated for legacy JSON templates.
-	BuilderConfig interface{}
+	BuilderConfig any
 	// HCLConfig is the HCL config for the builder
 	//
 	// Its only use is for telemetry, since we use it to extract the
@@ -118,7 +118,7 @@ type CoreBuildPostProcessor struct {
 	HCLConfig cty.Value
 	// config is JSON-specific, the configuration for the post-processor
 	// deserialised directly from the JSON template
-	config            map[string]interface{}
+	config            map[string]any
 	KeepInputArtifact *bool
 }
 
@@ -135,7 +135,7 @@ type CoreBuildProvisioner struct {
 	HCLConfig cty.Value
 	// config is JSON-specific, and is the configuration of the
 	// provisioner, with overrides
-	config []interface{}
+	config []any
 }
 
 // Returns the name of the build.
@@ -146,8 +146,8 @@ func (b *CoreBuild) Name() string {
 	return b.Type
 }
 
-func (b *CoreBuild) packerConfig() map[string]interface{} {
-	return map[string]interface{}{
+func (b *CoreBuild) packerConfig() map[string]any {
+	return map[string]any{
 		common.BuildNameConfigKey:     b.Type,
 		common.BuilderTypeConfigKey:   b.BuilderType,
 		common.CoreVersionConfigKey:   version.FormattedVersion(),
@@ -160,11 +160,11 @@ func (b *CoreBuild) packerConfig() map[string]interface{} {
 	}
 }
 
-func (b *CoreBuild) prepareProvisioners(provisioners []CoreBuildProvisioner, packerConfig map[string]interface{}, generatedVars []string) error {
+func (b *CoreBuild) prepareProvisioners(provisioners []CoreBuildProvisioner, packerConfig map[string]any, generatedVars []string) error {
 	generatedPlaceholderMap := placeholderDataFromGeneratedVars(generatedVars)
 
 	for _, coreProv := range provisioners {
-		configs := make([]interface{}, len(coreProv.config), len(coreProv.config)+2)
+		configs := make([]any, len(coreProv.config), len(coreProv.config)+2)
 		copy(configs, coreProv.config)
 		configs = append(configs, packerConfig, generatedPlaceholderMap)
 
@@ -243,7 +243,7 @@ func (b *CoreBuild) Prepare() (warn []string, err error) {
 
 	// Prepare the on-error-cleanup provisioner
 	if b.CleanupProvisioner.PType != "" {
-		configs := make([]interface{}, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+2)
+		configs := make([]any, len(b.CleanupProvisioner.config), len(b.CleanupProvisioner.config)+2)
 		copy(configs, b.CleanupProvisioner.config)
 		configs = append(configs, packerConfig, generatedPlaceholderMap)
 		err = b.CleanupProvisioner.Provisioner.Prepare(configs...)
@@ -282,7 +282,7 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 	if len(b.Provisioners) > 0 {
 		hookedProvisioners := make([]*HookedProvisioner, len(b.Provisioners))
 		for i, p := range b.Provisioners {
-			var pConfig interface{}
+			var pConfig any
 			if len(p.config) > 0 {
 				pConfig = p.config[0]
 			} else {

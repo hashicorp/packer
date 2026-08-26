@@ -25,7 +25,7 @@ func (d *cmdDatasource) ConfigSpec() hcldec.ObjectSpec {
 	return d.d.ConfigSpec()
 }
 
-func (d *cmdDatasource) Configure(configs ...interface{}) error {
+func (d *cmdDatasource) Configure(configs ...any) error {
 	defer func() {
 		r := recover()
 		d.checkExit(r, nil)
@@ -52,7 +52,7 @@ func (d *cmdDatasource) Execute() (cty.Value, error) {
 	return d.d.Execute()
 }
 
-func (d *cmdDatasource) checkExit(p interface{}, cb func()) {
+func (d *cmdDatasource) checkExit(p any, cb func()) {
 	if d.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {

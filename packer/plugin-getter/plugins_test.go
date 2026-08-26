@@ -900,7 +900,7 @@ func (g *mockPluginGetter) ExpectedFileName(pr *Requirement, version string, ent
 
 func (g *mockPluginGetter) Get(what string, options GetOptions) (io.ReadCloser, error) {
 
-	var toEncode interface{}
+	var toEncode any
 	switch what {
 	case "releases":
 		toEncode = g.Releases

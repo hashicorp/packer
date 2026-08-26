@@ -35,7 +35,7 @@ type ParallelTestBuilder struct {
 
 func (b *ParallelTestBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
 
-func (b *ParallelTestBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+func (b *ParallelTestBuilder) Prepare(raws ...any) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
@@ -46,11 +46,11 @@ func (b *ParallelTestBuilder) Run(ctx context.Context, ui packersdk.Ui, hook pac
 }
 
 // LockedBuilder won't run until unlock is called
-type LockedBuilder struct{ unlock chan interface{} }
+type LockedBuilder struct{ unlock chan any }
 
 func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
 
-func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+func (b *LockedBuilder) Prepare(raws ...any) ([]string, []string, error) {
 	return nil, nil, nil
 }
 
@@ -93,7 +93,7 @@ func TestBuildParallel_1(t *testing.T) {
 	// testfile has 6 builds, with first one locks 'forever', other builds
 	// should go through.
 	b := NewParallelTestBuilder(5)
-	locked := &LockedBuilder{unlock: make(chan interface{})}
+	locked := &LockedBuilder{unlock: make(chan any)}
 
 	c := &BuildCommand{
 		Meta: testMetaParallel(t, b, locked),
@@ -122,7 +122,7 @@ func TestBuildParallel_2(t *testing.T) {
 	// testfile has 6 builds, 2 of them lock 'forever', other builds
 	// should go through.
 	b := NewParallelTestBuilder(4)
-	locked := &LockedBuilder{unlock: make(chan interface{})}
+	locked := &LockedBuilder{unlock: make(chan any)}
 
 	c := &BuildCommand{
 		Meta: testMetaParallel(t, b, locked),
@@ -151,7 +151,7 @@ func TestBuildParallel_Timeout(t *testing.T) {
 	// testfile has 6 builds, 1 of them locks 'forever', one locks and times
 	// out other builds should go through.
 	b := NewParallelTestBuilder(4)
-	locked := &LockedBuilder{unlock: make(chan interface{})}
+	locked := &LockedBuilder{unlock: make(chan any)}
 
 	c := &BuildCommand{
 		Meta: testMetaParallel(t, b, locked),
