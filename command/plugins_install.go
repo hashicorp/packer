@@ -17,8 +17,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/hashicorp/packer/packer/plugin-getter/release"
-
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
@@ -26,8 +24,6 @@ import (
 	"github.com/hashicorp/packer/hcl2template/addrs"
 	"github.com/hashicorp/packer/packer"
 	plugingetter "github.com/hashicorp/packer/packer/plugin-getter"
-	"github.com/hashicorp/packer/packer/plugin-getter/github"
-	pkrversion "github.com/hashicorp/packer/version"
 )
 
 type PluginsInstallCommand struct {
@@ -177,27 +173,10 @@ func (c *PluginsInstallCommand) RunContext(buildCtx context.Context, args *Plugi
 		pluginRequirement.VersionConstraints = constraints
 	}
 
-	getters := []plugingetter.Getter{
-		&release.Getter{
-			Name: "releases.hashicorp.com",
-		},
-		&github.Getter{
-			// In the past some terraform plugins downloads were blocked from a
-			// specific aws region by s3. Changing the user agent unblocked the
-			// downloads so having one user agent per version will help mitigate
-			// that a little more. Especially in the case someone forks this
-			// code to make it more aggressive or something.
-			// TODO: allow to set this from the config file or an environment
-			// variable.
-			UserAgent: "packer-getter-github-" + pkrversion.String(),
-			Name:      "github.com",
-		},
-	}
-
 	newInstall, err := pluginRequirement.InstallLatest(plugingetter.InstallOptions{
 		PluginDirectory:           opts.PluginDirectory,
 		BinaryInstallationOptions: opts.BinaryInstallationOptions,
-		Getters:                   getters,
+		Getters:                   pluginGetters(pluginRequirement.Identifier),
 		Force:                     args.Force,
 	})
 
