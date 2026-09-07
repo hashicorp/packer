@@ -44,7 +44,7 @@ Comprehensive documentation is viewable on the Packer website at https://develop
 ## Contributing to Packer
 
 See
-[CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/master/.github/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/hashicorp/packer/blob/main/.github/CONTRIBUTING.md)
 for best practices and instructions on setting up your development environment
 to work on Packer.
 
