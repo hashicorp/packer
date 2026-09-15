@@ -16,13 +16,13 @@ require (
 	github.com/hako/durafmt v0.0.0-20200710122514-c0fb7b4da026
 	github.com/hashicorp/go-checkpoint v0.5.1-0.20260522084958-784cec078f5b
 	github.com/hashicorp/go-cty-funcs v0.1.1-0.20260703063543-3af2ddd1aaea
-	github.com/hashicorp/go-getter/v2 v2.2.2
+	github.com/hashicorp/go-getter/v2 v2.2.4
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/go-version v1.9.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/hashicorp/hcp-sdk-go v0.175.0
-	github.com/hashicorp/packer-plugin-sdk v0.6.10
+	github.com/hashicorp/packer-plugin-sdk v0.6.11
 	github.com/jehiah/go-strftime v0.0.0-20171201141054-1d33003b3869
 	github.com/klauspost/compress v1.18.7
 	github.com/klauspost/pgzip v1.2.6
@@ -43,14 +43,14 @@ require (
 	github.com/zclconf/go-cty v1.18.1
 	github.com/zclconf/go-cty-yaml v1.0.1
 	golang.org/x/crypto v0.56.0 // indirect
-	golang.org/x/mod v0.38.0
-	golang.org/x/net v0.57.0
+	golang.org/x/mod v0.40.0
+	golang.org/x/net v0.58.0
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/sync v0.22.0
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 	golang.org/x/text v0.41.0
-	golang.org/x/tools v0.48.0
+	golang.org/x/tools v0.49.0
 )
 
 require (
@@ -130,7 +130,7 @@ require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/aws/aws-sdk-go v1.55.5 // indirect
+	github.com/aws/aws-sdk-go v1.55.8 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.7 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.10 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.17 // indirect
