@@ -70,7 +70,7 @@ require (
 	github.com/sigstore/sigstore/pkg/signature/kms/gcp v1.10.8
 	github.com/sigstore/sigstore/pkg/signature/kms/hashivault v1.10.8
 	github.com/spdx/tools-golang v0.5.7
-	google.golang.org/grpc v1.83.1
+	google.golang.org/grpc v1.83.2
 	modernc.org/sqlite v1.46.1
 )
 
