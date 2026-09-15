@@ -15,6 +15,7 @@ import (
 	pkrfunction "github.com/hashicorp/packer/hcl2template/function"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
+	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/function"
 )
 
@@ -926,6 +927,35 @@ func (p *PackerConfig) printVariables() string {
 		fmt.Fprintf(out, "local.%s: %q\n", v.Name, PrintableCtyValue(val))
 	}
 	return out.String()
+}
+
+// userVariableValues returns the string representation of the input variable
+// values, keyed by variable name, for plugins to consume under the
+// packer_user_variables config key. This mirrors the legacy JSON templates'
+// user variables, making `{{ user "name" }}` work in plugin interpolation.
+// Variables marked sensitive are excluded so their values only reach a plugin
+// where the template references them explicitly. Unset/unknown values and
+// values with no string representation (lists, maps, objects) are skipped,
+// since legacy user variables were always strings.
+func (cfg *PackerConfig) userVariableValues() map[string]string {
+	userVars := make(map[string]string, len(cfg.InputVariables))
+
+	for key, variable := range cfg.InputVariables {
+		if variable.Sensitive {
+			continue
+		}
+		val := variable.Value()
+		if val.IsNull() || !val.IsWhollyKnown() {
+			continue
+		}
+		strVal, err := convert.Convert(val, cty.String)
+		if err != nil || strVal.IsNull() {
+			continue
+		}
+		userVars[key] = strVal.AsString()
+	}
+
+	return userVars
 }
 
 func (cfg *PackerConfig) sensitiveInputVariableKeys() []string {

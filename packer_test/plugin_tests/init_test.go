@@ -48,15 +48,17 @@ func (ts *PackerPluginTestSuite) TestPackerInitWithNonGithubSource() {
 	pluginPath := ts.MakePluginDir()
 	defer pluginPath.Cleanup()
 
-	ts.Run("try installing from a non-github source, should fail", func() {
+	ts.Run("try installing from an unreachable non-github source, should fail", func() {
+		// The .invalid TLD never resolves (RFC 6761), so the remote getter
+		// fails deterministically without depending on a live external host.
 		ts.PackerCommand().UsePluginDir(pluginPath).
 			SetArgs("init", "./templates/init/non_gh.pkr.hcl").
-			Assert(check.MustFail(), check.Grep(`doesn't appear to be a valid "github.com" source address`, check.GrepStdout))
+			Assert(check.MustFail(), check.Grep(`failed to fetch https://hubgit.invalid/hashicorp/packer-plugin-tester/index.json`, check.GrepStdout))
 	})
 
 	ts.Run("manually install plugin to the expected source", func() {
 		ts.PackerCommand().UsePluginDir(pluginPath).
-			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.10"), "hubgit.com/hashicorp/tester").
+			SetArgs("plugins", "install", "--path", ts.GetPluginPath(ts.T(), "1.0.10"), "hubgit.invalid/hashicorp/tester").
 			Assert(check.MustSucceed(), check.Grep("packer-plugin-tester_v1.0.10", check.GrepStdout))
 	})
 

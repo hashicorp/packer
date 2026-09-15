@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2024, 2025
+// Copyright IBM Corp. 2024, 2026
 // SPDX-License-Identifier: BUSL-1.1
 
 package shell_local
@@ -139,7 +139,7 @@ func TestPostProcessorPrepare_ExecuteCommand(t *testing.T) {
 	p = new(PostProcessor)
 	p.Configure(raws)
 	if runtime.GOOS != "windows" {
-		expected = []string{"/bin/sh", "-c", "{{.Vars}} {{.Script}}"}
+		expected = []string{"/bin/sh", "-c", "{{.Vars}} /bin/sh -e \"$0\"", "{{.Script}}"}
 	} else {
 		expected = []string{"cmd", "/V", "/C", "{{.Vars}}", "call", "{{.Script}}"}
 	}

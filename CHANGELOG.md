@@ -1,5 +1,61 @@
 # 📦 Changelog
 
+## 1.16.1 (September 15, 2026)
+
+### FEATURES:
+
+* plugin/getter: add support for installing plugins from non-GitHub HTTPS sources,
+  including mirrors and artifact repositories that expose the HashiCorp release
+  directory format.
+    [GH-13691](https://github.com/hashicorp/packer/pull/13691)
+
+### IMPROVEMENTS:
+
+* communicator/winrm: add configurable connection timeout and retry interval settings.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+* build: update Go to `1.26.8`.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+
+### BUG FIXES:
+
+* core/hcl2: pass user variable values to builders, provisioners, and post-processors
+  as `packer_user_variables`, restoring legacy `{{ user "name" }}` interpolation in
+  plugin-managed templates.
+    [GH-13686](https://github.com/hashicorp/packer/pull/13686)
+* post-processor/shell-local: execute inline scripts through the shell to avoid
+  intermittent `ETXTBSY` errors.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+
+### SECURITY:
+
+* test/deps: bump `google.golang.org/grpc` to `v1.83.2` in the plugin tester to
+  reject requests missing both the `:authority` and `Host` headers.
+    [GH-13704](https://github.com/hashicorp/packer/pull/13704)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` to `v0.6.11`.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+* deps: bump `github.com/hashicorp/go-getter/v2` to `v2.2.4`.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+* deps: bump `github.com/hashicorp/hcp-sdk-go` to `v0.175.0`,
+  `github.com/go-git/go-git/v5` to `v5.19.2`, and
+  `github.com/klauspost/compress` to `v1.18.7`.
+    [GH-13689](https://github.com/hashicorp/packer/pull/13689)
+* deps: bump `golang.org/x/crypto` to `v0.56.0`, `golang.org/x/net` to
+  `v0.58.0`, and `google.golang.org/grpc` to `v1.83.1`.
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+* deps: update additional Go module dependencies in Packer and the plugin tester.
+    [GH-13689](https://github.com/hashicorp/packer/pull/13689)
+    [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+
+### INTERNAL:
+
+* docs: update the README contribution link to use the `main` branch.
+    [GH-13700](https://github.com/hashicorp/packer/pull/13700)
+* compliance: update copyright headers.
+    [GH-13699](https://github.com/hashicorp/packer/pull/13699)
+
 ## 1.16.0 (July 24, 2026)
 
 ### FEATURES:
@@ -6801,4 +6857,3 @@ making changes for HCL2.
 ## 0.1.0 (June 28, 2013)
 
 * Initial release
-
