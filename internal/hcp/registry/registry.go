@@ -20,10 +20,15 @@ type Registry interface {
 	CompleteBuild(ctx context.Context, build *packer.CoreBuild, artifacts []sdkpacker.Artifact, buildErr error) ([]sdkpacker.Artifact, error)
 	VersionStatusSummary()
 	Metadata() Metadata
-	// FetchEnforcedBlocks fetches enforced provisioner blocks from HCP Packer
-	FetchEnforcedBlocks(ctx context.Context) error
-	// InjectEnforcedProvisioners injects enforced provisioners into the builds
+	// FetchEnforcedBlocks resolves the effective enforced-provisioner set from
+	// HCP Packer (RFC 6.2) and applies the mandatory/advisory failure matrix.
+	FetchEnforcedBlocks(ctx context.Context, opts EnforcementOptions) error
+	// InjectEnforcedProvisioners injects the resolved enforced provisioners into
+	// the builds in canonical execution order.
 	InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics
+	// RecordEnforcementSkip records an authorized --skip-enforcement decision
+	// into build metadata (RFC 10).
+	RecordEnforcementSkip(reasonCode, reasonNote string)
 }
 
 // New instantiates the appropriate registry for the Packer configuration template type.
