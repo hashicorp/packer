@@ -10,8 +10,7 @@ import (
 )
 
 func TestFixerISOChecksumTypeAndURL_Impl(t *testing.T) {
-	var raw interface{}
-	raw = new(FixerISOChecksumTypeAndURL)
+	var raw any = new(FixerISOChecksumTypeAndURL)
 	if _, ok := raw.(Fixer); !ok {
 		t.Fatalf("must be a Fixer")
 	}
@@ -20,44 +19,44 @@ func TestFixerISOChecksumTypeAndURL_Impl(t *testing.T) {
 func TestFixerISOChecksumTypeAndURL_Fix(t *testing.T) {
 
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":              "foo",
 				"iso_checksum_url":  "bar",
 				"iso_checksum_type": "ignored",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":         "foo",
 				"iso_checksum": "file:bar",
 			},
 		},
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":              "foo",
 				"iso_checksum":      "checksum",
 				"iso_checksum_type": "md5",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":         "foo",
 				"iso_checksum": "md5:checksum",
 			},
 		},
 
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":             "foo",
 				"iso_checksum":     "checksum",
 				"iso_checksum_url": "path/to/checksumfile",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":         "foo",
 				"iso_checksum": "file:path/to/checksumfile",
 			},
@@ -67,12 +66,12 @@ func TestFixerISOChecksumTypeAndURL_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerISOChecksumTypeAndURL
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

@@ -21,9 +21,9 @@ func (FixerAmazonPrivateIP) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerAmazonPrivateIP) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerAmazonPrivateIP) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can

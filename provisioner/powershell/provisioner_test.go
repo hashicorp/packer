@@ -49,8 +49,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 }
 
 func TestProvisioner_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &Provisioner{}
+	var raw any = &Provisioner{}
 	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
@@ -223,7 +222,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 	defer os.Remove(tf.Name())
 	defer tf.Close()
 
-	config["inline"] = []interface{}{"foo"}
+	config["inline"] = []any{"foo"}
 	config["script"] = tf.Name()
 	err = p.Prepare(config)
 	if err == nil {
@@ -243,7 +242,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 	defer os.Remove(tf.Name())
 	defer tf.Close()
 
-	config["inline"] = []interface{}{"foo"}
+	config["inline"] = []any{"foo"}
 	config["scripts"] = []string{tf.Name()}
 	err = p.Prepare(config)
 	if err == nil {
@@ -588,7 +587,7 @@ func TestProvisionerProvision_SkipClean(t *testing.T) {
 		os.Remove(tempFile.Name())
 	}()
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"scripts":     []string{tempFile.Name()},
 		"remote_path": "c:/Windows/Temp/script.ps1",
 	}
@@ -726,7 +725,7 @@ func TestProvisioner_createFlattenedElevatedEnvVars_windows(t *testing.T) {
 
 func TestProvisionerCorrectlyInterpolatesValidExitCodes(t *testing.T) {
 	type testCases struct {
-		Input    interface{}
+		Input    any
 		Expected []int
 	}
 	validExitCodeTests := []testCases{
@@ -753,7 +752,7 @@ func TestProvisionerCorrectlyInterpolatesValidExitCodes(t *testing.T) {
 
 func TestProvisionerCorrectlyInterpolatesExecutionPolicy(t *testing.T) {
 	type testCases struct {
-		Input       interface{}
+		Input       any
 		Expected    ExecutionPolicy
 		ErrExpected bool
 	}
@@ -918,7 +917,7 @@ func TestProvision_createCommandText(t *testing.T) {
 	p.config.PackerBuilderType = "iso"
 
 	// Non-elevated
-	p.generatedData = make(map[string]interface{})
+	p.generatedData = make(map[string]any)
 	cmd, _ := p.createCommandText()
 
 	re := regexp.MustCompile(`powershell -executionpolicy bypass -file c:/Windows/Temp/script.ps1`)
@@ -949,7 +948,7 @@ func TestProvision_createCommandTextNoneExecutionPolicy(t *testing.T) {
 	_ = p.Prepare(config)
 
 	// Non-elevated
-	p.generatedData = make(map[string]interface{})
+	p.generatedData = make(map[string]any)
 
 	cmd, _ := p.createCommandText()
 	re := regexp.MustCompile(`-file c:/Windows/Temp/script.ps1`)
@@ -982,21 +981,21 @@ func TestCancel(t *testing.T) {
 	// which kills the 'go test' tool
 }
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"inline": []interface{}{"foo", "bar"},
+func testConfig() map[string]any {
+	return map[string]any{
+		"inline": []any{"foo", "bar"},
 	}
 }
 
-func testConfigWithSkipClean() map[string]interface{} {
-	return map[string]interface{}{
-		"inline":     []interface{}{"foo", "bar"},
+func testConfigWithSkipClean() map[string]any {
+	return map[string]any{
+		"inline":     []any{"foo", "bar"},
 		"skip_clean": true,
 	}
 }
 
-func generatedData() map[string]interface{} {
-	return map[string]interface{}{
+func generatedData() map[string]any {
+	return map[string]any{
 		"PackerHTTPAddr": commonsteps.HttpAddrNotImplemented,
 		"PackerHTTPIP":   commonsteps.HttpIPNotImplemented,
 		"PackerHTTPPort": commonsteps.HttpPortNotImplemented,

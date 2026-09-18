@@ -16,7 +16,7 @@ type helperPostProcessor byte
 
 func (helperPostProcessor) ConfigSpec() hcldec.ObjectSpec { return nil }
 
-func (helperPostProcessor) Configure(...interface{}) error {
+func (helperPostProcessor) Configure(...any) error {
 	return nil
 }
 

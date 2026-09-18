@@ -14,17 +14,17 @@ func TestFixerGalaxyCommand_Impl(t *testing.T) {
 
 func TestFixerGalaxyCommand_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// set galaxy_command
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":           "ansible-local",
 				"galaxy_command": "/usr/local/bin/ansible-galaxy",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":           "ansible-local",
 				"galaxy_command": "/usr/local/bin/ansible-galaxy",
 			},
@@ -32,12 +32,12 @@ func TestFixerGalaxyCommand_Fix(t *testing.T) {
 
 		// set galaxycommand (old key)
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":          "ansible-local",
 				"galaxycommand": "/usr/bin/ansible-galaxy",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":           "ansible-local",
 				"galaxy_command": "/usr/bin/ansible-galaxy",
 			},
@@ -46,13 +46,13 @@ func TestFixerGalaxyCommand_Fix(t *testing.T) {
 		// set galaxy_command and galaxycommand
 		// galaxy_command takes precedence
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":           "ansible-local",
 				"galaxy_command": "ansible_galaxy_command",
 				"galaxycommand":  "ansible_galaxycommand",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":           "ansible-local",
 				"galaxy_command": "ansible_galaxy_command",
 			},
@@ -62,12 +62,12 @@ func TestFixerGalaxyCommand_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerGalaxyCommand
 
-		input := map[string]interface{}{
-			"provisioners": []interface{}{tc.Input},
+		input := map[string]any{
+			"provisioners": []any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"provisioners": []interface{}{tc.Expected},
+		expected := map[string]any{
+			"provisioners": []any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

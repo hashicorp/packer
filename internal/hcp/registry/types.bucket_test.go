@@ -425,7 +425,7 @@ func TestCompleteBuild(t *testing.T) {
 		BuilderIdValue: "builder.test",
 		FilesValue:     []string{"file.one"},
 		IdValue:        "Test",
-		StateValues: map[string]interface{}{
+		StateValues: map[string]any{
 			"builder.test": "OK",
 			image.ArtifactStateURI: &image.Image{
 				ImageID:        "hcp-test",
@@ -442,7 +442,7 @@ func TestCompleteBuild(t *testing.T) {
 		BuilderIdValue: "builder.test",
 		FilesValue:     []string{"file.one"},
 		IdValue:        "Test",
-		StateValues: map[string]interface{}{
+		StateValues: map[string]any{
 			"builder.test": "OK",
 		},
 		DestroyCalled: false,
@@ -645,7 +645,7 @@ func TestBucket_DoCompleteBuild_WithChannels(t *testing.T) {
 			BuilderIdValue: "builder.test",
 			FilesValue:     []string{"file.one"},
 			IdValue:        "test-artifact",
-			StateValues: map[string]interface{}{
+			StateValues: map[string]any{
 				"builder.test": "OK",
 				image.ArtifactStateURI: &image.Image{
 					ImageID:        "hcp-test-image",

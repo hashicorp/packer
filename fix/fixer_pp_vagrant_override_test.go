@@ -16,25 +16,25 @@ func TestFixerVagrantPPOverride_Impl(t *testing.T) {
 func TestFixerVagrantPPOverride_Fix(t *testing.T) {
 	var f FixerVagrantPPOverride
 
-	input := map[string]interface{}{
-		"post-processors": []interface{}{
+	input := map[string]any{
+		"post-processors": []any{
 			"foo",
 
-			map[string]interface{}{
+			map[string]any{
 				"type": "vagrant",
-				"aws": map[string]interface{}{
+				"aws": map[string]any{
 					"foo": "bar",
 				},
 			},
 
-			map[string]interface{}{
+			map[string]any{
 				"type": "vsphere",
 			},
 
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type": "vagrant",
-					"vmware": map[string]interface{}{
+					"vmware": map[string]any{
 						"foo": "bar",
 					},
 				},
@@ -42,28 +42,28 @@ func TestFixerVagrantPPOverride_Fix(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"post-processors": []interface{}{
+	expected := map[string]any{
+		"post-processors": []any{
 			"foo",
 
-			map[string]interface{}{
+			map[string]any{
 				"type": "vagrant",
-				"override": map[string]interface{}{
-					"aws": map[string]interface{}{
+				"override": map[string]any{
+					"aws": map[string]any{
 						"foo": "bar",
 					},
 				},
 			},
 
-			map[string]interface{}{
+			map[string]any{
 				"type": "vsphere",
 			},
 
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type": "vagrant",
-					"override": map[string]interface{}{
-						"vmware": map[string]interface{}{
+					"override": map[string]any{
+						"vmware": map[string]any{
 							"foo": "bar",
 						},
 					},

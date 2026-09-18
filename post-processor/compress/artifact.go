@@ -30,7 +30,7 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("compressed artifacts in: %s", a.Path)
 }
 
-func (*Artifact) State(name string) interface{} {
+func (*Artifact) State(name string) any {
 	return nil
 }
 

@@ -5,20 +5,20 @@ package fix
 
 // PP is a convenient way to interact with the post-processors within a fixer
 type PP struct {
-	PostProcessors []interface{} `mapstructure:"post-processors"`
+	PostProcessors []any `mapstructure:"post-processors"`
 }
 
 // postProcessors converts the variable structure of the template to a list
-func (pp *PP) ppList() []map[string]interface{} {
-	pps := make([]map[string]interface{}, 0, len(pp.PostProcessors))
+func (pp *PP) ppList() []map[string]any {
+	pps := make([]map[string]any, 0, len(pp.PostProcessors))
 	for _, rawPP := range pp.PostProcessors {
 		switch pp := rawPP.(type) {
 		case string:
-		case map[string]interface{}:
+		case map[string]any:
 			pps = append(pps, pp)
-		case []interface{}:
+		case []any:
 			for _, innerRawPP := range pp {
-				if innerPP, ok := innerRawPP.(map[string]interface{}); ok {
+				if innerPP, ok := innerRawPP.(map[string]any); ok {
 					pps = append(pps, innerPP)
 				}
 			}

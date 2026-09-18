@@ -10,8 +10,7 @@ import (
 )
 
 func TestFixerCleanImageName_Impl(t *testing.T) {
-	var raw interface{}
-	raw = new(FixerCleanImageName)
+	var raw any = new(FixerCleanImageName)
 	if _, ok := raw.(Fixer); !ok {
 		t.Fatalf("must be a Fixer")
 	}
@@ -20,24 +19,24 @@ func TestFixerCleanImageName_Impl(t *testing.T) {
 func TestFixerCleanImageName_Fix(t *testing.T) {
 	var f FixerCleanImageName
 
-	input := map[string]interface{}{
-		"builders": []interface{}{
-			map[string]interface{}{
+	input := map[string]any{
+		"builders": []any{
+			map[string]any{
 				"type":     "foo",
 				"ami_name": "heyo clean_image_name",
-				"image_labels": map[string]interface{}{
+				"image_labels": map[string]any{
 					"name": "test-packer-{{packer_version | clean_image_name}}",
 				},
 			},
 		},
 	}
 
-	expected := map[string]interface{}{
-		"builders": []map[string]interface{}{
+	expected := map[string]any{
+		"builders": []map[string]any{
 			{
 				"type":     "foo",
 				"ami_name": "heyo clean_resource_name",
-				"image_labels": map[string]interface{}{
+				"image_labels": map[string]any{
 					"name": "test-packer-{{packer_version | clean_resource_name}}",
 				},
 			},

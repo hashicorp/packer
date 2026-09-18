@@ -23,7 +23,7 @@ func testJSONRegistryWithBuilds(t *testing.T, builderNames ...string) (*JSONRegi
 		builders[name] = &packertemplate.Builder{
 			Name:   name,
 			Type:   "test",
-			Config: map[string]interface{}{},
+			Config: map[string]any{},
 		}
 	}
 
@@ -79,7 +79,7 @@ func TestJSONRegistry_InjectEnforcedProvisioners_AppliesOverride(t *testing.T) {
 
 	foundOverride := false
 	for _, raw := range provisioner.PrepConfigs {
-		config, ok := raw.(map[string]interface{})
+		config, ok := raw.(map[string]any)
 		if !ok {
 			continue
 		}

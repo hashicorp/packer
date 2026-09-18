@@ -15,17 +15,17 @@ func TestFixerHypervVmxcTypo_impl(t *testing.T) {
 
 func TestFixerHypervVmxcTypo_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No "clone_from_vmxc_path" in template - noop
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":      "hyperv-vmcx",
 				"temp_path": "C:/some/temp/path",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":      "hyperv-vmcx",
 				"temp_path": "C:/some/temp/path",
 			},
@@ -34,12 +34,12 @@ func TestFixerHypervVmxcTypo_Fix(t *testing.T) {
 		// "clone_from_vmxc_path" should be replaced with
 		// "clone_from_vmcx_path" in template
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                 "hyperv-vmcx",
 				"clone_from_vmxc_path": "C:/some/vmcx/path",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":                 "hyperv-vmcx",
 				"clone_from_vmcx_path": "C:/some/vmcx/path",
 			},
@@ -49,12 +49,12 @@ func TestFixerHypervVmxcTypo_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerHypervVmxcTypo
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

@@ -15,9 +15,9 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"inline": []interface{}{"foo", "bar"},
+func testConfig() map[string]any {
+	return map[string]any{
+		"inline": []any{"foo", "bar"},
 	}
 }
 
@@ -48,8 +48,7 @@ func TestProvisionerPrepare_extractScript(t *testing.T) {
 }
 
 func TestProvisioner_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &Provisioner{}
+	var raw any = &Provisioner{}
 	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a Provisioner")
 	}
@@ -135,7 +134,7 @@ func TestProvisionerPrepare_ScriptAndInline(t *testing.T) {
 	defer os.Remove(tf.Name())
 	defer tf.Close()
 
-	config["inline"] = []interface{}{"foo"}
+	config["inline"] = []any{"foo"}
 	config["script"] = tf.Name()
 	err = p.Prepare(config)
 	if err == nil {
@@ -155,7 +154,7 @@ func TestProvisionerPrepare_ScriptAndScripts(t *testing.T) {
 	defer os.Remove(tf.Name())
 	defer tf.Close()
 
-	config["inline"] = []interface{}{"foo"}
+	config["inline"] = []any{"foo"}
 	config["scripts"] = []string{tf.Name()}
 	err = p.Prepare(config)
 	if err == nil {
@@ -450,8 +449,8 @@ func TestCancel(t *testing.T) {
 	// Don't actually call Cancel() as it performs an os.Exit(0)
 	// which kills the 'go test' tool
 }
-func generatedData() map[string]interface{} {
-	return map[string]interface{}{
+func generatedData() map[string]any {
+	return map[string]any{
 		"PackerHTTPAddr": commonsteps.HttpAddrNotImplemented,
 		"PackerHTTPIP":   commonsteps.HttpIPNotImplemented,
 		"PackerHTTPPort": commonsteps.HttpPortNotImplemented,

@@ -295,7 +295,7 @@ func wrappedMain() int {
 func excludeHelpFunc(commands map[string]cli.CommandFactory, exclude []string) cli.HelpFunc {
 	// Make search slice into a map so we can use use the `if found` idiom
 	// instead of a nested loop.
-	var excludes = make(map[string]interface{}, len(exclude))
+	var excludes = make(map[string]any, len(exclude))
 	for _, item := range exclude {
 		excludes[item] = nil
 	}

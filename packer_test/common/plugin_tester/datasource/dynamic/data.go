@@ -38,7 +38,7 @@ func (d *Datasource) ConfigSpec() hcldec.ObjectSpec {
 	return d.config.FlatMapstructure().HCL2Spec()
 }
 
-func (d *Datasource) Configure(raws ...interface{}) error {
+func (d *Datasource) Configure(raws ...any) error {
 	err := config.Decode(&d.config, nil, raws...)
 	if err != nil {
 		return err

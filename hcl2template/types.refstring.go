@@ -88,7 +88,7 @@ func newDataSourceRefString(parts []string) (refString, error) {
 }
 
 // getComponentByRef gets a registered component from the configuration from a refString
-func (cfg *PackerConfig) getComponentByRef(rs refString) (interface{}, error) {
+func (cfg *PackerConfig) getComponentByRef(rs refString) (any, error) {
 	switch rs.MType {
 	case "data":
 		for _, ds := range cfg.Datasources {

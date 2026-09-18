@@ -15,7 +15,7 @@ type cmdHook struct {
 	client *PluginClient
 }
 
-func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data interface{}) error {
+func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data any) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
@@ -24,7 +24,7 @@ func (c *cmdHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm pa
 	return c.hook.Run(ctx, name, ui, comm, data)
 }
 
-func (c *cmdHook) checkExit(p interface{}, cb func()) {
+func (c *cmdHook) checkExit(p any, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {

@@ -15,7 +15,7 @@ import (
 func TestConfigPrepare(t *testing.T) {
 	tests := []struct {
 		name               string
-		inputConfig        map[string]interface{}
+		inputConfig        map[string]any
 		interpolateContext interpolate.Context
 		expectConfig       *Config
 		expectError        bool
@@ -23,7 +23,7 @@ func TestConfigPrepare(t *testing.T) {
 	}{
 		{
 			"empty config, should error without a source",
-			map[string]interface{}{},
+			map[string]any{},
 			interpolate.Context{},
 			nil,
 			true,
@@ -31,7 +31,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"config with full context for interpolation: success",
-			map[string]interface{}{
+			map[string]any{
 				"source": "{{ .Name }}",
 			},
 			interpolate.Context{
@@ -53,7 +53,7 @@ func TestConfigPrepare(t *testing.T) {
 			// Refer to the comment in `Prepare` for context as to WHY
 			// this cannot be considered an error.
 			"config with sbom name as interpolated value, without it in context, replace with a placeholder",
-			map[string]interface{}{
+			map[string]any{
 				"source":    "test",
 				"sbom_name": "{{ .Name }}",
 			},
@@ -67,7 +67,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"auto_generate enabled with defaults",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate": true,
 			},
 			interpolate.Context{},
@@ -82,7 +82,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"auto_generate with custom scan path",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate": true,
 				"scan_path":     "/opt/app",
 			},
@@ -98,7 +98,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"auto_generate with custom execute_command",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate":   true,
 				"execute_command": "{{.Path}} {{.Args}} {{.ScanPath}} > {{.Output}}",
 			},
@@ -114,7 +114,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"auto_generate with deprecated scanner_url (should warn but not fail)",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate": true,
 				"scanner_url":   "https://example.com/scanner",
 				"scan_path":     "/opt/app",
@@ -132,7 +132,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"deprecated scanner_checksum with scanner_url (should warn but not fail)",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate":    true,
 				"scanner_url":      "https://example.com/scanner",
 				"scanner_checksum": "abc123def456",
@@ -151,7 +151,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"deprecated scanner_checksum without scanner_url - should still error for clarity",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate":    true,
 				"scanner_checksum": "abc123",
 			},
@@ -162,7 +162,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"auto_generate with elevated user and password",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate":     true,
 				"elevated_user":     "admin",
 				"elevated_password": "password123",
@@ -181,7 +181,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"source and auto_generate both set - should error",
-			map[string]interface{}{
+			map[string]any{
 				"source":        "sbom.json",
 				"auto_generate": true,
 			},
@@ -192,7 +192,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"elevated_password without elevated_user - should error",
-			map[string]interface{}{
+			map[string]any{
 				"auto_generate":     true,
 				"elevated_password": "password123",
 			},
@@ -203,7 +203,7 @@ func TestConfigPrepare(t *testing.T) {
 		},
 		{
 			"source mode with scanner fields - should succeed (allows toggling auto_generate)",
-			map[string]interface{}{
+			map[string]any{
 				"source":            "sbom.json",
 				"scanner_args":      []string{"-o", "json"},
 				"scan_path":         "/opt/app",

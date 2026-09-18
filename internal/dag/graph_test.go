@@ -127,10 +127,10 @@ func TestGraphEdgesTo(t *testing.T) {
 }
 
 type hashVertex struct {
-	code interface{}
+	code any
 }
 
-func (v *hashVertex) Hashcode() interface{} {
+func (v *hashVertex) Hashcode() any {
 	return v.code
 }
 

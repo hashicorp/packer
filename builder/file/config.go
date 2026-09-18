@@ -25,7 +25,7 @@ type Config struct {
 	Content string `mapstructure:"content"`
 }
 
-func (c *Config) Prepare(raws ...interface{}) ([]string, error) {
+func (c *Config) Prepare(raws ...any) ([]string, error) {
 	warnings := []string{}
 
 	err := config.Decode(c, &config.DecodeOpts{

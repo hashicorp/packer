@@ -25,7 +25,7 @@ import (
 // A HookedProvisioner represents a provisioner and information describing it
 type HookedProvisioner struct {
 	Provisioner packersdk.Provisioner
-	Config      interface{}
+	Config      any
 	TypeName    string
 }
 
@@ -83,9 +83,9 @@ func BasicPlaceholderData() map[string]string {
 	return placeholderData
 }
 
-func CastDataToMap(data interface{}) map[string]interface{} {
+func CastDataToMap(data any) map[string]any {
 
-	if interMap, ok := data.(map[string]interface{}); ok {
+	if interMap, ok := data.(map[string]any); ok {
 		// null and file builder sometimes don't use a communicator and
 		// therefore don't go through RPC
 		return interMap
@@ -94,8 +94,8 @@ func CastDataToMap(data interface{}) map[string]interface{} {
 	// Provisioners expect a map[string]interface{} in their data field, but
 	// it gets converted into a map[interface]interface on the way over the
 	// RPC. Check that data can be cast into such a form, and cast it.
-	cast := make(map[string]interface{})
-	interMap, ok := data.(map[interface{}]interface{})
+	cast := make(map[string]any)
+	interMap, ok := data.(map[any]any)
 	if !ok {
 		log.Printf("Unable to read map[string]interface out of data."+
 			"Using empty interface: %#v", data)
@@ -113,7 +113,7 @@ func CastDataToMap(data interface{}) map[string]interface{} {
 }
 
 // Runs the provisioners in order.
-func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data interface{}) error {
+func (h *ProvisionHook) Run(ctx context.Context, name string, ui packersdk.Ui, comm packersdk.Communicator, data any) error {
 	// Shortcut
 	if len(h.Provisioners) == 0 {
 		return nil
@@ -191,13 +191,20 @@ type PausedProvisioner struct {
 	Provisioner packersdk.Provisioner
 }
 
-func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
-func (p *PausedProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
-func (p *PausedProvisioner) Prepare(raws ...interface{}) error {
+func (p *PausedProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	return p.Provisioner.ConfigSpec()
+}
+func (p *PausedProvisioner) FlatConfig() any {
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() any }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
+func (p *PausedProvisioner) Prepare(raws ...any) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *PausedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Pausing %s before the next provisioner...", p.PauseBefore))
@@ -217,13 +224,20 @@ type RetriedProvisioner struct {
 	Provisioner packersdk.Provisioner
 }
 
-func (r *RetriedProvisioner) ConfigSpec() hcldec.ObjectSpec { return r.ConfigSpec() }
-func (r *RetriedProvisioner) FlatConfig() interface{}       { return r.FlatConfig() }
-func (r *RetriedProvisioner) Prepare(raws ...interface{}) error {
+func (r *RetriedProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	return r.Provisioner.ConfigSpec()
+}
+func (r *RetriedProvisioner) FlatConfig() any {
+	if fc, ok := r.Provisioner.(interface{ FlatConfig() any }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
+func (r *RetriedProvisioner) Prepare(raws ...any) error {
 	return r.Provisioner.Prepare(raws...)
 }
 
-func (r *RetriedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (r *RetriedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	if ctx.Err() != nil { // context was cancelled
 		return ctx.Err()
 	}
@@ -261,17 +275,17 @@ type ContinueOnErrorProvisioner struct {
 func (p *ContinueOnErrorProvisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.Provisioner.ConfigSpec()
 }
-func (p *ContinueOnErrorProvisioner) FlatConfig() interface{} {
-	if fc, ok := p.Provisioner.(interface{ FlatConfig() interface{} }); ok {
+func (p *ContinueOnErrorProvisioner) FlatConfig() any {
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() any }); ok {
 		return fc.FlatConfig()
 	}
 	return nil
 }
-func (p *ContinueOnErrorProvisioner) Prepare(raws ...interface{}) error {
+func (p *ContinueOnErrorProvisioner) Prepare(raws ...any) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *ContinueOnErrorProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *ContinueOnErrorProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	err := p.Provisioner.Provision(ctx, ui, comm, generatedData)
 	if err == nil {
 		return nil
@@ -295,13 +309,20 @@ type DebuggedProvisioner struct {
 	Provisioner packersdk.Provisioner
 }
 
-func (p *DebuggedProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.ConfigSpec() }
-func (p *DebuggedProvisioner) FlatConfig() interface{}       { return p.FlatConfig() }
-func (p *DebuggedProvisioner) Prepare(raws ...interface{}) error {
+func (p *DebuggedProvisioner) ConfigSpec() hcldec.ObjectSpec {
+	return p.Provisioner.ConfigSpec()
+}
+func (p *DebuggedProvisioner) FlatConfig() any {
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() any }); ok {
+		return fc.FlatConfig()
+	}
+	return nil
+}
+func (p *DebuggedProvisioner) Prepare(raws ...any) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
-func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *DebuggedProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	// Use a select to determine if we get cancelled during the wait
 	message := "Pausing before the next provisioner . Press enter to continue."
 
@@ -336,21 +357,21 @@ type SBOMInternalProvisioner struct {
 }
 
 func (p *SBOMInternalProvisioner) ConfigSpec() hcldec.ObjectSpec { return p.Provisioner.ConfigSpec() }
-func (p *SBOMInternalProvisioner) FlatConfig() interface{} {
+func (p *SBOMInternalProvisioner) FlatConfig() any {
 	// Try to delegate to inner provisioner if it implements FlatConfig
-	if fc, ok := p.Provisioner.(interface{ FlatConfig() interface{} }); ok {
+	if fc, ok := p.Provisioner.(interface{ FlatConfig() any }); ok {
 		return fc.FlatConfig()
 	}
 	return nil
 }
 
-func (p *SBOMInternalProvisioner) Prepare(raws ...interface{}) error {
+func (p *SBOMInternalProvisioner) Prepare(raws ...any) error {
 	return p.Provisioner.Prepare(raws...)
 }
 
 func (p *SBOMInternalProvisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{},
+	generatedData map[string]any,
 ) error {
 	// Original implementation - all logic now in hcp-sbom provisioner
 	cwd, err := os.Getwd()

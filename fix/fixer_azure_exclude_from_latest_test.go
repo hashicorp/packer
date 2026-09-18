@@ -14,32 +14,32 @@ func TestFixerAzureExcludeFromLatest(t *testing.T) {
 
 func TestFixerAzureExcludeFromLatest_Fix_exlude_from_latest(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No shared_image_destination field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "azure-chroot",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "azure-chroot",
 			},
 		},
 
 		// exlude_from_latest field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "azure-chroot",
-				"shared_image_destination": map[string]interface{}{
+				"shared_image_destination": map[string]any{
 					"exlude_from_latest": "false",
 				},
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "azure-chroot",
-				"shared_image_destination": map[string]interface{}{
+				"shared_image_destination": map[string]any{
 					"exclude_from_latest": "false",
 				},
 			},
@@ -49,12 +49,12 @@ func TestFixerAzureExcludeFromLatest_Fix_exlude_from_latest(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerAzureExcludeFromLatest
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

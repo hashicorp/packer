@@ -77,7 +77,7 @@ func (p *Parser) parseProvisionerBlocks(blockContent string) ([]*ProvisionerBloc
 
 func normalizeLegacyProvisionersJSON(blockContent string) (string, bool, error) {
 	type legacyPayload struct {
-		Provisioners []map[string]interface{} `json:"provisioners"`
+		Provisioners []map[string]any `json:"provisioners"`
 	}
 
 	var payload legacyPayload
@@ -89,14 +89,14 @@ func normalizeLegacyProvisionersJSON(blockContent string) (string, bool, error) 
 		return "", false, nil
 	}
 
-	normalized := make([]map[string]interface{}, 0, len(payload.Provisioners))
+	normalized := make([]map[string]any, 0, len(payload.Provisioners))
 	for _, provisioner := range payload.Provisioners {
 		typeName, ok := provisioner["type"].(string)
 		if !ok || typeName == "" {
 			continue
 		}
 
-		cfg := make(map[string]interface{})
+		cfg := make(map[string]any)
 		for key, value := range provisioner {
 			if key == "type" {
 				continue
@@ -104,14 +104,14 @@ func normalizeLegacyProvisionersJSON(blockContent string) (string, bool, error) 
 			cfg[key] = value
 		}
 
-		normalized = append(normalized, map[string]interface{}{typeName: cfg})
+		normalized = append(normalized, map[string]any{typeName: cfg})
 	}
 
 	if len(normalized) == 0 {
 		return "", false, nil
 	}
 
-	out := map[string]interface{}{
+	out := map[string]any{
 		buildProvisionerLabel: normalized,
 	}
 

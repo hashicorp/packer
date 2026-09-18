@@ -19,10 +19,10 @@ func (FixerAmazonEnhancedNetworking) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerAmazonEnhancedNetworking) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerAmazonEnhancedNetworking) Fix(input map[string]any) (map[string]any, error) {
 	// Our template type we'll use for this fixer only
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can

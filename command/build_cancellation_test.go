@@ -57,7 +57,7 @@ func TestBuildCommand_RunContext_CtxCancel(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			b := NewParallelTestBuilder(tt.parallelPassingTests)
-			locked := &LockedBuilder{unlock: make(chan interface{})}
+			locked := &LockedBuilder{unlock: make(chan any)}
 			c := &BuildCommand{
 				Meta: testMetaParallel(t, b, locked),
 			}

@@ -16,11 +16,11 @@ import (
 //
 // The value must currently be a string, list, map, and any nested values
 // with those same types.
-func FormatResult(value interface{}) string {
+func FormatResult(value any) string {
 	return formatResult(value, false)
 }
 
-func formatResult(value interface{}, nested bool) string {
+func formatResult(value any, nested bool) string {
 	if value == nil {
 		return "null"
 	}
@@ -41,16 +41,16 @@ func formatResult(value interface{}, nested bool) string {
 		default:
 			return "false"
 		}
-	case []interface{}:
+	case []any:
 		return formatListResult(output)
-	case map[string]interface{}:
+	case map[string]any:
 		return formatMapResult(output)
 	default:
 		return "<unknown-type>"
 	}
 }
 
-func formatListResult(value []interface{}) string {
+func formatListResult(value []any) string {
 	var outputBuf bytes.Buffer
 	outputBuf.WriteString("[")
 	if len(value) > 0 {
@@ -67,7 +67,7 @@ func formatListResult(value []interface{}) string {
 	return outputBuf.String()
 }
 
-func formatMapResult(value map[string]interface{}) string {
+func formatMapResult(value map[string]any) string {
 	ks := make([]string, 0, len(value))
 	for k := range value {
 		ks = append(ks, k)

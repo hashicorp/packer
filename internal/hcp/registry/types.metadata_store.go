@@ -11,7 +11,7 @@ import "github.com/hashicorp/packer/internal/hcp/registry/metadata"
 type Metadata interface {
 	// Gather is the point where we vacuum all the information
 	// relevant from the environment in order to expose it to HCP Packer.
-	Gather(args map[string]interface{})
+	Gather(args map[string]any)
 }
 
 // MetadataStore is the effective implementation of a global store for metadata
@@ -20,13 +20,13 @@ type Metadata interface {
 // If HCP is enabled during a build, this is populated with a curated list of
 // arguments to the build command, and environment-related information.
 type MetadataStore struct {
-	PackerBuildCommandOptions map[string]interface{}
-	OperatingSystem           map[string]interface{}
-	Vcs                       map[string]interface{}
-	Cicd                      map[string]interface{}
+	PackerBuildCommandOptions map[string]any
+	OperatingSystem           map[string]any
+	Vcs                       map[string]any
+	Cicd                      map[string]any
 }
 
-func (ms *MetadataStore) Gather(args map[string]interface{}) {
+func (ms *MetadataStore) Gather(args map[string]any) {
 	ms.OperatingSystem = metadata.GetOSMetadata()
 	ms.Cicd = metadata.GetCicdMetadata()
 	ms.Vcs = metadata.GetVcsMetadata()
@@ -39,4 +39,4 @@ func (ms *MetadataStore) Gather(args map[string]interface{}) {
 // collected or kept in memory in this case.
 type NilMetadata struct{}
 
-func (ns NilMetadata) Gather(args map[string]interface{}) {}
+func (ns NilMetadata) Gather(args map[string]any) {}

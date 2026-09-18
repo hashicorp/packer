@@ -170,24 +170,21 @@ func TestTargetedUI_ScrubsMultilineSecrets(t *testing.T) {
 }
 
 func TestColoredUi_ImplUi(t *testing.T) {
-	var raw interface{}
-	raw = &ColoredUi{}
+	var raw any = &ColoredUi{}
 	if _, ok := raw.(packersdk.Ui); !ok {
 		t.Fatalf("ColoredUi must implement Ui")
 	}
 }
 
 func TestTargetedUI_ImplUi(t *testing.T) {
-	var raw interface{}
-	raw = &TargetedUI{}
+	var raw any = &TargetedUI{}
 	if _, ok := raw.(packersdk.Ui); !ok {
 		t.Fatalf("TargetedUI must implement Ui")
 	}
 }
 
 func TestBasicUi_ImplUi(t *testing.T) {
-	var raw interface{}
-	raw = &packersdk.BasicUi{}
+	var raw any = &packersdk.BasicUi{}
 	if _, ok := raw.(packersdk.Ui); !ok {
 		t.Fatalf("BasicUi must implement Ui")
 	}
@@ -273,8 +270,7 @@ func TestBasicUi_Ask(t *testing.T) {
 }
 
 func TestMachineReadableUi_ImplUi(t *testing.T) {
-	var raw interface{}
-	raw = &MachineReadableUi{}
+	var raw any = &MachineReadableUi{}
 	if _, ok := raw.(packersdk.Ui); !ok {
 		t.Fatalf("MachineReadableUi must implement Ui")
 	}

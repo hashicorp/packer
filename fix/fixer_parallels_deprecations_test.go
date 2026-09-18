@@ -14,28 +14,28 @@ func TestFixerParallelsDeprecations(t *testing.T) {
 
 func TestFixerParallelsDeprecations_Fix_parallels_tools_guest_path(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No parallels_tools_host_path field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "parallels-iso",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "parallels-iso",
 			},
 		},
 
 		// parallels_tools_host_path field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                      "parallels-iso",
 				"parallels_tools_host_path": "/Path...",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "parallels-iso",
 			},
 		},
@@ -44,12 +44,12 @@ func TestFixerParallelsDeprecations_Fix_parallels_tools_guest_path(t *testing.T)
 	for _, tc := range cases {
 		var f FixerParallelsDeprecations
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)
@@ -65,17 +65,17 @@ func TestFixerParallelsDeprecations_Fix_parallels_tools_guest_path(t *testing.T)
 
 func TestFixerParallelsDeprecations_Fix_guest_os_distribution(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No guest_os_distribution field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":          "parallels-iso",
 				"guest_os_type": "ubuntu",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "parallels-iso",
 				"guest_os_type": "ubuntu",
 			},
@@ -83,13 +83,13 @@ func TestFixerParallelsDeprecations_Fix_guest_os_distribution(t *testing.T) {
 
 		// guest_os_distribution and guest_os_type field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                  "parallels-iso",
 				"guest_os_type":         "linux",
 				"guest_os_distribution": "ubuntu",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "parallels-iso",
 				"guest_os_type": "ubuntu",
 			},
@@ -97,12 +97,12 @@ func TestFixerParallelsDeprecations_Fix_guest_os_distribution(t *testing.T) {
 
 		// guest_os_distribution but no guest_os_type field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                  "parallels-iso",
 				"guest_os_distribution": "ubuntu",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":          "parallels-iso",
 				"guest_os_type": "ubuntu",
 			},
@@ -112,12 +112,12 @@ func TestFixerParallelsDeprecations_Fix_guest_os_distribution(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerParallelsDeprecations
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)
