@@ -179,7 +179,7 @@ and therefore only show in their raw form here.
 			}
 			actual := string(bs)
 			if diff := cmp.Diff(tc.expected, actual); diff != "" {
-				t.Fatalf("unexpected ouput %s", diff)
+				t.Fatalf("unexpected output %s", diff)
 			}
 		})
 	}
