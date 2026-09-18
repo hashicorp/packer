@@ -1,6 +1,6 @@
 # 📦 Changelog
 
-## 1.16.1 (September 15, 2026)
+## 1.16.1 (September 18, 2026)
 
 ### FEATURES:
 
@@ -25,12 +25,16 @@
 * post-processor/shell-local: execute inline scripts through the shell to avoid
   intermittent `ETXTBSY` errors.
     [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+* build: bump `github.com/shoenig/go-m1cpu` to `v0.2.2` to prevent segmentation
+  faults on Apple M5 hardware.
+    [GH-13696](https://github.com/hashicorp/packer/pull/13696)
 
 ### SECURITY:
 
-* test/deps: bump `google.golang.org/grpc` to `v1.83.2` in the plugin tester to
-  reject requests missing both the `:authority` and `Host` headers.
+* deps: bump `google.golang.org/grpc` to `v1.83.2` in Packer and the plugin
+  tester to reject requests missing both the `:authority` and `Host` headers.
     [GH-13704](https://github.com/hashicorp/packer/pull/13704)
+    [GH-13707](https://github.com/hashicorp/packer/pull/13707)
 
 ### DEPENDENCIES:
 
@@ -43,8 +47,13 @@
   `github.com/klauspost/compress` to `v1.18.7`.
     [GH-13689](https://github.com/hashicorp/packer/pull/13689)
 * deps: bump `golang.org/x/crypto` to `v0.56.0`, `golang.org/x/net` to
-  `v0.58.0`, and `google.golang.org/grpc` to `v1.83.1`.
+  `v0.58.0`, and `google.golang.org/grpc` to `v1.83.2`.
     [GH-13701](https://github.com/hashicorp/packer/pull/13701)
+    [GH-13707](https://github.com/hashicorp/packer/pull/13707)
+* deps: bump `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/metric`,
+  and `go.opentelemetry.io/otel/trace` to `v1.45.0`, and
+  `github.com/go-logr/logr` to `v1.4.4`.
+    [GH-13710](https://github.com/hashicorp/packer/pull/13710)
 * deps: update additional Go module dependencies in Packer and the plugin tester.
     [GH-13689](https://github.com/hashicorp/packer/pull/13689)
     [GH-13701](https://github.com/hashicorp/packer/pull/13701)
