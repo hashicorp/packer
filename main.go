@@ -376,7 +376,7 @@ func loadConfig() (*config, error) {
 	}
 	defer f.Close()
 
-	// This loads a json config, defined in packer/config.go
+	// This loads a json config, defined in config.go
 	if err := decodeConfig(f, &config); err != nil {
 		return nil, err
 	}
