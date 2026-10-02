@@ -1,0 +1,7 @@
+{
+    "builders": [
+        {"type": "fail", "name": "fail0"},
+        {"type": "lock", "name": "lock1"},
+        {"type": "lock", "name": "lock2"}
+    ]
+}
