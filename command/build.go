@@ -211,6 +211,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
+	log.Printf("Fail-fast: %v", cla.FailFast)
 
 	if len(builds) == 0 {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
@@ -227,7 +228,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// Get the start of the build command
 	buildCommandStart := time.Now()
 
-	// Run all the builds in parallel and wait for them to complete
+	// Run all the builds in parallel and wait for them to complete.
+	// runCtx is cancelled on SIGINT (via buildCtx) and, when -fail-fast is
+	// set, after the first builder failure so remaining in-flight builds abort.
+	runCtx, failFastCancel := context.WithCancel(buildCtx)
+	defer failFastCancel()
+	var failFastOnce sync.Once
+
 	var wg sync.WaitGroup
 	var artifacts = struct {
 		sync.RWMutex
@@ -241,7 +248,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
 
 	for i := range builds {
-		if err := buildCtx.Err(); err != nil {
+		if err := runCtx.Err(); err != nil {
 			log.Println("Interrupted, not going to start any more builds.")
 			break
 		}
@@ -249,7 +256,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[b]
-		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+		if err := limitParallel.Acquire(runCtx, 1); err != nil {
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errs.Lock()
 			errs.m[name] = err
@@ -268,7 +275,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			defer limitParallel.Release(1)
 
-			err := hcpRegistry.StartBuild(buildCtx, b)
+			err := hcpRegistry.StartBuild(runCtx, b)
 			// Seems odd to require this error check here. Now that it is an error we can just exit with diag
 			if err != nil {
 				// If the build is already done, we skip without a warning
@@ -289,7 +296,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			}
 
 			log.Printf("Starting build run: %s", name)
-			runArtifacts, err := b.Run(buildCtx, ui)
+			runArtifacts, err := b.Run(runCtx, ui)
 
 			// Get the duration of the build and parse it
 			buildEnd := time.Now()
@@ -332,6 +339,12 @@ Check that you are using an HCP Ready integration before trying again:
 				errs.Lock()
 				errs.m[name] = err
 				errs.Unlock()
+				if cla.FailFast && buildCtx.Err() == nil {
+					failFastOnce.Do(func() {
+						c.Ui.Error(fmt.Sprintf("Fail-fast: cancelling remaining builds after %q failed.", name))
+						failFastCancel()
+					})
+				}
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {
@@ -470,6 +483,7 @@ Options:
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask|run-cleanup-provisioner] If the build fails do: clean up (default), abort, ask, or run-cleanup-provisioner.
   -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
+  -fail-fast                    Cancel remaining in-flight parallel builds after the first failure. (Default: false)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
@@ -500,6 +514,7 @@ func (*BuildCommand) AutocompleteFlags() complete.Flags {
 		"-machine-readable": complete.PredictNothing,
 		"-on-error":         complete.PredictNothing,
 		"-parallel":         complete.PredictNothing,
+		"-fail-fast":        complete.PredictNothing,
 		"-timestamp-ui":     complete.PredictNothing,
 		"-var":              complete.PredictNothing,
 		"-var-file":         complete.PredictNothing,
