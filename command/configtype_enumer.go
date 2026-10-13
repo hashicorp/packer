@@ -31,9 +31,12 @@ func _configTypeNoOp() {
 var _configTypeValues = []configType{ConfigTypeJSON, ConfigTypeHCL2}
 
 var _configTypeNameToValueMap = map[string]configType{
-	_configTypeName[0:4]:      ConfigTypeJSON,
+	_configTypeName[0:4]: ConfigTypeJSON,
+	_configTypeName[4:8]: ConfigTypeHCL2,
+}
+
+var _configTypeLowerNameToValueMap = map[string]configType{
 	_configTypeLowerName[0:4]: ConfigTypeJSON,
-	_configTypeName[4:8]:      ConfigTypeHCL2,
 	_configTypeLowerName[4:8]: ConfigTypeHCL2,
 }
 
@@ -49,7 +52,7 @@ func configTypeString(s string) (configType, error) {
 		return val, nil
 	}
 
-	if val, ok := _configTypeNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _configTypeLowerNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to configType values", s)
