@@ -37,21 +37,24 @@ func _ExecutionPolicyNoOp() {
 var _ExecutionPolicyValues = []ExecutionPolicy{ExecutionPolicyBypass, ExecutionPolicyAllsigned, ExecutionPolicyDefault, ExecutionPolicyRemotesigned, ExecutionPolicyRestricted, ExecutionPolicyUndefined, ExecutionPolicyUnrestricted, ExecutionPolicyNone}
 
 var _ExecutionPolicyNameToValueMap = map[string]ExecutionPolicy{
-	_ExecutionPolicyName[0:6]:        ExecutionPolicyBypass,
+	_ExecutionPolicyName[0:6]:   ExecutionPolicyBypass,
+	_ExecutionPolicyName[6:15]:  ExecutionPolicyAllsigned,
+	_ExecutionPolicyName[15:22]: ExecutionPolicyDefault,
+	_ExecutionPolicyName[22:34]: ExecutionPolicyRemotesigned,
+	_ExecutionPolicyName[34:44]: ExecutionPolicyRestricted,
+	_ExecutionPolicyName[44:53]: ExecutionPolicyUndefined,
+	_ExecutionPolicyName[53:65]: ExecutionPolicyUnrestricted,
+	_ExecutionPolicyName[65:69]: ExecutionPolicyNone,
+}
+
+var _ExecutionPolicyLowerNameToValueMap = map[string]ExecutionPolicy{
 	_ExecutionPolicyLowerName[0:6]:   ExecutionPolicyBypass,
-	_ExecutionPolicyName[6:15]:       ExecutionPolicyAllsigned,
 	_ExecutionPolicyLowerName[6:15]:  ExecutionPolicyAllsigned,
-	_ExecutionPolicyName[15:22]:      ExecutionPolicyDefault,
 	_ExecutionPolicyLowerName[15:22]: ExecutionPolicyDefault,
-	_ExecutionPolicyName[22:34]:      ExecutionPolicyRemotesigned,
 	_ExecutionPolicyLowerName[22:34]: ExecutionPolicyRemotesigned,
-	_ExecutionPolicyName[34:44]:      ExecutionPolicyRestricted,
 	_ExecutionPolicyLowerName[34:44]: ExecutionPolicyRestricted,
-	_ExecutionPolicyName[44:53]:      ExecutionPolicyUndefined,
 	_ExecutionPolicyLowerName[44:53]: ExecutionPolicyUndefined,
-	_ExecutionPolicyName[53:65]:      ExecutionPolicyUnrestricted,
 	_ExecutionPolicyLowerName[53:65]: ExecutionPolicyUnrestricted,
-	_ExecutionPolicyName[65:69]:      ExecutionPolicyNone,
 	_ExecutionPolicyLowerName[65:69]: ExecutionPolicyNone,
 }
 
@@ -73,7 +76,7 @@ func ExecutionPolicyString(s string) (ExecutionPolicy, error) {
 		return val, nil
 	}
 
-	if val, ok := _ExecutionPolicyNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ExecutionPolicyLowerNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to ExecutionPolicy values", s)
