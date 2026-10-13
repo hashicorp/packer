@@ -32,11 +32,14 @@ func _FixConfigModeNoOp() {
 var _FixConfigModeValues = []FixConfigMode{Stdout, Inplace, Diff}
 
 var _FixConfigModeNameToValueMap = map[string]FixConfigMode{
-	_FixConfigModeName[0:6]:        Stdout,
+	_FixConfigModeName[0:6]:   Stdout,
+	_FixConfigModeName[6:13]:  Inplace,
+	_FixConfigModeName[13:17]: Diff,
+}
+
+var _FixConfigModeLowerNameToValueMap = map[string]FixConfigMode{
 	_FixConfigModeLowerName[0:6]:   Stdout,
-	_FixConfigModeName[6:13]:       Inplace,
 	_FixConfigModeLowerName[6:13]:  Inplace,
-	_FixConfigModeName[13:17]:      Diff,
 	_FixConfigModeLowerName[13:17]: Diff,
 }
 
@@ -53,7 +56,7 @@ func FixConfigModeString(s string) (FixConfigMode, error) {
 		return val, nil
 	}
 
-	if val, ok := _FixConfigModeNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _FixConfigModeLowerNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to FixConfigMode values", s)
