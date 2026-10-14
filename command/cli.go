@@ -92,6 +92,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ba.MachineReadable, "machine-readable", false, "")
 
 	flags.Int64Var(&ba.ParallelBuilds, "parallel-builds", 0, "")
+	flags.BoolVar(&ba.FailFast, "fail-fast", false, "Cancel remaining parallel builds after the first failure.")
 
 	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
 	flags.Var(flagOnError, "on-error", "")
@@ -119,6 +120,7 @@ func GetCleanedBuildArgs(ba *BuildArgs) map[string]interface{} {
 		"except":    ba.Except,
 		"var-files": ba.VarFiles,
 		"path":      ba.Path,
+		"fail-fast": ba.FailFast,
 	}
 
 	var varNames []string
@@ -139,6 +141,7 @@ type BuildArgs struct {
 	OnError                             string
 	ReleaseOnly                         bool
 	SkipEnforcement                     bool
+	FailFast                            bool
 }
 
 func (ia *InitArgs) AddFlagSets(flags *flag.FlagSet) {
