@@ -33,7 +33,7 @@ func (a *FileArtifact) String() string {
 	return fmt.Sprintf("Stored file: %s", a.filename)
 }
 
-func (a *FileArtifact) State(name string) interface{} {
+func (a *FileArtifact) State(name string) any {
 	if name == registryimage.ArtifactStateURI {
 		img, err := registryimage.FromArtifact(a,
 			registryimage.WithID(path.Base(a.filename)),

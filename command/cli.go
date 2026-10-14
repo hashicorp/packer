@@ -111,8 +111,8 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 //
 // Most of the arguments are kept as-is, except for the -var args, where only
 // the keys are kept to avoid leaking potential secrets.
-func GetCleanedBuildArgs(ba *BuildArgs) map[string]interface{} {
-	cleanedArgs := map[string]interface{}{
+func GetCleanedBuildArgs(ba *BuildArgs) map[string]any {
+	cleanedArgs := map[string]any{
 		"debug":     ba.Debug,
 		"force":     ba.Force,
 		"only":      ba.Only,

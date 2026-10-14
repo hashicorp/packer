@@ -30,7 +30,7 @@ func TestBuildSLSAPredicateIncludesByproducts(t *testing.T) {
 		BuildType: "https://packer.io/buildtypes/json/v1",
 		Byproducts: []Byproduct{{
 			Name: "cloud-artifact-identity",
-			Content: map[string]interface{}{
+			Content: map[string]any{
 				"builderId": "packer.null",
 			},
 		}},

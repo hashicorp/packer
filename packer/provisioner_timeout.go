@@ -18,14 +18,14 @@ type TimeoutProvisioner struct {
 	Timeout time.Duration
 }
 
-func (p *TimeoutProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *TimeoutProvisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	ctx, cancel := context.WithTimeout(ctx, p.Timeout)
 	defer cancel()
 
 	// Use a select to determine if we get cancelled during the wait
 	ui.Say(fmt.Sprintf("Setting a %s timeout for the next provisioner...", p.Timeout))
 
-	errC := make(chan interface{})
+	errC := make(chan any)
 
 	go func() {
 		select {

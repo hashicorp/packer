@@ -27,7 +27,7 @@ func DeriveSubjects(artifact packersdk.Artifact) ([]Subject, error) {
 	return deriveSubjects(artifact)
 }
 
-func DeriveIdentityRecord(artifact packersdk.Artifact) (map[string]interface{}, error) {
+func DeriveIdentityRecord(artifact packersdk.Artifact) (map[string]any, error) {
 	return deriveIdentityRecord(artifact)
 }
 
@@ -76,12 +76,12 @@ func deriveSubjects(artifact packersdk.Artifact) ([]Subject, error) {
 	}}, nil
 }
 
-func deriveIdentityRecord(artifact packersdk.Artifact) (map[string]interface{}, error) {
+func deriveIdentityRecord(artifact packersdk.Artifact) (map[string]any, error) {
 	if artifact == nil {
 		return nil, fmt.Errorf("artifact is nil")
 	}
 
-	record := map[string]interface{}{
+	record := map[string]any{
 		"builderId": artifact.BuilderId(),
 		"id":        artifact.Id(),
 	}
@@ -100,13 +100,13 @@ func deriveIdentityRecord(artifact packersdk.Artifact) (map[string]interface{}, 
 	return record, nil
 }
 
-func normalizeJSONValue(value interface{}) (interface{}, error) {
+func normalizeJSONValue(value any) (any, error) {
 	encoded, err := json.Marshal(value)
 	if err != nil {
 		return nil, err
 	}
 
-	var decoded interface{}
+	var decoded any
 	if err := json.Unmarshal(encoded, &decoded); err != nil {
 		return nil, err
 	}

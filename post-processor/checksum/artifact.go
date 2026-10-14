@@ -36,7 +36,7 @@ func (a *Artifact) String() string {
 	return fmt.Sprintf("Created artifact from files: %s", files)
 }
 
-func (a *Artifact) State(name string) interface{} {
+func (a *Artifact) State(name string) any {
 	return nil
 }
 

@@ -15,14 +15,14 @@ func (FixerDockerEmail) DeprecatedOptions() map[string][]string {
 
 }
 
-func (FixerDockerEmail) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerDockerEmail) Fix(input map[string]any) (map[string]any, error) {
 	if input["post-processors"] == nil {
 		return input, nil
 	}
 
 	// Our template type we'll use for this fixer only
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 		PP       `mapstructure:",squash"`
 	}
 

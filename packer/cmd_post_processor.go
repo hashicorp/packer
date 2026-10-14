@@ -25,7 +25,7 @@ func (b *cmdPostProcessor) ConfigSpec() hcldec.ObjectSpec {
 	return b.p.ConfigSpec()
 }
 
-func (c *cmdPostProcessor) Configure(config ...interface{}) error {
+func (c *cmdPostProcessor) Configure(config ...any) error {
 	defer func() {
 		r := recover()
 		c.checkExit(r, nil)
@@ -43,7 +43,7 @@ func (c *cmdPostProcessor) PostProcess(ctx context.Context, ui packersdk.Ui, a p
 	return c.p.PostProcess(ctx, ui, a)
 }
 
-func (c *cmdPostProcessor) checkExit(p interface{}, cb func()) {
+func (c *cmdPostProcessor) checkExit(p any, cb func()) {
 	if c.client.Exited() && cb != nil {
 		cb()
 	} else if p != nil && !Killed {
