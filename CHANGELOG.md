@@ -1,5 +1,40 @@
 # 📦 Changelog
 
+## 1.16.2 (October 22, 2026)
+
+### BUG FIXES:
+
+* core: fix case-insensitive parsing of generated enum values for configuration
+  types and PowerShell execution policies.
+    [GH-13719](https://github.com/hashicorp/packer/pull/13719)
+
+### IMPROVEMENTS:
+
+* build: update Go to `1.26.10`.
+    [GH-13728](https://github.com/hashicorp/packer/pull/13728)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/hcp-sdk-go` to `v0.176.0`.
+    [GH-13722](https://github.com/hashicorp/packer/pull/13722)
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` in the plugin tester to
+  `v0.6.13`, `github.com/hashicorp/hcl/v2` to `v2.25.0`, and
+  `github.com/zclconf/go-cty` to `v1.19.0`; update other dependencies.
+    [GH-13728](https://github.com/hashicorp/packer/pull/13728)
+* test/deps: bump `go.opentelemetry.io/otel/sdk` in the plugin tester to
+  `v1.45.0`.
+    [GH-13709](https://github.com/hashicorp/packer/pull/13709)
+
+### INTERNAL:
+
+* ci: update pinned GitHub Actions dependencies.
+    [GH-13720](https://github.com/hashicorp/packer/pull/13720)
+* ci: bump `lock-threads` to `v6.0.2` so the scheduled workflow can lock issues
+  and pull requests.
+    [GH-13693](https://github.com/hashicorp/packer/pull/13693)
+* compliance: update copyright headers.
+    [GH-13718](https://github.com/hashicorp/packer/pull/13718)
+
 ## 1.16.1 (September 18, 2026)
 
 ### FEATURES:
