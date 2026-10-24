@@ -127,7 +127,7 @@ func PrintableCtyValue(v cty.Value) string {
 	return str
 }
 
-func ConvertPluginConfigValueToHCLValue(v interface{}) (cty.Value, error) {
+func ConvertPluginConfigValueToHCLValue(v any) (cty.Value, error) {
 	var buildValue cty.Value
 	switch v := v.(type) {
 	case bool:

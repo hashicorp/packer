@@ -14,16 +14,16 @@ func TestFixerAmazonTemporarySecurityCIDRs_Impl(t *testing.T) {
 
 func TestFixerAmazonTemporarySecurityCIDRs(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                                 "amazon-ebs",
 				"temporary_security_group_source_cidr": "0.0.0.0/0",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":                                  "amazon-ebs",
 				"temporary_security_group_source_cidrs": []string{"0.0.0.0/0"},
 			},
@@ -33,12 +33,12 @@ func TestFixerAmazonTemporarySecurityCIDRs(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerAmazonTemporarySecurityCIDRs
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

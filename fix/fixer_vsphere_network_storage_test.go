@@ -14,57 +14,57 @@ func TestFixerVSphereNetwork_impl(t *testing.T) {
 
 func TestFixerVSphereNetwork_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":        "vsphere-iso",
 				"network":     "",
 				"networkCard": "vmxnet3",
 				"disk_size":   5000,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "vsphere-iso",
-				"network_adapters": []interface{}{
-					map[string]interface{}{
+				"network_adapters": []any{
+					map[string]any{
 						"network":      "",
 						"network_card": "vmxnet3",
 					},
 				},
-				"storage": []interface{}{
-					map[string]interface{}{
+				"storage": []any{
+					map[string]any{
 						"disk_size": 5000,
 					},
 				},
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":         "vsphere-iso",
 				"network":      "",
 				"network_card": "vmxnet3",
 				"disk_size":    5000,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "vsphere-iso",
-				"network_adapters": []interface{}{
-					map[string]interface{}{
+				"network_adapters": []any{
+					map[string]any{
 						"network":      "",
 						"network_card": "vmxnet3",
 					},
 				},
-				"storage": []interface{}{
-					map[string]interface{}{
+				"storage": []any{
+					map[string]any{
 						"disk_size": 5000,
 					},
 				},
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                  "vsphere-iso",
 				"network":               "myNetwork",
 				"networkCard":           "vmxnet3",
@@ -73,16 +73,16 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				"disk_eagerly_scrub":    true,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "vsphere-iso",
-				"network_adapters": []interface{}{
-					map[string]interface{}{
+				"network_adapters": []any{
+					map[string]any{
 						"network":      "myNetwork",
 						"network_card": "vmxnet3",
 					},
 				},
-				"storage": []interface{}{
-					map[string]interface{}{
+				"storage": []any{
+					map[string]any{
 						"disk_size":             5000,
 						"disk_thin_provisioned": true,
 						"disk_eagerly_scrub":    true,
@@ -91,21 +91,21 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 			},
 		},
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":                  "vsphere-iso",
 				"network":               "myNetwork",
 				"networkCard":           "vmxnet3",
 				"disk_size":             5000,
 				"disk_thin_provisioned": true,
 				"disk_eagerly_scrub":    true,
-				"network_adapters": []interface{}{
-					map[string]interface{}{
+				"network_adapters": []any{
+					map[string]any{
 						"network":      "net1",
 						"network_card": "vmxnet3",
 					},
 				},
-				"storage": []interface{}{
-					map[string]interface{}{
+				"storage": []any{
+					map[string]any{
 						"disk_size":             5001,
 						"disk_thin_provisioned": true,
 						"disk_eagerly_scrub":    true,
@@ -113,25 +113,25 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 				},
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "vsphere-iso",
-				"network_adapters": []interface{}{
-					map[string]interface{}{
+				"network_adapters": []any{
+					map[string]any{
 						"network":      "myNetwork",
 						"network_card": "vmxnet3",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"network":      "net1",
 						"network_card": "vmxnet3",
 					},
 				},
-				"storage": []interface{}{
-					map[string]interface{}{
+				"storage": []any{
+					map[string]any{
 						"disk_size":             5000,
 						"disk_thin_provisioned": true,
 						"disk_eagerly_scrub":    true,
 					},
-					map[string]interface{}{
+					map[string]any{
 						"disk_size":             5001,
 						"disk_thin_provisioned": true,
 						"disk_eagerly_scrub":    true,
@@ -144,12 +144,12 @@ func TestFixerVSphereNetwork_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerVSphereNetworkDisk
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)
