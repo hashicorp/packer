@@ -40,7 +40,7 @@ var psEscape = strings.NewReplacer(
 // wraps the content in try catch block and exits with a status.
 const wrapPowershellString string = `
 	if (Test-Path variable:global:ProgressPreference) {
-	  set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'
+	  $ProgressPreference='SilentlyContinue'
 	}
 	{{if .DebugMode}}
 	Set-PsDebug -Trace {{.DebugMode}}
@@ -144,7 +144,7 @@ func (p *Provisioner) defaultExecuteCommand() string {
 
 func (p *Provisioner) defaultScriptCommand() string {
 	baseCmd := `& { if (Test-Path variable:global:ProgressPreference)` +
-		`{set-variable -name variable:global:ProgressPreference -value 'SilentlyContinue'};`
+		`{$ProgressPreference='SilentlyContinue'};`
 
 	if p.config.DebugMode != 0 {
 		baseCmd += fmt.Sprintf(`Set-PsDebug -Trace %d;`, p.config.DebugMode)
