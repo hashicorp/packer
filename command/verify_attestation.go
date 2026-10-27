@@ -133,7 +133,7 @@ func (*VerifyAttestationCommand) Synopsis() string {
 }
 
 func (*VerifyAttestationCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*VerifyAttestationCommand) AutocompleteFlags() complete.Flags {

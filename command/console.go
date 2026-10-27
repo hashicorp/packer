@@ -100,7 +100,7 @@ func (*ConsoleCommand) Synopsis() string {
 }
 
 func (*ConsoleCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*ConsoleCommand) AutocompleteFlags() complete.Flags {

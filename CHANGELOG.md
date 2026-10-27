@@ -1,5 +1,11 @@
 # 📦 Changelog
 
+## 1.16.3 (Unreleased)
+
+### BUG FIXES:
+
+* command: restore file and directory completion for commands that accept paths
+
 ## 1.16.2 (October 22, 2026)
 
 ### BUG FIXES:
