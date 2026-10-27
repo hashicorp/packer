@@ -80,7 +80,7 @@ func (c *InspectCommand) Synopsis() string {
 }
 
 func (c *InspectCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (c *InspectCommand) AutocompleteFlags() complete.Flags {

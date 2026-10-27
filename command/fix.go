@@ -169,7 +169,7 @@ func (c *FixCommand) Synopsis() string {
 }
 
 func (c *FixCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (c *FixCommand) AutocompleteFlags() complete.Flags {
