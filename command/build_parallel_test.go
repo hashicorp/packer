@@ -6,8 +6,10 @@ package command
 import (
 	"bytes"
 	"context"
+	"errors"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/hashicorp/hcl/v2/hcldec"
@@ -46,7 +48,12 @@ func (b *ParallelTestBuilder) Run(ctx context.Context, ui packersdk.Ui, hook pac
 }
 
 // LockedBuilder won't run until unlock is called
-type LockedBuilder struct{ unlock chan interface{} }
+type LockedBuilder struct {
+	unlock    chan interface{}
+	started   int32
+	completed int32
+	aborted   int32
+}
 
 func (b *LockedBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
 
@@ -56,16 +63,48 @@ func (b *LockedBuilder) Prepare(raws ...interface{}) ([]string, []string, error)
 
 func (b *LockedBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
 	ui.Say("locking build")
+	atomic.AddInt32(&b.started, 1)
 	select {
 	case <-b.unlock:
+		atomic.AddInt32(&b.completed, 1)
 	case <-ctx.Done():
+		atomic.AddInt32(&b.aborted, 1)
 		return nil, ctx.Err()
 	}
 	return nil, nil
 }
 
+// FailingBuilder waits until ready is closed, then fails. If ready is nil it
+// fails immediately. Used to prove fail-fast cancels in-flight sibling builds.
+type FailingBuilder struct {
+	ready chan struct{}
+}
+
+func (b *FailingBuilder) ConfigSpec() hcldec.ObjectSpec { return nil }
+
+func (b *FailingBuilder) Prepare(raws ...interface{}) ([]string, []string, error) {
+	return nil, nil, nil
+}
+
+func (b *FailingBuilder) Run(ctx context.Context, ui packersdk.Ui, hook packersdk.Hook) (packersdk.Artifact, error) {
+	ui.Say("failing build waiting")
+	if b.ready != nil {
+		select {
+		case <-b.ready:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
+	ui.Say("failing build")
+	return nil, errors.New("intentional failure")
+}
+
 // testMetaFile creates a Meta object that includes a file builder
 func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *LockedBuilder) Meta {
+	return testMetaParallelWithFail(t, builder, locked, &FailingBuilder{})
+}
+
+func testMetaParallelWithFail(t *testing.T, builder *ParallelTestBuilder, locked *LockedBuilder, failing *FailingBuilder) Meta {
 	var out, err bytes.Buffer
 	return Meta{
 		CoreConfig: &packer.CoreConfig{
@@ -75,6 +114,7 @@ func testMetaParallel(t *testing.T, builder *ParallelTestBuilder, locked *Locked
 						"parallel-test": func() (packersdk.Builder, error) { return builder, nil },
 						"file":          func() (packersdk.Builder, error) { return &file.Builder{}, nil },
 						"lock":          func() (packersdk.Builder, error) { return locked, nil },
+						"fail":          func() (packersdk.Builder, error) { return failing, nil },
 					},
 					Provisioners: packer.MapOfProvisioner{
 						"sleep": func() (packersdk.Provisioner, error) { return &sleep.Provisioner{}, nil },
