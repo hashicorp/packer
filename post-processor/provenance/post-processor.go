@@ -119,7 +119,7 @@ type PostProcessor struct {
 
 func (p *PostProcessor) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *PostProcessor) Configure(raws ...interface{}) error {
+func (p *PostProcessor) Configure(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "packer.post-processor.provenance",
 		Interpolate:        true,
@@ -278,7 +278,7 @@ func (p *PostProcessor) writeSBOMAttestation(ctx context.Context, ui packersdk.U
 	return nil
 }
 
-func (p *PostProcessor) writeAttestation(ctx context.Context, ui packersdk.Ui, statement interface{}, outputPath string) error {
+func (p *PostProcessor) writeAttestation(ctx context.Context, ui packersdk.Ui, statement any, outputPath string) error {
 	if p.config.SigningMode == internalattestation.SigningModeNone {
 		payload, err := json.MarshalIndent(statement, "", "  ")
 		if err != nil {
@@ -495,11 +495,11 @@ func (p *PostProcessor) resolveSBOMScanPath(source packersdk.Artifact) (string, 
 	return "", fmt.Errorf("sbom=true requires local artifact files or sbom_scan_path")
 }
 
-func buildSBOMPredicate(rawSBOM []byte, format internalsbom.Format) (interface{}, string, error) {
+func buildSBOMPredicate(rawSBOM []byte, format internalsbom.Format) (any, string, error) {
 	decoder := json.NewDecoder(bytes.NewReader(rawSBOM))
 	decoder.UseNumber()
 
-	var predicate interface{}
+	var predicate any
 	if err := decoder.Decode(&predicate); err != nil {
 		return nil, "", fmt.Errorf("decode SBOM payload: %w", err)
 	}
@@ -514,8 +514,8 @@ func buildSBOMPredicate(rawSBOM []byte, format internalsbom.Format) (interface{}
 	}
 }
 
-func (p *PostProcessor) externalParameters(env map[string]string) map[string]interface{} {
-	externalParameters := map[string]interface{}{}
+func (p *PostProcessor) externalParameters(env map[string]string) map[string]any {
+	externalParameters := map[string]any{}
 
 	if p.config.TemplatePath != "" {
 		externalParameters["template"] = p.config.TemplatePath
@@ -540,8 +540,8 @@ func (p *PostProcessor) externalParameters(env map[string]string) map[string]int
 	return externalParameters
 }
 
-func (p *PostProcessor) internalParameters() map[string]interface{} {
-	return map[string]interface{}{
+func (p *PostProcessor) internalParameters() map[string]any {
+	return map[string]any{
 		"packerBuildName":   p.config.PackerBuildName,
 		"packerBuilderType": p.config.PackerBuilderType,
 	}

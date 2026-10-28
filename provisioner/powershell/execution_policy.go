@@ -25,7 +25,7 @@ const (
 	ExecutionPolicyNone // not set
 )
 
-func StringToExecutionPolicyHook(f reflect.Kind, t reflect.Kind, data interface{}) (interface{}, error) {
+func StringToExecutionPolicyHook(f reflect.Kind, t reflect.Kind, data any) (any, error) {
 	if f != reflect.String || t != reflect.Int {
 		return data, nil
 	}

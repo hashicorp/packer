@@ -12,7 +12,7 @@ import (
 
 type MetadataProvider interface {
 	Detect() error
-	Details() map[string]interface{}
+	Details() map[string]any
 	Type() string
 }
 
@@ -55,14 +55,14 @@ func (g *Git) Type() string {
 	return "git"
 }
 
-func (g *Git) Details() map[string]interface{} {
+func (g *Git) Details() map[string]any {
 	headRef, err := g.repo.Head()
 	if err != nil {
 		log.Printf("[ERROR] failed to get reference to git HEAD: %s", err)
 		return nil
 	}
 
-	resp := map[string]interface{}{
+	resp := map[string]any{
 		"ref": headRef.Name().Short(),
 	}
 
@@ -78,7 +78,7 @@ func (g *Git) Details() map[string]interface{} {
 	return resp
 }
 
-func GetVcsMetadata() map[string]interface{} {
+func GetVcsMetadata() map[string]any {
 	vcsSystems := []MetadataProvider{
 		&Git{},
 	}
@@ -86,7 +86,7 @@ func GetVcsMetadata() map[string]interface{} {
 	for _, vcs := range vcsSystems {
 		err := vcs.Detect()
 		if err == nil {
-			return map[string]interface{}{
+			return map[string]any{
 				"type":    vcs.Type(),
 				"details": vcs.Details(),
 			}

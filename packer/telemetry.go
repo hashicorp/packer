@@ -105,7 +105,7 @@ func (c *CheckpointTelemetry) ReportPanic(m string) error {
 	return checkpoint.Report(ctx, panicParams)
 }
 
-func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options interface{}) *TelemetrySpan {
+func (c *CheckpointTelemetry) AddSpan(name, pluginType string, options any) *TelemetrySpan {
 	if c == nil {
 		return nil
 	}
@@ -188,12 +188,10 @@ func (s *TelemetrySpan) End(err error) {
 	}
 }
 
-func flattenConfigKeys(options interface{}) []string {
-	var flatten func(string, interface{}) []string
-
-	flatten = func(prefix string, options interface{}) (strOpts []string) {
+func flattenConfigKeys(options any) []string {
+	flatten := func(prefix string, options any) (strOpts []string) {
 		switch opt := options.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			return flattenJSON(prefix, options)
 		case cty.Value:
 			return flattenHCL(prefix, opt)
@@ -207,13 +205,13 @@ func flattenConfigKeys(options interface{}) []string {
 	return flattened
 }
 
-func flattenJSON(prefix string, options interface{}) (strOpts []string) {
-	if m, ok := options.(map[string]interface{}); ok {
+func flattenJSON(prefix string, options any) (strOpts []string) {
+	if m, ok := options.(map[string]any); ok {
 		for k, v := range m {
 			if prefix != "" {
 				k = prefix + "/" + k
 			}
-			if n, ok := v.(map[string]interface{}); ok {
+			if n, ok := v.(map[string]any); ok {
 				strOpts = append(strOpts, flattenJSON(k, n)...)
 			} else {
 				strOpts = append(strOpts, k)

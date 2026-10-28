@@ -14,50 +14,50 @@ func TestFixerSSHDisableAgent_Impl(t *testing.T) {
 
 func TestFixerSSHDisableAgent_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No disable_agent field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "virtualbox",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "virtualbox",
 			},
 		},
 
 		// disable_agent_forwarding without disable_agent
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"ssh_disable_agent_forwarding": true,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"ssh_disable_agent_forwarding": true,
 			},
 		},
 
 		// disable_agent without disable_agent_forwarding
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"ssh_disable_agent": true,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"ssh_disable_agent_forwarding": true,
 			},
 		},
 
 		// disable_agent and disable_agent_forwarding
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"ssh_disable_agent":            true,
 				"ssh_disable_agent_forwarding": false,
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"ssh_disable_agent_forwarding": false,
 			},
 		},
@@ -66,12 +66,12 @@ func TestFixerSSHDisableAgent_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerSSHDisableAgent
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

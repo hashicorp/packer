@@ -16,15 +16,15 @@ func TestFixerDockerTags(t *testing.T) {
 func TestFixerDockerTags_Fix(t *testing.T) {
 	var f FixerDockerTagtoTags
 
-	input := map[string]interface{}{
-		"post-processors": []interface{}{
-			map[string]interface{}{
+	input := map[string]any{
+		"post-processors": []any{
+			map[string]any{
 				"type": "docker-tag",
 				"tag":  "foo",
 				"tags": []string{"foo", "bar"},
 			},
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type": "docker-tag",
 					"tag":  []string{"baz"},
 					"tags": []string{"foo", "bar"},
@@ -33,14 +33,14 @@ func TestFixerDockerTags_Fix(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"post-processors": []interface{}{
-			map[string]interface{}{
+	expected := map[string]any{
+		"post-processors": []any{
+			map[string]any{
 				"type": "docker-tag",
 				"tags": []string{"foo", "bar"},
 			},
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type": "docker-tag",
 					"tags": []string{"baz", "foo", "bar"},
 				},
