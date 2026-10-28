@@ -453,7 +453,7 @@ func (c *Core) Build(n string) (*CoreBuild, error) {
 	}
 	// BuilderStore = config.Builders, gathered in loadConfig() in main.go
 	// For reference, the builtin BuilderStore is generated in
-	// packer/config.go in the Discover() func.
+	// plugin.go in the Discover() func.
 
 	if !c.components.PluginConfig.Builders.Has(configBuilder.Type) {
 		err := fmt.Errorf(
