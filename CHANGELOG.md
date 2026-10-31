@@ -4,6 +4,7 @@
 
 ### BUG FIXES:
 
+* core: track whole-local object dependencies when evaluating locals and data sources.
 * command: restore file and directory completion for commands that accept paths
 
 ## 1.16.2 (October 22, 2026)
