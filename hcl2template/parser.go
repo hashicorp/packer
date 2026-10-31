@@ -312,22 +312,39 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 	}
 }
 
+// expandLocalObjectDependencies makes a reference to the whole local object depend
+// on every local it can contain. Expression.Variables already excludes references
+// bound by a for expression, so a bare local here refers to the configuration.
+// Exclude the local being defined, since it cannot be part of its own value.
+func (cfg *PackerConfig) expandLocalObjectDependencies(deps []hcl.Traversal, exclude string) []hcl.Traversal {
+	var expanded []hcl.Traversal
+	for _, dep := range deps {
+		if len(dep) != 1 || dep.RootName() != localsAccessor {
+			expanded = append(expanded, dep)
+			continue
+		}
+		for _, local := range cfg.LocalBlocks {
+			if local.LocalName == exclude {
+				continue
+			}
+			expanded = append(expanded, hcl.Traversal{
+				dep[0], hcl.TraverseAttr{Name: local.LocalName},
+			})
+		}
+	}
+	return expanded
+}
+
 func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	for _, ds := range cfg.Datasources {
 		dependencies := GetVarsByType(ds.block, "data")
 		dependencies = append(dependencies, GetVarsByType(ds.block, "local")...)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, "")
 
 		for _, dep := range dependencies {
-			// If something is locally aliased as `local` or `data`, we'll falsely
-			// report it as a local variable, which is not necessarily what we
-			// want to process here, so we continue.
-			//
-			// Note: this is kinda brittle, we should understand scopes to accurately
-			// mark something from an expression as a reference to a local variable.
-			// No real good solution for this now, besides maybe forbidding something
-			// to be locally aliased as `local`.
+			// Whole data objects are not expanded into individual dependencies.
 			if len(dep) < 2 {
 				continue
 			}
@@ -359,16 +376,10 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	for _, loc := range cfg.LocalBlocks {
 		dependencies := FilterTraversalsByType(loc.Expr.Variables(), "data")
 		dependencies = append(dependencies, FilterTraversalsByType(loc.Expr.Variables(), "local")...)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, loc.LocalName)
 
 		for _, dep := range dependencies {
-			// If something is locally aliased as `local` or `data`, we'll falsely
-			// report it as a local variable, which is not necessarily what we
-			// want to process here, so we continue.
-			//
-			// Note: this is kinda brittle, we should understand scopes to accurately
-			// mark something from an expression as a reference to a local variable.
-			// No real good solution for this now, besides maybe forbidding something
-			// to be locally aliased as `local`.
+			// Whole data objects are not expanded into individual dependencies.
 			if len(dep) < 2 {
 				continue
 			}
