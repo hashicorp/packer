@@ -2,6 +2,11 @@
 
 ## 1.16.3 (Unreleased)
 
+### FEATURES:
+
+* build: add `-fail-fast` to cancel remaining parallel builds after the first failure.
+    [GH-13717](https://github.com/hashicorp/packer/pull/13717)
+
 ### BUG FIXES:
 
 * command: restore file and directory completion for commands that accept paths

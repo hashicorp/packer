@@ -246,6 +246,19 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		m map[string]error
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
+	// recordFailure stores a build error and, with -fail-fast, cancels the
+	// remaining in-flight builds once.
+	recordFailure := func(name string, err error) {
+		errs.Lock()
+		errs.m[name] = err
+		errs.Unlock()
+		if cla.FailFast && buildCtx.Err() == nil {
+			failFastOnce.Do(func() {
+				c.Ui.Error(fmt.Sprintf("Fail-fast: cancelling remaining builds after %q failed.", name))
+				failFastCancel()
+			})
+		}
+	}
 
 	for i := range builds {
 		if err := runCtx.Err(); err != nil {
@@ -292,6 +305,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 						Detail:   err.Error(),
 					},
 				})
+				recordFailure(name, err)
 				return
 			}
 
@@ -336,15 +350,7 @@ Check that you are using an HCP Ready integration before trying again:
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored after %s: %s", name, fmtBuildDuration, err))
-				errs.Lock()
-				errs.m[name] = err
-				errs.Unlock()
-				if cla.FailFast && buildCtx.Err() == nil {
-					failFastOnce.Do(func() {
-						c.Ui.Error(fmt.Sprintf("Fail-fast: cancelling remaining builds after %q failed.", name))
-						failFastCancel()
-					})
-				}
+				recordFailure(name, err)
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {
@@ -358,9 +364,7 @@ Check that you are using an HCP Ready integration before trying again:
 			// Packer should exit non-zero, so we re-assign the
 			// error to account for this case.
 			if hcperr != nil && err == nil {
-				errs.Lock()
-				errs.m[name] = hcperr
-				errs.Unlock()
+				recordFailure(name, hcperr)
 			}
 		}()
 
