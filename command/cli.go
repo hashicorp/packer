@@ -92,7 +92,7 @@ func (ba *BuildArgs) AddFlagSets(flags *flag.FlagSet) {
 	flags.BoolVar(&ba.MachineReadable, "machine-readable", false, "")
 
 	flags.Int64Var(&ba.ParallelBuilds, "parallel-builds", 0, "")
-	flags.BoolVar(&ba.FailFast, "fail-fast", false, "Cancel remaining parallel builds after the first failure.")
+	flags.BoolVar(&ba.FailFast, "fail-fast", false, "")
 
 	flagOnError := enumflag.New(&ba.OnError, "cleanup", "abort", "ask", "run-cleanup-provisioner")
 	flags.Var(flagOnError, "on-error", "")

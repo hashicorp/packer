@@ -4,11 +4,15 @@
 package command
 
 import (
+	"bytes"
 	"context"
 	"path/filepath"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
+
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 func waitAtomicAtLeast(t *testing.T, v *int32, want int32) {
@@ -135,5 +139,42 @@ func TestBuildFailFast_PrepareError(t *testing.T) {
 		if !failFast && started != 1 {
 			t.Errorf("without fail-fast: %d build(s) started, want the 1 valid build", started)
 		}
+	}
+}
+
+// TestBuildFailFast_NotStartedBuildsReported checks that, when builds run one
+// at a time, builds skipped after the first failure are listed as not started
+// rather than counted as errors, and that -on-error=abort gets a warning.
+func TestBuildFailFast_NotStartedBuildsReported(t *testing.T) {
+	failing := &FailingBuilder{ready: make(chan struct{})}
+	close(failing.ready)
+	locked := &LockedBuilder{unlock: make(chan interface{})}
+	c := &BuildCommand{
+		Meta: testMetaParallelWithFail(t, NewParallelTestBuilder(0), locked, failing),
+	}
+	args := []string{"-fail-fast", "-on-error=abort", "-parallel-builds=1",
+		filepath.Join(testFixture("parallel"), "1fail-2lock.json")}
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		t.Fatal("ParseArgs failed")
+	}
+	if code := c.RunContext(context.Background(), cfg); code == 0 {
+		t.Fatal("exit code 0, want non-zero after a failed build")
+	}
+	if started := atomic.LoadInt32(&locked.started); started != 0 {
+		t.Fatalf("%d build(s) started after the failure, want none", started)
+	}
+	errOut := c.Meta.Ui.(*packersdk.BasicUi).ErrorWriter.(*bytes.Buffer).String()
+	for _, want := range []string{
+		"Fail-fast: 2 build(s) were not started: lock.lock1, lock.lock2",
+		"skip their cleanup",
+	} {
+		if !strings.Contains(errOut, want) {
+			t.Errorf("error output does not contain %q:\n%s", want, errOut)
+		}
+	}
+	out := c.Meta.Ui.(*packersdk.BasicUi).Writer.(*bytes.Buffer).String()
+	if strings.Contains(out+errOut, "failed to acquire semaphore") {
+		t.Error("a build that never started was reported as a semaphore error")
 	}
 }
