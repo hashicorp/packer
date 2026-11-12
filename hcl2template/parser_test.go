@@ -24,6 +24,9 @@ func TestDetectBuildPrereqDependencies_wholeLocal(t *testing.T) {
 		want       []refString
 	}{
 		{"whole object", "merge(var, local)", []refString{{MType: "local", Name: "version"}, {MType: "local", Name: "name"}}},
+		{"nested lookup", `upper(lookup(local, "version", "unknown"))`, []refString{{MType: "local", Name: "version"}}},
+		{"lookup with whole local default", `lookup(local, "missing", merge(local))`, []refString{{MType: "local", Name: "version"}, {MType: "local", Name: "name"}}},
+		{"dynamic lookup", `lookup(local, var.key, "unknown")`, []refString{{MType: "local", Name: "version"}, {MType: "local", Name: "name"}}},
 		{"explicit reference", "local.version", []refString{{MType: "local", Name: "version"}}},
 		{"scoped local", "[for local in [1, 2] : local]", nil},
 		{"scoped local attribute", "[for local in [{version = 1}] : local.version]", nil},
@@ -59,6 +62,7 @@ func TestParse_wholeLocalDependencies(t *testing.T) {
 		want       cty.Value
 		wantCycle  bool
 		datasource bool
+		json       bool
 	}{
 		{
 			name: "templatefile with datasource backed locals",
@@ -96,6 +100,31 @@ data "null" "rendered" {
 			want:      cty.NumberIntVal(0),
 		},
 		{
+			name: "independent whole local lookups",
+			template: `
+data "null" "independent" { input = lookup(local, "missing", "c") }
+locals {
+  first = lookup(local, "missing", "a")
+  second = lookup(local, "missing", "b")
+  result = [local.first, local.second, data.null.independent.output]
+}
+`,
+			localName: "result",
+			want:      cty.TupleVal([]cty.Value{cty.StringVal("a"), cty.StringVal("b"), cty.StringVal("c")}),
+		},
+		{
+			name: "JSON local name containing a dot",
+			template: `{
+  "locals": {
+    "foo.bar": "a",
+    "result": "${length(local)}"
+  }
+}`,
+			localName: "result",
+			want:      cty.NumberIntVal(1),
+			json:      true,
+		},
+		{
 			name: "local cycle",
 			template: `
 locals {
@@ -117,7 +146,11 @@ data "null" "rendered" { input = jsonencode(local) }
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dir := t.TempDir()
-			filename := filepath.Join(dir, "test.pkr.hcl")
+			ext := hcl2FileExt
+			if tt.json {
+				ext = hcl2JsonFileExt
+			}
+			filename := filepath.Join(dir, "test"+ext)
 			if err := os.WriteFile(filename, []byte(tt.template), 0600); err != nil {
 				t.Fatal(err)
 			}

@@ -4,7 +4,15 @@
 
 ### BUG FIXES:
 
-* core: track whole-local object dependencies when evaluating locals and data sources.
+* core: track whole-local object dependencies when evaluating locals and data sources
+  and narrow native HCL dependencies for literal-key lookups
+
+  Other whole-local expressions still depend on every other declared local
+  This can introduce cycles in existing templates, including multiple independent
+  `templatefile(..., merge(var, local))` locals that previously relied on partial
+  evaluation of the local object
+  To migrate, pass only the locals each expression needs, for example
+  `templatefile("version.pkrtpl", merge(var, { version = local.version, vm_name = local.vm_name }))`
 * command: restore file and directory completion for commands that accept paths
 
 ## 1.16.2 (October 22, 2026)

@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/internal/dag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -312,19 +313,46 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 	}
 }
 
-// expandLocalObjectDependencies makes a reference to the whole local object depend
-// on every local it can contain. Expression.Variables already excludes references
-// bound by a for expression, so a bare local here refers to the configuration.
-// Exclude the local being defined, since it cannot be part of its own value.
-func (cfg *PackerConfig) expandLocalObjectDependencies(deps []hcl.Traversal, exclude string) []hcl.Traversal {
+// localObjectLookupKeys identifies literal-key lookups of the local object without
+// evaluating functions or unresolved variables. Source ranges distinguish the
+// lookup's first argument from other whole-local references, including defaults.
+func localObjectLookupKeys(node hclsyntax.Node) map[hcl.Range]string {
+	keys := make(map[hcl.Range]string)
+	if node == nil {
+		return keys
+	}
+	_ = hclsyntax.VisitAll(node, func(node hclsyntax.Node) hcl.Diagnostics {
+		call, ok := node.(*hclsyntax.FunctionCallExpr)
+		if !ok || call.Name != "lookup" || len(call.Args) < 2 || len(call.Args) > 3 || call.ExpandFinal {
+			return nil
+		}
+		traversal, diags := hcl.AbsTraversalForExpr(call.Args[0])
+		if diags.HasErrors() || len(traversal) != 1 || traversal.RootName() != localsAccessor {
+			return nil
+		}
+		key, diags := call.Args[1].Value(nil)
+		if !diags.HasErrors() && key.IsKnown() && !key.IsNull() && key.Type().Equals(cty.String) {
+			keys[traversal.SourceRange()] = key.AsString()
+		}
+		return nil
+	})
+	return keys
+}
+
+// expandLocalObjectDependencies narrows literal-key lookups to the selected local
+// and otherwise depends on every local the object can contain. Variables already
+// excludes scoped references. Exclude the local being defined from the object.
+func (cfg *PackerConfig) expandLocalObjectDependencies(deps []hcl.Traversal, exclude string, node hclsyntax.Node) []hcl.Traversal {
+	lookupKeys := localObjectLookupKeys(node)
 	var expanded []hcl.Traversal
 	for _, dep := range deps {
 		if len(dep) != 1 || dep.RootName() != localsAccessor {
 			expanded = append(expanded, dep)
 			continue
 		}
+		key, lookup := lookupKeys[dep.SourceRange()]
 		for _, local := range cfg.LocalBlocks {
-			if local.LocalName == exclude {
+			if local.LocalName == exclude || (lookup && local.LocalName != key) {
 				continue
 			}
 			expanded = append(expanded, hcl.Traversal{
@@ -341,7 +369,8 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	for _, ds := range cfg.Datasources {
 		dependencies := GetVarsByType(ds.block, "data")
 		dependencies = append(dependencies, GetVarsByType(ds.block, "local")...)
-		dependencies = cfg.expandLocalObjectDependencies(dependencies, "")
+		node, _ := ds.block.Body.(hclsyntax.Node)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, "", node)
 
 		for _, dep := range dependencies {
 			// Whole data objects are not expanded into individual dependencies.
@@ -376,7 +405,8 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	for _, loc := range cfg.LocalBlocks {
 		dependencies := FilterTraversalsByType(loc.Expr.Variables(), "data")
 		dependencies = append(dependencies, FilterTraversalsByType(loc.Expr.Variables(), "local")...)
-		dependencies = cfg.expandLocalObjectDependencies(dependencies, loc.LocalName)
+		node, _ := loc.Expr.(hclsyntax.Node)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, loc.LocalName, node)
 
 		for _, dep := range dependencies {
 			// Whole data objects are not expanded into individual dependencies.
