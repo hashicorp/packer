@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -974,6 +975,62 @@ func TestProvision_uploadEnvVars(t *testing.T) {
 
 	if comm.UploadCalled != true {
 		t.Fatalf("Failed to upload env var file")
+	}
+}
+
+// flakyUploadCommunicator fails the first Upload after reading readOnFail
+// bytes from the reader, and records the data of every later Upload.
+type flakyUploadCommunicator struct {
+	packersdk.MockCommunicator
+	readOnFail  int
+	uploadCalls int
+	uploads     []string
+}
+
+func (c *flakyUploadCommunicator) Upload(path string, r io.Reader, fi *os.FileInfo) error {
+	c.uploadCalls++
+	if c.uploadCalls == 1 {
+		if _, err := io.CopyN(io.Discard, r, int64(c.readOnFail)); err != nil {
+			return err
+		}
+		return fmt.Errorf("transient upload error")
+	}
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return err
+	}
+	c.uploads = append(c.uploads, string(data))
+	return nil
+}
+
+func TestProvision_uploadEnvVarsRetry(t *testing.T) {
+	flattenedEnvVars := `$env:PACKER_BUILDER_TYPE="footype"; $env:PACKER_BUILD_NAME="foobuild";`
+
+	tests := []struct {
+		name       string
+		readOnFail int
+	}{
+		{"partial read before failure", 10},
+		{"full read before failure", len(flattenedEnvVars)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := new(Provisioner)
+			comm := &flakyUploadCommunicator{readOnFail: tt.readOnFail}
+			p.communicator = comm
+
+			if err := p.uploadEnvVars(flattenedEnvVars); err != nil {
+				t.Fatalf("Did not expect error: %s", err.Error())
+			}
+
+			if comm.uploadCalls != 2 {
+				t.Fatalf("expected 2 upload attempts, got %d", comm.uploadCalls)
+			}
+			if comm.uploads[0] != flattenedEnvVars {
+				t.Fatalf("retried upload sent %q, expected %q", comm.uploads[0], flattenedEnvVars)
+			}
+		})
 	}
 }
 

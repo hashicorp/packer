@@ -569,9 +569,12 @@ func (p *Provisioner) uploadEnvVars(flattenedEnvVars string) (err error) {
 	// system. Do this in the context of a single retryable function so that
 	// we gracefully handle any errors created by transient conditions such as
 	// a system restart
-	envVarReader := strings.NewReader(flattenedEnvVars)
 	log.Printf("Uploading env vars to %s", p.config.RemoteEnvVarPath)
 	err = retry.Config{StartTimeout: p.config.StartRetryTimeout}.Run(ctx, func(context.Context) error {
+		// Create the reader on every attempt: a failed attempt may have
+		// consumed some or all of it, and reusing it would upload a
+		// truncated or empty file.
+		envVarReader := strings.NewReader(flattenedEnvVars)
 		if err := p.communicator.Upload(p.config.RemoteEnvVarPath, envVarReader, nil); err != nil {
 			return fmt.Errorf("Error uploading ps script containing env vars: %s", err)
 		}
