@@ -117,7 +117,7 @@ type Config struct {
 type Provisioner struct {
 	config        Config
 	communicator  packersdk.Communicator
-	generatedData map[string]interface{}
+	generatedData map[string]any
 }
 
 func formatUIWarning(message string) string {
@@ -140,7 +140,7 @@ func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec {
 	return p.config.FlatMapstructure().HCL2Spec()
 }
 
-func (p *Provisioner) FlatConfig() interface{} {
+func (p *Provisioner) FlatConfig() any {
 	return p.config.FlatMapstructure()
 }
 
@@ -178,7 +178,7 @@ var scannerPathTokenRegexp = regexp.MustCompile(`\{\{\s*\.Path\s*\}\}`)
 //	&& chmod +x {{.Path}}
 var scannerArgsOrScanPathTokenPrefixRegexp = regexp.MustCompile(`^\{\{\s*\.(Args|ScanPath)\s*\}\}`)
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "hcp-sbom",
 		Interpolate:        true,
@@ -280,7 +280,7 @@ type PackerSBOM struct {
 
 func (p *Provisioner) Provision(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{},
+	generatedData map[string]any,
 ) error {
 	// Store communicator and generatedData for elevated execution
 	p.communicator = comm
@@ -288,7 +288,7 @@ func (p *Provisioner) Provision(
 	log.Println("Starting to provision with `hcp-sbom` provisioner")
 
 	if generatedData == nil {
-		generatedData = make(map[string]interface{})
+		generatedData = make(map[string]any)
 	}
 	p.config.ctx.Data = generatedData
 
@@ -323,7 +323,7 @@ func (p *Provisioner) Provision(
 // provisionWithExistingSBOM handles the original flow where user provides an SBOM file
 func (p *Provisioner) provisionWithExistingSBOM(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{},
+	generatedData map[string]any,
 ) error {
 	src := p.config.Source
 
@@ -348,7 +348,7 @@ func (p *Provisioner) provisionWithExistingSBOM(
 // detectRemoteOS performs OS detection on the remote host
 func (p *Provisioner) detectRemoteOS(ctx context.Context, ui packersdk.Ui,
 	comm packersdk.Communicator,
-	generatedData map[string]interface{}) (string, string, error) {
+	generatedData map[string]any) (string, string, error) {
 	// First check if already detected (from generatedData)
 	if osType, ok := generatedData["OSType"].(string); ok {
 		if osArch, ok := generatedData["OSArch"].(string); ok {
@@ -612,7 +612,7 @@ func (p *Provisioner) runRemoteCmd(ctx context.Context, comm packersdk.Communica
 // to the remote host via the communicator before running `packer sbom-generate`.
 func (p *Provisioner) provisionWithNativeGeneration(
 	ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator,
-	generatedData map[string]interface{}, osType, osArch string,
+	generatedData map[string]any, osType, osArch string,
 ) error {
 	ui.Say("Starting Automatic SBOM generation workflow...")
 
@@ -874,7 +874,7 @@ func (p *Provisioner) cleanupRemoteFile(ctx context.Context, ui packersdk.Ui,
 }
 
 // processSBOMForHCP validates, compresses, and prepares SBOM for HCP upload
-func (p *Provisioner) processSBOMForHCP(generatedData map[string]interface{}, sbomData []byte) error {
+func (p *Provisioner) processSBOMForHCP(generatedData map[string]any, sbomData []byte) error {
 	// Validate SBOM format
 	format, err := validateSBOM(sbomData)
 	if err != nil {

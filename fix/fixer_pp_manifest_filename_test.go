@@ -16,14 +16,14 @@ func TestFixerManifestPPFilename_Impl(t *testing.T) {
 func TestFixerManifestPPFilename_Fix(t *testing.T) {
 	var f FixerManifestFilename
 
-	input := map[string]interface{}{
-		"post-processors": []interface{}{
-			map[string]interface{}{
+	input := map[string]any{
+		"post-processors": []any{
+			map[string]any{
 				"type":     "manifest",
 				"filename": "foo",
 			},
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type":     "manifest",
 					"filename": "foo",
 				},
@@ -31,14 +31,14 @@ func TestFixerManifestPPFilename_Fix(t *testing.T) {
 		},
 	}
 
-	expected := map[string]interface{}{
-		"post-processors": []interface{}{
-			map[string]interface{}{
+	expected := map[string]any{
+		"post-processors": []any{
+			map[string]any{
 				"type":   "manifest",
 				"output": "foo",
 			},
-			[]interface{}{
-				map[string]interface{}{
+			[]any{
+				map[string]any{
 					"type":   "manifest",
 					"output": "foo",
 				},

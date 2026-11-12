@@ -16,15 +16,14 @@ func TestPostProcessor_ImplementsPostProcessor(t *testing.T) {
 	var _ packersdk.PostProcessor = new(PostProcessor)
 }
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
-		"inline": []interface{}{"foo", "bar"},
+func testConfig() map[string]any {
+	return map[string]any{
+		"inline": []any{"foo", "bar"},
 	}
 }
 
 func TestPostProcessor_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &PostProcessor{}
+	var raw any = &PostProcessor{}
 	if _, ok := raw.(packersdk.PostProcessor); !ok {
 		t.Fatalf("must be a post processor")
 	}
@@ -168,7 +167,7 @@ func TestPostProcessorPrepare_ScriptAndInline(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	raws["inline"] = []interface{}{"foo"}
+	raws["inline"] = []any{"foo"}
 	raws["script"] = tf.Name()
 	err = p.Configure(raws)
 	if err == nil {
@@ -187,7 +186,7 @@ func TestPostProcessorPrepare_ScriptAndScripts(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	raws["inline"] = []interface{}{"foo"}
+	raws["inline"] = []any{"foo"}
 	raws["scripts"] = []string{tf.Name()}
 	err = p.Configure(raws)
 	if err == nil {

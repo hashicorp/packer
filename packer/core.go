@@ -270,7 +270,7 @@ func (c *Core) generateCoreBuildProvisionerWithProvisioner(rawP *template.Provis
 	cbp := CoreBuildProvisioner{}
 
 	// Get the configuration
-	config := make([]interface{}, 1, 2)
+	config := make([]any, 1, 2)
 	config[0] = rawP.Config
 	if rawP.Override != nil {
 		if override, ok := rawP.Override[rawName]; ok {
@@ -327,7 +327,7 @@ func (c *Core) generateCoreBuildProvisionerWithProvisioner(rawP *template.Provis
 func (c *Core) GenerateCoreBuildProvisionerFromHCLBody(
 	provisionerType string,
 	configBody hcl.Body,
-	override map[string]interface{},
+	override map[string]any,
 	pauseBefore time.Duration,
 	maxRetries int,
 	timeout time.Duration,
@@ -367,9 +367,9 @@ func (c *Core) GenerateCoreBuildProvisionerFromHCLBody(
 
 	flatProvisionerCfg = hcl2shim.WriteUnknownPlaceholderValues(flatProvisionerCfg)
 	decodedConfig := hcl2shim.ConfigValueFromHCL2(flatProvisionerCfg)
-	configMap, _ := decodedConfig.(map[string]interface{})
+	configMap, _ := decodedConfig.(map[string]any)
 	if configMap == nil {
-		configMap = make(map[string]interface{})
+		configMap = make(map[string]any)
 	}
 
 	rawProvisioner := &template.Provisioner{
@@ -799,9 +799,9 @@ func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
 		return diags
 	}
 
-	var rawTemplateData map[string]interface{}
-	input := make(map[string]interface{})
-	templateData := make(map[string]interface{})
+	var rawTemplateData map[string]any
+	input := make(map[string]any)
+	templateData := make(map[string]any)
 	if err := json.Unmarshal(c.Template.RawContents, &rawTemplateData); err != nil {
 		diags = append(diags, &hcl.Diagnostic{
 			Severity: hcl.DiagError,
@@ -814,7 +814,7 @@ func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
 	// delete empty top-level keys since the fixers seem to add them
 	// willy-nilly
 	for k := range input {
-		ml, ok := input[k].([]map[string]interface{})
+		ml, ok := input[k].([]map[string]any)
 		if !ok {
 			continue
 		}
@@ -823,7 +823,7 @@ func (c *Core) FixConfig(opts FixConfigOptions) hcl.Diagnostics {
 		}
 	}
 	// marshal/unmarshal to make comparable to templateData
-	var fixedData map[string]interface{}
+	var fixedData map[string]any
 	// Guaranteed to be valid json, so we can ignore errors
 	j, _ := json.Marshal(input)
 	if err := json.Unmarshal(j, &fixedData); err != nil {

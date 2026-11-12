@@ -10,9 +10,9 @@ import (
 // FixerQEMUHostPort updates ssh_host_port_min and ssh_host_port_max to host_port_min and host_port_max for QEMU builders
 type FixerQEMUHostPort struct{}
 
-func (FixerQEMUHostPort) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerQEMUHostPort) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Builders []map[string]interface{}
+		Builders []map[string]any
 	}
 
 	// Decode the input into our structure, if we can

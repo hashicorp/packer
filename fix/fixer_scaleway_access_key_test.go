@@ -14,28 +14,28 @@ func TestFixerScalewayAccessKey_Fix_Impl(t *testing.T) {
 
 func TestFixerScalewayAccessKey_Fix(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No key_path field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "scaleway",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "scaleway",
 			},
 		},
 
 		// organization_id without access_key
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":            "scaleway",
 				"organization_id": "0000",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "scaleway",
 				"organization_id": "0000",
 			},
@@ -43,12 +43,12 @@ func TestFixerScalewayAccessKey_Fix(t *testing.T) {
 
 		// access_key without organization_id
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":       "scaleway",
 				"access_key": "1111",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "scaleway",
 				"organization_id": "1111",
 			},
@@ -56,13 +56,13 @@ func TestFixerScalewayAccessKey_Fix(t *testing.T) {
 
 		// access_key and organization_id
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":            "scaleway",
 				"access_key":      "2222",
 				"organization_id": "3333",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":            "scaleway",
 				"organization_id": "3333",
 			},
@@ -72,12 +72,12 @@ func TestFixerScalewayAccessKey_Fix(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerScalewayAccessKey
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)

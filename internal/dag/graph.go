@@ -13,8 +13,8 @@ import (
 type Graph struct {
 	vertices  Set
 	edges     Set
-	downEdges map[interface{}]Set
-	upEdges   map[interface{}]Set
+	downEdges map[any]Set
+	upEdges   map[any]Set
 }
 
 // Subgrapher allows a Vertex to be a Graph itself, by returning a Grapher.
@@ -30,7 +30,7 @@ type Grapher interface {
 }
 
 // Vertex of the graph.
-type Vertex interface{}
+type Vertex any
 
 // NamedVertex is an optional interface that can be implemented by Vertex
 // to give it a human-friendly name that is used for outputting the graph.
@@ -207,10 +207,10 @@ func (g *Graph) init() {
 		g.edges = make(Set)
 	}
 	if g.downEdges == nil {
-		g.downEdges = make(map[interface{}]Set)
+		g.downEdges = make(map[any]Set)
 	}
 	if g.upEdges == nil {
-		g.upEdges = make(map[interface{}]Set)
+		g.upEdges = make(map[any]Set)
 	}
 }
 
