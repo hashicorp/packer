@@ -149,6 +149,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if len(builds) == 0 && ret != 0 {
 		return ret
 	}
+	if cla.FailFast && ret != 0 {
+		c.Ui.Error("Fail-fast: not starting any builds because some builds could not be prepared.")
+		return ret
+	}
 
 	// Fetch and inject enforced provisioners from HCP Packer (if configured)
 	if !cla.SkipEnforcement {
@@ -288,7 +292,7 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 
 			defer limitParallel.Release(1)
 
-			err := hcpRegistry.StartBuild(runCtx, b)
+			err := hcpRegistry.StartBuild(buildCtx, b)
 			// Seems odd to require this error check here. Now that it is an error we can just exit with diag
 			if err != nil {
 				// If the build is already done, we skip without a warning
@@ -317,11 +321,25 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 			buildDuration := buildEnd.Sub(buildStart)
 			fmtBuildDuration := durafmt.Parse(buildDuration).LimitFirstN(2)
 
+			// Read this before recordFailure cancels runCtx: it tells a build
+			// stopped by -fail-fast apart from the build that failed first.
+			stoppedByFailFast := err != nil && runCtx.Err() != nil && buildCtx.Err() == nil
+			if err != nil {
+				// Cancel the siblings now rather than after the HCP update.
+				recordFailure(name, err)
+			}
+
+			// The HCP update uses buildCtx so it still completes after a
+			// fail-fast cancellation.
+			hcpBuildErr := err
+			if stoppedByFailFast && !errors.Is(err, context.Canceled) {
+				hcpBuildErr = errors.Join(err, context.Canceled)
+			}
 			runArtifacts, hcperr := hcpRegistry.CompleteBuild(
 				buildCtx,
 				b,
 				runArtifacts,
-				err)
+				hcpBuildErr)
 			if hcperr != nil {
 				if _, ok := hcperr.(*registry.NotAHCPArtifactError); ok {
 					writeDiags(c.Ui, nil, hcl.Diagnostics{
@@ -350,7 +368,12 @@ Check that you are using an HCP Ready integration before trying again:
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored after %s: %s", name, fmtBuildDuration, err))
-				recordFailure(name, err)
+				for _, a := range runArtifacts {
+					if a == nil {
+						continue
+					}
+					ui.Error(fmt.Sprintf("Build '%s' stopped after producing an artifact, which was kept and must be cleaned up manually: %s", name, a.String()))
+				}
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {

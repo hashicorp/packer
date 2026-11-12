@@ -106,3 +106,34 @@ func TestBuildFailFast(t *testing.T) {
 		})
 	}
 }
+
+// TestBuildFailFast_PrepareError checks that -fail-fast starts no build when
+// another build in the template could not be prepared, while the default
+// behaviour still runs the valid builds.
+func TestBuildFailFast_PrepareError(t *testing.T) {
+	for _, failFast := range []bool{false, true} {
+		locked := &LockedBuilder{unlock: make(chan interface{})}
+		close(locked.unlock)
+		c := &BuildCommand{
+			Meta: testMetaParallelWithFail(t, NewParallelTestBuilder(0), locked, &FailingBuilder{ready: make(chan struct{})}),
+		}
+		args := []string{filepath.Join(testFixture("parallel"), "1lock-1unknown.json")}
+		if failFast {
+			args = append([]string{"-fail-fast"}, args...)
+		}
+		cfg, ret := c.ParseArgs(args)
+		if ret != 0 {
+			t.Fatal("ParseArgs failed")
+		}
+		if code := c.RunContext(context.Background(), cfg); code == 0 {
+			t.Errorf("fail-fast=%v: exit code 0, want non-zero for the unpreparable build", failFast)
+		}
+		started := atomic.LoadInt32(&locked.started)
+		if failFast && started != 0 {
+			t.Errorf("fail-fast: %d build(s) started, want none", started)
+		}
+		if !failFast && started != 1 {
+			t.Errorf("without fail-fast: %d build(s) started, want the 1 valid build", started)
+		}
+	}
+}

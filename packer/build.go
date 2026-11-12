@@ -368,8 +368,10 @@ func (b *CoreBuild) Run(ctx context.Context, originalUi packersdk.Ui) ([]packers
 
 	select {
 	case <-ctx.Done():
+		// The builder already produced its artifact; return it with the
+		// cancellation error so the caller can report it rather than lose it.
 		log.Println("Build was cancelled. Skipping post-processors.")
-		return nil, ctx.Err()
+		return []packersdk.Artifact{builderArtifact}, ctx.Err()
 	default:
 	}
 
