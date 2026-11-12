@@ -61,6 +61,9 @@ type Config struct {
 	// Whether to clean scripts up
 	SkipClean bool `mapstructure:"skip_clean"`
 
+	// Defaults to false. When true, allow the server to disconnect from Packer
+	// without throwing an error. A disconnect might happen if you restart the
+	// SSH server or reboot the host.
 	ExpectDisconnect bool `mapstructure:"expect_disconnect"`
 
 	// name of the tmp environment variable file, if UseEnvVarFile is true

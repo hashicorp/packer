@@ -2,6 +2,11 @@
 
 ## 1.16.3 (Unreleased)
 
+### IMPROVEMENTS:
+
+* docs: document rebooting a Linux guest with the `shell` provisioner using
+  `expect_disconnect`, `start_retry_timeout`, and `pause_before`.
+
 ### BUG FIXES:
 
 * command: restore file and directory completion for commands that accept paths
