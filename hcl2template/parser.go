@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/ext/dynblock"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/packer/internal/dag"
 	"github.com/hashicorp/packer/packer"
 	"github.com/zclconf/go-cty/cty"
@@ -312,22 +313,67 @@ func filterVarsFromLogs(inputOrLocal Variables) {
 	}
 }
 
+// localObjectLookupKeys identifies literal-key lookups of the local object without
+// evaluating functions or unresolved variables. Source ranges distinguish the
+// lookup's first argument from other whole-local references, including defaults.
+func localObjectLookupKeys(node hclsyntax.Node) map[hcl.Range]string {
+	keys := make(map[hcl.Range]string)
+	if node == nil {
+		return keys
+	}
+	_ = hclsyntax.VisitAll(node, func(node hclsyntax.Node) hcl.Diagnostics {
+		call, ok := node.(*hclsyntax.FunctionCallExpr)
+		if !ok || call.Name != "lookup" || len(call.Args) < 2 || len(call.Args) > 3 || call.ExpandFinal {
+			return nil
+		}
+		traversal, diags := hcl.AbsTraversalForExpr(call.Args[0])
+		if diags.HasErrors() || len(traversal) != 1 || traversal.RootName() != localsAccessor {
+			return nil
+		}
+		key, diags := call.Args[1].Value(nil)
+		if !diags.HasErrors() && key.IsKnown() && !key.IsNull() && key.Type().Equals(cty.String) {
+			keys[traversal.SourceRange()] = key.AsString()
+		}
+		return nil
+	})
+	return keys
+}
+
+// expandLocalObjectDependencies narrows literal-key lookups to the selected local
+// and otherwise depends on every local the object can contain. Variables already
+// excludes scoped references. Exclude the local being defined from the object.
+func (cfg *PackerConfig) expandLocalObjectDependencies(deps []hcl.Traversal, exclude string, node hclsyntax.Node) []hcl.Traversal {
+	lookupKeys := localObjectLookupKeys(node)
+	var expanded []hcl.Traversal
+	for _, dep := range deps {
+		if len(dep) != 1 || dep.RootName() != localsAccessor {
+			expanded = append(expanded, dep)
+			continue
+		}
+		key, lookup := lookupKeys[dep.SourceRange()]
+		for _, local := range cfg.LocalBlocks {
+			if local.LocalName == exclude || (lookup && local.LocalName != key) {
+				continue
+			}
+			expanded = append(expanded, hcl.Traversal{
+				dep[0], hcl.TraverseAttr{Name: local.LocalName},
+			})
+		}
+	}
+	return expanded
+}
+
 func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	var diags hcl.Diagnostics
 
 	for _, ds := range cfg.Datasources {
 		dependencies := GetVarsByType(ds.block, "data")
 		dependencies = append(dependencies, GetVarsByType(ds.block, "local")...)
+		node, _ := ds.block.Body.(hclsyntax.Node)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, "", node)
 
 		for _, dep := range dependencies {
-			// If something is locally aliased as `local` or `data`, we'll falsely
-			// report it as a local variable, which is not necessarily what we
-			// want to process here, so we continue.
-			//
-			// Note: this is kinda brittle, we should understand scopes to accurately
-			// mark something from an expression as a reference to a local variable.
-			// No real good solution for this now, besides maybe forbidding something
-			// to be locally aliased as `local`.
+			// Whole data objects are not expanded into individual dependencies.
 			if len(dep) < 2 {
 				continue
 			}
@@ -359,16 +405,11 @@ func (cfg *PackerConfig) detectBuildPrereqDependencies() hcl.Diagnostics {
 	for _, loc := range cfg.LocalBlocks {
 		dependencies := FilterTraversalsByType(loc.Expr.Variables(), "data")
 		dependencies = append(dependencies, FilterTraversalsByType(loc.Expr.Variables(), "local")...)
+		node, _ := loc.Expr.(hclsyntax.Node)
+		dependencies = cfg.expandLocalObjectDependencies(dependencies, loc.LocalName, node)
 
 		for _, dep := range dependencies {
-			// If something is locally aliased as `local` or `data`, we'll falsely
-			// report it as a local variable, which is not necessarily what we
-			// want to process here, so we continue.
-			//
-			// Note: this is kinda brittle, we should understand scopes to accurately
-			// mark something from an expression as a reference to a local variable.
-			// No real good solution for this now, besides maybe forbidding something
-			// to be locally aliased as `local`.
+			// Whole data objects are not expanded into individual dependencies.
 			if len(dep) < 2 {
 				continue
 			}
