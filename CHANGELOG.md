@@ -2,9 +2,18 @@
 
 ## 1.16.3 (Unreleased)
 
+### FEATURES:
+
+* build: add `-fail-fast` to cancel running builds and start no more after the first failure. Builds that were not started are listed at the end. With `-on-error=abort` or `run-cleanup-provisioner`, the cancelled builds skip their cleanup, as on an interrupt.
+    [GH-13717](https://github.com/hashicorp/packer/pull/13717)
+
 ### BUG FIXES:
 
 * command: restore file and directory completion for commands that accept paths
+* build: a failure to start a build in HCP Packer now makes `packer build` exit non-zero, also without `-fail-fast`.
+    [GH-13717](https://github.com/hashicorp/packer/pull/13717)
+* build: an artifact produced by a build that is cancelled (by an interrupt or `-fail-fast`) before its post-processors run is now reported instead of silently dropped.
+    [GH-13717](https://github.com/hashicorp/packer/pull/13717)
 
 ## 1.16.2 (October 22, 2026)
 

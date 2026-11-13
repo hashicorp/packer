@@ -1,0 +1,180 @@
+// Copyright IBM Corp. 2024, 2026
+// SPDX-License-Identifier: BUSL-1.1
+
+package command
+
+import (
+	"bytes"
+	"context"
+	"path/filepath"
+	"strings"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
+)
+
+func waitAtomicAtLeast(t *testing.T, v *int32, want int32) {
+	t.Helper()
+	deadline := time.After(10 * time.Second)
+	for {
+		if atomic.LoadInt32(v) >= want {
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatalf("timed out waiting for count >= %d (have %d)", want, atomic.LoadInt32(v))
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+}
+
+func TestBuildFailFast(t *testing.T) {
+	tests := []struct {
+		name            string
+		failFast        bool
+		wantCompleted   int32
+		wantAbortedMin  int32
+		unlockRemaining bool
+	}{
+		{
+			name:            "without fail-fast remaining builds complete",
+			failFast:        false,
+			wantCompleted:   2,
+			wantAbortedMin:  0,
+			unlockRemaining: true,
+		},
+		{
+			name:            "with fail-fast remaining builds abort",
+			failFast:        true,
+			wantCompleted:   0,
+			wantAbortedMin:  2,
+			unlockRemaining: false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			failing := &FailingBuilder{ready: make(chan struct{})}
+			locked := &LockedBuilder{unlock: make(chan interface{})}
+			c := &BuildCommand{
+				Meta: testMetaParallelWithFail(t, NewParallelTestBuilder(0), locked, failing),
+			}
+
+			args := []string{
+				"-parallel-builds=10",
+				filepath.Join(testFixture("parallel"), "1fail-2lock.json"),
+			}
+			if tt.failFast {
+				args = append([]string{"-fail-fast"}, args...)
+			}
+
+			ctx := context.Background()
+			codeC := make(chan int, 1)
+			go func() {
+				cfg, ret := c.ParseArgs(args)
+				if ret != 0 {
+					t.Error("ParseArgs failed")
+					codeC <- ret
+					return
+				}
+				codeC <- c.RunContext(ctx, cfg)
+			}()
+
+			waitAtomicAtLeast(t, &locked.started, 2)
+			close(failing.ready)
+
+			if tt.unlockRemaining {
+				close(locked.unlock)
+			}
+
+			select {
+			case code := <-codeC:
+				if code == 0 {
+					fatalCommand(t, c.Meta)
+				}
+			case <-time.After(15 * time.Second):
+				t.Fatal("deadlock: remaining parallel builds were not aborted")
+			}
+
+			completed := atomic.LoadInt32(&locked.completed)
+			aborted := atomic.LoadInt32(&locked.aborted)
+			if completed != tt.wantCompleted {
+				t.Fatalf("completed lock builds: got %d, want %d (aborted=%d)", completed, tt.wantCompleted, aborted)
+			}
+			if aborted < tt.wantAbortedMin {
+				t.Fatalf("aborted lock builds: got %d, want at least %d (completed=%d)", aborted, tt.wantAbortedMin, completed)
+			}
+		})
+	}
+}
+
+// TestBuildFailFast_PrepareError checks that -fail-fast starts no build when
+// another build in the template could not be prepared, while the default
+// behaviour still runs the valid builds.
+func TestBuildFailFast_PrepareError(t *testing.T) {
+	for _, failFast := range []bool{false, true} {
+		locked := &LockedBuilder{unlock: make(chan interface{})}
+		close(locked.unlock)
+		c := &BuildCommand{
+			Meta: testMetaParallelWithFail(t, NewParallelTestBuilder(0), locked, &FailingBuilder{ready: make(chan struct{})}),
+		}
+		args := []string{filepath.Join(testFixture("parallel"), "1lock-1unknown.json")}
+		if failFast {
+			args = append([]string{"-fail-fast"}, args...)
+		}
+		cfg, ret := c.ParseArgs(args)
+		if ret != 0 {
+			t.Fatal("ParseArgs failed")
+		}
+		if code := c.RunContext(context.Background(), cfg); code == 0 {
+			t.Errorf("fail-fast=%v: exit code 0, want non-zero for the unpreparable build", failFast)
+		}
+		started := atomic.LoadInt32(&locked.started)
+		if failFast && started != 0 {
+			t.Errorf("fail-fast: %d build(s) started, want none", started)
+		}
+		if !failFast && started != 1 {
+			t.Errorf("without fail-fast: %d build(s) started, want the 1 valid build", started)
+		}
+	}
+}
+
+// TestBuildFailFast_NotStartedBuildsReported checks that, when builds run one
+// at a time, builds skipped after the first failure are listed as not started
+// rather than counted as errors, and that -on-error=abort gets a warning.
+func TestBuildFailFast_NotStartedBuildsReported(t *testing.T) {
+	failing := &FailingBuilder{ready: make(chan struct{})}
+	close(failing.ready)
+	locked := &LockedBuilder{unlock: make(chan interface{})}
+	c := &BuildCommand{
+		Meta: testMetaParallelWithFail(t, NewParallelTestBuilder(0), locked, failing),
+	}
+	args := []string{"-fail-fast", "-on-error=abort", "-parallel-builds=1",
+		filepath.Join(testFixture("parallel"), "1fail-2lock.json")}
+	cfg, ret := c.ParseArgs(args)
+	if ret != 0 {
+		t.Fatal("ParseArgs failed")
+	}
+	if code := c.RunContext(context.Background(), cfg); code == 0 {
+		t.Fatal("exit code 0, want non-zero after a failed build")
+	}
+	if started := atomic.LoadInt32(&locked.started); started != 0 {
+		t.Fatalf("%d build(s) started after the failure, want none", started)
+	}
+	errOut := c.Meta.Ui.(*packersdk.BasicUi).ErrorWriter.(*bytes.Buffer).String()
+	for _, want := range []string{
+		"Fail-fast: 2 build(s) were not started: lock.lock1, lock.lock2",
+		"skip their cleanup",
+	} {
+		if !strings.Contains(errOut, want) {
+			t.Errorf("error output does not contain %q:\n%s", want, errOut)
+		}
+	}
+	out := c.Meta.Ui.(*packersdk.BasicUi).Writer.(*bytes.Buffer).String()
+	if strings.Contains(out+errOut, "failed to acquire semaphore") {
+		t.Error("a build that never started was reported as a semaphore error")
+	}
+}

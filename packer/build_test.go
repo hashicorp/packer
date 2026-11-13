@@ -5,6 +5,7 @@ package packer
 
 import (
 	"context"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -586,5 +587,40 @@ func TestBuild_Cancel(t *testing.T) {
 	_, err := build.Run(topCtx, testUi())
 	if err == nil {
 		t.Fatal("build should err")
+	}
+}
+
+// cancelAfterRunBuilder returns its artifact and then cancels the build, as
+// when cancellation arrives right after a builder created its output.
+type cancelAfterRunBuilder struct {
+	*packersdk.MockBuilder
+	cancel context.CancelFunc
+}
+
+func (b *cancelAfterRunBuilder) Run(ctx context.Context, ui packersdk.Ui, h packersdk.Hook) (packersdk.Artifact, error) {
+	artifact, err := b.MockBuilder.Run(ctx, ui, h)
+	b.cancel()
+	return artifact, err
+}
+
+// TestBuild_Run_CancelledKeepsBuilderArtifact checks that a build cancelled
+// after its builder produced an artifact returns that artifact with the
+// cancellation error, so the caller can report it.
+func TestBuild_Run_CancelledKeepsBuilderArtifact(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	build := testBuild()
+	build.Builder = &cancelAfterRunBuilder{MockBuilder: build.Builder.(*packersdk.MockBuilder), cancel: cancel}
+
+	if _, err := build.Prepare(); err != nil {
+		t.Fatalf("Prepare() error = %s", err)
+	}
+	artifacts, err := build.Run(ctx, packersdk.TestUi(t))
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("Run() error = %v, want context.Canceled", err)
+	}
+	if len(artifacts) != 1 || artifacts[0].Id() != "b" {
+		t.Fatalf("Run() artifacts = %v, want the builder artifact %q", artifacts, "b")
 	}
 }
