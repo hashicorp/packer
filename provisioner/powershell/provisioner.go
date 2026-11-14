@@ -135,9 +135,9 @@ func (p *Provisioner) defaultExecuteCommand() string {
 	}
 
 	if p.config.UsePwsh {
-		return fmt.Sprintf(`pwsh -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+		return fmt.Sprintf(`pwsh -NonInteractive -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
 	} else {
-		return fmt.Sprintf(`powershell -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
+		return fmt.Sprintf(`powershell -NonInteractive -executionpolicy %s -file {{.Path}}`, p.config.ExecutionPolicy)
 	}
 
 }
@@ -157,9 +157,9 @@ func (p *Provisioner) defaultScriptCommand() string {
 	}
 
 	if p.config.UsePwsh {
-		return fmt.Sprintf(`pwsh -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`pwsh -NonInteractive -executionpolicy %s -command "%s"`, p.config.ExecutionPolicy, baseCmd)
 	} else {
-		return fmt.Sprintf(`powershell -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
+		return fmt.Sprintf(`powershell -NonInteractive -executionpolicy %s "%s"`, p.config.ExecutionPolicy, baseCmd)
 	}
 
 }
