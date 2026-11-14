@@ -96,11 +96,13 @@ var LegacyStrftimeFunc = function.New(&function.Spec{
 // convenient.
 //
 // Please note that if you are using a large number of builders, provisioners
-// or post-processors, the isotime may be slightly different for each one
-// because it is from when the plugin is launched not the initial Packer
-// process. In order to avoid this and make the timestamp consistent across all
-// plugins, set it as a user variable and then access the user variable within
-// your plugins.
+// or post-processors, the isotime of a legacy JSON template may be slightly
+// different for each one because it is from when the plugin is launched not
+// the initial Packer process. In order to avoid this and make the timestamp
+// consistent across all plugins, set it as a user variable and then access the
+// user variable within your plugins. HCL2 templates do not have this
+// limitation, because the legacy time functions are resolved by the Packer
+// process before the configuration is handed to the plugins.
 func LegacyIsotime(format cty.Value) (cty.Value, error) {
 	return LegacyIsotimeFunc.Call([]cty.Value{format})
 }
