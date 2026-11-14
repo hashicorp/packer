@@ -37,9 +37,11 @@ func (r nullRegistry) Metadata() Metadata {
 	return NilMetadata{}
 }
 
-func (r nullRegistry) FetchEnforcedBlocks(ctx context.Context) error {
+func (r nullRegistry) FetchEnforcedBlocks(ctx context.Context, opts EnforcementOptions) error {
 	return nil
 }
+
+func (r nullRegistry) RecordEnforcementSkip(reasonCode, reasonNote string) {}
 
 func (r nullRegistry) InjectEnforcedProvisioners(builds []*packer.CoreBuild) hcl.Diagnostics {
 	return nil
