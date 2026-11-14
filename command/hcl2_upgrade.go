@@ -1056,10 +1056,10 @@ func (p *LocalsParser) Write(out *bytes.Buffer) {
 		fmt.Fprintln(out, `locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }`)
 	}
 	if isotime {
-		fmt.Fprintln(out, `# The "legacy_isotime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
+		fmt.Fprintln(out, `# The "legacy_isotime" function has been provided for backwards compatibility, but we recommend switching to the timestamp and formatdate functions.`)
 	}
 	if strftime {
-		fmt.Fprintln(out, `# The "legacy_strftime" function has been provided for backwards compatability, but we recommend switching to the timestamp and formatdate functions.`)
+		fmt.Fprintln(out, `# The "legacy_strftime" function has been provided for backwards compatibility, but we recommend switching to the timestamp and formatdate functions.`)
 	}
 	if len(p.LocalsOut) > 0 {
 		if p.WithAnnotations {

@@ -76,7 +76,7 @@ func BasicPlaceholderData() map[string]string {
 		placeholderData[key] = fmt.Sprintf("Build_%s. "+packerbuilderdata.PlaceholderMsg, key)
 	}
 
-	// Backwards-compatability: WinRM Password can get through without forcing
+	// Backwards-compatibility: WinRM Password can get through without forcing
 	// the generated func validation.
 	placeholderData["WinRMPassword"] = "{{.WinRMPassword}}"
 
