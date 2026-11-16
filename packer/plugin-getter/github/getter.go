@@ -54,7 +54,8 @@ func TransformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 		rd := bufio.NewReader(in)
 		buffer := bytes.NewBufferString("[")
 		json := json.NewEncoder(buffer)
-		for i := 0; ; i++ {
+		entries := 0
+		for {
 			line, err := rd.ReadString('\n')
 			if err != nil {
 				if err != io.EOF {
@@ -68,9 +69,10 @@ func TransformChecksumStream() func(in io.ReadCloser) (io.ReadCloser, error) {
 			case 2: // nominal case
 				checksumString, checksumFilename := parts[0], parts[1]
 
-				if i > 0 {
+				if entries > 0 {
 					_, _ = buffer.WriteString(",")
 				}
+				entries++
 				if err := json.Encode(struct {
 					Checksum string `json:"checksum"`
 					Filename string `json:"filename"`
