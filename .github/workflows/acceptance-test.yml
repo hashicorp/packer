@@ -64,6 +64,18 @@ jobs:
           mkdir -p /tmp/test-results
           make dev
           ACC_TEST_BUILDERS="amazon-ebs" PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+      # The acctest SDK only keeps Packer logs and generated templates for failed
+      # tests, writing them into each test package directory.
+      - name: Upload acceptance test logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: acceptance-test-logs
+          path: |
+            **/packer_log_*.txt
+            **/amazon-ebs_*.json
+            /tmp/test-results/
+          if-no-files-found: ignore
   # Send a slack notification if either job defined above fails
   slack-notify:
     permissions:
