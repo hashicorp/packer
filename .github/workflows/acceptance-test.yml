@@ -59,11 +59,13 @@ jobs:
       
     # we set the ACC_TEST_BUILDERS="amazon-ebs" since we want to test against the amazon-ebs tests (e.g. Powershell 
     # provisioner acceptance tests)
+    # -count=1 disables Go's test result cache (restored by setup-go); acceptance tests
+    # must always run, and the provisioner tests rely on acctest/plugin installing the amazon plugin.
       - name: Run acceptance tests per module
         run: |
           mkdir -p /tmp/test-results
           make dev
-          ACC_TEST_BUILDERS="amazon-ebs" PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
+          ACC_TEST_BUILDERS="amazon-ebs" PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -count=1 -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
       # The acctest SDK only keeps Packer logs and generated templates for failed
       # tests, writing them into each test package directory.
       - name: Upload acceptance test logs
