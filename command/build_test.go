@@ -1141,6 +1141,16 @@ func TestBuildCommand_ParseArgs(t *testing.T) {
 			},
 			0,
 		},
+		{fields{defaultMeta},
+			args{[]string{"-fail-fast", "file.json"}},
+			&BuildArgs{
+				MetaArgs:       MetaArgs{Path: "file.json"},
+				ParallelBuilds: math.MaxInt64,
+				Color:          true,
+				FailFast:       true,
+			},
+			0,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%s", tt.args.args), func(t *testing.T) {

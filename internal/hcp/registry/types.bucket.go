@@ -734,7 +734,7 @@ func (bucket *Bucket) completeBuild(
 
 	if buildErr != nil {
 		status := hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED
-		if ctx.Err() != nil {
+		if ctx.Err() != nil || errors.Is(buildErr, context.Canceled) {
 			status = hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDCANCELLED
 		}
 		err := bucket.UpdateBuildStatus(context.Background(), buildName, status)

@@ -1,0 +1,6 @@
+{
+    "builders": [
+        {"type": "lock", "name": "lock1"},
+        {"type": "does-not-exist", "name": "broken"}
+    ]
+}
