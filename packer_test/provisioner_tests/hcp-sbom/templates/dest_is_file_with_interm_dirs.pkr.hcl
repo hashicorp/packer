@@ -18,18 +18,9 @@ source "docker" "ubuntu" {
 build {
   sources = ["source.docker.ubuntu"]
 
-  provisioner "shell" {
-    inline = [
-      "apt-get update -y",
-      "apt-get install -y curl",
-      "bash -c \"$(curl -sSL https://install.mondoo.com/sh)\""
-    ]
-  }
-
-  provisioner "shell" {
-    inline = [
-      "cnquery sbom --output cyclonedx-json --output-target /tmp/sbom_cyclonedx.json",
-    ]
+  provisioner "file" {
+    source      = "${path.root}/../testdata/sbom_cyclonedx.json"
+    destination = "/tmp/sbom_cyclonedx.json"
   }
 
   provisioner "hcp-sbom" {
