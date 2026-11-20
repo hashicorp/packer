@@ -134,7 +134,7 @@ type HostSpecificTokenAuthTransport struct {
 // RoundTrip authorizes and authenticates the request with an
 // access token from Transport's Source.
 func (t *HostSpecificTokenAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	source, found := t.TokenSources[req.Host]
+	source, found := t.TokenSources[req.URL.Host]
 	if found {
 		reqBodyClosed := false
 		if req.Body != nil {
