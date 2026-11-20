@@ -15,7 +15,7 @@ import (
 func TestConfigValueFromHCL2(t *testing.T) {
 	tests := []struct {
 		Input cty.Value
-		Want  interface{}
+		Want  any
 	}{
 		{
 			cty.True,
@@ -48,11 +48,11 @@ func TestConfigValueFromHCL2(t *testing.T) {
 					"zip":    cty.StringVal("91037"),
 				}),
 			}),
-			map[string]interface{}{
+			map[string]any{
 				"name": "Ermintrude",
 				"age":  int(19),
-				"address": map[string]interface{}{
-					"street": []interface{}{"421 Shoreham Loop"},
+				"address": map[string]any{
+					"street": []any{"421 Shoreham Loop"},
 					"city":   "Fridgewater",
 					"state":  "MA",
 					"zip":    "91037",
@@ -64,7 +64,7 @@ func TestConfigValueFromHCL2(t *testing.T) {
 				"foo": cty.StringVal("bar"),
 				"bar": cty.StringVal("baz"),
 			}),
-			map[string]interface{}{
+			map[string]any{
 				"foo": "bar",
 				"bar": "baz",
 			},
@@ -74,7 +74,7 @@ func TestConfigValueFromHCL2(t *testing.T) {
 				cty.StringVal("foo"),
 				cty.True,
 			}),
-			[]interface{}{
+			[]any{
 				"foo",
 				true,
 			},

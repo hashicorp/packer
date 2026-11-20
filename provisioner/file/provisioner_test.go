@@ -15,15 +15,14 @@ import (
 	packersdk "github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
-func testConfig() map[string]interface{} {
-	return map[string]interface{}{
+func testConfig() map[string]any {
+	return map[string]any{
 		"destination": "something",
 	}
 }
 
 func TestProvisioner_Impl(t *testing.T) {
-	var raw interface{}
-	raw = &Provisioner{}
+	var raw any = &Provisioner{}
 	if _, ok := raw.(packersdk.Provisioner); !ok {
 		t.Fatalf("must be a provisioner")
 	}
@@ -116,7 +115,7 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"source":      tf.Name(),
 		"destination": "something",
 	}
@@ -131,7 +130,7 @@ func TestProvisionerProvision_SendsFile(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -158,7 +157,7 @@ func TestProvisionerProvision_SendsContent(t *testing.T) {
 
 	dst := "something.txt"
 	content := "hello"
-	config := map[string]interface{}{
+	config := map[string]any{
 		"content":     content,
 		"destination": dst,
 	}
@@ -173,7 +172,7 @@ func TestProvisionerProvision_SendsContent(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err := p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -214,7 +213,7 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"sources":     []string{tf1.Name(), tf2.Name()},
 		"destination": "something",
 	}
@@ -229,7 +228,7 @@ func TestProvisionerProvision_SendsFileMultipleFiles(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -284,7 +283,7 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 
 	// Run Provision
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"sources":     []string{td1, td2},
 		"destination": "something",
 	}
@@ -299,7 +298,7 @@ func TestProvisionerProvision_SendsFileMultipleDirs(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -336,7 +335,7 @@ func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"sources":     []string{tf1.Name(), tf2.Name()},
 		"destination": "something/",
 		"direction":   "download",
@@ -360,7 +359,7 @@ func TestProvisionerProvision_DownloadsMultipleFilesToFolder(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -407,7 +406,7 @@ func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 		t.Fatalf("error writing tempfile: %s", err)
 	}
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"sources":     []string{tf1.Name(), tf2.Name()},
 		"destination": "something/",
 	}
@@ -422,7 +421,7 @@ func TestProvisionerProvision_SendsFileMultipleFilesToFolder(t *testing.T) {
 		PB:     &packersdk.NoopProgressTracker{},
 	}
 	comm := &packersdk.MockCommunicator{}
-	err = p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	err = p.Provision(context.Background(), ui, comm, make(map[string]any))
 	if err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
@@ -464,7 +463,7 @@ func TestProvisionDownloadMkdirAll(t *testing.T) {
 	}
 	defer os.Remove(tf.Name())
 
-	config := map[string]interface{}{
+	config := map[string]any{
 		"source": tf.Name(),
 	}
 	var p Provisioner

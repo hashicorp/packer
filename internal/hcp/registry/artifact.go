@@ -31,7 +31,7 @@ func (a *registryArtifact) String() string {
 	return fmt.Sprintf("Published metadata to HCP Packer registry packer/%s/versions/%s", a.BucketName, a.VersionID)
 }
 
-func (*registryArtifact) State(name string) interface{} {
+func (*registryArtifact) State(name string) any {
 	return nil
 }
 

@@ -14,28 +14,28 @@ func TestFixerAmazonShutdownBehavior(t *testing.T) {
 
 func TestFixerAmazonShutdownBehavior_Fix_shutdown_behaviour(t *testing.T) {
 	cases := []struct {
-		Input    map[string]interface{}
-		Expected map[string]interface{}
+		Input    map[string]any
+		Expected map[string]any
 	}{
 		// No shutdown_behaviour field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type": "amazon-ebs",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type": "amazon-ebs",
 			},
 		},
 
 		// shutdown_behaviour field
 		{
-			Input: map[string]interface{}{
+			Input: map[string]any{
 				"type":               "amazon-ebs",
 				"shutdown_behaviour": "stop",
 			},
 
-			Expected: map[string]interface{}{
+			Expected: map[string]any{
 				"type":              "amazon-ebs",
 				"shutdown_behavior": "stop",
 			},
@@ -45,12 +45,12 @@ func TestFixerAmazonShutdownBehavior_Fix_shutdown_behaviour(t *testing.T) {
 	for _, tc := range cases {
 		var f FixerAmazonShutdownBehavior
 
-		input := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Input},
+		input := map[string]any{
+			"builders": []map[string]any{tc.Input},
 		}
 
-		expected := map[string]interface{}{
-			"builders": []map[string]interface{}{tc.Expected},
+		expected := map[string]any{
+			"builders": []map[string]any{tc.Expected},
 		}
 
 		output, err := f.Fix(input)
