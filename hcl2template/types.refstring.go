@@ -40,7 +40,7 @@ func NewRefStringFromDep(t hcl.Traversal) (refString, error) {
 
 	switch root {
 	case "local", "var":
-		return NewRefString(fmt.Sprintf("%s.%s", root, t[1].(hcl.TraverseAttr).Name))
+		return refString{MType: root, Name: t[1].(hcl.TraverseAttr).Name}, nil
 	case "data":
 		return NewRefString(fmt.Sprintf("%s.%s.%s", root,
 			t[1].(hcl.TraverseAttr).Name,
