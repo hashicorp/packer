@@ -149,6 +149,10 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	if len(builds) == 0 && ret != 0 {
 		return ret
 	}
+	if cla.FailFast && ret != 0 {
+		c.Ui.Error("Fail-fast: not starting any builds because some builds could not be prepared.")
+		return ret
+	}
 
 	// Fetch and inject enforced provisioners from HCP Packer (if configured)
 	if !cla.SkipEnforcement {
@@ -211,6 +215,11 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	log.Printf("Build debug mode: %v", cla.Debug)
 	log.Printf("Force build: %v", cla.Force)
 	log.Printf("On error: %v", cla.OnError)
+	log.Printf("Fail-fast: %v", cla.FailFast)
+	if cla.FailFast && (cla.OnError == "abort" || cla.OnError == "run-cleanup-provisioner") {
+		c.Ui.Error(fmt.Sprintf("Warning: with -fail-fast and -on-error=%s, builds cancelled after the first "+
+			"failure are interrupted and skip their cleanup, so their resources are left in place.", cla.OnError))
+	}
 
 	if len(builds) == 0 {
 		return writeDiags(c.Ui, nil, hcl.Diagnostics{
@@ -227,7 +236,13 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 	// Get the start of the build command
 	buildCommandStart := time.Now()
 
-	// Run all the builds in parallel and wait for them to complete
+	// Run all the builds in parallel and wait for them to complete.
+	// runCtx is cancelled on SIGINT (via buildCtx) and, when -fail-fast is
+	// set, after the first builder failure so remaining in-flight builds abort.
+	runCtx, failFastCancel := context.WithCancel(buildCtx)
+	defer failFastCancel()
+	var failFastOnce sync.Once
+
 	var wg sync.WaitGroup
 	var artifacts = struct {
 		sync.RWMutex
@@ -239,17 +254,47 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 		m map[string]error
 	}{m: make(map[string]error)}
 	limitParallel := semaphore.NewWeighted(cla.ParallelBuilds)
+	// recordFailure stores a build error and, with -fail-fast, cancels the
+	// remaining in-flight builds once.
+	recordFailure := func(name string, err error) {
+		errs.Lock()
+		errs.m[name] = err
+		errs.Unlock()
+		if cla.FailFast && buildCtx.Err() == nil {
+			failFastOnce.Do(func() {
+				c.Ui.Error(fmt.Sprintf("Fail-fast: cancelling remaining builds after %q failed.", name))
+				failFastCancel()
+			})
+		}
+	}
 
+	// notStarted lists builds that never started because -fail-fast stopped
+	// the run. They are reported separately and are not counted as errors.
+	var notStarted []string
+	stoppedByFailFastBeforeStart := func() bool { return runCtx.Err() != nil && buildCtx.Err() == nil }
 	for i := range builds {
-		if err := buildCtx.Err(); err != nil {
-			log.Println("Interrupted, not going to start any more builds.")
+		if err := runCtx.Err(); err != nil {
+			if stoppedByFailFastBeforeStart() {
+				for _, b := range builds[i:] {
+					notStarted = append(notStarted, b.Name())
+				}
+				log.Println("Fail-fast: not going to start any more builds.")
+			} else {
+				log.Println("Interrupted, not going to start any more builds.")
+			}
 			break
 		}
 
 		b := builds[i]
 		name := b.Name()
 		ui := buildUis[b]
-		if err := limitParallel.Acquire(buildCtx, 1); err != nil {
+		if err := limitParallel.Acquire(runCtx, 1); err != nil {
+			if stoppedByFailFastBeforeStart() {
+				for _, b := range builds[i:] {
+					notStarted = append(notStarted, b.Name())
+				}
+				break
+			}
 			ui.Error(fmt.Sprintf("Build '%s' failed to acquire semaphore: %s", name, err))
 			errs.Lock()
 			errs.m[name] = err
@@ -285,22 +330,38 @@ func (c *BuildCommand) RunContext(buildCtx context.Context, cla *BuildArgs) int 
 						Detail:   err.Error(),
 					},
 				})
+				recordFailure(name, err)
 				return
 			}
 
 			log.Printf("Starting build run: %s", name)
-			runArtifacts, err := b.Run(buildCtx, ui)
+			runArtifacts, err := b.Run(runCtx, ui)
+			builtArtifacts := runArtifacts
 
 			// Get the duration of the build and parse it
 			buildEnd := time.Now()
 			buildDuration := buildEnd.Sub(buildStart)
 			fmtBuildDuration := durafmt.Parse(buildDuration).LimitFirstN(2)
 
+			// Read this before recordFailure cancels runCtx: it tells a build
+			// stopped by -fail-fast apart from the build that failed first.
+			stoppedByFailFast := err != nil && runCtx.Err() != nil && buildCtx.Err() == nil
+			if err != nil {
+				// Cancel the siblings now rather than after the HCP update.
+				recordFailure(name, err)
+			}
+
+			// The HCP update uses buildCtx so it still completes after a
+			// fail-fast cancellation.
+			hcpBuildErr := err
+			if stoppedByFailFast && !errors.Is(err, context.Canceled) {
+				hcpBuildErr = errors.Join(err, context.Canceled)
+			}
 			runArtifacts, hcperr := hcpRegistry.CompleteBuild(
 				buildCtx,
 				b,
 				runArtifacts,
-				err)
+				hcpBuildErr)
 			if hcperr != nil {
 				if _, ok := hcperr.(*registry.NotAHCPArtifactError); ok {
 					writeDiags(c.Ui, nil, hcl.Diagnostics{
@@ -329,9 +390,14 @@ Check that you are using an HCP Ready integration before trying again:
 
 			if err != nil {
 				ui.Error(fmt.Sprintf("Build '%s' errored after %s: %s", name, fmtBuildDuration, err))
-				errs.Lock()
-				errs.m[name] = err
-				errs.Unlock()
+				if errors.Is(err, context.Canceled) {
+					for _, a := range builtArtifacts {
+						if a == nil {
+							continue
+						}
+						ui.Error(fmt.Sprintf("Build '%s' was cancelled after producing an artifact, which was kept and must be cleaned up manually: %s", name, a.String()))
+					}
+				}
 			} else {
 				ui.Say(fmt.Sprintf("Build '%s' finished after %s.", name, fmtBuildDuration))
 				if runArtifacts != nil {
@@ -345,9 +411,7 @@ Check that you are using an HCP Ready integration before trying again:
 			// Packer should exit non-zero, so we re-assign the
 			// error to account for this case.
 			if hcperr != nil && err == nil {
-				errs.Lock()
-				errs.m[name] = hcperr
-				errs.Unlock()
+				recordFailure(name, hcperr)
 			}
 		}()
 
@@ -372,6 +436,10 @@ Check that you are using an HCP Ready integration before trying again:
 	buildCommandDuration := buildCommandEnd.Sub(buildCommandStart)
 	fmtBuildCommandDuration := durafmt.Parse(buildCommandDuration).LimitFirstN(2)
 	c.Ui.Say(fmt.Sprintf("\n==> Wait completed after %s", fmtBuildCommandDuration))
+	if len(notStarted) > 0 {
+		c.Ui.Error(fmt.Sprintf("Fail-fast: %d build(s) were not started: %s", len(notStarted), strings.Join(notStarted, ", ")))
+		c.Ui.Machine("fail-fast-not-started", strings.Join(notStarted, ","))
+	}
 
 	if err := buildCtx.Err(); err != nil {
 		c.Ui.Say("Cleanly cancelled builds after being interrupted.")
@@ -470,6 +538,7 @@ Options:
   -machine-readable             Produce machine-readable output.
   -on-error=[cleanup|abort|ask|run-cleanup-provisioner] If the build fails do: clean up (default), abort, ask, or run-cleanup-provisioner.
   -parallel-builds=1            Number of builds to run in parallel. 1 disables parallelization. 0 means no limit (Default: 0)
+  -fail-fast                    After the first failure, cancel running builds and start no more. (Default: false)
   -timestamp-ui                 Enable prefixing of each ui output with an RFC3339 timestamp.
   -var 'key=value'              Variable for templates, can be used multiple times.
   -var-file=path                JSON or HCL2 file containing user variables, can be used multiple times.
@@ -500,6 +569,7 @@ func (*BuildCommand) AutocompleteFlags() complete.Flags {
 		"-machine-readable": complete.PredictNothing,
 		"-on-error":         complete.PredictNothing,
 		"-parallel":         complete.PredictNothing,
+		"-fail-fast":        complete.PredictNothing,
 		"-timestamp-ui":     complete.PredictNothing,
 		"-var":              complete.PredictNothing,
 		"-var-file":         complete.PredictNothing,

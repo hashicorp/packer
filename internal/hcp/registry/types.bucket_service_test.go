@@ -5,9 +5,11 @@ package registry
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	hcpPackerModels "github.com/hashicorp/hcp-sdk-go/clients/cloud-packer-service/stable/2023-01-01/models"
+	packerSDK "github.com/hashicorp/packer-plugin-sdk/packer"
 	hcpPackerAPI "github.com/hashicorp/packer/internal/hcp/api"
 )
 
@@ -381,5 +383,52 @@ func TestUpdateBuildStatus_DONENoImages(t *testing.T) {
 
 	if existingBuild.Status != hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING {
 		t.Errorf("expected the existing build to be in the running state")
+	}
+}
+
+// TestCompleteBuild_CancelledStatus checks that a build error caused by a
+// cancellation (such as -fail-fast stopping a sibling) is reported to HCP
+// Packer as CANCELLED, and any other build error as FAILED.
+func TestCompleteBuild_CancelledStatus(t *testing.T) {
+	tests := []struct {
+		name     string
+		buildErr error
+		want     hcpPackerModels.HashicorpCloudPacker20230101BuildStatus
+	}{
+		{"cancelled", errors.Join(errors.New("builder stopped"), context.Canceled), hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDCANCELLED},
+		{"failed", errors.New("builder failed"), hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDFAILED},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockService := hcpPackerAPI.NewMockPackerClientService()
+			mockService.VersionAlreadyExist = true
+			b := &Bucket{Name: "TestBucket", client: &hcpPackerAPI.Client{Packer: mockService}}
+			b.Version = NewVersion()
+			if err := b.Version.Initialize(); err != nil {
+				t.Fatal(err)
+			}
+			b.Version.expectedBuilds = append(b.Version.expectedBuilds, "happycloud.image")
+			mockService.ExistingBuilds = append(mockService.ExistingBuilds, "happycloud.image")
+			if err := b.Initialize(context.TODO(), hcpPackerModels.HashicorpCloudPacker20230101TemplateTypeHCL2); err != nil {
+				t.Fatal(err)
+			}
+			if err := b.populateVersion(context.TODO()); err != nil {
+				t.Fatal(err)
+			}
+			if err := b.UpdateBuildStatus(context.TODO(), "happycloud.image", hcpPackerModels.HashicorpCloudPacker20230101BuildStatusBUILDRUNNING); err != nil {
+				t.Fatal(err)
+			}
+
+			if _, err := b.completeBuild(context.Background(), "happycloud.image", nil, &packerSDK.BasicUi{}, tt.buildErr); err == nil {
+				t.Fatal("completeBuild() error = nil, want an error for a failed build")
+			}
+			build, err := b.Version.Build("happycloud.image")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if build.Status != tt.want {
+				t.Errorf("build status = %s, want %s", build.Status, tt.want)
+			}
+		})
 	}
 }
