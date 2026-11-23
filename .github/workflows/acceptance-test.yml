@@ -57,14 +57,15 @@ jobs:
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
       
-    # we set the ACC_TEST_BUILDERS="amazon-ebs" since we want to test against the amazon-ebs tests (e.g. Powershell 
-    # provisioner acceptance tests)
-    # -count=1 disables Go's test result cache (restored by setup-go); acceptance tests
-    # must always run, and the provisioner tests rely on acctest/plugin installing the amazon plugin.
+    # we set the ACC_TEST_BUILDERS="amazon-ebs" since we want to test against the amazon-ebs tests (e.g. Powershell
+    # provisioner acceptance tests).
+    # Explicitly install the amazon plugin so provisioner tests do not depend on acctest/plugin execution order,
+    # and pass -count=1 to disable Go's test result cache (restored by setup-go).
       - name: Run acceptance tests per module
         run: |
           mkdir -p /tmp/test-results
           make dev
+          ./bin/packer plugins install github.com/hashicorp/amazon "~> 1"
           ACC_TEST_BUILDERS="amazon-ebs" PACKER_ACC=1 gotestsum --format=short-verbose --junitfile /tmp/test-results/gotestsum-report.xml -- -count=1 -timeout=120m -p 2 $(go list ./... | grep -v inspec | grep -v profitbricks | grep -v oneandone)
       # The acctest SDK only keeps Packer logs and generated templates for failed
       # tests, writing them into each test package directory.
@@ -75,7 +76,9 @@ jobs:
           name: acceptance-test-logs
           path: |
             **/packer_log_*.txt
+            **/packer_init_log_*.txt
             **/amazon-ebs_*.json
+            **/amazon-*.pkr.hcl
             /tmp/test-results/
           if-no-files-found: ignore
   # Send a slack notification if either job defined above fails

@@ -25,6 +25,10 @@ import (
 var basicAmazonEbsHCL2Template string
 
 func TestAccInitAndBuildBasicAmazonEbs(t *testing.T) {
+	// Isolate the plugin directory so cleaning up and installing the plugin
+	// does not interfere with shared plugins used by other acceptance tests.
+	t.Setenv("PACKER_PLUGIN_PATH", t.TempDir())
+
 	plugin := addrs.Plugin{
 		Source: "github.com/hashicorp/amazon",
 	}

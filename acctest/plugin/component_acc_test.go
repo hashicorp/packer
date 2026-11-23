@@ -21,6 +21,10 @@ import (
 var basicAmazonAmiDatasourceHCL2Template string
 
 func TestAccInitAndBuildBasicAmazonAmiDatasource(t *testing.T) {
+	// Isolate the plugin directory so cleaning up and installing the plugin
+	// does not interfere with shared plugins used by other acceptance tests.
+	t.Setenv("PACKER_PLUGIN_PATH", t.TempDir())
+
 	plugin := addrs.Plugin{
 		Source: "github.com/hashicorp/amazon",
 	}
