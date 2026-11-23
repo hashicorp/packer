@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -59,6 +60,24 @@ type Config struct {
 	// set to "download" then the file "source" in the machine will be
 	// downloaded locally to "destination"
 	Direction string `mapstructure:"direction" required:"false"`
+	// A list of glob patterns (matched against the slash-separated path
+	// relative to the source, and against the base name) selecting which
+	// files to transfer. When a source is a directory, only matching files
+	// inside it are transferred (a filtered tree is staged locally and
+	// uploaded via UploadDir, so the layout and the source-basename
+	// semantics match an unfiltered UploadDir). Not supported for
+	// directory or glob downloads. When empty, everything is transferred.
+	// Cannot be used together with `content`.
+	Include []string `mapstructure:"include" required:"false"`
+	// A list of glob patterns (matched against the slash-separated path
+	// relative to the source, and against the base name) selecting which
+	// files to skip. Exclude wins over include. When a source is a
+	// directory upload, exclusions are enforced locally (staged tree) so
+	// they hold on every communicator, including WinRM whose UploadDir
+	// ignores them; otherwise the patterns are also passed to the
+	// communicator's UploadDir/DownloadDir. Cannot be used together with
+	// `content`.
+	Exclude []string `mapstructure:"exclude" required:"false"`
 	// For advanced users only. If true, check the file existence only before
 	// uploading, rather than upon pre-build validation. This allows users to
 	// upload files created on-the-fly. This defaults to false. We
@@ -118,6 +137,11 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 			errors.New("source(s) conflicts with content."))
 	}
 
+	if p.config.Content != "" && (len(p.config.Include) > 0 || len(p.config.Exclude) > 0) {
+		errs = packersdk.MultiErrorAppend(errs,
+			errors.New("include/exclude cannot be used with content."))
+	}
+
 	if p.config.Destination == "" {
 		errs = packersdk.MultiErrorAppend(errs,
 			errors.New("Destination must be specified."))
@@ -128,6 +152,36 @@ func (p *Provisioner) Prepare(raws ...interface{}) error {
 	}
 
 	return nil
+}
+
+// matchesAnyPattern reports whether rel (a slash-separated path) or its base
+// name matches any of the glob patterns.
+func matchesAnyPattern(patterns []string, rel string) bool {
+	base := path.Base(rel)
+	for _, pat := range patterns {
+		if ok, err := path.Match(pat, rel); err == nil && ok {
+			return true
+		}
+		if ok, err := path.Match(pat, base); err == nil && ok {
+			return true
+		}
+	}
+	return false
+}
+
+// passesFilters reports whether a file identified by rel (slash-separated,
+// relative to the source root, or the source itself) should be transferred
+// given the include/exclude globs. Exclude wins over include; an empty
+// include list means "everything".
+func passesFilters(include, exclude []string, rel string) bool {
+	rel = path.Clean(rel)
+	if len(exclude) > 0 && matchesAnyPattern(exclude, rel) {
+		return false
+	}
+	if len(include) > 0 && !matchesAnyPattern(include, rel) {
+		return false
+	}
+	return true
 }
 
 func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
@@ -156,6 +210,56 @@ func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packe
 	}
 }
 
+// stageFilteredDir copies the files of srcDir that pass the include/exclude
+// filters into a fresh temp dir, preserving the directory layout, and returns
+// the temp dir's path. Uploading the staged tree with a trailing slash via
+// comm.UploadDir then creates the remote parent directories recursively and
+// enforces the filters on every communicator (WinRM's UploadDir ignores the
+// exclude list in SDK v0.6.13), instead of uploading files one by one.
+func (p *Provisioner) stageFilteredDir(ui packersdk.Ui, srcDir string) (string, error) {
+	staged, err := tmp.Dir("pkr-file-filtered")
+	if err != nil {
+		return "", err
+	}
+	err = filepath.Walk(srcDir, func(filePath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(srcDir, filePath)
+		if err != nil {
+			return err
+		}
+		if !passesFilters(p.config.Include, p.config.Exclude, filepath.ToSlash(rel)) {
+			return nil
+		}
+		ui.Say(fmt.Sprintf("Uploading %s", filePath))
+		dstPath := filepath.Join(staged, rel)
+		if err := os.MkdirAll(filepath.Dir(dstPath), os.FileMode(0755)); err != nil {
+			return err
+		}
+		src, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+		dstFile, err := os.OpenFile(dstPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, info.Mode())
+		if err != nil {
+			return err
+		}
+		defer dstFile.Close()
+		_, err = io.Copy(dstFile, src)
+		return err
+	})
+	if err != nil {
+		os.RemoveAll(staged)
+		return "", err
+	}
+	return staged, nil
+}
+
 func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packersdk.Communicator) error {
 	dst, err := interpolate.Render(p.config.Destination, &p.config.ctx)
 	if err != nil {
@@ -166,6 +270,12 @@ func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packersdk.Communic
 		src, err := interpolate.Render(src, &p.config.ctx)
 		if err != nil {
 			return fmt.Errorf("Error interpolating source: %s", err)
+		}
+
+		isDirOrGlob := strings.HasSuffix(src, "/") || strings.ContainsAny(src, "*?[")
+		if !isDirOrGlob && !passesFilters(p.config.Include, p.config.Exclude, filepath.ToSlash(src)) {
+			ui.Say(fmt.Sprintf("Skipping %s (filtered by include/exclude)", src))
+			continue
 		}
 
 		// ensure destination dir exists.  p.config.Destination may either be a file or a dir.
@@ -184,9 +294,20 @@ func (p *Provisioner) ProvisionDownload(ui packersdk.Ui, comm packersdk.Communic
 				return err
 			}
 		}
-		// if the src was a dir, download the dir
-		if strings.HasSuffix(src, "/") || strings.ContainsAny(src, "*?[") {
-			return comm.DownloadDir(src, dst, nil)
+		// if the src was a dir or glob, download the dir; the communicator
+		// applies the exclude patterns to the remote listing.
+		if isDirOrGlob {
+			// DownloadDir only accepts an exclude list: an include filter
+			// would be silently ignored and transfer everything. Reject the
+			// combination explicitly instead of accepting it.
+			if len(p.config.Include) > 0 {
+				return fmt.Errorf(
+					"include is not supported for directory or glob downloads (%s): "+
+						"DownloadDir applies only exclude; download individual files instead",
+					src,
+				)
+			}
+			return comm.DownloadDir(src, dst, p.config.Exclude)
 		}
 
 		f, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
@@ -227,10 +348,41 @@ func (p *Provisioner) ProvisionUpload(ui packersdk.Ui, comm packersdk.Communicat
 
 		// If we're uploading a directory, short circuit and do that
 		if info.IsDir() {
-			if err = comm.UploadDir(dst, src, nil); err != nil {
+			if len(p.config.Include) > 0 || len(p.config.Exclude) > 0 {
+				// Any filter on a directory upload is enforced locally: stage
+				// the filtered tree and hand it to UploadDir with a trailing
+				// slash, which creates the remote parent directories
+				// recursively and applies no communicator-side exclude
+				// (WinRM's UploadDir ignores it in SDK v0.6.13).
+				//
+				// Mirror UploadDir's trailing-slash semantics for the
+				// destination: without one on src, the source basename
+				// becomes a subdirectory of dst. Join the remote path with
+				// slash semantics regardless of the host OS.
+				remoteDst := dst
+				if !strings.HasSuffix(src, "/") {
+					remoteDst = path.Join(dst, filepath.Base(src))
+				}
+				staged, err := p.stageFilteredDir(ui, src)
+				if err != nil {
+					ui.Error(fmt.Sprintf("Upload failed: %s", err))
+					return err
+				}
+				defer os.RemoveAll(staged)
+				if err = comm.UploadDir(remoteDst, staged+"/", nil); err != nil {
+					ui.Error(fmt.Sprintf("Upload failed: %s", err))
+					return err
+				}
+			} else if err = comm.UploadDir(dst, src, p.config.Exclude); err != nil {
 				ui.Error(fmt.Sprintf("Upload failed: %s", err))
 				return err
 			}
+			continue
+		}
+
+		// File (or glob-free) source: apply include/exclude to the entry itself.
+		if !passesFilters(p.config.Include, p.config.Exclude, filepath.ToSlash(src)) {
+			ui.Say(fmt.Sprintf("Skipping %s (filtered by include/exclude)", src))
 			continue
 		}
 

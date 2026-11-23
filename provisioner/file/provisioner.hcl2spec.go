@@ -23,6 +23,8 @@ type FlatConfig struct {
 	Sources             []string          `mapstructure:"sources" required:"false" cty:"sources" hcl:"sources"`
 	Destination         *string           `mapstructure:"destination" required:"true" cty:"destination" hcl:"destination"`
 	Direction           *string           `mapstructure:"direction" required:"false" cty:"direction" hcl:"direction"`
+	Include             []string          `mapstructure:"include" required:"false" cty:"include" hcl:"include"`
+	Exclude             []string          `mapstructure:"exclude" required:"false" cty:"exclude" hcl:"exclude"`
 	Generated           *bool             `mapstructure:"generated" required:"false" cty:"generated" hcl:"generated"`
 }
 
@@ -51,6 +53,8 @@ func (*FlatConfig) HCL2Spec() map[string]hcldec.Spec {
 		"sources":                    &hcldec.AttrSpec{Name: "sources", Type: cty.List(cty.String), Required: false},
 		"destination":                &hcldec.AttrSpec{Name: "destination", Type: cty.String, Required: false},
 		"direction":                  &hcldec.AttrSpec{Name: "direction", Type: cty.String, Required: false},
+		"include":                    &hcldec.AttrSpec{Name: "include", Type: cty.List(cty.String), Required: false},
+		"exclude":                    &hcldec.AttrSpec{Name: "exclude", Type: cty.List(cty.String), Required: false},
 		"generated":                  &hcldec.AttrSpec{Name: "generated", Type: cty.Bool, Required: false},
 	}
 	return s
