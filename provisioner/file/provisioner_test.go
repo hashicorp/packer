@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -562,6 +563,14 @@ func TestProvisionerProvision_UploadDirWithExclude(t *testing.T) {
 	}
 	defer os.Remove(td)
 
+	// tree: keep.txt, skip.log
+	files := map[string]string{"keep.txt": "a", "skip.log": "b"}
+	for rel, content := range files {
+		if err := os.WriteFile(filepath.Join(td, rel), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	config := map[string]interface{}{
 		"sources":     []string{td},
 		"destination": "something/",
@@ -571,21 +580,41 @@ func TestProvisionerProvision_UploadDirWithExclude(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
-	ui := &packersdk.BasicUi{Writer: bytes.NewBuffer(nil), PB: &packersdk.NoopProgressTracker{}}
+	b := bytes.NewBuffer(nil)
+	ui := &packersdk.BasicUi{Writer: b, PB: &packersdk.NoopProgressTracker{}}
 	comm := &packersdk.MockCommunicator{}
 	if err := p.Provision(context.Background(), ui, comm, make(map[string]interface{})); err != nil {
 		t.Fatalf("should successfully provision: %s", err)
 	}
 
-	if comm.UploadDirSrc != td {
-		t.Fatalf("expected UploadDir src %q, got %q", td, comm.UploadDirSrc)
+	// Exclude on a directory upload is enforced locally: a filtered tree is
+	// staged and handed to UploadDir with a trailing slash and NO
+	// communicator-side exclude (WinRM's UploadDir ignores it in SDK v0.6.13).
+	if comm.UploadDirSrc == "" || comm.UploadDirSrc == td {
+		t.Fatalf("expected UploadDir src to be a staged temp dir, got %q", comm.UploadDirSrc)
 	}
-	if len(comm.UploadDirExclude) != 2 || comm.UploadDirExclude[0] != "*.log" || comm.UploadDirExclude[1] != "tmp/*" {
-		t.Fatalf("expected exclude patterns forwarded to UploadDir, got %v", comm.UploadDirExclude)
+	if !strings.HasSuffix(comm.UploadDirSrc, "/") {
+		t.Fatalf("expected staged src to carry a trailing slash, got %q", comm.UploadDirSrc)
+	}
+	if len(comm.UploadDirExclude) != 0 {
+		t.Fatalf("expected no exclude forwarded to UploadDir (enforced locally), got %v", comm.UploadDirExclude)
+	}
+	// Source had no trailing slash, so the basename becomes a subdirectory of
+	// the remote destination, joined with slash semantics.
+	wantDst := path.Join("something/", filepath.Base(td))
+	if comm.UploadDirDst != wantDst {
+		t.Fatalf("expected UploadDir dst %q, got %q", wantDst, comm.UploadDirDst)
+	}
+	out := b.String()
+	if !strings.Contains(out, "keep.txt") {
+		t.Fatalf("expected output to mention kept file, got:\n%s", out)
+	}
+	if strings.Contains(out, "skip.log") {
+		t.Fatalf("excluded file must not be staged/uploaded, got:\n%s", out)
 	}
 }
 
-func TestProvisionerProvision_UploadDirWithIncludeUploadsIndividually(t *testing.T) {
+func TestProvisionerProvision_UploadDirWithIncludeStagesFilteredTree(t *testing.T) {
 	var p Provisioner
 
 	td, err := os.MkdirTemp("", "packerdir")
@@ -627,19 +656,85 @@ func TestProvisionerProvision_UploadDirWithIncludeUploadsIndividually(t *testing
 		t.Fatalf("should successfully provision: %s", err)
 	}
 
-	// include set => no UploadDir call, individual uploads happened
-	if comm.UploadDirSrc != "" {
-		t.Fatalf("expected no UploadDir call when include is set, got src %q", comm.UploadDirSrc)
+	// include set => filtered tree staged and uploaded via UploadDir (which
+	// creates remote parent dirs), not per-file Upload calls.
+	if comm.UploadDirSrc == "" || comm.UploadDirSrc == td {
+		t.Fatalf("expected UploadDir src to be a staged temp dir, got %q", comm.UploadDirSrc)
 	}
-	if !comm.UploadCalled {
-		t.Fatal("expected individual Upload calls when include is set")
+	if comm.UploadCalled {
+		t.Fatal("expected no individual Upload calls when a directory is filtered")
+	}
+	wantDst := path.Join("something/", filepath.Base(td))
+	if comm.UploadDirDst != wantDst {
+		t.Fatalf("expected UploadDir dst %q, got %q", wantDst, comm.UploadDirDst)
 	}
 	out := b.String()
 	if !strings.Contains(out, "keep.txt") || !strings.Contains(out, "keep2.txt") {
 		t.Fatalf("expected output to mention included files, got:\n%s", out)
 	}
-	if strings.Contains(out, "Uploading "+filepath.Join(td, "skip.log")) {
-		t.Fatalf("excluded-by-include file must not be uploaded, got:\n%s", out)
+	if strings.Contains(out, "skip.log") || strings.Contains(out, "skip2.log") {
+		t.Fatalf("excluded-by-include files must not be staged, got:\n%s", out)
+	}
+}
+
+func TestProvisionerProvision_UploadDirTrailingSlashKeepsDst(t *testing.T) {
+	var p Provisioner
+
+	td, err := os.MkdirTemp("", "packerdir")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(td)
+	if err := os.WriteFile(filepath.Join(td, "keep.txt"), []byte("a"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	config := map[string]interface{}{
+		"sources":     []string{td + "/"}, // trailing slash: contents go straight into dst
+		"destination": "/srv/app/",
+		"include":     []string{"*.txt"},
+	}
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ui := &packersdk.BasicUi{Writer: bytes.NewBuffer(nil), PB: &packersdk.NoopProgressTracker{}}
+	comm := &packersdk.MockCommunicator{}
+	if err := p.Provision(context.Background(), ui, comm, make(map[string]interface{})); err != nil {
+		t.Fatalf("should successfully provision: %s", err)
+	}
+	if comm.UploadDirDst != "/srv/app/" {
+		t.Fatalf("expected dst to stay %q with a trailing-slash source, got %q", "/srv/app/", comm.UploadDirDst)
+	}
+	if !strings.HasSuffix(comm.UploadDirSrc, "/") {
+		t.Fatalf("expected staged src to carry a trailing slash, got %q", comm.UploadDirSrc)
+	}
+}
+
+func TestProvisionerProvision_DownloadDirWithIncludeFails(t *testing.T) {
+	var p Provisioner
+
+	config := map[string]interface{}{
+		"sources":     []string{"/var/log/"},
+		"destination": t.TempDir() + "/",
+		"direction":   "download",
+		"include":     []string{"*.gz"},
+	}
+	if err := p.Prepare(config); err != nil {
+		t.Fatalf("err: %s", err)
+	}
+
+	ui := &packersdk.BasicUi{Writer: bytes.NewBuffer(nil), PB: &packersdk.NoopProgressTracker{}}
+	comm := &packersdk.MockCommunicator{}
+	err := p.Provision(context.Background(), ui, comm, make(map[string]interface{}))
+	if err == nil {
+		t.Fatal("expected an error: include is not supported for directory downloads")
+	}
+	if !strings.Contains(err.Error(), "include is not supported for directory or glob downloads") {
+		t.Fatalf("unexpected error: %s", err)
+	}
+	if comm.DownloadDirSrc != "" {
+		t.Fatalf("DownloadDir must not be called when include is set, got src %q", comm.DownloadDirSrc)
 	}
 }
 
