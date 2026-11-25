@@ -436,4 +436,7 @@ require (
 
 go 1.26.11
 
+// Use the patched ar reader for GO-2026-6905 until Syft replaces the dependency.
+replace github.com/blakesmith/ar => github.com/sbomify/ar v0.0.0-20261110120314-cac91ea00b05
+
 replace github.com/zclconf/go-cty => github.com/nywilken/go-cty v1.13.3 // added by packer-sdc fix as noted in github.com/hashicorp/packer-plugin-sdk/issues/187
