@@ -218,7 +218,7 @@ func (*InitCommand) Synopsis() string {
 }
 
 func (*InitCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*InitCommand) AutocompleteFlags() complete.Flags {

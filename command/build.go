@@ -487,7 +487,7 @@ func (*BuildCommand) Synopsis() string {
 }
 
 func (*BuildCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*BuildCommand) AutocompleteFlags() complete.Flags {
