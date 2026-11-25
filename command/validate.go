@@ -141,7 +141,7 @@ func (*ValidateCommand) Synopsis() string {
 }
 
 func (*ValidateCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*ValidateCommand) AutocompleteFlags() complete.Flags {

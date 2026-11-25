@@ -106,7 +106,7 @@ func (*FormatCommand) Synopsis() string {
 }
 
 func (*FormatCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*FormatCommand) AutocompleteFlags() complete.Flags {

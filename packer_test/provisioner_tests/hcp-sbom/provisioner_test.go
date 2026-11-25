@@ -89,6 +89,30 @@ func (ts *PackerHCPSbomTestSuite) TestDestFile_WithIntermediateDirs() {
 	os.RemoveAll("sbom")
 }
 
+// Generates an SBOM with the latest Mondoo scanner release so the suite fails
+// when scanners start emitting SBOMs that our cyclonedx-go version cannot parse.
+// The destination tests use a fixed fixture and cannot catch that.
+func (ts *PackerHCPSbomTestSuite) TestLatestScannerSBOM_IsParseable() {
+	ts.SkipNoAcc()
+
+	dir := ts.MakePluginDir()
+	defer dir.Cleanup()
+
+	ts.PackerCommand().UsePluginDir(dir).
+		SetArgs("plugins", "install", "github.com/hashicorp/docker").
+		Assert(check.MustSucceed())
+
+	ts.PackerCommand().UsePluginDir(dir).
+		AddEnv("HOME", os.Getenv("HOME")).
+		AddEnv("PATH", os.Getenv("PATH")).
+		SetArgs("build", "./templates/latest_scanner_sbom.pkr.hcl").
+		Assert(check.MustSucceed(),
+			check.GrepInverted("Failed to process SBOM"),
+			check.FileExists("sbom/sbom_cyclonedx.json", false))
+
+	ts.Require().NoError(os.RemoveAll("sbom"))
+}
+
 // * output directory (without trailing slash) - directory exists
 func (ts *PackerHCPSbomTestSuite) TestDestDir_NoTrailingSlash() {
 	ts.SkipNoAcc()

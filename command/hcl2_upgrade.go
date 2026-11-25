@@ -803,7 +803,7 @@ func (*HCL2UpgradeCommand) Synopsis() string {
 }
 
 func (*HCL2UpgradeCommand) AutocompleteArgs() complete.Predictor {
-	return complete.PredictNothing
+	return complete.PredictFiles("*")
 }
 
 func (*HCL2UpgradeCommand) AutocompleteFlags() complete.Flags {

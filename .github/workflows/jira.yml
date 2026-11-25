@@ -10,6 +10,10 @@ name: JIRA Sync
 jobs:
   sync:
     name: Sync to JIRA
+    # Disabled: the JIRA API token is no longer valid (every run failed with 401)
+    # and the JIRA_* secrets have been removed. Restore those secrets before
+    # removing this condition.
+    if: false
     permissions:
       issues: write # for actions/github-script to create comments
     runs-on: ubuntu-latest

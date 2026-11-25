@@ -1,5 +1,88 @@
 # 📦 Changelog
 
+## 1.16.3 (November 25, 2026)
+
+### NOTES:
+
+* builder/null: DSA (`ssh-dss`) SSH keys are no longer supported following the
+  update to `github.com/hashicorp/packer-plugin-sdk` `v0.6.14` and
+  `golang.org/x/crypto` `v0.59.0`. Configurations that set
+  `temporary_key_pair_type = "dsa"` or use a DSA key in `ssh_private_key_file`
+  now fail validation; use an `ed25519`, `ecdsa`, or `rsa` key instead.
+  External plugins are affected once they adopt the same SDK or
+  `golang.org/x/crypto` versions.
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+    [GH-13754](https://github.com/hashicorp/packer/pull/13754)
+
+### BUG FIXES:
+
+* command: restore file and directory completion for commands that accept paths.
+    [GH-13733](https://github.com/hashicorp/packer/pull/13733)
+* core/hcl2: use the overridden source name for `packer_build_name` (and
+  `PACKER_BUILD_NAME`) in builders, provisioners, and post-processors.
+    [GH-13723](https://github.com/hashicorp/packer/pull/13723)
+* provisioner/powershell: upload the full environment variable file on every
+  retry so scripts no longer run without their `environment_vars` after a
+  transient upload failure.
+    [GH-13735](https://github.com/hashicorp/packer/pull/13735)
+* sbom: fix a crash when scanning Debian archives with negative member sizes
+  (GO-2026-6905).
+    [GH-13755](https://github.com/hashicorp/packer/pull/13755)
+
+### SECURITY:
+
+* deps: bump `github.com/go-jose/go-jose/v4` to `v4.1.9` in Packer and `v4.1.6`
+  in the plugin tester to address denial-of-service and panic issues when
+  parsing JWKs, JSON, and CBC-HMAC data (GHSA-mgcc-cww5-fp2q,
+  GHSA-4w3g-jfj2-cw2q, GHSA-vvm8-gf78-28g4).
+    [GH-13737](https://github.com/hashicorp/packer/pull/13737)
+    [GH-13741](https://github.com/hashicorp/packer/pull/13741)
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+* deps: bump `go.opentelemetry.io/otel/sdk` and `go.opentelemetry.io/otel/trace`
+  to `v1.47.0` in Packer and the plugin tester so `AttributeValueLengthLimit`
+  can no longer be bypassed (GHSA-q7gw-24fr-5p69).
+    [GH-13743](https://github.com/hashicorp/packer/pull/13743)
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+* deps: bump `github.com/containerd/containerd/v2` to `v2.4.2` to fix a crash
+  caused by malformed digests in subject-annotated descriptors
+  (GHSA-vwhp-8p66-mq4f).
+    [GH-13754](https://github.com/hashicorp/packer/pull/13754)
+
+### IMPROVEMENTS:
+
+* build: update Go to `1.26.11`.
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+
+### DEPENDENCIES:
+
+* deps: bump `github.com/hashicorp/packer-plugin-sdk` to `v0.6.14`.
+    [GH-13754](https://github.com/hashicorp/packer/pull/13754)
+* deps: bump `golang.org/x/crypto` to `v0.59.0`, `golang.org/x/net` to
+  `v0.63.0`, `github.com/klauspost/compress` to `v1.20.5`,
+  `github.com/go-openapi/runtime` to `v0.33.0`, and
+  `github.com/go-openapi/strfmt` to `v0.27.0`; update other dependencies in
+  Packer and the plugin tester.
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+    [GH-13754](https://github.com/hashicorp/packer/pull/13754)
+* deps: bump `github.com/andybalholm/brotli` to `v1.2.8`.
+    [GH-13739](https://github.com/hashicorp/packer/pull/13739)
+
+### INTERNAL:
+
+* ci: upload logs from failed acceptance test runs.
+    [GH-13747](https://github.com/hashicorp/packer/pull/13747)
+* ci: disable Go test result caching for acceptance tests, install the Amazon
+  plugin before they run, and isolate the plugin directory in plugin
+  acceptance tests.
+    [GH-13749](https://github.com/hashicorp/packer/pull/13749)
+    [GH-13753](https://github.com/hashicorp/packer/pull/13753)
+* ci: disable the JIRA sync workflow and remove the issue migrator workflow.
+    [GH-13748](https://github.com/hashicorp/packer/pull/13748)
+* test: use a CycloneDX fixture in the HCP SBOM acceptance tests and add a
+  live-scanner SBOM acceptance test.
+    [GH-13750](https://github.com/hashicorp/packer/pull/13750)
+    [GH-13751](https://github.com/hashicorp/packer/pull/13751)
+
 ## 1.16.2 (October 22, 2026)
 
 ### BUG FIXES:
