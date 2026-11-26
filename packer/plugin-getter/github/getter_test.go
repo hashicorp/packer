@@ -4,6 +4,8 @@
 package github
 
 import (
+	"io"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/packer/hcl2template/addrs"
@@ -211,4 +213,57 @@ func TestExpectedFileName(t *testing.T) {
 	maliciousFileName := getter.ExpectedFileName(&pr, "1.2.3", entry,
 		`packer-plugin-docker_v1.2.3_x5.0_linux_amd64_/../../tmp/PWNED.zip`)
 	assert.Equal(t, "packer-plugin-docker_v1.2.3_x5.0_linux_amd64.zip", maliciousFileName)
+}
+
+func TestTransformChecksumStream(t *testing.T) {
+	entryFoo := plugingetter.ChecksumFileEntry{
+		Checksum: "1d6a2e1a7b2f3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d",
+		Filename: "packer-plugin-foo_v1.0.0_x5.0_linux_amd64.zip",
+	}
+	entryBar := plugingetter.ChecksumFileEntry{
+		Checksum: "2d6a2e1a7b2f3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d",
+		Filename: "packer-plugin-bar_v1.0.0_x5.0_linux_amd64.zip",
+	}
+
+	line := func(e plugingetter.ChecksumFileEntry) string {
+		return e.Checksum + "  " + e.Filename + "\n"
+	}
+
+	tests := []struct {
+		name  string
+		input string
+		want  []plugingetter.ChecksumFileEntry
+	}{
+		{
+			name:  "nominal file parses",
+			input: line(entryFoo) + line(entryBar),
+			want:  []plugingetter.ChecksumFileEntry{entryFoo, entryBar},
+		},
+		{
+			name:  "leading blank line is skipped",
+			input: "\n" + line(entryFoo) + line(entryBar),
+			want:  []plugingetter.ChecksumFileEntry{entryFoo, entryBar},
+		},
+		{
+			name:  "blank line between entries is skipped",
+			input: line(entryFoo) + "\n" + line(entryBar),
+			want:  []plugingetter.ChecksumFileEntry{entryFoo, entryBar},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out, err := TransformChecksumStream()(io.NopCloser(strings.NewReader(tt.input)))
+			if err != nil {
+				t.Fatalf("TransformChecksumStream returned an error: %s", err)
+			}
+
+			entries, err := plugingetter.ParseChecksumFileEntries(out)
+			if err != nil {
+				t.Fatalf("could not parse transformed checksum stream as JSON: %s", err)
+			}
+
+			assert.Equal(t, tt.want, entries)
+		})
+	}
 }
