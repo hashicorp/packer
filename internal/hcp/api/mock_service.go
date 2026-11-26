@@ -26,7 +26,9 @@ type MockPackerClientService struct {
 	TrackCalledServiceMethods                                                    bool
 
 	// Enforced block tracking
-	GetEnforcedBlocksByBucketCalled bool
+	GetEnforcedBlocksByBucketCalled        bool
+	ResolveEnforcedProvisionersCalled      bool
+	ResolveEnforcedProvisionersLastIfMatch string
 
 	// Mock Creates
 	CreateBucketResp  *hcpPackerModels.HashicorpCloudPacker20230101CreateBucketResponse
@@ -40,6 +42,10 @@ type MockPackerClientService struct {
 	// Mock enforced blocks
 	GetEnforcedBlocksByBucketResp *hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse
 	GetEnforcedBlocksByBucketErr  error
+
+	// Mock resolver
+	ResolveEnforcedProvisionersResp *hcpPackerModels.HashicorpCloudPacker20230101ResolveEnforcedProvisionersResponse
+	ResolveEnforcedProvisionersErr  error
 
 	ExistingBuilds      []string
 	ExistingBuildLabels map[string]string
@@ -353,6 +359,31 @@ func (svc *MockPackerClientService) PackerServiceGetEnforcedBlocksByBucket(
 	} else {
 		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101GetEnforcedBlocksByBucketResponse{
 			EnforcedBlockDetail: []*hcpPackerModels.HashicorpCloudPacker20230101EnforcedBlockDetail{},
+		}
+	}
+
+	return ok, nil
+}
+
+func (svc *MockPackerClientService) PackerServiceResolveEnforcedProvisioners(
+	params *hcpPackerService.PackerServiceResolveEnforcedProvisionersParams, _ runtime.ClientAuthInfoWriter,
+	opts ...hcpPackerService.ClientOption,
+) (*hcpPackerService.PackerServiceResolveEnforcedProvisionersOK, error) {
+
+	if svc.TrackCalledServiceMethods {
+		svc.ResolveEnforcedProvisionersCalled = true
+	}
+
+	if svc.ResolveEnforcedProvisionersErr != nil {
+		return nil, svc.ResolveEnforcedProvisionersErr
+	}
+
+	ok := &hcpPackerService.PackerServiceResolveEnforcedProvisionersOK{}
+	if svc.ResolveEnforcedProvisionersResp != nil {
+		ok.Payload = svc.ResolveEnforcedProvisionersResp
+	} else {
+		ok.Payload = &hcpPackerModels.HashicorpCloudPacker20230101ResolveEnforcedProvisionersResponse{
+			EffectiveProvisioners: []*hcpPackerModels.HashicorpCloudPacker20230101EffectiveProvisioner{},
 		}
 	}
 
