@@ -27,7 +27,7 @@ type CoreBuild struct {
 	Builder   packersdk.Builder
 	// BuilderConfig is the config for the builder.
 	//
-	// Is is deserialised directly from the JSON template,
+	// It is deserialised directly from the JSON template,
 	// and is only populated for legacy JSON templates.
 	BuilderConfig interface{}
 	// HCLConfig is the HCL config for the builder

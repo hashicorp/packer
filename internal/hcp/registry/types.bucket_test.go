@@ -414,7 +414,7 @@ func TestReadFromHCLBuildBlock(t *testing.T) {
 
 			diff := cmp.Diff(bucket, tt.expectedBucket, cmp.AllowUnexported(Bucket{}))
 			if diff != "" {
-				t.Errorf("expected the build to to have contents of hcp_packer_registry block but it does not: %v", diff)
+				t.Errorf("expected the build to have contents of hcp_packer_registry block but it does not: %v", diff)
 			}
 		})
 	}

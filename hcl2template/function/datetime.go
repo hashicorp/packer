@@ -90,7 +90,7 @@ var LegacyStrftimeFunc = function.New(&function.Spec{
 // https://www.packer.io/docs/templates/legacy_json_templates/engine#isotime-function-format-reference
 // for more details.
 //
-// This function has been provided to create backwards compatability with
+// This function has been provided to create backwards compatibility with
 // Packer's legacy JSON templates. However, we recommend that you upgrade your
 // HCL Packer template to use Timestamp and FormatDate together as soon as is
 // convenient.
