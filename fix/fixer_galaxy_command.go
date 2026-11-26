@@ -17,9 +17,9 @@ func (FixerGalaxyCommand) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerGalaxyCommand) Fix(input map[string]any) (map[string]any, error) {
 	type template struct {
-		Provisioners []interface{}
+		Provisioners []any
 	}
 
 	// Decode the input into our structure, if we can
@@ -29,7 +29,7 @@ func (FixerGalaxyCommand) Fix(input map[string]interface{}) (map[string]interfac
 	}
 
 	for i, raw := range tpl.Provisioners {
-		var provisioners map[string]interface{}
+		var provisioners map[string]any
 		if err := mapstructure.Decode(raw, &provisioners); err != nil {
 			// Ignore errors, could be a non-map
 			continue

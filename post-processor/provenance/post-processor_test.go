@@ -31,7 +31,7 @@ func TestPostProcessorWritesUnsignedStatementAndPreservesArtifact(t *testing.T) 
 	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
+	config := mustTemplateJSON(t, map[string]any{
 		"post-processors": []map[string]string{{
 			"type":       "provenance",
 			"output_dir": outputDir,
@@ -100,7 +100,7 @@ func TestPostProcessorChainsWithoutModifyingArtifact(t *testing.T) {
 	}
 
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
+	config := mustTemplateJSON(t, map[string]any{
 		"post-processors": []map[string]string{{
 			"type":       "provenance",
 			"output_dir": outputDir,
@@ -156,8 +156,8 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":           "provenance",
 			"output_dir":     outputDir,
 			"template":       "ubuntu.pkr.hcl",
@@ -236,7 +236,7 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 		t.Fatalf("unexpected source digest %q, want %q", got, want)
 	}
 
-	userVariables, ok := externalParameters["userVariables"].(map[string]interface{})
+	userVariables, ok := externalParameters["userVariables"].(map[string]any)
 	if !ok {
 		t.Fatalf("expected userVariables map, got %T", externalParameters["userVariables"])
 	}
@@ -247,7 +247,7 @@ func TestPostProcessorEnrichesPredicateFromConfigAndCIEnv(t *testing.T) {
 		t.Fatalf("unexpected config user variable %v, want %q", got, want)
 	}
 
-	onlyBuilds, ok := externalParameters["onlyBuilds"].([]interface{})
+	onlyBuilds, ok := externalParameters["onlyBuilds"].([]any)
 	if !ok || len(onlyBuilds) != 1 || onlyBuilds[0] != "qemu.ubuntu" {
 		t.Fatalf("unexpected onlyBuilds value %#v", externalParameters["onlyBuilds"])
 	}
@@ -282,8 +282,8 @@ func TestPostProcessorWritesSBOMAttestation(t *testing.T) {
 	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":       "provenance",
 			"output_dir": outputDir,
 			"sbom":       true,
@@ -335,8 +335,8 @@ func TestPostProcessorRegeneratesStaleSBOM(t *testing.T) {
 		t.Fatalf("write stale sbom: %v", err)
 	}
 
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":       "provenance",
 			"output_dir": outputDir,
 			"sbom":       true,
@@ -390,8 +390,8 @@ func TestPostProcessorSignsAttestationsWithConfiguredVerifier(t *testing.T) {
 
 	privateKeyPath, publicKeyPath := writeSigningKeypair(t)
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":         "provenance",
 			"output_dir":   outputDir,
 			"signing_mode": "key",
@@ -432,8 +432,8 @@ func TestPostProcessorRejectsMismatchedVerifier(t *testing.T) {
 	privateKeyPath, _ := writeSigningKeypair(t)
 	_, mismatchedVerifierPath := writeSigningKeypair(t)
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":         "provenance",
 			"output_dir":   outputDir,
 			"signing_mode": "key",
@@ -462,8 +462,8 @@ func TestPostProcessorWritesSigstoreBundleForKeylessAttestations(t *testing.T) {
 	defer func() { _ = artifact.Destroy() }()
 
 	outputDir := t.TempDir()
-	config := mustTemplateJSON(t, map[string]interface{}{
-		"post-processors": []map[string]interface{}{{
+	config := mustTemplateJSON(t, map[string]any{
+		"post-processors": []map[string]any{{
 			"type":                "provenance",
 			"output_dir":          outputDir,
 			"signing_mode":        "keyless",
@@ -799,7 +799,7 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	t.Helper()
 
 	target := filepath.Join(t.TempDir(), "package.txt")
-	config := mustTemplateJSON(t, map[string]interface{}{
+	config := mustTemplateJSON(t, map[string]any{
 		"builders": []map[string]string{{
 			"type":    "file",
 			"target":  target,
@@ -828,7 +828,7 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	return artifact
 }
 
-func mustTemplateJSON(t *testing.T, value interface{}) string {
+func mustTemplateJSON(t *testing.T, value any) string {
 	t.Helper()
 
 	encoded, err := json.Marshal(value)

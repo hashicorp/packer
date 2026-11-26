@@ -13,8 +13,8 @@ const (
 
 type PredicateInput struct {
 	BuildType            string
-	ExternalParameters   map[string]interface{}
-	InternalParameters   map[string]interface{}
+	ExternalParameters   map[string]any
+	InternalParameters   map[string]any
 	ResolvedDependencies []ResolvedDependency
 	BuilderID            string
 	Byproducts           []Byproduct
@@ -29,10 +29,10 @@ type SLSAProvenancePredicate struct {
 }
 
 type BuildDefinition struct {
-	BuildType            string                 `json:"buildType"`
-	ExternalParameters   map[string]interface{} `json:"externalParameters"`
-	InternalParameters   map[string]interface{} `json:"internalParameters,omitempty"`
-	ResolvedDependencies []ResolvedDependency   `json:"resolvedDependencies,omitempty"`
+	BuildType            string               `json:"buildType"`
+	ExternalParameters   map[string]any       `json:"externalParameters"`
+	InternalParameters   map[string]any       `json:"internalParameters,omitempty"`
+	ResolvedDependencies []ResolvedDependency `json:"resolvedDependencies,omitempty"`
 }
 
 type ResolvedDependency struct {
@@ -58,8 +58,8 @@ type Metadata struct {
 }
 
 type Byproduct struct {
-	Name    string      `json:"name"`
-	Content interface{} `json:"content,omitempty"`
+	Name    string `json:"name"`
+	Content any    `json:"content,omitempty"`
 }
 
 func BuildSLSAPredicate(input PredicateInput) SLSAProvenancePredicate {
@@ -73,12 +73,12 @@ func BuildSLSAPredicate(input PredicateInput) SLSAProvenancePredicate {
 		builderID = DefaultLocalBuilderID
 	}
 
-	externalParameters := map[string]interface{}{}
+	externalParameters := map[string]any{}
 	for key, value := range input.ExternalParameters {
 		externalParameters[key] = value
 	}
 
-	internalParameters := map[string]interface{}{
+	internalParameters := map[string]any{
 		"packerVersion": packerversion.String(),
 	}
 	for key, value := range input.InternalParameters {

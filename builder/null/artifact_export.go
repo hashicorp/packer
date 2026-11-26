@@ -27,7 +27,7 @@ func (a *NullArtifact) String() string {
 	return "Did not export anything. This is the null builder"
 }
 
-func (a *NullArtifact) State(name string) interface{} {
+func (a *NullArtifact) State(name string) any {
 	switch name {
 	case registryimage.ArtifactStateURI:
 		img, _ := registryimage.FromArtifact(a,
@@ -38,7 +38,7 @@ func (a *NullArtifact) State(name string) interface{} {
 		)
 		return img
 	case "generated_data":
-		return map[interface{}]interface{}{
+		return map[any]any{
 			"ID": "Null",
 		}
 	default:

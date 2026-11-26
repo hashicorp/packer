@@ -16,13 +16,13 @@ func TestFlattenConfigKeys_nil(t *testing.T) {
 }
 
 func TestFlattenConfigKeys_nested(t *testing.T) {
-	inp := make(map[string]interface{})
+	inp := make(map[string]any)
 	inp["A"] = ""
 	inp["B"] = []string{}
 
-	c := make(map[string]interface{})
+	c := make(map[string]any)
 	c["X"] = ""
-	d := make(map[string]interface{})
+	d := make(map[string]any)
 	d["a"] = ""
 
 	c["Y"] = d

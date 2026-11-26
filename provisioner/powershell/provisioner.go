@@ -125,7 +125,7 @@ type Config struct {
 type Provisioner struct {
 	config        Config
 	communicator  packersdk.Communicator
-	generatedData map[string]interface{}
+	generatedData map[string]any
 }
 
 func (p *Provisioner) defaultExecuteCommand() string {
@@ -166,7 +166,7 @@ func (p *Provisioner) defaultScriptCommand() string {
 
 func (p *Provisioner) ConfigSpec() hcldec.ObjectSpec { return p.config.FlatMapstructure().HCL2Spec() }
 
-func (p *Provisioner) Prepare(raws ...interface{}) error {
+func (p *Provisioner) Prepare(raws ...any) error {
 	err := config.Decode(&p.config, &config.DecodeOpts{
 		PluginType:         "powershell",
 		Interpolate:        true,
@@ -338,7 +338,7 @@ func extractInlineScript(p *Provisioner) (string, error) {
 	return temp.Name(), nil
 }
 
-func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]interface{}) error {
+func (p *Provisioner) Provision(ctx context.Context, ui packersdk.Ui, comm packersdk.Communicator, generatedData map[string]any) error {
 	ui.Say("Provisioning with Powershell...")
 	p.communicator = comm
 	p.generatedData = generatedData

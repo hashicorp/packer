@@ -18,7 +18,7 @@ func (FixerDockerTagtoTags) DeprecatedOptions() map[string][]string {
 	}
 }
 
-func (FixerDockerTagtoTags) Fix(input map[string]interface{}) (map[string]interface{}, error) {
+func (FixerDockerTagtoTags) Fix(input map[string]any) (map[string]any, error) {
 	if input["post-processors"] == nil {
 		return input, nil
 	}
@@ -56,7 +56,7 @@ func (FixerDockerTagtoTags) Fix(input map[string]interface{}) (map[string]interf
 		if ok {
 			// Gather all "tag" into the []string
 			switch t := tagRaw.(type) {
-			case []interface{}:
+			case []any:
 				for _, tag := range t {
 					allTags = append(allTags, tag.(string))
 				}
@@ -75,7 +75,7 @@ func (FixerDockerTagtoTags) Fix(input map[string]interface{}) (map[string]interf
 		if ok {
 			// Gather all "tag" into the []string
 			switch t := tagsRaw.(type) {
-			case []interface{}:
+			case []any:
 				for _, tag := range t {
 					allTags = append(allTags, tag.(string))
 				}

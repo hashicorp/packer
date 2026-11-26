@@ -87,7 +87,7 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	t.Helper()
 
 	target := filepath.Join(t.TempDir(), "package.txt")
-	config := mustTemplateJSON(t, map[string]interface{}{
+	config := mustTemplateJSON(t, map[string]any{
 		"builders": []map[string]string{{
 			"type":    "file",
 			"target":  target,
@@ -116,7 +116,7 @@ func buildFileArtifact(t *testing.T) packersdk.Artifact {
 	return artifact
 }
 
-func mustTemplateJSON(t *testing.T, value interface{}) string {
+func mustTemplateJSON(t *testing.T, value any) string {
 	t.Helper()
 
 	encoded, err := json.Marshal(value)

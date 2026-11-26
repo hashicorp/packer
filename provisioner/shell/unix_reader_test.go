@@ -10,8 +10,7 @@ import (
 )
 
 func TestUnixReader_impl(t *testing.T) {
-	var raw interface{}
-	raw = new(UnixReader)
+	var raw any = new(UnixReader)
 	if _, ok := raw.(io.Reader); !ok {
 		t.Fatal("should be reader")
 	}
