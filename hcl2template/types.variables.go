@@ -77,6 +77,10 @@ type Variable struct {
 	// declaration, the type of the default variable will be used. This will
 	// allow to ensure that users set this variable correctly.
 	Type cty.Type
+	// typeDeclared is set when the variable block has a type attribute. It
+	// distinguishes `type = any` from an omitted type, as both are
+	// represented by cty.DynamicPseudoType.
+	typeDeclared bool
 	// TypeDefaults holds the default values declared through optional()
 	// attribute modifiers within the variable's type constraint, if any. It is
 	// nil when the type constraint declares no such defaults. These defaults
@@ -388,6 +392,7 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		v.Type = tp
 		v.TypeDefaults = typeDefaults
+		v.typeDeclared = true
 	}
 
 	if attr, exists := content.Attributes["sensitive"]; exists {
@@ -425,7 +430,9 @@ func (variables *Variables) decodeVariableBlock(block *hcl.Block, ectx *hcl.Eval
 
 		// It's possible no type attribute was assigned so lets make sure we
 		// have a valid type otherwise there could be issues parsing the value.
-		if v.Type == cty.DynamicPseudoType &&
+		// An explicit `type = any` must not be narrowed to the default's type.
+		if !v.typeDeclared &&
+			v.Type == cty.DynamicPseudoType &&
 			!defaultValue.Type().Equals(cty.EmptyObject) &&
 			!defaultValue.Type().Equals(cty.EmptyTuple) {
 			v.Type = defaultValue.Type()
@@ -622,7 +629,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		}
 
 		fakeFilename := fmt.Sprintf("<value for var.%s from env>", name)
-		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.Type)
+		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -761,7 +768,7 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 		}
 
 		fakeFilename := fmt.Sprintf("<value for var.%s from arguments>", name)
-		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable.Type)
+		expr, moreDiags := expressionFromVariableDefinition(fakeFilename, value, variable)
 		diags = append(diags, moreDiags...)
 		if moreDiags.HasErrors() {
 			continue
@@ -794,15 +801,21 @@ func (cfg *PackerConfig) collectInputVariableValues(env []string, files []*hcl.F
 	return diags
 }
 
-// expressionFromVariableDefinition creates an hclsyntax.Expression that is capable of evaluating the specified value for a given cty.Type.
+// expressionFromVariableDefinition creates an hclsyntax.Expression that is capable of evaluating the specified value for the given variable.
 // The specified filename is to identify the source of where value originated from in the diagnostics report, if there is an error.
-func expressionFromVariableDefinition(filename string, value string, variableType cty.Type) (hclsyntax.Expression, hcl.Diagnostics) {
-	switch variableType {
-	case cty.String, cty.Number, cty.NilType, cty.DynamicPseudoType:
-		// when the type is nil (not set in a variable block) we default to
+func expressionFromVariableDefinition(filename string, value string, variable *Variable) (hclsyntax.Expression, hcl.Diagnostics) {
+	switch {
+	case variable.Type == cty.String,
+		variable.Type == cty.Number,
+		variable.Type == cty.NilType,
+		// when the type is not set in a variable block we default to
 		// interpreting everything as a string literal.
+		variable.Type == cty.DynamicPseudoType && !variable.typeDeclared:
 		return &hclsyntax.LiteralValueExpr{Val: cty.StringVal(value)}, nil
 	default:
+		// This includes `type = any`, whose value is parsed as an HCL
+		// expression so that a value of any type can be passed, like in
+		// Terraform. A string must therefore be quoted.
 		return hclsyntax.ParseExpression([]byte(value), filename, hcl.Pos{Line: 1, Column: 1})
 	}
 }
