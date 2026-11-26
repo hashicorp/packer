@@ -726,6 +726,61 @@ func TestParse_variables_optional_attributes(t *testing.T) {
 	}
 }
 
+// TestParse_variables_any_type ensures that a variable declared with
+// `type = any` accepts a value of any type from every source, even when its
+// default value has a specific type, and that command line and environment
+// values are parsed as HCL expressions for it, but not for untyped variables.
+func TestParse_variables_any_type(t *testing.T) {
+	t.Setenv("PKR_VAR_from_env", `["a", 1]`)
+
+	parser := getBasicParser()
+	cfg, diags := parser.Parse(
+		filepath.Join("testdata", "variables", "any_type.pkr.hcl"),
+		[]string{filepath.Join("testdata", "variables", "any_type.pkrvars.hcl")},
+		map[string]string{
+			"from_argv": `{ key = true }`,
+			"untyped":   `{ key = true }`,
+		},
+	)
+	if diags.HasErrors() {
+		t.Fatalf("unexpected error diagnostics parsing any type variables: %s", diags)
+	}
+
+	want := map[string]cty.Value{
+		"from_default": cty.StringVal("hello"),
+		"from_varfile": cty.ObjectVal(map[string]cty.Value{
+			"key1": cty.StringVal("v1"),
+			"key2": cty.NumberIntVal(2),
+		}),
+		"from_env":  cty.TupleVal([]cty.Value{cty.StringVal("a"), cty.NumberIntVal(1)}),
+		"from_argv": cty.ObjectVal(map[string]cty.Value{"key": cty.True}),
+		"untyped":   cty.StringVal("{ key = true }"),
+	}
+	for name, wantVal := range want {
+		v, ok := cfg.InputVariables[name]
+		if !ok {
+			t.Fatalf("expected %q input variable to be present", name)
+		}
+		if !v.Type.Equals(cty.DynamicPseudoType) {
+			t.Errorf("unexpected type for %s variable: got %#v, want cty.DynamicPseudoType", name, v.Type)
+		}
+		if got := v.Value(); !got.RawEquals(wantVal) {
+			t.Errorf("unexpected value for %s variable.\n got: %#v\nwant: %#v", name, got, wantVal)
+		}
+	}
+
+	// A string value must be quoted, as an unquoted one is parsed as a
+	// variable reference.
+	_, diags = parser.Parse(
+		filepath.Join("testdata", "variables", "any_type.pkr.hcl"),
+		nil,
+		map[string]string{"from_argv": `hello`},
+	)
+	if !diags.HasErrors() {
+		t.Fatal("expected an error for an unquoted string value of an any type variable")
+	}
+}
+
 func TestVariables_collectVariableValues(t *testing.T) {
 	type args struct {
 		env      []string
